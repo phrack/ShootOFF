@@ -20,8 +20,8 @@ public class Main extends Application {
 	public void start(Stage primaryStage) throws IOException {
 		Parent root = FXMLLoader.load(getClass().getResource("/com/shootoff/gui/ShootOFF.fxml"));
 	       
-		Scene scene = new Scene(root, 749, 534);
-	    
+		Scene scene = new Scene(root);
+		
 		primaryStage.setTitle("ShootOFF");
 		primaryStage.setScene(scene);
 		primaryStage.show();

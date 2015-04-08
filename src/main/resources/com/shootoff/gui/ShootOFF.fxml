@@ -12,14 +12,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.ShootOFFController">
    <children>
-      <MenuBar prefHeight="29.0" VBox.vgrow="NEVER">
+      <MenuBar fx:id="mainMenu" prefHeight="29.0" VBox.vgrow="NEVER">
         <menus>
           <Menu text="_File">
             <items>
-                  <MenuItem mnemonicParsing="false" text="Preferences..." />
+                  <MenuItem mnemonicParsing="false" onAction="#preferencesClicked" text="Preferences..." />
                   <MenuItem mnemonicParsing="false" text="Save Feed Image..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem text="E_xit" />

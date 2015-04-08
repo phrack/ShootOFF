@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<GridPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.PreferencesController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="180.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="0.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="0.0" prefWidth="180.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="0.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <Label text="Cameras:" />
+      <Label text="Detection Rate (ms):" GridPane.rowIndex="1" />
+      <Label text="Laser Intensity:" GridPane.rowIndex="2" />
+      <Label text="Marker Radius:" GridPane.rowIndex="3" />
+      <Label text="Ignore Laser Color" GridPane.rowIndex="4" />
+      <Slider GridPane.columnIndex="2" GridPane.rowIndex="1" />
+      <CheckBox mnemonicParsing="false" text="Virtual Magazine:" GridPane.rowIndex="5" />
+      <CheckBox mnemonicParsing="false" text="Inject Malfunctions (%):" GridPane.rowIndex="6" />
+      <Slider GridPane.columnIndex="2" GridPane.rowIndex="2" />
+      <Slider GridPane.columnIndex="2" GridPane.rowIndex="3" />
+      <ComboBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <Slider GridPane.columnIndex="2" GridPane.rowIndex="5" />
+      <Slider GridPane.columnIndex="2" GridPane.rowIndex="6" />
+      <Button minWidth="63.0" mnemonicParsing="false" text="OK" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+      <Button mnemonicParsing="false" text="Cancel" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+   </children>
+</GridPane>
