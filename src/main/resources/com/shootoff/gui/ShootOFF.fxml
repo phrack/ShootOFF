@@ -1,8 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.input.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1">
-	<!-- TODO Add Nodes -->
-</AnchorPane>
 
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <MenuBar prefHeight="29.0" VBox.vgrow="NEVER">
+        <menus>
+          <Menu text="_File">
+            <items>
+                  <MenuItem mnemonicParsing="false" text="Preferences..." />
+                  <MenuItem mnemonicParsing="false" text="Save Feed Image..." />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+              <MenuItem text="E_xit" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Targets">
+               <items>
+                  <MenuItem mnemonicParsing="false" text="Create Target..." />
+                  <Menu mnemonicParsing="false" text="Add Target" />
+                  <Menu mnemonicParsing="false" text="Edit Target" />
+                  <MenuItem mnemonicParsing="false" text="Hide Targets" />
+               </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Training">
+            <items>
+                  <RadioMenuItem mnemonicParsing="false" selected="true" text="None" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="Projector">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Start Arena" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Calibrate" />
+                  <Menu disable="true" mnemonicParsing="false" text="Add Target" />
+              </items>
+            </Menu>
+        </menus>
+      </MenuBar>
+      <HBox VBox.vgrow="ALWAYS">
+         <children>
+            <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER">
+              <tabs>
+                <Tab text="Default Camera">
+                  <content>
+                    <AnchorPane />
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
+            <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportWidth="147.0" HBox.hgrow="ALWAYS">
+               <content>
+                  <TableView minHeight="0.0" minWidth="0.0">
+                    <columns>
+                      <TableColumn prefWidth="65.0" sortable="false" text="Time" />
+                      <TableColumn prefWidth="65.0" sortable="false" text="Laser" />
+                    </columns>
+                  </TableView>
+               </content>
+            </ScrollPane>
+         </children>
+      </HBox>
+      <GridPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" VBox.vgrow="NEVER">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Button mnemonicParsing="false" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+         </children>
+      </GridPane>
+   </children>
+</VBox>
