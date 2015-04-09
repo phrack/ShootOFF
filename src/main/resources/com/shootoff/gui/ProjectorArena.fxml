@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane fx:id="arenaPanel" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.ProjectorArenaController">
+   <center>
+      <Canvas fx:id="arenaCanvas" height="480.0" onKeyPressed="#canvasKeyPressed" onMouseEntered="#canvasMouseEntered" width="600.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </BorderPane.margin>
+      </Canvas>
+   </center>
+</BorderPane>

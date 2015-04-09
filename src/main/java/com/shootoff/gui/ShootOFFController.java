@@ -7,12 +7,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuBar;
 
 public class ShootOFFController {
-	@FXML 
-	private MenuBar mainMenu;
+	@FXML private MenuBar mainMenu;
 	
 	@FXML 
 	public void preferencesClicked(ActionEvent event) throws IOException {
 		new PreferencesController().showPreferences(
 				mainMenu.getScene().getWindow());
+    }
+	
+	@FXML 
+	public void toggleArenaClicked(ActionEvent event) throws IOException {
+		new ProjectorArenaController().toggleArena();
     }
 }

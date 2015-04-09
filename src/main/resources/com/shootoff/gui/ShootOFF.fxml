@@ -39,7 +39,7 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Projector">
               <items>
-                <MenuItem mnemonicParsing="false" text="Start Arena" />
+                <MenuItem mnemonicParsing="false" text="Start Arena" onAction="#toggleArenaClicked" />
                   <MenuItem disable="true" mnemonicParsing="false" text="Calibrate" />
                   <Menu disable="true" mnemonicParsing="false" text="Add Target" />
               </items>
