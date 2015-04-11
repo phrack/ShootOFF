@@ -84,6 +84,16 @@ public class Configuration {
 		parseCmdLine(args);
 	}
 	
+	/**
+	 * Loads the configuration from a file named <tt>name</tt> and then
+	 * updates the configuration using the programs arguments stored in
+	 * <tt>args</tt>.
+	 * 
+	 * @param name	the configuration file to load properties from
+	 * @param args	the command line arguments for this program
+	 * @throws IOException	<tt>name</tt> doesn't exist on the file system
+	 * @throws ConfigurationException	a specific property value is out of spec
+	 */
 	public Configuration(String name, String[] args) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
