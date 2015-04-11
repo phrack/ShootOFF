@@ -1,2 +1,16 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // webcam-capture depends on slf4j, but uses and older and incomplete version that
+    // throws errors about missing a logger
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.12'
+    // bridj is here because webcam-capture depends on it but fetches 0.6.2, which
+    // does not play nicely with stackguard in newer versions of the JVM.
+    compile group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'    
+    compile group: 'com.github.sarxos', name: 'webcam-capture', version: '0.3.10'
+}
