@@ -11,7 +11,7 @@
 # Eclipse files
 .project
 .metadata
-.grade/**
+.gradle/**
 bin/**
 tmp/**
 tmp/**/*
