@@ -28,7 +28,7 @@ public class Main extends Application {
 		
 		Scene scene = new Scene(loader.getRoot());
 		
-		((ShootOFFController)loader.getController()).setConfig(config);
+		((ShootOFFController)loader.getController()).init(config);
 		primaryStage.setTitle("ShootOFF");
 		primaryStage.setScene(scene);
 		primaryStage.show();
