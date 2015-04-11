@@ -8,20 +8,27 @@ package com.shootoff;
 
 import java.io.IOException;
 
+import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.ShootOFFController;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-
 public class Main extends Application {
 	@Override
-	public void start(Stage primaryStage) throws IOException {
-		Parent root = FXMLLoader.load(getClass().getResource("/com/shootoff/gui/ShootOFF.fxml"));
-	       
-		Scene scene = new Scene(root);
+	public void start(Stage primaryStage) throws IOException, ConfigurationException {
+		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
+		Configuration config = new Configuration("shootoff.properties", args);
 		
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/shootoff/gui/ShootOFF.fxml"));
+	    loader.load();   
+		
+		Scene scene = new Scene(loader.getRoot());
+		
+		((ShootOFFController)loader.getController()).setConfig(config);
 		primaryStage.setTitle("ShootOFF");
 		primaryStage.setScene(scene);
 		primaryStage.show();

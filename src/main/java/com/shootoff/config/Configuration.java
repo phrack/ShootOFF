@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Properties;
 
 import org.apache.commons.cli.BasicParser;
@@ -166,7 +167,9 @@ public class Configuration {
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
 		
-		OutputStream outputStream = new FileOutputStream(configName);
+		URL configURL = getClass().getClassLoader().getResource(configName);
+		
+		OutputStream outputStream = new FileOutputStream(configURL.getFile());
 		prop.store(outputStream, "ShootOFF Configuration");
 	}
 	
