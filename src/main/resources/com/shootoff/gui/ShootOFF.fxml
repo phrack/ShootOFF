@@ -27,7 +27,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Targets">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Create Target..." />
+                  <MenuItem mnemonicParsing="false" onAction="#createTargetMenuClicked" text="Create Target..." />
                   <Menu mnemonicParsing="false" text="Add Target" />
                   <Menu mnemonicParsing="false" text="Edit Target" />
                   <MenuItem mnemonicParsing="false" text="Hide Targets" />

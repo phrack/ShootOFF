@@ -1,0 +1,12 @@
+The following images were not created by ShootOFF contributors and have their own licenses:
+
+gnome_media_floppy.png, gnome_image_x_generic.png -- GNU/GPL
+tags.png -- Freeware by Midtone Design Studios
+bring_forward.png -- LGPL
+send_backward.png -- LGPL
+
+All of these were found via https://www.iconfinder.com or http://www.findicons.com.
+
+The Appleseed(TM) AQT silhouette is used by permission from the RWVA. All rights reserved. ***
+
+*** These images are labeled as the Appleseed D Silhouette. WE DO NOT HAVE PERMISSION TO USE ANY OTHER RWVA/PROJECT APPLESEED CONTENT!!!!

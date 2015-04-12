@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <ToolBar prefHeight="40.0" prefWidth="622.0" BorderPane.alignment="CENTER">
+        <items>
+          <Button fx:id="saveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_floppy.png&quot;); -fx-background-position: center;">
+               <tooltip>
+                  <Tooltip text="Save Target" />
+               </tooltip>
+          </Button>
+          <ToggleButton fx:id="cursorButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true" style="-fx-background-image: url(&quot;images/cursor.png&quot;); -fx-background-position: center;">
+               <toggleGroup>
+                  <ToggleGroup fx:id="targetDrawingControls" />
+               </toggleGroup>
+               <tooltip>
+                  <Tooltip text="Select Region" />
+               </tooltip>
+          </ToggleButton>
+          <ToggleButton fx:id="imageButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_image_x_generic.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+               <tooltip>
+                  <Tooltip text="Draw Image" />
+               </tooltip>
+          </ToggleButton>
+          <ToggleButton fx:id="rectangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/rectangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw Rectangle" />
+               </tooltip>    
+          </ToggleButton>      
+          <ToggleButton fx:id="ovalsButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/oval.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw Oval" />
+               </tooltip>    
+          </ToggleButton>     
+          <ToggleButton fx:id="triangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/triangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw Triangle" />
+               </tooltip>    
+          </ToggleButton>     
+          <ToggleButton fx:id="appleseedThreeButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_3.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw D Silhouette 3" />
+               </tooltip>    
+          </ToggleButton>     
+          <ToggleButton fx:id="appleseedFourButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_4.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw D Silhouette 4" />
+               </tooltip>    
+          </ToggleButton>   
+          <ToggleButton fx:id="appleseedFiveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_5.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw D Silhouette 5" />
+               </tooltip>    
+          </ToggleButton>   
+          <ToggleButton fx:id="freeformButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/freeform_polygon.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+			   <tooltip>
+                  <Tooltip text="Draw Freeform Polygon" />
+               </tooltip>    
+          </ToggleButton>   
+          <Button fx:id="bringForwardButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/bring_forward.png&quot;); -fx-background-position: center;">
+			   <tooltip>
+                  <Tooltip text="Bring Forward" />
+               </tooltip>    
+          </Button>   
+          <Button fx:id="sendBackwardButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/send_backward.png&quot;); -fx-background-position: center;">
+			   <tooltip>
+                  <Tooltip text="Send Backward" />
+               </tooltip>    
+          </Button>   
+          <ToggleButton fx:id="tagsButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center;">
+			   <tooltip>
+                  <Tooltip text="Edit Selected Region's Tags" />
+               </tooltip>    
+          </ToggleButton>   
+          <ChoiceBox fx:id="regionColorChoiceBox" prefWidth="140.0">
+			   <tooltip>
+                  <Tooltip text="Set Selected Region's Fill Color" />
+               </tooltip>    
+          </ChoiceBox>   
+        </items>
+      </ToolBar>
+   </top>
+   <center>
+      <Group BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>

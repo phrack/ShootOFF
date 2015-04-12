@@ -49,7 +49,7 @@ public class ShootOFFController {
 		
 		Stage preferencesStage = new Stage();
 		
-		preferencesStage.initOwner(mainMenu.getScene().getWindow());
+		preferencesStage.initOwner(shootOFFStage);
 		preferencesStage.initModality(Modality.WINDOW_MODAL);
         preferencesStage.setTitle("Preferences");
         preferencesStage.setScene(new Scene(loader.getRoot()));
@@ -61,4 +61,18 @@ public class ShootOFFController {
 	public void toggleArenaClicked(ActionEvent event) throws IOException {
 		new ProjectorArenaController().toggleArena();
     }
+
+	@FXML 
+	public void createTargetMenuClicked(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
+		loader.load();
+		
+		Stage preferencesStage = new Stage();
+		
+		preferencesStage.initOwner(shootOFFStage);
+		preferencesStage.initModality(Modality.WINDOW_MODAL);
+        preferencesStage.setTitle("TargetEditor");
+        preferencesStage.setScene(new Scene(loader.getRoot()));
+        preferencesStage.show();
+	}
 }
