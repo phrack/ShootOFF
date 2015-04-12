@@ -61,6 +61,12 @@ public class ShootOFFController {
 	public void toggleArenaClicked(ActionEvent event) throws IOException {
 		new ProjectorArenaController().toggleArena();
     }
+	
+	@FXML
+	public void exitMenuClicked(ActionEvent event) {
+		camerasSupervisor.setStreamingAll(false);
+		shootOFFStage.close();
+	}
 
 	@FXML 
 	public void createTargetMenuClicked(ActionEvent event) throws IOException {
