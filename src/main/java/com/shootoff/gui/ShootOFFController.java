@@ -22,6 +22,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ShootOFFController {
+	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private Canvas defaultCanvas;
 	@FXML private CamerasSupervisor camerasSupervisor;
@@ -34,6 +35,11 @@ public class ShootOFFController {
 		
 		Webcam defaultCamera = Webcam.getDefault();
 		camerasSupervisor.addCameraManager(defaultCamera, new CanvasManager(defaultCanvas));
+	
+		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
+		shootOFFStage.setOnCloseRequest((value) -> {
+			camerasSupervisor.setStreamingAll(false);
+		});
 	}
 	
 	@FXML 
