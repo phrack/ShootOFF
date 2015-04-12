@@ -1,6 +1,7 @@
 package com.shootoff.camera;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
@@ -63,9 +64,9 @@ public class ShotSearcher implements Runnable {
 				int pixel = threshholded.getRGB(x, y) & 0xFF;
 				
 				if (pixel == 255) {
-					Color areaColor = detectColor(x, y);
-					if (areaColor != null) {
-						canvasManager.addShot(new Shot(areaColor, x, y, 
+					Optional<Color> areaColor = detectColor(x, y);
+					if (areaColor.isPresent()) {
+						canvasManager.addShot(new Shot(areaColor.get(), x, y, 
 								0, config.getMarkerRadius()));
 						return;
 					}
@@ -74,7 +75,7 @@ public class ShotSearcher implements Runnable {
 		}
 	}
 	
-	private Color detectColor(int x, int y) {
+	private Optional<Color> detectColor(int x, int y) {
 		int rgb = currentFrame.getRGB(x, y);
 		double r = getRed(rgb);
 		double g = getGreen(rgb);
@@ -139,19 +140,19 @@ public class ShotSearcher implements Runnable {
         // heuristic that noise tends to have color values that are very
         // similar
         if (g == 0 || b == 0) 
-            return null;
+            return Optional.empty();
 
         if ((r / g) > 1.02 && (r / b) > 1.02)
-            return Color.RED;
+            return Optional.of(Color.RED);
 
         if (r == 0 || b == 0)
-        	return null;
+        	return Optional.empty();
 
         if ((g / r) > 1.02 && (g / b) > 1.02)
-            return Color.GREEN;
+            return Optional.of(Color.GREEN);
 
 		
-		return null;
+		return Optional.empty();
 	}
 	
 	private int mixColor(int red, int green, int blue) {
