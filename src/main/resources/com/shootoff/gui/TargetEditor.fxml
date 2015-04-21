@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.TargetEditorController">
    <top>
       <ToolBar prefHeight="40.0" prefWidth="622.0" BorderPane.alignment="CENTER">
         <items>
@@ -15,7 +15,7 @@
                   <Tooltip text="Save Target" />
                </tooltip>
           </Button>
-          <ToggleButton fx:id="cursorButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" selected="true" style="-fx-background-image: url(&quot;images/cursor.png&quot;); -fx-background-position: center;">
+          <ToggleButton fx:id="cursorButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#cursorSelected" prefHeight="32.0" prefWidth="32.0" selected="true" style="-fx-background-image: url(&quot;images/cursor.png&quot;); -fx-background-position: center;">
                <toggleGroup>
                   <ToggleGroup fx:id="targetDrawingControls" />
                </toggleGroup>
@@ -28,7 +28,7 @@
                   <Tooltip text="Draw Image" />
                </tooltip>
           </ToggleButton>
-          <ToggleButton fx:id="rectangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/rectangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="rectangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawRectangle" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/rectangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw Rectangle" />
                </tooltip>    
@@ -87,6 +87,10 @@
       </ToolBar>
    </top>
    <center>
-      <Group BorderPane.alignment="CENTER" />
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0">
+         <children>
+            <Group fx:id="canvasGroup" layoutX="312.0" layoutY="45.0" onMouseMoved="#cursorMoved" BorderPane.alignment="CENTER" />
+         </children>
+      </AnchorPane>
    </center>
 </BorderPane>

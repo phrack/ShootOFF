@@ -19,7 +19,7 @@ public class CameraManager {
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
 	
-	public CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
+	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = webcam;
 		this.canvasManager = canvas;
 		this.config = config;
