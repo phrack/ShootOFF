@@ -82,5 +82,6 @@ public class ShootOFFController {
         preferencesStage.show();
         // TODO: Get snapshot for camera for selected tab to
         // set the target editor background
+        ((TargetEditorController)loader.getController()).init(null);
 	}
 }
