@@ -277,6 +277,8 @@ public class TargetEditorController {
 			shapesList.remove(selectedIndex);
 			shapesList.add(selectedIndex, topShape);
 			shapesList.add(selectedIndex + 1, bottomShape);
+			
+			Collections.swap(targetShapes, selectedIndex, selectedIndex + 1);
 		}
 	}
 	
@@ -295,6 +297,8 @@ public class TargetEditorController {
 			shapesList.remove(selectedIndex - 1);
 			shapesList.add(selectedIndex - 1, topShape);
 			shapesList.add(selectedIndex, bottomShape);
+			
+			Collections.swap(targetShapes, selectedIndex - 1, selectedIndex);
 		}
 	}
 	
