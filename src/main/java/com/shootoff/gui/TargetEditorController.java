@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shootoff.targets.EllipseRegion;
+import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 
@@ -39,6 +40,10 @@ public class TargetEditorController {
 	@FXML private ToggleButton cursorButton;
 	@FXML private ToggleButton rectangleButton;
 	@FXML private ToggleButton ovalButton;
+	@FXML private ToggleButton triangleButton;
+	@FXML private ToggleButton appleseedThreeButton;
+	@FXML private ToggleButton appleseedFourButton;
+	@FXML private ToggleButton appleseedFiveButton;
 	@FXML private Button sendBackwardButton;
 	@FXML private Button bringForwardButton;
 	@FXML private ToggleButton tagsButton;
@@ -259,13 +264,96 @@ public class TargetEditorController {
 	private void drawShape() {
 		Shape newShape = null;
 
+		final int DEFAULT_DIM = 40;
+		final double AQT_SCALE = 2.5;
+		
 		if (rectangleButton.isSelected()) {
 			newShape = new RectangleRegion(lastMouseX, lastMouseY, 
-				30, 30);
+				DEFAULT_DIM, DEFAULT_DIM);
 		} else if (ovalButton.isSelected()) {
-			final int radius = 15;
-			newShape = new EllipseRegion(lastMouseX + radius, 
-					lastMouseY + radius, radius, radius);
+			final int RADIUS = DEFAULT_DIM / 2;
+			newShape = new EllipseRegion(lastMouseX + RADIUS, 
+					lastMouseY + RADIUS, RADIUS, RADIUS);
+		} else if (triangleButton.isSelected()) {
+			newShape = new PolygonRegion(lastMouseX, lastMouseY + (DEFAULT_DIM / 2),
+					lastMouseX + DEFAULT_DIM, lastMouseY + (DEFAULT_DIM / 2),
+					lastMouseX + (DEFAULT_DIM / 2), lastMouseY);
+		} else if (appleseedThreeButton.isSelected()) {
+			newShape = new PolygonRegion(lastMouseX+15.083*AQT_SCALE, lastMouseY+13.12*AQT_SCALE, 
+		            lastMouseX+15.083*AQT_SCALE, lastMouseY+-0.147*AQT_SCALE, 
+		            lastMouseX+14.277*AQT_SCALE, lastMouseY+-2.508*AQT_SCALE, 
+		            lastMouseX+13.149*AQT_SCALE, lastMouseY+-4.115*AQT_SCALE, 
+		            lastMouseX+11.841*AQT_SCALE, lastMouseY+-5.257*AQT_SCALE, 
+		            lastMouseX+10.557*AQT_SCALE, lastMouseY+-6.064*AQT_SCALE, 
+		            lastMouseX+8.689*AQT_SCALE, lastMouseY+-6.811*AQT_SCALE, 
+		            lastMouseX+7.539*AQT_SCALE, lastMouseY+-8.439*AQT_SCALE, 
+		            lastMouseX+7.076*AQT_SCALE, lastMouseY+-9.978*AQT_SCALE, 
+		            lastMouseX+6.104*AQT_SCALE, lastMouseY+-11.577*AQT_SCALE, 
+		            lastMouseX+4.82*AQT_SCALE, lastMouseY+-12.829*AQT_SCALE, 
+		            lastMouseX+3.43*AQT_SCALE, lastMouseY+-13.788*AQT_SCALE, 
+		            lastMouseX+1.757*AQT_SCALE, lastMouseY+-14.386*AQT_SCALE, 
+		            lastMouseX+0.083*AQT_SCALE, lastMouseY+-14.55*AQT_SCALE, 
+		            lastMouseX+-1.59*AQT_SCALE, lastMouseY+-14.386*AQT_SCALE, 
+		            lastMouseX+-3.263*AQT_SCALE, lastMouseY+-13.788*AQT_SCALE, 
+		            lastMouseX+-4.653*AQT_SCALE, lastMouseY+-12.829*AQT_SCALE, 
+		            lastMouseX+-5.938*AQT_SCALE, lastMouseY+-11.577*AQT_SCALE, 
+		            lastMouseX+-6.909*AQT_SCALE, lastMouseY+-9.978*AQT_SCALE, 
+		            lastMouseX+-7.372*AQT_SCALE, lastMouseY+-8.439*AQT_SCALE, 
+		            lastMouseX+-8.522*AQT_SCALE, lastMouseY+-6.811*AQT_SCALE, 
+		            lastMouseX+-10.39*AQT_SCALE, lastMouseY+-6.064*AQT_SCALE, 
+		            lastMouseX+-11.674*AQT_SCALE, lastMouseY+-5.257*AQT_SCALE, 
+		            lastMouseX+-12.982*AQT_SCALE, lastMouseY+-4.115*AQT_SCALE, 
+		            lastMouseX+-14.11*AQT_SCALE, lastMouseY+-2.508*AQT_SCALE, 
+		            lastMouseX+-14.917*AQT_SCALE, lastMouseY+-0.147*AQT_SCALE, 
+		            lastMouseX+-14.917*AQT_SCALE, lastMouseY+13.12*AQT_SCALE);
+		} else if (appleseedFourButton.isSelected()) {
+			newShape = new PolygonRegion(lastMouseX+11.66*AQT_SCALE, lastMouseY+5.51*AQT_SCALE, 
+	                lastMouseX+11.595*AQT_SCALE, lastMouseY+0.689*AQT_SCALE, 
+	                lastMouseX+11.1*AQT_SCALE, lastMouseY+-1.084*AQT_SCALE, 
+	                lastMouseX+9.832*AQT_SCALE, lastMouseY+-2.441*AQT_SCALE, 
+	                lastMouseX+7.677*AQT_SCALE, lastMouseY+-3.322*AQT_SCALE, 
+	                lastMouseX+5.821*AQT_SCALE, lastMouseY+-4.709*AQT_SCALE, 
+	                lastMouseX+4.715*AQT_SCALE, lastMouseY+-6.497*AQT_SCALE, 
+	                lastMouseX+4.267*AQT_SCALE, lastMouseY+-8.135*AQT_SCALE, 
+	                lastMouseX+3.669*AQT_SCALE, lastMouseY+-9.41*AQT_SCALE, 
+	                lastMouseX+2.534*AQT_SCALE, lastMouseY+-10.553*AQT_SCALE, 
+	                lastMouseX+1.436*AQT_SCALE, lastMouseY+-11.091*AQT_SCALE, 
+	                lastMouseX+0.083*AQT_SCALE, lastMouseY+-11.323*AQT_SCALE, 
+	                lastMouseX+-1.269*AQT_SCALE, lastMouseY+-11.091*AQT_SCALE, 
+	                lastMouseX+-2.367*AQT_SCALE, lastMouseY+-10.553*AQT_SCALE, 
+	                lastMouseX+-3.502*AQT_SCALE, lastMouseY+-9.41*AQT_SCALE, 
+	                lastMouseX+-4.1*AQT_SCALE, lastMouseY+-8.135*AQT_SCALE, 
+	                lastMouseX+-4.548*AQT_SCALE, lastMouseY+-6.497*AQT_SCALE, 
+	                lastMouseX+-5.654*AQT_SCALE, lastMouseY+-4.709*AQT_SCALE, 
+	                lastMouseX+-7.51*AQT_SCALE, lastMouseY+-3.322*AQT_SCALE, 
+	                lastMouseX+-9.665*AQT_SCALE, lastMouseY+-2.441*AQT_SCALE, 
+	                lastMouseX+-10.933*AQT_SCALE, lastMouseY+-1.084*AQT_SCALE, 
+	                lastMouseX+-11.428*AQT_SCALE, lastMouseY+0.689*AQT_SCALE, 
+	                lastMouseX+-11.493*AQT_SCALE, lastMouseY+5.51*AQT_SCALE);
+		} else if (appleseedFiveButton.isSelected()) {
+			newShape = new PolygonRegion(lastMouseX+7.893*AQT_SCALE, lastMouseY+3.418*AQT_SCALE, 
+	                lastMouseX+7.893*AQT_SCALE, lastMouseY+1.147*AQT_SCALE, 
+	                lastMouseX+7.255*AQT_SCALE, lastMouseY+0.331*AQT_SCALE, 
+	                lastMouseX+5.622*AQT_SCALE, lastMouseY+-0.247*AQT_SCALE, 
+	                lastMouseX+4.187*AQT_SCALE, lastMouseY+-1.124*AQT_SCALE, 
+	                lastMouseX+2.833*AQT_SCALE, lastMouseY+-2.339*AQT_SCALE, 
+	                lastMouseX+1.917*AQT_SCALE, lastMouseY+-3.594*AQT_SCALE, 
+	                lastMouseX+1.219*AQT_SCALE, lastMouseY+-5.048*AQT_SCALE, 
+	                lastMouseX+0.9*AQT_SCALE, lastMouseY+-6.223*AQT_SCALE, 
+	                lastMouseX+0.801*AQT_SCALE, lastMouseY+-7.1*AQT_SCALE, 
+	                lastMouseX+0.521*AQT_SCALE, lastMouseY+-7.558*AQT_SCALE, 
+	                lastMouseX+0.083*AQT_SCALE, lastMouseY+-7.617*AQT_SCALE, 
+	                lastMouseX+-0.354*AQT_SCALE, lastMouseY+-7.558*AQT_SCALE, 
+	                lastMouseX+-0.634*AQT_SCALE, lastMouseY+-7.1*AQT_SCALE, 
+	                lastMouseX+-0.733*AQT_SCALE, lastMouseY+-6.223*AQT_SCALE, 
+	                lastMouseX+-1.052*AQT_SCALE, lastMouseY+-5.048*AQT_SCALE, 
+	                lastMouseX+-1.75*AQT_SCALE, lastMouseY+-3.594*AQT_SCALE, 
+	                lastMouseX+-2.666*AQT_SCALE, lastMouseY+-2.339*AQT_SCALE, 
+	                lastMouseX+-4.02*AQT_SCALE, lastMouseY+-1.124*AQT_SCALE, 
+	                lastMouseX+-5.455*AQT_SCALE, lastMouseY+-0.247*AQT_SCALE, 
+	                lastMouseX+-7.088*AQT_SCALE, lastMouseY+0.331*AQT_SCALE, 
+	                lastMouseX+-7.726*AQT_SCALE, lastMouseY+1.147*AQT_SCALE, 
+	                lastMouseX+-7.726*AQT_SCALE, lastMouseY+3.418*AQT_SCALE);
 		} else {
 			cursorShape = Optional.empty();
 			System.err.println("Unimplemented region type selected.");

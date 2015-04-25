@@ -38,22 +38,22 @@
                   <Tooltip text="Draw Oval" />
                </tooltip>    
           </ToggleButton>     
-          <ToggleButton fx:id="triangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/triangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="triangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/triangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw Triangle" />
                </tooltip>    
           </ToggleButton>     
-          <ToggleButton fx:id="appleseedThreeButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_3.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="appleseedThreeButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#drawShape" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_3.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw D Silhouette 3" />
                </tooltip>    
           </ToggleButton>     
-          <ToggleButton fx:id="appleseedFourButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_4.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="appleseedFourButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#drawShape" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_4.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw D Silhouette 4" />
                </tooltip>    
           </ToggleButton>   
-          <ToggleButton fx:id="appleseedFiveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_5.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="appleseedFiveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#drawShape" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_5.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw D Silhouette 5" />
                </tooltip>    
