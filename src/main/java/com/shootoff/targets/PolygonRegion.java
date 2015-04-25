@@ -1,6 +1,9 @@
 package com.shootoff.targets;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.collections.ObservableList;
@@ -16,14 +19,31 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	@Override
 	public void changeWidth(double widthDelta) {
 		ObservableList<Double> points = this.getPoints();
-		for (int i = 2; i < points.size(); i += 2) {
-			points.set(i, points.get(i) + widthDelta);
+		List<Double> pointsX = new ArrayList<Double>();
+		
+		for (int i = 0; i < points.size(); i += 2) {
+			pointsX.add(points.get(i));
 		}
+		
+		double width = Collections.max(pointsX);
+		double scaleFactor = (width + widthDelta) / width;
+        
+		this.setScaleX(this.getScaleX() * scaleFactor);
 	}
 
 	@Override
 	public void changeHeight(double heightDelta) {
-	//	this.setHeight(this.getHeight() + heightDelta);
+		ObservableList<Double> points = this.getPoints();
+		List<Double> pointsY = new ArrayList<Double>();
+		
+		for (int i = 1; i < points.size(); i += 2) {
+			pointsY.add(points.get(i));
+		}
+		
+		double height = Collections.max(pointsY);
+		double scaleFactor = (height + heightDelta) / height;
+        
+		this.setScaleY(this.getScaleY() * scaleFactor);
 	}
 	
 	@Override

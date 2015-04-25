@@ -256,6 +256,9 @@ public class TargetEditorController {
 		if (cursorShape.isPresent() && 
 				!targetShapes.contains(cursorShape.get())) {
 			canvasPane.getChildren().remove(cursorShape.get());
+		} else if (cursorShape.isPresent() && 
+				targetShapes.contains(cursorShape.get())) {
+			cursorShape.get().setStroke(UNSELECTED_STROKE_COLOR);
 		}
 		
 		drawShape();
