@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Stack;
 
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.PolygonRegion;
@@ -27,11 +28,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 public class TargetEditorController {
@@ -44,6 +49,7 @@ public class TargetEditorController {
 	@FXML private ToggleButton appleseedThreeButton;
 	@FXML private ToggleButton appleseedFourButton;
 	@FXML private ToggleButton appleseedFiveButton;
+	@FXML private ToggleButton freeformButton;
 	@FXML private Button sendBackwardButton;
 	@FXML private Button bringForwardButton;
 	@FXML private ToggleButton tagsButton;
@@ -58,6 +64,9 @@ public class TargetEditorController {
 	private Optional<Shape> cursorShape = Optional.empty();
 	private final List<Shape> targetShapes = new ArrayList<Shape>();
 	private Optional<TagEditorPanel> tagEditor = Optional.empty();
+	private final List<Double> freeformPoints = new ArrayList<Double>();
+	private final Stack<Shape> freeformShapes = new Stack<Shape>();
+	private Optional<Line> freeformEdge = Optional.empty();
 	private double lastMouseX = 0;
 	private double lastMouseY = 0;
 	
@@ -117,6 +126,10 @@ public class TargetEditorController {
 
 	@FXML
 	public void mouseMoved(MouseEvent event) {
+		if (freeformButton.isSelected()) {
+			drawTempPolygonEdge(event);
+		}
+		
 		if (!cursorShape.isPresent() || cursorButton.isSelected()) return;
 		
 		Shape selected = cursorShape.get();
@@ -129,10 +142,20 @@ public class TargetEditorController {
 		
 		if (lastMouseY >= 0)
 			selected.setLayoutY(lastMouseY - selected.getLayoutBounds().getMinY());
+		
+		event.consume();
 	}
 	
 	@FXML
 	public void shapeDropped(MouseEvent event) {
+		if (freeformButton.isSelected() && event.getButton().equals(MouseButton.PRIMARY)) {
+			drawPolygon(event);
+		} else if (freeformButton.isSelected() && event.getButton().equals(MouseButton.SECONDARY)) {
+			drawShape();
+			targetShapes.add(cursorShape.get());
+			clearFreeformState();
+		}
+		
 		if (!cursorShape.isPresent() || cursorButton.isSelected()) return;
 		
 		Shape selected = cursorShape.get();
@@ -141,6 +164,74 @@ public class TargetEditorController {
 		selected.setOnKeyPressed((e) -> { shapeKeyPressed(e); }); 
 		
 		drawShape();
+	}
+	
+	@FXML
+	public void canvasKeyPressed(KeyEvent event) {
+		if (freeformButton.isSelected() && 
+				event.isControlDown() && event.getCode() == KeyCode.Z) {
+			
+			undoPolygonStep();
+		}
+	}
+	
+	private void undoPolygonStep() {
+		if (freeformPoints.size() <= 0) return;
+		
+		// Remove last point, line, and vertex
+		freeformPoints.remove(freeformPoints.size() - 1);
+		freeformPoints.remove(freeformPoints.size() - 1);
+		
+		if (freeformPoints.size() == 0 && freeformEdge.isPresent()) {
+			canvasPane.getChildren().remove(freeformEdge.get());
+			freeformEdge = Optional.empty();
+		}
+		
+		// Edge if it exists, otherwise vertex
+		if (freeformShapes.size() > 0) 
+			canvasPane.getChildren().remove(freeformShapes.pop());
+		
+		// Vertex if there was an edge
+		if (freeformShapes.size() > 0)
+			canvasPane.getChildren().remove(freeformShapes.pop());
+	}
+	
+	private void drawTempPolygonEdge(MouseEvent event) {
+		// Need at least one point
+		if (freeformPoints.size() < 2) return;
+		
+		if (freeformEdge.isPresent()) 
+			canvasPane.getChildren().remove(freeformEdge.get());
+		
+		double lastX = freeformPoints.get(freeformPoints.size() - 2);
+		double lastY = freeformPoints.get(freeformPoints.size() - 1);
+		
+		Line tempEdge = new Line(lastX, lastY, event.getX(), event.getY());
+		final double DASH_OFFSET = 5;
+		
+		tempEdge.getStrokeDashArray().addAll(DASH_OFFSET, DASH_OFFSET);
+		freeformEdge = Optional.of(tempEdge);
+		canvasPane.getChildren().add(tempEdge);
+	}
+	
+	private void drawPolygon(MouseEvent event) {		
+		final int VERTEX_RADIUS = 3;
+		
+		Circle vertexDot = new Circle(event.getX(), event.getY(), VERTEX_RADIUS);
+		freeformShapes.add(vertexDot);
+		canvasPane.getChildren().add(vertexDot);
+		
+		if (freeformPoints.size() > 0) {
+			double lastX = freeformPoints.get(freeformPoints.size() - 2);
+			double lastY = freeformPoints.get(freeformPoints.size() - 1);
+			Line edge = new Line(lastX, lastY, event.getX(), event.getY());
+			
+			freeformShapes.push(edge);
+			canvasPane.getChildren().add(edge);
+		}
+		
+		freeformPoints.add(event.getX());
+		freeformPoints.add(event.getY());
 	}
 	
 	public void shapeClicked(MouseEvent event) {
@@ -238,6 +329,8 @@ public class TargetEditorController {
 	
 	@FXML
 	public void cursorSelected(ActionEvent event) {
+		clearFreeformState();
+		
 		if (!cursorShape.isPresent()) return;
 		
 		// Remove shape that was never actually placed
@@ -250,6 +343,8 @@ public class TargetEditorController {
 	
 	@FXML
 	public void drawShape(ActionEvent event) {
+		clearFreeformState();
+		
 		lastMouseX = 0;
 		lastMouseY = 0;
 		
@@ -357,6 +452,14 @@ public class TargetEditorController {
 	                lastMouseX+-7.088*AQT_SCALE, lastMouseY+0.331*AQT_SCALE, 
 	                lastMouseX+-7.726*AQT_SCALE, lastMouseY+1.147*AQT_SCALE, 
 	                lastMouseX+-7.726*AQT_SCALE, lastMouseY+3.418*AQT_SCALE);
+		} else if (freeformButton.isSelected()) {
+			double[] points = new double[freeformPoints.size()];
+			
+			for (int i = 0; i < freeformPoints.size(); i++) {
+				points[i] = freeformPoints.get(i);
+			}
+			
+			newShape = new PolygonRegion(points);
 		} else {
 			cursorShape = Optional.empty();
 			System.err.println("Unimplemented region type selected.");
@@ -368,6 +471,30 @@ public class TargetEditorController {
 		canvasPane.getChildren().add(newShape);
 		
 		cursorShape = Optional.of(newShape);
+	}
+	
+	@FXML
+	public void startPolygon(ActionEvent event) {
+		clearFreeformState();
+	}
+	
+	private void clearFreeformState() {
+		if (cursorShape.isPresent()) {
+			Shape selected = cursorShape.get();
+			if (!targetShapes.contains(selected)) 
+				canvasPane.getChildren().remove(selected);
+			
+			cursorShape = Optional.empty();
+		}
+		
+		freeformPoints.clear();
+		canvasPane.getChildren().removeAll(freeformShapes);
+		freeformShapes.clear();
+		
+		if (freeformEdge.isPresent()) {
+			canvasPane.getChildren().remove(freeformEdge.get());
+			freeformEdge = Optional.empty();
+		}
 	}
 	
 	@FXML
