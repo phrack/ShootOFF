@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import com.shootoff.targets.CircleRegion;
 import com.shootoff.targets.RectangleRegion;
 
 import javafx.beans.value.ChangeListener;
@@ -21,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -36,9 +38,10 @@ public class TargetEditorController {
 	@FXML private ToggleButton tagsButton;
 	@FXML private ChoiceBox<String> regionColorChoiceBox;
 	
-	private final Color DEFAULT_FILL_COLOR = Color.BLACK;
-	private final Color UNSELECTED_STROKE_COLOR = Color.BLACK;
-	private final double DEFAULT_OPACITY = 0.7;
+	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
+	private static final Color UNSELECTED_STROKE_COLOR = Color.BLACK;
+	private static final double DEFAULT_OPACITY = 0.7;
+	private static final int MOVEMENT_DELTA = 1;
 	
 	private Optional<Shape> cursorShape = Optional.empty();
 	private final Set<Shape> targetShapes = new HashSet<Shape>();
@@ -47,8 +50,8 @@ public class TargetEditorController {
 	
 	// TODO: Send shape back
 	// TODO: Bring shape forward
-	// TODO: Set color choice box on region selection
 	// TODO: Add/remove tags for selected shape
+	// TODO: Resize shape with keys
 	
 	public void init(Image backgroundImg) {
 		regionColorChoiceBox.setItems(FXCollections.observableArrayList(
@@ -85,6 +88,24 @@ public class TargetEditorController {
 		tagsButton.setDisable(!enabled);
 		regionColorChoiceBox.setDisable(!enabled);
 	}
+	
+	private String getColorName(Color color) {
+		if (color == Color.BLACK) {
+			return "black";
+		} else if (color == Color.BLUE) {
+			return "blue";
+		} else if (color == Color.GREEN) {
+			return "green";
+		} else if (color == Color.ORANGE) {
+			return "orange";
+		} else if (color == Color.RED) {
+			return "red";
+		} else if (color == Color.WHITE) {
+			return "white";
+		} else {
+			return "cornsilk";
+		}
+	}
 
 	@FXML
 	public void mouseMoved(MouseEvent event) {
@@ -109,6 +130,7 @@ public class TargetEditorController {
 		Shape selected = cursorShape.get();
 		targetShapes.add(selected);
 		selected.setOnMouseClicked((e) -> { shapeClicked(e); });
+		selected.setOnKeyPressed((e) -> { shapeKeyPressed(e); }); 
 		
 		drawShape();
 	}
@@ -132,9 +154,56 @@ public class TargetEditorController {
 		}
 
 		selected.setStroke(Color.GOLD);
-		
+		selected.requestFocus();
 		toggleShapeControls(true);
 		cursorShape = Optional.of(selected);
+		regionColorChoiceBox.getSelectionModel().select(
+				getColorName((Color)selected.getFill()));
+	}
+	
+	@SuppressWarnings("incomplete-switch")
+	public void shapeKeyPressed(KeyEvent event) {
+		Shape selected = (Shape)event.getTarget();
+		event.consume();
+		
+		switch (event.getCode()) {
+		case DELETE:
+			targetShapes.remove(selected);
+			canvasPane.getChildren().remove(selected);
+			break;
+			
+		case LEFT:
+			if (event.isShiftDown()) {
+
+			} else {
+				selected.setLayoutX(selected.getLayoutX() - MOVEMENT_DELTA);
+			}
+			break;
+			
+		case RIGHT:
+			if (event.isShiftDown()) {
+				
+			} else {
+				selected.setLayoutX(selected.getLayoutX() + MOVEMENT_DELTA);
+			}
+			break;
+			
+		case UP:
+			if (event.isShiftDown()) {
+				
+			} else {
+				selected.setLayoutY(selected.getLayoutY() - MOVEMENT_DELTA);
+			}
+			break;
+
+		case DOWN:
+			if (event.isShiftDown()) {
+				
+			} else {
+				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
+			}
+			break;
+		}
 	}
 	
 	@FXML
@@ -154,6 +223,11 @@ public class TargetEditorController {
 		lastMouseX = 0;
 		lastMouseY = 0;
 		
+		if (cursorShape.isPresent() && 
+				!targetShapes.contains(cursorShape.get())) {
+			canvasPane.getChildren().remove(cursorShape.get());
+		}
+		
 		drawShape();
 	}
 	
@@ -164,7 +238,12 @@ public class TargetEditorController {
 			newShape = new RectangleRegion(lastMouseX, lastMouseY, 
 				30, 30);
 		} else if (ovalButton.isSelected()) {
-			// TODO: Draw oval
+			final int radius = 15;
+			newShape = new CircleRegion(lastMouseX + radius, 
+					lastMouseY + radius, radius);
+		} else {
+			System.err.println("Unimplemented region type selected.");
+			return;
 		}
 
 		newShape.setFill(DEFAULT_FILL_COLOR);
