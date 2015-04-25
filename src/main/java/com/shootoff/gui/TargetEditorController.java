@@ -28,11 +28,13 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class TargetEditorController {
+	@FXML private BorderPane targetEditorPane;
 	@FXML private Pane canvasPane;
 	@FXML private ToggleButton cursorButton;
 	@FXML private ToggleButton rectangleButton;
@@ -50,10 +52,9 @@ public class TargetEditorController {
 	
 	private Optional<Shape> cursorShape = Optional.empty();
 	private final List<Shape> targetShapes = new ArrayList<Shape>();
+	private Optional<TagEditorPanel> tagEditor = Optional.empty();
 	private double lastMouseX = 0;
 	private double lastMouseY = 0;
-	
-	// TODO: Add/remove tags for selected shape
 	
 	public void init(Image backgroundImg) {
 		regionColorChoiceBox.setItems(FXCollections.observableArrayList(
@@ -146,13 +147,22 @@ public class TargetEditorController {
 		
 		// Want to select the current shape
 		Shape selected = (Shape)event.getTarget();
+		boolean tagEditorOpen = false;
 		
 		if (cursorShape.isPresent()) {
 			Shape previous = cursorShape.get();
 			
 			// Unhighlight the old selection
-			if (!previous.equals(selected))
+			if (!previous.equals(selected)) {
 				previous.setStroke(UNSELECTED_STROKE_COLOR);
+				
+				if (tagEditor.isPresent()) {
+					// Close tag editor
+					tagsButton.setSelected(false);
+					toggleTagEditor();
+					tagEditorOpen = true;
+				}
+			}
 		}
 
 		selected.setStroke(Color.GOLD);
@@ -161,6 +171,12 @@ public class TargetEditorController {
 		cursorShape = Optional.of(selected);
 		regionColorChoiceBox.getSelectionModel().select(
 				getColorName((Color)selected.getFill()));
+		
+		// Re-open editor
+		if (tagEditorOpen) {
+			tagsButton.setSelected(true);
+			toggleTagEditor();
+		}
 	}
 	
 	@SuppressWarnings("incomplete-switch")
@@ -173,6 +189,10 @@ public class TargetEditorController {
 			targetShapes.remove(selected);
 			canvasPane.getChildren().remove(selected);
 			toggleShapeControls(false);
+			if (tagEditor.isPresent()) {
+				tagsButton.setSelected(false);
+				toggleTagEditor();
+			}
 			break;
 			
 		case LEFT:
@@ -304,6 +324,27 @@ public class TargetEditorController {
 	
 	@FXML
 	public void toggleTagEditor(ActionEvent event) {
+		if (cursorShape.isPresent() && 
+				!targetShapes.contains(cursorShape.get())) return;
 		
+		toggleTagEditor();
+	}
+	
+	public void toggleTagEditor() {
+		TargetRegion selected = (TargetRegion)cursorShape.get();
+		
+		if (tagsButton.isSelected()) {
+			TagEditorPanel editor = new TagEditorPanel(selected.getAllTags());
+			tagEditor = Optional.of(editor);
+			targetEditorPane.getChildren().add(editor);
+			editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
+			editor.setLayoutY(tagsButton.getLayoutY() + tagsButton.getHeight() + 
+					tagsButton.getPadding().getBottom() + 2);
+		} else if (tagEditor.isPresent()) {
+			TagEditorPanel editor = tagEditor.get();
+			targetEditorPane.getChildren().remove(editor);
+			selected.replaceAllTags(editor.getTags());
+			tagEditor = Optional.empty();
+		}
 	}
 }
