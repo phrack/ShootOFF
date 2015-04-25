@@ -10,8 +10,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.shootoff.targets.CircleRegion;
+import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.RectangleRegion;
+import com.shootoff.targets.TargetRegion;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -42,6 +43,7 @@ public class TargetEditorController {
 	private static final Color UNSELECTED_STROKE_COLOR = Color.BLACK;
 	private static final double DEFAULT_OPACITY = 0.7;
 	private static final int MOVEMENT_DELTA = 1;
+	private static final int SCALE_DELTA = 1;
 	
 	private Optional<Shape> cursorShape = Optional.empty();
 	private final Set<Shape> targetShapes = new HashSet<Shape>();
@@ -51,7 +53,6 @@ public class TargetEditorController {
 	// TODO: Send shape back
 	// TODO: Bring shape forward
 	// TODO: Add/remove tags for selected shape
-	// TODO: Resize shape with keys
 	
 	public void init(Image backgroundImg) {
 		regionColorChoiceBox.setItems(FXCollections.observableArrayList(
@@ -112,7 +113,7 @@ public class TargetEditorController {
 		if (!cursorShape.isPresent() || cursorButton.isSelected()) return;
 		
 		Shape selected = cursorShape.get();
-		
+
 		lastMouseX = event.getX() - (selected.getLayoutBounds().getWidth() / 2);
 		lastMouseY = event.getY() - (selected.getLayoutBounds().getHeight() / 2);
 		
@@ -164,17 +165,18 @@ public class TargetEditorController {
 	@SuppressWarnings("incomplete-switch")
 	public void shapeKeyPressed(KeyEvent event) {
 		Shape selected = (Shape)event.getTarget();
-		event.consume();
+		TargetRegion region = (TargetRegion)selected;
 		
 		switch (event.getCode()) {
 		case DELETE:
 			targetShapes.remove(selected);
 			canvasPane.getChildren().remove(selected);
+			toggleShapeControls(false);
 			break;
 			
 		case LEFT:
 			if (event.isShiftDown()) {
-
+				region.changeWidth(SCALE_DELTA * -1);
 			} else {
 				selected.setLayoutX(selected.getLayoutX() - MOVEMENT_DELTA);
 			}
@@ -182,7 +184,7 @@ public class TargetEditorController {
 			
 		case RIGHT:
 			if (event.isShiftDown()) {
-				
+				region.changeWidth(SCALE_DELTA);
 			} else {
 				selected.setLayoutX(selected.getLayoutX() + MOVEMENT_DELTA);
 			}
@@ -190,7 +192,7 @@ public class TargetEditorController {
 			
 		case UP:
 			if (event.isShiftDown()) {
-				
+				region.changeHeight(SCALE_DELTA * -1);
 			} else {
 				selected.setLayoutY(selected.getLayoutY() - MOVEMENT_DELTA);
 			}
@@ -198,12 +200,14 @@ public class TargetEditorController {
 
 		case DOWN:
 			if (event.isShiftDown()) {
-				
+				region.changeHeight(SCALE_DELTA);
 			} else {
 				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
 			}
 			break;
 		}
+		
+		event.consume();
 	}
 	
 	@FXML
@@ -239,9 +243,10 @@ public class TargetEditorController {
 				30, 30);
 		} else if (ovalButton.isSelected()) {
 			final int radius = 15;
-			newShape = new CircleRegion(lastMouseX + radius, 
-					lastMouseY + radius, radius);
+			newShape = new EllipseRegion(lastMouseX + radius, 
+					lastMouseY + radius, radius, radius);
 		} else {
+			cursorShape = Optional.empty();
 			System.err.println("Unimplemented region type selected.");
 			return;
 		}
