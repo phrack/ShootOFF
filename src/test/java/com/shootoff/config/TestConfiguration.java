@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import javafx.scene.paint.Color;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -116,8 +118,10 @@ public class TestConfiguration {
 			
 			defaultConfig.setIgnoreLaserColorName("red");
 			defaultConfig.validateConfiguration();
+			assertEquals(Color.RED, defaultConfig.getIgnoreLaserColor().get());
 			defaultConfig.setIgnoreLaserColorName("green");
 			defaultConfig.validateConfiguration();
+			assertEquals(Color.GREEN, defaultConfig.getIgnoreLaserColor().get());
 		} catch (ConfigurationException e) {
 			fail("Ignore laser color values are correct but got ConfigurationException");
 		}

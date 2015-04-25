@@ -72,6 +72,10 @@ public class ShotSearcher implements Runnable {
 				if (pixel == 255) {
 					Optional<Color> areaColor = detectColor(x, y);
 					if (areaColor.isPresent()) {
+						if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
+								areaColor.get().equals(config.getIgnoreLaserColor().get()))
+									continue; 
+						
 						canvasManager.addShot(new Shot(areaColor.get(), x, y, 
 								0, config.getMarkerRadius()));
 						return;

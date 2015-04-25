@@ -50,6 +50,28 @@ public class TestShotSearcher {
 		
 		assertEquals(0, shots.size());
 	}
+
+	@Test
+	public void testNoInterenceOneShotIgnoreRed() throws IOException, InterruptedException {
+		config.setIgnoreLaserColor(true);
+		config.setIgnoreLaserColorName("red");
+		List<Shot> shots = findShots("/shotsearcher/no_interference_one_shot.png");	
+		
+		assertEquals(0, shots.size());
+	}
+	
+	@Test
+	public void testNoInterenceOneShotIgnoreGreen() throws IOException, InterruptedException {
+		config.setIgnoreLaserColor(true);
+		config.setIgnoreLaserColorName("green");
+		List<Shot> shots = findShots("/shotsearcher/no_interference_one_shot.png");	
+		
+		assertEquals(1, shots.size());
+		
+		assertEquals(52, shots.get(0).getX());
+		assertEquals(174, shots.get(0).getY());
+		assertEquals(Color.RED, shots.get(0).getColor());
+	}
 	
 	@Test
 	public void testNoInterenceOneShot() throws IOException, InterruptedException {
@@ -100,5 +122,19 @@ public class TestShotSearcher {
 		assertEquals(408, shots.get(3).getX());
 		assertEquals(330, shots.get(3).getY());
 		assertEquals(Color.RED, shots.get(3).getColor());
+	}
+	
+	@Test
+	public void testInterenceOneShotIgnoreGreen() throws IOException, InterruptedException {
+		config.setIgnoreLaserColor(true);
+		config.setIgnoreLaserColorName("green");
+		List<Shot> shots = findShots("/shotsearcher/interference_one_shot.png");	
+		
+		assertEquals(1, shots.size());
+		
+		// Real shot
+		assertEquals(408, shots.get(0).getX());
+		assertEquals(330, shots.get(0).getY());
+		assertEquals(Color.RED, shots.get(0).getColor());
 	}
 }

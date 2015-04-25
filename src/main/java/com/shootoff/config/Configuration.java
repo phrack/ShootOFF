@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Optional;
 import java.util.Properties;
+
+import javafx.scene.paint.Color;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -334,6 +337,16 @@ public class Configuration {
 		return ignoreLaserColor;
 	}
 
+	public Optional<Color> getIgnoreLaserColor() {
+		if (ignoreLaserColorName.equals("red")) {
+			return Optional.of(Color.RED);
+		} else if (ignoreLaserColorName.equals("green")) {
+			return Optional.of(Color.GREEN);
+		}
+			
+		return Optional.empty();
+	}
+	
 	public String getIgnoreLaserColorName() {
 		return ignoreLaserColorName;
 	}
