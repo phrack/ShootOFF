@@ -6,9 +6,10 @@
 
 package com.shootoff.gui;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.RectangleRegion;
@@ -17,8 +18,10 @@ import com.shootoff.targets.TargetRegion;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleButton;
@@ -46,12 +49,10 @@ public class TargetEditorController {
 	private static final int SCALE_DELTA = 1;
 	
 	private Optional<Shape> cursorShape = Optional.empty();
-	private final Set<Shape> targetShapes = new HashSet<Shape>();
+	private final List<Shape> targetShapes = new ArrayList<Shape>();
 	private double lastMouseX = 0;
 	private double lastMouseY = 0;
 	
-	// TODO: Send shape back
-	// TODO: Bring shape forward
 	// TODO: Add/remove tags for selected shape
 	
 	public void init(Image backgroundImg) {
@@ -256,5 +257,49 @@ public class TargetEditorController {
 		canvasPane.getChildren().add(newShape);
 		
 		cursorShape = Optional.of(newShape);
+	}
+	
+	@FXML
+	public void bringForward(ActionEvent event) {
+		if (cursorShape.isPresent() && 
+				!targetShapes.contains(cursorShape.get())) return;
+		
+		ObservableList<Node> shapesList = canvasPane.getChildren();
+		int selectedIndex = shapesList.indexOf(cursorShape.get());
+
+		if (selectedIndex < shapesList.size() - 1) {
+			// We have to do this dance instead of just calling
+			// Collections.swap otherwise we get an IllegalArgumentException
+			// from the Scene for duplicating a child node
+			Node topShape = shapesList.get(selectedIndex + 1);
+			Node bottomShape = shapesList.get(selectedIndex);
+			shapesList.remove(selectedIndex + 1);
+			shapesList.remove(selectedIndex);
+			shapesList.add(selectedIndex, topShape);
+			shapesList.add(selectedIndex + 1, bottomShape);
+		}
+	}
+	
+	@FXML
+	public void sendBackward(ActionEvent event) {
+		if (cursorShape.isPresent() && 
+				!targetShapes.contains(cursorShape.get())) return;
+		
+		ObservableList<Node> shapesList = canvasPane.getChildren();
+		int selectedIndex = shapesList.indexOf(cursorShape.get());
+
+		if (selectedIndex > 0) {
+			Node topShape = shapesList.get(selectedIndex);
+			Node bottomShape = shapesList.get(selectedIndex - 1);
+			shapesList.remove(selectedIndex);
+			shapesList.remove(selectedIndex - 1);
+			shapesList.add(selectedIndex - 1, topShape);
+			shapesList.add(selectedIndex, bottomShape);
+		}
+	}
+	
+	@FXML
+	public void toggleTagEditor(ActionEvent event) {
+		
 	}
 }

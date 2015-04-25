@@ -63,17 +63,17 @@
                   <Tooltip text="Draw Freeform Polygon" />
                </tooltip>    
           </ToggleButton>   
-          <Button fx:id="bringForwardButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/bring_forward.png&quot;); -fx-background-position: center;">
+          <Button fx:id="bringForwardButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#bringForward" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/bring_forward.png&quot;); -fx-background-position: center;">
 			   <tooltip>
                   <Tooltip text="Bring Forward" />
                </tooltip>    
           </Button>   
-          <Button fx:id="sendBackwardButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/send_backward.png&quot;); -fx-background-position: center;">
+          <Button fx:id="sendBackwardButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#sendBackward" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/send_backward.png&quot;); -fx-background-position: center;">
 			   <tooltip>
                   <Tooltip text="Send Backward" />
                </tooltip>    
           </Button>   
-          <ToggleButton fx:id="tagsButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center;">
+          <ToggleButton fx:id="tagsButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleTagEditor" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center;">
 			   <tooltip>
                   <Tooltip text="Edit Selected Region's Tags" />
                </tooltip>    
