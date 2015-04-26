@@ -34,7 +34,7 @@ public class ShootOFFController {
 		this.camerasSupervisor = new CamerasSupervisor(config);
 		
 		Webcam defaultCamera = Webcam.getDefault();
-		camerasSupervisor.addCameraManager(defaultCamera, new CanvasManager(defaultCanvas));
+		camerasSupervisor.addCameraManager(defaultCamera, new CanvasManager(defaultCanvas, config));
 	
 		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
 		shootOFFStage.setOnCloseRequest((value) -> {

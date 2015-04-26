@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.config.Configuration;
 
 import javafx.scene.canvas.Canvas;
 
 public class MockCanvasManager extends CanvasManager {
 	private final List<Shot> shots = new ArrayList<Shot>();
 	
-	public MockCanvasManager() {
-		super(new Canvas());
+	public MockCanvasManager(Configuration config) {
+		super(new Canvas(), config);
 	}
 
 	@Override

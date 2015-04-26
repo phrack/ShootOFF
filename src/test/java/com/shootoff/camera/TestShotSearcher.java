@@ -24,7 +24,7 @@ public class TestShotSearcher {
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
-		mockManager = new MockCanvasManager();
+		mockManager = new MockCanvasManager(config);
 	}
 	
 	private List<Shot> findShots(String imagePath) throws IOException, InterruptedException {
@@ -68,8 +68,8 @@ public class TestShotSearcher {
 		
 		assertEquals(1, shots.size());
 		
-		assertEquals(52, shots.get(0).getX());
-		assertEquals(174, shots.get(0).getY());
+		assertEquals(52, shots.get(0).getX(), 1);
+		assertEquals(174, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 	}
 	
@@ -79,8 +79,8 @@ public class TestShotSearcher {
 		
 		assertEquals(1, shots.size());
 		
-		assertEquals(52, shots.get(0).getX());
-		assertEquals(174, shots.get(0).getY());
+		assertEquals(52, shots.get(0).getX(), 1);
+		assertEquals(174, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 	}
 	
@@ -90,12 +90,12 @@ public class TestShotSearcher {
 
 		assertEquals(2, shots.size());
 
-		assertEquals(41, shots.get(0).getX());
-		assertEquals(32, shots.get(0).getY());
+		assertEquals(41, shots.get(0).getX(), 1);
+		assertEquals(32, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 		
-		assertEquals(52, shots.get(1).getX());
-		assertEquals(174, shots.get(1).getY());
+		assertEquals(52, shots.get(1).getX(), 1);
+		assertEquals(174, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
 	
@@ -106,21 +106,21 @@ public class TestShotSearcher {
 		assertEquals(4, shots.size());
 
 		// Interference
-		assertEquals(1, shots.get(0).getX());
-		assertEquals(190, shots.get(0).getY());
+		assertEquals(1, shots.get(0).getX(), 1);
+		assertEquals(190, shots.get(0).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(0).getColor());
 
-		assertEquals(163, shots.get(1).getX());
-		assertEquals(113, shots.get(1).getY());
+		assertEquals(163, shots.get(1).getX(), 1);
+		assertEquals(113, shots.get(1).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(1).getColor());
 		
-		assertEquals(160, shots.get(2).getX());
-		assertEquals(134, shots.get(2).getY());
+		assertEquals(160, shots.get(2).getX(), 1);
+		assertEquals(134, shots.get(2).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(2).getColor());
 		
 		// Real shot
-		assertEquals(408, shots.get(3).getX());
-		assertEquals(330, shots.get(3).getY());
+		assertEquals(408, shots.get(3).getX(), 1);
+		assertEquals(330, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
 	}
 	
@@ -133,8 +133,8 @@ public class TestShotSearcher {
 		assertEquals(1, shots.size());
 		
 		// Real shot
-		assertEquals(408, shots.get(0).getX());
-		assertEquals(330, shots.get(0).getY());
+		assertEquals(408, shots.get(0).getX(), 1);
+		assertEquals(330, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 	}
 }

@@ -11,12 +11,12 @@ import javafx.scene.paint.Color;
 
 public class Shot {
 	private final Color color;
-	private final int x;
-	private final int y;
+	private final double x;
+	private final double y;
 	private final int timestamp;
 	private final int markerRadius;
 	
-	public Shot (Color color, int x, int y, int timestamp, int markerRadius) {
+	public Shot (Color color, double x, double y, int timestamp, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
@@ -33,11 +33,11 @@ public class Shot {
 		return color;
 	}
 	
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 	
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 	
