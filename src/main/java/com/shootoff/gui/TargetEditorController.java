@@ -22,6 +22,7 @@ import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.GifAnimation;
 import com.shootoff.targets.animation.SpriteAnimation;
+import com.shootoff.targets.io.TargetIO;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -135,6 +136,21 @@ public class TargetEditorController {
 		}
 	}
 
+	@FXML
+	public void saveTarget(ActionEvent event) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save Target");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target")
+            );
+		File targetFile = fileChooser.showSaveDialog(canvasPane.getParent().getScene().getWindow());
+		targetFile = new File(targetFile.getPath() + ".target");
+		
+		if (targetFile != null) {
+			TargetIO.saveTarget(targetRegions, targetFile);
+		}
+	}
+	
 	@FXML
 	public void mouseMoved(MouseEvent event) {
 		if (freeformButton.isSelected()) {
