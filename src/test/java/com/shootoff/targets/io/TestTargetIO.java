@@ -79,24 +79,24 @@ public class TestTargetIO {
 			switch (region.getType()) {
 			case IMAGE:
 				ImageRegion img = (ImageRegion)region;
-				assertTrue(this.img.getX() == img.getX());
-				assertTrue(this.img.getY() == img.getY());
+				assertEquals(this.img.getX(), img.getX(), 0.5);
+				assertEquals(this.img.getY(), img.getY(), 0.5);
 				assertEquals(this.img.getImageFile(), img.getImageFile());
 				break;
 			case RECTANGLE:
 				RectangleRegion rec = (RectangleRegion)region;
-				assertTrue(this.rec.getX() == rec.getX());
-				assertTrue(this.rec.getY() == rec.getY());
-				assertTrue(this.rec.getWidth() == rec.getWidth());
-				assertTrue(this.rec.getHeight() == rec.getHeight());
+				assertEquals(this.rec.getX(), rec.getX(), 0.5);
+				assertEquals(this.rec.getY(), rec.getY(), 0.5);
+				assertEquals(this.rec.getWidth(), rec.getWidth(), 0.5);
+				assertEquals(this.rec.getHeight(), rec.getHeight(), 0.5);
 				assertEquals(this.rec.getFill(), rec.getFill());
 				break;
 			case ELLIPSE:
 				EllipseRegion ell = (EllipseRegion)region;
-				assertTrue(this.ell.getCenterX() == ell.getCenterX());
-				assertTrue(this.ell.getCenterY() == ell.getCenterY());
-				assertTrue(this.ell.getRadiusX() == ell.getRadiusX());
-				assertTrue(this.ell.getRadiusY() == ell.getRadiusY());
+				assertEquals(this.ell.getCenterX(), ell.getCenterX(), 0.5);
+				assertEquals(this.ell.getCenterY(), ell.getCenterY(), 0.5);
+				assertEquals(this.ell.getRadiusX(), ell.getRadiusX(), 0.5);
+				assertEquals(this.ell.getRadiusY(), ell.getRadiusY(), 0.5);
 				assertEquals(this.ell.getFill(), ell.getFill());
 				break;
 			case POLYGON:
