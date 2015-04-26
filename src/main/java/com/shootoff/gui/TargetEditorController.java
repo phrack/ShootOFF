@@ -95,18 +95,6 @@ public class TargetEditorController {
 							((Shape)selected).setFill(createColor(newValue));
 					}
 				}
-				
-				private Color createColor(String name) {
-					switch (name) {
-					case "black": return Color.BLACK;
-					case "blue": return Color.BLUE;
-					case "green": return Color.GREEN;
-					case "orange": return Color.ORANGE;
-					case "red": return Color.RED;
-					case "white": return Color.WHITE;
-					default: return Color.CORNSILK;
-					}
-				}
 		    });
 	}
 	
@@ -117,7 +105,19 @@ public class TargetEditorController {
 		regionColorChoiceBox.setDisable(!enabled);
 	}
 	
-	private String getColorName(Color color) {
+	public static Color createColor(String name) {
+		switch (name) {
+		case "black": return Color.BLACK;
+		case "blue": return Color.BLUE;
+		case "green": return Color.GREEN;
+		case "orange": return Color.ORANGE;
+		case "red": return Color.RED;
+		case "white": return Color.WHITE;
+		default: return Color.CORNSILK;
+		}
+	}
+	
+	public static String getColorName(Color color) {
 		if (color == Color.BLACK) {
 			return "black";
 		} else if (color == Color.BLUE) {
@@ -639,7 +639,7 @@ public class TargetEditorController {
 		} else if (tagEditor.isPresent()) {
 			TagEditorPanel editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
-			selected.replaceAllTags(editor.getTags());
+			selected.setTags(editor.getTags());
 			tagEditor = Optional.empty();
 		}
 	}

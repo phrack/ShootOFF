@@ -10,7 +10,7 @@
    <top>
       <ToolBar prefHeight="40.0" prefWidth="622.0" BorderPane.alignment="CENTER">
         <items>
-          <Button fx:id="saveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_floppy.png&quot;); -fx-background-position: center;">
+          <Button maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveTarget" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_floppy.png&quot;); -fx-background-position: center;">
                <tooltip>
                   <Tooltip text="Save Target" />
                </tooltip>

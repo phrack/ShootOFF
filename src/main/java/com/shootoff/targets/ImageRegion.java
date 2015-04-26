@@ -18,6 +18,8 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	public ImageRegion(double x, double y, File imageFile) {
 		super();
 		
+		this.setLayoutX(x);
+		this.setLayoutY(y);
 		this.imageFile = imageFile;
 	}
 	
@@ -62,7 +64,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	}
 	
 	@Override
-	public void replaceAllTags(Map<String, String> newTags) {
+	public void setTags(Map<String, String> newTags) {
 		tags.clear();
 		tags.putAll(newTags);
 	}

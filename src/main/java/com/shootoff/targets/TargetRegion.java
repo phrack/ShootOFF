@@ -9,5 +9,5 @@ public interface TargetRegion {
 	public boolean tagExists(String name);
 	public String getTag(String name);
 	public Map<String, String> getAllTags();
-	public void replaceAllTags(Map<String, String> newTags);
+	public void setTags(Map<String, String> newTags);
 }

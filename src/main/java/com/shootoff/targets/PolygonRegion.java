@@ -72,7 +72,7 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	}
 	
 	@Override
-	public void replaceAllTags(Map<String, String> newTags) {
+	public void setTags(Map<String, String> newTags) {
 		tags.clear();
 		tags.putAll(newTags);
 	}
