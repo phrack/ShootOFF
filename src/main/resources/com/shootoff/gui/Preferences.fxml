@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -43,5 +44,11 @@
       <Label fx:id="markerRadiusLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
       <Label fx:id="virtualMagazineLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
       <Label fx:id="malfunctionsLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+      <ListView fx:id="webcamListView" maxHeight="-Infinity" minHeight="-Infinity" orientation="HORIZONTAL" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2">
+         <GridPane.margin>
+            <Insets bottom="5.0" />
+         </GridPane.margin>
+      </ListView>
+      <Button mnemonicParsing="false" onAction="#addCameraClicked" text="Add" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
    </children>
 </GridPane>
