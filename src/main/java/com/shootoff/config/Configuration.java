@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -24,7 +27,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.github.sarxos.webcam.Webcam;
+
 public class Configuration {
+	private static final String WEBCAMS_PROP = "shootoff.webcams";
 	private static final String DETECTION_RATE_PROP = "shootoff.detectionrate";
 	private static final String LASER_INTENSITY_PROP = "shootoff.laserintensity";
 	private static final String MARKER_RADIUS_PROP = "shootoff.markerradius";
@@ -58,6 +64,7 @@ public class Configuration {
 	private InputStream configInput;
 	private String configName;
 	
+	private List<Webcam> webcams =  new ArrayList<Webcam>();
 	private int detectionRate = 100;
 	private int laserIntensity = 230;
 	private int markerRadius = 2;
@@ -126,6 +133,17 @@ public class Configuration {
 					configName);
 		}
 		
+		if (prop.containsKey(WEBCAMS_PROP)) {
+			List<String> webcamNames = new ArrayList<String>(
+					Arrays.asList(prop.getProperty(WEBCAMS_PROP).split(",")));
+			
+			for (Webcam webcam : Webcam.getWebcams()) {
+				if (webcamNames.contains(webcam.getName())) {
+					webcams.add(webcam);
+				}
+			}
+		}
+		
 		if (prop.containsKey(DETECTION_RATE_PROP)) {
 			detectionRate = Integer.parseInt(prop.getProperty(DETECTION_RATE_PROP));
 		}
@@ -171,6 +189,13 @@ public class Configuration {
 		
 		Properties prop = new Properties();
 		
+		StringBuilder webcamList = new StringBuilder();
+		for (Webcam webcam : webcams) {
+			if (webcamList.length() > 0) webcamList.append(",");
+			webcamList.append(webcam.getName());
+		}
+		
+		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(DETECTION_RATE_PROP, String.valueOf(detectionRate));
 		prop.setProperty(LASER_INTENSITY_PROP, String.valueOf(laserIntensity));
 		prop.setProperty(MARKER_RADIUS_PROP, String.valueOf(markerRadius));
@@ -280,6 +305,11 @@ public class Configuration {
 					String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
 		}
 	}
+	
+	public void setWebcams(List<Webcam> webcams) {
+		this.webcams.clear();
+		this.webcams.addAll(webcams);
+	}
 
 	public void setDetectionRate(int detectionRate) {
 		this.detectionRate = detectionRate;
@@ -321,6 +351,10 @@ public class Configuration {
 		this.debugMode = debugMode;
 	}
 
+	public List<Webcam> getWebcams() {
+		return webcams;
+	}
+	
 	public int getDetectionRate() {
 		return detectionRate;
 	}

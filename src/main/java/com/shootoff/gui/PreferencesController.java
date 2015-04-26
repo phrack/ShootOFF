@@ -95,6 +95,11 @@ public class PreferencesController {
 		linkSliderToLabel(virtualMagazineSlider, virtualMagazineLabel);
 		linkSliderToLabel(malfunctionsSlider, malfunctionsLabel);
 		
+		for (Webcam webcam : config.getWebcams()) {
+			configuredNames.add(webcam.getName());
+			configuredCameras.add(webcam);
+		}
+		
 		detectionRateSlider.setValue(config.getDetectionRate());
 		laserIntensitySlider.setValue(config.getLaserIntensity());
 		markerRadiusSlider.setValue(config.getMarkerRadius());
@@ -144,6 +149,7 @@ public class PreferencesController {
 	
 	@FXML 
 	public void okClicked(ActionEvent event) throws ConfigurationException, IOException {
+		config.setWebcams(configuredCameras);
 		config.setDetectionRate((int)detectionRateSlider.getValue());
 		config.setLaserIntensity((int)laserIntensitySlider.getValue());
 		config.setMarkerRadius((int)markerRadiusSlider.getValue());

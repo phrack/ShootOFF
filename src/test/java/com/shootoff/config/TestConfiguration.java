@@ -20,6 +20,7 @@ public class TestConfiguration {
 		
 	@Test
 	public void testConfirmDefaults() {
+		assertEquals(0, defaultConfig.getWebcams().size());
 		assertEquals(100, defaultConfig.getDetectionRate());
 		assertEquals(230, defaultConfig.getLaserIntensity());
 		assertEquals(2, defaultConfig.getMarkerRadius());

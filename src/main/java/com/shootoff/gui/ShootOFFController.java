@@ -18,12 +18,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ShootOFFController {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
+	@FXML private TabPane cameraTabPane;
 	@FXML private Canvas defaultCanvas;
 	@FXML private CamerasSupervisor camerasSupervisor;
 
@@ -33,13 +37,33 @@ public class ShootOFFController {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
 		
-		Webcam defaultCamera = Webcam.getDefault();
-		camerasSupervisor.addCameraManager(defaultCamera, new CanvasManager(defaultCanvas, config));
-	
+		if (config.getWebcams().isEmpty()) {
+			Webcam defaultCamera = Webcam.getDefault();
+			camerasSupervisor.addCameraManager(defaultCamera, 
+					new CanvasManager(defaultCanvas, config));
+		} else {
+			addConfiguredCameras();
+		}
+		
 		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.setStreamingAll(false);
 		});
+	}
+	
+	private void addConfiguredCameras() {
+		cameraTabPane.getTabs().clear();
+		
+		for (Webcam webcam : config.getWebcams()) {
+			Tab cameraTab = new Tab(webcam.getName());
+			Canvas cameraCanvas = new Canvas(640, 480);
+			cameraTab.setContent(new AnchorPane(cameraCanvas));
+			
+			camerasSupervisor.addCameraManager(webcam, 
+					new CanvasManager(cameraCanvas, config));
+			
+			cameraTabPane.getTabs().add(cameraTab);
+		}
 	}
 	
 	@FXML 

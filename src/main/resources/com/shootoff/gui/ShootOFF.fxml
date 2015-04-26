@@ -49,7 +49,7 @@
       </MenuBar>
       <HBox VBox.vgrow="ALWAYS">
          <children>
-            <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER">
+            <TabPane fx:id="cameraTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER">
               <tabs>
                 <Tab text="Default Camera">
                   <content>
