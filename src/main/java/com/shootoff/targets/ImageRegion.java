@@ -1,36 +1,49 @@
-/*
- * Copyright (c) 2015 phrack. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file.
- */
-
 package com.shootoff.targets;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import javafx.scene.shape.Rectangle;
+import com.shootoff.targets.animation.SpriteAnimation;
 
-public class RectangleRegion extends Rectangle implements TargetRegion {
+import javafx.scene.image.ImageView;
+
+public class ImageRegion extends ImageView implements TargetRegion {
 	private final Map<String, String> tags = new HashMap<String, String>();
+	private final File imageFile;
 	
-	public RectangleRegion(double x, double y, double width, double height) {
-		super(x, y, width, height);
+	private Optional<SpriteAnimation> animation = Optional.empty();
+	
+	public ImageRegion(double x, double y, File imageFile) {
+		super();
+		
+		this.imageFile = imageFile;
+	}
+	
+	public File getImageFile() {
+		return imageFile;
+	}
+	
+	public void setAnimation(SpriteAnimation animation) {
+		this.animation = Optional.of(animation);
+	}
+	
+	public Optional<SpriteAnimation> getAnimation() {
+		return animation;
 	}
 
 	@Override
 	public void changeWidth(double widthDelta) {
-		this.setWidth(this.getWidth() + widthDelta);
 	}
 
 	@Override
 	public void changeHeight(double heightDelta) {
-		this.setHeight(this.getHeight() + heightDelta);
 	}
 	
 	@Override
 	public RegionType getType() {
-		return RegionType.RECTANGLE;
+		return RegionType.IMAGE;
 	}
 	
 	@Override

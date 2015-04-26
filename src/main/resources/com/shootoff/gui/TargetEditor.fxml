@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="targetEditorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.TargetEditorController" onKeyPressed="#canvasKeyPressed">
+<BorderPane fx:id="targetEditorPane" onKeyPressed="#canvasKeyPressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.TargetEditorController">
    <top>
       <ToolBar prefHeight="40.0" prefWidth="622.0" BorderPane.alignment="CENTER">
         <items>
@@ -23,7 +23,7 @@
                   <Tooltip text="Select Region" />
                </tooltip>
           </ToggleButton>
-          <ToggleButton fx:id="imageButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_image_x_generic.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="imageButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openImage" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_image_x_generic.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
                <tooltip>
                   <Tooltip text="Draw Image" />
                </tooltip>
@@ -87,6 +87,6 @@
       </ToolBar>
    </top>
    <center>
-      <Pane fx:id="canvasPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#shapeDropped" onMouseMoved="#mouseMoved" prefHeight="480.0" prefWidth="640.0" />
+      <Pane fx:id="canvasPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#regionDropped" onMouseMoved="#mouseMoved" prefHeight="480.0" prefWidth="640.0" />
    </center>
 </BorderPane>

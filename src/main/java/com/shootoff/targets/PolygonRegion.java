@@ -1,3 +1,8 @@
+/* Copyright (c) 2015 phrack. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 package com.shootoff.targets;
 
 import java.util.ArrayList;
@@ -44,6 +49,11 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 		double scaleFactor = (height + heightDelta) / height;
         
 		this.setScaleY(this.getScaleY() * scaleFactor);
+	}
+	
+	@Override
+	public RegionType getType() {
+		return RegionType.POLYGON;
 	}
 	
 	@Override

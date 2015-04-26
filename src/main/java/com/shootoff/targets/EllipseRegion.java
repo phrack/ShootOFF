@@ -30,6 +30,11 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 	}
 	
 	@Override
+	public RegionType getType() {
+		return RegionType.ELLIPSE;
+	}
+	
+	@Override
 	public boolean tagExists(String name) {
 		return tags.containsKey(name);
 	}

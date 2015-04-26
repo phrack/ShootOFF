@@ -6,6 +6,8 @@
 
 package com.shootoff.gui;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +15,13 @@ import java.util.Optional;
 import java.util.Stack;
 
 import com.shootoff.targets.EllipseRegion;
+import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
+import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.targets.animation.GifAnimation;
+import com.shootoff.targets.animation.SpriteAnimation;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -38,11 +44,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
+import javafx.stage.FileChooser;
 
 public class TargetEditorController {
 	@FXML private BorderPane targetEditorPane;
 	@FXML private Pane canvasPane;
 	@FXML private ToggleButton cursorButton;
+	@FXML private ToggleButton imageButton;
 	@FXML private ToggleButton rectangleButton;
 	@FXML private ToggleButton ovalButton;
 	@FXML private ToggleButton triangleButton;
@@ -61,8 +69,8 @@ public class TargetEditorController {
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
 	
-	private Optional<Shape> cursorShape = Optional.empty();
-	private final List<Shape> targetShapes = new ArrayList<Shape>();
+	private Optional<Node> cursorRegion = Optional.empty();
+	private final List<Node> targetRegions = new ArrayList<Node>();
 	private Optional<TagEditorPanel> tagEditor = Optional.empty();
 	private final List<Double> freeformPoints = new ArrayList<Double>();
 	private final Stack<Shape> freeformShapes = new Stack<Shape>();
@@ -80,8 +88,11 @@ public class TargetEditorController {
 				public void changed(ObservableValue<? extends String> observable,
 						String oldValue, String newValue) {
 					
-					if (cursorShape.isPresent()) {
-						cursorShape.get().setFill(createColor(newValue));
+					if (cursorRegion.isPresent()) {
+						TargetRegion selected = (TargetRegion)cursorRegion.get();
+						
+						if (selected.getType() != RegionType.IMAGE)
+							((Shape)selected).setFill(createColor(newValue));
 					}
 				}
 				
@@ -130,9 +141,9 @@ public class TargetEditorController {
 			drawTempPolygonEdge(event);
 		}
 		
-		if (!cursorShape.isPresent() || cursorButton.isSelected()) return;
+		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
 		
-		Shape selected = cursorShape.get();
+		Node selected = cursorRegion.get();
 
 		lastMouseX = event.getX() - (selected.getLayoutBounds().getWidth() / 2);
 		lastMouseY = event.getY() - (selected.getLayoutBounds().getHeight() / 2);
@@ -147,23 +158,43 @@ public class TargetEditorController {
 	}
 	
 	@FXML
-	public void shapeDropped(MouseEvent event) {
+	public void regionDropped(MouseEvent event) {
 		if (freeformButton.isSelected() && event.getButton().equals(MouseButton.PRIMARY)) {
 			drawPolygon(event);
 		} else if (freeformButton.isSelected() && event.getButton().equals(MouseButton.SECONDARY)) {
 			drawShape();
-			targetShapes.add(cursorShape.get());
+			targetRegions.add(cursorRegion.get());
 			clearFreeformState();
 		}
 		
-		if (!cursorShape.isPresent() || cursorButton.isSelected()) return;
+		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
 		
-		Shape selected = cursorShape.get();
-		targetShapes.add(selected);
-		selected.setOnMouseClicked((e) -> { shapeClicked(e); });
-		selected.setOnKeyPressed((e) -> { shapeKeyPressed(e); }); 
+		Node selected = cursorRegion.get();
+		targetRegions.add(selected);
+		selected.setOnMouseClicked((e) -> { regionClicked(e); });
+		selected.setOnKeyPressed((e) -> { regionKeyPressed(e); }); 
 		
-		drawShape();
+		if (((TargetRegion)selected).getType() == RegionType.IMAGE) {
+			ImageRegion droppedImage = (ImageRegion)selected;
+			
+			// If the new image region has an animation, play it once
+			if (droppedImage.getAnimation().isPresent()) {
+				SpriteAnimation animation = droppedImage.getAnimation().get();
+				animation.setCycleCount(1);
+				
+				animation.setOnFinished((e) ->
+					{
+						animation.reset();
+						animation.setOnFinished(null);
+					});
+				
+				animation.play();
+			}
+			
+			drawImage(droppedImage.getImageFile());
+		} else {
+			drawShape();
+		}
 	}
 	
 	@FXML
@@ -234,23 +265,24 @@ public class TargetEditorController {
 		freeformPoints.add(event.getY());
 	}
 	
-	public void shapeClicked(MouseEvent event) {
+	public void regionClicked(MouseEvent event) {
 		if (!cursorButton.isSelected()) {
-			// We want to drop a new shape
-			shapeDropped(event);
+			// We want to drop a new region
+			regionDropped(event);
 			return;
 		}
 		
-		// Want to select the current shape
-		Shape selected = (Shape)event.getTarget();
+		// Want to select the current region
+		Node selected = (Node)event.getTarget();
 		boolean tagEditorOpen = false;
 		
-		if (cursorShape.isPresent()) {
-			Shape previous = cursorShape.get();
+		if (cursorRegion.isPresent()) {
+			Node previous = cursorRegion.get();
 			
 			// Unhighlight the old selection
 			if (!previous.equals(selected)) {
-				previous.setStroke(UNSELECTED_STROKE_COLOR);
+				if (((TargetRegion)previous).getType() != RegionType.IMAGE)
+					((Shape)previous).setStroke(UNSELECTED_STROKE_COLOR);
 				
 				if (tagEditor.isPresent()) {
 					// Close tag editor
@@ -261,12 +293,14 @@ public class TargetEditorController {
 			}
 		}
 
-		selected.setStroke(Color.GOLD);
+		if (((TargetRegion)selected).getType() != RegionType.IMAGE)
+			((Shape)selected).setStroke(Color.GOLD);
 		selected.requestFocus();
 		toggleShapeControls(true);
-		cursorShape = Optional.of(selected);
-		regionColorChoiceBox.getSelectionModel().select(
-				getColorName((Color)selected.getFill()));
+		cursorRegion = Optional.of(selected);
+		if (((TargetRegion)selected).getType() != RegionType.IMAGE)
+			regionColorChoiceBox.getSelectionModel().select(
+					getColorName((Color)((Shape)selected).getFill()));
 		
 		// Re-open editor
 		if (tagEditorOpen) {
@@ -276,13 +310,13 @@ public class TargetEditorController {
 	}
 	
 	@SuppressWarnings("incomplete-switch")
-	public void shapeKeyPressed(KeyEvent event) {
-		Shape selected = (Shape)event.getTarget();
+	public void regionKeyPressed(KeyEvent event) {
+		Node selected = (Node)event.getTarget();
 		TargetRegion region = (TargetRegion)selected;
 		
 		switch (event.getCode()) {
 		case DELETE:
-			targetShapes.remove(selected);
+			targetRegions.remove(selected);
 			canvasPane.getChildren().remove(selected);
 			toggleShapeControls(false);
 			if (tagEditor.isPresent()) {
@@ -331,14 +365,54 @@ public class TargetEditorController {
 	public void cursorSelected(ActionEvent event) {
 		clearFreeformState();
 		
-		if (!cursorShape.isPresent()) return;
+		if (!cursorRegion.isPresent()) return;
 		
 		// Remove shape that was never actually placed
-		Shape selected = cursorShape.get();
-		if (!targetShapes.contains(selected)) 
+		Node selected = cursorRegion.get();
+		if (!targetRegions.contains(selected)) 
 			canvasPane.getChildren().remove(selected);
 		
-		cursorShape = Optional.empty();
+		cursorRegion = Optional.empty();
+	}
+	
+	@FXML
+	public void openImage(ActionEvent event) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Image");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif")
+            );
+		File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
+		
+		drawImage(imageFile);
+	}
+	
+	private void drawImage(File imageFile) {
+		Optional<ImageRegion> imageRegion = Optional.empty();
+		
+		if (imageFile != null) {
+			try {
+				int firstDot = imageFile.getName().indexOf('.') + 1;
+				String extension = imageFile.getName().substring(firstDot);
+				
+				switch (extension) {
+				case "gif":
+					ImageRegion newRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
+					GifAnimation gif = new GifAnimation(newRegion, imageFile);
+					newRegion.setImage(gif.getFirstFrame());
+					if (gif.getFrameCout() > 0) newRegion.setAnimation(gif);
+					imageRegion = Optional.of(newRegion);
+					break;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (imageRegion.isPresent()) {
+			canvasPane.getChildren().add(imageRegion.get());
+			cursorRegion = Optional.of(imageRegion.get());
+		}
 	}
 	
 	@FXML
@@ -348,12 +422,16 @@ public class TargetEditorController {
 		lastMouseX = 0;
 		lastMouseY = 0;
 		
-		if (cursorShape.isPresent() && 
-				!targetShapes.contains(cursorShape.get())) {
-			canvasPane.getChildren().remove(cursorShape.get());
-		} else if (cursorShape.isPresent() && 
-				targetShapes.contains(cursorShape.get())) {
-			cursorShape.get().setStroke(UNSELECTED_STROKE_COLOR);
+		if (cursorRegion.isPresent() && 
+				!targetRegions.contains(cursorRegion.get())) {
+			canvasPane.getChildren().remove(cursorRegion.get());
+		} else if (cursorRegion.isPresent() && 
+				targetRegions.contains(cursorRegion.get())) {
+			
+			TargetRegion selected = (TargetRegion)cursorRegion.get();
+			
+			if (selected.getType() != RegionType.IMAGE)
+				((Shape)selected).setStroke(UNSELECTED_STROKE_COLOR);
 		}
 		
 		drawShape();
@@ -461,7 +539,7 @@ public class TargetEditorController {
 			
 			newShape = new PolygonRegion(points);
 		} else {
-			cursorShape = Optional.empty();
+			cursorRegion = Optional.empty();
 			System.err.println("Unimplemented region type selected.");
 			return;
 		}
@@ -470,7 +548,7 @@ public class TargetEditorController {
 		newShape.setOpacity(DEFAULT_OPACITY);
 		canvasPane.getChildren().add(newShape);
 		
-		cursorShape = Optional.of(newShape);
+		cursorRegion = Optional.of(newShape);
 	}
 	
 	@FXML
@@ -479,12 +557,12 @@ public class TargetEditorController {
 	}
 	
 	private void clearFreeformState() {
-		if (cursorShape.isPresent()) {
-			Shape selected = cursorShape.get();
-			if (!targetShapes.contains(selected)) 
+		if (cursorRegion.isPresent()) {
+			Node selected = cursorRegion.get();
+			if (!targetRegions.contains(selected)) 
 				canvasPane.getChildren().remove(selected);
 			
-			cursorShape = Optional.empty();
+			cursorRegion = Optional.empty();
 		}
 		
 		freeformPoints.clear();
@@ -499,11 +577,11 @@ public class TargetEditorController {
 	
 	@FXML
 	public void bringForward(ActionEvent event) {
-		if (cursorShape.isPresent() && 
-				!targetShapes.contains(cursorShape.get())) return;
+		if (cursorRegion.isPresent() && 
+				!targetRegions.contains(cursorRegion.get())) return;
 		
 		ObservableList<Node> shapesList = canvasPane.getChildren();
-		int selectedIndex = shapesList.indexOf(cursorShape.get());
+		int selectedIndex = shapesList.indexOf(cursorRegion.get());
 
 		if (selectedIndex < shapesList.size() - 1) {
 			// We have to do this dance instead of just calling
@@ -516,17 +594,17 @@ public class TargetEditorController {
 			shapesList.add(selectedIndex, topShape);
 			shapesList.add(selectedIndex + 1, bottomShape);
 			
-			Collections.swap(targetShapes, selectedIndex, selectedIndex + 1);
+			Collections.swap(targetRegions, selectedIndex, selectedIndex + 1);
 		}
 	}
 	
 	@FXML
 	public void sendBackward(ActionEvent event) {
-		if (cursorShape.isPresent() && 
-				!targetShapes.contains(cursorShape.get())) return;
+		if (cursorRegion.isPresent() && 
+				!targetRegions.contains(cursorRegion.get())) return;
 		
 		ObservableList<Node> shapesList = canvasPane.getChildren();
-		int selectedIndex = shapesList.indexOf(cursorShape.get());
+		int selectedIndex = shapesList.indexOf(cursorRegion.get());
 
 		if (selectedIndex > 0) {
 			Node topShape = shapesList.get(selectedIndex);
@@ -536,20 +614,20 @@ public class TargetEditorController {
 			shapesList.add(selectedIndex - 1, topShape);
 			shapesList.add(selectedIndex, bottomShape);
 			
-			Collections.swap(targetShapes, selectedIndex - 1, selectedIndex);
+			Collections.swap(targetRegions, selectedIndex - 1, selectedIndex);
 		}
 	}
 	
 	@FXML
 	public void toggleTagEditor(ActionEvent event) {
-		if (cursorShape.isPresent() && 
-				!targetShapes.contains(cursorShape.get())) return;
+		if (cursorRegion.isPresent() && 
+				!targetRegions.contains(cursorRegion.get())) return;
 		
 		toggleTagEditor();
 	}
 	
 	public void toggleTagEditor() {
-		TargetRegion selected = (TargetRegion)cursorShape.get();
+		TargetRegion selected = (TargetRegion)cursorRegion.get();
 		
 		if (tagsButton.isSelected()) {
 			TagEditorPanel editor = new TagEditorPanel(selected.getAllTags());
