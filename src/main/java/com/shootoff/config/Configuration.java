@@ -14,9 +14,11 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 import javafx.scene.paint.Color;
 
@@ -28,6 +30,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.ShotProcessor;
+import com.shootoff.camera.VirtualMagazineProcessor;
 
 public class Configuration {
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
@@ -76,6 +80,9 @@ public class Configuration {
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
 
+	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
+	private VirtualMagazineProcessor magazineProcessor = null;
+	
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
@@ -145,40 +152,47 @@ public class Configuration {
 		}
 		
 		if (prop.containsKey(DETECTION_RATE_PROP)) {
-			detectionRate = Integer.parseInt(prop.getProperty(DETECTION_RATE_PROP));
+			setDetectionRate(
+					Integer.parseInt(prop.getProperty(DETECTION_RATE_PROP)));
 		}
 		
 		if (prop.containsKey(LASER_INTENSITY_PROP)) {
-			laserIntensity = Integer.parseInt(prop.getProperty(LASER_INTENSITY_PROP));
+			setLaserIntensity(
+					Integer.parseInt(prop.getProperty(LASER_INTENSITY_PROP)));
 		}
 		
 		if (prop.containsKey(MARKER_RADIUS_PROP)) {
-			markerRadius = Integer.parseInt(prop.getProperty(MARKER_RADIUS_PROP));
+			setMarkerRadius(
+					Integer.parseInt(prop.getProperty(MARKER_RADIUS_PROP)));
 		}
 		
 		if (prop.containsKey(IGNORE_LASER_COLOR_PROP)) {
 			String colorName = prop.getProperty(IGNORE_LASER_COLOR_PROP);
 			
 			if (!colorName.equals("None")) {
-				ignoreLaserColor = true;
-				ignoreLaserColorName = colorName;
+				setIgnoreLaserColor(true);
+				setIgnoreLaserColorName(colorName);
 			} 
 		}
 		
 		if (prop.containsKey(USE_VIRTUAL_MAGAZINE_PROP)) {
-			useVirtualMagazine = Boolean.parseBoolean(prop.getProperty(USE_VIRTUAL_MAGAZINE_PROP));
+			setUseVirtualMagazine(
+					Boolean.parseBoolean(prop.getProperty(USE_VIRTUAL_MAGAZINE_PROP)));
 		}
 		
 		if (prop.containsKey(VIRTUAL_MAGAZINE_CAPACITY_PROP)) {
-			virtualMagazineCapacity = Integer.parseInt(prop.getProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP));
+			setVirtualMagazineCapacity(
+					Integer.parseInt(prop.getProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP)));
 		}
 		
 		if (prop.containsKey(USE_MALFUNCTIONS_PROP)) {
-			useMalfunctions = Boolean.parseBoolean(prop.getProperty(USE_MALFUNCTIONS_PROP));
+			setMalfunctions(
+					Boolean.parseBoolean(prop.getProperty(USE_MALFUNCTIONS_PROP)));
 		}
 		
 		if (prop.containsKey(MALFUNCTIONS_PROBABILITY_PROP)) {
-			malfunctionsProbability = Float.parseFloat(prop.getProperty(MALFUNCTIONS_PROBABILITY_PROP));
+			setMalfunctionsProbability(
+					Float.parseFloat(prop.getProperty(MALFUNCTIONS_PROBABILITY_PROP)));
 		}
 		
 		validateConfiguration();
@@ -251,7 +265,6 @@ public class Configuration {
 			if (cmd.hasOption("c")) {
 				ignoreLaserColor = true;
 				ignoreLaserColorName = cmd.getOptionValue("c");
-				
 			}
 			
 			if (cmd.hasOption("u")) {
@@ -333,10 +346,24 @@ public class Configuration {
 
 	public void setUseVirtualMagazine(boolean useVirtualMagazine) {
 		this.useVirtualMagazine = useVirtualMagazine;
+		
+		if (!useVirtualMagazine) {
+			shotProcessors.remove(magazineProcessor);
+			magazineProcessor = null;
+		}
 	}
 
 	public void setVirtualMagazineCapacity(int virtualMagazineCapacity) {
 		this.virtualMagazineCapacity = virtualMagazineCapacity;
+		
+		if (useVirtualMagazine) {
+			if (magazineProcessor != null) {
+				shotProcessors.remove(magazineProcessor);
+			}
+			
+			magazineProcessor = new VirtualMagazineProcessor(this);
+			shotProcessors.add(magazineProcessor);
+		}
 	}
 
 	public void setMalfunctions(boolean injectMalfunctions) {
@@ -403,5 +430,9 @@ public class Configuration {
 
 	public boolean inDebugMode() {
 		return debugMode;
+	}
+	
+	public Set<ShotProcessor> getShotProcessors() {
+		return shotProcessors;
 	}
 }

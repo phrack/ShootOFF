@@ -105,9 +105,11 @@ public class PreferencesController {
 		markerRadiusSlider.setValue(config.getMarkerRadius());
 		ignoreLaserColorChoiceBox.setValue(config.getIgnoreLaserColorName());
 		virtualMagazineCheckBox.setSelected(config.useVirtualMagazine());
+		virtualMagazineSlider.setDisable(!config.useVirtualMagazine());
 		virtualMagazineSlider.setValue(config.getVirtualMagazineCapacity());
 		malfunctionsCheckBox.setSelected(config.useMalfunctions());
 		malfunctionsSlider.setValue(config.getMalfunctionsProbability());
+		malfunctionsSlider.setDisable(!config.useMalfunctions());
 	}
 	
 	private void linkSliderToLabel(final Slider slider, final Label label) {
