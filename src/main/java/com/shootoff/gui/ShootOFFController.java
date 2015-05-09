@@ -16,8 +16,8 @@ import com.shootoff.config.Configuration;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -30,7 +30,7 @@ public class ShootOFFController {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private TabPane cameraTabPane;
-	@FXML private Canvas defaultCanvas;
+	@FXML private Group defaultCanvasGroup;
 	@FXML private CamerasSupervisor camerasSupervisor;
 
 	public Configuration config;
@@ -42,7 +42,7 @@ public class ShootOFFController {
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
 			camerasSupervisor.addCameraManager(defaultCamera, 
-					new CanvasManager(defaultCanvas, config));
+					new CanvasManager(defaultCanvasGroup, config));
 		} else {
 			addConfiguredCameras();
 		}
@@ -58,11 +58,12 @@ public class ShootOFFController {
 		
 		for (Webcam webcam : config.getWebcams()) {
 			Tab cameraTab = new Tab(webcam.getName());
-			Canvas cameraCanvas = new Canvas(640, 480);
-			cameraTab.setContent(new AnchorPane(cameraCanvas));
+			Group cameraCanvasGroup = new Group();
+			// 640 x 480
+			cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 			
 			camerasSupervisor.addCameraManager(webcam, 
-					new CanvasManager(cameraCanvas, config));
+					new CanvasManager(cameraCanvasGroup, config));
 			
 			cameraTabPane.getTabs().add(cameraTab);
 		}

@@ -6,27 +6,31 @@
 
 package com.shootoff.camera;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.application.Platform;
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Ellipse;
 
 public class Shot {
 	private final Color color;
 	private final double x;
 	private final double y;
 	private final int timestamp;
-	private final int markerRadius;
+	private final Ellipse marker;
 	
 	public Shot (Color color, double x, double y, int timestamp, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
-		this.markerRadius = markerRadius;
+		this.marker = new Ellipse(x, y, markerRadius, markerRadius);
+		this.marker.setFill(color);
 	}
 	
-	public void drawShot(GraphicsContext gc) {
-        gc.setFill(color);
-        gc.fillOval(x, y, markerRadius, markerRadius);
+	public void drawShot(Group canvasGroup) {
+		Platform.runLater(() -> {
+				canvasGroup.getChildren().add(marker);
+			});
 	}
 
 	public Color getColor() {
