@@ -20,9 +20,9 @@ import java.util.Properties;
 
 import javafx.scene.paint.Color;
 
-import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -234,7 +234,7 @@ public class Configuration {
 				"turns on malfunctions and sets the probability of them happening");
 		
 		try {
-			CommandLineParser parser = new BasicParser();
+			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
 			
 			if (cmd.hasOption("d")) debugMode = true;
