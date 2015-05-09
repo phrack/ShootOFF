@@ -9,6 +9,7 @@ package com.shootoff.gui;
 import java.io.IOException;
 
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 
@@ -20,6 +21,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -104,8 +106,9 @@ public class ShootOFFController {
         preferencesStage.setTitle("TargetEditor");
         preferencesStage.setScene(new Scene(loader.getRoot()));
         preferencesStage.show();
-        // TODO: Get snapshot for camera for selected tab to
-        // set the target editor background
-        ((TargetEditorController)loader.getController()).init(null);
+        
+        CameraManager currentCamera = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+        Image currentFrame = currentCamera.getCurrentFrame();
+        ((TargetEditorController)loader.getController()).init(currentFrame);
 	}
 }

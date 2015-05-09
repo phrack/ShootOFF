@@ -35,6 +35,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -69,7 +70,7 @@ public class TargetEditorController {
 	private static final double DEFAULT_OPACITY = 0.7;
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
-	
+
 	private Optional<Node> cursorRegion = Optional.empty();
 	private final List<Node> targetRegions = new ArrayList<Node>();
 	private Optional<TagEditorPanel> tagEditor = Optional.empty();
@@ -80,6 +81,12 @@ public class TargetEditorController {
 	private double lastMouseY = 0;
 	
 	public void init(Image backgroundImg) {
+		if (backgroundImg != null) {
+			ImageView backgroundImgView = new ImageView();
+			backgroundImgView.setImage(backgroundImg);
+			canvasPane.getChildren().add(backgroundImgView);
+		}
+		
 		regionColorChoiceBox.setItems(FXCollections.observableArrayList(
 	    		"black", "blue", "green", "orange", "red", "white"));
 		

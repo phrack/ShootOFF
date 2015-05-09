@@ -6,8 +6,8 @@
 
 package com.shootoff.camera;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
@@ -15,7 +15,7 @@ import com.shootoff.gui.CanvasManager;
 
 public class CamerasSupervisor {
 	private final Configuration config;
-	private final Set<CameraManager> managers = new HashSet<CameraManager>();
+	private final List<CameraManager> managers = new ArrayList<CameraManager>();
 	
 	public CamerasSupervisor(Configuration config) {
 		this.config = config;
@@ -35,5 +35,9 @@ public class CamerasSupervisor {
 		for (CameraManager manager : managers) {
 			manager.setDetecting(isDetecting);
 		}
+	}
+	
+	public CameraManager getCameraManager(int index) {
+		return managers.get(index);
 	}
 }
