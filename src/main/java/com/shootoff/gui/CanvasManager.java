@@ -61,6 +61,16 @@ public class CanvasManager {
 		background.setImage(img);
 	}
 	
+	public void reset() {
+		Platform.runLater(() -> {
+				for (Shot shot : shots) {
+					canvasGroup.getChildren().remove(shot.getMarker());
+				}
+				
+				shots.clear();
+			}); 
+	}
+	
 	public void addShot(Shot shot) {
 		shots.add(shot);
 		shot.drawShot(canvasGroup);

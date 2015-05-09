@@ -39,6 +39,10 @@ public class CameraManager {
 		new Thread(new Detector()).start();
 	}
 	
+	public void reset() {
+		canvasManager.reset();
+	}
+	
 	public void setStreaming(boolean isStreaming) {
 		this.isStreaming = isStreaming;
 	}

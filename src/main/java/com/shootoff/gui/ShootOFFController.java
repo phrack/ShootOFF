@@ -112,4 +112,9 @@ public class ShootOFFController {
         Image currentFrame = currentCamera.getCurrentFrame();
         ((TargetEditorController)loader.getController()).init(currentFrame);
 	}
+	
+	@FXML
+	public void resetClicked(ActionEvent event) {
+		camerasSupervisor.reset();
+	}
 }

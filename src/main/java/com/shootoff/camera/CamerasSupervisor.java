@@ -25,6 +25,12 @@ public class CamerasSupervisor {
 		managers.add(new CameraManager(webcam, canvasManager, config));
 	}
 	
+	public void reset() {
+		for (CameraManager manager : managers) {
+			manager.reset();
+		}
+	}
+	
 	public void setStreamingAll(boolean isStreaming) {
 		for (CameraManager manager : managers) {
 			manager.setStreaming(isStreaming);

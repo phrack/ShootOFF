@@ -48,4 +48,8 @@ public class Shot {
 	public int getTimestamp() {
 		return timestamp;
 	}
+	
+	public Ellipse getMarker() {
+		return marker;
+	}
 }
