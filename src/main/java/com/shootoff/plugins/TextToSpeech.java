@@ -23,7 +23,6 @@ public final class TextToSpeech {
 		inited = true;
 	}
 	
-	   
 	public static void say(String comment) {
 		try {
 			if(!inited) {
