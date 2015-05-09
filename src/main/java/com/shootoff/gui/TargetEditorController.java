@@ -439,8 +439,11 @@ public class TargetEditorController {
 	}
 	
 	@FXML
-	public void drawShape(ActionEvent event) {
-		clearFreeformState();
+	public void drawShape(ActionEvent event) {	
+		if (tagsButton.isSelected()) {
+			tagsButton.setSelected(false);
+			toggleTagEditor();
+		}
 		
 		lastMouseX = 0;
 		lastMouseY = 0;
@@ -457,6 +460,7 @@ public class TargetEditorController {
 				((Shape)selected).setStroke(UNSELECTED_STROKE_COLOR);
 		}
 		
+		clearFreeformState();
 		drawShape();
 	}
 	
