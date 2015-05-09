@@ -23,6 +23,7 @@ public class TestVirtualMagazineProcessor {
 		
 		VirtualMagazineProcessor magazineProcessor = 
 				(VirtualMagazineProcessor)config.getShotProcessors().toArray()[0];
+		magazineProcessor.setUseTTS(false);
 		
 		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);
 		
