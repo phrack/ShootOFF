@@ -6,7 +6,10 @@
 
 package com.shootoff.gui;
 
+import java.io.File;
 import java.io.IOException;
+
+import marytts.util.io.FileFilter;
 
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraManager;
@@ -18,7 +21,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
@@ -26,9 +31,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ShootOFFController implements CameraConfigListener {
+public class ShootOFFController implements CameraConfigListener, TargetListener {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
+	@FXML private Menu addTargetMenu;
+	@FXML private Menu editTargetMenu;
 	@FXML private TabPane cameraTabPane;
 	@FXML private Group defaultCanvasGroup;
 	
@@ -38,6 +45,8 @@ public class ShootOFFController implements CameraConfigListener {
 	public void init(Configuration config) {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
+		
+		findTargets();
 		
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
@@ -74,6 +83,14 @@ public class ShootOFFController implements CameraConfigListener {
 		}
 	}
 	
+	private void findTargets() {
+		File targetsFolder = new File("targets");
+		
+		for (File file : targetsFolder.listFiles(new FileFilter("target"))) {
+			newTarget(file);
+		}
+	}
+	
 	@FXML 
 	public void preferencesClicked(ActionEvent event) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/Preferences.fxml"));
@@ -102,6 +119,14 @@ public class ShootOFFController implements CameraConfigListener {
 
 	@FXML 
 	public void createTargetMenuClicked(ActionEvent event) throws IOException {
+		FXMLLoader loader = createPreferencesStage();
+		
+        CameraManager currentCamera = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+		Image currentFrame = currentCamera.getCurrentFrame();
+        ((TargetEditorController)loader.getController()).init(currentFrame, this);
+	}
+	
+	private FXMLLoader createPreferencesStage() throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
 		loader.load();
 		
@@ -113,13 +138,42 @@ public class ShootOFFController implements CameraConfigListener {
         preferencesStage.setScene(new Scene(loader.getRoot()));
         preferencesStage.show();
         
-        CameraManager currentCamera = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-        Image currentFrame = currentCamera.getCurrentFrame();
-        ((TargetEditorController)loader.getController()).init(currentFrame);
+        return loader;
 	}
 	
 	@FXML
 	public void resetClicked(ActionEvent event) {
 		camerasSupervisor.reset();
+	}
+
+	@Override
+	public void newTarget(File path) {
+		String targetPath = path.getPath();
+		
+		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
+				targetPath.lastIndexOf('.'));
+		
+		MenuItem addTargetItem = new MenuItem(targetName);
+		
+		addTargetItem.setOnAction((e) -> {
+				System.out.println("Add" + path);
+			});
+		
+		MenuItem editTargetItem = new MenuItem(targetName);
+
+		editTargetItem.setOnAction((e) -> {
+				try {
+					FXMLLoader loader = createPreferencesStage();
+					
+					CameraManager currentCamera = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+					Image currentFrame = currentCamera.getCurrentFrame();
+					((TargetEditorController)loader.getController()).init(currentFrame, this, path);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+		
+		addTargetMenu.getItems().add(addTargetItem);
+		editTargetMenu.getItems().add(editTargetItem);
 	}
 }

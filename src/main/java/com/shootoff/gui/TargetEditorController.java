@@ -30,6 +30,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -67,10 +68,10 @@ public class TargetEditorController {
 	
 	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
 	private static final Color UNSELECTED_STROKE_COLOR = Color.BLACK;
-	private static final double DEFAULT_OPACITY = 0.7;
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
 
+	private TargetListener targetListener = null;
 	private Optional<Node> cursorRegion = Optional.empty();
 	private final List<Node> targetRegions = new ArrayList<Node>();
 	private Optional<TagEditorPanel> tagEditor = Optional.empty();
@@ -80,12 +81,14 @@ public class TargetEditorController {
 	private double lastMouseX = 0;
 	private double lastMouseY = 0;
 	
-	public void init(Image backgroundImg) {
+	public void init(Image backgroundImg, TargetListener targetListener) {
 		if (backgroundImg != null) {
 			ImageView backgroundImgView = new ImageView();
 			backgroundImgView.setImage(backgroundImg);
 			canvasPane.getChildren().add(backgroundImgView);
 		}
+		
+		this.targetListener = targetListener;
 		
 		regionColorChoiceBox.setItems(FXCollections.observableArrayList(
 	    		"black", "blue", "green", "orange", "red", "white"));
@@ -104,6 +107,22 @@ public class TargetEditorController {
 					}
 				}
 		    });
+	}
+	
+	public void init(Image backgroundImg, TargetListener targetListener, File targetFile) {
+		init(backgroundImg, targetListener);
+		
+		Optional<Group> target = TargetIO.loadTarget(targetFile);
+		
+		if (target.isPresent()) {
+			for (Node region : target.get().getChildren()) {
+				region.setOnMouseClicked((e) -> { regionClicked(e); });
+				region.setOnKeyPressed((e) -> { regionKeyPressed(e); }); 
+			}
+			
+			canvasPane.getChildren().addAll(target.get().getChildren());
+			targetRegions.addAll(target.get().getChildren());
+		}
 	}
 	
 	private void toggleShapeControls(boolean enabled) {
@@ -154,7 +173,11 @@ public class TargetEditorController {
 		targetFile = new File(targetFile.getPath() + ".target");
 		
 		if (targetFile != null) {
+			boolean isNewTarget = !targetFile.exists();
+			
 			TargetIO.saveTarget(targetRegions, targetFile);
+			
+			if (isNewTarget) targetListener.newTarget(targetFile);
 		}
 	}
 	
@@ -572,7 +595,7 @@ public class TargetEditorController {
 		}
 
 		newShape.setFill(DEFAULT_FILL_COLOR);
-		newShape.setOpacity(DEFAULT_OPACITY);
+		newShape.setOpacity(TargetIO.DEFAULT_OPACITY);
 		canvasPane.getChildren().add(newShape);
 		
 		cursorRegion = Optional.of(newShape);

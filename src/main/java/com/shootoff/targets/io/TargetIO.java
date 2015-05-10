@@ -16,6 +16,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 public class TargetIO {
+	public static final double DEFAULT_OPACITY = 0.7;
+	
 	public static void saveTarget(List<Node> regions, File targetFile) {
 		RegionVisitor visitor;
 		
@@ -74,6 +76,7 @@ public class TargetIO {
 		
 		Group targetGroup = new Group();
 		for (Node region : regions) {
+			region.setOpacity(DEFAULT_OPACITY);
 			targetGroup.getChildren().add(region);
 		}
 		
