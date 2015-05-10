@@ -31,9 +31,9 @@ public class ShootOFFController implements CameraConfigListener {
 	@FXML private MenuBar mainMenu;
 	@FXML private TabPane cameraTabPane;
 	@FXML private Group defaultCanvasGroup;
-	@FXML private CamerasSupervisor camerasSupervisor;
-
-	public Configuration config;
+	
+	private CamerasSupervisor camerasSupervisor;
+	private Configuration config;
 	
 	public void init(Configuration config) {
 		this.config = config;
