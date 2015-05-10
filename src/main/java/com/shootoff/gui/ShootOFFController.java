@@ -156,7 +156,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		
 		addTargetItem.setOnAction((e) -> {
-				System.out.println("Add" + path);
+				camerasSupervisor.getCanvasManager(
+						cameraTabPane.getSelectionModel().getSelectedIndex()).addTarget(path);
 			});
 		
 		MenuItem editTargetItem = new MenuItem(targetName);

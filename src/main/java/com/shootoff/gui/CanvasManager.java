@@ -6,12 +6,15 @@
 
 package com.shootoff.gui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.io.TargetIO;
 
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -81,5 +84,13 @@ public class CanvasManager {
 		
 		shots.add(shot);
 		shot.drawShot(canvasGroup);
+	}
+	
+	public void addTarget(File targetFile) {
+		Optional<Group> target = TargetIO.loadTarget(targetFile);
+		
+		if (target.isPresent()) {			
+			canvasGroup.getChildren().add(target.get());
+		}
 	}
 }

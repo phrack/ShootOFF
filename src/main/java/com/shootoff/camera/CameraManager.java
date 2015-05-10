@@ -55,6 +55,10 @@ public class CameraManager {
 		return SwingFXUtils.toFXImage(webcam.getImage(), null);
 	}
 	
+	public CanvasManager getCanvasManager() {
+		return canvasManager;
+	}
+	
 	private class Detector implements Runnable {
 		private BufferedImage currentFrame;
 		

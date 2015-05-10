@@ -46,4 +46,8 @@ public class CamerasSupervisor {
 	public CameraManager getCameraManager(int index) {
 		return managers.get(index);
 	}
+	
+	public CanvasManager getCanvasManager(int index) {
+		return managers.get(index).getCanvasManager();
+	}
 }
