@@ -214,7 +214,6 @@ public class CanvasManager {
 		}
 		
 		for (Node node : target.getChildren()) {
-			
 			TargetRegion region = (TargetRegion)node;
 			if (region.getType() != RegionType.IMAGE) {
 				((Shape)region).setStroke(stroke);
