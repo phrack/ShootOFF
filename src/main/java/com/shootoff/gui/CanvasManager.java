@@ -14,6 +14,7 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -25,6 +26,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 
 public class CanvasManager {
 	private static final int MOVEMENT_DELTA = 1;
@@ -42,6 +44,7 @@ public class CanvasManager {
 		this.config = config;
 	
 		this.background.setOnMouseClicked((event) -> {
+				toggleTargetSelection(Optional.empty());
 				selectedTarget = Optional.empty();
 				canvasGroup.requestFocus();
 			});
@@ -111,6 +114,7 @@ public class CanvasManager {
 		
 		if (target.isPresent()) {			
 			target.get().setOnMouseClicked((event) -> {
+					toggleTargetSelection(target);
 					selectedTarget = target;
 					canvasGroup.requestFocus();
 				});
@@ -169,6 +173,33 @@ public class CanvasManager {
 				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
 			}
 			break;
+		}
+	}
+	
+	private void toggleTargetSelection(Optional<Group> newSelection) {
+		if (selectedTarget.isPresent())
+			setTargetSelection(selectedTarget.get(), false);
+		
+		if (newSelection.isPresent()) {
+			setTargetSelection(newSelection.get(), true);
+			selectedTarget = newSelection;
+		}
+	}
+	
+	private void setTargetSelection(Group target, boolean isSelected) {
+		Color stroke;
+		
+		if (isSelected) {
+			stroke = TargetRegion.SELECTED_STROKE_COLOR;
+		} else {
+			stroke = TargetRegion.UNSELECTED_STROKE_COLOR;
+		}
+		
+		for (Node node : target.getChildren()) {
+			TargetRegion region = (TargetRegion)node;
+			if (region.getType() != RegionType.IMAGE) {
+				((Shape)region).setStroke(stroke);
+			}
 		}
 	}
 }

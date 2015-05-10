@@ -67,7 +67,7 @@ public class TargetEditorController {
 	@FXML private ChoiceBox<String> regionColorChoiceBox;
 	
 	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
-	private static final Color UNSELECTED_STROKE_COLOR = Color.BLACK;
+	
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
 
@@ -328,7 +328,7 @@ public class TargetEditorController {
 			// Unhighlight the old selection
 			if (!previous.equals(selected)) {
 				if (((TargetRegion)previous).getType() != RegionType.IMAGE)
-					((Shape)previous).setStroke(UNSELECTED_STROKE_COLOR);
+					((Shape)previous).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
 				
 				if (tagEditor.isPresent()) {
 					// Close tag editor
@@ -340,7 +340,7 @@ public class TargetEditorController {
 		}
 
 		if (((TargetRegion)selected).getType() != RegionType.IMAGE)
-			((Shape)selected).setStroke(Color.GOLD);
+			((Shape)selected).setStroke(TargetRegion.SELECTED_STROKE_COLOR);
 		selected.requestFocus();
 		toggleShapeControls(true);
 		cursorRegion = Optional.of(selected);
@@ -480,7 +480,7 @@ public class TargetEditorController {
 			TargetRegion selected = (TargetRegion)cursorRegion.get();
 			
 			if (selected.getType() != RegionType.IMAGE)
-				((Shape)selected).setStroke(UNSELECTED_STROKE_COLOR);
+				((Shape)selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
 		}
 		
 		clearFreeformState();
