@@ -26,7 +26,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class ShootOFFController {
+public class ShootOFFController implements CameraConfigListener {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private TabPane cameraTabPane;
@@ -51,6 +51,11 @@ public class ShootOFFController {
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.setStreamingAll(false);
 		});
+	}
+	
+	@Override
+	public void cameraConfigUpdated() {
+		addConfiguredCameras();
 	}
 	
 	private void addConfiguredCameras() {
@@ -81,7 +86,7 @@ public class ShootOFFController {
         preferencesStage.setTitle("Preferences");
         preferencesStage.setScene(new Scene(loader.getRoot()));
         preferencesStage.show();
-        ((PreferencesController)loader.getController()).setConfig(config);
+        ((PreferencesController)loader.getController()).setConfig(config, this);
     }
 	
 	@FXML 

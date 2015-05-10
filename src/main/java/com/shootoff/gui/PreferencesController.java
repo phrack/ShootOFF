@@ -50,11 +50,16 @@ public class PreferencesController {
 	
 	private Stage preferencesStage;
 	private Configuration config;
-	private List<Webcam> configuredCameras = new ArrayList<Webcam>();
-	private ObservableList<String> configuredNames = FXCollections.observableArrayList();
+	private CameraConfigListener cameraConfigListener; 
+	private boolean cameraConfigChanged = false;
+	private final List<Webcam> configuredCameras = new ArrayList<Webcam>();
+	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 	
-	public void setConfig(Configuration config) throws IOException {
+	public void setConfig(Configuration config, 
+			CameraConfigListener cameraConfigListener) throws IOException {
 	    preferencesStage = (Stage)detectionRateSlider.getScene().getWindow();
+	    
+	    this.cameraConfigListener = cameraConfigListener;
 	    
 	    ignoreLaserColorChoiceBox.setItems(FXCollections.observableArrayList(
 	    		"None", "red", "green"));
@@ -80,7 +85,8 @@ public class PreferencesController {
 	    				}
 	    			}
 	    			
-	    			configuredNames.removeAll(selectedNames);
+	    			boolean changed = configuredNames.removeAll(selectedNames);
+	    			if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
 	    		}
 	    	});
 	    
@@ -142,8 +148,10 @@ public class PreferencesController {
 		cameraSelector.setOnHidden((e) -> {
 				if (!cameraSelector.getSelectedWebcams().isEmpty()) {
 					for (Webcam webcam : cameraSelector.getSelectedWebcams()) {
-						configuredNames.add(webcam.getName());
+						boolean changed = configuredNames.add(webcam.getName());
 						configuredCameras.add(webcam);
+						
+		    			if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
 					}
 				}
 			});
@@ -164,6 +172,8 @@ public class PreferencesController {
 		
 		config.writeConfigurationFile();
 		preferencesStage.close();
+		
+		if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
 	}
 
 	@FXML 

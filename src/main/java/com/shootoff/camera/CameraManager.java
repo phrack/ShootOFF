@@ -60,8 +60,10 @@ public class CameraManager {
 		
 		@Override
 		public void run() {
-			webcam.setViewSize(new Dimension(640, 480));
-			webcam.open();			
+			if (!webcam.isOpen()) {
+				webcam.setViewSize(new Dimension(640, 480));
+				webcam.open();			
+			}
 			
 			streamCameraFrames();
 		}
