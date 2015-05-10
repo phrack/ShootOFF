@@ -65,7 +65,7 @@
             </TabPane>
             <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportWidth="147.0" HBox.hgrow="ALWAYS">
                <content>
-                  <TableView minHeight="0.0" minWidth="0.0">
+                  <TableView fx:id="shotTimerTable" minHeight="0.0" minWidth="0.0">
                     <columns>
                       <TableColumn prefWidth="65.0" sortable="false" text="Time" />
                       <TableColumn prefWidth="65.0" sortable="false" text="Laser" />
