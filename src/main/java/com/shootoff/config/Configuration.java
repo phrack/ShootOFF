@@ -30,6 +30,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
 
@@ -82,6 +83,7 @@ public class Configuration {
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
+	private MalfunctionsProcessor malfunctionsProcessor = null;
 	
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
@@ -347,7 +349,7 @@ public class Configuration {
 	public void setUseVirtualMagazine(boolean useVirtualMagazine) {
 		this.useVirtualMagazine = useVirtualMagazine;
 		
-		if (!useVirtualMagazine) {
+		if (!useVirtualMagazine && magazineProcessor != null) {
 			shotProcessors.remove(magazineProcessor);
 			magazineProcessor = null;
 		}
@@ -368,10 +370,24 @@ public class Configuration {
 
 	public void setMalfunctions(boolean injectMalfunctions) {
 		this.useMalfunctions = injectMalfunctions;
+		
+		if (!useMalfunctions && malfunctionsProcessor != null) {
+			shotProcessors.remove(malfunctionsProcessor);
+			malfunctionsProcessor = null;
+		}
 	}
 
 	public void setMalfunctionsProbability(float injectMalfunctionsProbability) {
 		this.malfunctionsProbability = injectMalfunctionsProbability;
+		
+		if (useMalfunctions) {
+			if (malfunctionsProcessor != null) {
+				shotProcessors.remove(malfunctionsProcessor);
+			}
+			
+			malfunctionsProcessor = new MalfunctionsProcessor(this);
+			shotProcessors.add(malfunctionsProcessor);
+		}
 	}
 
 	public void setDebugMode(boolean debugMode) {
