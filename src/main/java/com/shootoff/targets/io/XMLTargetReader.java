@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -53,6 +55,7 @@ public class XMLTargetReader {
 		TargetRegion currentRegion;
 		List<Double> polygonPoints = null;
 		Color polygonFill = null;
+		Map<String, String> currentTags;
 		
 		public List<Node> getRegions() {
 			return regions;
@@ -60,14 +63,17 @@ public class XMLTargetReader {
 		
 		public void startElement(String uri, String localName,String qName, 
                 Attributes attributes) throws SAXException {
+			
 			switch (qName) {
 			case "image":
+				currentTags = new HashMap<String, String>();
 				currentRegion = new ImageRegion(
 						Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")),
 						new File(attributes.getValue("file")));
 				break;
 			case "rectangle":
+				currentTags = new HashMap<String, String>();
 				currentRegion = new RectangleRegion(
 						Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")),
@@ -77,6 +83,7 @@ public class XMLTargetReader {
 						.createColor(attributes.getValue("fill")));
 				break;
 			case "ellipse":
+				currentTags = new HashMap<String, String>();
 				currentRegion = new EllipseRegion(
 						Double.parseDouble(attributes.getValue("centerX")),
 						Double.parseDouble(attributes.getValue("centerY")),
@@ -86,6 +93,7 @@ public class XMLTargetReader {
 						.createColor(attributes.getValue("fill")));
 				break;
 			case "polygon":
+				currentTags = new HashMap<String, String>();
 				polygonPoints = new ArrayList<Double>();
 				polygonFill = TargetEditorController
 						.createColor(attributes.getValue("fill"));
@@ -95,6 +103,7 @@ public class XMLTargetReader {
 				polygonPoints.add(Double.parseDouble(attributes.getValue("y")));
 				break;
 			case "tag":
+				currentTags.put(attributes.getValue("name"), attributes.getValue("value"));
 				break;
 			}
 		}
@@ -113,6 +122,7 @@ public class XMLTargetReader {
 			case "image":
 			case "rectangle":
 			case "ellipse":
+				currentRegion.setTags(currentTags);
 				regions.add((Node)currentRegion);
 				break;
 			}

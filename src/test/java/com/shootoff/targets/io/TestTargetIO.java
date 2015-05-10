@@ -82,6 +82,7 @@ public class TestTargetIO {
 				assertEquals(this.img.getX(), img.getX(), 0.5);
 				assertEquals(this.img.getY(), img.getY(), 0.5);
 				assertEquals(this.img.getImageFile(), img.getImageFile());
+				assertEquals("2", this.img.getTag("1"));
 				break;
 			case RECTANGLE:
 				RectangleRegion rec = (RectangleRegion)region;
@@ -90,6 +91,8 @@ public class TestTargetIO {
 				assertEquals(this.rec.getWidth(), rec.getWidth(), 0.5);
 				assertEquals(this.rec.getHeight(), rec.getHeight(), 0.5);
 				assertEquals(this.rec.getFill(), rec.getFill());
+				assertEquals("b", this.rec.getTag("a"));
+				assertEquals("d", this.rec.getTag("c"));
 				break;
 			case ELLIPSE:
 				EllipseRegion ell = (EllipseRegion)region;

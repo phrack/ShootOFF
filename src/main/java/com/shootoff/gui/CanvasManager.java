@@ -36,6 +36,7 @@ public class CanvasManager {
 	private final Configuration config;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots = new ArrayList<Shot>();
+	private final List<Group> targets = new ArrayList<Group>();
 	
 	private Optional<Group> selectedTarget = Optional.empty();
 	
@@ -107,6 +108,22 @@ public class CanvasManager {
 		
 		shots.add(shot);
 		shot.drawShot(canvasGroup);
+		checkHit(shot);
+	}
+	
+	private Optional<TargetRegion> checkHit(Shot shot) {
+		for (Group target : targets) {
+			if (target.getBoundsInParent().contains(shot.getX(), shot.getY())) {
+				// Target was hit, see if a specific region was hit
+				for (Node node : target.getChildren()) {
+					if (node.getBoundsInParent().contains(shot.getX(), shot.getY())) {
+						return Optional.of((TargetRegion)node);
+					}
+				}
+			}
+		}
+		
+		return Optional.empty();
 	}
 	
 	public void addTarget(File targetFile) {
@@ -120,6 +137,7 @@ public class CanvasManager {
 				});
 			
 			canvasGroup.getChildren().add(target.get());
+			targets.add(target.get());
 		}
 	}
 	
@@ -196,6 +214,7 @@ public class CanvasManager {
 		}
 		
 		for (Node node : target.getChildren()) {
+			
 			TargetRegion region = (TargetRegion)node;
 			if (region.getType() != RegionType.IMAGE) {
 				((Shape)region).setStroke(stroke);
