@@ -14,24 +14,44 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
 import javafx.application.Platform;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;import javafx.scene.paint.Color;
 
 public class CanvasManager {
+	private static final int MOVEMENT_DELTA = 1;
+	private static final int SCALE_DELTA = 1;
+	
 	private final Group canvasGroup;
 	private final Configuration config;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots = new ArrayList<Shot>();
 	
+	private Optional<Group> selectedTarget = Optional.empty();
+	
 	public CanvasManager(Group canvasGroup, Configuration config) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
+	
+		this.background.setOnMouseClicked((event) -> {
+				selectedTarget = Optional.empty();
+				canvasGroup.requestFocus();
+			});
+		
+		canvasGroup.setOnKeyPressed((event) -> {
+				if (!selectedTarget.isPresent()) return;
+				
+				transformTarget(event, selectedTarget.get());
+				event.consume();
+			});
 
 		if (Platform.isFxApplicationThread()) {
 			ProgressIndicator progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -54,7 +74,7 @@ public class CanvasManager {
 					}
 				});
 		}
-	}
+	}	
 	
 	public void updateBackground(Image img) {
 		if (!canvasGroup.getChildren().contains(background)) {
@@ -90,7 +110,65 @@ public class CanvasManager {
 		Optional<Group> target = TargetIO.loadTarget(targetFile);
 		
 		if (target.isPresent()) {			
+			target.get().setOnMouseClicked((event) -> {
+					selectedTarget = target;
+					canvasGroup.requestFocus();
+				});
+			
 			canvasGroup.getChildren().add(target.get());
+		}
+	}
+	
+	@SuppressWarnings("incomplete-switch")
+	private void transformTarget(KeyEvent event, Group selected) {
+		switch (event.getCode()) {
+		case DELETE:
+			canvasGroup.getChildren().remove(selectedTarget.get());
+			break;
+			
+		case LEFT:
+			if (event.isShiftDown()) {
+				for (Node node : selected.getChildren()) {
+					TargetRegion region = (TargetRegion)node;
+					region.changeWidth(SCALE_DELTA * -1);
+				}
+			} else {
+				selected.setLayoutX(selected.getLayoutX() - MOVEMENT_DELTA);
+			}
+			break;
+			
+		case RIGHT:
+			if (event.isShiftDown()) {
+				for (Node node : selected.getChildren()) {
+					TargetRegion region = (TargetRegion)node;
+					region.changeWidth(SCALE_DELTA);
+				}
+			} else {
+				selected.setLayoutX(selected.getLayoutX() + MOVEMENT_DELTA);
+			}
+			break;
+			
+		case UP:
+			if (event.isShiftDown()) {
+				for (Node node : selected.getChildren()) {
+					TargetRegion region = (TargetRegion)node;
+					region.changeHeight(SCALE_DELTA * -1);
+				}
+			} else {
+				selected.setLayoutY(selected.getLayoutY() - MOVEMENT_DELTA);
+			}
+			break;
+
+		case DOWN:
+			if (event.isShiftDown()) {
+				for (Node node : selected.getChildren()) {
+					TargetRegion region = (TargetRegion)node;
+					region.changeHeight(SCALE_DELTA);
+				}
+			} else {
+				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
+			}
+			break;
 		}
 	}
 }
