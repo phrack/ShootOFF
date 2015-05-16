@@ -14,6 +14,7 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.plugins.TrainingProtocol;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -108,7 +109,9 @@ public class CanvasManager {
 		
 		shots.add(shot);
 		shot.drawShot(canvasGroup);
-		checkHit(shot);
+		
+		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
+		if (currentProtocol.isPresent()) currentProtocol.get().shotListener(shot, checkHit(shot));
 	}
 	
 	private Optional<TargetRegion> checkHit(Shot shot) {
@@ -139,6 +142,10 @@ public class CanvasManager {
 			canvasGroup.getChildren().add(target.get());
 			targets.add(target.get());
 		}
+	}
+	
+	public List<Group> getTargets() {
+		return targets;
 	}
 	
 	@SuppressWarnings("incomplete-switch")

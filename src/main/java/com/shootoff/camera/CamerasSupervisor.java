@@ -9,6 +9,8 @@ package com.shootoff.camera;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.Group;
+
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
@@ -49,5 +51,15 @@ public class CamerasSupervisor {
 	
 	public CanvasManager getCanvasManager(int index) {
 		return managers.get(index).getCanvasManager();
+	}
+	
+	public List<Group> getTargets() {
+		List<Group> targets = new ArrayList<Group>();
+		
+		for (CameraManager manager : managers) {
+			targets.addAll(manager.getCanvasManager().getTargets());
+		}
+		
+		return targets;
 	}
 }

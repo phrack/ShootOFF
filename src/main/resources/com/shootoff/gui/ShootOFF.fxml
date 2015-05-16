@@ -34,9 +34,13 @@
                   <MenuItem mnemonicParsing="false" text="Hide Targets" />
                </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Training">
+          <Menu fx:id="trainingMenu" mnemonicParsing="false" text="Training">
             <items>
-                  <RadioMenuItem mnemonicParsing="false" selected="true" text="None" />
+                  <RadioMenuItem mnemonicParsing="false" onAction="#clickedNoneProtocol" selected="true" text="None">
+                      <toggleGroup>
+            	  		   <ToggleGroup fx:id="trainingToggleGroup" />
+                      </toggleGroup>
+                  </RadioMenuItem>
             </items>
           </Menu>
             <Menu mnemonicParsing="false" text="Projector">

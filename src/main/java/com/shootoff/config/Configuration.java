@@ -33,6 +33,7 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
+import com.shootoff.plugins.TrainingProtocol;
 
 public class Configuration {
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
@@ -80,6 +81,7 @@ public class Configuration {
 	private boolean useMalfunctions = false;
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
+	private TrainingProtocol currentProtocol = null;
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
@@ -393,6 +395,12 @@ public class Configuration {
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
 	}
+	
+	public void setProtocol(TrainingProtocol protocol) {
+		if (currentProtocol != null) currentProtocol.destroy();
+		
+		currentProtocol = protocol;
+	}
 
 	public List<Webcam> getWebcams() {
 		return webcams;
@@ -450,5 +458,11 @@ public class Configuration {
 	
 	public Set<ShotProcessor> getShotProcessors() {
 		return shotProcessors;
+	}
+	
+	public Optional<TrainingProtocol> getProtocol() {
+		if (currentProtocol == null) return Optional.empty();
+		
+		return Optional.of(currentProtocol);
 	}
 }

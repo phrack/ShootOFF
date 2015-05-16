@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2015 phrack. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 package com.shootoff.plugins;
 
 import java.util.Set;
@@ -12,6 +18,7 @@ import marytts.util.data.audio.AudioPlayer;
 
 public final class TextToSpeech {
 	private static boolean inited = false;
+	private static boolean isSilenced = false;
 	private static MaryInterface marytts = null;
 	
 	protected TextToSpeech() {}
@@ -23,7 +30,12 @@ public final class TextToSpeech {
 		inited = true;
 	}
 	
-	public static void say(String comment) {
+	public static void say(String comment) {		
+		if (isSilenced) {
+			System.out.println(comment);
+			return;
+		}
+		
 		try {
 			if(!inited) {
 				init();
@@ -38,5 +50,19 @@ public final class TextToSpeech {
 				SynthesisException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Allows TTS to be silenced or on. If silenced, instead of 
+	 * saying a comment the desired comment will be printed to
+	 * stdout. This exists so that components can be easily tested
+	 * even if they are reliant on TTS. 
+	 * 
+	 * @param isSilenced set to <tt>true</tt> if spoken phrases
+	 * 					 should instead be printed to stdout,
+	 * 					 <tt>false</tt> for normal operation.
+	 */
+	public static void silence(boolean isSilenced) {
+		TextToSpeech.isSilenced = isSilenced;
 	}
 }

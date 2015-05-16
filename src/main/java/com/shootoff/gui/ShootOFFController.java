@@ -15,6 +15,7 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.plugins.RandomShoot;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,8 +25,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
@@ -36,6 +39,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private MenuBar mainMenu;
 	@FXML private Menu addTargetMenu;
 	@FXML private Menu editTargetMenu;
+	@FXML private Menu trainingMenu;
+	@FXML private ToggleGroup trainingToggleGroup;
 	@FXML private TabPane cameraTabPane;
 	@FXML private Group defaultCanvasGroup;
 	
@@ -47,6 +52,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		this.camerasSupervisor = new CamerasSupervisor(config);
 		
 		findTargets();
+		registerTrainingProtocols();
 		
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
@@ -89,6 +95,22 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		for (File file : targetsFolder.listFiles(new FileFilter("target"))) {
 			newTarget(file);
 		}
+	}
+	
+	private void registerTrainingProtocols() {
+		RadioMenuItem randomShootItem = new RadioMenuItem(new RandomShoot().getInfo().getName());
+		randomShootItem.setToggleGroup(trainingToggleGroup);
+		
+		randomShootItem.setOnAction((e) -> {
+				config.setProtocol(new RandomShoot(camerasSupervisor.getTargets()));
+			});
+		
+		trainingMenu.getItems().add(randomShootItem);
+	}
+	
+	@FXML 
+	public void clickedNoneProtocol(ActionEvent event) {
+		config.setProtocol(null);
 	}
 	
 	@FXML 
@@ -154,6 +176,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				targetPath.lastIndexOf('.'));
 		
 		MenuItem addTargetItem = new MenuItem(targetName);
+		addTargetItem.setMnemonicParsing(false);
 		
 		addTargetItem.setOnAction((e) -> {
 				camerasSupervisor.getCanvasManager(
@@ -161,7 +184,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			});
 		
 		MenuItem editTargetItem = new MenuItem(targetName);
-
+		editTargetItem.setMnemonicParsing(false);
+		
 		editTargetItem.setOnAction((e) -> {
 				try {
 					FXMLLoader loader = createPreferencesStage();
