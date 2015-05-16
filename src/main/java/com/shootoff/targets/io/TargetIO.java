@@ -11,6 +11,7 @@ import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -55,8 +56,19 @@ public class TargetIO {
 				break;
 			case POLYGON:
 				PolygonRegion pol = (PolygonRegion)node;
+				
+				Double[] points = new Double[pol.getPoints().size()];
+				
+				for (int i = 0; i < pol.getPoints().size(); i+=2) {
+					Point2D p = pol.localToParent(pol.getPoints().get(i), 
+												  pol.getPoints().get(i + 1));
+					
+					points[i] = p.getX();
+					points[i + 1] = p.getY();
+				}
+				
 				visitor.visitPolygonRegion(
-						pol.getPoints().toArray(new Double[pol.getPoints().size()]), 
+						points, 
 						TargetEditorController.getColorName((Color)pol.getFill()), 
 						pol.getAllTags());
 				break;
