@@ -210,7 +210,6 @@ public class TargetEditorController {
 			drawPolygon(event);
 		} else if (freeformButton.isSelected() && event.getButton().equals(MouseButton.SECONDARY)) {
 			drawShape();
-			targetRegions.add(cursorRegion.get());
 			clearFreeformState(true);
 		}
 		
