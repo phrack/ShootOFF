@@ -211,7 +211,7 @@ public class TargetEditorController {
 		} else if (freeformButton.isSelected() && event.getButton().equals(MouseButton.SECONDARY)) {
 			drawShape();
 			targetRegions.add(cursorRegion.get());
-			clearFreeformState();
+			clearFreeformState(true);
 		}
 		
 		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
@@ -410,7 +410,7 @@ public class TargetEditorController {
 	
 	@FXML
 	public void cursorSelected(ActionEvent event) {
-		clearFreeformState();
+		clearFreeformState(false);
 		
 		if (!cursorRegion.isPresent()) return;
 		
@@ -484,7 +484,7 @@ public class TargetEditorController {
 				((Shape)selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
 		}
 		
-		clearFreeformState();
+		clearFreeformState(false);
 		drawShape();
 	}
 	
@@ -604,11 +604,11 @@ public class TargetEditorController {
 	
 	@FXML
 	public void startPolygon(ActionEvent event) {
-		clearFreeformState();
+		clearFreeformState(false);
 	}
 	
-	private void clearFreeformState() {
-		if (cursorRegion.isPresent()) {
+	private void clearFreeformState(boolean finishedDrawing) {
+		if (cursorRegion.isPresent() && !finishedDrawing) {
 			Node selected = cursorRegion.get();
 			if (!targetRegions.contains(selected)) 
 				canvasPane.getChildren().remove(selected);
