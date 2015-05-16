@@ -115,13 +115,14 @@ public class TargetEditorController {
 		Optional<Group> target = TargetIO.loadTarget(targetFile);
 		
 		if (target.isPresent()) {
+			targetRegions.addAll(target.get().getChildren());
+			
 			for (Node region : target.get().getChildren()) {
 				region.setOnMouseClicked((e) -> { regionClicked(e); });
 				region.setOnKeyPressed((e) -> { regionKeyPressed(e); }); 
 			}
 			
 			canvasPane.getChildren().addAll(target.get().getChildren());
-			targetRegions.addAll(target.get().getChildren());
 		}
 	}
 	
