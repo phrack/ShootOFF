@@ -118,7 +118,8 @@ public class CanvasManager {
 		for (Group target : targets) {
 			if (target.getBoundsInParent().contains(shot.getX(), shot.getY())) {
 				// Target was hit, see if a specific region was hit
-				for (Node node : target.getChildren()) {
+				for (int i = target.getChildren().size() - 1; i >= 0; i--) {
+					Node node = target.getChildren().get(i);
 					if (node.getBoundsInParent().contains(shot.getX(), shot.getY())) {
 						return Optional.of((TargetRegion)node);
 					}
