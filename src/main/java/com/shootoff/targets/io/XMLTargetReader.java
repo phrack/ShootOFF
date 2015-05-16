@@ -84,6 +84,7 @@ public class XMLTargetReader {
 				try {
 					int firstDot = imageFile.getName().indexOf('.') + 1;
 					String extension = imageFile.getName().substring(firstDot);
+					
 					if (extension.endsWith("gif")) {
 						GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
 						imageRegion.setImage(gif.getFirstFrame());
