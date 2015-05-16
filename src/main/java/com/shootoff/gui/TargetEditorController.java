@@ -455,6 +455,7 @@ public class TargetEditorController {
 					ImageRegion newPNGRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
 					newPNGRegion.setImage(new Image(new FileInputStream(imageFile)));
 					imageRegion = Optional.of(newPNGRegion);		
+					break;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
