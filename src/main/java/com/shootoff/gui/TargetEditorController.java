@@ -7,6 +7,7 @@
 package com.shootoff.gui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -426,7 +427,8 @@ public class TargetEditorController {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Image");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif")
+                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
+                new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png")
             );
 		File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
 		
@@ -443,12 +445,16 @@ public class TargetEditorController {
 				
 				switch (extension) {
 				case "gif":
-					ImageRegion newRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
-					GifAnimation gif = new GifAnimation(newRegion, imageFile);
-					newRegion.setImage(gif.getFirstFrame());
-					if (gif.getFrameCout() > 0) newRegion.setAnimation(gif);
-					imageRegion = Optional.of(newRegion);
+					ImageRegion newGIFRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
+					GifAnimation gif = new GifAnimation(newGIFRegion, imageFile);
+					newGIFRegion.setImage(gif.getFirstFrame());
+					if (gif.getFrameCout() > 0) newGIFRegion.setAnimation(gif);
+					imageRegion = Optional.of(newGIFRegion);
 					break;
+				case "png":
+					ImageRegion newPNGRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
+					newPNGRegion.setImage(new Image(new FileInputStream(imageFile)));
+					imageRegion = Optional.of(newPNGRegion);		
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
