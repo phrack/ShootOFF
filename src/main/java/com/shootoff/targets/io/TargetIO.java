@@ -34,19 +34,21 @@ public class TargetIO {
 			switch (region.getType()) {
 			case IMAGE:
 				ImageRegion img = (ImageRegion)node;
-				visitor.visitImageRegion(img.getX(), img.getY(), 
+				visitor.visitImageRegion(img.getBoundsInParent().getMinX(), img.getBoundsInParent().getMinY(), 
 						img.getImageFile(), img.getAllTags());
 				break;
 			case RECTANGLE:
 				RectangleRegion rec = (RectangleRegion)node;
-				visitor.visitRectangleRegion(rec.getX(), rec.getY(), 
+				visitor.visitRectangleRegion(rec.getBoundsInParent().getMinX(), rec.getBoundsInParent().getMinY(), 
 						rec.getWidth(), rec.getHeight(), 
 						TargetEditorController.getColorName((Color)rec.getFill()), 
 						rec.getAllTags());
 				break;
 			case ELLIPSE:
 				EllipseRegion ell = (EllipseRegion)node;
-				visitor.visitEllipse(ell.getCenterX(), ell.getCenterY(), 
+				double absoluteCenterX = ell.getBoundsInParent().getMinX() + ell.getRadiusX();
+				double absoluteCenterY = ell.getBoundsInParent().getMinY() + ell.getRadiusY();
+				visitor.visitEllipse(absoluteCenterX, absoluteCenterY, 
 						ell.getRadiusX(), ell.getRadiusY(), 
 						TargetEditorController.getColorName((Color)ell.getFill()), 
 						ell.getAllTags());
