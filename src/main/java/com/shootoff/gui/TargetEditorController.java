@@ -630,11 +630,17 @@ public class TargetEditorController {
 	public void bringForward(ActionEvent event) {
 		if (cursorRegion.isPresent() && 
 				!targetRegions.contains(cursorRegion.get())) return;
-		
-		ObservableList<Node> shapesList = canvasPane.getChildren();
-		int selectedIndex = shapesList.indexOf(cursorRegion.get());
+				
+		int selectedIndex = targetRegions.indexOf(cursorRegion.get());
 
-		if (selectedIndex < shapesList.size() - 1) {
+		if (selectedIndex < targetRegions.size() - 1) {
+			Collections.swap(targetRegions, selectedIndex, selectedIndex + 1);
+			
+			// Get the index separately for the shapes list because the target region
+			// list has fewer items (e.g. no background)
+			ObservableList<Node> shapesList = canvasPane.getChildren();
+			selectedIndex = shapesList.indexOf(cursorRegion.get());
+			
 			// We have to do this dance instead of just calling
 			// Collections.swap otherwise we get an IllegalArgumentException
 			// from the Scene for duplicating a child node
@@ -644,8 +650,6 @@ public class TargetEditorController {
 			shapesList.remove(selectedIndex);
 			shapesList.add(selectedIndex, topShape);
 			shapesList.add(selectedIndex + 1, bottomShape);
-			
-			Collections.swap(targetRegions, selectedIndex, selectedIndex + 1);
 		}
 	}
 	
@@ -654,18 +658,20 @@ public class TargetEditorController {
 		if (cursorRegion.isPresent() && 
 				!targetRegions.contains(cursorRegion.get())) return;
 		
-		ObservableList<Node> shapesList = canvasPane.getChildren();
-		int selectedIndex = shapesList.indexOf(cursorRegion.get());
-
+		int selectedIndex = targetRegions.indexOf(cursorRegion.get());
+		
 		if (selectedIndex > 0) {
+			Collections.swap(targetRegions, selectedIndex - 1, selectedIndex);
+			
+			ObservableList<Node> shapesList = canvasPane.getChildren();
+			selectedIndex = shapesList.indexOf(cursorRegion.get());
+
 			Node topShape = shapesList.get(selectedIndex);
 			Node bottomShape = shapesList.get(selectedIndex - 1);
 			shapesList.remove(selectedIndex);
 			shapesList.remove(selectedIndex - 1);
 			shapesList.add(selectedIndex - 1, topShape);
 			shapesList.add(selectedIndex, bottomShape);
-			
-			Collections.swap(targetRegions, selectedIndex - 1, selectedIndex);
 		}
 	}
 	
