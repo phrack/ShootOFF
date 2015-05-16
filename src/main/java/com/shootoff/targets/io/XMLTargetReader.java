@@ -75,16 +75,20 @@ public class XMLTargetReader {
 			case "image":
 				currentTags = new HashMap<String, String>();
 				
-				File imgFile = new File(attributes.getValue("file"));
+				File imageFile = new File(attributes.getValue("file"));
 				
 				ImageRegion imageRegion = new ImageRegion(
 						Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")),
-						imgFile);
+						imageFile);
 				try {
-					GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
-					imageRegion.setImage(gif.getFirstFrame());
-					if (gif.getFrameCout() > 0) imageRegion.setAnimation(gif);
+					int firstDot = imageFile.getName().indexOf('.') + 1;
+					String extension = imageFile.getName().substring(firstDot);
+					if (extension.endsWith("gif")) {
+						GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
+						imageRegion.setImage(gif.getFirstFrame());
+						if (gif.getFrameCout() > 0) imageRegion.setAnimation(gif);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
