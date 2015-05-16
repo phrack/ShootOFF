@@ -23,6 +23,7 @@ import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.targets.animation.GifAnimation;
 
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -67,10 +68,23 @@ public class XMLTargetReader {
 			switch (qName) {
 			case "image":
 				currentTags = new HashMap<String, String>();
-				currentRegion = new ImageRegion(
+				
+				File imgFile = new File(attributes.getValue("file"));
+				
+				ImageRegion imageRegion = new ImageRegion(
 						Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")),
-						new File(attributes.getValue("file")));
+						imgFile);
+				try {
+					GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
+					imageRegion.setImage(gif.getFirstFrame());
+					if (gif.getFrameCout() > 0) imageRegion.setAnimation(gif);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				currentRegion = imageRegion;
+				
 				break;
 			case "rectangle":
 				currentTags = new HashMap<String, String>();

@@ -9,6 +9,7 @@ import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
+import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.geometry.Point2D;
@@ -90,7 +91,7 @@ public class TargetIO {
 		
 		Group targetGroup = new Group();
 		for (Node region : regions) {
-			region.setOpacity(DEFAULT_OPACITY);
+			if (((TargetRegion)region).getType() != RegionType.IMAGE) region.setOpacity(DEFAULT_OPACITY);
 			targetGroup.getChildren().add(region);
 		}
 		

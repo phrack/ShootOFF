@@ -1,12 +1,15 @@
 package com.shootoff.targets;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.targets.animation.SpriteAnimation;
 
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class ImageRegion extends ImageView implements TargetRegion {
@@ -21,6 +24,11 @@ public class ImageRegion extends ImageView implements TargetRegion {
 		this.setLayoutX(x);
 		this.setLayoutY(y);
 		this.imageFile = imageFile;
+		try {
+			this.setImage(new Image(new FileInputStream(imageFile)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public File getImageFile() {
