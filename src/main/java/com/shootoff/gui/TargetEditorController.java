@@ -170,9 +170,9 @@ public class TargetEditorController {
                 new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target")
             );
 		File targetFile = fileChooser.showSaveDialog(canvasPane.getParent().getScene().getWindow());
-		targetFile = new File(targetFile.getPath() + ".target");
 		
 		if (targetFile != null) {
+			targetFile = new File(targetFile.getPath() + ".target");
 			boolean isNewTarget = !targetFile.exists();
 			
 			TargetIO.saveTarget(targetRegions, targetFile);
