@@ -33,7 +33,7 @@ public class TestTargetIO {
 	public void setUp() {
 		Map<String, String> imgTags = new HashMap<String, String>();
 		imgTags.put("1", "2");
-		img = new ImageRegion(6, 6, new File("fake.gif"));
+		img = new ImageRegion(6, 6, new File("targets" + File.separator + "plate.gif"));
 		img.setTags(imgTags);
 		
 		Map<String, String> recTags = new HashMap<String, String>();
