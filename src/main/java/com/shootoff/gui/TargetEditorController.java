@@ -438,6 +438,9 @@ public class TargetEditorController {
 	private void drawImage(File imageFile) {
 		Optional<ImageRegion> imageRegion = Optional.empty();
 		
+		lastMouseX = 0;
+		lastMouseY = 0;
+		
 		if (imageFile != null) {
 			try {
 				int firstDot = imageFile.getName().indexOf('.') + 1;
