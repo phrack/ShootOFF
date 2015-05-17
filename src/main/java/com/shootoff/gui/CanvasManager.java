@@ -15,6 +15,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.TrainingProtocol;
+import com.shootoff.plugins.TrainingProtocolBase;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -121,7 +122,9 @@ public class CanvasManager {
 		shot.drawShot(canvasGroup);
 		
 		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
-		if (currentProtocol.isPresent()) currentProtocol.get().shotListener(shot, checkHit(shot));
+		Optional<TargetRegion> hitRegion = checkHit(shot);
+		if (hitRegion.isPresent() && hitRegion.get().tagExists("command")) executeRegionCommands(hitRegion.get());
+		if (currentProtocol.isPresent()) currentProtocol.get().shotListener(shot, hitRegion);
 	}
 	
 	private Optional<TargetRegion> checkHit(Shot shot) {
@@ -140,10 +143,45 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
+	private void executeRegionCommands(TargetRegion region) {
+		String commandsSource = region.getTag("command");
+		String commands[]  = commandsSource.split(";");		
+		
+		for (String command : commands) {
+			int openParen = command.indexOf('(');
+			String commandName;
+			String args[];
+			
+			if (openParen > 0) {
+				commandName = command.substring(0, openParen);
+				args = command.substring(openParen + 1, command.indexOf(')')).split(",");
+			} else {
+				commandName = command;
+				args = null;
+			}
+			
+			switch (commandName) {
+			case "play_sound":
+				TrainingProtocolBase.playSound(args[0]);
+				break;
+			}
+		}
+	}
+	
 	public void addTarget(File targetFile) {
 		Optional<Group> target = TargetIO.loadTarget(targetFile);
 		
-		if (target.isPresent()) {			
+		if (target.isPresent()) {		
+			// Make sure visible:false regions are hidden
+			for (Node node : target.get().getChildren()) {
+				TargetRegion region = (TargetRegion)node;
+				if (region.tagExists("visible") && 
+						region.getTag("visible").equals("false")) {
+					
+					node.setVisible(false);
+				}
+			}
+			
 			target.get().setOnMouseClicked((event) -> {
 					toggleTargetSelection(target);
 					selectedTarget = target;

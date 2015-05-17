@@ -6,7 +6,16 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
 
 import javafx.scene.Group;
 
@@ -26,5 +35,26 @@ public class TrainingProtocolBase {
 	
 	public TrainingProtocolBase(List<Group> targets) {
 		this.targets = targets;
+	}
+	
+	public static void playSound(String soundFilePath) {
+		AudioInputStream audioInputStream = null;
+
+		try {
+			audioInputStream = AudioSystem.getAudioInputStream(new File(soundFilePath));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (audioInputStream != null) {
+			AudioFormat format = audioInputStream.getFormat();
+			DataLine.Info info = new DataLine.Info(Clip.class, format);
+			try {
+				Clip clip = (Clip) AudioSystem.getLine(info);
+				clip.open(audioInputStream);
+				clip.start();
+			} catch (LineUnavailableException | IOException e) {
+				e.printStackTrace();
+			}
+		} 
 	}
 }
