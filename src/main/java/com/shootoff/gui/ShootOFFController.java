@@ -194,6 +194,25 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.setStreamingAll(false);
 		shootOFFStage.close();
 	}
+	
+	@FXML
+	public void hideTargetsClicked(ActionEvent event) {
+		MenuItem hideTargetMenuItem = (MenuItem)event.getSource();
+		
+		if (hideTargetMenuItem.getText().equals("Hide Targets")) {
+			hideTargetMenuItem.setText("Show Targets");
+			
+			for (Group target : camerasSupervisor.getTargets()) {
+				target.setVisible(false);
+			}
+		} else {
+			hideTargetMenuItem.setText("Hide Targets");
+			
+			for (Group target : camerasSupervisor.getTargets()) {
+				target.setVisible(true);
+			}
+		}
+	}
 
 	@FXML 
 	public void createTargetMenuClicked(ActionEvent event) throws IOException {

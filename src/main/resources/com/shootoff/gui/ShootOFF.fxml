@@ -31,7 +31,7 @@
                   <MenuItem mnemonicParsing="false" onAction="#createTargetMenuClicked" text="Create Target..." />
                   <Menu fx:id="addTargetMenu" mnemonicParsing="false" text="Add Target" />
                   <Menu fx:id="editTargetMenu" mnemonicParsing="false" text="Edit Target" />
-                  <MenuItem mnemonicParsing="false" text="Hide Targets" />
+                  <MenuItem mnemonicParsing="false" onAction="#hideTargetsClicked" text="Hide Targets" />
                </items>
           </Menu>
           <Menu fx:id="trainingMenu" mnemonicParsing="false" text="Training">
