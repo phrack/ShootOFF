@@ -432,14 +432,14 @@ public class TargetEditorController {
             );
 		File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
 		
+		lastMouseX = 0;
+		lastMouseY = 0;
+		
 		drawImage(imageFile);
 	}
 	
 	private void drawImage(File imageFile) {
 		Optional<ImageRegion> imageRegion = Optional.empty();
-		
-		lastMouseX = 0;
-		lastMouseY = 0;
 		
 		if (imageFile != null) {
 			try {
