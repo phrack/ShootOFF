@@ -22,17 +22,23 @@ import javax.sound.sampled.LineUnavailableException;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.DelayedStartIntervalController;
+import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ShotEntry;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /** 
@@ -77,6 +83,28 @@ public class TrainingProtocolBase {
 				canvasManager.getCanvasGroup().getChildren().add(protocolLabel);
 			}
 		}
+	}
+	
+	public void getDelayedStartInterval(DelayedStartListener listener) {
+		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
+		try {
+			loader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Stage delayedStartIntervalStage = new Stage();
+		
+		if (shotTimerTable != null) {
+			delayedStartIntervalStage.initOwner((Stage)shotTimerTable.getScene().getWindow());
+			delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
+		}
+		delayedStartIntervalStage.setTitle("Preferences");
+		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
+		delayedStartIntervalStage.show();
+		
+		DelayedStartIntervalController controller = (DelayedStartIntervalController)loader.getController();
+		controller.init(listener);
 	}
 	
 	/**
