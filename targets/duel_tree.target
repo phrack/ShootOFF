@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="145.500000" y="1.500000" file="targets/duel_tree_stand.gif">
+	</image>
+	<image x="146.500000" y="32.500000" file="targets/tree-paddle-left.gif">
+		<tag name="name" value="left_paddle_1" />
+		<tag name="command" value="animate;reverse" />
+	</image>
+	<image x="147.500000" y="193.500000" file="targets/tree-paddle-left.gif">
+		<tag name="name" value="left_paddle_2" />
+		<tag name="command" value="animate;reverse" />
+	</image>
+	<image x="148.500000" y="356.500000" file="targets/tree-paddle-left.gif">
+		<tag name="name" value="left_paddle_3" />
+		<tag name="command" value="animate;reverse" />
+	</image>
+	<image x="148.500000" y="113.500000" file="targets/tree-paddles-right.gif">
+		<tag name="name" value="right_paddle_1" />
+		<tag name="command" value="animate;reverse" />
+	</image>
+	<image x="148.500000" y="277.500000" file="targets/tree-paddles-right.gif">
+		<tag name="name" value="right_paddle_2" />
+		<tag name="command" value="animate;reverse" />
+	</image>
+	<image x="149.500000" y="438.500000" file="targets/tree-paddles-right.gif">
+		<tag name="name" value="right_paddle_3" />
+		<tag name="command" value="animate;reverse" />
+	</image>
+</target>
