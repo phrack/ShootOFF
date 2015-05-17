@@ -19,13 +19,15 @@ public class ShotSearcher implements Runnable {
 	private final CanvasManager canvasManager;
 	private final BufferedImage currentFrame;
 	private final BufferedImage threshholded;
+	private final long timestamp;
 	
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, 
-			BufferedImage currentFrame, BufferedImage grayScale) {
+			BufferedImage currentFrame, BufferedImage grayScale, long timestamp) {
 		this.config = config;
 		this.canvasManager = canvasManager;
 		this.currentFrame = currentFrame;
 		this.threshholded = threshold(grayScale);
+		this.timestamp = timestamp;
 	}
 	
 	@Override
@@ -77,7 +79,7 @@ public class ShotSearcher implements Runnable {
 									continue; 
 						
 						canvasManager.addShot(new Shot(areaColor.get(), x, y, 
-								0, config.getMarkerRadius()));
+								timestamp, config.getMarkerRadius()));
 						return;
 					}
 				}

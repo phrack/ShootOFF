@@ -15,10 +15,10 @@ public class Shot {
 	private final Color color;
 	private final double x;
 	private final double y;
-	private final int timestamp;
+	private final long timestamp;
 	private final Ellipse marker;
 	
-	public Shot (Color color, double x, double y, int timestamp, int markerRadius) {
+	public Shot (Color color, double x, double y, long timestamp, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
@@ -45,7 +45,7 @@ public class Shot {
 		return y;
 	}
 	
-	public int getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 	

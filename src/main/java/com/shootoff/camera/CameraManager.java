@@ -25,6 +25,8 @@ public class CameraManager {
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
 	
+	private long startTime = 0;
+	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = webcam;
 		this.canvasManager = canvas;
@@ -36,10 +38,12 @@ public class CameraManager {
 			webcamRefreshDelay = (int)(1000 / webcam.getFPS());
 		}
 		
+		startTime = System.currentTimeMillis();
 		new Thread(new Detector()).start();
 	}
 	
 	public void reset() {
+		startTime = System.currentTimeMillis();
 		canvasManager.reset();
 	}
 	
@@ -109,7 +113,7 @@ public class CameraManager {
 			grayScale.createGraphics().drawImage(currentCopy, 0, 0, null);
 			
 			new Thread(new ShotSearcher(config, canvasManager, 
-					currentCopy, grayScale)).start();
+					currentCopy, grayScale, System.currentTimeMillis() - startTime)).start();
 		}
 	}	
 }
