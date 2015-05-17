@@ -3,6 +3,7 @@ package com.shootoff.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 
@@ -15,7 +16,7 @@ public class MockCanvasManager extends CanvasManager {
 	private final Configuration config;
 	
 	public MockCanvasManager(Configuration config) {
-		super(new Group(), config, FXCollections.observableArrayList());
+		super(new Group(), config, new CamerasSupervisor(config), FXCollections.observableArrayList());
 		this.config = config;
 	}
 

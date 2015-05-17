@@ -71,7 +71,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
 			camerasSupervisor.addCameraManager(defaultCamera, 
-					new CanvasManager(defaultCanvasGroup, config, shotEntries));
+					new CanvasManager(defaultCanvasGroup, config, camerasSupervisor, shotEntries));
 		} else {
 			addConfiguredCameras();
 		}
@@ -127,7 +127,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 			
 			camerasSupervisor.addCameraManager(webcam, 
-					new CanvasManager(cameraCanvasGroup, config, shotEntries));
+					new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries));
 			
 			cameraTabPane.getTabs().add(cameraTab);
 		}

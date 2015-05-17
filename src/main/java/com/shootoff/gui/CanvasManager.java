@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
@@ -40,6 +41,7 @@ public class CanvasManager {
 	
 	private final Group canvasGroup;
 	private final Configuration config;
+	private final CamerasSupervisor camerasSupervisor;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots = new ArrayList<Shot>();
@@ -48,9 +50,11 @@ public class CanvasManager {
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	
-	public CanvasManager(Group canvasGroup, Configuration config, ObservableList<ShotEntry> shotEntries) {
+	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor,
+			ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
+		this.camerasSupervisor = camerasSupervisor;
 		this.shotEntries = shotEntries;
 	
 		this.background.setOnMouseClicked((event) -> {
@@ -189,6 +193,10 @@ public class CanvasManager {
 			}
 			
 			switch (commandName) {
+			case "reset":
+				camerasSupervisor.reset();
+				break;
+				
 			case "animate":
 				animate(region, args);
 				break;
