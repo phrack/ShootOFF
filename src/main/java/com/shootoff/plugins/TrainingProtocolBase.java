@@ -124,6 +124,14 @@ public class TrainingProtocolBase {
 		if (Platform.isFxApplicationThread()) protocolLabel.setText(message);
 	}
 	
+	/** 
+	 * Perform the equivalent of the user hitting the reset button.
+	 */
+	public void reset() {
+		camerasSupervisor.reset();
+		if (config.getProtocol().isPresent()) config.getProtocol().get().reset(camerasSupervisor.getTargets());	
+	}
+	
 	/**
 	 * Plays an audio file asyncronously.
 	 * 
