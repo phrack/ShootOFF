@@ -175,7 +175,11 @@ public class CanvasManager {
 			// Make sure visible:false regions are hidden
 			for (Node node : target.get().getChildren()) {
 				TargetRegion region = (TargetRegion)node;
+<<<<<<< HEAD
 				if (region.tagExists("visible") && 
+=======
+				if (region.getAllTags().containsKey("visible") && 
+>>>>>>> 6eaa784478c737f89cb7ec36da54fb4aa02da1d3
 						region.getTag("visible").equals("false")) {
 					
 					node.setVisible(false);
