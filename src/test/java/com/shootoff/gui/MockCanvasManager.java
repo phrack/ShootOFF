@@ -6,6 +6,7 @@ import java.util.List;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 
+import javafx.collections.FXCollections;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
@@ -14,7 +15,7 @@ public class MockCanvasManager extends CanvasManager {
 	private final Configuration config;
 	
 	public MockCanvasManager(Configuration config) {
-		super(new Group(), config);
+		super(new Group(), config, FXCollections.observableArrayList());
 		this.config = config;
 	}
 

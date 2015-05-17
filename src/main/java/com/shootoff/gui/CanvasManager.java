@@ -20,6 +20,7 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
@@ -35,6 +36,7 @@ public class CanvasManager {
 	
 	private final Group canvasGroup;
 	private final Configuration config;
+	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots = new ArrayList<Shot>();
 	private final List<Group> targets = new ArrayList<Group>();
@@ -42,9 +44,10 @@ public class CanvasManager {
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	
-	public CanvasManager(Group canvasGroup, Configuration config) {
+	public CanvasManager(Group canvasGroup, Configuration config, ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
+		this.shotEntries = shotEntries;
 	
 		this.background.setOnMouseClicked((event) -> {
 				toggleTargetSelection(Optional.empty());
@@ -100,6 +103,7 @@ public class CanvasManager {
 				}
 				
 				shots.clear();
+				shotEntries.clear();
 			}); 
 	}
 	
@@ -112,6 +116,7 @@ public class CanvasManager {
 			if (!processor.processShot(shot)) return;
 		}
 		
+		shotEntries.add(new ShotEntry(shot));
 		shots.add(shot);
 		shot.drawShot(canvasGroup);
 		

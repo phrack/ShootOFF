@@ -17,6 +17,9 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.RandomShoot;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,9 +31,13 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -43,9 +50,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private ToggleGroup trainingToggleGroup;
 	@FXML private TabPane cameraTabPane;
 	@FXML private Group defaultCanvasGroup;
+	@FXML private TableView<ShotEntry> shotTimerTable;
 	
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
+	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	
 	public void init(Configuration config) {
 		this.config = config;
@@ -57,7 +66,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
 			camerasSupervisor.addCameraManager(defaultCamera, 
-					new CanvasManager(defaultCanvasGroup, config));
+					new CanvasManager(defaultCanvasGroup, config, shotEntries));
 		} else {
 			addConfiguredCameras();
 		}
@@ -66,6 +75,36 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.setStreamingAll(false);
 		});
+		
+		TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
+		timeCol.setPrefWidth(65);
+		timeCol.setCellValueFactory(
+                new PropertyValueFactory<ShotEntry, String>("timestamp"));
+		
+		TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
+		laserCol.setPrefWidth(65);
+		laserCol.setCellValueFactory(
+                new PropertyValueFactory<ShotEntry, String>("color"));
+       
+		shotTimerTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<ShotEntry>() {
+	        @Override
+	        public void onChanged(Change<? extends ShotEntry> change)
+	        {
+	        	while (change.next()) {
+		        	for (ShotEntry unselected : change.getRemoved()) {
+		        		unselected.getShot().getMarker().setStroke(Color.BLACK);
+		        	}
+		        	
+		        	for (ShotEntry selected : change.getAddedSubList()) {
+		        		selected.getShot().getMarker().setStroke(Color.GOLD);
+		        	}
+	        	}
+	        }
+	    });
+
+		shotTimerTable.getColumns().add(timeCol);
+		shotTimerTable.getColumns().add(laserCol);
+		shotTimerTable.setItems(shotEntries);
 	}
 	
 	@Override
@@ -83,7 +122,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 			
 			camerasSupervisor.addCameraManager(webcam, 
-					new CanvasManager(cameraCanvasGroup, config));
+					new CanvasManager(cameraCanvasGroup, config, shotEntries));
 			
 			cameraTabPane.getTabs().add(cameraTab);
 		}
