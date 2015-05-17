@@ -17,17 +17,26 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	private final File imageFile;
 	
 	private Optional<SpriteAnimation> animation = Optional.empty();
-	
+
 	public ImageRegion(double x, double y, File imageFile) {
 		super();
 		
 		this.setLayoutX(x);
 		this.setLayoutY(y);
 		this.imageFile = imageFile;
+		
 		try {
 			this.setImage(new Image(new FileInputStream(imageFile)));
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public boolean onFirstFrame() {
+		if (!animation.isPresent()) {
+			return true; 
+		} else {
+			return this.getImage().equals(animation.get().getFirstFrame());
 		}
 	}
 	
@@ -41,6 +50,10 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	
 	public Optional<SpriteAnimation> getAnimation() {
 		return animation;
+	}
+	
+	public void reset() {
+		if (animation.isPresent()) animation.get().reset();
 	}
 
 	@Override

@@ -4,8 +4,8 @@
 		<tag name="name" value="pepper_popper" />
 		<tag name="command" value="play_sound(sounds/metal_clang.wav)" />
 	</image>
-	<ellipse centerX="292.000000" centerY="130.000000" radiusX="108.000000" radiusY="106.000000" fill="black">
-		<tag name="command" value="animate(pepper_popper);play_sound(sounds/metal_clang.wav)" />
+	<ellipse centerX="291.500000" centerY="129.500000" radiusX="108.000000" radiusY="106.000000" fill="black">
+		<tag name="command" value="animate(pepper_popper);play_sound(sounds/metal_clang.wav,pepper_popper)" />
 		<tag name="visible" value="false" />
 	</ellipse>
 </target>

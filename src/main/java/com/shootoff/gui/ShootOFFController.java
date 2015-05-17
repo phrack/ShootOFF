@@ -16,6 +16,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.RandomShoot;
+import com.shootoff.targets.TargetRegion;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -37,7 +38,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -92,11 +92,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        {
 	        	while (change.next()) {
 		        	for (ShotEntry unselected : change.getRemoved()) {
-		        		unselected.getShot().getMarker().setStroke(Color.BLACK);
+		        		unselected.getShot().getMarker().setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
 		        	}
 		        	
 		        	for (ShotEntry selected : change.getAddedSubList()) {
-		        		selected.getShot().getMarker().setStroke(Color.GOLD);
+		        		selected.getShot().getMarker().setStroke(TargetRegion.SELECTED_STROKE_COLOR);
 		        	}
 	        	}
 	        }

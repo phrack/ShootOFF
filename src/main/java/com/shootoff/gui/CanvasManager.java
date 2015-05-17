@@ -16,6 +16,7 @@ import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.TrainingProtocol;
 import com.shootoff.plugins.TrainingProtocolBase;
+import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -98,6 +99,15 @@ public class CanvasManager {
 	public void reset() {
 		startTime = System.currentTimeMillis();
 		
+		// Reset animations
+		for (Group target : targets) {
+			for (Node node : target.getChildren()) {
+				TargetRegion region = (TargetRegion)node;
+				
+				if (region.getType() == RegionType.IMAGE) ((ImageRegion)region).reset();
+			}
+		}
+		
 		Platform.runLater(() -> {
 				for (Shot shot : shots) {
 					canvasGroup.getChildren().remove(shot.getMarker());
@@ -134,6 +144,18 @@ public class CanvasManager {
 				for (int i = target.getChildren().size() - 1; i >= 0; i--) {
 					Node node = target.getChildren().get(i);
 					if (node.getBoundsInParent().contains(shot.getX(), shot.getY())) {
+						// If we hit an image region on a transparent pixel, ignore it
+						TargetRegion region = (TargetRegion)node;
+						if (region.getType() == RegionType.IMAGE) {
+							Image currentImage = ((ImageRegion)region).getImage();
+							int adjustedX = (int)(shot.getX() - node.getBoundsInParent().getMinX());
+							int adjustedY = (int)(shot.getY() - node.getBoundsInParent().getMinY());
+							
+							if (currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
+								continue;
+							}
+						}
+						
 						return Optional.of((TargetRegion)node);
 					}
 				}
@@ -161,11 +183,65 @@ public class CanvasManager {
 			}
 			
 			switch (commandName) {
+			case "animate":
+				animate(region, args);
+				break;
+				
 			case "play_sound":
+				// If there is a second parameter, we should look to see if it's an
+				// image region that is down and if so, don't play the sound
+				if (args.length == 2) {
+					Optional<TargetRegion> namedRegion = getTargetRegionByName(region, args[1]);
+					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
+						if (!((ImageRegion)namedRegion.get()).onFirstFrame()) break;
+					}
+				}
+				
 				TrainingProtocolBase.playSound(args[0]);
 				break;
 			}
 		}
+	}
+	
+	private void animate(TargetRegion region, String args[]) {
+		ImageRegion imageRegion;
+		
+		if (args == null) {
+			imageRegion = (ImageRegion)region;
+		} else {
+			Optional<TargetRegion> r = getTargetRegionByName(region, args[0]);
+			
+			if (r.isPresent()) {
+				imageRegion = (ImageRegion)r.get();
+			} else {
+				System.err.format("Request to animate region named %s, but it "
+						+ "doesn't exist.", args[0]);
+				return;
+			}
+		}
+		
+		// Don't repeat animations for fallen targets
+		if (!imageRegion.onFirstFrame()) return;
+		
+		if (imageRegion.getAnimation().isPresent()) {
+			imageRegion.getAnimation().get().play();
+		} else {
+			System.err.println("Request to animate region, but region does "
+					+ "not contain an animation.");
+		}
+	}
+	
+	private Optional<TargetRegion> getTargetRegionByName(TargetRegion region, String name) {
+		for (Group target : targets) {
+			if (target.getChildren().contains(region)) {
+				for (Node node : target.getChildren()) {
+					TargetRegion r = (TargetRegion)node;
+					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
+				}
+			}
+		}
+		
+		return Optional.empty();
 	}
 	
 	public void addTarget(File targetFile) {
@@ -175,11 +251,8 @@ public class CanvasManager {
 			// Make sure visible:false regions are hidden
 			for (Node node : target.get().getChildren()) {
 				TargetRegion region = (TargetRegion)node;
-<<<<<<< HEAD
+
 				if (region.tagExists("visible") && 
-=======
-				if (region.getAllTags().containsKey("visible") && 
->>>>>>> 6eaa784478c737f89cb7ec36da54fb4aa02da1d3
 						region.getTag("visible").equals("false")) {
 					
 					node.setVisible(false);
@@ -206,6 +279,7 @@ public class CanvasManager {
 		switch (event.getCode()) {
 		case DELETE:
 			canvasGroup.getChildren().remove(selectedTarget.get());
+			targets.remove(selectedTarget.get());
 			break;
 			
 		case LEFT:
