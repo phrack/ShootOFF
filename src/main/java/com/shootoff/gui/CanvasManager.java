@@ -19,8 +19,10 @@ import com.shootoff.plugins.TrainingProtocolBase;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.targets.animation.SpriteAnimation;
 import com.shootoff.targets.io.TargetIO;
 
+import javafx.animation.Animation.Status;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -187,6 +189,10 @@ public class CanvasManager {
 				animate(region, args);
 				break;
 				
+			case "reverse":
+				reverseAnimation(region);
+				break;
+				
 			case "play_sound":
 				// If there is a second parameter, we should look to see if it's an
 				// image region that is down and if so, don't play the sound
@@ -228,6 +234,29 @@ public class CanvasManager {
 		} else {
 			System.err.println("Request to animate region, but region does "
 					+ "not contain an animation.");
+		}
+	}
+	
+	private void reverseAnimation(TargetRegion region) {
+		if (region.getType() != RegionType.IMAGE) {
+			System.err.println("A reversal was requested on a non-image region.");
+			return;
+		}
+		
+		ImageRegion imageRegion = (ImageRegion)region;
+		if (imageRegion.getAnimation().isPresent()) {
+			SpriteAnimation animation = imageRegion.getAnimation().get();
+
+			if (animation.getStatus() == Status.RUNNING) {
+				animation.setOnFinished((e) -> {
+						animation.reverse();
+						animation.setOnFinished(null);
+					});
+			} else {
+				animation.reverse();
+			}
+		} else {
+			System.err.println("A reversal was requested on an image region that isn't animated.");
 		}
 	}
 	

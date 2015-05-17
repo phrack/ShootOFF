@@ -83,7 +83,7 @@ public class GifAnimation extends SpriteAnimation {
 
             IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex).getAsTree("javax_imageio_gif_image_1.0");
             IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
-            int delay = Integer.valueOf(gce.getAttribute("delayTime"));
+            int delay = Integer.valueOf(gce.getAttribute("delayTime")) * 10;
             String disposal = gce.getAttribute("disposalMethod");
 
             int x = 0;

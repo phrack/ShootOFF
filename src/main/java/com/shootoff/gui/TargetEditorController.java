@@ -451,7 +451,7 @@ public class TargetEditorController {
 					ImageRegion newGIFRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
 					GifAnimation gif = new GifAnimation(newGIFRegion, imageFile);
 					newGIFRegion.setImage(gif.getFirstFrame());
-					if (gif.getFrameCout() > 0) newGIFRegion.setAnimation(gif);
+					if (gif.getFrameCount() > 0) newGIFRegion.setAnimation(gif);
 					imageRegion = Optional.of(newGIFRegion);
 					break;
 				case "png":

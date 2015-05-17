@@ -18,9 +18,9 @@ public class SpriteAnimation extends Transition {
     private final int count;
 
     private int lastIndex;
+    private boolean isReversed = false;
 
     public SpriteAnimation(ImageView imageView, ImageFrame[] frames) {
-    	
         this.imageView = imageView;
         this.frames = frames;
         this.count = frames.length;
@@ -28,14 +28,20 @@ public class SpriteAnimation extends Transition {
     }
     
     public Image getFirstFrame() {
-    	return frames[0].getImage();
+    	if (!isReversed) {
+    		return frames[0].getImage();
+    	} else {
+    		return frames[frames.length - 1].getImage();
+    	}
     }
     
-    public int getFrameCout() {
+    public int getFrameCount() {
     	return frames.length;
     }
 
     public void reset() {
+    	isReversed = false;
+    	setRate(Math.abs(getRate()));
     	imageView.setImage(getFirstFrame());
     }
     
@@ -45,5 +51,10 @@ public class SpriteAnimation extends Transition {
             imageView.setImage(frames[index].getImage());
             lastIndex = index;
         }
+    }
+    
+    public void reverse() {
+    	isReversed = !isReversed;
+    	setRate(getRate() * -1);
     }
 }
