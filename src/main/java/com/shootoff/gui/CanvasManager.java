@@ -40,6 +40,7 @@ public class CanvasManager {
 	private final List<Group> targets = new ArrayList<Group>();
 	
 	private Optional<Group> selectedTarget = Optional.empty();
+	private long startTime = 0;
 	
 	public CanvasManager(Group canvasGroup, Configuration config) {
 		this.canvasGroup = canvasGroup;
@@ -70,11 +71,9 @@ public class CanvasManager {
 			canvasGroup.setOnMouseClicked((event) -> {
 					if (event.getButton() == MouseButton.PRIMARY) {
 						if (event.isShiftDown()) {
-							addShot(new Shot(Color.RED, event.getX(),
-									event.getY(), 0, config.getMarkerRadius()));
+							addShot(Color.RED, event.getX(), event.getY());
 						} else if (event.isControlDown()) {
-							addShot(new Shot(Color.GREEN, event.getX(),
-									event.getY(), 0, config.getMarkerRadius()));
+							addShot(Color.GREEN, event.getX(), event.getY());
 						}
 					}
 				});
@@ -93,6 +92,8 @@ public class CanvasManager {
 	}
 	
 	public void reset() {
+		startTime = System.currentTimeMillis();
+		
 		Platform.runLater(() -> {
 				for (Shot shot : shots) {
 					canvasGroup.getChildren().remove(shot.getMarker());
@@ -102,7 +103,11 @@ public class CanvasManager {
 			}); 
 	}
 	
-	public void addShot(Shot shot) {
+	public void addShot(Color color, double x, double y) {
+		if (startTime == 0) startTime = System.currentTimeMillis();
+		Shot shot = new Shot(color, x, y, 
+				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+		
 		for (ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) return;
 		}
