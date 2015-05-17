@@ -133,6 +133,15 @@ public class TrainingProtocolBase {
 	}
 	
 	/**
+	 * Sets whether or not shot detection is paused.
+	 * 
+	 * @param isPaused <tt>true</tt> to temporarily stop detecting shots
+	 */
+	public void pauseShotDetection(boolean isPaused) {
+		camerasSupervisor.setDetectingAll(!isPaused);
+	}
+	
+	/**
 	 * Plays an audio file asyncronously.
 	 * 
 	 * @param soundFilePath	the audio file to play (e.g. "sounds/metal_clang.wav")
