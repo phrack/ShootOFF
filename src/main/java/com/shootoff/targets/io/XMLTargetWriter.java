@@ -29,7 +29,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	@Override
 	public void visitImageRegion(double x, double y, File imageFile,
 			Map<String, String> tags) {
-
+		
 		xmlBody.append(String.format(
 				"\t<image x=\"%f\" y=\"%f\" file=\"%s\">\n", 
 				x, y, imageFile.getPath()));

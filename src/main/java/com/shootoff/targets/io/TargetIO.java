@@ -7,6 +7,7 @@
 package com.shootoff.targets.io;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,8 +43,14 @@ public class TargetIO {
 			switch (region.getType()) {
 			case IMAGE:
 				ImageRegion img = (ImageRegion)node;
+				
+				// Make image path relative to cwd so that image files can be found on different machines
+				URI baseURI = new File(System.getProperty("user.dir")).toURI();
+				URI imgURI = new File(img.getImageFile().getAbsolutePath()).toURI();
+				File relativeImageFile = new File(baseURI.relativize(imgURI).getPath());
+				
 				visitor.visitImageRegion(img.getBoundsInParent().getMinX(), img.getBoundsInParent().getMinY(), 
-						img.getImageFile(), img.getAllTags());
+						relativeImageFile, img.getAllTags());
 				break;
 			case RECTANGLE:
 				RectangleRegion rec = (RectangleRegion)node;

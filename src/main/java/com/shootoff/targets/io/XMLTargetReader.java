@@ -30,6 +30,7 @@ import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.GifAnimation;
+import com.shootoff.targets.animation.SpriteAnimation;
 
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -89,6 +90,19 @@ public class XMLTargetReader {
 						GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
 						imageRegion.setImage(gif.getFirstFrame());
 						if (gif.getFrameCout() > 0) imageRegion.setAnimation(gif);
+					}
+					
+					if (imageRegion.getAnimation().isPresent()) {
+						SpriteAnimation animation = imageRegion.getAnimation().get();
+						animation.setCycleCount(1);
+						
+						animation.setOnFinished((e) ->
+							{
+								animation.reset();
+								animation.setOnFinished(null);
+							});
+						
+						animation.play();
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
