@@ -205,6 +205,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML
 	public void resetClicked(ActionEvent event) {
 		camerasSupervisor.reset();
+		if (config.getProtocol().isPresent()) config.getProtocol().get().reset(camerasSupervisor.getTargets());
 	}
 
 	@Override
