@@ -207,7 +207,7 @@ public class TargetEditorController {
 	
 	@FXML
 	public void regionDropped(MouseEvent event) {
-		if (freeformButton.isSelected() && event.getButton().equals(MouseButton.PRIMARY)) {
+		if (freeformButton.isSelected() && event.getButton().equals(MouseButton.PRIMARY)) {			
 			drawPolygon(event);
 		} else if (freeformButton.isSelected() && event.getButton().equals(MouseButton.SECONDARY)) {
 			drawShape();
@@ -692,20 +692,18 @@ public class TargetEditorController {
 		toggleTagEditor();
 	}
 	
-	public void toggleTagEditor() {
-		TargetRegion selected = (TargetRegion)cursorRegion.get();
-		
-		if (tagsButton.isSelected()) {
-			TagEditorPanel editor = new TagEditorPanel(selected.getAllTags());
+	private void toggleTagEditor() {
+		if (tagsButton.isSelected() && cursorRegion.isPresent()) {
+			TagEditorPanel editor = new TagEditorPanel(((TargetRegion)cursorRegion.get()).getAllTags());
 			tagEditor = Optional.of(editor);
 			targetEditorPane.getChildren().add(editor);
 			editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
 			editor.setLayoutY(tagsButton.getLayoutY() + tagsButton.getHeight() + 
 					tagsButton.getPadding().getBottom() + 2);
-		} else if (tagEditor.isPresent()) {
+		} else if (!tagsButton.isSelected() && tagEditor.isPresent()) {
 			TagEditorPanel editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
-			selected.setTags(editor.getTags());
+			if (cursorRegion.isPresent()) ((TargetRegion)cursorRegion.get()).setTags(editor.getTags());
 			tagEditor = Optional.empty();
 		}
 	}
