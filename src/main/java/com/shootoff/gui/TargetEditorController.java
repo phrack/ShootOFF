@@ -613,6 +613,21 @@ public class TargetEditorController {
 	
 	@FXML
 	public void startPolygon(ActionEvent event) {
+		if (cursorRegion.isPresent() && 
+				targetRegions.contains(cursorRegion.get())) {
+			
+			TargetRegion selected = (TargetRegion)cursorRegion.get();
+			
+			if (selected.getType() != RegionType.IMAGE)
+				((Shape)selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+			
+			if (tagsButton.isSelected()) {
+				tagsButton.setSelected(false);
+				toggleTagEditor();
+			}
+			toggleShapeControls(false);
+		}
+		
 		clearFreeformState(false);
 	}
 	
