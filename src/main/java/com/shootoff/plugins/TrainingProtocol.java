@@ -45,7 +45,9 @@ public interface TrainingProtocol {
 	public void reset(List<Group> targets);
 	
 	/**
-	 * Called when a training protocol is being unloaded by the framework
+	 * Called when a training protocol is being unloaded by the framework.
+	 * This method must call super.destroy() otherwise an exception will occur
+	 * when protocols are switched.
 	 */
     public void destroy();
 }

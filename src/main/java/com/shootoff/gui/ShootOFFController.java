@@ -8,6 +8,8 @@ package com.shootoff.gui;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.List;
 
 import marytts.util.io.FileFilter;
 
@@ -16,6 +18,9 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.RandomShoot;
+import com.shootoff.plugins.ShootForScore;
+import com.shootoff.plugins.TrainingProtocol;
+import com.shootoff.plugins.TrainingProtocolBase;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.collections.FXCollections;
@@ -137,14 +142,26 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private void registerTrainingProtocols() {
-		RadioMenuItem randomShootItem = new RadioMenuItem(new RandomShoot().getInfo().getName());
-		randomShootItem.setToggleGroup(trainingToggleGroup);
+		addTrainingProtocol(new RandomShoot());
+		addTrainingProtocol(new ShootForScore());
+	}
+	
+	private void addTrainingProtocol(TrainingProtocol protocol) {
+		RadioMenuItem protocolItem = new RadioMenuItem(protocol.getInfo().getName());
+		protocolItem.setToggleGroup(trainingToggleGroup);
 		
-		randomShootItem.setOnAction((e) -> {
-				config.setProtocol(new RandomShoot(camerasSupervisor.getTargets()));
+		protocolItem.setOnAction((e) -> {
+				try {
+					Constructor<?> ctor = protocol.getClass().getConstructor(List.class);
+					TrainingProtocol newProtocol = (TrainingProtocol)ctor.newInstance(camerasSupervisor.getTargets());
+					((TrainingProtocolBase)newProtocol).init(config, camerasSupervisor, shotTimerTable);
+					config.setProtocol(newProtocol);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			});
 		
-		trainingMenu.getItems().add(randomShootItem);
+		trainingMenu.getItems().add(protocolItem);
 	}
 	
 	@FXML 

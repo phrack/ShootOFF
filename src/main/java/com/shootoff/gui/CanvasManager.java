@@ -98,6 +98,10 @@ public class CanvasManager {
 		background.setImage(img);
 	}
 	
+	public Group getCanvasGroup() {
+		return canvasGroup;
+	}
+	
 	public void reset() {
 		startTime = System.currentTimeMillis();
 		

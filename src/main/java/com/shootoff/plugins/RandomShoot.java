@@ -146,5 +146,7 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 	}
 
 	@Override
-	public void destroy() {}
+	public void destroy() {
+		super.destroy();
+	}
 }

@@ -45,8 +45,22 @@ public class CamerasSupervisor {
 		}
 	}
 	
+	public List<CameraManager> getCameraManagers() {
+		return managers;
+	}
+	
 	public CameraManager getCameraManager(int index) {
 		return managers.get(index);
+	}
+	
+	public List<CanvasManager> getCanvasManagers() {
+		List<CanvasManager> canvasManagers = new ArrayList<CanvasManager>();
+		
+		for (CameraManager manager : managers) {
+			canvasManagers.add(manager.getCanvasManager());
+		}
+		
+		return canvasManagers;
 	}
 	
 	public CanvasManager getCanvasManager(int index) {
