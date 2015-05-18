@@ -120,17 +120,25 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void addConfiguredCameras() {
 		cameraTabPane.getTabs().clear();
 		
-		for (Webcam webcam : config.getWebcams()) {
-			Tab cameraTab = new Tab(webcam.getName());
-			Group cameraCanvasGroup = new Group();
-			// 640 x 480
-			cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
-			
-			camerasSupervisor.addCameraManager(webcam, 
-					new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries));
-			
-			cameraTabPane.getTabs().add(cameraTab);
+		if (config.getWebcams().isEmpty()) {
+			addCameraTab("Default", Webcam.getDefault());
+		} else {
+			for (String webcamName : config.getWebcams().keySet()) {
+				addCameraTab(webcamName, config.getWebcams().get(webcamName));
+			}
 		}
+	}
+	
+	private void addCameraTab(String webcamName, Webcam webcam) {
+		Tab cameraTab = new Tab(webcamName);
+		Group cameraCanvasGroup = new Group();
+		// 640 x 480
+		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
+		
+		camerasSupervisor.addCameraManager(webcam, 
+				new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries));
+		
+		cameraTabPane.getTabs().add(cameraTab);
 	}
 	
 	private void findTargets() {

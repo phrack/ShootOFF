@@ -13,9 +13,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -70,7 +71,7 @@ public class Configuration {
 	private InputStream configInput;
 	private String configName;
 	
-	private List<Webcam> webcams =  new ArrayList<Webcam>();
+	private Map<String, Webcam> webcams =  new HashMap<String, Webcam>();
 	private int detectionRate = 100;
 	private int laserIntensity = 230;
 	private int markerRadius = 2;
@@ -145,12 +146,21 @@ public class Configuration {
 		}
 		
 		if (prop.containsKey(WEBCAMS_PROP)) {
-			List<String> webcamNames = new ArrayList<String>(
-					Arrays.asList(prop.getProperty(WEBCAMS_PROP).split(",")));
+			List<String> webcamNames = new ArrayList<String>();
+			List<String> webcamInternalNames = new ArrayList<String>();
+			
+			for (String nameString : prop.getProperty(WEBCAMS_PROP).split(",")) {
+				String[] names = nameString.split(":");
+				if (names.length > 1) {
+					webcamNames.add(names[0]);
+					webcamInternalNames.add(names[1]);
+				}
+			}
 			
 			for (Webcam webcam : Webcam.getWebcams()) {
-				if (webcamNames.contains(webcam.getName())) {
-					webcams.add(webcam);
+				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
+				if (cameraIndex >= 0) {
+					webcams.put(webcamNames.get(cameraIndex), webcam);
 				}
 			}
 		}
@@ -208,9 +218,11 @@ public class Configuration {
 		Properties prop = new Properties();
 		
 		StringBuilder webcamList = new StringBuilder();
-		for (Webcam webcam : webcams) {
+		for (String webcamName : webcams.keySet()) {
 			if (webcamList.length() > 0) webcamList.append(",");
-			webcamList.append(webcam.getName());
+			webcamList.append(webcamName);
+			webcamList.append(":");
+			webcamList.append(webcams.get(webcamName).getName());
 		}
 		
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
@@ -323,9 +335,12 @@ public class Configuration {
 		}
 	}
 	
-	public void setWebcams(List<Webcam> webcams) {
+	public void setWebcams(List<String> webcamNames, List<Webcam> webcams) {
 		this.webcams.clear();
-		this.webcams.addAll(webcams);
+		
+		for (int i = 0; i < webcamNames.size(); i++) {
+			this.webcams.put(webcamNames.get(i), webcams.get(i));
+		}
 	}
 
 	public void setDetectionRate(int detectionRate) {
@@ -402,7 +417,7 @@ public class Configuration {
 		currentProtocol = protocol;
 	}
 
-	public List<Webcam> getWebcams() {
+	public Map<String, Webcam> getWebcams() {
 		return webcams;
 	}
 	

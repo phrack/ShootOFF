@@ -68,7 +68,7 @@ public class PreferencesController {
 	            ListCell<String>>() {
 	                @Override 
 	                public ListCell<String> call(ListView<String> list) {
-	                    return new ImageCell(Webcam.getWebcams());
+	                    return new ImageCell(configuredCameras, configuredNames);
 	                }
 	            }
 	        );
@@ -101,9 +101,9 @@ public class PreferencesController {
 		linkSliderToLabel(virtualMagazineSlider, virtualMagazineLabel);
 		linkSliderToLabel(malfunctionsSlider, malfunctionsLabel);
 		
-		for (Webcam webcam : config.getWebcams()) {
-			configuredNames.add(webcam.getName());
-			configuredCameras.add(webcam);
+		for (String webcamName : config.getWebcams().keySet()) {
+			configuredNames.add(webcamName);
+			configuredCameras.add(config.getWebcams().get(webcamName));
 		}
 		
 		detectionRateSlider.setValue(config.getDetectionRate());
@@ -159,7 +159,7 @@ public class PreferencesController {
 	
 	@FXML 
 	public void okClicked(ActionEvent event) throws ConfigurationException, IOException {
-		config.setWebcams(configuredCameras);
+		config.setWebcams(configuredNames, configuredCameras);
 		config.setDetectionRate((int)detectionRateSlider.getValue());
 		config.setLaserIntensity((int)laserIntensitySlider.getValue());
 		config.setMarkerRadius((int)markerRadiusSlider.getValue());

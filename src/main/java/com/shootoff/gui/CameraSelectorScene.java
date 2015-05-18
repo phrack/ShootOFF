@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.github.sarxos.webcam.Webcam;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -32,7 +33,7 @@ public class CameraSelectorScene extends Stage {
 		for (Webcam webcam : Webcam.getWebcams()) {
 			if (!configuredCameras.contains(webcam)) {
 				unconfiguredWebcams.add(webcam);
-				webcams.add(webcam.getName());
+				Platform.runLater(() -> { webcams.add(webcam.getName()); });
 			}
 		}
 		
@@ -43,7 +44,7 @@ public class CameraSelectorScene extends Stage {
 	            ListCell<String>>() {
 	                @Override 
 	                public ListCell<String> call(ListView<String> list) {
-	                    return new ImageCell(unconfiguredWebcams);
+	                    return new ImageCell(unconfiguredWebcams, null);
 	                }
 	            }
 	        );
