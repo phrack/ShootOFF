@@ -17,6 +17,7 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.TimedHolsterDrill;
@@ -152,6 +153,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private void registerTrainingProtocols() {
+		addTrainingProtocol(new ISSFStandardPistol());
 		addTrainingProtocol(new RandomShoot());
 		addTrainingProtocol(new ShootForScore());
 		addTrainingProtocol(new TimedHolsterDrill());

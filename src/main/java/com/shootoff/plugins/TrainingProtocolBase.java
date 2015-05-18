@@ -211,5 +211,7 @@ public class TrainingProtocolBase {
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
 			canvasManager.getCanvasGroup().getChildren().remove(protocolLabel);
 		}
+		
+		pauseShotDetection(false);
 	}
 }
