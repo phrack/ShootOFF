@@ -116,7 +116,7 @@ public class ShotSearcher implements Runnable {
 			pixelsSeen++;
 		}
 			
-		// Average 10 pixels up
+		// Average colorDetectionRadius pixels up
 		for (int y_offset = y; 
 				y_offset < currentFrame.getHeight() && y_offset - y < colorDetectionRadius; 
 				y_offset++) {
@@ -128,7 +128,7 @@ public class ShotSearcher implements Runnable {
 			pixelsSeen++;
 		}
 			
-		// Average 10 pixels down
+		// Average colorDetectionRadius pixels down
 		for (int y_offset = y; 
 				y_offset > 0 && y - y_offset < colorDetectionRadius; 
 				y_offset--) {
