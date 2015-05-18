@@ -1,0 +1,115 @@
+package com.shootoff.plugins;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javafx.scene.Group;
+
+import com.shootoff.camera.Shot;
+import com.shootoff.gui.DelayedStartListener;
+import com.shootoff.targets.TargetRegion;
+
+public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingProtocol, DelayedStartListener {
+	private final static String LENGTH_COL_NAME = "Length";
+	private final static int LENGTH_COL_WIDTH = 60;
+	private final static int START_DELAY = 10; // s
+	private static final int CORE_POOL_SIZE = 2;
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private TrainingProtocolBase thisSuper;
+	private int delayMin = 4;
+	private int delayMax = 8;
+	private boolean repeatProtocol = true;
+	private long beepTime = 0;
+	
+	public TimedHolsterDrill() {}
+	
+	public TimedHolsterDrill(List<Group> targets) {
+		super(targets);
+		this.thisSuper = super.getInstance();
+	}
+	
+	@Override
+	public void init() {
+		super.addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
+		super.pauseShotDetection(true);
+		super.getDelayedStartInterval(this);
+		
+		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);	
+	}
+	
+	private class SetupWait implements Callable<Void> {
+		@Override
+		public Void call() throws Exception {
+			TextToSpeech.say("shooter... make ready");
+			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+			
+			if (repeatProtocol)
+				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
+		
+			return null;
+		}
+	}
+	
+	private class Round implements Callable<Void> {
+		@Override
+		public Void call() throws Exception {
+			if (repeatProtocol) {
+	            TrainingProtocolBase.playSound("sounds/beep.wav");
+	            thisSuper.pauseShotDetection(false);
+	            beepTime = System.currentTimeMillis();
+	            
+	            int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+	            executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
+			}
+			
+			return null;
+		}
+	}
+	
+	@Override
+	public void updatedDelayedStartInterval(int min, int max) {
+		delayMin = min;
+		delayMax = max;
+	}
+	
+	@Override
+	public ProtocolMetadata getInfo() {
+		return new ProtocolMetadata("Timed Holster Drill", "1.0", "phrack",
+			    "This protocol does not require a target, but one may be used "
+			    		+ "to give the shooter something to shoot at. When the protocol "
+			    		+ "is started you are asked to enter a range for randomly "
+			    		+ "delayed starts. You are then given 10 seconds to position "
+			    		+ "yourself. After a random wait (within the entered range) a "
+			    		+ "beep tells you to draw their pistol from it's holster, "
+			    		+ "fire at your target, and finally re-holster. This process is "
+			    		+ "repeated as long as this protocol is on.");
+	}
+
+	@Override
+	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+		float drawShotLength = (float)(System.currentTimeMillis() - beepTime) / (float)1000; // s
+		super.setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
+	}
+
+	@Override
+	public void reset(List<Group> targets) {
+		repeatProtocol = false;
+		executorService.shutdownNow();		
+		super.getDelayedStartInterval(this);
+		repeatProtocol = true;
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+	}
+	
+	@Override
+	public void destroy() {
+		repeatProtocol = false;
+		executorService.shutdownNow();
+		super.destroy();
+	}
+}

@@ -13,7 +13,6 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
 	private final static String POINTS_COL_NAME = "Score";
 	private final static int POINTS_COL_WIDTH = 60;
 	
-	private boolean pointsColSet = false;
 	private int redScore = 0;
 	private int greenScore = 0;
 	
@@ -21,6 +20,11 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
 	
 	public ShootForScore(List<Group> targets) {
 		super(targets);
+	}
+	
+	@Override
+	public void init() {
+		super.addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
 	}
 	
 	/**
@@ -54,11 +58,6 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (!pointsColSet) {
-			super.addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
-			pointsColSet = true;
-		}
-		
 		if (!hitRegion.isPresent()) return;
 		
 		if (hitRegion.get().tagExists("points")) {

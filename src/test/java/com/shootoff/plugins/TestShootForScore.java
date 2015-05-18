@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -35,6 +36,8 @@ public class TestShootForScore {
 	
 	@Before
 	public void setUp() throws ConfigurationException {
+		new JFXPanel(); // Initialize the JFX toolkit
+		
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 		

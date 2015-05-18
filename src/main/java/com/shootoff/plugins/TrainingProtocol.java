@@ -15,6 +15,13 @@ import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
 public interface TrainingProtocol {
+	/** 
+	 * Any protocol specific initialization that needs to use protocol API methods
+	 * should call them in this method instead of the constructor, otherwise the
+	 * API may not be initialized yet.
+	 */
+	public void init();
+	
 	/**
 	 * Called when a training protocol is first loaded to retrive information
 	 * about the plugin that is displayable to the user.

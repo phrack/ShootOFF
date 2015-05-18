@@ -56,19 +56,14 @@ public class TrainingProtocolBase {
 	
 	private final Map<String, TableColumn<ShotEntry, String>> protocolColumns = 
 			new HashMap<String, TableColumn<ShotEntry, String>>();
-	private final Label protocolLabel;
+	private final Label protocolLabel = new Label();;
 	
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
-	public TrainingProtocolBase() {
-		if (Platform.isFxApplicationThread()) protocolLabel = new Label();
-		else protocolLabel = null;
-	}
+	public TrainingProtocolBase() {}
 	
 	public TrainingProtocolBase(List<Group> targets) {
 		this.targets = targets;
-		if (Platform.isFxApplicationThread()) protocolLabel = new Label();
-		else protocolLabel = null;
 	}
 	
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, 
@@ -77,12 +72,21 @@ public class TrainingProtocolBase {
 		this.camerasSupervisor = camerasSupervisor;
 		this.shotTimerTable = shotTimerTable;
 		
-		if (Platform.isFxApplicationThread()) {
-			protocolLabel.setTextFill(Color.WHITE);
-			for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
-				canvasManager.getCanvasGroup().getChildren().add(protocolLabel);
-			}
+		protocolLabel.setTextFill(Color.WHITE);
+		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
+			canvasManager.getCanvasGroup().getChildren().add(protocolLabel);
 		}
+	}
+	
+	/**
+	 * Returns the current instance of this class. This metehod exists so that we can
+	 * call methods in this class when in an internal class (e.g. to implement Callable)
+	 * that doesn't have access to super.
+	 * 
+	 * @return the current instance of this class
+	 */
+	public TrainingProtocolBase getInstance() {
+		return this;
 	}
 	
 	public void getDelayedStartInterval(DelayedStartListener listener) {
@@ -95,10 +99,8 @@ public class TrainingProtocolBase {
 		
 		Stage delayedStartIntervalStage = new Stage();
 		
-		if (shotTimerTable != null) {
-			delayedStartIntervalStage.initOwner((Stage)shotTimerTable.getScene().getWindow());
-			delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
-		}
+		delayedStartIntervalStage.initOwner((Stage)shotTimerTable.getScene().getWindow());
+		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
 		delayedStartIntervalStage.setTitle("Preferences");
 		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
 		delayedStartIntervalStage.show();
@@ -116,8 +118,6 @@ public class TrainingProtocolBase {
 	 * @param width	the width of the new column
 	 */
 	public void addShotTimerColumn(String name, int width) {
-		if (!Platform.isFxApplicationThread()) return;
-			
 		TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
@@ -137,8 +137,11 @@ public class TrainingProtocolBase {
 	 * @param value	the text that should be inserted
 	 */
 	public void setShotTimerColumnText(String name, String value) {
-		if (Platform.isFxApplicationThread()) 
-			shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setProtocolValue(name, value);
+		if (shotTimerTable != null) {
+			Platform.runLater(() -> {
+					shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setProtocolValue(name, value);
+				});
+		}
 	}
 	
 	/**
@@ -149,7 +152,9 @@ public class TrainingProtocolBase {
 	public void showTextOnFeed(String message) {
 		if (config.inDebugMode()) System.out.println(message);
 		
-		if (Platform.isFxApplicationThread()) protocolLabel.setText(message);
+		Platform.runLater(() -> {
+				protocolLabel.setText(message);
+			});
 	}
 	
 	/** 

@@ -28,6 +28,9 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 		super(targets);
 		if (fetchSubtargets(targets)) startRound();
 	}
+	
+	@Override
+	public void init() {}
 
 	private void startRound() {
 		pickSubtargets();
