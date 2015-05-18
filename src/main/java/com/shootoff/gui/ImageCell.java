@@ -31,6 +31,12 @@ public class ImageCell extends TextFieldListCell<String> {
     public void updateItem(String item, boolean empty) {  	
         super.updateItem(item, empty);
         
+        if (empty || item == null) {
+        	setGraphic(null);
+        	setText(null);
+        	return;
+        }
+        
         Platform.runLater(() -> {
             	Optional<Image> webcamImg = Optional.empty();
                 
@@ -52,10 +58,9 @@ public class ImageCell extends TextFieldListCell<String> {
                     ImageView img = new ImageView(webcamImg.get());
                     img.setFitWidth(100);
                     img.setFitHeight(75);
-                    if (item != null) {
-                        setGraphic(img);
-                        setText(item);
-                    }
+                    
+                    setGraphic(img);
+                    setText(item);
                 }
         });
     }
