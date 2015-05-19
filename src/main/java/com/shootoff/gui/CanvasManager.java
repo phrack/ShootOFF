@@ -307,6 +307,7 @@ public class CanvasManager {
 				});
 			
 			canvasGroup.getChildren().add(target.get());
+			new TargetContainer(target.get(), config);
 			targets.add(target.get());
 		}
 	}
@@ -317,6 +318,9 @@ public class CanvasManager {
 	
 	@SuppressWarnings("incomplete-switch")
 	private void transformTarget(KeyEvent event, Group selected) {
+		double currentWidth = selected.getBoundsInParent().getWidth();
+		double currentHeight = selected.getBoundsInParent().getHeight();
+		
 		switch (event.getCode()) {
 		case DELETE:
 			canvasGroup.getChildren().remove(selectedTarget.get());
@@ -324,47 +328,71 @@ public class CanvasManager {
 			break;
 			
 		case LEFT:
-			if (event.isShiftDown()) {
+			{
+				double newWidth = currentWidth + SCALE_DELTA;
+				double scaleDelta = (newWidth - currentWidth) / currentWidth;
+				
 				for (Node node : selected.getChildren()) {
-					TargetRegion region = (TargetRegion)node;
-					region.changeWidth(SCALE_DELTA * -1);
+					if (event.isShiftDown()) {
+						node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
+	
+					} else {
+						node.setLayoutX(node.getLayoutX() - MOVEMENT_DELTA);
+					}
 				}
-			} else {
-				selected.setLayoutX(selected.getLayoutX() - MOVEMENT_DELTA);
 			}
+
 			break;
 			
 		case RIGHT:
-			if (event.isShiftDown()) {
+			{
+				double newWidth = currentWidth - SCALE_DELTA;
+				double scaleDelta = (newWidth - currentWidth) / currentWidth;
+				
 				for (Node node : selected.getChildren()) {
-					TargetRegion region = (TargetRegion)node;
-					region.changeWidth(SCALE_DELTA);
+					if (event.isShiftDown()) {
+						node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
+	
+					} else {
+						node.setLayoutX(node.getLayoutX() + MOVEMENT_DELTA);
+					}
 				}
-			} else {
-				selected.setLayoutX(selected.getLayoutX() + MOVEMENT_DELTA);
 			}
+			
 			break;
 			
 		case UP:
-			if (event.isShiftDown()) {
+			{
+				double newHeight = currentHeight + SCALE_DELTA;
+				double scaleDelta = (newHeight - currentHeight) / currentHeight;
+				
 				for (Node node : selected.getChildren()) {
-					TargetRegion region = (TargetRegion)node;
-					region.changeHeight(SCALE_DELTA * -1);
+					if (event.isShiftDown()) {
+						node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
+	
+					} else {
+						node.setLayoutY(node.getLayoutY() - MOVEMENT_DELTA);
+					}
 				}
-			} else {
-				selected.setLayoutY(selected.getLayoutY() - MOVEMENT_DELTA);
 			}
+			
 			break;
 
 		case DOWN:
-			if (event.isShiftDown()) {
+			{
+				double newHeight = currentHeight - SCALE_DELTA;
+				double scaleDelta = (newHeight - currentHeight) / currentHeight;
+				
 				for (Node node : selected.getChildren()) {
-					TargetRegion region = (TargetRegion)node;
-					region.changeHeight(SCALE_DELTA);
+					if (event.isShiftDown()) {
+						node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
+	
+					} else {
+						node.setLayoutY(node.getLayoutY() + MOVEMENT_DELTA);
+					}
 				}
-			} else {
-				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
 			}
+			
 			break;
 		}
 	}
