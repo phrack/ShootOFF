@@ -148,16 +148,18 @@ public class ShotSearcher implements Runnable {
         // 2% bigger than the other components. This is based on the
         // heuristic that noise tends to have color values that are very
         // similar
+		final double PDIFF_THRESHOLD = 1.05;
+		
         if (g == 0 || b == 0) 
             return Optional.empty();
 
-        if ((r / g) > 1.02 && (r / b) > 1.02)
+        if ((r / g) > PDIFF_THRESHOLD && (r / b) > PDIFF_THRESHOLD)
             return Optional.of(Color.RED);
 
         if (r == 0 || b == 0)
         	return Optional.empty();
 
-        if ((g / r) > 1.02 && (g / b) > 1.02)
+        if ((g / r) > PDIFF_THRESHOLD && (g / b) > PDIFF_THRESHOLD)
             return Optional.of(Color.GREEN);
 
 		
