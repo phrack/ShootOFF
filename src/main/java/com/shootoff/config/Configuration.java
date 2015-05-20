@@ -31,6 +31,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
@@ -91,17 +92,20 @@ public class Configuration {
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
+		shotProcessors.add(new DeduplicationProcessor());
 		readConfigurationFile();
 	}
 	
 	public Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
+		shotProcessors.add(new DeduplicationProcessor());
 		readConfigurationFile();
 	}
 	
 	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
+		shotProcessors.add(new DeduplicationProcessor());
 		readConfigurationFile();
 		parseCmdLine(args);
 	}
@@ -118,12 +122,14 @@ public class Configuration {
 	 */
 	public Configuration(String name, String[] args) throws IOException, ConfigurationException {
 		configName = name;
+		shotProcessors.add(new DeduplicationProcessor());
 		readConfigurationFile();
 		parseCmdLine(args);
 	}
 
 	public Configuration(String[] args) throws ConfigurationException {
 		configName = DEFAULT_CONFIG_FILE;
+		shotProcessors.add(new DeduplicationProcessor());
 		parseCmdLine(args);
 	}
 	
