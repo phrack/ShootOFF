@@ -12,6 +12,7 @@ import java.util.Optional;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 public class ShotSearcher implements Runnable {
@@ -76,7 +77,9 @@ public class ShotSearcher implements Runnable {
 								areaColor.get().equals(config.getIgnoreLaserColor().get()))
 									continue; 
 						
-						canvasManager.addShot(areaColor.get(), x, y);
+						Point2D center = approximateCenter(x, y);
+						
+						canvasManager.addShot(areaColor.get(), center.getX(), center.getY());
 						return;
 					}
 				}
@@ -145,7 +148,7 @@ public class ShotSearcher implements Runnable {
 		b /= (double)pixelsSeen;
 		
         // We only detect a color if the largest component is at least
-        // 2% bigger than the other components. This is based on the
+        // 5% bigger than the other components. This is based on the
         // heuristic that noise tends to have color values that are very
         // similar
 		final double PDIFF_THRESHOLD = 1.05;
@@ -181,4 +184,42 @@ public class ShotSearcher implements Runnable {
 	private int getBlue(int rgb) {
 		return (rgb & 0x000000ff) >> 0;
 	}		
+	
+	/**
+	 * Find the approximate center of the shot given initial coordinates. This
+	 * method works by using the heuristic that shots typically have white or barely
+	 * off white centers and these centers are rarely bigger than 8 x 8 pixels. 
+	 * Given the current algorith, the initial coordinates are always on the top left 
+	 * of the shot. Thus, we search from the initial shot for diagonally 8 pixels and
+	 * down to find off white pixels to determine the rough bounds of the center of the
+	 * shot. With the rough bounds, the approximate center is the middle of the bounds.
+	 * 
+	 * 
+	 * @param x	initial x coordinate of the shot location
+	 * @param y initial y coordinate of the shot location
+	 * @return the approximate center of the shot
+	 */
+	private Point2D approximateCenter(double x, double y) {
+		double minX = x, minY = y;
+		double maxX = x, maxY = y;
+		
+		for (;maxX < minX + 8; maxX++, maxY++) {
+			// Make sure the pixel's RGB value is > (210, 210, 210) 
+			// (210 decimal = 0xD2) as heuristically the off white
+			// center doesn't drop below this
+			final int RGB_THRESHOLD = 0xD2;
+			
+			int rgb = currentFrame.getRGB((int)maxX, (int)maxY);
+			int r = getRed(rgb);
+			int g = getGreen(rgb);
+			int b = getBlue(rgb);
+			
+			if (r < RGB_THRESHOLD || g < RGB_THRESHOLD || b < RGB_THRESHOLD) break;
+		}
+		
+		double centerX = minX + ((maxX - minX) / 2);
+		double centerY = minY + ((maxY - minY) / 2);
+		
+		return new Point2D(centerX, centerY);
+	}
 }
