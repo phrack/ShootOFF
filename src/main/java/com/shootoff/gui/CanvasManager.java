@@ -135,6 +135,10 @@ public class CanvasManager {
 			}
 		}
 		
+		if (arenaController.isPresent()) {
+			arenaController.get().getCanvasManager().reset();
+		}
+		
 		clearShots();
 	}
 	
@@ -194,6 +198,7 @@ public class CanvasManager {
 		
 		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
 		Optional<TargetRegion> hitRegion = checkHit(shot);
+		if (hitRegion.isPresent() && hitRegion.get().tagExists("command")) executeRegionCommands(hitRegion.get());
 		if (currentProtocol.isPresent()) {
 			currentProtocol.get().shotListener(shot, hitRegion);
 			return true;

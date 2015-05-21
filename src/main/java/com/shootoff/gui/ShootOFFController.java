@@ -18,6 +18,7 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.ProjectorTrainingProtocolBase;
 import com.shootoff.plugins.RandomShoot;
@@ -204,6 +205,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private void registerProjectorProtocols() {
+		addProjectorTrainingProtocol(new DuelingTree());
 		addProjectorTrainingProtocol(new ShootDontShoot());
 	}
 	
@@ -384,6 +386,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML
 	public void resetClicked(ActionEvent event) {
 		camerasSupervisor.reset();
+		
 		if (config.getProtocol().isPresent()) {
 			List<Group> knownTargets = new ArrayList<Group>();
 			knownTargets.addAll(camerasSupervisor.getTargets());

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2015 phrack. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * found in the LICENSE file.
+ */
+
 package com.shootoff.plugins;
 
 import java.io.File;
@@ -15,6 +21,8 @@ import com.shootoff.gui.ProjectorArenaController;
 import com.shootoff.gui.ShotEntry;
 
 public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
+	private Configuration config;
+	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaController arenaController;
 	private final List<Group> targets = new ArrayList<Group>();
 	
@@ -29,7 +37,16 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, 
 			TableView<ShotEntry> shotTimerTable, ProjectorArenaController arenaController) {
 		super.init(config, camerasSupervisor, shotTimerTable);
+		this.config = config;
+		this.camerasSupervisor = camerasSupervisor;
 		this.arenaController = arenaController;
+	}
+	
+	@Override
+	public void reset() {
+		camerasSupervisor.reset();
+		if (config.getProtocol().isPresent()) 
+			config.getProtocol().get().reset(arenaController.getCanvasManager().getTargets());	
 	}
 	
 	/**

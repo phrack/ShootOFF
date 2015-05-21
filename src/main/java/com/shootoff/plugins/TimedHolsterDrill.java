@@ -50,7 +50,7 @@ public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingP
 	
 	private class SetupWait implements Callable<Void> {
 		@Override
-		public Void call() throws Exception {
+		public Void call() {
 			TextToSpeech.say("shooter... make ready");
 			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 			
