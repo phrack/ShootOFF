@@ -45,9 +45,10 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Projector">
               <items>
-                <MenuItem mnemonicParsing="false" onAction="#toggleArenaClicked" text="Start Arena" />
-                  <MenuItem disable="true" mnemonicParsing="false" text="Calibrate" />
-                  <Menu disable="true" mnemonicParsing="false" text="Add Target" />
+                 <MenuItem fx:id="startArenaMenuItem" mnemonicParsing="false" onAction="#startArenaClicked" text="Start Arena" />
+                  <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
+                  <Menu fx:id="addArenaTargetMenu" disable="true" mnemonicParsing="false" text="Add Target" />
+                  <MenuItem fx:id="toggleArenaShotsMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaShotsClicked" text="Show Shot Markers" />
               </items>
             </Menu>
         </menus>

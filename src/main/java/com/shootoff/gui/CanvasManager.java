@@ -26,6 +26,7 @@ import com.shootoff.targets.io.TargetIO;
 import javafx.animation.Animation.Status;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
@@ -49,6 +50,10 @@ public class CanvasManager {
 	
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
+	private boolean showShots = true;
+	
+	private Optional<ProjectorArenaController> arenaController = Optional.empty();
+	private Optional<Bounds> projectionBounds = Optional.empty();
 	
 	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor,
 			ObservableList<ShotEntry> shotEntries) {
@@ -128,6 +133,19 @@ public class CanvasManager {
 			}); 
 	}
 	
+	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {		
+		this.arenaController = Optional.ofNullable(arenaController);
+		this.projectionBounds = Optional.ofNullable(projectionBounds);
+	}
+	
+	public void setShowShots(boolean showShots) {
+		if (this.showShots != showShots) {
+			for (Shot shot : shots) shot.getMarker().setVisible(showShots);
+		}
+		
+		this.showShots = showShots;
+	}
+	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		Shot shot = new Shot(color, x, y, 
@@ -139,12 +157,51 @@ public class CanvasManager {
 		
 		shotEntries.add(new ShotEntry(shot));
 		shots.add(shot);
-		shot.drawShot(canvasGroup);
+		drawShot(shot);
 		
 		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
 		Optional<TargetRegion> hitRegion = checkHit(shot);
 		if (hitRegion.isPresent() && hitRegion.get().tagExists("command")) executeRegionCommands(hitRegion.get());
-		if (currentProtocol.isPresent()) currentProtocol.get().shotListener(shot, hitRegion);
+		
+		boolean processedShot = false;
+		
+		if (arenaController.isPresent() && projectionBounds.isPresent()) {
+			Bounds b = projectionBounds.get();
+			
+			if (b.contains(shot.getX(), shot.getY())) {
+				double x_scale = arenaController.get().getWidth() / b.getWidth();
+				double y_scale = arenaController.get().getHeight() / b.getHeight();
+				
+				Shot arenaShot = new Shot(shot.getColor(), 
+						(shot.getX() - b.getMinX()) * x_scale, (shot.getY() - b.getMinY()) * y_scale,
+						shot.getTimestamp(), config.getMarkerRadius());
+				
+				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
+			}
+		}
+		
+		if (currentProtocol.isPresent() && !processedShot) currentProtocol.get().shotListener(shot, hitRegion);
+	}
+	
+	public boolean addArenaShot(Shot shot) {
+		shots.add(shot);
+		drawShot(shot);
+		
+		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
+		Optional<TargetRegion> hitRegion = checkHit(shot);
+		if (currentProtocol.isPresent()) {
+			currentProtocol.get().shotListener(shot, hitRegion);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private void drawShot(Shot shot) {
+		Platform.runLater(() -> {
+				canvasGroup.getChildren().add(shot.getMarker());
+				shot.getMarker().setVisible(showShots);
+			});
 	}
 	
 	private Optional<TargetRegion> checkHit(Shot shot) {
@@ -306,10 +363,19 @@ public class CanvasManager {
 					canvasGroup.requestFocus();
 				});
 			
-			canvasGroup.getChildren().add(target.get());
-			new TargetContainer(target.get(), config);
-			targets.add(target.get());
+			addTarget(target.get());
 		}
+	}
+	
+	public void addTarget(Group target) {
+		canvasGroup.getChildren().add(target);
+		new TargetContainer(target, config);
+		targets.add(target);
+	}
+	
+	public void removeTarget(Group target) {
+		canvasGroup.getChildren().remove(target);
+		targets.remove(target);
 	}
 	
 	public List<Group> getTargets() {
@@ -323,8 +389,7 @@ public class CanvasManager {
 		
 		switch (event.getCode()) {
 		case DELETE:
-			canvasGroup.getChildren().remove(selectedTarget.get());
-			targets.remove(selectedTarget.get());
+			removeTarget(selectedTarget.get());
 			break;
 			
 		case LEFT:

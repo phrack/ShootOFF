@@ -6,8 +6,6 @@
 
 package com.shootoff.camera;
 
-import javafx.application.Platform;
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
@@ -27,12 +25,6 @@ public class Shot {
 		this.marker.setFill(color);
 	}
 	
-	public void drawShot(Group canvasGroup) {
-		Platform.runLater(() -> {
-				canvasGroup.getChildren().add(marker);
-			});
-	}
-
 	public Color getColor() {
 		return color;
 	}
