@@ -111,6 +111,18 @@ public class CanvasManager {
 		return canvasGroup;
 	}
 	
+	public void clearShots() {
+		Platform.runLater(() -> {
+			for (Shot shot : shots) {
+				canvasGroup.getChildren().remove(shot.getMarker());
+			}
+			
+			shots.clear();
+			if (shotEntries != null) shotEntries.clear();
+			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
+		}); 
+	}
+	
 	public void reset() {
 		startTime = System.currentTimeMillis();
 		
@@ -123,14 +135,7 @@ public class CanvasManager {
 			}
 		}
 		
-		Platform.runLater(() -> {
-				for (Shot shot : shots) {
-					canvasGroup.getChildren().remove(shot.getMarker());
-				}
-				
-				shots.clear();
-				shotEntries.clear();
-			}); 
+		clearShots();
 	}
 	
 	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {		
@@ -342,7 +347,7 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
-	public void addTarget(File targetFile) {
+	public Optional<Group> addTarget(File targetFile) {
 		Optional<Group> target = TargetIO.loadTarget(targetFile);
 		
 		if (target.isPresent()) {		
@@ -365,16 +370,17 @@ public class CanvasManager {
 			
 			addTarget(target.get());
 		}
+		return target;
 	}
 	
 	public void addTarget(Group target) {
-		canvasGroup.getChildren().add(target);
+		Platform.runLater(() -> { canvasGroup.getChildren().add(target); });
 		new TargetContainer(target, config);
 		targets.add(target);
 	}
 	
 	public void removeTarget(Group target) {
-		canvasGroup.getChildren().remove(target);
+		Platform.runLater(() -> { canvasGroup.getChildren().remove(target); });
 		targets.remove(target);
 	}
 	

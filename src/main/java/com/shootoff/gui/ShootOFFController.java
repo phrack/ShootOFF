@@ -19,7 +19,9 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.ISSFStandardPistol;
+import com.shootoff.plugins.ProjectorTrainingProtocolBase;
 import com.shootoff.plugins.RandomShoot;
+import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingProtocol;
@@ -74,6 +76,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private ProjectorArenaController arenaController;
 	private Group calibrationGroup;
 	private CanvasManager calibratingManager;
+	private List<MenuItem> projectorProtocolMenuItems = new ArrayList<MenuItem>();
 	
 	public void init(Configuration config) {
 		this.config = config;
@@ -81,6 +84,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		findTargets();
 		registerTrainingProtocols();
+		registerProjectorProtocols();
 		
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
@@ -199,6 +203,33 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		trainingMenu.getItems().add(protocolItem);
 	}
 	
+	private void registerProjectorProtocols() {
+		addProjectorTrainingProtocol(new ShootDontShoot());
+	}
+	
+	private void addProjectorTrainingProtocol(TrainingProtocol protocol) {
+		RadioMenuItem protocolItem = new RadioMenuItem(protocol.getInfo().getName());
+		protocolItem.setToggleGroup(trainingToggleGroup);	
+		if (arenaController == null) protocolItem.setDisable(true);
+		
+		protocolItem.setOnAction((e) -> {
+				try {
+					Constructor<?> ctor = protocol.getClass().getConstructor(List.class);
+					TrainingProtocol newProtocol = (TrainingProtocol)ctor.newInstance(
+							arenaController.getCanvasManager().getTargets());
+					((ProjectorTrainingProtocolBase)newProtocol).init(config, camerasSupervisor, 
+							shotTimerTable, arenaController);
+					newProtocol.init();
+					config.setProtocol(newProtocol);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+		
+		trainingMenu.getItems().add(protocolItem);
+		projectorProtocolMenuItems.add(protocolItem);
+	}
+	
 	@FXML 
 	public void clickedNoneProtocol(ActionEvent event) {
 		config.setProtocol(null);
@@ -258,6 +289,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
+		
+		for (MenuItem m : projectorProtocolMenuItems) m.setDisable(isDisabled);
 	}
 	
 	@FXML

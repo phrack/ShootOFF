@@ -21,8 +21,12 @@ public class TestVirtualMagazineProcessor {
 	public void testThreeShotCapacity() {
 		config.setVirtualMagazineCapacity(3);
 		
-		VirtualMagazineProcessor magazineProcessor = 
-				(VirtualMagazineProcessor)config.getShotProcessors().toArray()[0];
+		VirtualMagazineProcessor magazineProcessor = null;
+		
+		for (ShotProcessor s : config.getShotProcessors()) {
+			if (s instanceof VirtualMagazineProcessor) magazineProcessor = (VirtualMagazineProcessor)s;
+		}
+		
 		magazineProcessor.setUseTTS(false);
 		
 		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);

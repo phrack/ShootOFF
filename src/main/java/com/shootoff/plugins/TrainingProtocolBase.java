@@ -157,6 +157,13 @@ public class TrainingProtocolBase {
 			});
 	}
 	
+	/**
+	 * Clear all present shots.
+	 */
+	public void clearShots()  {
+		camerasSupervisor.clearShots();
+	}
+	
 	/** 
 	 * Perform the equivalent of the user hitting the reset button.
 	 */

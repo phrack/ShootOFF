@@ -38,6 +38,10 @@ public class CameraManager {
 		
 		new Thread(new Detector()).start();
 	}
+
+	public void clearShots() {
+		canvasManager.clearShots();
+	}
 	
 	public void reset() {
 		canvasManager.reset();

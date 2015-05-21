@@ -35,8 +35,12 @@ public class TestMalfunctionsProcessor {
 	public void testManyMalfunctions() {
 		config.setMalfunctionsProbability((float)90.0);
 		
-		MalfunctionsProcessor malfunctionsProcessor = 
-				(MalfunctionsProcessor)config.getShotProcessors().toArray()[0];
+		MalfunctionsProcessor malfunctionsProcessor = null;
+		
+		for (ShotProcessor s : config.getShotProcessors()) {
+			if (s instanceof MalfunctionsProcessor) malfunctionsProcessor = (MalfunctionsProcessor)s;
+		}
+		
 		malfunctionsProcessor.setUseTTS(false);
 		
 		assertTrue(simulateShots(malfunctionsProcessor) >= 80);
@@ -46,8 +50,12 @@ public class TestMalfunctionsProcessor {
 	public void testFewMalfunctions() {
 		config.setMalfunctionsProbability((float)10.0);
 		
-		MalfunctionsProcessor malfunctionsProcessor = 
-				(MalfunctionsProcessor)config.getShotProcessors().toArray()[0];
+		MalfunctionsProcessor malfunctionsProcessor = null;
+		
+		for (ShotProcessor s : config.getShotProcessors()) {
+			if (s instanceof MalfunctionsProcessor) malfunctionsProcessor = (MalfunctionsProcessor)s;
+		}
+
 		malfunctionsProcessor.setUseTTS(false);
 		
 		assertTrue(simulateShots(malfunctionsProcessor) <= 20);
