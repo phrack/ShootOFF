@@ -129,9 +129,12 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+		if (currentSubtargets.isEmpty()) return;
+		
 		if (hitRegion.isPresent()) {
 			String subtargetValue = hitRegion.get().getTag("subtarget");
-			if (subtargetValue != null && subtargetValue.equals(subtargets.get(currentSubtargets.peek()))) {
+			if (subtargetValue != null &&
+					subtargetValue.equals(subtargets.get(currentSubtargets.peek()))) {
 				currentSubtargets.pop();
 			} else {
 				sayCurrentSubtarget();
