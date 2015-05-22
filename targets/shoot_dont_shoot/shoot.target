@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<target>
-	<image x="44.000000" y="73.000000" file="targets/shoot_dont_shoot/shoot.gif">
-		<tag name="subtarget" value="shoot" />
-	</image>
-</target>

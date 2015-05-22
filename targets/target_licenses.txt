@@ -1,5 +1,0 @@
-The following targets were not created by ShootOFF contributors and have their own licenses:
-
-ISSF.png -- GFDL / CC-BY-SA Author: flip619
-
-
