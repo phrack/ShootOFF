@@ -122,7 +122,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		        	}
 		        	
 		        	for (ShotEntry selected : change.getAddedSubList()) {
-		        		selected.getShot().getMarker().setStroke(TargetRegion.SELECTED_STROKE_COLOR);
+		        		selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
 		        	}
 	        	}
 	        }
