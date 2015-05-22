@@ -56,7 +56,7 @@ public class TrainingProtocolBase {
 	
 	private final Map<String, TableColumn<ShotEntry, String>> protocolColumns = 
 			new HashMap<String, TableColumn<ShotEntry, String>>();
-	private final Label protocolLabel = new Label();;
+	private final Label protocolLabel = new Label();
 	
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
