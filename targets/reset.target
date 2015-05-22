@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<ellipse centerX="41.500000" centerY="300.500000" radiusX="25.000000" radiusY="25.000000" fill="orange">
+		<tag name="command" value="reset" />
+	</ellipse>
+</target>

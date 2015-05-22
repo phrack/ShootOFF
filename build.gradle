@@ -1,0 +1,31 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+    // Next 2 are used for tts
+    maven {
+        url  "http://dl.bintray.com/marytts/marytts" 
+    }
+    maven {
+        url  "http://dl.bintray.com/dfki-lt/maven" 
+    }
+}
+
+dependencies {
+    // webcam-capture depends on slf4j, but uses and older and incomplete version that
+    // throws errors about missing a logger
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.12'
+    // bridj is here because webcam-capture depends on it but fetches 0.6.2, which
+    // does not play nicely with stackguard in newer versions of the JVM.
+    compile group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'    
+    compile group: 'com.github.sarxos', name: 'webcam-capture', version: '0.3.10'
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.+'
+
+    // tts dependencies
+    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.+'
+    compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.+'
+    compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.+'
+
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
