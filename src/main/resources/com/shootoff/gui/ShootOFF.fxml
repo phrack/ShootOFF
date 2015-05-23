@@ -21,7 +21,7 @@
           <Menu text="_File">
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#preferencesClicked" text="Preferences..." />
-                  <MenuItem mnemonicParsing="false" text="Save Feed Image..." />
+                  <MenuItem mnemonicParsing="false" onAction="#saveFeedClicked" text="Save Feed Image..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem onAction="#exitMenuClicked" text="E_xit" />
             </items>

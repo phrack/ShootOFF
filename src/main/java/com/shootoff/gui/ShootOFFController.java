@@ -6,11 +6,14 @@
 
 package com.shootoff.gui;
 
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import marytts.util.io.FileFilter;
 
@@ -34,6 +37,7 @@ import com.shootoff.targets.io.TargetIO;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -53,6 +57,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -398,6 +403,29 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			}
 			
 			config.getProtocol().get().reset(knownTargets);
+		}
+	}
+	
+	@FXML
+	public void saveFeedClicked(ActionEvent event) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save Feed Image");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Joint Photographic Experts Group (*.jpg)", "*.jpeg"),
+                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
+                new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png")
+            );
+		File feedFile = fileChooser.showSaveDialog(shootOFFStage);
+		
+		if (feedFile != null) {
+			String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
+			File imageFile = new File(feedFile.getPath() + "." +  extension);
+			RenderedImage renderedImage = SwingFXUtils.fromFXImage(shootOFFStage.getScene().snapshot(null), null);
+			try {
+				ImageIO.write(renderedImage, extension, imageFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
