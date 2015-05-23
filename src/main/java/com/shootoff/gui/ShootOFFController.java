@@ -43,6 +43,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -111,14 +112,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		laserCol.setPrefWidth(65);
 		laserCol.setCellValueFactory(
                 new PropertyValueFactory<ShotEntry, String>("color"));
-       
+		
 		shotTimerTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<ShotEntry>() {
 	        @Override
 	        public void onChanged(Change<? extends ShotEntry> change)
 	        {
 	        	while (change.next()) {
 		        	for (ShotEntry unselected : change.getRemoved()) {
-		        		unselected.getShot().getMarker().setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+		        		unselected.getShot().getMarker().setFill(unselected.getShot().getColor());
 		        	}
 		        	
 		        	for (ShotEntry selected : change.getAddedSubList()) {
@@ -127,10 +128,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        	}
 	        }
 	    });
-
+		
 		shotTimerTable.getColumns().add(timeCol);
 		shotTimerTable.getColumns().add(laserCol);
 		shotTimerTable.setItems(shotEntries);
+		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 	
 	@Override
