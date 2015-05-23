@@ -25,7 +25,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 public class TargetIO {
-	public static final double DEFAULT_OPACITY = 0.7;
+	public static final double DEFAULT_OPACITY = 0.5;
 	
 	public static void saveTarget(List<Node> regions, File targetFile) {
 		RegionVisitor visitor;
