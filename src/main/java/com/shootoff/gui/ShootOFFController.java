@@ -411,7 +411,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Feed Image");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Joint Photographic Experts Group (*.jpg)", "*.jpeg"),
                 new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
                 new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png")
             );
