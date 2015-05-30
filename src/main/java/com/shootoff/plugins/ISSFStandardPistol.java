@@ -81,6 +81,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 		super.addShotTimerColumn(ROUND_COL_NAME, ROUND_COL_WIDTH);
 		super.getDelayedStartInterval(this);
 		
+		thisSuper.pauseShotDetection(true);
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);	
 	}
 	
