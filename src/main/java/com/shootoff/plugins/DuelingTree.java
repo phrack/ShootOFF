@@ -182,5 +182,6 @@ public class DuelingTree extends ProjectorTrainingProtocolBase implements Traini
 	public void destroy() {
 		continueProtocol = false;
 		executorService.shutdownNow();
+		super.destroy();
 	}
 }

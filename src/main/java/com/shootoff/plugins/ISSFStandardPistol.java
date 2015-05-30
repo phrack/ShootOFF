@@ -225,5 +225,6 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 	public void destroy() {
 		repeatProtocol = false;
 		executorService.shutdownNow();
+		super.destroy();
 	}
 }
