@@ -60,6 +60,7 @@ public class CanvasManager {
 	private final List<Shot> shots = new ArrayList<Shot>();
 	private final List<Group> targets = new ArrayList<Group>();
 	
+	private ProgressIndicator progress;
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
@@ -88,7 +89,7 @@ public class CanvasManager {
 			});
 
 		if (Platform.isFxApplicationThread()) {
-			ProgressIndicator progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
+			progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
 			progress.setPrefHeight(480);
 			progress.setPrefWidth(640);
 			canvasGroup.getChildren().add(progress);
@@ -111,6 +112,8 @@ public class CanvasManager {
 	public void updateBackground(Image img) {
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {
+					if (canvasGroup.getChildren().contains(progress)) 
+						canvasGroup.getChildren().remove(progress);
 					canvasGroup.getChildren().clear();
 					canvasGroup.getChildren().add(background);
 				});
