@@ -45,7 +45,6 @@ public class ProjectorArenaController {
 		arenaStage = (Stage)arenaAnchor.getScene().getWindow();
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, null);
 		canvasManager.updateBackground(null);
-		arenaAnchor.setStyle("-fx-background-color: #FFFFFF;");
 	}
 	
 	public void toggleArena() throws IOException {
