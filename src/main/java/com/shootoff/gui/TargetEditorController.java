@@ -503,6 +503,9 @@ public class TargetEditorController {
 			
 			if (selected.getType() != RegionType.IMAGE)
 				((Shape)selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+			
+			toggleShapeControls(false);
+			cursorRegion = Optional.empty();
 		}
 		
 		clearFreeformState(false);
