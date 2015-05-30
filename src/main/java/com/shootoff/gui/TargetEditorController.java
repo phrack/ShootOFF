@@ -208,10 +208,13 @@ public class TargetEditorController {
 		lastMouseX = event.getX() - (selected.getLayoutBounds().getWidth() / 2);
 		lastMouseY = event.getY() - (selected.getLayoutBounds().getHeight() / 2);
 		
-		if (lastMouseX >= 0)
+		if (lastMouseX < 0) lastMouseX = 0;
+		if (lastMouseY < 0) lastMouseY = 0;
+		
+		if (event.getX() + (selected.getLayoutBounds().getWidth() / 2) <= canvasPane.getWidth())
 			selected.setLayoutX(lastMouseX - selected.getLayoutBounds().getMinX());
 		
-		if (lastMouseY >= 0)
+		if (event.getY() + (selected.getLayoutBounds().getHeight() / 2) <= canvasPane.getHeight())
 			selected.setLayoutY(lastMouseY - selected.getLayoutBounds().getMinY());
 		
 		event.consume();
@@ -231,7 +234,7 @@ public class TargetEditorController {
 		Node selected = cursorRegion.get();
 		targetRegions.add(selected);
 		selected.setOnMouseClicked((e) -> { regionClicked(e); });
-		selected.setOnKeyPressed((e) -> { regionKeyPressed(e); }); 
+		selected.setOnKeyPressed((e) -> { regionKeyPressed(e); });
 		
 		if (((TargetRegion)selected).getType() == RegionType.IMAGE) {
 			ImageRegion droppedImage = (ImageRegion)selected;
@@ -618,6 +621,14 @@ public class TargetEditorController {
 			System.err.println("Unimplemented region type selected.");
 			return;
 		}
+		
+		double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
+		if (leftX < 0)
+			newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
+		
+		double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
+		if (topY < 0)
+			newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
 
 		newShape.setFill(DEFAULT_FILL_COLOR);
 		newShape.setOpacity(TargetIO.DEFAULT_OPACITY);
