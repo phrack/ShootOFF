@@ -43,6 +43,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -53,6 +54,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
@@ -93,14 +95,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		registerTrainingProtocols();
 		registerProjectorProtocols();
 		
-		if (config.getWebcams().isEmpty()) {
-			Webcam defaultCamera = Webcam.getDefault();
-			camerasSupervisor.addCameraManager(defaultCamera, 
-					new CanvasManager(defaultCanvasGroup, config, camerasSupervisor, shotEntries));
-		} else {
-			addConfiguredCameras();
-		}
-		
 		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
 		shootOFFStage.getIcons().add(
 				   new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png"))); 
@@ -109,6 +103,24 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			if (config.getProtocol().isPresent()) config.getProtocol().get().destroy();
 			if (arenaController != null) arenaController.close();
 		});
+		
+		if (config.getWebcams().isEmpty()) {
+			Webcam defaultCamera = Webcam.getDefault();
+			if (defaultCamera != null) {
+				camerasSupervisor.addCameraManager(defaultCamera, 
+					new CanvasManager(defaultCanvasGroup, config, camerasSupervisor, shotEntries));
+			} else {
+				Alert cameraAlert = new Alert(AlertType.ERROR);
+				cameraAlert.setTitle("No Webcams");
+				cameraAlert.setHeaderText("No Webcams Found!");
+				cameraAlert.setResizable(true);
+				cameraAlert.setContentText("ShootOFF needs a webcam to function. Now closing...");
+				cameraAlert.showAndWait();
+				System.exit(-1);
+			}
+		} else {
+			addConfiguredCameras();
+		}
 		
 		TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
 		timeCol.setPrefWidth(65);

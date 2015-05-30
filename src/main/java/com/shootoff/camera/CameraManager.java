@@ -9,11 +9,17 @@ package com.shootoff.camera;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
+import java.util.Optional;
+
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
+
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 
 public class CameraManager {
@@ -81,6 +87,29 @@ public class CameraManager {
 			
 			while (isStreaming) {
 				currentFrame = webcam.getImage();
+				
+				if (currentFrame == null && !webcam.isOpen()) {
+					Platform.runLater(() -> {
+							Alert cameraAlert = new Alert(AlertType.ERROR);
+							
+							Optional<String> cameraName = config.getWebcamsUserName(webcam);
+							String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
+							String message;
+							if (cameraName.isPresent()) {
+								message = String.format(messageFormat, cameraName.get());
+							} else {
+								message = String.format(messageFormat, webcam.getName());
+							}
+							
+							cameraAlert.setTitle("Webcam Missing");
+							cameraAlert.setHeaderText("Cannot Communicate with Camera!");
+							cameraAlert.setResizable(true);
+							cameraAlert.setContentText(message);
+							cameraAlert.show();
+						});
+					
+					return;
+				}
 				
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
 				

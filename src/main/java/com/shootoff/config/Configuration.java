@@ -427,6 +427,14 @@ public class Configuration {
 		return webcams;
 	}
 	
+	public Optional<String> getWebcamsUserName(Webcam webcam) {
+		for (String userName : webcams.keySet()) {
+			if (webcams.get(userName).equals(webcam)) return Optional.of(userName);
+		}
+		
+		return Optional.empty();
+	}
+	
 	public int getDetectionRate() {
 		return detectionRate;
 	}
