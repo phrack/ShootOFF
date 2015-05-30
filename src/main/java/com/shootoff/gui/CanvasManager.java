@@ -112,8 +112,6 @@ public class CanvasManager {
 	public void updateBackground(Image img) {
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {
-					if (canvasGroup.getChildren().contains(progress)) 
-						canvasGroup.getChildren().remove(progress);
 					canvasGroup.getChildren().clear();
 					canvasGroup.getChildren().add(background);
 				});
