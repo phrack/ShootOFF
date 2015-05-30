@@ -28,6 +28,7 @@ import javafx.util.Callback;
 public class CameraSelectorScene extends Stage {
 	private final List<Webcam> unconfiguredWebcams = new ArrayList<Webcam>();
 	private final List<Webcam> selectedWebcams = new ArrayList<Webcam>();
+	private final ListView<String> webcamListView = new ListView<String>();
 	
 	public CameraSelectorScene(Window parent, List<Webcam> configuredCameras) {
 		super();
@@ -44,7 +45,6 @@ public class CameraSelectorScene extends Stage {
 		}
 		
 		BorderPane pane = new BorderPane();
-		ListView<String> webcamListView = new ListView<String>();
 		
 	    webcamListView.setCellFactory(new Callback<ListView<String>, 
 	            ListCell<String>>() {
@@ -54,19 +54,16 @@ public class CameraSelectorScene extends Stage {
 	                }
 	            }
 	        );
-		
+
+	    webcamListView.setOnMouseClicked((event) -> {
+	    		if (event.getClickCount() == 2) {
+	    			addSelection();
+	    		}
+	    	});
+	    
 	    webcamListView.setOnKeyPressed((event) -> {
 	    		if (event.getCode() == KeyCode.ENTER) {
-	    			ObservableList<String> selectedNames = 
-	    					webcamListView.getSelectionModel().getSelectedItems();
-	    			
-	                for (Webcam webcam : unconfiguredWebcams) {
-	                	if (selectedNames.contains(webcam.getName())) {
-	                		selectedWebcams.add(webcam);
-	                	}
-	                }
-	                
-	                this.close();
+	    			addSelection();
 	    		}
 	    	});
 	    
@@ -77,6 +74,21 @@ public class CameraSelectorScene extends Stage {
 		Scene scene = new Scene(pane);
 		this.setScene(scene);
 		this.show();
+	}
+	
+	private void addSelection() {
+		ObservableList<String> selectedNames = 
+				webcamListView.getSelectionModel().getSelectedItems();
+		
+		if (selectedNames.isEmpty()) return;
+		
+        for (Webcam webcam : unconfiguredWebcams) {
+        	if (selectedNames.contains(webcam.getName())) {
+        		selectedWebcams.add(webcam);
+        	}
+        }
+        
+        this.close();
 	}
 	
 	public List<Webcam> getSelectedWebcams() {
