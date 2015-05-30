@@ -161,6 +161,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	private void addConfiguredCameras() {
 		cameraTabPane.getTabs().clear();
+		camerasSupervisor.clearManagers();
 		
 		if (config.getWebcams().isEmpty()) {
 			addCameraTab("Default", Webcam.getDefault());

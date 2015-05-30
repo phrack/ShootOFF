@@ -26,6 +26,12 @@ public class CamerasSupervisor {
 	public void addCameraManager(Webcam webcam, CanvasManager canvasManager) {
 		managers.add(new CameraManager(webcam, canvasManager, config));
 	}
+	
+	public void clearManagers() {
+		setStreamingAll(false);
+		setDetectingAll(false);
+		managers.clear();
+	}
 
 	public void clearShots() {
 		for (CameraManager manager : managers) {
