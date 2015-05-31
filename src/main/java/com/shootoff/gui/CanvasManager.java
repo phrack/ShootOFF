@@ -241,7 +241,9 @@ public class CanvasManager {
 							int adjustedX = (int)(shot.getX() - node.getBoundsInParent().getMinX());
 							int adjustedY = (int)(shot.getY() - node.getBoundsInParent().getMinY());
 							
-							if (currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
+							if (currentImage.getHeight() > adjustedY && 
+								currentImage.getWidth() > adjustedX && 
+									currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
 								continue;
 							}
 						}
