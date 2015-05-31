@@ -186,7 +186,10 @@ public class TargetEditorController {
 		File targetFile = fileChooser.showSaveDialog(canvasPane.getParent().getScene().getWindow());
 		
 		if (targetFile != null) {
-			targetFile = new File(targetFile.getPath() + ".target");
+			String path = targetFile.getPath();
+			if (!path.endsWith(".target")) path += ".target";
+			
+			targetFile = new File(path);
 			boolean isNewTarget = !targetFile.exists();
 			
 			TargetIO.saveTarget(targetRegions, targetFile);
