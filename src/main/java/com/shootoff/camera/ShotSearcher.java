@@ -30,7 +30,7 @@ import javafx.scene.paint.Color;
 public class ShotSearcher implements Runnable {
 	private final int BLACK_PIXEL = 0;
 	private final int WHITE_PIXEL = 1;
-	private final int MIN_SHOT_DIM = 4; // px
+	private final int MIN_SHOT_DIM = 7; // px
 	
 	private final Configuration config;
 	private final CanvasManager canvasManager;
@@ -217,8 +217,7 @@ public class ShotSearcher implements Runnable {
 		double centerX = minX + (shotWidth / 2);
 		
 		// If the width and height of the shot are really small it's a false positive
-		System.out.println(shotWidth + " " + shotHeight);
-		if (shotWidth < MIN_SHOT_DIM || shotHeight < MIN_SHOT_DIM)
+		if (shotWidth < MIN_SHOT_DIM && shotHeight < MIN_SHOT_DIM)
 			return Optional.empty();
 
 		return Optional.of(new Point2D(centerX, centerY));

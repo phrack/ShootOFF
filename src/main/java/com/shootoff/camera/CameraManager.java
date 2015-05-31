@@ -88,7 +88,6 @@ public class CameraManager {
 		return canvasManager;
 	}
 	
-	
 	protected static BufferedImage threshold(Configuration config, BufferedImage grayScale) {
 		BufferedImage threshholdedImg = new BufferedImage(grayScale.getWidth(),
 				grayScale.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
@@ -123,6 +122,23 @@ public class CameraManager {
 		}
 		
 		return newCount;
+	}
+	
+	protected BufferedImage countToImage(byte[][] count) {
+		BufferedImage img = new BufferedImage(count[0].length,
+				count.length, BufferedImage.TYPE_BYTE_GRAY);
+		
+		for (int y = 0; y < img.getHeight(); y++) {
+			for (int x = 0; x < img.getWidth(); x++) {
+				if (count[y][x] == 1) {
+					img.setRGB(x, y, mixColor(255, 255, 255));
+				} else {
+					img.setRGB(x, y, mixColor(0, 0, 0));
+				}
+			}
+		}
+		
+		return img;
 	}
 	
 	private class Detector implements Runnable {
@@ -171,8 +187,8 @@ public class CameraManager {
 					return;
 				}
 				
-				//Image img = SwingFXUtils.toFXImage(currentFrame, null);
-				//canvasManager.updateBackground(img);
+				Image img = SwingFXUtils.toFXImage(currentFrame, null);
+				canvasManager.updateBackground(img);
 				
 				if (System.currentTimeMillis() - 
 						startDetectionCycle >= config.getDetectionRate()) {
@@ -204,23 +220,6 @@ public class CameraManager {
 						bloomFilter[y][x] -= count[y][x];
 				}
 			}
-		}
-		
-		private BufferedImage countToImage(byte[][] count) {
-			BufferedImage img = new BufferedImage(count[0].length,
-					count.length, BufferedImage.TYPE_BYTE_GRAY);
-			
-			for (int y = 0; y < img.getHeight(); y++) {
-				for (int x = 0; x < img.getWidth(); x++) {
-					if (count[y][x] == 1) {
-						img.setRGB(x, y, mixColor(255, 255, 255));
-					} else {
-						img.setRGB(x, y, mixColor(0, 0, 0));
-					}
-				}
-			}
-			
-			return img;
 		}
 		
 		private byte[][] generateMask() {
@@ -273,8 +272,8 @@ public class CameraManager {
 				new Thread(new ShotSearcher(config, canvasManager, 
 						currentCopy, shotFrame)).start();
 				
-				Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
-				canvasManager.updateBackground(img);
+				//Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
+				//canvasManager.updateBackground(img);
 				
 				// Update the bloom filter by removing the oldest frame
 				// and adding the current one
