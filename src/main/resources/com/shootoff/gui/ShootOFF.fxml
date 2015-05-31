@@ -6,6 +6,7 @@
  found in the LICENSE file.
 -->
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.input.*?>
@@ -62,8 +63,11 @@
                </content>
             </ScrollPane>
          </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
       </HBox>
-      <GridPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" VBox.vgrow="NEVER">
+      <GridPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="35.0" VBox.vgrow="NEVER">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
          </columnConstraints>
@@ -71,7 +75,10 @@
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" onAction="#resetClicked" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+            <Button mnemonicParsing="false" onAction="#resetClicked" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+               <GridPane.margin>
+                  <Insets bottom="2.0" />
+               </GridPane.margin></Button>
          </children>
       </GridPane>
    </children>
