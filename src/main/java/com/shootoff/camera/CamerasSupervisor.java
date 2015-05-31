@@ -42,6 +42,11 @@ public class CamerasSupervisor {
 	public void clearManagers() {
 		setStreamingAll(false);
 		setDetectingAll(false);
+		
+		for (CameraManager manager : managers) {
+			manager.close();
+		}
+		
 		managers.clear();
 	}
 

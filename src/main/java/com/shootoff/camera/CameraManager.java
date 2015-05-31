@@ -65,6 +65,10 @@ public class CameraManager {
 		canvasManager.reset();
 	}
 	
+	public void close() {
+		webcam.close();
+	}
+	
 	public void setStreaming(boolean isStreaming) {
 		this.isStreaming = isStreaming;
 	}
