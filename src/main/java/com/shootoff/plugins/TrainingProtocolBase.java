@@ -65,11 +65,11 @@ public class TrainingProtocolBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
+	private final Map<CanvasManager, Label> protocolLabels = new HashMap<CanvasManager, Label>();
 	
 	private final Map<String, TableColumn<ShotEntry, String>> protocolColumns = 
 			new HashMap<String, TableColumn<ShotEntry, String>>();
-	private final Label protocolLabel = new Label();
-	
+
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
 	public TrainingProtocolBase() {}
@@ -84,9 +84,11 @@ public class TrainingProtocolBase {
 		this.camerasSupervisor = camerasSupervisor;
 		this.shotTimerTable = shotTimerTable;
 		
-		protocolLabel.setTextFill(Color.WHITE);
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
+			Label protocolLabel = new Label();
+			protocolLabel.setTextFill(Color.WHITE);
 			canvasManager.getCanvasGroup().getChildren().add(protocolLabel);
+			protocolLabels.put(canvasManager, protocolLabel);
 		}
 	}
 	
@@ -165,7 +167,8 @@ public class TrainingProtocolBase {
 		if (config.inDebugMode()) System.out.println(message);
 		
 		Platform.runLater(() -> {
-				protocolLabel.setText(message);
+				for (Label protocolLabel : protocolLabels.values())
+					protocolLabel.setText(message);
 			});
 	}
 	
@@ -228,8 +231,10 @@ public class TrainingProtocolBase {
 		}
 		
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
-			canvasManager.getCanvasGroup().getChildren().remove(protocolLabel);
+			canvasManager.getCanvasGroup().getChildren().remove(protocolLabels.get(canvasManager));
 		}
+		
+		protocolLabels.clear();
 		
 		pauseShotDetection(false);
 	}
