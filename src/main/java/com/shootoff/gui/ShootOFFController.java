@@ -47,6 +47,7 @@ import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -142,6 +143,19 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		laserCol.setPrefWidth(65);
 		laserCol.setCellValueFactory(
                 new PropertyValueFactory<ShotEntry, String>("color"));
+		
+		shotEntries.addListener(new ListChangeListener<ShotEntry>() {
+	        @Override
+	        public void onChanged(Change<? extends ShotEntry> change)
+	        {
+	        	change.next();
+	        	if (change.getAddedSize() < 1) return;
+	        	Platform.runLater(() -> {
+	        			final int size = shotTimerTable.getItems().size();
+	        			if (size > 0) shotTimerTable.scrollTo(size - 1);
+	        		});
+	        }
+	    });
 		
 		shotTimerTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<ShotEntry>() {
 	        @Override
