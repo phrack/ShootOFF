@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
@@ -83,7 +84,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu trainingMenu;
 	@FXML private ToggleGroup trainingToggleGroup;
 	@FXML private TabPane cameraTabPane;
-	@FXML private Group defaultCanvasGroup;
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private MenuItem startArenaMenuItem;
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
@@ -119,8 +119,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (config.getWebcams().isEmpty()) {
 			Webcam defaultCamera = Webcam.getDefault();
 			if (defaultCamera != null) {
-				camerasSupervisor.addCameraManager(defaultCamera, 
-					new CanvasManager(defaultCanvasGroup, config, camerasSupervisor, shotEntries));
+				if (!addCameraTab("Default", defaultCamera)) cameraLockFailure(defaultCamera, true);
 			} else {
 				Alert cameraAlert = new Alert(AlertType.ERROR);
 				cameraAlert.setTitle("No Webcams");
@@ -176,15 +175,50 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.clearManagers();
 		
 		if (config.getWebcams().isEmpty()) {
-			addCameraTab("Default", Webcam.getDefault());
+			if (!addCameraTab("Default", Webcam.getDefault())) cameraLockFailure(Webcam.getDefault(), true);
 		} else {
 			for (String webcamName : config.getWebcams().keySet()) {
-				addCameraTab(webcamName, config.getWebcams().get(webcamName));
+				Webcam webcam = config.getWebcams().get(webcamName);
+				if (!addCameraTab(webcamName, webcam)) cameraLockFailure(webcam, config.getWebcams().size() <= 1);
 			}
 		}
 	}
 	
-	private void addCameraTab(String webcamName, Webcam webcam) {
+	private void cameraLockFailure(Webcam webcam, boolean onlyCamera) {
+		Alert cameraAlert = new Alert(AlertType.ERROR);
+		cameraAlert.setTitle("Webcam Locked");
+		cameraAlert.setHeaderText("Cannot Open Webcam");
+		cameraAlert.setResizable(true);
+		
+		String messageFormat;
+		
+		if (onlyCamera) {
+			messageFormat = "Cannot open the webcam %s. It is being "
+					+ "used by another program. This is the only configured camera, thus"
+					+ "ShootOFF must close.";
+		} else {
+			messageFormat = "Cannot open the webcam %s. It is being "
+					+ "used by another program or you have ShootOFF open more than once.";
+		}
+		
+		Optional<String> webcamName = config.getWebcamsUserName(webcam);
+		
+		cameraAlert.setContentText(String.format(messageFormat, 
+				webcamName.isPresent() ? webcamName.get() : webcam.getName()));
+		
+		if (onlyCamera) {
+			cameraAlert.showAndWait();
+			System.exit(-1);
+		} else {
+			cameraAlert.show();
+		}
+	}
+	
+	private boolean addCameraTab(String webcamName, Webcam webcam) {
+		if (webcam.getLock().isLocked()) {
+			return false;
+		}
+		
 		Tab cameraTab = new Tab(webcamName);
 		Group cameraCanvasGroup = new Group();
 		// 640 x 480
@@ -193,7 +227,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.addCameraManager(webcam, 
 				new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries));
 		
-		cameraTabPane.getTabs().add(cameraTab);
+		return cameraTabPane.getTabs().add(cameraTab);
 	}
 	
 	private void findTargets() {
