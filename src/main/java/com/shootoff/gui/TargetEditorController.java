@@ -180,6 +180,7 @@ public class TargetEditorController {
 	public void saveTarget(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Target");
+		fileChooser.setInitialDirectory(new File("targets"));
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target")
             );
