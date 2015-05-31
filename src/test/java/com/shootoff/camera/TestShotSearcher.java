@@ -35,9 +35,11 @@ public class TestShotSearcher {
 				testFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 		
 		grayScale.createGraphics().drawImage(testFrame, 0, 0, null);
-
+		
+		BufferedImage threshed = CameraManager.threshold(config, grayScale);
+		
 		Thread searcher = new Thread(
-				new ShotSearcher(config, mockManager, testFrame, grayScale));
+				new ShotSearcher(config, mockManager, testFrame, CameraManager.getFrameCount(threshed)));
 		searcher.start();
 		searcher.join();
 		

@@ -88,6 +88,43 @@ public class CameraManager {
 		return canvasManager;
 	}
 	
+	
+	protected static BufferedImage threshold(Configuration config, BufferedImage grayScale) {
+		BufferedImage threshholdedImg = new BufferedImage(grayScale.getWidth(),
+				grayScale.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+		
+		for (int y = 0; y < grayScale.getHeight(); y++) {
+			for (int x = 0; x < grayScale.getWidth(); x++) {
+				int pixel = grayScale.getRGB(x, y) & 0xFF;
+				
+				if (pixel > config.getLaserIntensity()) {
+					threshholdedImg.setRGB(x, y, mixColor(255, 255, 255));
+				} else {
+					threshholdedImg.setRGB(x, y, mixColor(0, 0, 0));
+				}
+			}
+		}
+		
+		return threshholdedImg;
+	}
+	
+	private static int mixColor(int red, int green, int blue) {
+		return red << 16 | green << 8 | blue;
+	}
+	
+	protected static byte[][] getFrameCount(BufferedImage img) {
+		byte[][] newCount = new byte[FEED_HEIGHT][FEED_WIDTH];
+		
+		for (int y = 0; y < img.getHeight(); y++) {
+			for (int x = 0; x < img.getWidth(); x++) {
+				int pixel = img.getRGB(x, y) & 0xFF;
+				if (pixel == 255) newCount[y][x] = 1;
+			}
+		}
+		
+		return newCount;
+	}
+	
 	private class Detector implements Runnable {
 		private BufferedImage currentFrame;
 		private final int BLOOM_COUNT = 10;
@@ -150,42 +187,6 @@ public class CameraManager {
 					e.printStackTrace();
 				}
 			}
-		}
-		
-		private BufferedImage threshold(BufferedImage grayScale) {
-			BufferedImage threshholdedImg = new BufferedImage(grayScale.getWidth(),
-					grayScale.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-			
-			for (int y = 0; y < grayScale.getHeight(); y++) {
-				for (int x = 0; x < grayScale.getWidth(); x++) {
-					int pixel = grayScale.getRGB(x, y) & 0xFF;
-					
-					if (pixel > config.getLaserIntensity()) {
-						threshholdedImg.setRGB(x, y, mixColor(255, 255, 255));
-					} else {
-						threshholdedImg.setRGB(x, y, mixColor(0, 0, 0));
-					}
-				}
-			}
-			
-			return threshholdedImg;
-		}
-		
-		private int mixColor(int red, int green, int blue) {
-			return red << 16 | green << 8 | blue;
-		}
-		
-		private byte[][] getFrameCount(BufferedImage img) {
-			byte[][] newCount = new byte[FEED_HEIGHT][FEED_WIDTH];
-			
-			for (int y = 0; y < img.getHeight(); y++) {
-				for (int x = 0; x < img.getWidth(); x++) {
-					int pixel = img.getRGB(x, y) & 0xFF;
-					if (pixel == 255) newCount[y][x] = 1;
-				}
-			}
-			
-			return newCount;
 		}
 		
 		private void addFrameCount(byte[][] count) {
@@ -263,7 +264,7 @@ public class CameraManager {
 					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(currentCopy, 0, 0, null);
 			
-			BufferedImage threshed = threshold(grayScale);
+			BufferedImage threshed = threshold(config, grayScale);
 			
 			if (counts.size() == BLOOM_COUNT) {
 				byte[][] currentFrame = getFrameCount(threshed);
