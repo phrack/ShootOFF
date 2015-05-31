@@ -20,13 +20,13 @@ package com.shootoff.camera;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
-
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -35,6 +35,9 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 
 public class CameraManager {
+	public static final int FEED_WIDTH = 640;
+	public static final int FEED_HEIGHT = 480;
+	
 	private final Webcam webcam;
 	private final CanvasManager canvasManager;
 	private final Configuration config;
@@ -87,11 +90,15 @@ public class CameraManager {
 	
 	private class Detector implements Runnable {
 		private BufferedImage currentFrame;
+		private final int BLOOM_COUNT = 10;
+		private int oldestFrame = 0;
+		private List<Object> counts = new ArrayList<Object>();
+		private byte[][] bloomFilter = new byte[FEED_HEIGHT][FEED_WIDTH];
 		
 		@Override
 		public void run() {
 			if (!webcam.isOpen()) {
-				webcam.setViewSize(new Dimension(640, 480));
+				webcam.setViewSize(new Dimension(FEED_WIDTH, FEED_HEIGHT));
 				webcam.open();			
 			}
 			
@@ -127,9 +134,8 @@ public class CameraManager {
 					return;
 				}
 				
-				Image img = SwingFXUtils.toFXImage(currentFrame, null);
-				
-				canvasManager.updateBackground(img);
+				//Image img = SwingFXUtils.toFXImage(currentFrame, null);
+				//canvasManager.updateBackground(img);
 				
 				if (System.currentTimeMillis() - 
 						startDetectionCycle >= config.getDetectionRate()) {
@@ -146,6 +152,106 @@ public class CameraManager {
 			}
 		}
 		
+		private BufferedImage threshold(BufferedImage grayScale) {
+			BufferedImage threshholdedImg = new BufferedImage(grayScale.getWidth(),
+					grayScale.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+			
+			for (int y = 0; y < grayScale.getHeight(); y++) {
+				for (int x = 0; x < grayScale.getWidth(); x++) {
+					int pixel = grayScale.getRGB(x, y) & 0xFF;
+					
+					if (pixel > config.getLaserIntensity()) {
+						threshholdedImg.setRGB(x, y, mixColor(255, 255, 255));
+					} else {
+						threshholdedImg.setRGB(x, y, mixColor(0, 0, 0));
+					}
+				}
+			}
+			
+			return threshholdedImg;
+		}
+		
+		private int mixColor(int red, int green, int blue) {
+			return red << 16 | green << 8 | blue;
+		}
+		
+		private byte[][] getFrameCount(BufferedImage img) {
+			byte[][] newCount = new byte[FEED_HEIGHT][FEED_WIDTH];
+			
+			for (int y = 0; y < img.getHeight(); y++) {
+				for (int x = 0; x < img.getWidth(); x++) {
+					int pixel = img.getRGB(x, y) & 0xFF;
+					if (pixel == 255) newCount[y][x] = 1;
+				}
+			}
+			
+			return newCount;
+		}
+		
+		private void addFrameCount(byte[][] count) {
+			for (int y = 0; y < FEED_HEIGHT; y++) {
+				for (int x = 0; x < FEED_WIDTH; x++) {
+					bloomFilter[y][x] += count[y][x];
+				}
+			}
+		}
+		
+		private void subFrameCount(byte[][] count) {
+			for (int y = 0; y < FEED_HEIGHT; y++) {
+				for (int x = 0; x < FEED_WIDTH; x++) {
+					if (bloomFilter[y][x] >= 1)
+						bloomFilter[y][x] -= count[y][x];
+				}
+			}
+		}
+		
+		private BufferedImage countToImage(byte[][] count) {
+			BufferedImage img = new BufferedImage(count[0].length,
+					count.length, BufferedImage.TYPE_BYTE_GRAY);
+			
+			for (int y = 0; y < img.getHeight(); y++) {
+				for (int x = 0; x < img.getWidth(); x++) {
+					if (count[y][x] == 1) {
+						img.setRGB(x, y, mixColor(255, 255, 255));
+					} else {
+						img.setRGB(x, y, mixColor(0, 0, 0));
+					}
+				}
+			}
+			
+			return img;
+		}
+		
+		private byte[][] generateMask() {
+			byte[][] mask = new byte[FEED_HEIGHT][FEED_WIDTH];
+			
+			for (int y = 0; y < FEED_HEIGHT; y++) {
+				for (int x = 0; x < FEED_WIDTH; x++) {
+					if (bloomFilter[y][x] == 0) mask[y][x] = 0;
+					else mask[y][x] = 1;
+				}
+			}
+			
+			return mask;	
+		}
+		
+		private byte not(byte value) {
+			if (value == 1) return 0;
+			else return 1;
+		}
+		
+		private byte[][] getShotFrame(byte[][] mask, byte[][] currentFrame) {
+			byte[][] shotFrame = new byte[FEED_HEIGHT][FEED_WIDTH];
+			
+			for (int y = 0; y < FEED_HEIGHT; y++) {
+				for (int x = 0; x < FEED_WIDTH; x++) {
+					shotFrame[y][x] = (byte) (not(mask[y][x]) & currentFrame[y][x]);
+				}
+			}
+			
+			return shotFrame;	
+		}
+		
 		private void detectShots() {
 			if (!isDetecting) return;
 			
@@ -157,8 +263,31 @@ public class CameraManager {
 					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(currentCopy, 0, 0, null);
 			
-			new Thread(new ShotSearcher(config, canvasManager, 
-					currentCopy, grayScale)).start();
+			BufferedImage threshed = threshold(grayScale);
+			
+			if (counts.size() == BLOOM_COUNT) {
+				byte[][] currentFrame = getFrameCount(threshed);
+				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
+				
+				new Thread(new ShotSearcher(config, canvasManager, 
+						currentCopy, shotFrame)).start();
+				
+				Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
+				canvasManager.updateBackground(img);
+				
+				// Update the bloom filter by removing the oldest frame
+				// and adding the current one
+				subFrameCount((byte[][])counts.get(oldestFrame));
+				counts.set(oldestFrame, currentFrame);
+				addFrameCount(currentFrame);
+				oldestFrame = (oldestFrame + 1) % BLOOM_COUNT;
+			} else {
+				counts.add(getFrameCount(threshed));
+				
+				if (counts.size() == BLOOM_COUNT) {
+					for (Object count : counts) addFrameCount((byte[][])count);
+				}
+			}
 		}
 	}	
 }
