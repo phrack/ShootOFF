@@ -34,7 +34,7 @@
       <CheckBox fx:id="malfunctionsCheckBox" mnemonicParsing="false" onAction="#malfunctionsCheckBoxClicked" text="Inject Malfunctions (%):" GridPane.rowIndex="6" />
       <Slider fx:id="laserIntensitySlider" majorTickUnit="50.0" max="255.0" min="1.0" minorTickCount="2" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
       <Slider fx:id="markerRadiusSlider" blockIncrement="1.0" majorTickUnit="9.0" max="20.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-      <Slider fx:id="virtualMagazineSlider" blockIncrement="1.0" disable="true" majorTickUnit="5.0" max="45.0" min="1.0" minorTickCount="2" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+      <Slider fx:id="virtualMagazineSlider" blockIncrement="1.0" disable="true" majorTickUnit="5.0" max="45.0" min="1.0" minorTickCount="2" showTickLabels="true" showTickMarks="true" value="1.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
       <Slider fx:id="malfunctionsSlider" disable="true" max="99.9" min="0.1" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="6" />
       <Button minWidth="63.0" mnemonicParsing="false" onAction="#okClicked" text="OK" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
       <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
