@@ -30,6 +30,7 @@ import javafx.scene.paint.Color;
 public class ShotSearcher implements Runnable {
 	private final int BLACK_PIXEL = 0;
 	private final int WHITE_PIXEL = 1;
+	private final int MIN_SHOT_DIM = 4; // px
 	
 	private final Configuration config;
 	private final CanvasManager canvasManager;
@@ -71,10 +72,13 @@ public class ShotSearcher implements Runnable {
 								areaColor.get().equals(config.getIgnoreLaserColor().get()))
 									continue; 
 						
-						Point2D center = approximateCenter(x, y);
+						Optional<Point2D> center = approximateCenter(x, y);
 						
-						canvasManager.addShot(areaColor.get(), center.getX(), center.getY());
-						return;
+						if (center.isPresent()) {
+							canvasManager.addShot(areaColor.get(), center.get().getX(), 
+									center.get().getY());
+							return;
+						}
 					}
 				}
 			}
@@ -182,14 +186,14 @@ public class ShotSearcher implements Runnable {
 	 * @param y initial y coordinate of the shot location
 	 * @return the approximate center of the shot
 	 */
-	private Point2D approximateCenter(double x, double y) {
+	private Optional<Point2D> approximateCenter(double x, double y) {
 		double minX = x, minY = y;
 		double maxX = x, maxY = y;	
 		
 		// We need to see a certain number of black pixels because the shot
 		// does not have sharp borders (we may hit a black pixel right away
 		// even though it's not the read edge otherwise)
-		final int BORDER_WIDTH = 5;
+		final int BORDER_WIDTH = 3;
 		int blackCount = 0;
 	
 		for (;maxY < shotFrame.length; maxY++) {
@@ -199,7 +203,8 @@ public class ShotSearcher implements Runnable {
 		
 		blackCount = 0;
 		minY -= BORDER_WIDTH;
-		double centerY = minY + ((maxY - minY) / 2);
+		double shotHeight = maxY - minY;
+		double centerY = minY + (shotHeight / 2);
 		
 		for (;maxX < shotFrame[0].length; maxX++) {
 			if (shotFrame[(int)centerY][(int)maxX] == BLACK_PIXEL) blackCount++; else blackCount = 0;
@@ -208,8 +213,14 @@ public class ShotSearcher implements Runnable {
 		
 		maxX -= BORDER_WIDTH;
 		
-		double centerX = minX + ((maxX - minX) / 2);
+		double shotWidth = maxX - minX;
+		double centerX = minX + (shotWidth / 2);
+		
+		// If the width and height of the shot are really small it's a false positive
+		System.out.println(shotWidth + " " + shotHeight);
+		if (shotWidth < MIN_SHOT_DIM || shotHeight < MIN_SHOT_DIM)
+			return Optional.empty();
 
-		return new Point2D(centerX, centerY);
+		return Optional.of(new Point2D(centerX, centerY));
 	}
 }
