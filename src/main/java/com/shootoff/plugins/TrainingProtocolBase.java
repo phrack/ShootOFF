@@ -65,8 +65,8 @@ public class TrainingProtocolBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
-	private final Map<CanvasManager, Label> protocolLabels = new HashMap<CanvasManager, Label>();
 	
+	private final Map<CanvasManager, Label> protocolLabels = new HashMap<CanvasManager, Label>();
 	private final Map<String, TableColumn<ShotEntry, String>> protocolColumns = 
 			new HashMap<String, TableColumn<ShotEntry, String>>();
 
