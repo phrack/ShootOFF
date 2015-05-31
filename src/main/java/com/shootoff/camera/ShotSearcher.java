@@ -47,11 +47,11 @@ public class ShotSearcher implements Runnable {
 		// each independently
 		int sub_width = threshholded.getWidth() / 3;
 		int sub_height = threshholded.getHeight() / 3;
-		
-		for (int x_start = 0; x_start <= threshholded.getWidth() - sub_width; 
-				x_start += sub_width) {
-			for (int y_start = 0; y_start <= threshholded.getHeight() - sub_height; 
-					y_start += sub_height) {
+
+		for (int y_start = 0; y_start <= threshholded.getHeight() - sub_height; 
+				y_start += sub_height) {
+			for (int x_start = 0; x_start <= threshholded.getWidth() - sub_width; 
+					x_start += sub_width) {
 				
 				findShot(x_start, x_start + sub_width, y_start, y_start + sub_height);
 			}
@@ -62,8 +62,8 @@ public class ShotSearcher implements Runnable {
 		BufferedImage threshholdedImg = new BufferedImage(grayScale.getWidth(),
 				grayScale.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 		
-		for (int x = 0; x < grayScale.getWidth(); x++) {
-			for (int y = 0; y < grayScale.getHeight(); y++) {
+		for (int y = 0; y < grayScale.getHeight(); y++) {
+			for (int x = 0; x < grayScale.getWidth(); x++) {
 				int pixel = grayScale.getRGB(x, y) & 0xFF;
 				
 				if (pixel > config.getLaserIntensity()) {
@@ -198,14 +198,7 @@ public class ShotSearcher implements Runnable {
 	}		
 	
 	/**
-	 * Find the approximate center of the shot given initial coordinates. This
-	 * method works by using the heuristic that shots typically have white or barely
-	 * off white centers and these centers are rarely bigger than 8 x 8 pixels. 
-	 * Given the current algorith, the initial coordinates are always on the top left 
-	 * of the shot. Thus, we search from the initial shot for diagonally 8 pixels and
-	 * down to find off white pixels to determine the rough bounds of the center of the
-	 * shot. With the rough bounds, the approximate center is the middle of the bounds.
-	 * 
+	 * Find the approximate center of the shot given initial coordinates. 
 	 * 
 	 * @param x	initial x coordinate of the shot location
 	 * @param y initial y coordinate of the shot location
@@ -213,25 +206,34 @@ public class ShotSearcher implements Runnable {
 	 */
 	private Point2D approximateCenter(double x, double y) {
 		double minX = x, minY = y;
-		double maxX = x, maxY = y;
+		double maxX = x, maxY = y;	
 		
-		for (;maxX < minX + 8; maxX++, maxY++) {
-			// Make sure the pixel's RGB value is > (210, 210, 210) 
-			// (210 decimal = 0xD2) as heuristically the off white
-			// center doesn't drop below this
-			final int RGB_THRESHOLD = 0xD2;
-			
-			int rgb = currentFrame.getRGB((int)maxX, (int)maxY);
-			int r = getRed(rgb);
-			int g = getGreen(rgb);
-			int b = getBlue(rgb);
-			
-			if (r < RGB_THRESHOLD || g < RGB_THRESHOLD || b < RGB_THRESHOLD) break;
+		// We need to see a certain number of black pixels because the shot
+		// does not have sharp borders (we may hit a black pixel right away
+		// even though it's not the read edge otherwise)
+		final int BORDER_WIDTH = 5;
+		int blackCount = 0;
+	
+		for (;maxY < threshholded.getHeight(); maxY++) {
+			int pixel = threshholded.getRGB((int)maxX, (int)maxY) & 0xFF;
+			if (pixel == 0) blackCount++; else blackCount = 0;
+			if (blackCount == BORDER_WIDTH) break;
 		}
 		
-		double centerX = minX + ((maxX - minX) / 2);
+		blackCount = 0;
+		minY -= BORDER_WIDTH;
 		double centerY = minY + ((maxY - minY) / 2);
 		
+		for (;maxX < threshholded.getWidth(); maxX++) {
+			int pixel = threshholded.getRGB((int)maxX, (int)centerY) & 0xFF;
+			if (pixel == 0) blackCount++; else blackCount = 0;
+			if (blackCount == BORDER_WIDTH) break;
+		}
+		
+		maxX -= BORDER_WIDTH;
+		
+		double centerX = minX + ((maxX - minX) / 2);
+
 		return new Point2D(centerX, centerY);
 	}
 }

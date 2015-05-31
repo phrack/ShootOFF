@@ -107,7 +107,7 @@ public class TestShotSearcher {
 				
 		// Real shot
 		assertEquals(411, shots.get(0).getX(), 1);
-		assertEquals(333, shots.get(0).getY(), 1);
+		assertEquals(331, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 	}
 	
@@ -121,7 +121,7 @@ public class TestShotSearcher {
 		
 		// Real shot
 		assertEquals(411, shots.get(0).getX(), 1);
-		assertEquals(333, shots.get(0).getY(), 1);
+		assertEquals(331, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 	}
 }
