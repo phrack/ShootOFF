@@ -177,22 +177,29 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (config.getWebcams().isEmpty()) {
 			if (!addCameraTab("Default", Webcam.getDefault())) cameraLockFailure(Webcam.getDefault(), true);
 		} else {
+			int failureCount = 0;
+			
 			for (String webcamName : config.getWebcams().keySet()) {
 				Webcam webcam = config.getWebcams().get(webcamName);
-				if (!addCameraTab(webcamName, webcam)) cameraLockFailure(webcam, config.getWebcams().size() <= 1);
+				
+				if (!addCameraTab(webcamName, webcam)) {
+					failureCount++;
+					cameraLockFailure(webcam, failureCount == config.getWebcams().size());
+				}
 			}
 		}
 	}
 	
-	private void cameraLockFailure(Webcam webcam, boolean onlyCamera) {
+	private void cameraLockFailure(Webcam webcam, boolean allCamerasFailed) {
 		Alert cameraAlert = new Alert(AlertType.ERROR);
 		cameraAlert.setTitle("Webcam Locked");
 		cameraAlert.setHeaderText("Cannot Open Webcam");
 		cameraAlert.setResizable(true);
+		cameraAlert.getDialogPane().getScene().getWindow().requestFocus();
 		
 		String messageFormat;
 		
-		if (onlyCamera) {
+		if (allCamerasFailed) {
 			messageFormat = "Cannot open the webcam %s. It is being "
 					+ "used by another program. This is the only configured camera, thus"
 					+ "ShootOFF must close.";
@@ -206,7 +213,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		cameraAlert.setContentText(String.format(messageFormat, 
 				webcamName.isPresent() ? webcamName.get() : webcam.getName()));
 		
-		if (onlyCamera) {
+		if (allCamerasFailed) {
 			cameraAlert.showAndWait();
 			System.exit(-1);
 		} else {
@@ -215,7 +222,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private boolean addCameraTab(String webcamName, Webcam webcam) {
-		if (webcam.getLock().isLocked()) {
+		if (webcam.getLock().isLocked() && !webcam.isOpen()) {
 			return false;
 		}
 		
