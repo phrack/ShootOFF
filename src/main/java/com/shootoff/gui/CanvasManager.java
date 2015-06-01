@@ -20,8 +20,13 @@ package com.shootoff.gui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
@@ -52,6 +57,7 @@ public class CanvasManager {
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
 	
+	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
 	private final CamerasSupervisor camerasSupervisor;
@@ -174,7 +180,10 @@ public class CanvasManager {
 				System.currentTimeMillis() - startTime, config.getMarkerRadius());
 		
 		for (ShotProcessor processor : config.getShotProcessors()) {
-			if (!processor.processShot(shot)) return;
+			if (!processor.processShot(shot)) {
+				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
+				return;
+			}
 		}
 		
 		shotEntries.add(new ShotEntry(shot));
@@ -229,7 +238,7 @@ public class CanvasManager {
 	
 	private Optional<TargetRegion> checkHit(Shot shot) {
 		for (Group target : targets) {
-			if (target.getBoundsInParent().contains(shot.getX(), shot.getY())) {
+			if (target.getBoundsInParent().contains(shot.getX(), shot.getY())) {				
 				// Target was hit, see if a specific region was hit
 				for (int i = target.getChildren().size() - 1; i >= 0; i--) {
 					Node node = target.getChildren().get(i);
@@ -248,11 +257,30 @@ public class CanvasManager {
 							}
 						}
 						
+						if (config.inDebugMode()) {
+							Map<String, String> tags = region.getAllTags();
+							
+							StringBuilder tagList = new StringBuilder();
+							for (Iterator<String> it = tags.keySet().iterator(); it.hasNext();) {
+								String tagName = it.next();
+								tagList.append(tagName);
+								tagList.append(":");
+								tagList.append(tags.get(tagName));
+								if (it.hasNext()) tagList.append(", ");
+							}
+						
+							logger.debug("Processing Shot: Found Hit Region For Shot ({}, {}), Type ({}), Tags ({})", 
+									shot.getX(), shot.getY(), region.getType(), tagList.toString());	
+						}
+						
 						return Optional.of((TargetRegion)node);
 					}
 				}
 			}
 		}
+		
+		logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", 
+				shot.getX(), shot.getY());
 		
 		return Optional.empty();
 	}
