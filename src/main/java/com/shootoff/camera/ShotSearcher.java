@@ -21,6 +21,9 @@ package com.shootoff.camera;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
@@ -32,6 +35,7 @@ public class ShotSearcher implements Runnable {
 	private final int WHITE_PIXEL = 1;
 	private final int MIN_SHOT_DIM = 7; // px
 	
+	private final Logger logger = LoggerFactory.getLogger(ShotSearcher.class);
 	private final Configuration config;
 	private final CanvasManager canvasManager;
 	private final BufferedImage currentFrame;
@@ -75,6 +79,10 @@ public class ShotSearcher implements Runnable {
 						Optional<Point2D> center = approximateCenter(x, y);
 						
 						if (center.isPresent()) {
+							logger.debug("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {})", 
+									x, y, center.get().getX(),
+									center.get().getY());
+							
 							canvasManager.addShot(areaColor.get(), center.get().getX(), 
 									center.get().getY());
 							return;
@@ -156,7 +164,7 @@ public class ShotSearcher implements Runnable {
 
         if ((r / g) > PDIFF_THRESHOLD && (r / b) > PDIFF_THRESHOLD)
             return Optional.of(Color.RED);
-
+            
         if (r == 0 || b == 0)
         	return Optional.empty();
 
@@ -217,8 +225,11 @@ public class ShotSearcher implements Runnable {
 		double centerX = minX + (shotWidth / 2);
 		
 		// If the width and height of the shot are really small it's a false positive
-		if (shotWidth < MIN_SHOT_DIM && shotHeight < MIN_SHOT_DIM)
+		if (shotWidth < MIN_SHOT_DIM && shotHeight < MIN_SHOT_DIM) {
+			logger.debug("Suspected shot rejected: Dimensions Too Small "
+					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, MIN_SHOT_DIM);
 			return Optional.empty();
+		}
 
 		return Optional.of(new Point2D(centerX, centerY));
 	}

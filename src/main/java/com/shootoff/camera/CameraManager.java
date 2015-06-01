@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
@@ -38,6 +41,7 @@ public class CameraManager {
 	public static final int FEED_WIDTH = 640;
 	public static final int FEED_HEIGHT = 480;
 	
+	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	private final Webcam webcam;
 	private final CanvasManager canvasManager;
 	private final Configuration config;
@@ -285,6 +289,7 @@ public class CameraManager {
 				counts.add(getFrameCount(threshed));
 				
 				if (counts.size() == BLOOM_COUNT) {
+					logger.debug("Finished initializing bloom filter: Enabling Shot Detection");
 					for (Object count : counts) addFrameCount((byte[][])count);
 				}
 			}

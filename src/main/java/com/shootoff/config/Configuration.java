@@ -43,6 +43,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
 import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
@@ -285,30 +286,30 @@ public class Configuration {
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
 			
-			if (cmd.hasOption("d")) debugMode = true;
+			if (cmd.hasOption("d")) setDebugMode(true);
 			
 			if (cmd.hasOption("r"))
-				detectionRate = Integer.parseInt(cmd.getOptionValue("r"));
+				setDetectionRate(Integer.parseInt(cmd.getOptionValue("r")));
 			
 			if (cmd.hasOption("i")) 
-				laserIntensity = Integer.parseInt(cmd.getOptionValue("i"));
+				setLaserIntensity(Integer.parseInt(cmd.getOptionValue("i")));
 			
 			if (cmd.hasOption("m"))
-				markerRadius = Integer.parseInt(cmd.getOptionValue("m"));
+				setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
 			
 			if (cmd.hasOption("c")) {
-				ignoreLaserColor = true;
-				ignoreLaserColorName = cmd.getOptionValue("c");
+				setIgnoreLaserColor(true);
+				setIgnoreLaserColorName(cmd.getOptionValue("c"));
 			}
 			
 			if (cmd.hasOption("u")) {
-				useVirtualMagazine = true;
-				virtualMagazineCapacity = Integer.parseInt(cmd.getOptionValue("u"));
+				setUseVirtualMagazine(true);
+				setVirtualMagazineCapacity(Integer.parseInt(cmd.getOptionValue("u")));
 			}
 			
 			if (cmd.hasOption("f")) {
-				useMalfunctions = true;
-				malfunctionsProbability = Float.parseFloat(cmd.getOptionValue("f"));
+				setMalfunctions(true);
+				setMalfunctionsProbability(Float.parseFloat(cmd.getOptionValue("f")));
 			}
 		} catch (ParseException e) {
 			System.err.println(e.getMessage());
@@ -427,6 +428,16 @@ public class Configuration {
 
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
+		
+		if (debugMode) {
+			System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
+			// Ensure WebcamDefaultDriver's logger stays at info because it is quite noisy
+			// and doesn't output information we care about.
+			System.setProperty(org.slf4j.impl.SimpleLogger.LOG_KEY_PREFIX + 
+					WebcamDefaultDriver.class.getName(), "INFO");
+		} else {
+			System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+		}
 	}
 	
 	public void setProtocol(TrainingProtocol protocol) {
