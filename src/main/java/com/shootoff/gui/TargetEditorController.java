@@ -620,25 +620,33 @@ public class TargetEditorController {
 			}
 			
 			newShape = new PolygonRegion(points);
+			
+			targetRegions.add(newShape);
+			newShape.setOnMouseClicked((e) -> { regionClicked(e); });
+			newShape.setOnKeyPressed((e) -> { regionKeyPressed(e); });
 		} else {
 			cursorRegion = Optional.empty();
 			System.err.println("Unimplemented region type selected.");
 			return;
 		}
 		
-		double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
-		if (leftX < 0)
-			newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
-		
-		double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
-		if (topY < 0)
-			newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
-
 		newShape.setFill(DEFAULT_FILL_COLOR);
 		newShape.setOpacity(TargetIO.DEFAULT_OPACITY);
 		canvasPane.getChildren().add(newShape);
 		
-		cursorRegion = Optional.of(newShape);
+		// New freeform polygon should not be on the cursor or
+		// adjusted (it can't be off the canvas)
+		if (!freeformButton.isSelected()) {
+			double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
+			if (leftX < 0)
+				newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
+			
+			double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
+			if (topY < 0)
+				newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
+			
+			cursorRegion = Optional.of(newShape);
+		}
 	}
 	
 	@FXML
