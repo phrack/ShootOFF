@@ -60,8 +60,8 @@ public class TargetContainer {
 	        if(!isInResizeZone(event)) {
 	        	move = true;
 	        	
-	        	x = event.getX() - target.getLayoutX();
-	        	y = event.getY() - target.getLayoutY();
+	        	x = event.getX();
+	        	y = event.getY();
 	            return;
 	        }
 	        
@@ -79,12 +79,18 @@ public class TargetContainer {
     		
 	        if(move) {
 	        	if (config.inDebugMode() && (event.isControlDown() || event.isShiftDown())) return;
-	        	
+
+        		double deltaX = event.getX() - x;
+        		double deltaY = event.getY() - y;
+        	        		
 	        	for (Node node : target.getChildren()) {
-		            node.setLayoutX(target.getLayoutX() + event.getX() - x);
-		            node.setLayoutY(target.getLayoutY() + event.getY() - y);
+		            node.setLayoutX(node.getLayoutX() + deltaX);
+		            node.setLayoutY(node.getLayoutY() + deltaY);
 	        	}
-	            
+	        	
+	        	x = event.getX();
+	        	y = event.getY();
+	        	
 	            return;
 	        }
 	 
@@ -171,7 +177,7 @@ public class TargetContainer {
     }
     
     private void mouseReleased() {
-    	target.setOnMouseReleased((event) -> {
+    	target.setOnMouseReleased((event) -> {    		
     		resize = false;
     		move = false;
         	target.setCursor(Cursor.DEFAULT);
