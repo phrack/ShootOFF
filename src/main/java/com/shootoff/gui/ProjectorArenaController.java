@@ -25,16 +25,18 @@ import com.shootoff.config.Configuration;
 
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-public class ProjectorArenaController {
+public class ProjectorArenaController implements CalibrationListener {
 	private Stage arenaStage;
 	@FXML private AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
+	@FXML private Label calibrationLabel;
 	
 	@SuppressWarnings("unused")
 	private Configuration config;
@@ -83,4 +85,9 @@ public class ProjectorArenaController {
 	public void canvasMouseEntered(MouseEvent event) throws IOException {
 		arenaAnchor.requestFocus();
     }
+
+	@Override
+	public void calibrated() {
+		calibrationLabel.setVisible(false);
+	}
 }

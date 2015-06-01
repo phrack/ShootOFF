@@ -410,6 +410,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			calibratingManager.removeTarget(calibrationGroup);
 			calibratingManager.setProjectorArena(arenaController, calibrationGroup.getBoundsInParent());
 			calibrationGroup = null;
+			arenaController.calibrated();
 		}		
 	}
 	
