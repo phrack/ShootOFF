@@ -18,12 +18,12 @@
 
 package com.shootoff.config;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -154,7 +154,7 @@ public class Configuration {
 		if (configInput != null) {
 			inputStream = configInput;
 		} else {
-			inputStream = getClass().getClassLoader().getResourceAsStream(configName);
+			inputStream = new FileInputStream(configName);
 		}
 			 
 		if (inputStream != null) {
@@ -254,9 +254,7 @@ public class Configuration {
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
 		
-		URL configURL = getClass().getClassLoader().getResource(configName);
-		
-		OutputStream outputStream = new FileOutputStream(configURL.getFile());
+		OutputStream outputStream = new FileOutputStream(configName);
 		prop.store(outputStream, "ShootOFF Configuration");
 	}
 	

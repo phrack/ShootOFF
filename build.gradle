@@ -25,10 +25,13 @@ configurations {
     jfxant
 }
 
+task copyConfig(type:Copy) {
+    from 'shootoff.properties' into 'build/dist'
+}
+
 task copyTargets(type:Copy) {
     from 'targets' into 'build/dist/targets'
 }
-
 
 task copySounds(type:Copy) {
     from 'sounds' into 'build/dist/sounds'
@@ -62,6 +65,7 @@ dependencies {
 }
 
 task fxJar(dependsOn: build){
+    dependsOn('copyConfig')
     dependsOn('copyTargets')
     dependsOn('copySounds')
     dependsOn('copyLibs')
