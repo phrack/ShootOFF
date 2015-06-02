@@ -8,20 +8,20 @@
 
 <GridPane hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.PreferencesController">
    <columnConstraints>
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="180.0" />
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="0.0" />
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="0.0" prefWidth="180.0" />
-      <ColumnConstraints hgrow="SOMETIMES" maxWidth="70.0" minWidth="10.0" prefWidth="70.0" />
+      <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
+      <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0"  />
+      <ColumnConstraints hgrow="SOMETIMES" percentWidth="35.0" />
+      <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
    </columnConstraints>
    <rowConstraints>
-      <RowConstraints minHeight="0.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="20" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
       <Label text="Cameras:" />
