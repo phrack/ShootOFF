@@ -23,7 +23,7 @@ public class TestConfiguration {
 		assertEquals(0, defaultConfig.getWebcams().size());
 		assertEquals(70, defaultConfig.getDetectionRate());
 		assertEquals(230, defaultConfig.getLaserIntensity());
-		assertEquals(2, defaultConfig.getMarkerRadius());
+		assertEquals(4, defaultConfig.getMarkerRadius());
 		assertEquals(false, defaultConfig.ignoreLaserColor());
 		assertEquals("None", defaultConfig.getIgnoreLaserColorName());
 		assertEquals(false, defaultConfig.useVirtualMagazine());
