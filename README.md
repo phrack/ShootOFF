@@ -7,7 +7,7 @@ You can find additional information about using ShootOFF on the wiki: https://gi
 
 To work with the ShootOFF source code you will need, at a minimum:
 
-* JDK 8 with JavaFX -- the easiest way to get this is to install the Oracle version of the JDK; OpenJDK does have the JavaFX source code, but the process to get a working JDK with it at the moment is time consuming
+* JDK 8 with JavaFX -- the easiest way to get this is to install the Oracle version of the JDK; OpenJDK does have the JavaFX source code, but the process to get a working JDK with it at the moment is time consuming. Minimum version for ShootOFF is 8u40. Any earlier version will not have the Dialog class (https://docs.oracle.com/javase/8/javafx/api/javafx/scene/control/Dialog.html), which ShootOFF uses for alerts
 * Gradle
 
 To use Eclipse, we recommend installing E(fx)clipse and SceneBuilder as well. To generate an importable Eclipse project run: gradle eclipse
