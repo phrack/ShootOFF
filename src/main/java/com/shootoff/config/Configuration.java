@@ -88,7 +88,7 @@ public class Configuration {
 	private Map<String, Webcam> webcams =  new HashMap<String, Webcam>();
 	private int detectionRate = 70;
 	private int laserIntensity = 230;
-	private int markerRadius = 2;
+	private int markerRadius = 4;
 	private boolean ignoreLaserColor = false;
 	private String ignoreLaserColorName = "None";
 	private boolean useVirtualMagazine = false;
