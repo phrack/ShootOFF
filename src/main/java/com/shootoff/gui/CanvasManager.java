@@ -46,6 +46,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -63,6 +64,7 @@ public class CanvasManager {
 	private final List<Group> targets = new ArrayList<Group>();
 	
 	private ProgressIndicator progress;
+	private Optional<ContextMenu> contextMenu;
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
@@ -70,7 +72,7 @@ public class CanvasManager {
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 	
-	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor,
+	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor, 
 			ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
@@ -90,19 +92,23 @@ public class CanvasManager {
 			canvasGroup.getChildren().add(progress);
 		}
 		
-		// Click to shoot
-		if (config.inDebugMode()) {
-			canvasGroup.setOnMouseClicked((event) -> {
-					if (event.getButton() == MouseButton.PRIMARY) {
-						if (event.isShiftDown()) {
-							addShot(Color.RED, event.getX(), event.getY());
-						} else if (event.isControlDown()) {
-							addShot(Color.GREEN, event.getX(), event.getY());
-						}
-					}
-				});
-		}
+		canvasGroup.setOnMouseClicked((event) -> {
+			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
+				// Click to shoot
+				if (event.isShiftDown()) {
+					addShot(Color.RED, event.getX(), event.getY());
+				} else if (event.isControlDown()) {
+					addShot(Color.GREEN, event.getX(), event.getY());
+				}
+			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
+				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
+			}
+		});
 	}	
+	
+	public void setContextMenu(ContextMenu menu) {
+		this.contextMenu = Optional.of(menu);
+	}
 	
 	public void updateBackground(Image img) {
 		if (!canvasGroup.getChildren().contains(background)) {

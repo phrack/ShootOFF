@@ -58,6 +58,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -245,10 +246,49 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 		
-		camerasSupervisor.addCameraManager(webcam, 
-				new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries));
+		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries);
+		camerasSupervisor.addCameraManager(webcam, canvasManager);
+		canvasManager.setContextMenu(createContextMenu());
 		
 		return cameraTabPane.getTabs().add(cameraTab);
+	}
+	
+	private ContextMenu createContextMenu() {
+		ContextMenu contextMenu = new ContextMenu();
+		
+		if (config.inDebugMode()) {
+			MenuItem showStreamDebuggerMenuItem = new MenuItem("Show Stream Debugger");
+			
+			showStreamDebuggerMenuItem.setOnAction((event) -> {
+					FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/StreamDebugger.fxml"));
+					try {
+						loader.load();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					Stage streamDebuggerStage = new Stage();
+
+			        streamDebuggerStage.setTitle(String.format("Stream Debugger -- %s", 
+			        		cameraTabPane.getSelectionModel().getSelectedItem().getText()));
+			        streamDebuggerStage.setScene(new Scene(loader.getRoot()));
+			        streamDebuggerStage.show();
+					CameraManager cameraManager = camerasSupervisor.getCameraManager(
+							cameraTabPane.getSelectionModel().getSelectedIndex());
+			        ((StreamDebuggerController)loader.getController()).init(cameraManager);
+			        
+			        showStreamDebuggerMenuItem.setDisable(true);
+			        
+			        streamDebuggerStage.setOnCloseRequest((e) -> {
+			        		showStreamDebuggerMenuItem.setDisable(false);
+			        		cameraManager.setThresholdListener(null);
+			        	});
+				});
+			
+			contextMenu.getItems().add(showStreamDebuggerMenuItem);
+		}
+		
+		return contextMenu;
 	}
 	
 	private void findTargets() {

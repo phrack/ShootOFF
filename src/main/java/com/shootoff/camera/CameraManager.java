@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.ThresholdListener;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -41,6 +42,8 @@ public class CameraManager {
 	public static final int FEED_WIDTH = 640;
 	public static final int FEED_HEIGHT = 480;
 	
+	private int bloomCount = 10;
+	
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	private final Webcam webcam;
 	private final CanvasManager canvasManager;
@@ -49,6 +52,7 @@ public class CameraManager {
 	
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
+	private Optional<ThresholdListener> thresholdListener = Optional.empty();
 	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = webcam;
@@ -90,6 +94,14 @@ public class CameraManager {
 	
 	public CanvasManager getCanvasManager() {
 		return canvasManager;
+	}
+	
+	public void setBloomCount(int count) {
+		bloomCount = count;
+	}
+	
+	public void setThresholdListener(ThresholdListener thresholdListener) {
+		this.thresholdListener = Optional.ofNullable(thresholdListener);
 	}
 	
 	protected static BufferedImage threshold(Configuration config, BufferedImage grayScale) {
@@ -147,10 +159,10 @@ public class CameraManager {
 	
 	private class Detector implements Runnable {
 		private BufferedImage currentFrame;
-		private final int BLOOM_COUNT = 10;
 		private int oldestFrame = 0;
 		private List<Object> counts = new ArrayList<Object>();
 		private byte[][] bloomFilter = new byte[FEED_HEIGHT][FEED_WIDTH];
+		private boolean bloomFilterInitialized = false;
 		
 		@Override
 		public void run() {
@@ -257,7 +269,7 @@ public class CameraManager {
 		}
 		
 		private void detectShots() {
-			if (!isDetecting) return;
+			if (!isDetecting || bloomCount == 0) return;
 			
 			BufferedImage currentCopy = new BufferedImage(currentFrame.getWidth(),
 					currentFrame.getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -269,27 +281,39 @@ public class CameraManager {
 			
 			BufferedImage threshed = threshold(config, grayScale);
 			
-			if (counts.size() == BLOOM_COUNT) {
+			// This condition is true if the stream debugger is opened
+			// and the bloom count slider is changed
+			if (bloomFilterInitialized && counts.size() != bloomCount) {
+				counts.clear();
+				bloomFilterInitialized = false;
+				oldestFrame = 0;
+			}
+			
+			if (bloomFilterInitialized) {
 				byte[][] currentFrame = getFrameCount(threshed);
 				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
 				
 				new Thread(new ShotSearcher(config, canvasManager, 
 						currentCopy, shotFrame)).start();
 				
-				//Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
-				//canvasManager.updateBackground(img);
+				if (thresholdListener.isPresent()) {
+					Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
+					thresholdListener.get().updateThreshold(img);
+				}
 				
 				// Update the bloom filter by removing the oldest frame
 				// and adding the current one
 				subFrameCount((byte[][])counts.get(oldestFrame));
 				counts.set(oldestFrame, currentFrame);
 				addFrameCount(currentFrame);
-				oldestFrame = (oldestFrame + 1) % BLOOM_COUNT;
+				oldestFrame = (oldestFrame + 1) % bloomCount;
 			} else {
-				counts.add(getFrameCount(threshed));
+				if (counts.size() != bloomCount) counts.add(getFrameCount(threshed));
 				
-				if (counts.size() == BLOOM_COUNT) {
-					logger.debug("Finished initializing bloom filter: Enabling Shot Detection");
+				if (counts.size() == bloomCount) {
+					bloomFilterInitialized = true;
+					logger.debug("Finished initializing bloom filter ({} frames in filter): Enabling Shot Detection",
+							bloomCount);
 					for (Object count : counts) addFrameCount((byte[][])count);
 				}
 			}
