@@ -30,7 +30,7 @@ import javafx.scene.control.TableView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.controllers.ProjectorArenaController;
+import com.shootoff.gui.controller.ProjectorArenaController;
 
 public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	private Configuration config;

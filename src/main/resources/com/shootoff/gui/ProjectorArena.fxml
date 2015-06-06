@@ -8,7 +8,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="arenaAnchor" onKeyPressed="#canvasKeyPressed" onMouseEntered="#canvasMouseEntered" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.ProjectorArenaController">
+<AnchorPane fx:id="arenaAnchor" onKeyPressed="#canvasKeyPressed" onMouseEntered="#canvasMouseEntered" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ProjectorArenaController">
    <children>
       <Group fx:id="arenaCanvasGroup" />
       <Label fx:id="calibrationLabel" alignment="CENTER" layoutX="6.0" layoutY="6.0" prefHeight="90.0" prefWidth="628.0" text="Needs Calibration" textFill="#f5a807">

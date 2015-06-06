@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<GridPane hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.PreferencesController">
+<GridPane hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.PreferencesController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
       <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0"  />

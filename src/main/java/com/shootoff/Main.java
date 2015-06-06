@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.controllers.ShootOFFController;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
 
 import javafx.application.Application;

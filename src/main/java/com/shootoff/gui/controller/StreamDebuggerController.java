@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui.controllers;
+package com.shootoff.gui.controller;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.gui.ThresholdListener;

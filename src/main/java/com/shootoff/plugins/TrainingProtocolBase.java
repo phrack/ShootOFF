@@ -36,7 +36,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.controllers.DelayedStartIntervalController;
+import com.shootoff.gui.controller.DelayedStartIntervalController;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
