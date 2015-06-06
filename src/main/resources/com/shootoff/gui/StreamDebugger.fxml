@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.StreamDebuggerController">
+   <children>
+      <ImageView fx:id="thresholdImageView" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
+      <Label text="Color Component Difference Threshold:" />
+      <Slider fx:id="colorDifferenceSlider" />
+      <Label text="Shot Center Approximation Border Size:" />
+      <Slider fx:id="centerBorderSlider" />
+      <Label text="Minimum Detected Shot Dimensions:" />
+      <Slider fx:id="minDimSlider" />
+      <Label text="Bloom Filter Frame Count:" />
+      <Slider fx:id="bloomCountSlider" blockIncrement="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="10.0" />
+   </children>
+</VBox>
