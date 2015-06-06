@@ -20,6 +20,7 @@ package com.shootoff.gui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class CanvasManager {
 	private final CamerasSupervisor camerasSupervisor;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
-	private final List<Shot> shots = new ArrayList<Shot>();
+	private final List<Shot> shots;
 	private final List<Group> targets = new ArrayList<Group>();
 	
 	private ProgressIndicator progress;
@@ -78,6 +79,7 @@ public class CanvasManager {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.shotEntries = shotEntries;
+		shots = Collections.synchronizedList(new ArrayList<Shot>());
 	
 		this.background.setOnMouseClicked((event) -> {
 				toggleTargetSelection(Optional.empty());
