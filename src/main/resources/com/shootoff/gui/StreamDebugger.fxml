@@ -10,12 +10,12 @@
    <children>
       <ImageView fx:id="thresholdImageView" fitHeight="480.0" fitWidth="640.0" pickOnBounds="true" preserveRatio="true" />
       <Label text="Color Component Difference Threshold:" />
-      <Slider fx:id="colorDifferenceSlider" blockIncrement="0.01" majorTickUnit="0.1" max="2.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="1.05" />
+      <Slider fx:id="colorDifferenceSlider" blockIncrement="0.01" majorTickUnit="0.1" max="2.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.05" />
       <Label text="Shot Center Approximation Border Size:" />
-      <Slider fx:id="centerBorderSlider" />
+      <Slider fx:id="centerBorderSlider" majorTickUnit="2.0" max="10.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="3.0" />
       <Label text="Minimum Detected Shot Dimensions:" />
-      <Slider fx:id="minDimSlider" />
+      <Slider fx:id="minDimSlider" blockIncrement="1.0" majorTickUnit="2.0" max="20.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="7.0" />
       <Label text="Bloom Filter Frame Count:" />
-      <Slider fx:id="bloomCountSlider" blockIncrement="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="10.0" />
+      <Slider fx:id="bloomCountSlider" blockIncrement="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0" />
    </children>
 </VBox>

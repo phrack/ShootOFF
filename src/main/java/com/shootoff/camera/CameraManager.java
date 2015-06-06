@@ -53,6 +53,8 @@ public class CameraManager {
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
 	private Optional<Double> colorDiffThreshold = Optional.empty();
+	private Optional<Integer> centerApproxBorderSize = Optional.empty();
+	private Optional<Integer> minimumShotDimension = Optional.empty();
 	private Optional<ThresholdListener> thresholdListener = Optional.empty();
 	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
@@ -100,6 +102,16 @@ public class CameraManager {
 	public void setColorDiffThreshold(double threshold) {
 		colorDiffThreshold = Optional.of(threshold);
 		logger.debug("Set color component difference threshold: {}", threshold);
+	}
+
+	public void setCenterApproxBorderSize(int borderSize) {
+		centerApproxBorderSize = Optional.of(borderSize);
+		logger.debug("Set the shot center approximation border size to: {}", borderSize);
+	}
+	
+	public void setMinimumShotDimension(int minDim) {
+		minimumShotDimension = Optional.of(minDim);
+		logger.debug("Set the minimum dimension for shots to: {}", minDim);
 	}
 	
 	public void setBloomCount(int count) {
@@ -304,6 +316,14 @@ public class CameraManager {
 				
 				if (colorDiffThreshold.isPresent()) {
 					shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());
+				}
+				
+				if (centerApproxBorderSize.isPresent()) {
+					shotSearcher.setCenterApproxBorderSize(centerApproxBorderSize.get());
+				}
+				
+				if (minimumShotDimension.isPresent()) {
+					shotSearcher.setMinimumShotDimension(minimumShotDimension.get());
 				}
 				
 				new Thread(shotSearcher).start();

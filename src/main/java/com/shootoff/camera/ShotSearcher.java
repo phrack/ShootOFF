@@ -33,7 +33,6 @@ import javafx.scene.paint.Color;
 public class ShotSearcher implements Runnable {
 	private final int BLACK_PIXEL = 0;
 	private final int WHITE_PIXEL = 1;
-	private final int MIN_SHOT_DIM = 7; // px
 	
 	private final Logger logger = LoggerFactory.getLogger(ShotSearcher.class);
 	private final Configuration config;
@@ -46,6 +45,8 @@ public class ShotSearcher implements Runnable {
     // heuristic that noise tends to have color values that are very
     // similar
 	private double colorDiffThreshold = 1.05;
+	private int borderWidth = 3; // px
+	private int minShotDim = 7; // px
 	
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, 
 			BufferedImage currentFrame, byte[][] shotFrame) {
@@ -57,6 +58,14 @@ public class ShotSearcher implements Runnable {
 	
 	public void setColorDiffThreshold(double threshold) {
 		colorDiffThreshold = threshold;
+	}
+	
+	public void setCenterApproxBorderSize(int width) {
+		borderWidth = width;
+	}
+	
+	public void setMinimumShotDimension(int minDim) {
+		minShotDim = minDim;
 	}
 	
 	@Override
@@ -205,33 +214,32 @@ public class ShotSearcher implements Runnable {
 		// We need to see a certain number of black pixels because the shot
 		// does not have sharp borders (we may hit a black pixel right away
 		// even though it's not the read edge otherwise)
-		final int BORDER_WIDTH = 3;
 		int blackCount = 0;
 	
 		for (;maxY < shotFrame.length; maxY++) {
 			if (shotFrame[(int)maxY][(int)maxX] == BLACK_PIXEL) blackCount++; else blackCount = 0;
-			if (blackCount == BORDER_WIDTH) break;
+			if (blackCount == borderWidth) break;
 		}
 		
 		blackCount = 0;
-		minY -= BORDER_WIDTH;
+		minY -= borderWidth;
 		double shotHeight = maxY - minY;
 		double centerY = minY + (shotHeight / 2);
 		
 		for (;maxX < shotFrame[0].length; maxX++) {
 			if (shotFrame[(int)centerY][(int)maxX] == BLACK_PIXEL) blackCount++; else blackCount = 0;
-			if (blackCount == BORDER_WIDTH) break;
+			if (blackCount == borderWidth) break;
 		}
 		
-		maxX -= BORDER_WIDTH;
+		maxX -= borderWidth;
 		
 		double shotWidth = maxX - minX;
 		double centerX = minX + (shotWidth / 2);
 		
 		// If the width and height of the shot are really small it's a false positive
-		if (shotWidth < MIN_SHOT_DIM && shotHeight < MIN_SHOT_DIM) {
+		if (shotWidth < minShotDim && shotHeight < minShotDim) {
 			logger.debug("Suspected shot rejected: Dimensions Too Small "
-					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, MIN_SHOT_DIM);
+					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
 		}
 
