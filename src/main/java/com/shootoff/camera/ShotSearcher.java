@@ -41,12 +41,22 @@ public class ShotSearcher implements Runnable {
 	private final BufferedImage currentFrame;
 	private final byte[][] shotFrame;
 	
+    // We only detect a color if the largest component is at least
+    // 5% bigger than the other components. This is based on the
+    // heuristic that noise tends to have color values that are very
+    // similar
+	private double colorDiffThreshold = 1.05;
+	
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, 
 			BufferedImage currentFrame, byte[][] shotFrame) {
 		this.config = config;
 		this.canvasManager = canvasManager;
 		this.currentFrame = currentFrame;
 		this.shotFrame = shotFrame;
+	}
+	
+	public void setColorDiffThreshold(double threshold) {
+		colorDiffThreshold = threshold;
 	}
 	
 	@Override
@@ -153,22 +163,16 @@ public class ShotSearcher implements Runnable {
 		g /= (double)pixelsSeen;
 		b /= (double)pixelsSeen;
 		
-        // We only detect a color if the largest component is at least
-        // 5% bigger than the other components. This is based on the
-        // heuristic that noise tends to have color values that are very
-        // similar
-		final double PDIFF_THRESHOLD = 1.05;
-		
         if (g == 0 || b == 0) 
             return Optional.empty();
-
-        if ((r / g) > PDIFF_THRESHOLD && (r / b) > PDIFF_THRESHOLD)
+        
+        if ((r / g) > colorDiffThreshold && (r / b) > colorDiffThreshold)
             return Optional.of(Color.RED);
             
         if (r == 0 || b == 0)
         	return Optional.empty();
 
-        if ((g / r) > PDIFF_THRESHOLD && (g / b) > PDIFF_THRESHOLD)
+        if ((g / r) > colorDiffThreshold && (g / b) > colorDiffThreshold)
             return Optional.of(Color.GREEN);
 
 		

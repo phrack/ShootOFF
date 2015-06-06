@@ -18,6 +18,15 @@ public class StreamDebuggerController implements ThresholdListener {
 	
 	public void init(CameraManager cameraManager) {
 		cameraManager.setThresholdListener(this);
+
+		colorDifferenceSlider.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override 
+			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+	        	if (newValue == null) return;
+	        
+        		cameraManager.setColorDiffThreshold(newValue.doubleValue());
+	      	}
+	    });
 		
 		bloomCountSlider.valueProperty().addListener(new ChangeListener<Number>() {
 				@Override 

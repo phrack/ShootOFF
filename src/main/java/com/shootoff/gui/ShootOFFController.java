@@ -257,9 +257,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		ContextMenu contextMenu = new ContextMenu();
 		
 		if (config.inDebugMode()) {
-			MenuItem showStreamDebuggerMenuItem = new MenuItem("Show Stream Debugger");
+			MenuItem startStreamDebuggerMenuItem = new MenuItem("Start Stream Debugger");
 			
-			showStreamDebuggerMenuItem.setOnAction((event) -> {
+			startStreamDebuggerMenuItem.setOnAction((event) -> {
 					FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/StreamDebugger.fxml"));
 					try {
 						loader.load();
@@ -277,15 +277,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 							cameraTabPane.getSelectionModel().getSelectedIndex());
 			        ((StreamDebuggerController)loader.getController()).init(cameraManager);
 			        
-			        showStreamDebuggerMenuItem.setDisable(true);
+			        startStreamDebuggerMenuItem.setDisable(true);
 			        
 			        streamDebuggerStage.setOnCloseRequest((e) -> {
-			        		showStreamDebuggerMenuItem.setDisable(false);
+			        		startStreamDebuggerMenuItem.setDisable(false);
 			        		cameraManager.setThresholdListener(null);
 			        	});
 				});
 			
-			contextMenu.getItems().add(showStreamDebuggerMenuItem);
+			contextMenu.getItems().add(startStreamDebuggerMenuItem);
 		}
 		
 		return contextMenu;

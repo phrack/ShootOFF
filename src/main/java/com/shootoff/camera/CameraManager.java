@@ -52,6 +52,7 @@ public class CameraManager {
 	
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
+	private Optional<Double> colorDiffThreshold = Optional.empty();
 	private Optional<ThresholdListener> thresholdListener = Optional.empty();
 	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
@@ -94,6 +95,11 @@ public class CameraManager {
 	
 	public CanvasManager getCanvasManager() {
 		return canvasManager;
+	}
+	
+	public void setColorDiffThreshold(double threshold) {
+		colorDiffThreshold = Optional.of(threshold);
+		logger.debug("Set color component difference threshold: {}", threshold);
 	}
 	
 	public void setBloomCount(int count) {
@@ -293,8 +299,14 @@ public class CameraManager {
 				byte[][] currentFrame = getFrameCount(threshed);
 				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
 				
-				new Thread(new ShotSearcher(config, canvasManager, 
-						currentCopy, shotFrame)).start();
+				ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, 
+						currentCopy, shotFrame);
+				
+				if (colorDiffThreshold.isPresent()) {
+					shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());
+				}
+				
+				new Thread(shotSearcher).start();
 				
 				if (thresholdListener.isPresent()) {
 					Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
