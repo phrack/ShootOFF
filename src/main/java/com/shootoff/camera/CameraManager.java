@@ -57,6 +57,8 @@ public class CameraManager {
 	private Optional<Integer> minimumShotDimension = Optional.empty();
 	private Optional<ThresholdListener> thresholdListener = Optional.empty();
 	
+	private boolean[][] sectorStatuses;
+	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = webcam;
 		this.canvasManager = canvas;
@@ -68,9 +70,26 @@ public class CameraManager {
 			webcamRefreshDelay = (int)(1000 / webcam.getFPS());
 		}
 		
+		sectorStatuses = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		
+		// Turn on all shot sectors by default
+		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+				sectorStatuses[y][x] = true;
+			}
+		}
+		
 		new Thread(new Detector()).start();
 	}
 
+	public boolean[][] getSectorStatuses() {
+		return sectorStatuses;
+	}
+	
+	public void setSectorStatuses(boolean[][] sectorStatuses) {
+		this.sectorStatuses = sectorStatuses;
+	}
+	
 	public void clearShots() {
 		canvasManager.clearShots();
 	}
@@ -311,7 +330,7 @@ public class CameraManager {
 				byte[][] currentFrame = getFrameCount(threshed);
 				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
 				
-				ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, 
+				ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
 						currentCopy, shotFrame);
 				
 				if (colorDiffThreshold.isPresent()) {

@@ -56,6 +56,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
@@ -255,6 +256,27 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	private ContextMenu createContextMenu() {
 		ContextMenu contextMenu = new ContextMenu();
+		
+		MenuItem toggleDetectionSectors = new MenuItem("Toggle Shot Detection Sectors");
+		
+		toggleDetectionSectors.setOnAction((event) -> {
+				AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+				CameraManager cameraManager = camerasSupervisor.getCameraManager(
+						cameraTabPane.getSelectionModel().getSelectedIndex());
+				
+				// Only add the pane if it isn't already open
+				boolean hasPane = false;
+				for (Node node : tabAnchor.getChildren()) {
+					if (node instanceof ShotSectorPane) {
+						hasPane = true;
+						break;
+					}
+				}
+				
+				if (!hasPane) new ShotSectorPane(tabAnchor, cameraManager);
+			});
+		
+		contextMenu.getItems().add(toggleDetectionSectors);
 		
 		if (config.inDebugMode()) {
 			MenuItem startStreamDebuggerMenuItem = new MenuItem("Start Stream Debugger");

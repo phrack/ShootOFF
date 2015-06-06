@@ -20,11 +20,19 @@ import com.shootoff.gui.MockCanvasManager;
 public class TestShotSearcher {
 	private Configuration config;
 	private MockCanvasManager mockManager;
+	private boolean[][] sectorStatuses;
 	
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
 		mockManager = new MockCanvasManager(config);
+		sectorStatuses = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		
+		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+				sectorStatuses[y][x] = true;
+			}
+		}
 	}
 	
 	private List<Shot> findShots(String imagePath) throws IOException, InterruptedException {
@@ -39,7 +47,8 @@ public class TestShotSearcher {
 		BufferedImage threshed = CameraManager.threshold(config, grayScale);
 		
 		Thread searcher = new Thread(
-				new ShotSearcher(config, mockManager, testFrame, CameraManager.getFrameCount(threshed)));
+				new ShotSearcher(config, mockManager, sectorStatuses, 
+						testFrame, CameraManager.getFrameCount(threshed)));
 		searcher.start();
 		searcher.join();
 		
@@ -84,6 +93,15 @@ public class TestShotSearcher {
 		assertEquals(53, shots.get(0).getX(), 1);
 		assertEquals(175, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
+	}
+	
+	@Test
+	public void testNoInterenceOneShotSectorOff() throws IOException, InterruptedException {
+		// Turn off the sector the shot is in
+		sectorStatuses[1][0] = false;
+ 		List<Shot> shots = findShots("/shotsearcher/no_interference_one_shot.png");	
+		
+		assertEquals(0, shots.size());
 	}
 	
 	@Test

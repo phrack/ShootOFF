@@ -31,12 +31,16 @@ import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
 public class ShotSearcher implements Runnable {
+	public static final int SECTOR_COLUMNS = 3;
+	public static final int SECTOR_ROWS = 3;
+	
 	private final int BLACK_PIXEL = 0;
 	private final int WHITE_PIXEL = 1;
 	
 	private final Logger logger = LoggerFactory.getLogger(ShotSearcher.class);
 	private final Configuration config;
 	private final CanvasManager canvasManager;
+	private final boolean[][] sectorStatuses;
 	private final BufferedImage currentFrame;
 	private final byte[][] shotFrame;
 	
@@ -48,10 +52,11 @@ public class ShotSearcher implements Runnable {
 	private int borderWidth = 3; // px
 	private int minShotDim = 7; // px
 	
-	public ShotSearcher(Configuration config, CanvasManager canvasManager, 
+	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
 			BufferedImage currentFrame, byte[][] shotFrame) {
 		this.config = config;
 		this.canvasManager = canvasManager;
+		this.sectorStatuses = sectorStatuses;
 		this.currentFrame = currentFrame;
 		this.shotFrame = shotFrame;
 	}
@@ -70,17 +75,19 @@ public class ShotSearcher implements Runnable {
 	
 	@Override
 	public void run() {
-		// Split the image into 3 columns and 3 rows, and search
+		// Split the image into x columns and y rows, and search
 		// each independently
-		int sub_width = shotFrame[0].length / 3;
-		int sub_height = shotFrame.length / 3;
+		int sub_width = shotFrame[0].length / SECTOR_COLUMNS;
+		int sub_height = shotFrame.length / SECTOR_ROWS;
 		
-		for (int y_start = 0; y_start <= shotFrame.length - sub_height; 
-				y_start += sub_height) {
-			for (int x_start = 0; x_start <= shotFrame[0].length - sub_width; 
-					x_start += sub_width) {
+		for (int y_start = 0, sector_y = 0; y_start <= shotFrame.length - sub_height; 
+				y_start += sub_height, sector_y++) {
+			for (int x_start = 0, sector_x = 0; x_start <= shotFrame[0].length - sub_width; 
+					x_start += sub_width, sector_x++) {
 				
-				findShot(x_start, x_start + sub_width, y_start, y_start + sub_height);
+				// Don't detect a shot in a sector that is turned off
+				if (sectorStatuses[sector_y][sector_x])
+					findShot(x_start, x_start + sub_width, y_start, y_start + sub_height);
 			}
 		}
 	}
