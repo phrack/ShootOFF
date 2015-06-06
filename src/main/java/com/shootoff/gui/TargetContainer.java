@@ -32,9 +32,14 @@ import javafx.scene.input.MouseEvent;
  * @author phrack
  */
 public class TargetContainer {
+	private static final int MOVEMENT_DELTA = 1;
+	private static final int SCALE_DELTA = 1;
     private static final int RESIZE_MARGIN = 5;
+    
     private final Group target;
     private final Configuration config;
+    private final CanvasManager parent;
+    private final boolean userDeletable;
     private boolean move;
     private boolean resize;
     private boolean top;
@@ -45,14 +50,18 @@ public class TargetContainer {
     private double x;
     private double y;
     
-    public TargetContainer(Group target, Configuration config) {
+    public TargetContainer(Group target, Configuration config, CanvasManager parent,
+    		boolean userDeletable) {
         this.target = target;
         this.config = config;
+        this.parent = parent;
+        this.userDeletable = userDeletable;
         
         mousePressed();
         mouseDragged();
         mouseMoved();
         mouseReleased();
+        keyPressed();
     }
     
     private void mousePressed() {
@@ -184,6 +193,91 @@ public class TargetContainer {
     	});
     }
     
+    private void keyPressed() {
+		target.setOnKeyPressed((event) -> {	
+			double currentWidth = target.getBoundsInParent().getWidth();
+			double currentHeight = target.getBoundsInParent().getHeight();
+			
+			switch (event.getCode()) {
+			case DELETE:
+				if (userDeletable) parent.removeTarget(target);
+				break;
+				
+			case LEFT:
+				{
+					double newWidth = currentWidth + SCALE_DELTA;
+					double scaleDelta = (newWidth - currentWidth) / currentWidth;
+					
+					for (Node node : target.getChildren()) {
+						if (event.isShiftDown()) {
+							node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
+		
+						} else {
+							node.setLayoutX(node.getLayoutX() - MOVEMENT_DELTA);
+						}
+					}
+				}
+
+				break;
+				
+			case RIGHT:
+				{
+					double newWidth = currentWidth - SCALE_DELTA;
+					double scaleDelta = (newWidth - currentWidth) / currentWidth;
+					
+					for (Node node : target.getChildren()) {
+						if (event.isShiftDown()) {
+							node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
+		
+						} else {
+							node.setLayoutX(node.getLayoutX() + MOVEMENT_DELTA);
+						}
+					}
+				}
+				
+				break;
+				
+			case UP:
+				{
+					double newHeight = currentHeight + SCALE_DELTA;
+					double scaleDelta = (newHeight - currentHeight) / currentHeight;
+					
+					for (Node node : target.getChildren()) {
+						if (event.isShiftDown()) {
+							node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
+		
+						} else {
+							node.setLayoutY(node.getLayoutY() - MOVEMENT_DELTA);
+						}
+					}
+				}
+				
+				break;
+
+			case DOWN:
+				{
+					double newHeight = currentHeight - SCALE_DELTA;
+					double scaleDelta = (newHeight - currentHeight) / currentHeight;
+					
+					for (Node node : target.getChildren()) {
+						if (event.isShiftDown()) {
+							node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
+		
+						} else {
+							node.setLayoutY(node.getLayoutY() + MOVEMENT_DELTA);
+						}
+					}
+				}
+				
+				break;
+				
+			default:
+				break;
+			}
+			event.consume();
+		});
+    }
+  
     private boolean isTopZone(MouseEvent event) {
     	return event.getY() < (target.getLayoutBounds().getMinY() + RESIZE_MARGIN);	
     }

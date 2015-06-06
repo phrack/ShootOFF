@@ -49,14 +49,10 @@ import javafx.scene.Node;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class CanvasManager {
-	private static final int MOVEMENT_DELTA = 1;
-	private static final int SCALE_DELTA = 1;
-	
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
@@ -85,13 +81,6 @@ public class CanvasManager {
 				toggleTargetSelection(Optional.empty());
 				selectedTarget = Optional.empty();
 				canvasGroup.requestFocus();
-			});
-		
-		canvasGroup.setOnKeyPressed((event) -> {
-				if (!selectedTarget.isPresent()) return;
-				
-				transformTarget(event, selectedTarget.get());
-				event.consume();
 			});
 
 		if (Platform.isFxApplicationThread()) {
@@ -413,17 +402,17 @@ public class CanvasManager {
 			target.get().setOnMouseClicked((event) -> {
 					toggleTargetSelection(target);
 					selectedTarget = target;
-					canvasGroup.requestFocus();
+					target.get().requestFocus();
 				});
 			
-			addTarget(target.get());
+			addTarget(target.get(), true);
 		}
 		return target;
 	}
 	
-	public void addTarget(Group target) {
+	public void addTarget(Group target, boolean userDeletable) {
 		Platform.runLater(() -> { canvasGroup.getChildren().add(target); });
-		new TargetContainer(target, config);
+		new TargetContainer(target, config, this, userDeletable);
 		targets.add(target);
 	}
 	
@@ -434,86 +423,6 @@ public class CanvasManager {
 	
 	public List<Group> getTargets() {
 		return targets;
-	}
-	
-	@SuppressWarnings("incomplete-switch")
-	private void transformTarget(KeyEvent event, Group selected) {
-		double currentWidth = selected.getBoundsInParent().getWidth();
-		double currentHeight = selected.getBoundsInParent().getHeight();
-		
-		switch (event.getCode()) {
-		case DELETE:
-			removeTarget(selectedTarget.get());
-			break;
-			
-		case LEFT:
-			{
-				double newWidth = currentWidth + SCALE_DELTA;
-				double scaleDelta = (newWidth - currentWidth) / currentWidth;
-				
-				for (Node node : selected.getChildren()) {
-					if (event.isShiftDown()) {
-						node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
-	
-					} else {
-						node.setLayoutX(node.getLayoutX() - MOVEMENT_DELTA);
-					}
-				}
-			}
-
-			break;
-			
-		case RIGHT:
-			{
-				double newWidth = currentWidth - SCALE_DELTA;
-				double scaleDelta = (newWidth - currentWidth) / currentWidth;
-				
-				for (Node node : selected.getChildren()) {
-					if (event.isShiftDown()) {
-						node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
-	
-					} else {
-						node.setLayoutX(node.getLayoutX() + MOVEMENT_DELTA);
-					}
-				}
-			}
-			
-			break;
-			
-		case UP:
-			{
-				double newHeight = currentHeight + SCALE_DELTA;
-				double scaleDelta = (newHeight - currentHeight) / currentHeight;
-				
-				for (Node node : selected.getChildren()) {
-					if (event.isShiftDown()) {
-						node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
-	
-					} else {
-						node.setLayoutY(node.getLayoutY() - MOVEMENT_DELTA);
-					}
-				}
-			}
-			
-			break;
-
-		case DOWN:
-			{
-				double newHeight = currentHeight - SCALE_DELTA;
-				double scaleDelta = (newHeight - currentHeight) / currentHeight;
-				
-				for (Node node : selected.getChildren()) {
-					if (event.isShiftDown()) {
-						node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
-	
-					} else {
-						node.setLayoutY(node.getLayoutY() + MOVEMENT_DELTA);
-					}
-				}
-			}
-			
-			break;
-		}
 	}
 	
 	private void toggleTargetSelection(Optional<Group> newSelection) {

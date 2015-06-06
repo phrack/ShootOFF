@@ -397,13 +397,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			calibrationRectangle.setFill(Color.PURPLE);
 			calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
 			
-			calibrationGroup = new Group();
-			new TargetContainer(calibrationGroup, config);
-			calibrationGroup.getChildren().add(calibrationRectangle);
-			
+
 			calibratingManager = camerasSupervisor.getCanvasManager(
 					cameraTabPane.getSelectionModel().getSelectedIndex());
-			calibratingManager.addTarget(calibrationGroup);
+			calibrationGroup = new Group();
+			calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
+			calibrationGroup.getChildren().add(calibrationRectangle);
+			
+			calibratingManager.addTarget(calibrationGroup, false);
 		} else {
 			toggleArenaCalibrationMenuItem.setText("Calibrate");
 			
