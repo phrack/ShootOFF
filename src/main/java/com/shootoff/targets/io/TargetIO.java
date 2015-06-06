@@ -23,7 +23,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-import com.shootoff.gui.TargetEditorController;
+import com.shootoff.gui.controllers.TargetEditorController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;

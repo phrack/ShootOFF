@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.controllers;
+
+import com.shootoff.gui.DelayedStartListener;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

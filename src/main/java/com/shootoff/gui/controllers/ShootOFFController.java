@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.controllers;
 
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -34,6 +34,11 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.CameraConfigListener;
+import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.ShotEntry;
+import com.shootoff.gui.ShotSectorPane;
+import com.shootoff.gui.TargetListener;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.ProjectorTrainingProtocolBase;

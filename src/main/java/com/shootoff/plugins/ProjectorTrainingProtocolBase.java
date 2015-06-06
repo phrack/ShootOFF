@@ -29,8 +29,8 @@ import javafx.scene.control.TableView;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
-import com.shootoff.gui.ProjectorArenaController;
 import com.shootoff.gui.ShotEntry;
+import com.shootoff.gui.controllers.ProjectorArenaController;
 
 public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	private Configuration config;

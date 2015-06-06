@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.controllers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
+import com.shootoff.gui.TagEditorPanel;
+import com.shootoff.gui.TargetListener;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;

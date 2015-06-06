@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +26,9 @@ import java.util.List;
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.CameraConfigListener;
+import com.shootoff.gui.CameraSelectorScene;
+import com.shootoff.gui.ImageCell;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

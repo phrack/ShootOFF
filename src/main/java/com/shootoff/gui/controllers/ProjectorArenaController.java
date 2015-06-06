@@ -16,12 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.controllers;
 
 import java.io.IOException;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.CalibrationListener;
+import com.shootoff.gui.CanvasManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.Group;

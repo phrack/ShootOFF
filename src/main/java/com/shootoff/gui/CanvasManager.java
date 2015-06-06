@@ -33,6 +33,7 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.controllers.ProjectorArenaController;
 import com.shootoff.plugins.TrainingProtocol;
 import com.shootoff.plugins.TrainingProtocolBase;
 import com.shootoff.targets.ImageRegion;
