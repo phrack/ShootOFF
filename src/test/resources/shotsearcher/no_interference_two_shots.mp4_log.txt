@@ -1,0 +1,9 @@
+[Thread-22] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (308, 84), Center (312.0, 86.5)
+[Thread-22] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Did Not Find Hit For Shot (312.0, 86.5)
+[Thread-23] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (314, 80), Center (317.5, 81.0)
+[Thread-23] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
+[Thread-28] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (379, 183), Center (382.5, 183.0)
+[Thread-28] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Did Not Find Hit For Shot (382.5, 183.0)
+[Thread-29] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (368, 171), Center (372.0, 173.0)
+[Thread-29] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
+
