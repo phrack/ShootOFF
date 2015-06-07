@@ -119,7 +119,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shootOFFStage.getIcons().add(
 				   new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png"))); 
 		shootOFFStage.setOnCloseRequest((value) -> {
-			camerasSupervisor.setStreamingAll(false);
+			camerasSupervisor.closeAll();
 			if (config.getProtocol().isPresent()) config.getProtocol().get().destroy();
 			if (arenaController != null) arenaController.close();
 		});
@@ -266,8 +266,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		toggleDetectionSectors.setOnAction((event) -> {
 				AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
-				CameraManager cameraManager = camerasSupervisor.getCameraManager(
-						cameraTabPane.getSelectionModel().getSelectedIndex());
 				
 				// Only add the pane if it isn't already open
 				boolean hasPane = false;
@@ -278,7 +276,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					}
 				}
 				
-				if (!hasPane) new ShotSectorPane(tabAnchor, cameraManager);
+				if (!hasPane) {
+					CameraManager cameraManager = camerasSupervisor.getCameraManager(
+							cameraTabPane.getSelectionModel().getSelectedIndex());
+					new ShotSectorPane(tabAnchor, cameraManager);
+				}
 			});
 		
 		contextMenu.getItems().add(toggleDetectionSectors);
@@ -296,8 +298,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					
 					Stage streamDebuggerStage = new Stage();
 
+					String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
 			        streamDebuggerStage.setTitle(String.format("Stream Debugger -- %s", 
-			        		cameraTabPane.getSelectionModel().getSelectedItem().getText()));
+			        		tabName));
 			        streamDebuggerStage.setScene(new Scene(loader.getRoot()));
 			        streamDebuggerStage.show();
 					CameraManager cameraManager = camerasSupervisor.getCameraManager(
@@ -313,6 +316,26 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				});
 			
 			contextMenu.getItems().add(startStreamDebuggerMenuItem);
+			
+			MenuItem recordMenuItem = new MenuItem("Start Recording");
+			
+			recordMenuItem.setOnAction((event) -> {
+					CameraManager cameraManager = camerasSupervisor.getCameraManager(
+							cameraTabPane.getSelectionModel().getSelectedIndex());
+				
+					if (recordMenuItem.getText().equals("Start Recording")) {
+						recordMenuItem.setText("Stop Recording");
+						
+						String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
+						String videoName = tabName + ".mp4";
+						cameraManager.startRecording(new File(videoName));
+					} else {
+						recordMenuItem.setText("Start Recording");
+						cameraManager.stopRecording();
+					}
+				});
+			
+			contextMenu.getItems().add(recordMenuItem);
 		}
 		
 		return contextMenu;

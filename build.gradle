@@ -19,6 +19,9 @@ repositories {
     maven {
         url  "http://dl.bintray.com/dfki-lt/maven" 
     }
+    maven {
+        url  "http://xuggle.googlecode.com/svn/trunk/repo/share/java/" 
+    }
 }
 
 configurations {
@@ -60,6 +63,9 @@ dependencies {
     compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.+'
     compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.+'
     compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.+'
+
+    // xuggle for recording and playing back video
+    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.+'
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }

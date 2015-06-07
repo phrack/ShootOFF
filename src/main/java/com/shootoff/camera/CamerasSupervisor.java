@@ -74,6 +74,13 @@ public class CamerasSupervisor {
 		}
 	}
 	
+	public void closeAll() {
+		for (CameraManager manager : managers) {
+			manager.setStreaming(false);
+			manager.close();
+		}
+	}
+	
 	public List<CameraManager> getCameraManagers() {
 		return managers;
 	}

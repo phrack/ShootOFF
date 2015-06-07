@@ -20,6 +20,7 @@ package com.shootoff.camera;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,13 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.ThresholdListener;
+import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.ICodec;
+import com.xuggle.xuggler.IPixelFormat;
+import com.xuggle.xuggler.IVideoPicture;
+import com.xuggle.xuggler.video.ConverterFactory;
+import com.xuggle.xuggler.video.IConverter;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -57,6 +65,10 @@ public class CameraManager {
 	private Optional<Integer> minimumShotDimension = Optional.empty();
 	private Optional<ThresholdListener> thresholdListener = Optional.empty();
 	
+	private boolean recording = false;
+	private boolean isFirstFrame = true;
+	private IMediaWriter videoWriter;
+	private long recordingStartTime;
 	private boolean[][] sectorStatuses;
 	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
@@ -100,6 +112,7 @@ public class CameraManager {
 	
 	public void close() {
 		webcam.close();
+		if (recording) stopRecording();
 	}
 	
 	public void setStreaming(boolean isStreaming) {
@@ -108,6 +121,21 @@ public class CameraManager {
 	
 	public void setDetecting(boolean isDetecting) {
 		this.isDetecting = isDetecting;
+	}
+	
+	public void startRecording(File videoFile) {
+		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
+		videoWriter = ToolFactory.makeWriter(videoFile.getName());
+		videoWriter.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, FEED_WIDTH, FEED_HEIGHT);
+		recordingStartTime = System.currentTimeMillis();
+		isFirstFrame = true;
+		
+		recording = true;
+	}
+	
+	public void stopRecording() {
+		recording = false;
+		videoWriter.close();
 	}
 	
 	public Image getCurrentFrame() {
@@ -238,6 +266,19 @@ public class CameraManager {
 						});
 					
 					return;
+				}
+				
+				if (recording) {
+					BufferedImage image = ConverterFactory.convertToType(currentFrame, BufferedImage.TYPE_3BYTE_BGR);
+					IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+
+					IVideoPicture frame = converter.toPicture(image, 
+							(System.currentTimeMillis() - recordingStartTime) * 1000);
+					frame.setKeyFrame(isFirstFrame);
+					frame.setQuality(0);
+					isFirstFrame = false;
+
+					videoWriter.encodeVideo(0, frame);
 				}
 				
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
