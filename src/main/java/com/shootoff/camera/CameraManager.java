@@ -32,8 +32,12 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.ThresholdListener;
+import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.mediatool.event.ICloseEvent;
+import com.xuggle.mediatool.event.IVideoPictureEvent;
 import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IPixelFormat;
 import com.xuggle.xuggler.IVideoPicture;
@@ -53,7 +57,9 @@ public class CameraManager {
 	private int bloomCount = 10;
 	
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
-	private final Webcam webcam;
+	private final Optional<Webcam> webcam;
+	private final Object processingLock;
+	private boolean processedVideo = false;
 	private final CanvasManager canvasManager;
 	private final Configuration config;
 	private final int webcamRefreshDelay; // in milliseconds (ms)
@@ -72,7 +78,8 @@ public class CameraManager {
 	private boolean[][] sectorStatuses;
 	
 	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
-		this.webcam = webcam;
+		this.webcam = Optional.of(webcam);
+		processingLock = null;
 		this.canvasManager = canvas;
 		this.config = config;
 		
@@ -82,6 +89,29 @@ public class CameraManager {
 			webcamRefreshDelay = (int)(1000 / webcam.getFPS());
 		}
 		
+		init(new Detector());
+	}
+	
+	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config) {
+		this.webcam = Optional.empty();
+		this.processingLock = processingLock;
+		this.canvasManager = canvas;
+		this.config = config;
+		webcamRefreshDelay = 30;
+		
+		Detector detector = new Detector();
+		
+	    IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
+	    reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+	    reader.addListener(detector);
+	    
+	    init(detector);
+	    
+	    while (reader.readPacket() == null)
+	      do {} while(false);
+	}
+	
+	private void init(Detector detector) {
 		sectorStatuses = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
 		
 		// Turn on all shot sectors by default
@@ -91,7 +121,7 @@ public class CameraManager {
 			}
 		}
 		
-		new Thread(new Detector()).start();
+		new Thread(detector).start();
 	}
 
 	public boolean[][] getSectorStatuses() {
@@ -111,7 +141,7 @@ public class CameraManager {
 	}
 	
 	public void close() {
-		webcam.close();
+		if (webcam.isPresent()) webcam.get().close();
 		if (recording) stopRecording();
 	}
 	
@@ -139,11 +169,19 @@ public class CameraManager {
 	}
 	
 	public Image getCurrentFrame() {
-		return SwingFXUtils.toFXImage(webcam.getImage(), null);
+		if (webcam.isPresent()) {
+			return SwingFXUtils.toFXImage(webcam.get().getImage(), null);
+		} else {
+			return null;
+		}
 	}
 	
 	public CanvasManager getCanvasManager() {
 		return canvasManager;
+	}
+	
+	public boolean getProcessedVideo() {
+		return processedVideo;
 	}
 	
 	public void setColorDiffThreshold(double threshold) {
@@ -222,7 +260,7 @@ public class CameraManager {
 		return img;
 	}
 	
-	private class Detector implements Runnable {
+	private class Detector extends MediaListenerAdapter implements Runnable {
 		private BufferedImage currentFrame;
 		private int oldestFrame = 0;
 		private List<Object> counts = new ArrayList<Object>();
@@ -231,31 +269,50 @@ public class CameraManager {
 		
 		@Override
 		public void run() {
-			if (!webcam.isOpen()) {
-				webcam.setViewSize(new Dimension(FEED_WIDTH, FEED_HEIGHT));
-				webcam.open();			
+			if (webcam.isPresent()) {
+				if (!webcam.get().isOpen()) {
+					webcam.get().setViewSize(new Dimension(FEED_WIDTH, FEED_HEIGHT));
+					webcam.get().open();			
+				}
+				
+				streamCameraFrames();
 			}
-			
-			streamCameraFrames();
+		}
+		
+		@Override
+		public void onVideoPicture(IVideoPictureEvent event)
+		{
+			currentFrame = event.getImage();
+			detectShots();
+		}
+		
+		@Override
+		public void onClose(ICloseEvent event) {
+			synchronized (processingLock) {
+				processedVideo = true;
+				processingLock.notifyAll();
+			}
 		}
 		
 		private void streamCameraFrames() {
 			long startDetectionCycle = System.currentTimeMillis();
 			
 			while (isStreaming) {
-				currentFrame = webcam.getImage();
+				if (webcam.isPresent()) {
+					currentFrame = webcam.get().getImage();
+				}
 				
-				if (currentFrame == null && !webcam.isOpen()) {
+				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					Platform.runLater(() -> {
 							Alert cameraAlert = new Alert(AlertType.ERROR);
 							
-							Optional<String> cameraName = config.getWebcamsUserName(webcam);
+							Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
 							String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
 							String message;
 							if (cameraName.isPresent()) {
 								message = String.format(messageFormat, cameraName.get());
 							} else {
-								message = String.format(messageFormat, webcam.getName());
+								message = String.format(messageFormat, webcam.get().getName());
 							}
 							
 							cameraAlert.setTitle("Webcam Missing");

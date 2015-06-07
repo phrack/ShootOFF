@@ -1,9 +1,10 @@
-[Thread-22] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (308, 84), Center (312.0, 86.5)
-[Thread-22] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Did Not Find Hit For Shot (312.0, 86.5)
-[Thread-23] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (314, 80), Center (317.5, 81.0)
-[Thread-23] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
-[Thread-28] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (379, 183), Center (382.5, 183.0)
-[Thread-28] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Did Not Find Hit For Shot (382.5, 183.0)
-[Thread-29] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (368, 171), Center (372.0, 173.0)
-[Thread-29] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
-
+[Thread-50] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (618, 168), Center (627.0, 168.5)
+[Thread-50] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Did Not Find Hit For Shot (627.0, 168.5)
+[Thread-51] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (627, 155), Center (631.0, 155.0)
+[Thread-51] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
+[Thread-51] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (634, 160), Center (635.0, 160.5)
+[Thread-51] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
+[Thread-56] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (426, 126), Center (430.0, 130.0)
+[Thread-56] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Did Not Find Hit For Shot (430.0, 130.0)
+[Thread-57] DEBUG com.shootoff.camera.ShotSearcher - Suspected shot accepted: Original Coords (434, 136), Center (438.5, 136.0)
+[Thread-51] DEBUG com.shootoff.gui.CanvasManager - Processing Shot: Shot Rejected By com.shootoff.camera.DeduplicationProcessor
