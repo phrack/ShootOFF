@@ -19,6 +19,7 @@
 package com.shootoff.gui.controller;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
@@ -48,7 +49,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		this.config = config;
 		arenaStage = (Stage)arenaAnchor.getScene().getWindow();
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, null);
-		canvasManager.updateBackground(null);
+		canvasManager.updateBackground(null, Optional.empty());
 		arenaAnchor.setStyle("-fx-background-color: #696969;");
 	}
 	

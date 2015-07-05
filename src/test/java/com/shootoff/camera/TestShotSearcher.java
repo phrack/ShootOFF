@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.scene.paint.Color;
 
@@ -48,7 +49,7 @@ public class TestShotSearcher {
 		
 		Thread searcher = new Thread(
 				new ShotSearcher(config, mockManager, sectorStatuses, 
-						testFrame, CameraManager.getFrameCount(threshed)));
+						testFrame, CameraManager.getFrameCount(threshed), Optional.empty()));
 		searcher.start();
 		searcher.join();
 		

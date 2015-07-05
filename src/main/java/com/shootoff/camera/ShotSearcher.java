@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
+import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 
@@ -43,6 +44,7 @@ public class ShotSearcher implements Runnable {
 	private final boolean[][] sectorStatuses;
 	private final BufferedImage currentFrame;
 	private final byte[][] shotFrame;
+	private final Optional<Bounds> projectionBounds;
 	
     // We only detect a color if the largest component is at least
     // 5% bigger than the other components. This is based on the
@@ -53,12 +55,13 @@ public class ShotSearcher implements Runnable {
 	private int minShotDim = 7; // px
 	
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
-			BufferedImage currentFrame, byte[][] shotFrame) {
+			BufferedImage currentFrame, byte[][] shotFrame, Optional<Bounds> projectionBounds) {
 		this.config = config;
 		this.canvasManager = canvasManager;
 		this.sectorStatuses = sectorStatuses;
 		this.currentFrame = currentFrame;
 		this.shotFrame = shotFrame;
+		this.projectionBounds = projectionBounds;
 	}
 	
 	public void setColorDiffThreshold(double threshold) {
@@ -109,8 +112,14 @@ public class ShotSearcher implements Runnable {
 									x, y, center.get().getX(),
 									center.get().getY());
 							
-							canvasManager.addShot(areaColor.get(), center.get().getX(), 
-									center.get().getY());
+							if (projectionBounds.isPresent()) {
+								Bounds b = projectionBounds.get();
+								canvasManager.addShot(areaColor.get(), center.get().getX() + b.getMinX(), 
+										center.get().getY() + b.getMinY());
+							} else {
+								canvasManager.addShot(areaColor.get(), center.get().getX(), 
+										center.get().getY());
+							}
 							return;
 						}
 					}

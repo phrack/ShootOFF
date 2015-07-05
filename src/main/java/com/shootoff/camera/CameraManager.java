@@ -46,6 +46,7 @@ import com.xuggle.xuggler.video.IConverter;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
@@ -63,9 +64,12 @@ public class CameraManager {
 	private final CanvasManager canvasManager;
 	private final Configuration config;
 	private final int webcamRefreshDelay; // in milliseconds (ms)
+	private Optional<Bounds> projectionBounds = Optional.empty();
 	
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
+	private boolean cropFeedToProjection = false;
+	private boolean limitDetectProjection = false;
 	private Optional<Double> colorDiffThreshold = Optional.empty();
 	private Optional<Integer> centerApproxBorderSize = Optional.empty();
 	private Optional<Integer> minimumShotDimension = Optional.empty();
@@ -151,6 +155,18 @@ public class CameraManager {
 	
 	public void setDetecting(boolean isDetecting) {
 		this.isDetecting = isDetecting;
+	}
+	
+	public void setProjectionBounds(Bounds cropBounds) {
+		this.projectionBounds = Optional.ofNullable(cropBounds);
+	}
+	
+	public void setCropFeedToProjection(boolean cropFeed) {
+		cropFeedToProjection = cropFeed;
+	}
+	
+	public void setLimitDetectProjection(boolean limitDetection) {
+		limitDetectProjection = limitDetection;
 	}
 	
 	public void startRecording(File videoFile) {
@@ -338,8 +354,19 @@ public class CameraManager {
 					videoWriter.encodeVideo(0, frame);
 				}
 				
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					Bounds b = projectionBounds.get();
+					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(), 
+							(int)b.getWidth(), (int)b.getHeight());
+				}
+				
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
-				canvasManager.updateBackground(img);
+				
+				if (cropFeedToProjection) {
+					canvasManager.updateBackground(img, projectionBounds);
+				} else {
+					canvasManager.updateBackground(img, Optional.empty());
+				}
 				
 				if (System.currentTimeMillis() - 
 						startDetectionCycle >= config.getDetectionRate()) {
@@ -408,7 +435,14 @@ public class CameraManager {
 			
 			BufferedImage currentCopy = new BufferedImage(currentFrame.getWidth(),
 					currentFrame.getHeight(), BufferedImage.TYPE_INT_RGB);
-			currentCopy.createGraphics().drawImage(currentFrame, 0, 0, null);
+			
+			if (limitDetectProjection && projectionBounds.isPresent()) {
+				Bounds b = projectionBounds.get();
+				currentCopy = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(), 
+						(int)b.getWidth(), (int)b.getHeight());
+			} else {
+				currentCopy.createGraphics().drawImage(currentFrame, 0, 0, null);
+			}
 			
 			BufferedImage grayScale = new BufferedImage(currentCopy.getWidth(),
 					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
@@ -429,7 +463,7 @@ public class CameraManager {
 				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
 				
 				ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-						currentCopy, shotFrame);
+						currentCopy, shotFrame, projectionBounds);
 				
 				if (colorDiffThreshold.isPresent()) {
 					shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());

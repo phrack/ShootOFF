@@ -36,6 +36,7 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.CalibrationConfigPane;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.TargetListener;
@@ -103,8 +104,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	
 	private ProjectorArenaController arenaController;
+	private CalibrationConfigPane calibrationConfigPane;
 	private Group calibrationGroup;
-	private CanvasManager calibratingManager;
+	private CameraManager calibratingManager;
 	private List<MenuItem> projectorProtocolMenuItems = new ArrayList<MenuItem>();
 	
 	public void init(Configuration config) {
@@ -454,8 +456,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        		toggleArenaCalibrationMenuItem.setText("Calibrate");
 	        		toggleArenaShotsMenuItem.setText("Show Shot Markers");
 	        		if (calibratingManager != null) {
-	        			calibratingManager.setProjectorArena(null, null);
-	        			if (calibrationGroup != null) calibratingManager.removeTarget(calibrationGroup);
+	        			calibratingManager.getCanvasManager().setProjectorArena(null, null);
+	        			if (calibrationGroup != null) calibratingManager.getCanvasManager().removeTarget(calibrationGroup);
 	        			calibratingManager = null;
 	        		}
 	        		toggleProjectorMenus(true);
@@ -482,25 +484,40 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
 			
+			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+			calibrationConfigPane = new CalibrationConfigPane(tabAnchor);
+			
 			RectangleRegion calibrationRectangle =  new RectangleRegion(DEFAULT_DIM, DEFAULT_DIM, 
 					DEFAULT_POS, DEFAULT_POS);
 			calibrationRectangle.setFill(Color.PURPLE);
 			calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
-			
 
-			calibratingManager = camerasSupervisor.getCanvasManager(
+			calibratingManager = camerasSupervisor.getCameraManager(
 					cameraTabPane.getSelectionModel().getSelectedIndex());
 			calibrationGroup = new Group();
 			calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
 			calibrationGroup.getChildren().add(calibrationRectangle);
 			
-			calibratingManager.addTarget(calibrationGroup, false);
+			calibratingManager.getCanvasManager().addTarget(calibrationGroup, false);
+			
 		} else {
 			toggleArenaCalibrationMenuItem.setText("Calibrate");
 			
-			calibratingManager.removeTarget(calibrationGroup);
-			calibratingManager.setProjectorArena(arenaController, calibrationGroup.getBoundsInParent());
+			calibrationConfigPane.close();
+			
+			calibratingManager.getCanvasManager().removeTarget(calibrationGroup);
+			calibratingManager.getCanvasManager().setProjectorArena(arenaController, calibrationGroup.getBoundsInParent());
+			calibratingManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
+			calibratingManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
+			
+			if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
+				calibratingManager.setProjectionBounds(calibrationGroup.getBoundsInParent());
+			} else {
+				calibratingManager.setProjectionBounds(null);
+			}
+			
 			calibrationGroup = null;
+			calibrationConfigPane = null;
 			arenaController.calibrated();
 		}		
 	}

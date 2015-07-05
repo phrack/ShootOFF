@@ -113,12 +113,20 @@ public class CanvasManager {
 		this.contextMenu = Optional.of(menu);
 	}
 	
-	public void updateBackground(Image img) {
+	public void updateBackground(Image img, Optional<Bounds> projectionBounds) {
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {
 					canvasGroup.getChildren().clear();
 					canvasGroup.getChildren().add(background);
 				});
+		}
+		
+		if (projectionBounds.isPresent()) {
+			background.setX(projectionBounds.get().getMinX());
+			background.setY(projectionBounds.get().getMinY());
+		} else {
+			background.setX(0);
+			background.setY(0);
 		}
 		
 		background.setImage(img);
