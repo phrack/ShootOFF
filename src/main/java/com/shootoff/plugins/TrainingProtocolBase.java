@@ -202,10 +202,14 @@ public class TrainingProtocolBase {
 	 * @param soundFilePath	the audio file to play (e.g. "sounds/metal_clang.wav")
 	 */
 	public static void playSound(String soundFilePath) {
+		playSound(new File(soundFilePath));
+	}
+	
+	public static void playSound(File soundFile) {
 		AudioInputStream audioInputStream = null;
 
 		try {
-			audioInputStream = AudioSystem.getAudioInputStream(new File(soundFilePath));
+			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

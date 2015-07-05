@@ -2,6 +2,7 @@ package com.shootoff.config;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import javafx.scene.paint.Color;
@@ -26,6 +27,10 @@ public class TestConfiguration {
 		assertEquals(4, defaultConfig.getMarkerRadius());
 		assertEquals(false, defaultConfig.ignoreLaserColor());
 		assertEquals("None", defaultConfig.getIgnoreLaserColorName());
+		assertEquals(false, defaultConfig.useRedLaserSound());
+		assertEquals("sounds/walther_ppq.wav", defaultConfig.getRedLaserSound().getPath());
+		assertEquals(false, defaultConfig.useGreenLaserSound());
+		assertEquals("sounds/walther_ppq.wav", defaultConfig.getGreenLaserSound().getPath());
 		assertEquals(false, defaultConfig.useVirtualMagazine());
 		assertEquals(7, defaultConfig.getVirtualMagazineCapacity());
 		assertEquals(false, defaultConfig.useMalfunctions());
@@ -129,6 +134,44 @@ public class TestConfiguration {
 	}
 	
 	@Test(expected=ConfigurationException.class)
+	public void testRedLaserSoundInvalid() throws ConfigurationException {
+		defaultConfig.setUseRedLaserSound(true);
+		defaultConfig.setRedLaserSound(new File("sounds/some_crazy_sound.wav"));
+		defaultConfig.validateConfiguration();		
+	}
+
+	@Test
+	public void testRedLaserSoundValid() {
+		try {
+			defaultConfig.setUseRedLaserSound(true);
+			
+			defaultConfig.setRedLaserSound(new File("sounds/walther_ppq.wav"));
+			defaultConfig.validateConfiguration();	
+		} catch (ConfigurationException e) {
+			fail("Red laser sound values are correct but got ConfigurationException");
+		}
+	}
+	
+	@Test(expected=ConfigurationException.class)
+	public void testGreenLaserSoundInvalid() throws ConfigurationException {
+		defaultConfig.setUseGreenLaserSound(true);
+		defaultConfig.setGreenLaserSound(new File("sounds/some_crazy_sound.wav"));
+		defaultConfig.validateConfiguration();		
+	}
+
+	@Test
+	public void testGreenLaserSoundValid() {
+		try {
+			defaultConfig.setUseGreenLaserSound(true);
+			
+			defaultConfig.setGreenLaserSound(new File("sounds/walther_ppq.wav"));
+			defaultConfig.validateConfiguration();	
+		} catch (ConfigurationException e) {
+			fail("Red laser sound values are correct but got ConfigurationException");
+		}
+	}
+	
+	@Test(expected=ConfigurationException.class)
 	public void testVirtualMagazineCapacityBelowRange() throws ConfigurationException {
 		defaultConfig.setVirtualMagazineCapacity(0);
 		defaultConfig.validateConfiguration();		
@@ -191,6 +234,10 @@ public class TestConfiguration {
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
+		assertEquals(true, config.useRedLaserSound());
+		assertEquals("sounds/metal_clang.wav", config.getRedLaserSound().getPath());
+		assertEquals(false, config.useGreenLaserSound());
+		assertEquals("sounds/beep.wav", config.getGreenLaserSound().getPath());
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());

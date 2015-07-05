@@ -196,6 +196,12 @@ public class CanvasManager {
 		shots.add(shot);
 		drawShot(shot);
 		
+		if (config.useRedLaserSound() && color.equals(Color.RED)) {
+			TrainingProtocolBase.playSound(config.getRedLaserSound());
+		} else 	if (config.useGreenLaserSound() && color.equals(Color.GREEN)) {
+			TrainingProtocolBase.playSound(config.getGreenLaserSound());
+		}
+		
 		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
 		Optional<TargetRegion> hitRegion = checkHit(shot);
 		if (hitRegion.isPresent() && hitRegion.get().tagExists("command")) executeRegionCommands(hitRegion.get());

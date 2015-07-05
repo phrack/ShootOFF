@@ -18,10 +18,12 @@
 
 package com.shootoff.gui.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
@@ -36,6 +38,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -43,7 +46,9 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -56,6 +61,12 @@ public class PreferencesController {
 	@FXML private Slider markerRadiusSlider;
 	@FXML private Label markerRadiusLabel;
 	@FXML private ChoiceBox<String> ignoreLaserColorChoiceBox;
+	@FXML private CheckBox redLaserSoundCheckBox;
+	@FXML private TextField redLaserSoundTextField;
+	@FXML private Button redLaserSoundButton;
+	@FXML private CheckBox greenLaserSoundCheckBox;
+	@FXML private TextField greenLaserSoundTextField;	
+	@FXML private Button greenLaserSoundButton;
 	@FXML private CheckBox virtualMagazineCheckBox;
 	@FXML private Slider virtualMagazineSlider;
 	@FXML private Label virtualMagazineLabel;
@@ -125,6 +136,14 @@ public class PreferencesController {
 		laserIntensitySlider.setValue(config.getLaserIntensity());
 		markerRadiusSlider.setValue(config.getMarkerRadius());
 		ignoreLaserColorChoiceBox.setValue(config.getIgnoreLaserColorName());
+		redLaserSoundCheckBox.setSelected(config.useRedLaserSound());
+		redLaserSoundTextField.setText(config.getRedLaserSound().getPath());
+		redLaserSoundTextField.setDisable(!config.useRedLaserSound());
+		redLaserSoundButton.setDisable(!config.useRedLaserSound());
+		greenLaserSoundCheckBox.setSelected(config.useGreenLaserSound());
+		greenLaserSoundTextField.setText(config.getGreenLaserSound().getPath());
+		greenLaserSoundTextField.setDisable(!config.useGreenLaserSound());
+		greenLaserSoundButton.setDisable(!config.useGreenLaserSound());
 		virtualMagazineCheckBox.setSelected(config.useVirtualMagazine());
 		virtualMagazineSlider.setDisable(!config.useVirtualMagazine());
 		virtualMagazineSlider.setValue(config.getVirtualMagazineCapacity());
@@ -143,6 +162,41 @@ public class PreferencesController {
 		        label.setText(Math.round(newValue.intValue()) + "");
 		      }
 		    });
+	}
+	
+	@FXML 
+	public void redLaserSoundCheckBoxClicked(ActionEvent event) {
+		redLaserSoundTextField.setDisable(!redLaserSoundCheckBox.isSelected());
+		redLaserSoundButton.setDisable(!redLaserSoundCheckBox.isSelected());
+	}
+	
+	@FXML 
+	public void greenLaserSoundCheckBoxClicked(ActionEvent event) {
+		greenLaserSoundTextField.setDisable(!greenLaserSoundCheckBox.isSelected());
+		greenLaserSoundButton.setDisable(!greenLaserSoundCheckBox.isSelected());
+	}
+	
+	@FXML 
+	public void redLaserSoundButtonClicked(ActionEvent event) {
+		Optional<File> soundFile = selectSoundFile();
+		if (soundFile.isPresent()) redLaserSoundTextField.setText(soundFile.get().getPath());
+	}
+	
+	@FXML 
+	public void greenLaserSoundButtonClicked(ActionEvent event) {
+		Optional<File> soundFile = selectSoundFile();
+		if (soundFile.isPresent()) greenLaserSoundTextField.setText(soundFile.get().getPath());	
+	}
+	
+	private Optional<File> selectSoundFile() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Select Shot Sound");
+		fileChooser.setInitialDirectory(new File("sounds"));
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Sound File", "*.mp3", "*.wav")
+            );
+        
+		return Optional.ofNullable(fileChooser.showOpenDialog(preferencesStage));
 	}
 	
 	@FXML 
@@ -180,6 +234,10 @@ public class PreferencesController {
 		config.setMarkerRadius((int)markerRadiusSlider.getValue());
 		config.setIgnoreLaserColor(!ignoreLaserColorChoiceBox.getValue().equals("None"));
 		config.setIgnoreLaserColorName(ignoreLaserColorChoiceBox.getValue());
+		config.setUseRedLaserSound(redLaserSoundCheckBox.isSelected());
+		config.setRedLaserSound(new File(redLaserSoundTextField.getText()));
+		config.setUseGreenLaserSound(greenLaserSoundCheckBox.isSelected());
+		config.setGreenLaserSound(new File(greenLaserSoundTextField.getText()));
 		config.setUseVirtualMagazine(virtualMagazineCheckBox.isSelected());
 		config.setVirtualMagazineCapacity((int)virtualMagazineSlider.getValue());
 		config.setMalfunctions(malfunctionsCheckBox.isSelected());

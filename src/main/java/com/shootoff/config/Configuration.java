@@ -18,6 +18,7 @@
 
 package com.shootoff.config;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -56,6 +57,10 @@ public class Configuration {
 	private static final String LASER_INTENSITY_PROP = "shootoff.laserintensity";
 	private static final String MARKER_RADIUS_PROP = "shootoff.markerradius";
 	private static final String IGNORE_LASER_COLOR_PROP = "shootoff.ignorelasercolor";
+	private static final String USE_RED_LASER_SOUND_PROP = "shootoff.redlasersound.use";
+	private static final String RED_LASER_SOUND_PROP = "shootoff.redlasersound";
+	private static final String USE_GREEN_LASER_SOUND_PROP = "shootoff.greenlasersound.use";
+	private static final String GREEN_LASER_SOUND_PROP = "shootoff.greenlasersound";
 	private static final String USE_VIRTUAL_MAGAZINE_PROP = "shootoff.virtualmagazine.use";
 	private static final String VIRTUAL_MAGAZINE_CAPACITY_PROP = "shootoff.virtualmagazine.capacity";
 	private static final String USE_MALFUNCTIONS_PROP = "shootoff.malfunctions.use";
@@ -73,6 +78,8 @@ public class Configuration {
 	protected static final String LASER_COLOR_MESSAGE = 
 			"LASER_COLOR has an invalid value: %s. Acceptable values are "
 			+ "\"red\" and \"green\".";
+	protected static final String LASER_SOUND_MESSAGE = 
+			"LASER_SOUND has an invalid value: %s. Sound file must exist.";
 	protected static final String VIRTUAL_MAGAZINE_MESSAGE = 
 			"VIRTUAL_MAGAZINE has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 45.";
@@ -91,6 +98,10 @@ public class Configuration {
 	private int markerRadius = 4;
 	private boolean ignoreLaserColor = false;
 	private String ignoreLaserColorName = "None";
+	private boolean useRedLaserSound = false;
+	private File redLaserSound = new File("sounds/walther_ppq.wav");
+	private boolean useGreenLaserSound = false;
+	private File greenLaserSound = new File("sounds/walther_ppq.wav");
 	private boolean useVirtualMagazine = false;
 	private int virtualMagazineCapacity = 7;
 	private boolean useMalfunctions = false;
@@ -208,6 +219,26 @@ public class Configuration {
 			} 
 		}
 		
+		if (prop.containsKey(USE_RED_LASER_SOUND_PROP)) {
+			setUseRedLaserSound(
+					Boolean.parseBoolean(prop.getProperty(USE_RED_LASER_SOUND_PROP)));
+		}
+		
+		if (prop.containsKey(RED_LASER_SOUND_PROP)) {
+			setRedLaserSound(
+					new File(prop.getProperty(RED_LASER_SOUND_PROP)));
+		}
+		
+		if (prop.containsKey(USE_GREEN_LASER_SOUND_PROP)) {
+			setUseGreenLaserSound(
+					Boolean.parseBoolean(prop.getProperty(USE_GREEN_LASER_SOUND_PROP)));
+		}
+		
+		if (prop.containsKey(GREEN_LASER_SOUND_PROP)) {
+			setGreenLaserSound(
+					new File(prop.getProperty(GREEN_LASER_SOUND_PROP)));
+		}
+		
 		if (prop.containsKey(USE_VIRTUAL_MAGAZINE_PROP)) {
 			setUseVirtualMagazine(
 					Boolean.parseBoolean(prop.getProperty(USE_VIRTUAL_MAGAZINE_PROP)));
@@ -249,6 +280,10 @@ public class Configuration {
 		prop.setProperty(LASER_INTENSITY_PROP, String.valueOf(laserIntensity));
 		prop.setProperty(MARKER_RADIUS_PROP, String.valueOf(markerRadius));
 		prop.setProperty(IGNORE_LASER_COLOR_PROP, ignoreLaserColorName);
+		prop.setProperty(USE_RED_LASER_SOUND_PROP, String.valueOf(useRedLaserSound));
+		prop.setProperty(RED_LASER_SOUND_PROP, redLaserSound.getPath());
+		prop.setProperty(USE_GREEN_LASER_SOUND_PROP, String.valueOf(useGreenLaserSound));
+		prop.setProperty(GREEN_LASER_SOUND_PROP, greenLaserSound.getPath());		
 		prop.setProperty(USE_VIRTUAL_MAGAZINE_PROP, String.valueOf(useVirtualMagazine));
 		prop.setProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP, String.valueOf(virtualMagazineCapacity));
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
@@ -334,6 +369,14 @@ public class Configuration {
 					String.format(MARKER_RADIUS_MESSAGE, laserIntensity));
 		}
 		
+		if (useRedLaserSound && !redLaserSound.exists()) {
+			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
+		}
+		
+		if (useGreenLaserSound && !greenLaserSound.exists()) {
+			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
+		}
+		
 		if (ignoreLaserColor && !ignoreLaserColorName.equals("red") && 
 				!ignoreLaserColorName.equals("green")) {
 			throw new ConfigurationException(
@@ -380,6 +423,22 @@ public class Configuration {
 		this.ignoreLaserColorName = ignoreLaserColorName;
 	}
 
+	public void setUseRedLaserSound(Boolean useRedLaserSound) {
+		this.useRedLaserSound = useRedLaserSound;
+	}
+	
+	public void setRedLaserSound(File redLaserSound) {
+		this.redLaserSound = redLaserSound;
+	}
+	
+	public void setUseGreenLaserSound(Boolean useGreenLaserSound) {
+		this.useGreenLaserSound = useGreenLaserSound;
+	}
+	
+	public void setGreenLaserSound(File greenLaserSound) {
+		this.greenLaserSound = greenLaserSound;
+	}
+	
 	public void setUseVirtualMagazine(boolean useVirtualMagazine) {
 		this.useVirtualMagazine = useVirtualMagazine;
 		
@@ -484,6 +543,22 @@ public class Configuration {
 	
 	public String getIgnoreLaserColorName() {
 		return ignoreLaserColorName;
+	}
+	
+	public boolean useRedLaserSound() {
+		return useRedLaserSound;
+	}
+	
+	public File getRedLaserSound() {
+		return redLaserSound;
+	}
+	
+	public boolean useGreenLaserSound() {
+		return useGreenLaserSound;
+	}
+	
+	public File getGreenLaserSound() {
+		return greenLaserSound;
 	}
 
 	public boolean useVirtualMagazine() {
