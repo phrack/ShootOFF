@@ -198,7 +198,7 @@ public class CanvasManager {
 		
 		if (config.useRedLaserSound() && color.equals(Color.RED)) {
 			TrainingProtocolBase.playSound(config.getRedLaserSound());
-		} else 	if (config.useGreenLaserSound() && color.equals(Color.GREEN)) {
+		} else if (config.useGreenLaserSound() && color.equals(Color.GREEN)) {
 			TrainingProtocolBase.playSound(config.getGreenLaserSound());
 		}
 		

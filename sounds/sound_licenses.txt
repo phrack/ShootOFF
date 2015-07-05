@@ -2,4 +2,6 @@ metal_clang.wav Attribution 3.0 http://soundbible.com/1781-Metal-Clang.html
 
 From http://www.stillnorthmedia.com/firearm-sound-library.html:
 
+benelli_nova.wav
+sks.wav
 wathler_ppq.wav
