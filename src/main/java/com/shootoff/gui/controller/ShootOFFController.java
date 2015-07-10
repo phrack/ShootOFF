@@ -102,6 +102,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
+	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 	
 	private ProjectorArenaController arenaController;
 	private CalibrationConfigPane calibrationConfigPane;
@@ -124,6 +125,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			camerasSupervisor.closeAll();
 			if (config.getProtocol().isPresent()) config.getProtocol().get().destroy();
 			if (arenaController != null) arenaController.close();
+			
+			for (Stage streamDebuggerStage : streamDebuggerStages) {
+				streamDebuggerStage.close();
+			}
 		});
 		
 		if (config.getWebcams().isEmpty()) {
@@ -299,6 +304,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					}
 					
 					Stage streamDebuggerStage = new Stage();
+					streamDebuggerStages.add(streamDebuggerStage);
 
 					String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
 			        streamDebuggerStage.setTitle(String.format("Stream Debugger -- %s", 
@@ -314,6 +320,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			        streamDebuggerStage.setOnCloseRequest((e) -> {
 			        		startStreamDebuggerMenuItem.setDisable(false);
 			        		cameraManager.setThresholdListener(null);
+			        		streamDebuggerStages.remove(streamDebuggerStage);
 			        	});
 				});
 			
