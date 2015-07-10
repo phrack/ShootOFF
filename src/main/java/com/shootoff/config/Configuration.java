@@ -116,22 +116,23 @@ public class Configuration {
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
-		shotProcessors.add(new DeduplicationProcessor());
 		readConfigurationFile();
+		shotProcessors.add(new DeduplicationProcessor());
 	}
 	
 	public Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
-		shotProcessors.add(new DeduplicationProcessor());
 		readConfigurationFile();
+		shotProcessors.add(new DeduplicationProcessor());
 	}
 	
 	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
-		shotProcessors.add(new DeduplicationProcessor());
-		readConfigurationFile();
 		parseCmdLine(args);
+		readConfigurationFile();
+		parseCmdLine(args); // Parse twice so that we guarantee debug is set and override config file
+		shotProcessors.add(new DeduplicationProcessor());
 	}
 	
 	/**
@@ -146,15 +147,16 @@ public class Configuration {
 	 */
 	public Configuration(String name, String[] args) throws IOException, ConfigurationException {
 		configName = name;
-		shotProcessors.add(new DeduplicationProcessor());
+		parseCmdLine(args);
 		readConfigurationFile();
 		parseCmdLine(args);
+		shotProcessors.add(new DeduplicationProcessor());
 	}
 
 	public Configuration(String[] args) throws ConfigurationException {
 		configName = DEFAULT_CONFIG_FILE;
-		shotProcessors.add(new DeduplicationProcessor());
 		parseCmdLine(args);
+		shotProcessors.add(new DeduplicationProcessor());
 	}
 	
 	private void readConfigurationFile() throws IOException, ConfigurationException {

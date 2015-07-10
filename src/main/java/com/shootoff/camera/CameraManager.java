@@ -63,7 +63,6 @@ public class CameraManager {
 	private boolean processedVideo = false;
 	private final CanvasManager canvasManager;
 	private final Configuration config;
-	private final int webcamRefreshDelay; // in milliseconds (ms)
 	private Optional<Bounds> projectionBounds = Optional.empty();
 	
 	private boolean isStreaming = true;
@@ -87,12 +86,6 @@ public class CameraManager {
 		this.canvasManager = canvas;
 		this.config = config;
 		
-		if (webcam.getFPS() == 0) {
-			webcamRefreshDelay = 30; // ms
-		} else {
-			webcamRefreshDelay = (int)(1000 / webcam.getFPS());
-		}
-		
 		init(new Detector());
 	}
 	
@@ -101,7 +94,6 @@ public class CameraManager {
 		this.processingLock = processingLock;
 		this.canvasManager = canvas;
 		this.config = config;
-		webcamRefreshDelay = 30;
 		
 		Detector detector = new Detector();
 		
@@ -282,6 +274,8 @@ public class CameraManager {
 		private List<Object> counts = new ArrayList<Object>();
 		private byte[][] bloomFilter = new byte[FEED_HEIGHT][FEED_WIDTH];
 		private boolean bloomFilterInitialized = false;
+		private long fpsDetectionStart = 0;
+		private int framesSeen = 0;
 		
 		@Override
 		public void run() {
@@ -296,6 +290,11 @@ public class CameraManager {
 		}
 		
 		@Override
+		/** 
+		 * From the MediaListenerAdapter. This method is used to get a new frame
+		 * from a video that is being played back in a unit test, not to get
+		 * a frame from the webcam.
+		 */
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			currentFrame = event.getImage();
@@ -314,8 +313,12 @@ public class CameraManager {
 			long startDetectionCycle = System.currentTimeMillis();
 			
 			while (isStreaming) {
-				if (webcam.isPresent()) {
+				if (webcam.isPresent() && webcam.get().isImageNew()) {
 					currentFrame = webcam.get().getImage();
+					if (fpsDetectionStart == 0) fpsDetectionStart = System.currentTimeMillis();
+					if (!bloomFilterInitialized) framesSeen++;
+				} else {
+					continue;
 				}
 				
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
@@ -373,12 +376,6 @@ public class CameraManager {
 					
 					startDetectionCycle = System.currentTimeMillis();
 					detectShots();
-				}
-				
-				try {
-					Thread.sleep(webcamRefreshDelay);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
 			}
 		}
@@ -498,6 +495,12 @@ public class CameraManager {
 					logger.debug("Finished initializing bloom filter ({} frames in filter): Enabling Shot Detection",
 							bloomCount);
 					for (Object count : counts) addFrameCount((byte[][])count);
+					
+					long bloomFilterInitTime = System.currentTimeMillis() - fpsDetectionStart;
+					double fpsMultiplier = 1000.0 / (double)bloomFilterInitTime;
+					int fps = (int)Math.round((double)framesSeen * fpsMultiplier);
+
+					logger.debug("Bloom filter initialized in {} ms with {} FPS from the camera", bloomFilterInitTime, fps);
 				}
 			}
 		}
