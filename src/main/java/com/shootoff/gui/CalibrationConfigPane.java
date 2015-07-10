@@ -18,8 +18,10 @@ public class CalibrationConfigPane extends BorderPane {
 		minimizeDetectionRadioButton.setToggleGroup(configToggleGroup);
 		cropRadioButton.setToggleGroup(configToggleGroup);
 		
-		minimizeDetectionRadioButton.setTextFill(Color.GOLD);
-		cropRadioButton.setTextFill(Color.GOLD);
+		minimizeDetectionRadioButton.setStyle("-fx-background-color: darkgray;");
+		minimizeDetectionRadioButton.setTextFill(Color.WHITE);
+		cropRadioButton.setStyle("-fx-background-color: darkgray;");
+		cropRadioButton.setTextFill(Color.WHITE);
 		
 		this.setLeft(minimizeDetectionRadioButton);
 		this.setRight(cropRadioButton);
