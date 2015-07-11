@@ -64,5 +64,4 @@ public class TestCameraManager {
 		assertEquals(130, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
-
 }

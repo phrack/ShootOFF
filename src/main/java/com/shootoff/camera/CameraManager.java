@@ -454,12 +454,14 @@ public class CameraManager {
 			}
 			
 			if (bloomFilterInitialized) {
-				double webcamFPS = webcam.get().getFPS();
-				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
-					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection", 
-							webcam.get().getName(), webcamFPS);
-					showFPSWarning(webcamFPS);
-					showedFPSWarning = true;
+				if (webcam.isPresent()) {
+					double webcamFPS = webcam.get().getFPS();
+					if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
+						logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection", 
+								webcam.get().getName(), webcamFPS);
+						showFPSWarning(webcamFPS);
+						showedFPSWarning = true;
+					}
 				}
 				
 				byte[][] currentFrame = getFrameCount(threshed);
@@ -498,10 +500,14 @@ public class CameraManager {
 				
 				if (counts.size() == bloomCount) {
 					bloomFilterInitialized = true;
-					logger.debug("[{}] Finished initializing bloom filter ({} frames in filter): Enabling Shot Detection",
-							webcam.get().getName(), bloomCount);
-					logger.debug("[{}] Webcam FPS pre-shot detection: {}", 
-							webcam.get().getName(), webcam.get().getFPS());
+					
+					if (webcam.isPresent()) {
+						logger.debug("[{}] Finished initializing bloom filter ({} frames in filter): Enabling Shot Detection",
+								webcam.get().getName(), bloomCount);
+						logger.debug("[{}] Webcam FPS pre-shot detection: {}", 
+								webcam.get().getName(), webcam.get().getFPS());
+					}
+					
 					for (Object count : counts) addFrameCount((byte[][])count);
 				}
 			}
