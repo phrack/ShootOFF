@@ -54,6 +54,7 @@ import javafx.scene.image.Image;
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
 	public static final int FEED_HEIGHT = 480;
+	public static final int MIN_SHOT_DETECTION_FPS = 5;
 	
 	private int bloomCount = 10;
 	
@@ -274,9 +275,8 @@ public class CameraManager {
 		private List<Object> counts = new ArrayList<Object>();
 		private byte[][] bloomFilter = new byte[FEED_HEIGHT][FEED_WIDTH];
 		private boolean bloomFilterInitialized = false;
-		private long fpsDetectionStart = 0;
-		private int framesSeen = 0;
-		
+		private boolean showedFPSWarning = false;
+
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
@@ -315,8 +315,6 @@ public class CameraManager {
 			while (isStreaming) {
 				if (webcam.isPresent() && webcam.get().isImageNew()) {
 					currentFrame = webcam.get().getImage();
-					if (fpsDetectionStart == 0) fpsDetectionStart = System.currentTimeMillis();
-					if (!bloomFilterInitialized) framesSeen++;
 				} else {
 					continue;
 				}
@@ -456,6 +454,14 @@ public class CameraManager {
 			}
 			
 			if (bloomFilterInitialized) {
+				double webcamFPS = webcam.get().getFPS();
+				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
+					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection", 
+							webcam.get().getName(), webcamFPS);
+					showFPSWarning(webcamFPS);
+					showedFPSWarning = true;
+				}
+				
 				byte[][] currentFrame = getFrameCount(threshed);
 				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
 				
@@ -492,17 +498,35 @@ public class CameraManager {
 				
 				if (counts.size() == bloomCount) {
 					bloomFilterInitialized = true;
-					logger.debug("Finished initializing bloom filter ({} frames in filter): Enabling Shot Detection",
-							bloomCount);
+					logger.debug("[{}] Finished initializing bloom filter ({} frames in filter): Enabling Shot Detection",
+							webcam.get().getName(), bloomCount);
+					logger.debug("[{}] Webcam FPS pre-shot detection: {}", 
+							webcam.get().getName(), webcam.get().getFPS());
 					for (Object count : counts) addFrameCount((byte[][])count);
-					
-					long bloomFilterInitTime = System.currentTimeMillis() - fpsDetectionStart;
-					double fpsMultiplier = 1000.0 / (double)bloomFilterInitTime;
-					int fps = (int)Math.round((double)framesSeen * fpsMultiplier);
-
-					logger.debug("Bloom filter initialized in {} ms with {} FPS from the camera", bloomFilterInitTime, fps);
 				}
 			}
+		}
+		
+		private void showFPSWarning(double fps) {
+			Platform.runLater(() -> {
+				Alert cameraAlert = new Alert(AlertType.ERROR);
+				
+				Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
+				String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
+						+ " shots may be missed. You may be able to raise the FPS by closing other applications.";
+				String message;
+				if (cameraName.isPresent()) {
+					message = String.format(messageFormat, cameraName.get(), fps);
+				} else {
+					message = String.format(messageFormat, webcam.get().getName(), fps);
+				}
+				
+				cameraAlert.setTitle("Webcam FPS Too Low");
+				cameraAlert.setHeaderText("Webcam FPS is too low!");
+				cameraAlert.setResizable(true);
+				cameraAlert.setContentText(message);
+				cameraAlert.show();
+			});
 		}
 	}	
 }
