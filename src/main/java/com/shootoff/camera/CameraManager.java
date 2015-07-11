@@ -90,7 +90,8 @@ public class CameraManager {
 		init(new Detector());
 	}
 	
-	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config) {
+	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas, 
+			Configuration config, boolean[][] sectorStatuses) {
 		this.webcam = Optional.empty();
 		this.processingLock = processingLock;
 		this.canvasManager = canvas;
@@ -102,7 +103,8 @@ public class CameraManager {
 	    reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 	    reader.addListener(detector);
 	    
-	    init(detector);
+	    setSectorStatuses(sectorStatuses);
+	    new Thread(detector).start();
 	    
 	    while (reader.readPacket() == null)
 	      do {} while(false);
