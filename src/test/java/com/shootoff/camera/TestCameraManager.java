@@ -126,6 +126,14 @@ public class TestCameraManager {
 		assertEquals(334.5, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
 	}
+	
+	@Test
+	public void testMSHD3000ardwareDefaultsAmbientLightNatureScene() {
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4", 
+				Optional.empty());
+
+		assertEquals(0, shots.size());
+	}
 
 	@Test
 	public void testPS3EyeHardwareDefaults() {
@@ -149,5 +157,13 @@ public class TestCameraManager {
 		assertEquals(176.5, shots.get(3).getX(), 1);
 		assertEquals(251.5, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsAmbientLightNatureScene() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4", 
+				Optional.empty());
+		
+		assertEquals(0, shots.size());
 	}
 }
