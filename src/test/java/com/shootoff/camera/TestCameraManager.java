@@ -89,9 +89,8 @@ public class TestCameraManager {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4", 
 				Optional.of(overrideShotSectors));
 		
-		// Currently missing first shot in top left and last two shots on
-		// bottom right getting rejected due to size heuristic
-		assertEquals(8, shots.size());
+		// Currently missing first shot in top left
+		assertEquals(9, shots.size());
 
 		assertEquals(385.5, shots.get(0).getX(), 1);
 		assertEquals(182.5, shots.get(0).getY(), 1);
@@ -124,6 +123,10 @@ public class TestCameraManager {
 		assertEquals(532, shots.get(7).getX(), 1);
 		assertEquals(334.5, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
+		
+		assertEquals(529.5, shots.get(8).getX(), 1);
+		assertEquals(356, shots.get(8).getY(), 1);
+		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 	
 	@Test
@@ -237,11 +240,30 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 
+	@Test
+	public void testMSHD3000ardwareDefaultsAmbientLightNatureScene() {
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4", 
+				Optional.empty());
+
+		assertEquals(0, shots.size());
+	}
 	
 	@Test
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
+		// Turn off the top sectors because they are all just noise.
+		boolean[][] overrideShotSectors = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+				if (y == 0) {
+					overrideShotSectors[y][x] = false;
+				} else {
+					overrideShotSectors[y][x] = true;
+				}
+			}
+		}
+		
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", 
-				Optional.empty());
+				Optional.of(overrideShotSectors));
 		
 		assertEquals(4, shots.size());
 		
@@ -304,5 +326,13 @@ public class TestCameraManager {
 		assertEquals(436.5, shots.get(8).getX(), 1);
 		assertEquals(377, shots.get(8).getY(), 1);
 		assertEquals(Color.RED, shots.get(8).getColor());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsAmbientLightNatureScene() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4", 
+				Optional.empty());
+		
+		assertEquals(0, shots.size());
 	}
 }
