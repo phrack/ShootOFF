@@ -128,6 +128,65 @@ public class TestCameraManager {
 	}
 
 	@Test
+	public void testMSHD3000MinBrightnessMinContrastWhiteBalanceOff() {
+		// Turn off the top sectors because they are all just noise.
+		boolean[][] overrideShotSectors = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+				if (y == 0) {
+					overrideShotSectors[y][x] = false;
+				} else {
+					overrideShotSectors[y][x] = true;
+				}
+			}
+		}
+		
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_contrast_0_brightness_30_whitebalance_off.mp4", 
+				Optional.of(overrideShotSectors));
+		
+		// Currently missing first shot in top left and last two shots on
+		// bottom right getting rejected due to size heuristic
+		assertEquals(9, shots.size());
+
+		assertEquals(377, shots.get(0).getX(), 1);
+		assertEquals(274.5, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+		
+		assertEquals(226.5, shots.get(1).getX(), 1);
+		assertEquals(180.5, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+		
+		assertEquals(251, shots.get(2).getX(), 1);
+		assertEquals(377.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+		
+		assertEquals(537, shots.get(3).getX(), 1);
+		assertEquals(383.5, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
+		
+		assertEquals(505, shots.get(4).getX(), 1);
+		assertEquals(167.5, shots.get(4).getY(), 1);
+		assertEquals(Color.RED, shots.get(4).getColor());
+		
+		assertEquals(496.5, shots.get(5).getX(), 1);
+		assertEquals(268, shots.get(5).getY(), 1);
+		assertEquals(Color.RED, shots.get(5).getColor());
+		
+		assertEquals(272, shots.get(6).getX(), 1);
+		assertEquals(278.5, shots.get(6).getY(), 1);
+		assertEquals(Color.RED, shots.get(6).getColor());
+		
+		assertEquals(375.5, shots.get(7).getX(), 1);
+		assertEquals(200.5, shots.get(7).getY(), 1);
+		assertEquals(Color.RED, shots.get(7).getColor());
+		
+		assertEquals(403, shots.get(8).getX(), 1);
+		assertEquals(363, shots.get(8).getY(), 1);
+		assertEquals(Color.RED, shots.get(8).getColor());
+	}
+
+	
+	@Test
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_constrast_default_brightness_default_whitebalance_on.mp4", 
 				Optional.empty());
