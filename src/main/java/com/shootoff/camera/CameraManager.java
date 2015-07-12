@@ -526,20 +526,19 @@ public class CameraManager {
 		private void detectShots() {
 			if (!isDetecting || bloomCount == 0) return;
 			
-			BufferedImage currentCopy = new BufferedImage(currentFrame.getWidth(),
-					currentFrame.getHeight(), BufferedImage.TYPE_INT_RGB);
+			BufferedImage workingCopy;
 			
 			if (limitDetectProjection && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
-				currentCopy = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(), 
+				workingCopy = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(), 
 						(int)b.getWidth(), (int)b.getHeight());
 			} else {
-				currentCopy.createGraphics().drawImage(currentFrame, 0, 0, null);
+				workingCopy = currentFrame;
 			}
 			
-			BufferedImage grayScale = new BufferedImage(currentCopy.getWidth(),
+			BufferedImage grayScale = new BufferedImage(currentFrame.getWidth(),
 					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-			grayScale.createGraphics().drawImage(currentCopy, 0, 0, null);
+			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 			
 			BufferedImage threshed = threshold(config, grayScale);
 			
@@ -566,7 +565,7 @@ public class CameraManager {
 				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
 				
 				ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-						currentCopy, shotFrame, projectionBounds);
+						workingCopy, shotFrame, projectionBounds);
 				
 				if (colorDiffThreshold.isPresent()) {
 					shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());
