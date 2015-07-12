@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
-import com.shootoff.gui.ThresholdListener;
+import com.shootoff.gui.DebuggerListener;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -73,7 +73,7 @@ public class CameraManager {
 	private Optional<Double> colorDiffThreshold = Optional.empty();
 	private Optional<Integer> centerApproxBorderSize = Optional.empty();
 	private Optional<Integer> minimumShotDimension = Optional.empty();
-	private Optional<ThresholdListener> thresholdListener = Optional.empty();
+	private Optional<DebuggerListener> debuggerListener = Optional.empty();
 	
 	private boolean recording = false;
 	private boolean isFirstFrame = true;
@@ -214,8 +214,8 @@ public class CameraManager {
 		bloomCount = count;
 	}
 	
-	public void setThresholdListener(ThresholdListener thresholdListener) {
-		this.thresholdListener = Optional.ofNullable(thresholdListener);
+	public void setThresholdListener(DebuggerListener thresholdListener) {
+		this.debuggerListener = Optional.ofNullable(thresholdListener);
 	}
 	
 	protected static BufferedImage threshold(Configuration config, BufferedImage grayScale) {
@@ -458,7 +458,8 @@ public class CameraManager {
 			if (bloomFilterInitialized) {
 				if (webcam.isPresent()) {
 					double webcamFPS = webcam.get().getFPS();
-					if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
+					if (debuggerListener.isPresent()) debuggerListener.get().updateFPS(webcamFPS);
+					if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {	
 						logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection", 
 								webcam.get().getName(), webcamFPS);
 						showFPSWarning(webcamFPS);
@@ -487,8 +488,8 @@ public class CameraManager {
 				
 				new Thread(shotSearcher).start();
 				
-				if (thresholdListener.isPresent()) {
-					thresholdListener.get().updateThreshold(countToImage(shotFrame), mask);
+				if (debuggerListener.isPresent()) {
+					debuggerListener.get().updateThreshold(countToImage(shotFrame), mask);
 				}
 				
 				// Update the bloom filter by removing the oldest frame

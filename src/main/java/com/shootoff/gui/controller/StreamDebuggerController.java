@@ -22,23 +22,31 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import com.shootoff.camera.CameraManager;
-import com.shootoff.gui.ThresholdListener;
+import com.shootoff.gui.DebuggerListener;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 
-public class StreamDebuggerController implements ThresholdListener {
+public class StreamDebuggerController implements DebuggerListener {
+	private Stage streamDebuggerStage;
 	@FXML private ImageView thresholdImageView;
 	@FXML private Slider colorDifferenceSlider;
 	@FXML private Slider centerBorderSlider;
 	@FXML private Slider minDimSlider;
 	@FXML private Slider bloomCountSlider;
 	
+	private String defaultWindowTitle = "";
+	
 	public void init(CameraManager cameraManager) {
+		streamDebuggerStage = (Stage)thresholdImageView.getScene().getWindow();
+		defaultWindowTitle = streamDebuggerStage.getTitle();
+		
 		cameraManager.setThresholdListener(this);
 
 		colorDifferenceSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -97,5 +105,12 @@ public class StreamDebuggerController implements ThresholdListener {
 		}
 		
 		thresholdImageView.setImage(SwingFXUtils.toFXImage(coloredImg, null));
+	}
+
+	@Override
+	public void updateFPS(double fps) {
+		Platform.runLater(() -> {
+				streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", fps)); 
+			});
 	}
 }
