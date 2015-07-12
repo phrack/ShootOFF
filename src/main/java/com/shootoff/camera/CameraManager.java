@@ -391,57 +391,72 @@ public class CameraManager {
 		}
 		
 		private void fixFrame(BufferedImage frame) {
-			float averageLum = averageLum(frame);
+			AverageFrameComponents averages = averageFrameComponents(frame);
 			
+			float averageLum = averages.getAverageLum();
+			float averageRed = averages.getAverageRed();
+		
+			// If the frame is brighter than the ideal brightness step
+			// the brightness down
 			if (averageLum > IDEAL_LUM) {
 				RescaleOp brightnessScaler = new RescaleOp(IDEAL_LUM / averageLum, 0, null);
 				brightnessScaler.filter(frame, frame);
 			}
 			
-			float averageRed = averageRedComponent(frame);
 			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
 			
+			// If the color temperatures (using just the red component as an
+			// approximation) are only a bit off from ideal step up the heat.
+			// We don't want to make big changes or it will blow up in dark
+			// rooms by trying to do huge corrections that max r and zero b
+			// components in rgb pixels.
 			if (averageRed < IDEAL_R_AVERAGE && colorCorrection < 2f) {
 				adjustColorTemperature(frame, colorCorrection);
 			}	
 		}
 		
-		private float averageLum(BufferedImage frame) {
+		private class AverageFrameComponents {
+			private final float averageLum;
+			private final float averageRed;
+			
+			public AverageFrameComponents(float lum, float red) {
+				averageLum = lum; averageRed = red;
+			}
+			
+			public float getAverageLum() {
+				return averageLum;
+			}
+			
+			public float getAverageRed() {
+				return averageRed;
+			}
+		}
+		
+		private AverageFrameComponents averageFrameComponents(BufferedImage frame) {
 			long totalLum = 0;
+			long totalRed = 0;
 			for (int x = 0; x < frame.getWidth(); x++) {
 				for (int y = 0; y < frame.getHeight(); y++) {
 					Color c = new Color(frame.getRGB(x, y));
 					totalLum += (c.getRed() + c.getRed() + c.getRed() +
 							c.getBlue() +
 							c.getGreen() + c.getGreen() + c.getGreen() + c.getGreen()) >> 3;
-				}
-			}
-			
-			float totalPixels = (float)(frame.getWidth() * frame.getHeight());
-			
-			return (float)(totalLum) / totalPixels;
-		}
-		
-		
-		private float averageRedComponent(BufferedImage frame) {
-			long totalRed = 0;
-			for (int x = 0; x < frame.getWidth(); x++) {
-				for (int y = 0; y < frame.getHeight(); y++) {
-					Color c = new Color(frame.getRGB(x, y));
 					totalRed += c.getRed();
 				}
 			}
 			
 			float totalPixels = (float)(frame.getWidth() * frame.getHeight());
-			
-			return (float)(totalRed) / totalPixels;
+	
+			return new AverageFrameComponents((float)(totalLum) / totalPixels,
+					(float)(totalRed) / totalPixels);
 		}
 		
-		// This is not perfect because it treats color temps are linear.
-		// Essentially we use the differene between the ideal average r
-		// component and the average for the current frame to adjust red
-		// and blue up or down to get roughly the ideal color temperature
-		// for shot detection.
+		/* This is not perfect because it treats color temps as linear.
+		 * Essentially we use the difference between the ideal average r
+		 * component and the average for the current frame to adjust red
+		 * and blue up or down to get roughly the ideal color temperature
+		 * for shot detection.
+		 */
 		private void adjustColorTemperature(BufferedImage frame, float dr) {
 			float db = 1 - (dr - 1);
 			
