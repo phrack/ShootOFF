@@ -52,7 +52,7 @@ public class ShotSearcher implements Runnable {
     // similar
 	private double colorDiffThreshold = 1.05;
 	private int borderWidth = 3; // px
-	private int minShotDim = 7; // px
+	private int minShotDim = 6; // px
 	
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
 			BufferedImage currentFrame, byte[][] shotFrame, Optional<Bounds> projectionBounds) {
