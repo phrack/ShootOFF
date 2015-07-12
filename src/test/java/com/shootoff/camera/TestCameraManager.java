@@ -126,6 +126,61 @@ public class TestCameraManager {
 		assertEquals(334.5, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
 	}
+	
+	@Test
+	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOn() {
+		// Turn off the top sectors because they are all just noise.
+		boolean[][] overrideShotSectors = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+				if (y == 0) {
+					overrideShotSectors[y][x] = false;
+				} else {
+					overrideShotSectors[y][x] = true;
+				}
+			}
+		}
+		
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_constrast_5_brightness_30_whitebalance_on.mp4", 
+				Optional.of(overrideShotSectors));
+		
+		
+		// Currently missing first shot in top left
+		assertEquals(8, shots.size());
+
+		
+		assertEquals(378.5, shots.get(0).getX(), 1);
+		assertEquals(168.5, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+		
+		assertEquals(521.5, shots.get(1).getX(), 1);
+		assertEquals(163.5, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+		
+		assertEquals(530, shots.get(2).getX(), 1);
+		assertEquals(251.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+		
+		assertEquals(380.5, shots.get(3).getX(), 1);
+		assertEquals(264, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
+		
+		assertEquals(233, shots.get(4).getX(), 1);
+		assertEquals(270, shots.get(4).getY(), 1);
+		assertEquals(Color.RED, shots.get(4).getColor());
+		
+		assertEquals(249.5, shots.get(5).getX(), 1);
+		assertEquals(379, shots.get(5).getY(), 1);
+		assertEquals(Color.RED, shots.get(5).getColor());
+		
+		assertEquals(381.5, shots.get(6).getX(), 1);
+		assertEquals(375.5, shots.get(6).getY(), 1);
+		assertEquals(Color.RED, shots.get(6).getColor());
+		
+		assertEquals(539, shots.get(7).getX(), 1);
+		assertEquals(381, shots.get(7).getY(), 1);
+		assertEquals(Color.RED, shots.get(7).getColor());
+	}
 
 	@Test
 	public void testMSHD3000MinBrightnessMinContrastWhiteBalanceOff() {
