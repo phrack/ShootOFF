@@ -60,6 +60,7 @@ public class TestCameraManager {
 	@Test
 	public void testNoInterferenceTwoShots() {
 		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4", Optional.empty());
+		//List<Shot> shots = findShots("/shotsearcher/ps3eye_constrast_default_brightness_default_whitebalance_on.mp4", Optional.empty());
 		
 		assertEquals(2, shots.size());
 		
