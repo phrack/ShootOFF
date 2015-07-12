@@ -86,7 +86,7 @@ public class TestCameraManager {
 			}
 		}
 		
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_brightness_30_constrast_5_whitebalance_off.mp4", 
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4", 
 				Optional.of(overrideShotSectors));
 		
 		// Currently missing first shot in top left and last two shots on
@@ -140,7 +140,7 @@ public class TestCameraManager {
 			}
 		}
 		
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_constrast_5_brightness_30_whitebalance_on.mp4", 
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_on.mp4", 
 				Optional.of(overrideShotSectors));
 		
 		// Currently missing first shot in top left
@@ -193,7 +193,7 @@ public class TestCameraManager {
 			}
 		}
 		
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_contrast_0_brightness_30_whitebalance_off.mp4", 
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_min_contrast_whitebalance_off.mp4", 
 				Optional.of(overrideShotSectors));
 		
 		// Currently missing first shot in top left and last two shots on
@@ -240,7 +240,7 @@ public class TestCameraManager {
 	
 	@Test
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_constrast_default_brightness_default_whitebalance_on.mp4", 
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", 
 				Optional.empty());
 		
 		assertEquals(4, shots.size());
