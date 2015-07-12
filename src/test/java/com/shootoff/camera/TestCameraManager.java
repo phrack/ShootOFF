@@ -91,7 +91,8 @@ public class TestCameraManager {
 				Optional.of(overrideShotSectors));
 		
 		
-		// Currently missing shot in top left and two shots on bottom right
+		// Currently missing first shot in top left and last two shots on
+		// bottom right getting rejected due to size heuristic
 		assertEquals(8, shots.size());
 
 		assertEquals(385.5, shots.get(0).getX(), 1);
@@ -125,5 +126,29 @@ public class TestCameraManager {
 		assertEquals(532, shots.get(7).getX(), 1);
 		assertEquals(334.5, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
+	}
+
+	@Test
+	public void testPS3EyeHardwareDefaults() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_constrast_default_brightness_default_whitebalance_on.mp4", 
+				Optional.empty());
+		
+		assertEquals(4, shots.size());
+		
+		assertEquals(236.5, shots.get(0).getX(), 1);
+		assertEquals(169.5, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+		
+		assertEquals(175, shots.get(1).getX(), 1);
+		assertEquals(191, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+		
+		assertEquals(229.5, shots.get(2).getX(), 1);
+		assertEquals(227.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+		
+		assertEquals(176.5, shots.get(1).getX(), 1);
+		assertEquals(251.5, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
 	}
 }
