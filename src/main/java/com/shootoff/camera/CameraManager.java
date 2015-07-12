@@ -24,6 +24,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -278,6 +280,7 @@ public class CameraManager {
 		private byte[][] bloomFilter = new byte[FEED_HEIGHT][FEED_WIDTH];
 		private boolean bloomFilterInitialized = false;
 		private boolean showedFPSWarning = false;
+		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 
 		@Override
 		public void run() {
@@ -375,7 +378,7 @@ public class CameraManager {
 						startDetectionCycle >= config.getDetectionRate()) {
 					
 					startDetectionCycle = System.currentTimeMillis();
-					detectShots();
+					detectionExecutor.submit(new Thread(() -> {detectShots();}));
 				}
 			}
 		}
