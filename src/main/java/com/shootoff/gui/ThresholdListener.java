@@ -1,7 +1,7 @@
 package com.shootoff.gui;
 
-import javafx.scene.image.Image;
+import java.awt.image.BufferedImage;
 
 public interface ThresholdListener {
-	public void updateThreshold(Image thresholdImg);
+	public void updateThreshold(BufferedImage thresholdImg, byte[][] mask);
 }
