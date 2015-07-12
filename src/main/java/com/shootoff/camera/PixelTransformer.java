@@ -5,5 +5,5 @@ import java.awt.image.BufferedImage;
 
 public interface PixelTransformer {
 	public void updatePixel(int x, int y, Color c);
-	public BufferedImage generateTransformation(BufferedImage frame);
+	public void generateTransformation(BufferedImage frame);
 }
