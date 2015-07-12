@@ -399,9 +399,10 @@ public class CameraManager {
 			}
 			
 			float averageRed = averageRedComponent(frame);
+			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
 			
-			if (averageRed > IDEAL_R_AVERAGE) {
-				adjustColorTemperature(frame, IDEAL_R_AVERAGE / averageRed);
+			if (averageRed < IDEAL_R_AVERAGE && colorCorrection < 2f) {
+				adjustColorTemperature(frame, colorCorrection);
 			}	
 		}
 		

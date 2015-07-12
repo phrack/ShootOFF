@@ -146,8 +146,8 @@ public class TestCameraManager {
 		assertEquals(227.5, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 		
-		assertEquals(176.5, shots.get(1).getX(), 1);
-		assertEquals(251.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());
+		assertEquals(176.5, shots.get(3).getX(), 1);
+		assertEquals(251.5, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
 	}
 }
