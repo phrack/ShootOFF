@@ -81,7 +81,7 @@ public class StreamDebuggerController implements DebuggerListener {
 				public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
 		        	if (newValue == null) return;
 
-	        		cameraManager.setBloomCount(newValue.intValue());
+	        	//	cameraManager.setBloomCount(newValue.intValue());
 		      	}
 		    });
 	}

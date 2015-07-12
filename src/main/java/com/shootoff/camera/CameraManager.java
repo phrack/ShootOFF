@@ -23,8 +23,6 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,8 +61,8 @@ public class CameraManager {
 												     // for a video recorded using a webcam with hw settings that
 												     // worked well
 	public static final float IDEAL_LUM = 136;		 // See comment above
-
-	private int bloomCount = 10;
+	public static final int INIT_FRAME_COUNT = 5; // Used by current pixel transformer to decide how many frames
+												  // to use for initialization
 
 	private final PixelTransformer pixelTransformer = new MovingAveragePixelTransformer();
 
@@ -219,11 +217,7 @@ public class CameraManager {
 		minimumShotDimension = Optional.of(minDim);
 		logger.debug("Set the minimum dimension for shots to: {}", minDim);
 	}
-
-	public void setBloomCount(int count) {
-		bloomCount = count;
-	}
-
+	
 	public void setThresholdListener(DebuggerListener thresholdListener) {
 		this.debuggerListener = Optional.ofNullable(thresholdListener);
 	}
@@ -251,43 +245,11 @@ public class CameraManager {
 		return red << 16 | green << 8 | blue;
 	}
 
-	protected static byte[][] getFrameCount(BufferedImage img) {
-		byte[][] newCount = new byte[FEED_HEIGHT][FEED_WIDTH];
-
-		for (int y = 0; y < img.getHeight(); y++) {
-			for (int x = 0; x < img.getWidth(); x++) {
-				int pixel = img.getRGB(x, y) & 0xFF;
-				if (pixel == 255) newCount[y][x] = 1;
-			}
-		}
-
-		return newCount;
-	}
-
-	protected BufferedImage countToImage(byte[][] count) {
-		BufferedImage img = new BufferedImage(count[0].length,
-				count.length, BufferedImage.TYPE_BYTE_GRAY);
-
-		for (int y = 0; y < img.getHeight(); y++) {
-			for (int x = 0; x < img.getWidth(); x++) {
-				if (count[y][x] == 1) {
-					img.setRGB(x, y, mixColor(255, 255, 255));
-				} else {
-					img.setRGB(x, y, mixColor(0, 0, 0));
-				}
-			}
-		}
-
-		return img;
-	}
-
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private BufferedImage currentFrame;
-		private int oldestFrame = 0;
-		private List<Object> counts = new ArrayList<Object>();
-		private byte[][] bloomFilter = new byte[FEED_HEIGHT][FEED_WIDTH];
-		private boolean bloomFilterInitialized = false;
 		private boolean showedFPSWarning = false;
+		private boolean pixelTransformerInitialized = false;
+		private int seenFrames = 0;
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 
 		@Override
@@ -314,7 +276,12 @@ public class CameraManager {
 
 			fixFrame(currentFrame);
 
-			detectShots();
+			if (pixelTransformerInitialized == false) {
+				seenFrames++;
+				if (seenFrames == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
+			} else {
+				detectShots();
+			}
 		}
 
 		@Override
@@ -332,6 +299,14 @@ public class CameraManager {
 				if (webcam.isPresent() && webcam.get().isImageNew()) {
 					currentFrame = webcam.get().getImage();
 					fixFrame(currentFrame);
+					if (pixelTransformerInitialized == false) {
+						seenFrames++;
+						if (seenFrames == INIT_FRAME_COUNT) { 
+							pixelTransformerInitialized = true;
+						} else {
+							continue;
+						}
+					}
 				} else {
 					continue;
 				}
@@ -393,6 +368,8 @@ public class CameraManager {
 					detectionExecutor.submit(new Thread(() -> {detectShots();}));
 				}
 			}
+			
+			detectionExecutor.shutdown();
 		}
 
 		private void fixFrame(BufferedImage frame) {
@@ -483,54 +460,6 @@ public class CameraManager {
 				}
 			}
 		}
-
-		private void addFrameCount(byte[][] count) {
-			for (int y = 0; y < FEED_HEIGHT; y++) {
-				for (int x = 0; x < FEED_WIDTH; x++) {
-					bloomFilter[y][x] += count[y][x];
-				}
-			}
-		}
-
-		private void subFrameCount(byte[][] count) {
-			for (int y = 0; y < FEED_HEIGHT; y++) {
-				for (int x = 0; x < FEED_WIDTH; x++) {
-					if (bloomFilter[y][x] >= 1)
-						bloomFilter[y][x] -= count[y][x];
-				}
-			}
-		}
-
-		private byte[][] generateMask() {
-			byte[][] mask = new byte[FEED_HEIGHT][FEED_WIDTH];
-
-			for (int y = 0; y < FEED_HEIGHT; y++) {
-				for (int x = 0; x < FEED_WIDTH; x++) {
-					if (bloomFilter[y][x] == 0) mask[y][x] = 0;
-					else mask[y][x] = 1;
-				}
-			}
-
-			return mask;
-		}
-
-		private byte not(byte value) {
-			if (value == 1) return 0;
-			else return 1;
-		}
-
-		private byte[][] getShotFrame(byte[][] mask, byte[][] currentFrame) {
-			byte[][] shotFrame = new byte[FEED_HEIGHT][FEED_WIDTH];
-
-			for (int y = 0; y < FEED_HEIGHT; y++) {
-				for (int x = 0; x < FEED_WIDTH; x++) {
-					shotFrame[y][x] = (byte) (not(mask[y][x]) & currentFrame[y][x]);
-				}
-			}
-
-			return shotFrame;
-		}
-
 		private void detectShots() {
 			if (!isDetecting) return;
 
