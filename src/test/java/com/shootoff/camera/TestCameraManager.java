@@ -89,7 +89,6 @@ public class TestCameraManager {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_brightness_30_constrast_5_whitebalance_off.mp4", 
 				Optional.of(overrideShotSectors));
 		
-		
 		// Currently missing first shot in top left and last two shots on
 		// bottom right getting rejected due to size heuristic
 		assertEquals(8, shots.size());
@@ -144,11 +143,9 @@ public class TestCameraManager {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_constrast_5_brightness_30_whitebalance_on.mp4", 
 				Optional.of(overrideShotSectors));
 		
-		
 		// Currently missing first shot in top left
 		assertEquals(8, shots.size());
 
-		
 		assertEquals(378.5, shots.get(0).getX(), 1);
 		assertEquals(168.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
