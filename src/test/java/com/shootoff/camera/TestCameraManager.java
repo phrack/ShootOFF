@@ -128,7 +128,7 @@ public class TestCameraManager {
 	}
 
 	@Test
-	public void testPS3EyeHardwareDefaults() {
+	public void testPS3EyeHardwareDefaultsBrightRoom() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_constrast_default_brightness_default_whitebalance_on.mp4", 
 				Optional.empty());
 		
@@ -149,5 +149,49 @@ public class TestCameraManager {
 		assertEquals(176.5, shots.get(3).getX(), 1);
 		assertEquals(251.5, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsDarkRoom() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_projector_dark_room.mp4", 
+				Optional.empty());
+		
+		assertEquals(9, shots.size());
+		
+		assertEquals(119, shots.get(0).getX(), 1);
+		assertEquals(142.5, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+		
+		assertEquals(279.5, shots.get(1).getX(), 1);
+		assertEquals(123.5, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+		
+		assertEquals(438, shots.get(2).getX(), 1);
+		assertEquals(145.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+		
+		assertEquals(443.5, shots.get(3).getX(), 1);
+		assertEquals(230, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
+		
+		assertEquals(302, shots.get(4).getX(), 1);
+		assertEquals(238, shots.get(4).getY(), 1);
+		assertEquals(Color.RED, shots.get(4).getColor());
+		
+		assertEquals(218.5, shots.get(5).getX(), 1);
+		assertEquals(244.5, shots.get(5).getY(), 1);
+		assertEquals(Color.RED, shots.get(5).getColor());
+		
+		assertEquals(122, shots.get(6).getX(), 1);
+		assertEquals(244, shots.get(6).getY(), 1);
+		assertEquals(Color.RED, shots.get(6).getColor());
+		
+		assertEquals(288, shots.get(7).getX(), 1);
+		assertEquals(375, shots.get(7).getY(), 1);
+		assertEquals(Color.RED, shots.get(7).getColor());
+		
+		assertEquals(436.5, shots.get(8).getX(), 1);
+		assertEquals(377, shots.get(8).getY(), 1);
+		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 }
