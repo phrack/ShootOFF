@@ -18,14 +18,17 @@
 
 package com.shootoff.gui.controller;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+
 import com.shootoff.camera.CameraManager;
 import com.shootoff.gui.ThresholdListener;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class StreamDebuggerController implements ThresholdListener {
@@ -80,7 +83,19 @@ public class StreamDebuggerController implements ThresholdListener {
 	}
 
 	@Override
-	public void updateThreshold(Image thresholdImg) {
-		thresholdImageView.setImage(thresholdImg);
+	public void updateThreshold(BufferedImage thresholdImg, byte[][] mask) {
+		BufferedImage coloredImg = new BufferedImage(thresholdImg.getWidth(), thresholdImg.getHeight(), 
+				BufferedImage.TYPE_INT_RGB);
+		coloredImg.createGraphics().drawImage(thresholdImg, 0, 0, null);
+		
+		for (int x = 0; x < thresholdImg.getWidth(); x++) {
+			for (int y = 0; y < thresholdImg.getHeight(); y++) {
+				if (mask[y][x] == 1) {
+					coloredImg.setRGB(x, y, Color.RED.getRGB());
+				}
+			}
+		}
+		
+		thresholdImageView.setImage(SwingFXUtils.toFXImage(coloredImg, null));
 	}
 }

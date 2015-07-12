@@ -467,7 +467,8 @@ public class CameraManager {
 				}
 				
 				byte[][] currentFrame = getFrameCount(threshed);
-				byte[][] shotFrame = getShotFrame(generateMask(), currentFrame);
+				byte[][] mask = generateMask();
+				byte[][] shotFrame = getShotFrame(mask, currentFrame);
 				
 				ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
 						currentCopy, shotFrame, projectionBounds);
@@ -487,8 +488,7 @@ public class CameraManager {
 				new Thread(shotSearcher).start();
 				
 				if (thresholdListener.isPresent()) {
-					Image img = SwingFXUtils.toFXImage(countToImage(shotFrame), null);
-					thresholdListener.get().updateThreshold(img);
+					thresholdListener.get().updateThreshold(countToImage(shotFrame), mask);
 				}
 				
 				// Update the bloom filter by removing the oldest frame
