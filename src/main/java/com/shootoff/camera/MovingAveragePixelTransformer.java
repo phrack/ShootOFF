@@ -49,10 +49,22 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 				int frameLum = calcLums(frameC);
 				
 				if (x == 119 && y == 143) {
-					//System.out.println(frameLum + " " + maLum + " " + (1 - ((float)maLum / (float)frameLum)));
+					System.out.println(frameLum + " " + maLum + " " + (1 - ((float)maLum / (float)frameLum)));
 				}
 				
-				if (frameLum <= maLum)
+				if (maLum > CameraManager.IDEAL_LUM) {
+					float percent = ((float)maLum / (float)frameLum);
+					float percentBrighter = 1 - percent;
+					
+					if (percentBrighter < .2f) {
+						float[] hsbvals = Color.RGBtoHSB(frameC.getRed(), frameC.getGreen(), frameC.getBlue(), null);
+						hsbvals[2] *= CameraManager.IDEAL_LUM / (float)frameLum;
+						frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
+					}
+				}
+				
+				
+				/*if (frameLum >= maLum)
 				{
 					// Pixel darker than average or same so we don't care, just black it out
 					frame.setRGB(x, y, new Color(0,0,0).getRGB());
@@ -66,13 +78,13 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 					
 					// Also step down the average otherwise the average acts as a lower
 					// bound for how low we can go and we want to be able to hit rock bottom (black)
-					if (percentBrighter < .05) {
+					if (maLum > CameraManager.IDEAL_LUM && percentBrighter < 0.5) {
 						float[] hsbvals = Color.RGBtoHSB(frameC.getRed(), frameC.getGreen(), frameC.getBlue(), null);
-						hsbvals[2] *= percent;
-						lumsMovingAverage[y][x] *= percent;
-						frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
+						hsbvals[2] *= percentBrighter;
+						//lumsMovingAverage[y][x] *= percent;
+						//frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
 					}
-				}
+				}*/
 			}
 		}
 	}
