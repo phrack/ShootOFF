@@ -61,7 +61,7 @@ public class CameraManager {
 												     // for a video recorded using a webcam with hw settings that
 												     // worked well
 	public static final float IDEAL_LUM = 136;		 // See comment above
-	public static final int INIT_FRAME_COUNT = 5; // Used by current pixel transformer to decide how many frames
+	public static final int INIT_FRAME_COUNT = 2; // Used by current pixel transformer to decide how many frames
 												  // to use for initialization
 
 	private final PixelTransformer pixelTransformer = new MovingAveragePixelTransformer();

@@ -3,35 +3,43 @@ package com.shootoff.camera;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class MovingAveragePixelTransformer implements PixelTransformer {
+	private final static int BRIGHTNESS_INDEX = 2;
 	
-
-	//private final BufferedImage movingAverageBuffer = new BufferedImage(CameraManager.FEED_WIDTH,
-	//		CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
-
-	private final Logger logger = LoggerFactory.getLogger(MovingAveragePixelTransformer.class);
+	private final BufferedImage colorMovingAverage = new BufferedImage(CameraManager.FEED_WIDTH,
+			CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
-
-	private float biggestFactor = 0f;
+	//private final float[][] lumsBrighterMovingAverage = new float[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
 	
 	public void updatePixel(int x, int y, Color c) {
-		//if (x == 10 && y == 10)
-		//	System.out.println("Current average: " + lumsMovingAverage[y][x]);
-		lumsMovingAverage[y][x] = ((lumsMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) +
-				calcLums(c)) / CameraManager.INIT_FRAME_COUNT;
-		//if (x == 10 && y == 10)
-		//	System.out.println("New average: " + lumsMovingAverage[y][x] + " " + calcLums(c));
-		/*Color maC = new Color(movingAverageBuffer.getRGB(x,y));
-		int averageRed = ((maC.getRed() * (MOVING_AVERAGE_LENGTH-1)) + c.getRed()) / MOVING_AVERAGE_LENGTH;
-		int averageGreen = ((maC.getGreen() * (MOVING_AVERAGE_LENGTH-1)) + c.getGreen()) / MOVING_AVERAGE_LENGTH;
-		int averageBlue = ((maC.getBlue() * (MOVING_AVERAGE_LENGTH-1)) + c.getBlue()) / MOVING_AVERAGE_LENGTH;
+		int currentLum = calcLums(c);
+		
+		// Update the average brightness
+        if (lumsMovingAverage[y][x] == 0)
+            lumsMovingAverage[y][x] = currentLum;
+	
+		/*lumsMovingAverage[y][x] = ((lumsMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) +
+				currentLum) / CameraManager.INIT_FRAME_COUNT;
+		
+		// Update the average brightness change if the pixel got brighter
+		float percentBrighter = 1 - ((float)lumsMovingAverage[y][x] / (float)currentLum);
+		
+		if (percentBrighter > 0) {
+			lumsBrighterMovingAverage[y][x] = ((lumsBrighterMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) + percentBrighter) / 
+					CameraManager.INIT_FRAME_COUNT;
+		}*/
+
+		// Update the average color
+		Color maC = new Color(colorMovingAverage.getRGB(x,y));
+		int averageRed = ((maC.getRed() * (CameraManager.INIT_FRAME_COUNT-1)) + c.getRed()) / 
+				CameraManager.INIT_FRAME_COUNT;
+		int averageGreen = ((maC.getGreen() * (CameraManager.INIT_FRAME_COUNT-1)) + c.getGreen()) / 
+				CameraManager.INIT_FRAME_COUNT;
+		int averageBlue = ((maC.getBlue() * (CameraManager.INIT_FRAME_COUNT-1)) + c.getBlue()) / 
+				CameraManager.INIT_FRAME_COUNT;
 
 		Color newAverage = new Color(averageRed, averageGreen, averageBlue);
-		movingAverageBuffer.setRGB(x, y, newAverage.getRGB());*/
+		colorMovingAverage.setRGB(x, y, newAverage.getRGB());
 	}
 
 	private int calcLums(Color c) {
@@ -39,50 +47,53 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 				c.getBlue() +
 				c.getGreen() + c.getGreen() + c.getGreen() + c.getGreen()) >> 3;
 	}
+	
+	private boolean isRedBrighter(Color currentC, Color averageC) {
+		// We only care if current red is brighter than normal
+		if (currentC.getRed() < averageC.getRed()) return false;
+		
+		//System.out.println("color: current rgb" + currentC.getRed() + "," + currentC.getGreen() + "," + currentC.getBlue() + " average red: "+ averageC.getRed());
+		
+		float percentRedBigger = 1 - ((float)averageC.getRed() / (float)currentC.getRed());
+		
+		// Current red must be at least 10% bigger than normal and it should be larger or
+		// equal to all other components
+		return percentRedBigger >= .17f && currentC.getRed() >= averageC.getGreen() && currentC.getRed() >= averageC.getBlue();
+	}
 
 	public void generateTransformation(BufferedImage frame) {
 		for (int x = 0; x < frame.getWidth(); x++) {
 			for (int y = 0; y < frame.getHeight(); y++) {
 				int maLum = lumsMovingAverage[y][x];
 
-				Color frameC = new Color(frame.getRGB(x, y));
-				int frameLum = calcLums(frameC);
+				Color currentC = new Color(frame.getRGB(x, y));
+				//int currentLum = calcLums(currentC);
 				
-				if (x == 119 && y == 143) {
-					System.out.println(frameLum + " " + maLum + " " + (1 - ((float)maLum / (float)frameLum)));
-				}
+
+				/*if (x == 627 && y == 168) {
+					isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)));
+				}*/
 				
-				if (maLum > CameraManager.IDEAL_LUM) {
-					float percent = ((float)maLum / (float)frameLum);
-					float percentBrighter = 1 - percent;
+				// We only care about dimming pixels that are brighter than average
+				 if (maLum > CameraManager.IDEAL_LUM) {
+					 // If the current pixels is brighter than normal and it's not because
+					 // red grew by quit a bit, dim the pixel. If it is brighter and red
+					 // grew by quite a bit it might be a shot
+					 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)))) {
+	                        float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
+	                        hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)maLum;
+	                        frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
+				 	}
+				 }
+				
+				
+				/*if (maLum > CameraManager.IDEAL_LUM) {
+					float percentBrighter = 1 - ((float)maLum / (float)currentLum);
 					
 					if (percentBrighter < .2f) {
-						float[] hsbvals = Color.RGBtoHSB(frameC.getRed(), frameC.getGreen(), frameC.getBlue(), null);
-						hsbvals[2] *= CameraManager.IDEAL_LUM / (float)frameLum;
+						float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
+						hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)currentLum;
 						frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
-					}
-				}
-				
-				
-				/*if (frameLum >= maLum)
-				{
-					// Pixel darker than average or same so we don't care, just black it out
-					frame.setRGB(x, y, new Color(0,0,0).getRGB());
-				} else {
-					// Pixel is brighter than average, but by how much?
-					float percent = ((float)maLum / (float)frameLum);
-					float percentBrighter = 1 - percent;
-					
-					// Step down pixel unless it has gotten more than 5% brighter
-					// % determined using binary search and nature scene
-					
-					// Also step down the average otherwise the average acts as a lower
-					// bound for how low we can go and we want to be able to hit rock bottom (black)
-					if (maLum > CameraManager.IDEAL_LUM && percentBrighter < 0.5) {
-						float[] hsbvals = Color.RGBtoHSB(frameC.getRed(), frameC.getGreen(), frameC.getBlue(), null);
-						hsbvals[2] *= percentBrighter;
-						//lumsMovingAverage[y][x] *= percent;
-						//frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
 					}
 				}*/
 			}
