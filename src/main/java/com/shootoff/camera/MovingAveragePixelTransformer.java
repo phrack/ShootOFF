@@ -9,25 +9,16 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 	private final BufferedImage colorMovingAverage = new BufferedImage(CameraManager.FEED_WIDTH,
 			CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
-	//private final float[][] lumsBrighterMovingAverage = new float[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
 	
 	public void updatePixel(int x, int y, Color c) {
 		int currentLum = calcLums(c);
 		
 		// Update the average brightness
         if (lumsMovingAverage[y][x] == 0)
+        {
             lumsMovingAverage[y][x] = currentLum;
-	
-		/*lumsMovingAverage[y][x] = ((lumsMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) +
-				currentLum) / CameraManager.INIT_FRAME_COUNT;
-		
-		// Update the average brightness change if the pixel got brighter
-		float percentBrighter = 1 - ((float)lumsMovingAverage[y][x] / (float)currentLum);
-		
-		if (percentBrighter > 0) {
-			lumsBrighterMovingAverage[y][x] = ((lumsBrighterMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) + percentBrighter) / 
-					CameraManager.INIT_FRAME_COUNT;
-		}*/
+            colorMovingAverage.setRGB(x,y, c.getRGB());
+        }
 
 		// Update the average color
 		Color maC = new Color(colorMovingAverage.getRGB(x,y));
@@ -56,9 +47,22 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		
 		float percentRedBigger = 1 - ((float)averageC.getRed() / (float)currentC.getRed());
 		
-		// Current red must be at least 10% bigger than normal and it should be larger or
+		// Current red must be at least 17% bigger than normal and it should be larger or
 		// equal to all other components
 		return percentRedBigger >= .17f && currentC.getRed() >= averageC.getGreen() && currentC.getRed() >= averageC.getBlue();
+	}
+	
+	private boolean isGreenBrighter(Color currentC, Color averageC) {
+		// We only care if current red is brighter than normal
+		if (currentC.getGreen() < averageC.getGreen()) return false;
+		
+		//System.out.println("color: current rgb" + currentC.getRed() + "," + currentC.getGreen() + "," + currentC.getBlue() + " average red: "+ averageC.getRed());
+		
+		float percentGreenBigger = 1 - ((float)averageC.getGreen() / (float)currentC.getGreen());
+		
+		// Current green must be at least 17% bigger than normal and it should be larger or
+		// equal to all other components
+		return percentGreenBigger >= .17f && currentC.getGreen() >= averageC.getRed() && currentC.getGreen() >= averageC.getBlue();
 	}
 
 	public void generateTransformation(BufferedImage frame) {
@@ -67,8 +71,6 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 				int maLum = lumsMovingAverage[y][x];
 
 				Color currentC = new Color(frame.getRGB(x, y));
-				//int currentLum = calcLums(currentC);
-				
 
 				/*if (x == 627 && y == 168) {
 					isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)));
@@ -79,23 +81,13 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 					 // If the current pixels is brighter than normal and it's not because
 					 // red grew by quit a bit, dim the pixel. If it is brighter and red
 					 // grew by quite a bit it might be a shot
-					 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)))) {
+					 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y))) && 
+							 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)))) {
 	                        float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
 	                        hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)maLum;
 	                        frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
 				 	}
 				 }
-				
-				
-				/*if (maLum > CameraManager.IDEAL_LUM) {
-					float percentBrighter = 1 - ((float)maLum / (float)currentLum);
-					
-					if (percentBrighter < .2f) {
-						float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
-						hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)currentLum;
-						frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
-					}
-				}*/
 			}
 		}
 	}

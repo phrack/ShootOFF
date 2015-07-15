@@ -274,11 +274,11 @@ public class TestCameraManager {
 		assertEquals(230, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
 		
-		assertEquals(297.5, shots.get(4).getX(), 1);
+		assertEquals(302, shots.get(4).getX(), 1);
 		assertEquals(239, shots.get(4).getY(), 1);
 		assertEquals(Color.RED, shots.get(4).getColor());
 		
-		assertEquals(213.5, shots.get(5).getX(), 1);
+		assertEquals(218.5, shots.get(5).getX(), 1);
 		assertEquals(244.5, shots.get(5).getY(), 1);
 		assertEquals(Color.RED, shots.get(5).getColor());
 		
@@ -286,7 +286,7 @@ public class TestCameraManager {
 		assertEquals(244, shots.get(6).getY(), 1);
 		assertEquals(Color.RED, shots.get(6).getColor());
 		
-		assertEquals(285, shots.get(7).getX(), 1);
+		assertEquals(288, shots.get(7).getX(), 1);
 		assertEquals(375, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
 		
@@ -298,6 +298,34 @@ public class TestCameraManager {
 	@Test
 	public void testPS3EyeHardwareDefaultsAmbientLightNatureScene() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4");
+		
+		assertEquals(0, shots.size());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4");
+		
+		assertEquals(0, shots.size());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4");
+		
+		assertEquals(0, shots.size());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4");
+		
+		assertEquals(0, shots.size());
+	}
+	
+	@Test
+	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOffSafari() {
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4");
 		
 		assertEquals(0, shots.size());
 	}
