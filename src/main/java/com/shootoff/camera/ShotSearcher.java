@@ -77,24 +77,24 @@ public class ShotSearcher implements Runnable {
 	public void run() {
 		// Split the image into x columns and y rows, and search
 		// each independently
-		int sub_width = threshed.getWidth() / SECTOR_COLUMNS;
-		int sub_height = threshed.getHeight() / SECTOR_ROWS;
+		int subWidth = threshed.getWidth() / SECTOR_COLUMNS;
+		int subHeight = threshed.getHeight() / SECTOR_ROWS;
 
-		for (int y_start = 0, sector_y = 0; sector_y < SECTOR_ROWS;
-				y_start += sub_height, sector_y++) {
-			for (int x_start = 0, sector_x = 0; sector_x < SECTOR_COLUMNS;
-					x_start += sub_width, sector_x++) {
+		for (int startY = 0, sectorY = 0; sectorY < SECTOR_ROWS;
+				startY += subHeight, sectorY++) {
+			for (int startX = 0, sectorX = 0; sectorX < SECTOR_COLUMNS;
+					startX += subWidth, sectorX++) {
 
 				// Don't detect a shot in a sector that is turned off
-				if (sectorStatuses[sector_y][sector_x])
-					findShot(x_start, x_start + sub_width, y_start, y_start + sub_height);
+				if (sectorStatuses[sectorY][sectorX])
+					findShot(startX, startX + subWidth, startY, startY + subHeight);
 			}
 		}
 	}
 
-	private void findShot(int x_start, int x_end, int y_start, int y_end) {
-		for (int x = x_start; x < x_end; x++) {
-			for (int y = y_start; y < y_end; y++) {
+	private void findShot(int startX, int endX, int startY, int endY) {
+		for (int x = startX; x < endX; x++) {
+			for (int y = startY; y < endY; y++) {
 				if (threshed.getRGB(x, y) == java.awt.Color.WHITE.getRGB()) {
 					Optional<Color> areaColor = detectColor(x, y);
 					if (areaColor.isPresent()) {
@@ -105,9 +105,9 @@ public class ShotSearcher implements Runnable {
 						Optional<Point2D> center = approximateCenter(x, y);
 
 						if (center.isPresent()) {
-							logger.debug("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {})",
+							logger.debug("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {}), {}",
 									x, y, center.get().getX(),
-									center.get().getY());
+									center.get().getY(), areaColor.get());
 
 							if (projectionBounds.isPresent()) {
 								Bounds b = projectionBounds.get();

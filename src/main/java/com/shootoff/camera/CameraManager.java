@@ -106,7 +106,7 @@ public class CameraManager {
 		this.config = config;
 
 		Detector detector = new Detector();
-
+		
 	    IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 	    reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 	    reader.addListener(detector);
@@ -250,6 +250,7 @@ public class CameraManager {
 		private boolean pixelTransformerInitialized = false;
 		private int seenFrames = 0;
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
+		private LightingCondition lightCondition;
 
 		@Override
 		public void run() {
@@ -375,17 +376,14 @@ public class CameraManager {
 
 		private void fixFrame(BufferedImage frame) {
 			AverageFrameComponents averages = averageFrameComponents(frame);
-
-			float averageLum = averages.getAverageLum();
-			float averageRed = averages.getAverageRed();
-
-			// If the frame is brighter than the ideal brightness step
-			// the brightness down
-			if (averageLum > IDEAL_LUM) {
-				RescaleOp brightnessScaler = new RescaleOp(IDEAL_LUM / averageLum, 0, null);
-				brightnessScaler.filter(frame, frame);
+			
+			if (averages.averageLum > 90) {
+				lightCondition = LightingCondition.BRIGHT;
+			} else {
+				lightCondition = LightingCondition.DARK;
 			}
-
+			
+			float averageRed = averages.getAverageRed();
 			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
 
 			// If the color temperatures (using just the red component as an
@@ -422,7 +420,7 @@ public class CameraManager {
 				for (int y = 0; y < frame.getHeight(); y++) {
 					Color c = new Color(frame.getRGB(x, y));
 
-					pixelTransformer.updatePixel(x, y, c);
+					pixelTransformer.updateFilter(x, y, c);
 
 					totalLum += (c.getRed() + c.getRed() + c.getRed() +
 							c.getBlue() +
@@ -474,7 +472,7 @@ public class CameraManager {
 				workingCopy = currentFrame;
 			}
 
-			pixelTransformer.generateTransformation(workingCopy);
+			pixelTransformer.applyFilter(workingCopy, lightCondition);
 
 			BufferedImage grayScale = new BufferedImage(currentFrame.getWidth(),
 					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);

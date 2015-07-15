@@ -52,7 +52,7 @@ public class TestCameraManager {
 		return mockManager.getShots();
 	}
 	
-	@Test
+	//@Test
 	public void testNoInterferenceTwoShots() {
 		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4");
 		
@@ -67,7 +67,7 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
 	
-	@Test
+	//@Test
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOff() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -119,7 +119,7 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(9).getColor());
 	}
 	
-	@Test
+	//@Test
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOn() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -167,7 +167,7 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 
-	@Test
+	//@Test
 	public void testMSHD3000MinBrightnessMinContrastWhiteBalanceOff() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -217,14 +217,14 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 
-	@Test
+	//@Test
 	public void testMSHD3000ardwareDefaultsAmbientLightNatureScene() {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4");
 
 		assertEquals(0, shots.size());
 	}
 	
-	@Test
+	//@Test
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -302,9 +302,10 @@ public class TestCameraManager {
 		assertEquals(0, shots.size());
 	}
 	
-	@Test
+	//@Test
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4");
+		
 		
 		assertEquals(0, shots.size());
 	}
@@ -313,10 +314,14 @@ public class TestCameraManager {
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4");
 		
-		assertEquals(0, shots.size());
+		for (Shot shot : shots) System.out.println(shot.getX() + ", " + shot.getY());
+		
+		// Middle row
+		
+		assertEquals(0, shots.size());		
 	}
 	
-	@Test
+	//@Test
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4");
 		
@@ -326,6 +331,8 @@ public class TestCameraManager {
 	@Test
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOffSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4");
+		
+		for (Shot shot : shots) System.out.println(shot.getX() + ", " + shot.getY());
 		
 		assertEquals(0, shots.size());
 	}

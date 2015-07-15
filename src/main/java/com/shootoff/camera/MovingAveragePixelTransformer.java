@@ -10,7 +10,7 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 			CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
 	
-	public void updatePixel(int x, int y, Color c) {
+	public void updateFilter(int x, int y, Color c) {
 		int currentLum = calcLums(c);
 		
 		// Update the average brightness
@@ -39,7 +39,7 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 				c.getGreen() + c.getGreen() + c.getGreen() + c.getGreen()) >> 3;
 	}
 	
-	private boolean isRedBrighter(Color currentC, Color averageC) {
+	private boolean isRedBrighter(Color currentC, Color averageC, LightingCondition lightCondition) {
 		// We only care if current red is brighter than normal
 		if (currentC.getRed() < averageC.getRed()) return false;
 		
@@ -47,12 +47,18 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		
 		float percentRedBigger = 1 - ((float)averageC.getRed() / (float)currentC.getRed());
 		
-		// Current red must be at least 17% bigger than normal and it should be larger or
-		// equal to all other components
-		return percentRedBigger >= .17f && currentC.getRed() >= averageC.getGreen() && currentC.getRed() >= averageC.getBlue();
+		// The pixel is redder than normal and looks red in general
+		float threshold;
+		if (lightCondition == LightingCondition.BRIGHT) {
+			threshold = .43f;
+		} else {
+			threshold = .11f;
+		}
+		
+		return percentRedBigger >= threshold && currentC.getRed() >= averageC.getGreen() && currentC.getRed() >= averageC.getBlue();
 	}
 	
-	private boolean isGreenBrighter(Color currentC, Color averageC) {
+	private boolean isGreenBrighter(Color currentC, Color averageC, LightingCondition lightCondition) {
 		// We only care if current red is brighter than normal
 		if (currentC.getGreen() < averageC.getGreen()) return false;
 		
@@ -60,12 +66,17 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		
 		float percentGreenBigger = 1 - ((float)averageC.getGreen() / (float)currentC.getGreen());
 		
-		// Current green must be at least 17% bigger than normal and it should be larger or
-		// equal to all other components
-		return percentGreenBigger >= .17f && currentC.getGreen() >= averageC.getRed() && currentC.getGreen() >= averageC.getBlue();
+		// The pixel is redder than normal and looks red in general
+		float threshold;
+		if (lightCondition == LightingCondition.BRIGHT) {
+			threshold = .43f;
+		} else {
+			threshold = .09f;
+		}
+		return percentGreenBigger >= threshold  && currentC.getGreen() >= averageC.getBlue();
 	}
 
-	public void generateTransformation(BufferedImage frame) {
+	public void applyFilter(BufferedImage frame, LightingCondition lightCondition) {
 		for (int x = 0; x < frame.getWidth(); x++) {
 			for (int y = 0; y < frame.getHeight(); y++) {
 				int maLum = lumsMovingAverage[y][x];
@@ -81,8 +92,8 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 					 // If the current pixels is brighter than normal and it's not because
 					 // red grew by quit a bit, dim the pixel. If it is brighter and red
 					 // grew by quite a bit it might be a shot
-					 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y))) && 
-							 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)))) {
+					 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition) && 
+							 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition)) {
 	                        float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
 	                        hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)maLum;
 	                        frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
