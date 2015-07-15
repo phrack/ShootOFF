@@ -112,8 +112,7 @@ public class CameraManager {
 	    reader.addListener(detector);
 
 	    setSectorStatuses(sectorStatuses);
-	    new Thread(detector).start();
-
+	    
 	    while (reader.readPacket() == null)
 	      do {} while(false);
 	}
@@ -199,7 +198,7 @@ public class CameraManager {
 		return canvasManager;
 	}
 
-	public boolean getProcessedVideo() {
+	public boolean isVideoProcessed() {
 		return processedVideo;
 	}
 
@@ -290,6 +289,8 @@ public class CameraManager {
 				processedVideo = true;
 				processingLock.notifyAll();
 			}
+			
+			detectionExecutor.shutdown();
 		}
 
 		private void streamCameraFrames() {

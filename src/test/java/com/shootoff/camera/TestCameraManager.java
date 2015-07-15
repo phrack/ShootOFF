@@ -42,7 +42,7 @@ public class TestCameraManager {
 		
 		try {
 			synchronized (processingLock) {
-				while (!cameraManager.getProcessedVideo())
+				while (!cameraManager.isVideoProcessed())
 					processingLock.wait();
 			}
 		} catch (InterruptedException e) {
