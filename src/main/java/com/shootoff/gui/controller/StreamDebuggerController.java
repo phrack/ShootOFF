@@ -38,7 +38,6 @@ public class StreamDebuggerController implements DebuggerListener {
 	@FXML private Slider colorDifferenceSlider;
 	@FXML private Slider centerBorderSlider;
 	@FXML private Slider minDimSlider;
-	@FXML private Slider bloomCountSlider;
 
 	private String defaultWindowTitle = "";
 
@@ -74,15 +73,6 @@ public class StreamDebuggerController implements DebuggerListener {
         		cameraManager.setMinimumShotDimension(newValue.intValue());
 	      	}
 	    });
-
-		bloomCountSlider.valueProperty().addListener(new ChangeListener<Number>() {
-				@Override
-				public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-		        	if (newValue == null) return;
-
-	        	//	cameraManager.setBloomCount(newValue.intValue());
-		      	}
-		    });
 	}
 
 	public ImageView getThresholdImageView() {
@@ -95,7 +85,7 @@ public class StreamDebuggerController implements DebuggerListener {
 	}
 
 	@Override
-	public void updateFPS(double fps) {
+	public void updateCameraFPS(double fps) {
 		Platform.runLater(() -> {
 				streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", fps));
 			});

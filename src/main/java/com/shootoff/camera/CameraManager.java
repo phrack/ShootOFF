@@ -484,7 +484,7 @@ public class CameraManager {
 
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();
-				if (debuggerListener.isPresent()) debuggerListener.get().updateFPS(webcamFPS);
+				if (debuggerListener.isPresent()) debuggerListener.get().updateCameraFPS(webcamFPS);
 				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
 							webcam.get().getName(), webcamFPS);
