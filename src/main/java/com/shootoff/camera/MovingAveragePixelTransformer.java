@@ -48,7 +48,7 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		// The pixel is redder than normal and looks red in general
 		float threshold;
 		if (lightCondition == LightingCondition.BRIGHT) {
-			threshold = .43f;
+			threshold = .42f;
 		} else {
 			threshold = .20f;
 		}
@@ -62,10 +62,10 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		
 		float percentGreenBigger = 1 - ((float)averageC.getGreen() / (float)currentC.getGreen());
 		
-		// The pixel is redder than normal and looks red in general
+		// The pixel is greener than normal and looks greener in general
 		float threshold;
 		if (lightCondition == LightingCondition.BRIGHT) {
-			threshold = .43f;
+			threshold = .40f;
 		} else {
 			threshold = .50f;
 		}
