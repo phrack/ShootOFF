@@ -65,7 +65,7 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 		// The pixel is greener than normal and looks greener in general
 		float threshold;
 		if (lightCondition == LightingCondition.BRIGHT) {
-			threshold = .40f;
+			threshold = .60f;
 		} else {
 			threshold = .50f;
 		}
