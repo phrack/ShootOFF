@@ -18,7 +18,6 @@
 
 package com.shootoff.gui.controller;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import com.shootoff.camera.CameraManager;
@@ -91,20 +90,8 @@ public class StreamDebuggerController implements DebuggerListener {
 	}
 
 	@Override
-	public void updateThreshold(BufferedImage thresholdImg, byte[][] mask) {
-		/*BufferedImage coloredImg = new BufferedImage(thresholdImg.getWidth(), thresholdImg.getHeight(),
-				BufferedImage.TYPE_INT_RGB);
-		coloredImg.createGraphics().drawImage(thresholdImg, 0, 0, null);
-
-		for (int x = 0; x < thresholdImg.getWidth(); x++) {
-			for (int y = 0; y < thresholdImg.getHeight(); y++) {
-				if (mask[y][x] == 1) {
-					coloredImg.setRGB(x, y, Color.RED.getRGB());
-				}
-			}
-		}*/
-
-		thresholdImageView.setImage(SwingFXUtils.toFXImage(thresholdImg, null));
+	public void updateDebugView(BufferedImage debugImg) {
+		thresholdImageView.setImage(SwingFXUtils.toFXImage(debugImg, null));
 	}
 
 	@Override

@@ -19,7 +19,11 @@
 package com.shootoff.camera;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
+
+import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +109,13 @@ public class ShotSearcher implements Runnable {
 						Optional<Point2D> center = approximateCenter(x, y);
 
 						if (center.isPresent()) {
+							/*try {
+								ImageIO.write(currentFrame, "PNG", new File(System.nanoTime() + ".png"));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}*/
+							
 							logger.debug("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {}), {}",
 									x, y, center.get().getX(),
 									center.get().getY(), areaColor.get());

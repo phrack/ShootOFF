@@ -52,7 +52,7 @@ public class TestCameraManager {
 		return mockManager.getShots();
 	}
 	
-	//@Test
+	@Test
 	public void testNoInterferenceTwoShots() {
 		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4");
 		
@@ -67,7 +67,7 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
 	
-	//@Test
+	@Test
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOff() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -119,7 +119,7 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(9).getColor());
 	}
 	
-	//@Test
+	@Test
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOn() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -167,7 +167,7 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 
-	//@Test
+	@Test
 	public void testMSHD3000MinBrightnessMinContrastWhiteBalanceOff() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -217,14 +217,14 @@ public class TestCameraManager {
 		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 
-	//@Test
+	@Test
 	public void testMSHD3000ardwareDefaultsAmbientLightNatureScene() {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4");
 
 		assertEquals(0, shots.size());
 	}
 	
-	//@Test
+	@Test
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
 		// Turn off the top sectors because they are all just noise.
 		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
@@ -302,7 +302,7 @@ public class TestCameraManager {
 		assertEquals(0, shots.size());
 	}
 	
-	//@Test
+	@Test
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4");
 		
@@ -314,14 +314,29 @@ public class TestCameraManager {
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4");
 		
-		for (Shot shot : shots) System.out.println(shot.getX() + ", " + shot.getY());
+		// Misses all three shots on the sky at the top and both water shots on the bottom
+		// these are basically non-starters with a fully bright projection like this.
 		
-		// Middle row
+		assertEquals(4, shots.size());
 		
-		assertEquals(0, shots.size());		
+		assertEquals(166.0, shots.get(0).getX(), 1);
+		assertEquals(222.0, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+
+		assertEquals(367.0, shots.get(1).getX(), 1);
+		assertEquals(223.0, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+
+		assertEquals(504.0, shots.get(2).getX(), 1);
+		assertEquals(218.0, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+
+		assertEquals(440.5, shots.get(3).getX(), 1);
+		assertEquals(250.5, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
 	}
 	
-	//@Test
+	@Test
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4");
 		
@@ -332,8 +347,49 @@ public class TestCameraManager {
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOffSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4");
 		
-		for (Shot shot : shots) System.out.println(shot.getX() + ", " + shot.getY());
+		int count = 0;
+		for (Shot shot : shots) {
+			System.out.println("assertEquals(" + shot.getX() + ", shots.get(" + count + ").getX(), 1);");
+			System.out.println("assertEquals(" + shot.getY() + ", shots.get(" + count + ").getY(), 1);");
+			System.out.println("assertEquals(Color.GREEN, shots.get(" + count + ").getColor());");
+			System.out.println();
+			count++;
+		}
 		
-		assertEquals(0, shots.size());
+		// Misses all three shots on the sky at the top and the middle water shot on the bottom
+		// these are basically non-starters with a fully bright projection like this.
+		
+		// Some shots are duped because the a laser pointer was used and the shots are therefore
+		// very sloppy
+	
+		assertEquals(7, shots.size());
+		
+		assertEquals(472.5, shots.get(0).getX(), 1);
+		assertEquals(64.0, shots.get(0).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(0).getColor());
+
+		assertEquals(470.5, shots.get(1).getX(), 1);
+		assertEquals(59.0, shots.get(1).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(1).getColor());
+
+		assertEquals(200.0, shots.get(2).getX(), 1);
+		assertEquals(234.0, shots.get(2).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(2).getColor());
+
+		assertEquals(376.0, shots.get(3).getX(), 1);
+		assertEquals(228.0, shots.get(3).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(3).getColor());
+
+		assertEquals(498.0, shots.get(4).getX(), 1);
+		assertEquals(224.5, shots.get(4).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(4).getColor());
+
+		assertEquals(479.0, shots.get(5).getX(), 1);
+		assertEquals(281.0, shots.get(5).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(5).getColor());
+
+		assertEquals(207.0, shots.get(6).getX(), 1);
+		assertEquals(281.0, shots.get(6).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(6).getColor());
 	}
 }

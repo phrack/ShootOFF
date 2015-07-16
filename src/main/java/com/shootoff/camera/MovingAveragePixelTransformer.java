@@ -43,8 +43,6 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		// We only care if current red is brighter than normal
 		if (currentC.getRed() < averageC.getRed()) return false;
 		
-		//System.out.println("color: current rgb" + currentC.getRed() + "," + currentC.getGreen() + "," + currentC.getBlue() + " average red: "+ averageC.getRed());
-		
 		float percentRedBigger = 1 - ((float)averageC.getRed() / (float)currentC.getRed());
 		
 		// The pixel is redder than normal and looks red in general
@@ -52,17 +50,15 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		if (lightCondition == LightingCondition.BRIGHT) {
 			threshold = .43f;
 		} else {
-			threshold = .11f;
+			threshold = .20f;
 		}
 		
-		return percentRedBigger >= threshold && currentC.getRed() >= averageC.getGreen() && currentC.getRed() >= averageC.getBlue();
+		return percentRedBigger >= threshold && currentC.getRed() >= averageC.getBlue();
 	}
 	
 	private boolean isGreenBrighter(Color currentC, Color averageC, LightingCondition lightCondition) {
-		// We only care if current red is brighter than normal
+		// We only care if current green is brighter than normal
 		if (currentC.getGreen() < averageC.getGreen()) return false;
-		
-		//System.out.println("color: current rgb" + currentC.getRed() + "," + currentC.getGreen() + "," + currentC.getBlue() + " average red: "+ averageC.getRed());
 		
 		float percentGreenBigger = 1 - ((float)averageC.getGreen() / (float)currentC.getGreen());
 		
@@ -71,7 +67,7 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 		if (lightCondition == LightingCondition.BRIGHT) {
 			threshold = .43f;
 		} else {
-			threshold = .09f;
+			threshold = .50f;
 		}
 		return percentGreenBigger >= threshold  && currentC.getGreen() >= averageC.getBlue();
 	}
@@ -83,10 +79,6 @@ public class MovingAveragePixelTransformer implements PixelTransformer {
 
 				Color currentC = new Color(frame.getRGB(x, y));
 
-				/*if (x == 627 && y == 168) {
-					isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)));
-				}*/
-				
 				// We only care about dimming pixels that are brighter than average
 				 if (maLum > CameraManager.IDEAL_LUM) {
 					 // If the current pixels is brighter than normal and it's not because

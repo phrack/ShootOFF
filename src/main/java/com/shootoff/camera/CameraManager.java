@@ -21,7 +21,6 @@ package com.shootoff.camera;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -57,6 +56,9 @@ public class CameraManager {
 	public static final int FEED_WIDTH = 640;
 	public static final int FEED_HEIGHT = 480;
 	public static final int MIN_SHOT_DETECTION_FPS = 5;
+	public static final int LIGHTING_CONDITION_THRESHOLD = 90; 	// Greater is a bright room, less than is a dark room
+																// for the purposes of tuning other thresholds.
+																// Calculated using all test videos
 	public static final float IDEAL_R_AVERAGE = 171; // Determined by averaging all of the red pixels per frame
 												     // for a video recorded using a webcam with hw settings that
 												     // worked well
@@ -377,7 +379,7 @@ public class CameraManager {
 		private void fixFrame(BufferedImage frame) {
 			AverageFrameComponents averages = averageFrameComponents(frame);
 			
-			if (averages.averageLum > 90) {
+			if (averages.getAverageLum() > LIGHTING_CONDITION_THRESHOLD) {
 				lightCondition = LightingCondition.BRIGHT;
 			} else {
 				lightCondition = LightingCondition.DARK;
@@ -509,7 +511,7 @@ public class CameraManager {
 			new Thread(shotSearcher).start();
 
 			if (debuggerListener.isPresent()) {
-				debuggerListener.get().updateThreshold(workingCopy, null);
+				debuggerListener.get().updateDebugView(workingCopy);
 			}
 		}
 
