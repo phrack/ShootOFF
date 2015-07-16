@@ -349,7 +349,7 @@ public class TestCameraManager {
 		assertEquals(4, shots.size());
 		
 		assertEquals(161.0, shots.get(0).getX(), 1);
-		assertEquals(222.0, shots.get(0).getY(), 1);
+		assertEquals(220.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 
 		assertEquals(367.0, shots.get(1).getX(), 1);
@@ -433,38 +433,31 @@ public class TestCameraManager {
 		
 		// Misses all three shots on the sky at the top and the middle water shot on the bottom
 		// these are basically non-starters with a fully bright projection like this.
-		
-		// Some shots are duped because the a laser pointer was used and the shots are therefore
-		// very sloppy
-	
-		assertEquals(7, shots.size());
+			
+		assertEquals(6, shots.size());
 		
 		assertEquals(472.5, shots.get(0).getX(), 1);
 		assertEquals(64.0, shots.get(0).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(0).getColor());
 
-		assertEquals(470.5, shots.get(1).getX(), 1);
-		assertEquals(59.0, shots.get(1).getY(), 1);
+		assertEquals(200.0, shots.get(1).getX(), 1);
+		assertEquals(234.0, shots.get(1).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(1).getColor());
 
-		assertEquals(200.0, shots.get(2).getX(), 1);
-		assertEquals(234.0, shots.get(2).getY(), 1);
+		assertEquals(376.0, shots.get(2).getX(), 1);
+		assertEquals(228.0, shots.get(2).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(2).getColor());
 
-		assertEquals(376.0, shots.get(3).getX(), 1);
-		assertEquals(228.0, shots.get(3).getY(), 1);
+		assertEquals(498.0, shots.get(3).getX(), 1);
+		assertEquals(224.5, shots.get(3).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(3).getColor());
 
-		assertEquals(498.0, shots.get(4).getX(), 1);
-		assertEquals(224.5, shots.get(4).getY(), 1);
+		assertEquals(479.0, shots.get(4).getX(), 1);
+		assertEquals(281.0, shots.get(4).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(4).getColor());
 
-		assertEquals(479.0, shots.get(5).getX(), 1);
+		assertEquals(207.0, shots.get(5).getX(), 1);
 		assertEquals(281.0, shots.get(5).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(5).getColor());
-
-		assertEquals(207.0, shots.get(6).getX(), 1);
-		assertEquals(281.0, shots.get(6).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(6).getColor());
 	}
 }

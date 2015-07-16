@@ -224,7 +224,6 @@ public class CameraManager {
 	}
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
-		private BufferedImage currentFrame;
 		private boolean showedFPSWarning = false;
 		private boolean pixelTransformerInitialized = false;
 		private int seenFrames = 0;
@@ -251,7 +250,7 @@ public class CameraManager {
 		 */
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
-			currentFrame = event.getImage();
+			BufferedImage currentFrame = event.getImage();
 
 			fixFrame(currentFrame);
 
@@ -259,7 +258,7 @@ public class CameraManager {
 				seenFrames++;
 				if (seenFrames == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
 			} else {
-				detectShots();
+				detectShots(currentFrame);
 			}
 		}
 
@@ -273,10 +272,12 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 
-		private void streamCameraFrames() {
+		private void streamCameraFrames() {			
 			long startDetectionCycle = System.currentTimeMillis();
 
 			while (isStreaming) {
+				BufferedImage currentFrame;
+				
 				if (webcam.isPresent() && webcam.get().isImageNew()) {
 					currentFrame = webcam.get().getImage();
 					fixFrame(currentFrame);
@@ -346,7 +347,8 @@ public class CameraManager {
 						startDetectionCycle >= config.getDetectionRate()) {
 
 					startDetectionCycle = System.currentTimeMillis();
-					detectionExecutor.submit(new Thread(() -> {detectShots();}));
+					final BufferedImage frame = currentFrame;
+					detectionExecutor.submit(new Thread(() -> {detectShots(frame);}));
 				}
 			}
 			
@@ -438,25 +440,25 @@ public class CameraManager {
 				}
 			}
 		}
-		private void detectShots() {
+		private void detectShots(BufferedImage frame) {
 			if (!isDetecting) return;
 
-			BufferedImage workingCopy = new BufferedImage(currentFrame.getWidth(), currentFrame.getHeight(),
+			BufferedImage workingCopy = new BufferedImage(frame.getWidth(), frame.getHeight(),
 					BufferedImage.TYPE_INT_RGB);
 
 			if (limitDetectProjection && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
-				BufferedImage subFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
+				BufferedImage subFrame = frame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 						(int)b.getWidth(), (int)b.getHeight());
 				workingCopy.createGraphics().drawImage(subFrame, (int)b.getMinX(), (int)b.getMinY(), null);
 			} else {
-				workingCopy.createGraphics().drawImage(currentFrame, 0, 0, null);
+				workingCopy.createGraphics().drawImage(frame, 0, 0, null);
 			}
 
 			pixelTransformer.applyFilter(workingCopy, lightCondition);
 
-			BufferedImage grayScale = new BufferedImage(currentFrame.getWidth(),
-					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+			BufferedImage grayScale = new BufferedImage(frame.getWidth(),
+					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
 			if (webcam.isPresent()) {
@@ -471,7 +473,7 @@ public class CameraManager {
 			}
 
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					currentFrame, grayScale, projectionBounds);
+					frame, grayScale, projectionBounds);
 
 			if (colorDiffThreshold.isPresent()) {
 				shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());
