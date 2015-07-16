@@ -95,7 +95,7 @@ public class ShotSearcher implements Runnable {
 	private void findShot(int startX, int endX, int startY, int endY) {
 		for (int x = startX; x < endX; x++) {
 			for (int y = startY; y < endY; y++) {
-				if (threshed.getRGB(x, y) == java.awt.Color.WHITE.getRGB()) {
+				if ((threshed.getRGB(x, y) & 0xFF) > config.getLaserIntensity()) {
 					Optional<Color> areaColor = detectColor(x, y);
 					if (areaColor.isPresent()) {
 						if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
@@ -230,7 +230,7 @@ public class ShotSearcher implements Runnable {
 		int blackCount = 0;
 
 		for (;maxY < threshed.getHeight(); maxY++) {
-			if (threshed.getRGB((int)maxX, (int)maxY) == java.awt.Color.BLACK.getRGB())
+			if ((threshed.getRGB((int)maxX, (int)maxY) & 0xFF) <= config.getLaserIntensity())
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 		}
@@ -241,7 +241,7 @@ public class ShotSearcher implements Runnable {
 		double centerY = minY + (shotHeight / 2);
 
 		for (;maxX < threshed.getWidth(); maxX++) {
-			if (threshed.getRGB((int)maxX, (int)centerY) == java.awt.Color.BLACK.getRGB())
+			if ((threshed.getRGB((int)maxX, (int)centerY) & 0xFF) <= config.getLaserIntensity())
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 		}

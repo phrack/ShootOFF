@@ -66,7 +66,7 @@ public class CameraManager {
 	public static final int INIT_FRAME_COUNT = 5; // Used by current pixel transformer to decide how many frames
 												  // to use for initialization
 
-	private final PixelTransformer pixelTransformer = new MovingAveragePixelTransformer();
+	private final PixelTransformer pixelTransformer = new BrightnessPixelTransformer();
 
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	private final Optional<Webcam> webcam;
@@ -221,29 +221,6 @@ public class CameraManager {
 	
 	public void setThresholdListener(DebuggerListener thresholdListener) {
 		this.debuggerListener = Optional.ofNullable(thresholdListener);
-	}
-
-	protected static BufferedImage threshold(Configuration config, BufferedImage grayScale) {
-		BufferedImage threshholdedImg = new BufferedImage(grayScale.getWidth(),
-				grayScale.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-
-		for (int y = 0; y < grayScale.getHeight(); y++) {
-			for (int x = 0; x < grayScale.getWidth(); x++) {
-				int pixel = grayScale.getRGB(x, y) & 0xFF;
-
-				if (pixel > config.getLaserIntensity()) {
-					threshholdedImg.setRGB(x, y, mixColor(255, 255, 255));
-				} else {
-					threshholdedImg.setRGB(x, y, mixColor(0, 0, 0));
-				}
-			}
-		}
-
-		return threshholdedImg;
-	}
-
-	private static int mixColor(int red, int green, int blue) {
-		return red << 16 | green << 8 | blue;
 	}
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
@@ -480,8 +457,6 @@ public class CameraManager {
 					currentFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
-			BufferedImage threshed = threshold(config, grayScale);
-
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();
 				if (debuggerListener.isPresent()) debuggerListener.get().updateCameraFPS(webcamFPS);
@@ -494,7 +469,7 @@ public class CameraManager {
 			}
 
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					workingCopy, threshed, projectionBounds);
+					workingCopy, grayScale, projectionBounds);
 
 			if (colorDiffThreshold.isPresent()) {
 				shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());

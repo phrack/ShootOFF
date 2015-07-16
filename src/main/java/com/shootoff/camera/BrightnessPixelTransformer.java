@@ -3,7 +3,7 @@ package com.shootoff.camera;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-public class MovingAveragePixelTransformer implements PixelTransformer {
+public class BrightnessPixelTransformer implements PixelTransformer {
 	private final static int BRIGHTNESS_INDEX = 2;
 	
 	private final BufferedImage colorMovingAverage = new BufferedImage(CameraManager.FEED_WIDTH,
