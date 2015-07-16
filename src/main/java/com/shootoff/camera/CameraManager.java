@@ -441,14 +441,16 @@ public class CameraManager {
 		private void detectShots() {
 			if (!isDetecting) return;
 
-			BufferedImage workingCopy;
+			BufferedImage workingCopy = new BufferedImage(currentFrame.getWidth(), currentFrame.getHeight(),
+					BufferedImage.TYPE_INT_RGB);
 
 			if (limitDetectProjection && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
-				workingCopy = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
+				BufferedImage subFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 						(int)b.getWidth(), (int)b.getHeight());
+				workingCopy.createGraphics().drawImage(subFrame, (int)b.getMinX(), (int)b.getMinY(), null);
 			} else {
-				workingCopy = currentFrame;
+				workingCopy.createGraphics().drawImage(currentFrame, 0, 0, null);
 			}
 
 			pixelTransformer.applyFilter(workingCopy, lightCondition);
@@ -469,7 +471,7 @@ public class CameraManager {
 			}
 
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					workingCopy, grayScale, projectionBounds);
+					currentFrame, grayScale, projectionBounds);
 
 			if (colorDiffThreshold.isPresent()) {
 				shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());
