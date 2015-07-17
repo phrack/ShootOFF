@@ -127,77 +127,74 @@ public class ShotSearcher implements Runnable {
 
 	private Optional<Color> detectColor(int x, int y) {
 		int rgb = currentFrame.getRGB(x, y);
-		double r = getRed(rgb);
-		double g = getGreen(rgb);
-		double b = getBlue(rgb);
-
-		final int colorDetectionRadius = 5;
+		float r = getRed(rgb);
+		float g = getGreen(rgb);
+		
+		final int colorDetectionRadius = 4;
 		int pixelsSeen = 1;
 
 		// Average colorDetectionRadius pixels left
-		for (int x_offset = x; x_offset > 0 && x - x_offset < colorDetectionRadius;
-				x_offset--) {
+		for (int offsetX = x; offsetX > 0 && x - offsetX < colorDetectionRadius;
+				offsetX--) {
 
-			rgb = currentFrame.getRGB(x_offset, y);
+			rgb = currentFrame.getRGB(offsetX, y);
 			r += getRed(rgb);
 			g += getGreen(rgb);
-			b += getBlue(rgb);
 			pixelsSeen++;
 		}
 
 		// Average colorDetectionRadius pixels right
-		for (int x_offset = x;
-				x_offset < currentFrame.getWidth() && x_offset - x < colorDetectionRadius;
-				x_offset++) {
+		for (int offsetX = x;
+				offsetX < currentFrame.getWidth() && offsetX - x < colorDetectionRadius;
+				offsetX++) {
 
-			rgb = currentFrame.getRGB(x_offset, y);
+			rgb = currentFrame.getRGB(offsetX, y);
 			r += getRed(rgb);
 			g += getGreen(rgb);
-			b += getBlue(rgb);
 			pixelsSeen++;
 		}
 
 		// Average colorDetectionRadius pixels up
-		for (int y_offset = y;
-				y_offset < currentFrame.getHeight() && y_offset - y < colorDetectionRadius;
-				y_offset++) {
+		for (int offsetY = y;
+				offsetY < currentFrame.getHeight() && offsetY - y < colorDetectionRadius;
+				offsetY++) {
 
-			rgb = currentFrame.getRGB(x, y_offset);
+			rgb = currentFrame.getRGB(x, offsetY);
 			r += getRed(rgb);
 			g += getGreen(rgb);
-			b += getBlue(rgb);
 			pixelsSeen++;
 		}
 
 		// Average colorDetectionRadius pixels down
-		for (int y_offset = y;
-				y_offset > 0 && y - y_offset < colorDetectionRadius;
-				y_offset--) {
+		for (int offsetY = y;
+				offsetY > 0 && y - offsetY < colorDetectionRadius;
+				offsetY--) {
 
-			rgb = currentFrame.getRGB(x, y_offset);
+			rgb = currentFrame.getRGB(x, offsetY);
 			r += getRed(rgb);
 			g += getGreen(rgb);
-			b += getBlue(rgb);
 			pixelsSeen++;
 		}
 
-		r /= (double)pixelsSeen;
-		g /= (double)pixelsSeen;
-		b /= (double)pixelsSeen;
+		r /= (float)pixelsSeen;
+		g /= (float)pixelsSeen;
+		
+        if (r == 0 || g == 0) return Optional.empty();
+        
+		// No shot detected? Try with the warmer colors
+        if ((r / g) > colorDiffThreshold) {
+        	logger.trace("Shot Processing: Found shot ({}, {}) red, r = {}, g = {}, r / g = {}", x, y, r, g, (r / g));
+        	return Optional.of(Color.RED);
+        }
+        
+        if ((g / r) > colorDiffThreshold) {
+        	logger.trace("Shot Processing: Found shot ({}, {}) green, r = {}, g = {}, g / r = {}", x, y, r, g, (g / r));
+        	return Optional.of(Color.GREEN);
+        }
 
-        if (g == 0 || b == 0)
-            return Optional.empty();
-
-        if ((r / g) > colorDiffThreshold && (r / b) > colorDiffThreshold)
-            return Optional.of(Color.RED);
-
-        if (r == 0 || b == 0)
-        	return Optional.empty();
-
-        if ((g / r) > colorDiffThreshold && (g / b) > colorDiffThreshold)
-            return Optional.of(Color.GREEN);
-
-
+        logger.trace("Shot Processing: No color could be detected for suspected shot({}, {}), rg = ({}, {}), " + 
+        		"r / g = {}, g / r = {}", x, y, r, g, (r / g), (g / r)); 
+        
 		return Optional.empty();
 	}
 
@@ -207,10 +204,6 @@ public class ShotSearcher implements Runnable {
 
 	private int getGreen(int rgb) {
 		return (rgb & 0x0000ff00) >> 8;
-	}
-
-	private int getBlue(int rgb) {
-		return (rgb & 0x000000ff) >> 0;
 	}
 
 	/**

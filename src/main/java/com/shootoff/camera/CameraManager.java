@@ -56,9 +56,12 @@ public class CameraManager {
 	public static final int FEED_WIDTH = 640;
 	public static final int FEED_HEIGHT = 480;
 	public static final int MIN_SHOT_DETECTION_FPS = 5;
-	public static final int LIGHTING_CONDITION_THRESHOLD = 90; 	// Greater is a bright room, less than is a dark room
-																// for the purposes of tuning other thresholds.
-																// Calculated using all test videos
+	
+	// These thresholds were calculated using all of the test videos
+	public static final int LIGHTING_CONDITION_VERY_BRIGHT_THRESHOLD = 130;
+	// Anything below this threshold is considered dark
+	public static final int LIGHTING_CONDITION__BRIGHT_THRESHOLD = 90; 	
+	
 	public static final float IDEAL_R_AVERAGE = 171; // Determined by averaging all of the red pixels per frame
 												     // for a video recorded using a webcam with hw settings that
 												     // worked well
@@ -250,9 +253,8 @@ public class CameraManager {
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			BufferedImage currentFrame = event.getImage();
-
-			AverageFrameComponents averages = fixFrame(currentFrame);
-
+			AverageFrameComponents averages = averageFrameComponents(currentFrame);
+			
 			if (pixelTransformerInitialized == false) {
 				seenFrames++;
 				if (seenFrames == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
@@ -278,7 +280,7 @@ public class CameraManager {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 				
 				BufferedImage currentFrame = webcam.get().getImage();
-				final AverageFrameComponents averages = fixFrame(currentFrame);
+				final AverageFrameComponents averages = averageFrameComponents(currentFrame);
 				
 				if (pixelTransformerInitialized == false) {
 					seenFrames++;
@@ -351,12 +353,6 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 
-		private AverageFrameComponents fixFrame(BufferedImage frame) {
-			AverageFrameComponents averages = averageFrameComponents(frame);
-			
-			return averages;
-		}
-
 		private class AverageFrameComponents {
 			private final float averageLum;
 			private final float averageRed;
@@ -370,7 +366,9 @@ public class CameraManager {
 			}
 			
 			public LightingCondition getLightingCondition() {
-				if (averageLum > LIGHTING_CONDITION_THRESHOLD) {
+				if (averageLum > LIGHTING_CONDITION_VERY_BRIGHT_THRESHOLD) {
+					return LightingCondition.VERY_BRIGHT;
+				} else if (averageLum > LIGHTING_CONDITION__BRIGHT_THRESHOLD) {
 					return LightingCondition.BRIGHT;
 				} else {
 					return LightingCondition.DARK;
@@ -448,7 +446,7 @@ public class CameraManager {
 						// TODO: WHY WHY WHY does this work if we adjust the frame here
 						// instead of working copy? If we don't do it or remove working
 						// copy a bunch of tests start failing
-						adjustColorTemperature(frame, x, y, dr, db);
+						adjustColorTemperature(workingCopy, x, y, dr, db);
 					}
 					
 					pixelTransformer.applyFilter(workingCopy, x, y, averages.getLightingCondition());
@@ -461,7 +459,9 @@ public class CameraManager {
 
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();
-				if (debuggerListener.isPresent()) debuggerListener.get().updateCameraFPS(webcamFPS);
+				if (debuggerListener.isPresent()) {
+					debuggerListener.get().updateFeedData(webcamFPS, averages.getLightingCondition());
+				}
 				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
 							webcam.get().getName(), webcamFPS);
@@ -471,7 +471,7 @@ public class CameraManager {
 			}
 
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					frame, grayScale, projectionBounds);
+					workingCopy, grayScale, projectionBounds);
 
 			if (colorDiffThreshold.isPresent()) {
 				shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());

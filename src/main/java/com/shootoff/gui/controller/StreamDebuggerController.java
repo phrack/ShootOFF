@@ -21,6 +21,7 @@ package com.shootoff.gui.controller;
 import java.awt.image.BufferedImage;
 
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.LightingCondition;
 import com.shootoff.gui.DebuggerListener;
 
 import javafx.application.Platform;
@@ -85,9 +86,10 @@ public class StreamDebuggerController implements DebuggerListener {
 	}
 
 	@Override
-	public void updateCameraFPS(double fps) {
+	public void updateFeedData(double fps, LightingCondition lightingCondition) {
 		Platform.runLater(() -> {
-				streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", fps));
+				streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS -- %s", 
+						fps, lightingCondition));
 			});
 	}
 }

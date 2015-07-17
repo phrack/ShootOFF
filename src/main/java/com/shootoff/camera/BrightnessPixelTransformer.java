@@ -13,12 +13,16 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 	public void updateFilter(int x, int y, Color c) {
 		int currentLum = calcLums(c);
 		
-		// Update the average brightness
         if (lumsMovingAverage[y][x] == 0)
         {
             lumsMovingAverage[y][x] = currentLum;
             colorMovingAverage.setRGB(x,y, c.getRGB());
+
+            return;
         }
+        
+        // Update the average brightness
+        lumsMovingAverage[y][x] = ((lumsMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
 
 		// Update the average color
 		Color maC = new Color(colorMovingAverage.getRGB(x,y));
@@ -47,10 +51,12 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 		
 		// The pixel is redder than normal and looks red in general
 		float threshold;
-		if (lightCondition == LightingCondition.BRIGHT) {
-			threshold = .42f;
+		if (lightCondition == LightingCondition.VERY_BRIGHT) {
+			threshold = .15f;
+		} else if (lightCondition == LightingCondition.BRIGHT) {
+			threshold = .41f;
 		} else {
-			threshold = .20f;
+			threshold = .25f;
 		}
 		
 		return percentRedBigger >= threshold && currentC.getRed() >= averageC.getBlue();
@@ -64,7 +70,9 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 		
 		// The pixel is greener than normal and looks greener in general
 		float threshold;
-		if (lightCondition == LightingCondition.BRIGHT) {
+		if (lightCondition == LightingCondition.VERY_BRIGHT) {
+			threshold = .25f;
+		} else if (lightCondition == LightingCondition.BRIGHT) {
 			threshold = .60f;
 		} else {
 			threshold = .50f;

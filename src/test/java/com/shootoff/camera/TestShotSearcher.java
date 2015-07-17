@@ -122,13 +122,29 @@ public class TestShotSearcher {
 	@Test
 	public void testInterenceOneShot() throws IOException, InterruptedException {
 		List<Shot> shots = findShots("/shotsearcher/interference_one_shot.png");
+		
+		assertEquals(5, shots.size());
 
-		assertEquals(1, shots.size());
+		assertEquals(168.0, shots.get(0).getX(), 1);
+		assertEquals(134.0, shots.get(0).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(0).getColor());
+
+		assertEquals(0, shots.get(1).getX(), 1);
+		assertEquals(213, shots.get(1).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(1).getColor());
+
+		assertEquals(162.5, shots.get(2).getX(), 1);
+		assertEquals(168.5, shots.get(2).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(2).getColor());
+
+		assertEquals(53.0, shots.get(3).getX(), 1);
+		assertEquals(240.0, shots.get(3).getY(), 1);
+		assertEquals(Color.GREEN, shots.get(3).getColor());
 
 		// Real shot
-		assertEquals(411, shots.get(0).getX(), 1);
-		assertEquals(331, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
+		assertEquals(411.0, shots.get(4).getX(), 1);
+		assertEquals(331.0, shots.get(4).getY(), 1);
+		assertEquals(Color.RED, shots.get(4).getColor());
 	}
 
 	@Test
