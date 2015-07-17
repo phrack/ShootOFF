@@ -72,26 +72,22 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 		return percentGreenBigger >= threshold  && currentC.getGreen() >= averageC.getBlue();
 	}
 
-	public void applyFilter(BufferedImage frame, LightingCondition lightCondition) {
-		for (int x = 0; x < frame.getWidth(); x++) {
-			for (int y = 0; y < frame.getHeight(); y++) {
-				int maLum = lumsMovingAverage[y][x];
+	public void applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition) {
+		int maLum = lumsMovingAverage[y][x];
 
-				Color currentC = new Color(frame.getRGB(x, y));
+		Color currentC = new Color(frame.getRGB(x, y));
 
-				// We only care about dimming pixels that are brighter than average
-				 if (maLum > CameraManager.IDEAL_LUM) {
-					 // If the current pixels is brighter than normal and it's not because
-					 // red grew by quit a bit, dim the pixel. If it is brighter and red
-					 // grew by quite a bit it might be a shot
-					 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition) && 
-							 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition)) {
-	                        float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
-	                        hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)maLum;
-	                        frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
-				 	}
-				 }
-			}
-		}
+		// We only care about dimming pixels that are brighter than average
+		 if (maLum > CameraManager.IDEAL_LUM) {
+			 // If the current pixels is brighter than normal and it's not because
+			 // red grew by quit a bit, dim the pixel. If it is brighter and red
+			 // grew by quite a bit it might be a shot
+			 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition) && 
+					 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition)) {
+                    float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
+                    hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)maLum;
+                    frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
+		 	}
+		 }
 	}
 }

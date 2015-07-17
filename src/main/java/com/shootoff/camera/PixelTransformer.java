@@ -5,5 +5,5 @@ import java.awt.image.BufferedImage;
 
 public interface PixelTransformer {
 	public void updateFilter(int x, int y, Color c);
-	public void applyFilter(BufferedImage frame, LightingCondition lightCondition);
+	public void applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition);
 }

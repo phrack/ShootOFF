@@ -406,23 +406,17 @@ public class CameraManager {
 		 * and blue up or down to get roughly the ideal color temperature
 		 * for shot detection.
 		 */
-		private void adjustColorTemperature(BufferedImage frame, float dr) {
-			float db = 1 - (dr - 1);
+		private void adjustColorTemperature(BufferedImage frame, int x, int y, float dr, float db) {
+			Color c = new Color(frame.getRGB(x, y));
 
-			for (int x = 0; x < frame.getWidth(); x++) {
-				for (int y = 0; y < frame.getHeight(); y++) {
-					Color c = new Color(frame.getRGB(x, y));
+			float r = c.getRed() * dr;
+			if (r > 255) r = 255;
+			if (r < 0) r = 0;
+			float b = c.getBlue() * db;
+			if (b > 255) b = 255;
+			if (b < 0) b = 0;
 
-					float r = c.getRed() * dr;
-					if (r > 255) r = 255;
-					if (r < 0) r = 0;
-					float b = c.getBlue() * db;
-					if (b > 255) b = 255;
-					if (b < 0) b = 0;
-
-					frame.setRGB(x, y, new Color((int)r, c.getGreen(), (int)b).getRGB());
-				}
-			}
+			frame.setRGB(x, y, new Color((int)r, c.getGreen(), (int)b).getRGB());
 		}
 		private void detectShots(BufferedImage frame, AverageFrameComponents averages) {
 			if (!isDetecting) return;
@@ -440,18 +434,26 @@ public class CameraManager {
 			}
 
 			float averageRed = averages.getAverageRed();
-			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
+			float dr = IDEAL_R_AVERAGE / averageRed;
+			float db = 1 - (dr - 1);
 
-			// If the color temperatures (using just the red component as an
-			// approximation) are only a bit off from ideal step up the heat.
-			// We don't want to make big changes or it will blow up in dark
-			// rooms by trying to do huge corrections that max r and zero b
-			// components in rgb pixels.
-			if (averageRed < IDEAL_R_AVERAGE && colorCorrection < 2f) {
-				adjustColorTemperature(frame, colorCorrection);
+			for (int x = 0; x < frame.getWidth(); x++) {
+				for (int y = 0; y < frame.getHeight(); y++) {
+					// If the color temperatures (using just the red component as an
+					// approximation) are only a bit off from ideal step up the heat.
+					// We don't want to make big changes or it will blow up in dark
+					// rooms by trying to do huge corrections that max r and zero b
+					// components in rgb pixels.
+					if (averageRed < IDEAL_R_AVERAGE && dr < 2f) {
+						// TODO: WHY WHY WHY does this work if we adjust the frame here
+						// instead of working copy? If we don't do it or remove working
+						// copy a bunch of tests start failing
+						adjustColorTemperature(frame, x, y, dr, db);
+					}
+					
+					pixelTransformer.applyFilter(workingCopy, x, y, averages.getLightingCondition());
+				}
 			}
-			
-			pixelTransformer.applyFilter(workingCopy, averages.getLightingCondition());
 
 			BufferedImage grayScale = new BufferedImage(frame.getWidth(),
 					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
