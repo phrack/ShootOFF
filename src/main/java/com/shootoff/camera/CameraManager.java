@@ -228,7 +228,6 @@ public class CameraManager {
 		private boolean pixelTransformerInitialized = false;
 		private int seenFrames = 0;
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
-		private LightingCondition lightCondition;
 
 		@Override
 		public void run() {
@@ -252,13 +251,13 @@ public class CameraManager {
 		{
 			BufferedImage currentFrame = event.getImage();
 
-			fixFrame(currentFrame);
+			AverageFrameComponents averages = fixFrame(currentFrame);
 
 			if (pixelTransformerInitialized == false) {
 				seenFrames++;
 				if (seenFrames == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
 			} else {
-				detectShots(currentFrame);
+				detectShots(currentFrame, averages);
 			}
 		}
 
@@ -276,21 +275,18 @@ public class CameraManager {
 			long startDetectionCycle = System.currentTimeMillis();
 
 			while (isStreaming) {
-				BufferedImage currentFrame;
+				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 				
-				if (webcam.isPresent() && webcam.get().isImageNew()) {
-					currentFrame = webcam.get().getImage();
-					fixFrame(currentFrame);
-					if (pixelTransformerInitialized == false) {
-						seenFrames++;
-						if (seenFrames == INIT_FRAME_COUNT) { 
-							pixelTransformerInitialized = true;
-						} else {
-							continue;
-						}
+				BufferedImage currentFrame = webcam.get().getImage();
+				final AverageFrameComponents averages = fixFrame(currentFrame);
+				
+				if (pixelTransformerInitialized == false) {
+					seenFrames++;
+					if (seenFrames == INIT_FRAME_COUNT) { 
+						pixelTransformerInitialized = true;
+					} else {
+						continue;
 					}
-				} else {
-					continue;
 				}
 
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
@@ -348,22 +344,16 @@ public class CameraManager {
 
 					startDetectionCycle = System.currentTimeMillis();
 					final BufferedImage frame = currentFrame;
-					detectionExecutor.submit(new Thread(() -> {detectShots(frame);}));
+					detectionExecutor.submit(new Thread(() -> {detectShots(frame, averages);}));
 				}
 			}
 			
 			detectionExecutor.shutdown();
 		}
 
-		private void fixFrame(BufferedImage frame) {
+		private AverageFrameComponents fixFrame(BufferedImage frame) {
 			AverageFrameComponents averages = averageFrameComponents(frame);
-			
-			if (averages.getAverageLum() > LIGHTING_CONDITION_THRESHOLD) {
-				lightCondition = LightingCondition.BRIGHT;
-			} else {
-				lightCondition = LightingCondition.DARK;
-			}
-			
+				
 			float averageRed = averages.getAverageRed();
 			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
 
@@ -375,6 +365,8 @@ public class CameraManager {
 			if (averageRed < IDEAL_R_AVERAGE && colorCorrection < 2f) {
 				adjustColorTemperature(frame, colorCorrection);
 			}
+			
+			return averages;
 		}
 
 		private class AverageFrameComponents {
@@ -384,13 +376,17 @@ public class CameraManager {
 			public AverageFrameComponents(float lum, float red) {
 				averageLum = lum; averageRed = red;
 			}
-
-			public float getAverageLum() {
-				return averageLum;
-			}
-
+			
 			public float getAverageRed() {
 				return averageRed;
+			}
+			
+			public LightingCondition getLightingCondition() {
+				if (averageLum > LIGHTING_CONDITION_THRESHOLD) {
+					return LightingCondition.BRIGHT;
+				} else {
+					return LightingCondition.DARK;
+				} 
 			}
 		}
 
@@ -440,7 +436,7 @@ public class CameraManager {
 				}
 			}
 		}
-		private void detectShots(BufferedImage frame) {
+		private void detectShots(BufferedImage frame, AverageFrameComponents averages) {
 			if (!isDetecting) return;
 
 			BufferedImage workingCopy = new BufferedImage(frame.getWidth(), frame.getHeight(),
@@ -455,7 +451,7 @@ public class CameraManager {
 				workingCopy.createGraphics().drawImage(frame, 0, 0, null);
 			}
 
-			pixelTransformer.applyFilter(workingCopy, lightCondition);
+			pixelTransformer.applyFilter(workingCopy, averages.getLightingCondition());
 
 			BufferedImage grayScale = new BufferedImage(frame.getWidth(),
 					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
