@@ -353,18 +353,6 @@ public class CameraManager {
 
 		private AverageFrameComponents fixFrame(BufferedImage frame) {
 			AverageFrameComponents averages = averageFrameComponents(frame);
-				
-			float averageRed = averages.getAverageRed();
-			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
-
-			// If the color temperatures (using just the red component as an
-			// approximation) are only a bit off from ideal step up the heat.
-			// We don't want to make big changes or it will blow up in dark
-			// rooms by trying to do huge corrections that max r and zero b
-			// components in rgb pixels.
-			if (averageRed < IDEAL_R_AVERAGE && colorCorrection < 2f) {
-				adjustColorTemperature(frame, colorCorrection);
-			}
 			
 			return averages;
 		}
@@ -451,6 +439,18 @@ public class CameraManager {
 				workingCopy.createGraphics().drawImage(frame, 0, 0, null);
 			}
 
+			float averageRed = averages.getAverageRed();
+			float colorCorrection = IDEAL_R_AVERAGE / averageRed;
+
+			// If the color temperatures (using just the red component as an
+			// approximation) are only a bit off from ideal step up the heat.
+			// We don't want to make big changes or it will blow up in dark
+			// rooms by trying to do huge corrections that max r and zero b
+			// components in rgb pixels.
+			if (averageRed < IDEAL_R_AVERAGE && colorCorrection < 2f) {
+				adjustColorTemperature(frame, colorCorrection);
+			}
+			
 			pixelTransformer.applyFilter(workingCopy, averages.getLightingCondition());
 
 			BufferedImage grayScale = new BufferedImage(frame.getWidth(),
