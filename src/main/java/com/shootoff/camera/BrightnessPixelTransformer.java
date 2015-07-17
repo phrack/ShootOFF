@@ -73,7 +73,7 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 		if (lightCondition == LightingCondition.VERY_BRIGHT) {
 			threshold = .25f;
 		} else if (lightCondition == LightingCondition.BRIGHT) {
-			threshold = .60f;
+			threshold = .65f;
 		} else {
 			threshold = .50f;
 		}
