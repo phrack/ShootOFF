@@ -62,34 +62,47 @@ public class TestCamerManagerVeryBright {
 		
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4");
 		
-		// This misses the top two left shots and the middle two left shots because
-		// they are dimmed out too much by the light that is in the camera frame
-				
-		assertEquals(6, shots.size());
+		assertEquals(10, shots.size());
 		
-		assertEquals(520.0, shots.get(0).getX(), 1);
-		assertEquals(170.5, shots.get(0).getY(), 1);
+		assertEquals(249.5, shots.get(0).getX(), 1);
+		assertEquals(191.0, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 
-		assertEquals(531.5, shots.get(1).getX(), 1);
-		assertEquals(258.5, shots.get(1).getY(), 1);
+		assertEquals(385.5, shots.get(1).getX(), 1);
+		assertEquals(182.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
-		assertEquals(250.0, shots.get(2).getX(), 1);
-		assertEquals(392.5, shots.get(2).getY(), 1);
+		assertEquals(520.0, shots.get(2).getX(), 1);
+		assertEquals(170.5, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
-		assertEquals(392.5, shots.get(3).getX(), 1);
-		assertEquals(382.5, shots.get(3).getY(), 1);
+		assertEquals(531.5, shots.get(3).getX(), 1);
+		assertEquals(258.5, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
 
-		assertEquals(531.5, shots.get(4).getX(), 1);
-		assertEquals(335.0, shots.get(4).getY(), 1);
+		assertEquals(383.0, shots.get(4).getX(), 1);
+		assertEquals(263.5, shots.get(4).getY(), 1);
 		assertEquals(Color.RED, shots.get(4).getColor());
 
-		assertEquals(529.5, shots.get(5).getX(), 1);
-		assertEquals(356.0, shots.get(5).getY(), 1);
-		assertEquals(Color.RED, shots.get(5).getColor());	
+		assertEquals(251.0, shots.get(5).getX(), 1);
+		assertEquals(276.0, shots.get(5).getY(), 1);
+		assertEquals(Color.RED, shots.get(5).getColor());
+
+		assertEquals(250.0, shots.get(6).getX(), 1);
+		assertEquals(392.5, shots.get(6).getY(), 1);
+		assertEquals(Color.RED, shots.get(6).getColor());
+
+		assertEquals(392.0, shots.get(7).getX(), 1);
+		assertEquals(382.5, shots.get(7).getY(), 1);
+		assertEquals(Color.RED, shots.get(7).getColor());
+
+		assertEquals(531.5, shots.get(8).getX(), 1);
+		assertEquals(335.0, shots.get(8).getY(), 1);
+		assertEquals(Color.RED, shots.get(8).getColor());
+
+		assertEquals(529.5, shots.get(9).getX(), 1);
+		assertEquals(356.0, shots.get(9).getY(), 1);
+		assertEquals(Color.RED, shots.get(9).getColor());
 	}
 	
 	@Test
@@ -194,7 +207,7 @@ public class TestCamerManagerVeryBright {
 
 	@Test
 	// VERY BRIGHT
-	public void testMSHD3000ardwareDefaultsAmbientLightNatureScene() {
+	public void testMSHD3000HardwareDefaultsAmbientLightNatureScene() {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4");
 
 		assertEquals(0, shots.size());
