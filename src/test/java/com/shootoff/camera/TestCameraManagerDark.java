@@ -4,7 +4,10 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -34,11 +37,12 @@ public class TestCameraManagerDark {
 		}
 	}
 	
-	private List<Shot> findShots(String videoPath) {
+	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
 		Object processingLock = new Object();
 		File videoFile = new  File(getClass().getResource(videoPath).getFile());
 		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses);
+		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
+				projectionBounds);
 		
 		try {
 			synchronized (processingLock) {
@@ -55,7 +59,7 @@ public class TestCameraManagerDark {
 	@Test
 	// DARK
 	public void testNoInterferenceTwoShots() {
-		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4");
+		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4", Optional.empty());
 		
 		assertEquals(2, shots.size());
 		
@@ -71,7 +75,7 @@ public class TestCameraManagerDark {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsDarkRoom() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_projector_dark_room.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_projector_dark_room.mp4", Optional.empty());
 				
 		assertEquals(9, shots.size());
 		
@@ -115,7 +119,7 @@ public class TestCameraManagerDark {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsAmbientLightNatureScene() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4", Optional.empty());
 		
 		assertEquals(0, shots.size());
 	}	
@@ -123,7 +127,7 @@ public class TestCameraManagerDark {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4", Optional.empty());
 		
 		// Misses left two sky shots at the top and both water shots on the bottom
 		// these are basically non-starters with a fully bright projection like this.
@@ -154,17 +158,17 @@ public class TestCameraManagerDark {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOffSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4", Optional.empty());
 		
-		// Gets all but bottom middle water shot and some dupes due to laser pointer handling
+		// Gets misses middle shots on middle and bottom row
 		
-		assertEquals(10, shots.size());
+		assertEquals(9, shots.size());
 		
 		assertEquals(473.0, shots.get(0).getX(), 1);
 		assertEquals(63.0, shots.get(0).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(0).getColor());
 
-		// Dupe of shot above
+		// Dupe of the shot above
 		assertEquals(470.5, shots.get(1).getX(), 1);
 		assertEquals(59.0, shots.get(1).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(1).getColor());
@@ -173,33 +177,102 @@ public class TestCameraManagerDark {
 		assertEquals(99.5, shots.get(2).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(2).getColor());
 
-		// Dupe of shot above
-		assertEquals(473.5, shots.get(3).getX(), 1);
-		assertEquals(99.5, shots.get(3).getY(), 1);
+		assertEquals(337.5, shots.get(3).getX(), 1);
+		assertEquals(97.0, shots.get(3).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(3).getColor());
 
-		assertEquals(337.5, shots.get(4).getX(), 1);
-		assertEquals(97.0, shots.get(4).getY(), 1);
+		assertEquals(205.5, shots.get(4).getX(), 1);
+		assertEquals(99.0, shots.get(4).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(4).getColor());
 
-		assertEquals(205.5, shots.get(5).getX(), 1);
-		assertEquals(99.0, shots.get(5).getY(), 1);
+		assertEquals(199.5, shots.get(5).getX(), 1);
+		assertEquals(233.5, shots.get(5).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(5).getColor());
 
-		assertEquals(199.5, shots.get(6).getX(), 1);
-		assertEquals(233.5, shots.get(6).getY(), 1);
+		assertEquals(498.0, shots.get(6).getX(), 1);
+		assertEquals(224.0, shots.get(6).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(6).getColor());
 
-		assertEquals(498.0, shots.get(7).getX(), 1);
-		assertEquals(224.0, shots.get(7).getY(), 1);
+		assertEquals(479.0, shots.get(7).getX(), 1);
+		assertEquals(281.0, shots.get(7).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(7).getColor());
 
-		assertEquals(479.0, shots.get(8).getX(), 1);
-		assertEquals(281.0, shots.get(8).getY(), 1);
+		assertEquals(207.0, shots.get(8).getX(), 1);
+		assertEquals(279.5, shots.get(8).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(8).getColor());
 
-		assertEquals(207.0, shots.get(9).getX(), 1);
-		assertEquals(279.5, shots.get(9).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(9).getColor());
+	}
+	
+	@Test
+	// DARK
+	public void testPS3EyeHardwareDefaultsBrightRoomLimitedBounds() {
+		// Turn off the top sectors because they are all just noise.
+		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+			sectorStatuses[0][x] = false;
+		}
+		
+		// This misses the middle two shots
+		Bounds projectionBounds = new BoundingBox(109, 104, 379, 297);
+		
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.of(projectionBounds));
+		
+		assertEquals(4, shots.size());
+		
+		assertEquals(236.5, shots.get(0).getX(), 1);
+		assertEquals(169.5, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+		
+		assertEquals(175, shots.get(1).getX(), 1);
+		assertEquals(191, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+		
+		assertEquals(229.5, shots.get(2).getX(), 1);
+		assertEquals(227.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+		
+		assertEquals(176.5, shots.get(3).getX(), 1);
+		assertEquals(251.5, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
+	}
+	
+	@Test
+	// DARK
+	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafariLimitedBounds() {
+		Bounds projectionBounds = new BoundingBox(131, 77, 390, 265);
+		
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
+				Optional.of(projectionBounds));
+		
+		// This misses the bottom two shots on the water
+		
+		assertEquals(7, shots.size());
+		
+		assertEquals(604.0, shots.get(0).getX(), 1);
+		assertEquals(204.0, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+
+		assertEquals(481.5, shots.get(1).getX(), 1);
+		assertEquals(207.5, shots.get(1).getY(), 1);
+		assertEquals(Color.RED, shots.get(1).getColor());
+
+		assertEquals(338.5, shots.get(2).getX(), 1);
+		assertEquals(190.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+
+		assertEquals(315.0, shots.get(3).getX(), 1);
+		assertEquals(305.0, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());
+
+		assertEquals(441.5, shots.get(4).getX(), 1);
+		assertEquals(307.0, shots.get(4).getY(), 1);
+		assertEquals(Color.RED, shots.get(4).getColor());
+
+		assertEquals(599.0, shots.get(5).getX(), 1);
+		assertEquals(297.0, shots.get(5).getY(), 1);
+		assertEquals(Color.RED, shots.get(5).getColor());
+
+		assertEquals(600.5, shots.get(6).getX(), 1);
+		assertEquals(345.5, shots.get(6).getY(), 1);
+		assertEquals(Color.RED, shots.get(6).getColor());
 	}
 }

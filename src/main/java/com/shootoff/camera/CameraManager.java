@@ -104,11 +104,16 @@ public class CameraManager {
 	}
 
 	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas,
-			Configuration config, boolean[][] sectorStatuses) {
+			Configuration config, boolean[][] sectorStatuses, Optional<Bounds> projectionBounds) {
 		this.webcam = Optional.empty();
 		this.processingLock = processingLock;
 		this.canvasManager = canvas;
 		this.config = config;
+		
+		if (projectionBounds.isPresent()) {
+			setLimitDetectProjection(true);
+			setProjectionBounds(projectionBounds.get());
+		}
 
 		Detector detector = new Detector();
 		
@@ -164,8 +169,8 @@ public class CameraManager {
 		this.isDetecting = isDetecting;
 	}
 
-	public void setProjectionBounds(Bounds cropBounds) {
-		this.projectionBounds = Optional.ofNullable(cropBounds);
+	public void setProjectionBounds(Bounds projectionBounds) {
+		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
 
 	public void setCropFeedToProjection(boolean cropFeed) {
@@ -231,7 +236,7 @@ public class CameraManager {
 		private boolean pixelTransformerInitialized = false;
 		private int seenFrames = 0;
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
-
+		
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
@@ -379,8 +384,26 @@ public class CameraManager {
 		private AverageFrameComponents averageFrameComponents(BufferedImage frame) {
 			long totalLum = 0;
 			long totalRed = 0;
-			for (int x = 0; x < frame.getWidth(); x++) {
-				for (int y = 0; y < frame.getHeight(); y++) {
+			
+			int minX;
+			int maxX;
+			int minY;
+			int maxY;
+			
+			if (limitDetectProjection && projectionBounds.isPresent()) {
+				minX = (int)projectionBounds.get().getMinX();
+				maxX = (int)projectionBounds.get().getMaxX();
+				minY = (int)projectionBounds.get().getMinY();
+				maxY = (int)projectionBounds.get().getMaxY();
+			} else {
+				minX = 0;
+				maxX = frame.getWidth();
+				minY = 0;
+				maxY = frame.getHeight();
+			}
+			
+			for (int x = minX; x < maxX; x++) {
+				for (int y = minY; y < maxY; y++) {
 					Color c = new Color(frame.getRGB(x, y));
 
 					pixelTransformer.updateFilter(x, y, c);
@@ -435,8 +458,26 @@ public class CameraManager {
 			float dr = IDEAL_R_AVERAGE / averageRed;
 			float db = 1 - (dr - 1);
 
-			for (int x = 0; x < frame.getWidth(); x++) {
-				for (int y = 0; y < frame.getHeight(); y++) {
+			int minX;
+			int maxX;
+			int minY;
+			int maxY;
+			
+			if (limitDetectProjection && projectionBounds.isPresent()) {
+				minX = (int)projectionBounds.get().getMinX();
+				maxX = (int)projectionBounds.get().getMaxX();
+				minY = (int)projectionBounds.get().getMinY();
+				maxY = (int)projectionBounds.get().getMaxY();
+			} else {
+				minX = 0;
+				maxX = frame.getWidth();
+				minY = 0;
+				maxY = frame.getHeight();
+			}
+			
+			for (int x = minX; x < maxX; x++) {
+				for (int y = minY; y < maxY; y++) {
+			
 					// If the color temperatures (using just the red component as an
 					// approximation) are only a bit off from ideal step up the heat.
 					// We don't want to make big changes or it will blow up in dark

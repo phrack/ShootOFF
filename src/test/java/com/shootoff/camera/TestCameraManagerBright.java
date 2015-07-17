@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
+import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -34,11 +36,11 @@ public class TestCameraManagerBright {
 		}
 	}
 	
-	private List<Shot> findShots(String videoPath) {
+	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
 		Object processingLock = new Object();
 		File videoFile = new  File(getClass().getResource(videoPath).getFile());
-		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses);
+		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
+				projectionBounds);
 		
 		try {
 			synchronized (processingLock) {
@@ -62,7 +64,7 @@ public class TestCameraManagerBright {
 		
 		// This misses the middle two shots
 		
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty());
 		
 		assertEquals(2, shots.size());
 		
@@ -73,12 +75,13 @@ public class TestCameraManagerBright {
 		assertEquals(176, shots.get(1).getX(), 1);
 		assertEquals(251.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
-	}
+	}	
 	
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
+				Optional.empty());
 		
 		// This misses the bottom two shots on the water and far right shot in middle row
 		
@@ -112,7 +115,7 @@ public class TestCameraManagerBright {
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4");
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4", Optional.empty());
 		
 		// This gets a few dupes due to sloppy shots (laser pointer was used) and
 		// misses the far left shot in the middle row

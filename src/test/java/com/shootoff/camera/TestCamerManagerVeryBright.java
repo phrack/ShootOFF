@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
+import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -34,11 +36,11 @@ public class TestCamerManagerVeryBright {
 		}
 	}
 	
-	private List<Shot> findShots(String videoPath) {
+	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
 		Object processingLock = new Object();
 		File videoFile = new  File(getClass().getResource(videoPath).getFile());
-		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses);
+		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
+				projectionBounds);
 		
 		try {
 			synchronized (processingLock) {
@@ -60,7 +62,8 @@ public class TestCamerManagerVeryBright {
 			sectorStatuses[0][x] = false;
 		}
 		
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4");
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4", 
+				Optional.empty());
 		
 		assertEquals(10, shots.size());
 		
@@ -113,7 +116,8 @@ public class TestCamerManagerVeryBright {
 			sectorStatuses[0][x] = false;
 		}
 		
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_on.mp4");
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_on.mp4",
+				Optional.empty());
 		
 		assertEquals(9, shots.size());
 
@@ -162,7 +166,8 @@ public class TestCamerManagerVeryBright {
 			sectorStatuses[0][x] = false;
 		}
 		
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_min_contrast_whitebalance_off.mp4");
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_min_contrast_whitebalance_off.mp4",
+				Optional.empty());
 		
 		// Currently missing first shot in top left and last two shots on
 		// bottom right getting rejected due to size heuristic
@@ -208,7 +213,8 @@ public class TestCamerManagerVeryBright {
 	@Test
 	// VERY BRIGHT
 	public void testMSHD3000HardwareDefaultsAmbientLightNatureScene() {
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4");
+		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4", 
+				Optional.empty());
 
 		assertEquals(0, shots.size());
 	}
