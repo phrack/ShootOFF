@@ -36,7 +36,6 @@ import javafx.stage.Stage;
 public class StreamDebuggerController implements DebuggerListener {
 	private Stage streamDebuggerStage;
 	@FXML private ImageView thresholdImageView;
-	@FXML private Slider colorDifferenceSlider;
 	@FXML private Slider centerBorderSlider;
 	@FXML private Slider minDimSlider;
 
@@ -47,15 +46,6 @@ public class StreamDebuggerController implements DebuggerListener {
 		defaultWindowTitle = streamDebuggerStage.getTitle();
 
 		cameraManager.setThresholdListener(this);
-
-		colorDifferenceSlider.valueProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-	        	if (newValue == null) return;
-
-        		cameraManager.setColorDiffThreshold(newValue.doubleValue());
-	      	}
-	    });
 
 		centerBorderSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override

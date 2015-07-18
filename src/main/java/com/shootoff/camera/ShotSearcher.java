@@ -40,29 +40,20 @@ public class ShotSearcher implements Runnable {
 	private final CanvasManager canvasManager;
 	private final boolean[][] sectorStatuses;
 	private final BufferedImage currentFrame;
-	private final BufferedImage threshed;
+	private final BufferedImage grayScale;
 	private final Optional<Bounds> projectionBounds;
 
-    // We only detect a color if the largest component is at least
-    // 5% bigger than the other components. This is based on the
-    // heuristic that noise tends to have color values that are very
-    // similar
-	private double colorDiffThreshold = 1.05;
 	private int borderWidth = 3; // px
 	private int minShotDim = 6; // px
 
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
-			BufferedImage currentFrame, BufferedImage threshed, Optional<Bounds> projectionBounds) {
+			BufferedImage currentFrame, BufferedImage grayScale, Optional<Bounds> projectionBounds) {
 		this.config = config;
 		this.canvasManager = canvasManager;
 		this.sectorStatuses = sectorStatuses;
 		this.currentFrame = currentFrame;
-		this.threshed = threshed;
+		this.grayScale = grayScale;
 		this.projectionBounds = projectionBounds;
-	}
-
-	public void setColorDiffThreshold(double threshold) {
-		colorDiffThreshold = threshold;
 	}
 
 	public void setCenterApproxBorderSize(int width) {
@@ -77,8 +68,8 @@ public class ShotSearcher implements Runnable {
 	public void run() {
 		// Split the image into x columns and y rows, and search
 		// each independently
-		int subWidth = threshed.getWidth() / SECTOR_COLUMNS;
-		int subHeight = threshed.getHeight() / SECTOR_ROWS;
+		int subWidth = grayScale.getWidth() / SECTOR_COLUMNS;
+		int subHeight = grayScale.getHeight() / SECTOR_ROWS;
 
 		for (int startY = 0, sectorY = 0; sectorY < SECTOR_ROWS;
 				startY += subHeight, sectorY++) {
@@ -95,7 +86,7 @@ public class ShotSearcher implements Runnable {
 	private void findShot(int startX, int endX, int startY, int endY) {
 		for (int x = startX; x < endX; x++) {
 			for (int y = startY; y < endY; y++) {
-				if ((threshed.getRGB(x, y) & 0xFF) > config.getLaserIntensity()) {
+				if ((grayScale.getRGB(x, y) & 0xFF) > config.getLaserIntensity()) {
 					Optional<Color> areaColor = detectColor(x, y);
 					if (areaColor.isPresent()) {
 						if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
@@ -125,85 +116,49 @@ public class ShotSearcher implements Runnable {
 		}
 	}
 
-	private Optional<Color> detectColor(int x, int y) {
-		int rgb = currentFrame.getRGB(x, y);
-		float r = getRed(rgb);
-		float g = getGreen(rgb);
+	private Optional<Color> detectColor(int x, int y) {      
+		final int colorDetectionRadius = minShotDim;
+		int redCount = 0;
+		int greenCount = 0;
 		
-		final int colorDetectionRadius = 4;
-		int pixelsSeen = 1;
-
-		// Average colorDetectionRadius pixels left
-		for (int offsetX = x; offsetX > 0 && x - offsetX < colorDetectionRadius;
-				offsetX--) {
-
-			rgb = currentFrame.getRGB(offsetX, y);
-			r += getRed(rgb);
-			g += getGreen(rgb);
-			pixelsSeen++;
-		}
-
-		// Average colorDetectionRadius pixels right
-		for (int offsetX = x;
-				offsetX < currentFrame.getWidth() && offsetX - x < colorDetectionRadius;
-				offsetX++) {
-
-			rgb = currentFrame.getRGB(offsetX, y);
-			r += getRed(rgb);
-			g += getGreen(rgb);
-			pixelsSeen++;
-		}
-
-		// Average colorDetectionRadius pixels up
-		for (int offsetY = y;
+		// Get the color of pixels down and right to count
+		// the number of reds and greens
+		for (int offsetX = x, offsetY = y; 
+				offsetX < currentFrame.getWidth() && offsetX - x < colorDetectionRadius &&
 				offsetY < currentFrame.getHeight() && offsetY - y < colorDetectionRadius;
-				offsetY++) {
+				offsetX++, offsetY++)
+			
+		{
+			java.awt.Color c = new java.awt.Color(currentFrame.getRGB(offsetX, offsetY));
 
-			rgb = currentFrame.getRGB(x, offsetY);
-			r += getRed(rgb);
-			g += getGreen(rgb);
-			pixelsSeen++;
+			float[] hsb = java.awt.Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
+			
+			boolean nearWhite = hsb[1] < 0.1 && hsb[2] > 0.9;
+			boolean nearBlack = hsb[2] < 0.1;
+			
+			if (!nearWhite && !nearBlack) {
+			    float deg = hsb[0]*360;
+			    if (deg >= 0 && deg <  30) redCount++;
+			    else if (deg >=  90 && deg < 150) greenCount++;
+			    else if (deg >= 33) redCount++;
+			}
 		}
-
-		// Average colorDetectionRadius pixels down
-		for (int offsetY = y;
-				offsetY > 0 && y - offsetY < colorDetectionRadius;
-				offsetY--) {
-
-			rgb = currentFrame.getRGB(x, offsetY);
-			r += getRed(rgb);
-			g += getGreen(rgb);
-			pixelsSeen++;
-		}
-
-		r /= (float)pixelsSeen;
-		g /= (float)pixelsSeen;
 		
-        if (r == 0 || g == 0) return Optional.empty();
-        
-		// No shot detected? Try with the warmer colors
-        if ((r / g) > colorDiffThreshold) {
-        	logger.trace("Shot Processing: Found shot ({}, {}) red, r = {}, g = {}, r / g = {}", x, y, r, g, (r / g));
-        	return Optional.of(Color.RED);
-        }
-        
-        if ((g / r) > colorDiffThreshold) {
-        	logger.trace("Shot Processing: Found shot ({}, {}) green, r = {}, g = {}, g / r = {}", x, y, r, g, (g / r));
-        	return Optional.of(Color.GREEN);
-        }
-
-        logger.trace("Shot Processing: No color could be detected for suspected shot({}, {}), rg = ({}, {}), " + 
-        		"r / g = {}, g / r = {}", x, y, r, g, (r / g), (g / r)); 
-        
-		return Optional.empty();
-	}
-
-	private int getRed(int rgb) {
-		return (rgb & 0x00ff0000) >> 16;
-	}
-
-	private int getGreen(int rgb) {
-		return (rgb & 0x0000ff00) >> 8;
+		// More than one pixel must be a specific color otherwise the shot is likely just noise
+		if (Math.abs(redCount - greenCount) < 2) {
+			logger.trace("Shot Processing: No color detected for suspected shot ({}, {}), "
+					+ "redCount = {}, greenCount = {}",
+					x, y, redCount, greenCount);
+			return Optional.empty();
+		} else if (redCount > greenCount) {
+			logger.trace("Shot Processing: Detected red shot ({}, {}), redCount = {}, greenCount = {}",
+					x, y, redCount, greenCount);
+			return Optional.of(Color.RED);
+		} else {
+			logger.trace("Shot Processing: Detected green shot ({}, {}), redCount = {}, greenCount = {}",
+					x, y, redCount, greenCount);
+			return Optional.of(Color.GREEN);
+		}
 	}
 
 	/**
@@ -217,13 +172,13 @@ public class ShotSearcher implements Runnable {
 		double minX = x, minY = y;
 		double maxX = x, maxY = y;
 
-		// We need to see a certain number of black pixels because the shot
-		// does not have sharp borders (we may hit a black pixel right away
-		// even though it's not the read edge otherwise)
+		// We need to see a certain number of dark pixels because the shot
+		// does not have sharp borders (we may hit a dark pixel right away
+		// even though it's not the real edge otherwise)
 		int blackCount = 0;
 
-		for (;maxY < threshed.getHeight(); maxY++) {
-			if ((threshed.getRGB((int)maxX, (int)maxY) & 0xFF) <= config.getLaserIntensity())
+		for (;maxY < grayScale.getHeight(); maxY++) {
+			if ((grayScale.getRGB((int)maxX, (int)maxY) & 0xFF) <= config.getLaserIntensity())
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 		}
@@ -233,8 +188,8 @@ public class ShotSearcher implements Runnable {
 		double shotHeight = maxY - minY;
 		double centerY = minY + (shotHeight / 2);
 
-		for (;maxX < threshed.getWidth(); maxX++) {
-			if ((threshed.getRGB((int)maxX, (int)centerY) & 0xFF) <= config.getLaserIntensity())
+		for (;maxX < grayScale.getWidth(); maxX++) {
+			if ((grayScale.getRGB((int)maxX, (int)centerY) & 0xFF) <= config.getLaserIntensity())
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 		}
@@ -247,6 +202,11 @@ public class ShotSearcher implements Runnable {
 		// If the width and height of the shot are really small it's a false positive
 		if (shotWidth < minShotDim && shotHeight < minShotDim) {
 			logger.debug("Suspected shot rejected: Dimensions Too Small "
+					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
+			return Optional.empty();
+			// Really big is bad too
+		} else if (shotWidth > minShotDim * 3 || shotHeight > minShotDim * 3) {
+			logger.debug("Suspected shot rejected: Dimensions Too big "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
 		}

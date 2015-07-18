@@ -83,7 +83,6 @@ public class CameraManager {
 	private boolean isDetecting = true;
 	private boolean cropFeedToProjection = false;
 	private boolean limitDetectProjection = false;
-	private Optional<Double> colorDiffThreshold = Optional.empty();
 	private Optional<Integer> centerApproxBorderSize = Optional.empty();
 	private Optional<Integer> minimumShotDimension = Optional.empty();
 	private Optional<DebuggerListener> debuggerListener = Optional.empty();
@@ -210,11 +209,6 @@ public class CameraManager {
 
 	public boolean isVideoProcessed() {
 		return processedVideo;
-	}
-
-	public void setColorDiffThreshold(double threshold) {
-		colorDiffThreshold = Optional.of(threshold);
-		logger.debug("Set color component difference threshold: {}", threshold);
 	}
 
 	public void setCenterApproxBorderSize(int borderSize) {
@@ -498,6 +492,9 @@ public class CameraManager {
 					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
+			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
+					frame, grayScale, projectionBounds);
+			
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();
 				if (debuggerListener.isPresent()) {
@@ -509,13 +506,6 @@ public class CameraManager {
 					showFPSWarning(webcamFPS);
 					showedFPSWarning = true;
 				}
-			}
-
-			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					workingCopy, grayScale, projectionBounds);
-
-			if (colorDiffThreshold.isPresent()) {
-				shotSearcher.setColorDiffThreshold(colorDiffThreshold.get());
 			}
 
 			if (centerApproxBorderSize.isPresent()) {
