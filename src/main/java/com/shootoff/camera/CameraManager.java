@@ -284,6 +284,10 @@ public class CameraManager {
 				if (pixelTransformerInitialized == false) {
 					seenFrames++;
 					if (seenFrames == INIT_FRAME_COUNT) { 
+						if (averages.getLightingCondition() == LightingCondition.VERY_BRIGHT) {
+							showBrightnessWarning();
+						}
+						
 						pixelTransformerInitialized = true;
 					} else {
 						continue;
@@ -539,6 +543,33 @@ public class CameraManager {
 
 				cameraAlert.setTitle("Webcam FPS Too Low");
 				cameraAlert.setHeaderText("Webcam FPS is too low!");
+				cameraAlert.setResizable(true);
+				cameraAlert.setContentText(message);
+				cameraAlert.show();
+			});
+		}
+		
+		private void showBrightnessWarning() {
+			Platform.runLater(() -> {
+				Alert cameraAlert = new Alert(AlertType.WARNING);
+
+				Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
+				String messageFormat = "The camera %s is streaming frames that are very bright. "
+						+ " This will increase the odds of shots falsely being detected."
+						+ " For best results, please do any mix of the following:\n\n"
+						+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness\n"
+						+ "-Remove any bright light sources in the camera's view\n"
+						+ "-Turn down your projector's brightness and contrast\n"
+						+ "-Dim any lights in the room or turn them off, especially those behind the shooter";
+				String message;
+				if (cameraName.isPresent()) {
+					message = String.format(messageFormat, cameraName.get());
+				} else {
+					message = String.format(messageFormat, webcam.get().getName());
+				}
+
+				cameraAlert.setTitle("Conditions Very Bright");
+				cameraAlert.setHeaderText("Webcam detected very bright conditions!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
 				cameraAlert.show();
