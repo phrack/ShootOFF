@@ -125,12 +125,12 @@ public class TestShotSearcher {
 		
 		assertEquals(5, shots.size());
 
-		assertEquals(171.0, shots.get(0).getX(), 1);
-		assertEquals(124.0, shots.get(0).getY(), 1);
+		assertEquals(174.0, shots.get(0).getX(), 1);
+		assertEquals(108.0, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 
-		assertEquals(0, shots.get(1).getX(), 1);
-		assertEquals(213, shots.get(1).getY(), 1);
+		assertEquals(2, shots.get(1).getX(), 1);
+		assertEquals(214, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
 		assertEquals(163.5, shots.get(2).getX(), 1);

@@ -198,9 +198,10 @@ public class ShotSearcher implements Runnable {
 
 		double shotWidth = maxX - minX;
 		double centerX = minX + (shotWidth / 2);
-
+		
 		// If the width and height of the shot are really small it's a false positive
-		if (shotWidth < minShotDim && shotHeight < minShotDim) {
+		if ((shotWidth < minShotDim && shotHeight < minShotDim) || 
+				shotWidth == 0 || shotHeight == 0) {
 			logger.debug("Suspected shot rejected: Dimensions Too Small "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
