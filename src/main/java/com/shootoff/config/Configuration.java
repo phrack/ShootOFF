@@ -489,7 +489,12 @@ public class Configuration {
 		this.debugMode = debugMode;
 		
 		if (debugMode) {
-			System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
+			String logLevel = System.getProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY);
+			if (logLevel == null) {
+				System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
+			} else if (!logLevel.toLowerCase().equals("trace")) {
+				System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
+			}
 			// Ensure WebcamDefaultDriver's logger stays at info because it is quite noisy
 			// and doesn't output information we care about.
 			System.setProperty(org.slf4j.impl.SimpleLogger.LOG_KEY_PREFIX + 
