@@ -442,36 +442,34 @@ public class CameraManager {
 
 			BufferedImage workingCopy = new BufferedImage(frame.getWidth(), frame.getHeight(),
 					BufferedImage.TYPE_INT_RGB);
+			
+			int minX;
+			int maxX;
+			int minY;
+			int maxY;
 
 			if (limitDetectProjection && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
 				BufferedImage subFrame = frame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 						(int)b.getWidth(), (int)b.getHeight());
 				workingCopy.createGraphics().drawImage(subFrame, (int)b.getMinX(), (int)b.getMinY(), null);
-			} else {
-				workingCopy.createGraphics().drawImage(frame, 0, 0, null);
-			}
-
-			float averageRed = averages.getAverageRed();
-			float dr = IDEAL_R_AVERAGE / averageRed;
-			float db = 1 - (dr - 1);
-
-			int minX;
-			int maxX;
-			int minY;
-			int maxY;
-			
-			if (limitDetectProjection && projectionBounds.isPresent()) {
+				
 				minX = (int)projectionBounds.get().getMinX();
 				maxX = (int)projectionBounds.get().getMaxX();
 				minY = (int)projectionBounds.get().getMinY();
 				maxY = (int)projectionBounds.get().getMaxY();
 			} else {
+				workingCopy.createGraphics().drawImage(frame, 0, 0, null);
+				
 				minX = 0;
 				maxX = frame.getWidth();
 				minY = 0;
 				maxY = frame.getHeight();
 			}
+
+			float averageRed = averages.getAverageRed();
+			float dr = IDEAL_R_AVERAGE / averageRed;
+			float db = 1 - (dr - 1);
 			
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
@@ -482,9 +480,6 @@ public class CameraManager {
 					// rooms by trying to do huge corrections that max r and zero b
 					// components in rgb pixels.
 					if (averageRed < IDEAL_R_AVERAGE && dr < 2f) {
-						// TODO: WHY WHY WHY does this work if we adjust the frame here
-						// instead of working copy? If we don't do it or remove working
-						// copy a bunch of tests start failing
 						adjustColorTemperature(workingCopy, x, y, dr, db);
 					}
 					
@@ -497,7 +492,7 @@ public class CameraManager {
 			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					frame, grayScale, projectionBounds);
+					frame, grayScale, projectionBounds, cropFeedToProjection);
 			
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();

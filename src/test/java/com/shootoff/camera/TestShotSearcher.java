@@ -48,7 +48,7 @@ public class TestShotSearcher {
 		
 		Thread searcher = new Thread(
 				new ShotSearcher(config, mockManager, sectorStatuses,
-						testFrame, grayScale, Optional.empty()));
+						testFrame, grayScale, Optional.empty(), false));
 		searcher.start();
 		searcher.join();
 

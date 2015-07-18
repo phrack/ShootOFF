@@ -42,18 +42,21 @@ public class ShotSearcher implements Runnable {
 	private final BufferedImage currentFrame;
 	private final BufferedImage grayScale;
 	private final Optional<Bounds> projectionBounds;
+	private final boolean cropped;
 
 	private int borderWidth = 3; // px
 	private int minShotDim = 6; // px
 
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
-			BufferedImage currentFrame, BufferedImage grayScale, Optional<Bounds> projectionBounds) {
+			BufferedImage currentFrame, BufferedImage grayScale, Optional<Bounds> projectionBounds,
+			boolean cropped) {
 		this.config = config;
 		this.canvasManager = canvasManager;
 		this.sectorStatuses = sectorStatuses;
 		this.currentFrame = currentFrame;
 		this.grayScale = grayScale;
 		this.projectionBounds = projectionBounds;
+		this.cropped = cropped;
 	}
 
 	public void setCenterApproxBorderSize(int width) {
@@ -100,7 +103,7 @@ public class ShotSearcher implements Runnable {
 									x, y, center.get().getX(),
 									center.get().getY(), areaColor.get());
 
-							if (projectionBounds.isPresent()) {
+							if (cropped && projectionBounds.isPresent()) {
 								Bounds b = projectionBounds.get();
 								canvasManager.addShot(areaColor.get(), center.get().getX() + b.getMinX(),
 										center.get().getY() + b.getMinY());
