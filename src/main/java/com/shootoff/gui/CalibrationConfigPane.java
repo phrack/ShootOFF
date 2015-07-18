@@ -9,21 +9,28 @@ import javafx.scene.paint.Color;
 public class CalibrationConfigPane extends BorderPane {
 	private final Pane parent;
 	private final ToggleGroup configToggleGroup = new ToggleGroup();
+	private final RadioButton detectEverywhere = new RadioButton("Detect everywhere");
 	private final RadioButton minimizeDetectionRadioButton = new RadioButton("Only detect in projector bounds"); 
 	private final RadioButton cropRadioButton = new RadioButton("Crop feed to projector bounds");
 	
 	public CalibrationConfigPane(Pane parent) {
 		this.parent = parent;
 		
+		detectEverywhere.setToggleGroup(configToggleGroup);
 		minimizeDetectionRadioButton.setToggleGroup(configToggleGroup);
 		cropRadioButton.setToggleGroup(configToggleGroup);
 		
+		minimizeDetectionRadioButton.setSelected(true);
+		
+		detectEverywhere.setStyle("-fx-background-color: darkgray;");
+		detectEverywhere.setTextFill(Color.WHITE);
 		minimizeDetectionRadioButton.setStyle("-fx-background-color: darkgray;");
 		minimizeDetectionRadioButton.setTextFill(Color.WHITE);
 		cropRadioButton.setStyle("-fx-background-color: darkgray;");
 		cropRadioButton.setTextFill(Color.WHITE);
 		
-		this.setLeft(minimizeDetectionRadioButton);
+		this.setLeft(detectEverywhere);
+		this.setCenter(minimizeDetectionRadioButton);
 		this.setRight(cropRadioButton);
 		
 		parent.getChildren().add(this);
