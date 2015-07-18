@@ -458,17 +458,16 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        arenaController.init(config, camerasSupervisor);
 	        arenaController.getCanvasManager().setShowShots(false);
 	        
+	        toggleArenaCalibrationMenuItem.fire();
+	        
 	        arenaStage.setOnCloseRequest((e) -> { 
-	        		arenaController = null;
-	        		toggleArenaCalibrationMenuItem.setText("Calibrate");
 	        		toggleArenaShotsMenuItem.setText("Show Shot Markers");
 	        		if (calibratingManager != null) {
-	        			calibratingManager.getCanvasManager().setProjectorArena(null, null);
-	        			if (calibrationGroup != null) calibratingManager.getCanvasManager().removeTarget(calibrationGroup);
-	        			calibratingManager = null;
+	        			toggleArenaCalibrationMenuItem.fire();
 	        		}
 	        		toggleProjectorMenus(true);
 	        		startArenaMenuItem.setDisable(false);
+	        		arenaController = null;
 	        	});
 		}
 		
@@ -505,6 +504,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
 			calibrationGroup.getChildren().add(calibrationRectangle);
 			
+			calibratingManager.setDetecting(false);
 			calibratingManager.setProjectionBounds(null);
 			calibratingManager.getCanvasManager().addTarget(calibrationGroup, false);
 			
@@ -524,6 +524,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				calibratingManager.setProjectionBounds(null);
 			}
 			
+			calibratingManager.setDetecting(true);
+			
+			calibratingManager = null;
 			calibrationGroup = null;
 			calibrationConfigPane = null;
 			arenaController.calibrated();
