@@ -505,6 +505,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
 			calibrationGroup.getChildren().add(calibrationRectangle);
 			
+			calibratingManager.setProjectionBounds(null);
 			calibratingManager.getCanvasManager().addTarget(calibrationGroup, false);
 			
 		} else {
