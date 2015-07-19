@@ -278,6 +278,13 @@ public class CameraManager {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 				
 				BufferedImage currentFrame = webcam.get().getImage();
+
+				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
+					showMissingCameraError();
+					detectionExecutor.shutdown();
+					return;
+				}
+				
 				final AverageFrameComponents averages = averageFrameComponents(currentFrame);
 				
 				if (pixelTransformerInitialized == false) {
@@ -291,29 +298,6 @@ public class CameraManager {
 					} else {
 						continue;
 					}
-				}
-
-				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
-					Platform.runLater(() -> {
-							Alert cameraAlert = new Alert(AlertType.ERROR);
-
-							Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
-							String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
-							String message;
-							if (cameraName.isPresent()) {
-								message = String.format(messageFormat, cameraName.get());
-							} else {
-								message = String.format(messageFormat, webcam.get().getName());
-							}
-
-							cameraAlert.setTitle("Webcam Missing");
-							cameraAlert.setHeaderText("Cannot Communicate with Camera!");
-							cameraAlert.setResizable(true);
-							cameraAlert.setContentText(message);
-							cameraAlert.show();
-						});
-
-					return;
 				}
 
 				if (recording) {
@@ -520,10 +504,31 @@ public class CameraManager {
 				debuggerListener.get().updateDebugView(workingCopy);
 			}
 		}
-
-		private void showFPSWarning(double fps) {
+		
+		private void showMissingCameraError() {
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.ERROR);
+
+				Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
+				String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
+				String message;
+				if (cameraName.isPresent()) {
+					message = String.format(messageFormat, cameraName.get());
+				} else {
+					message = String.format(messageFormat, webcam.get().getName());
+				}
+
+				cameraAlert.setTitle("Webcam Missing");
+				cameraAlert.setHeaderText("Cannot Communicate with Camera!");
+				cameraAlert.setResizable(true);
+				cameraAlert.setContentText(message);
+				cameraAlert.show();
+			});
+		}
+		
+		private void showFPSWarning(double fps) {
+			Platform.runLater(() -> {
+				Alert cameraAlert = new Alert(AlertType.WARNING);
 
 				Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
 				String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
