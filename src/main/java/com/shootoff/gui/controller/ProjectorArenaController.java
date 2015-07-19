@@ -79,7 +79,9 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	@FXML
 	public void canvasKeyPressed(KeyEvent event) {
-		if (event.getCode() == KeyCode.F11) {
+		boolean macFullscreen = event.getCode() == KeyCode.F &&
+			event.isControlDown() && event.isShortcutDown();
+		if (event.getCode() == KeyCode.F11 || macFullscreen) {
 			arenaStage.setAlwaysOnTop(!arenaStage.isAlwaysOnTop());
 			arenaStage.setFullScreen(!arenaStage.isFullScreen());
 		}

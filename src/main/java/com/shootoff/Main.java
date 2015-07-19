@@ -20,6 +20,7 @@ package com.shootoff;
 
 import java.io.IOException;
 
+import com.shootoff.camera.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -51,6 +52,13 @@ public class Main extends Application {
 	}
 	
 	public static void main(String[] args) {
+		// Check the comment at the top of the Camera class
+		// for more information about this hack
+		String os = System.getProperty("os.name"); 
+		if (os != null && os.equals("Mac OS X")) {
+			Camera.getDefault();
+		}
+		
 		launch(args);
 	}
 }
