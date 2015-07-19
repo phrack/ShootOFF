@@ -187,12 +187,12 @@ public class ShotSearcher implements Runnable {
 		}
 
 		blackCount = 0;
-		minY -= borderWidth;
+		if (minY >= borderWidth) minY -= borderWidth;
 		double shotHeight = maxY - minY;
 		double centerY = minY + (shotHeight / 2);
 
 		double shotWidth = 0;
-		for (int yy = (int)minY; yy < minY + shotHeight; yy++) {
+		for (int yy = (int)minY; yy < maxY; yy++) {
 			int xx = (int)minX;
 			for (; xx < grayScale.getWidth(); xx++) {
 				if ((grayScale.getRGB((int)xx, (int)yy) & 0xFF) <= config.getLaserIntensity())
@@ -200,9 +200,9 @@ public class ShotSearcher implements Runnable {
 				if (blackCount == borderWidth) break;
 			}
 		
-			xx -= borderWidth;
+			if (xx > borderWidth) xx -= borderWidth;
 			double width = xx - minX;
-			if (width > shotWidth && width < minShotDim) shotWidth = width;
+			if (width >= shotWidth && width < minShotDim) shotWidth = width;
 		}
 
 		double centerX = minX + (shotWidth / 2);
