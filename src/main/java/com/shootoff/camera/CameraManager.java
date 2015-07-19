@@ -29,7 +29,6 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
@@ -72,7 +71,7 @@ public class CameraManager {
 	private final PixelTransformer pixelTransformer = new BrightnessPixelTransformer();
 
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
-	private final Optional<Webcam> webcam;
+	private final Optional<Camera> webcam;
 	private final Object processingLock;
 	private boolean processedVideo = false;
 	private final CanvasManager canvasManager;
@@ -93,7 +92,7 @@ public class CameraManager {
 	private long recordingStartTime;
 	private boolean[][] sectorStatuses;
 
-	protected CameraManager(Webcam webcam, CanvasManager canvas, Configuration config) {
+	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
 		processingLock = null;
 		this.canvasManager = canvas;

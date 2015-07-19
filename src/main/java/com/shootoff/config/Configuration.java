@@ -43,8 +43,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
+import com.shootoff.camera.Camera;
 import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
@@ -92,7 +92,7 @@ public class Configuration {
 	private InputStream configInput;
 	private String configName;
 	
-	private Map<String, Webcam> webcams =  new HashMap<String, Webcam>();
+	private Map<String, Camera> webcams =  new HashMap<String, Camera>();
 	private int detectionRate = 70;
 	private int laserIntensity = 230;
 	private int markerRadius = 4;
@@ -189,7 +189,7 @@ public class Configuration {
 				}
 			}
 			
-			for (Webcam webcam : Webcam.getWebcams()) {
+			for (Camera webcam : Camera.getWebcams()) {
 				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
 				if (cameraIndex >= 0) {
 					webcams.put(webcamNames.get(cameraIndex), webcam);
@@ -397,7 +397,7 @@ public class Configuration {
 		}
 	}
 	
-	public void setWebcams(List<String> webcamNames, List<Webcam> webcams) {
+	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
 		this.webcams.clear();
 		
 		for (int i = 0; i < webcamNames.size(); i++) {
@@ -510,11 +510,11 @@ public class Configuration {
 		currentProtocol = protocol;
 	}
 
-	public Map<String, Webcam> getWebcams() {
+	public Map<String, Camera> getWebcams() {
 		return webcams;
 	}
 	
-	public Optional<String> getWebcamsUserName(Webcam webcam) {
+	public Optional<String> getWebcamsUserName(Camera webcam) {
 		for (String userName : webcams.keySet()) {
 			if (webcams.get(userName).equals(webcam)) return Optional.of(userName);
 		}

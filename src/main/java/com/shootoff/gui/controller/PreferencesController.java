@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CameraConfigListener;
@@ -78,7 +78,7 @@ public class PreferencesController {
 	private Configuration config;
 	private CameraConfigListener cameraConfigListener; 
 	private boolean cameraConfigChanged = false;
-	private final List<Webcam> configuredCameras = new ArrayList<Webcam>();
+	private final List<Camera> configuredCameras = new ArrayList<Camera>();
 	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 	
 	public void setConfig(Configuration config, 
@@ -104,8 +104,8 @@ public class PreferencesController {
 	    			ObservableList<String> selectedNames =
 	    					webcamListView.getSelectionModel().getSelectedItems();
 	    			
-	    			for (Iterator<Webcam> it = configuredCameras.iterator(); it.hasNext();) {
-	    				Webcam webcam = it.next();
+	    			for (Iterator<Camera> it = configuredCameras.iterator(); it.hasNext();) {
+	    				Camera webcam = it.next();
 	    				if (selectedNames.contains(webcam.getName())) {
 	    					it.remove();
 	    				}
@@ -216,7 +216,7 @@ public class PreferencesController {
 		
 		cameraSelector.setOnHidden((e) -> {
 				if (!cameraSelector.getSelectedWebcams().isEmpty()) {
-					for (Webcam webcam : cameraSelector.getSelectedWebcams()) {
+					for (Camera webcam : cameraSelector.getSelectedWebcams()) {
 						boolean changed = configuredNames.add(webcam.getName());
 						configuredCameras.add(webcam);
 						

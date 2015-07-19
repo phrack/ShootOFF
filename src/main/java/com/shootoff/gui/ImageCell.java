@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.shootoff.camera.Camera;
+
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -31,14 +33,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.converter.DefaultStringConverter;
 
-import com.github.sarxos.webcam.Webcam;
-
 public class ImageCell extends TextFieldListCell<String> {
-	private static final Map<Webcam, Image> imageCache = new HashMap<Webcam, Image>();
-	private final List<Webcam> webcams;
+	private static final Map<Camera, Image> imageCache = new HashMap<Camera, Image>();
+	private final List<Camera> webcams;
 	private final List<String> userDefinedCameraNames;
 	
-	public ImageCell(List<Webcam> webcams, List<String> userDefinedCameraNames) {
+	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames) {
 		this.webcams = webcams;
 		this.userDefinedCameraNames = userDefinedCameraNames;
 		
@@ -59,7 +59,7 @@ public class ImageCell extends TextFieldListCell<String> {
             	Optional<Image> webcamImg = Optional.empty();
                 
                 if (userDefinedCameraNames == null) {
-                	for (Webcam webcam : webcams) {
+                	for (Camera webcam : webcams) {
                 		if (webcam.getName().equals(item)) {
                 				webcamImg = Optional.of(fetchWebcamImage(webcam));
                 			break;
@@ -83,7 +83,7 @@ public class ImageCell extends TextFieldListCell<String> {
         });
     }
     
-    private Image fetchWebcamImage(Webcam webcam) {
+    private Image fetchWebcamImage(Camera webcam) {
     	if (imageCache.containsKey(webcam)) {
     		return imageCache.get(webcam);
     	}

@@ -30,7 +30,7 @@ import javax.imageio.ImageIO;
 
 import marytts.util.io.FileFilter;
 
-import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
@@ -132,7 +132,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		});
 		
 		if (config.getWebcams().isEmpty()) {
-			Webcam defaultCamera = Webcam.getDefault();
+			Camera defaultCamera = Camera.getDefault();
 			if (defaultCamera != null) {
 				if (!addCameraTab("Default", defaultCamera)) cameraLockFailure(defaultCamera, true);
 			} else {
@@ -203,12 +203,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.clearManagers();
 		
 		if (config.getWebcams().isEmpty()) {
-			if (!addCameraTab("Default", Webcam.getDefault())) cameraLockFailure(Webcam.getDefault(), true);
+			if (!addCameraTab("Default", Camera.getDefault())) cameraLockFailure(Camera.getDefault(), true);
 		} else {
 			int failureCount = 0;
 			
 			for (String webcamName : config.getWebcams().keySet()) {
-				Webcam webcam = config.getWebcams().get(webcamName);
+				Camera webcam = config.getWebcams().get(webcamName);
 				
 				if (!addCameraTab(webcamName, webcam)) {
 					failureCount++;
@@ -218,7 +218,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 	}
 	
-	private void cameraLockFailure(Webcam webcam, boolean allCamerasFailed) {
+	private void cameraLockFailure(Camera webcam, boolean allCamerasFailed) {
 		Alert cameraAlert = new Alert(AlertType.ERROR);
 		cameraAlert.setTitle("Webcam Locked");
 		cameraAlert.setHeaderText("Cannot Open Webcam");
@@ -249,8 +249,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 	}
 	
-	private boolean addCameraTab(String webcamName, Webcam webcam) {
-		if (webcam.getLock().isLocked() && !webcam.isOpen()) {
+	private boolean addCameraTab(String webcamName, Camera webcam) {
+		if (webcam.isLocked() && !webcam.isOpen()) {
 			return false;
 		}
 		

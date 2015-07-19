@@ -23,7 +23,6 @@ import java.util.List;
 
 import javafx.scene.Group;
 
-import com.github.sarxos.webcam.Webcam;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
@@ -35,7 +34,7 @@ public class CamerasSupervisor {
 		this.config = config;
 	}
 	
-	public void addCameraManager(Webcam webcam, CanvasManager canvasManager) {
+	public void addCameraManager(Camera webcam, CanvasManager canvasManager) {
 		managers.add(new CameraManager(webcam, canvasManager, config));
 	}
 	

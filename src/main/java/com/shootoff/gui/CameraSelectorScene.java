@@ -21,7 +21,7 @@ package com.shootoff.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.Camera;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -38,18 +38,18 @@ import javafx.stage.Window;
 import javafx.util.Callback;
 
 public class CameraSelectorScene extends Stage {
-	private final List<Webcam> unconfiguredWebcams = new ArrayList<Webcam>();
-	private final List<Webcam> selectedWebcams = new ArrayList<Webcam>();
+	private final List<Camera> unconfiguredWebcams = new ArrayList<Camera>();
+	private final List<Camera> selectedWebcams = new ArrayList<Camera>();
 	private final ListView<String> webcamListView = new ListView<String>();
 	
-	public CameraSelectorScene(Window parent, List<Webcam> configuredCameras) {
+	public CameraSelectorScene(Window parent, List<Camera> configuredCameras) {
 		super();
 		this.initOwner(parent);
 		this.initModality(Modality.WINDOW_MODAL);
 		
 		ObservableList<String> webcams = FXCollections.observableArrayList();
 		
-		for (Webcam webcam : Webcam.getWebcams()) {
+		for (Camera webcam : Camera.getWebcams()) {
 			if (!configuredCameras.contains(webcam)) {
 				unconfiguredWebcams.add(webcam);
 				Platform.runLater(() -> { webcams.add(webcam.getName()); });
@@ -94,7 +94,7 @@ public class CameraSelectorScene extends Stage {
 		
 		if (selectedNames.isEmpty()) return;
 		
-        for (Webcam webcam : unconfiguredWebcams) {
+        for (Camera webcam : unconfiguredWebcams) {
         	if (selectedNames.contains(webcam.getName())) {
         		selectedWebcams.add(webcam);
         	}
@@ -103,7 +103,7 @@ public class CameraSelectorScene extends Stage {
         this.close();
 	}
 	
-	public List<Webcam> getSelectedWebcams() {
+	public List<Camera> getSelectedWebcams() {
 		return selectedWebcams;
 	}
 }
