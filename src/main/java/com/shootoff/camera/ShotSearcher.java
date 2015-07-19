@@ -205,7 +205,6 @@ public class ShotSearcher implements Runnable {
 			if (width > shotWidth && width < minShotDim) shotWidth = width;
 		}
 
-		 //shotWidth = maxX - minX;
 		double centerX = minX + (shotWidth / 2);
 		
 		// If the width and height of the shot are really small it's a false positive
