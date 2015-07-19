@@ -229,7 +229,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		if (allCamerasFailed) {
 			messageFormat = "Cannot open the webcam %s. It is being "
-					+ "used by another program. This is the only configured camera, thus"
+					+ "used by another program. This is the only configured camera, thus "
 					+ "ShootOFF must close.";
 		} else {
 			messageFormat = "Cannot open the webcam %s. It is being "
