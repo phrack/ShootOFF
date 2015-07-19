@@ -173,7 +173,7 @@ public class ShotSearcher implements Runnable {
 	 */
 	private Optional<Point2D> approximateCenter(double x, double y) {
 		double minX = x, minY = y;
-		double maxX = x, maxY = y;
+		double maxY = y;
 
 		// We need to see a certain number of dark pixels because the shot
 		// does not have sharp borders (we may hit a dark pixel right away
@@ -181,7 +181,7 @@ public class ShotSearcher implements Runnable {
 		int blackCount = 0;
 
 		for (;maxY < grayScale.getHeight(); maxY++) {
-			if ((grayScale.getRGB((int)maxX, (int)maxY) & 0xFF) <= config.getLaserIntensity())
+			if ((grayScale.getRGB((int)x, (int)maxY) & 0xFF) <= config.getLaserIntensity())
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 		}
@@ -191,15 +191,21 @@ public class ShotSearcher implements Runnable {
 		double shotHeight = maxY - minY;
 		double centerY = minY + (shotHeight / 2);
 
-		for (;maxX < grayScale.getWidth(); maxX++) {
-			if ((grayScale.getRGB((int)maxX, (int)centerY) & 0xFF) <= config.getLaserIntensity())
-				blackCount++; else blackCount = 0;
-			if (blackCount == borderWidth) break;
+		double shotWidth = 0;
+		for (int yy = (int)minY; yy < minY + shotHeight; yy++) {
+			int xx = (int)minX;
+			for (; xx < grayScale.getWidth(); xx++) {
+				if ((grayScale.getRGB((int)xx, (int)yy) & 0xFF) <= config.getLaserIntensity())
+					blackCount++; else blackCount = 0;
+				if (blackCount == borderWidth) break;
+			}
+		
+			xx -= borderWidth;
+			double width = xx - minX;
+			if (width > shotWidth && width < minShotDim) shotWidth = width;
 		}
 
-		maxX -= borderWidth;
-
-		double shotWidth = maxX - minX;
+		 //shotWidth = maxX - minX;
 		double centerX = minX + (shotWidth / 2);
 		
 		// If the width and height of the shot are really small it's a false positive

@@ -63,12 +63,12 @@ public class TestCameraManagerDark {
 		
 		assertEquals(2, shots.size());
 		
-		assertEquals(627, shots.get(0).getX(), 1);
+		assertEquals(629.5, shots.get(0).getX(), 1);
 		assertEquals(168.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 		
 		assertEquals(430, shots.get(1).getX(), 1);
-		assertEquals(133, shots.get(1).getY(), 1);
+		assertEquals(134.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
 	
@@ -87,7 +87,7 @@ public class TestCameraManagerDark {
 		assertEquals(125, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
-		assertEquals(438.0, shots.get(2).getX(), 1);
+		assertEquals(436.5, shots.get(2).getX(), 1);
 		assertEquals(145.5, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
@@ -99,7 +99,7 @@ public class TestCameraManagerDark {
 		assertEquals(239.0, shots.get(4).getY(), 1);
 		assertEquals(Color.RED, shots.get(4).getColor());
 
-		assertEquals(214.0, shots.get(5).getX(), 1);
+		assertEquals(216.5, shots.get(5).getX(), 1);
 		assertEquals(246, shots.get(5).getY(), 1);
 		assertEquals(Color.RED, shots.get(5).getColor());
 
@@ -107,7 +107,7 @@ public class TestCameraManagerDark {
 		assertEquals(244.0, shots.get(6).getY(), 1);
 		assertEquals(Color.RED, shots.get(6).getColor());
 
-		assertEquals(285.0, shots.get(7).getX(), 1);
+		assertEquals(287.5, shots.get(7).getX(), 1);
 		assertEquals(375.0, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
 
@@ -250,7 +250,7 @@ public class TestCameraManagerDark {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
 				Optional.of(projectionBounds));
 		
-		assertEquals(8, shots.size());
+		assertEquals(9, shots.size());
 		
 		assertEquals(473.0, shots.get(0).getX(), 1);
 		assertEquals(127.0, shots.get(0).getY(), 1);
@@ -264,7 +264,7 @@ public class TestCameraManagerDark {
 		assertEquals(113.5, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
-		assertEquals(182.5, shots.get(3).getX(), 1);
+		assertEquals(183.0, shots.get(3).getX(), 1);
 		assertEquals(228.0, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
 
@@ -280,8 +280,12 @@ public class TestCameraManagerDark {
 		assertEquals(268.5, shots.get(6).getY(), 1);
 		assertEquals(Color.RED, shots.get(6).getColor());
 
-		assertEquals(201.5, shots.get(7).getX(), 1);
-		assertEquals(297.5, shots.get(7).getY(), 1);
+		assertEquals(339.5, shots.get(7).getX(), 1);
+		assertEquals(293.0, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
+
+		assertEquals(201.5, shots.get(8).getX(), 1);
+		assertEquals(297.5, shots.get(8).getY(), 1);
+		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 }

@@ -149,7 +149,7 @@ public class TestCamerManagerVeryBright {
 		assertEquals(379, shots.get(6).getY(), 1);
 		assertEquals(Color.RED, shots.get(6).getColor());
 		
-		assertEquals(381.5, shots.get(7).getX(), 1);
+		assertEquals(383.5, shots.get(7).getX(), 1);
 		assertEquals(375.5, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
 		
