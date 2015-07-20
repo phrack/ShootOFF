@@ -350,6 +350,7 @@ public class Configuration {
 			System.err.println(e.getMessage());
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("com.shootoff.Main", options);
+			System.exit(-1);
 		}
 		
 		validateConfiguration();
