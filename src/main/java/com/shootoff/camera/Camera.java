@@ -66,10 +66,17 @@ public class Camera {
 	
 	
 	public static Camera getDefault() {
-		if (isMac)
+		if (isMac) {
 			return new Camera(defaultWebcam);
-		else
-			return new Camera(Webcam.getDefault());
+		} else {
+			Webcam webcam = Webcam.getDefault();
+			
+			if (webcam != null) {
+				return new Camera(webcam);
+			} else {
+				return null;
+			}
+		}
 	}
 	
 	public static List<Camera> getWebcams() {
