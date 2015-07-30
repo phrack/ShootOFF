@@ -99,6 +99,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu addArenaTargetMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
 	
+	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
@@ -119,6 +120,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		registerProjectorProtocols();
 		
 		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
+		this.defaultWindowTitle = shootOFFStage.getTitle();
 		shootOFFStage.getIcons().add(
 				   new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png"))); 
 		shootOFFStage.setOnCloseRequest((value) -> {
@@ -262,6 +264,17 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries);
 		camerasSupervisor.addCameraManager(webcam, canvasManager);
 		canvasManager.setContextMenu(createContextMenu());
+		
+		// Show coords of mouse when in canvas during debug mode
+		if (config.inDebugMode()) {
+			canvasManager.getCanvasGroup().setOnMouseMoved((event) -> {
+					shootOFFStage.setTitle(defaultWindowTitle + " (" + event.getX() + ", " + event.getY() + ")");
+				});
+			
+			canvasManager.getCanvasGroup().setOnMouseExited((event) -> {
+					shootOFFStage.setTitle(defaultWindowTitle);
+				});
+		}
 		
 		return cameraTabPane.getTabs().add(cameraTab);
 	}
