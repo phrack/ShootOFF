@@ -254,13 +254,16 @@ public class CanvasManager {
 				// Target was hit, see if a specific region was hit
 				for (int i = target.getChildren().size() - 1; i >= 0; i--) {
 					Node node = target.getChildren().get(i);
-					if (node.contains(node.parentToLocal(shot.getX(), shot.getY()))) {
+					
+					Bounds nodeBounds = target.getLocalToParentTransform().transform(node.getBoundsInParent());
+					
+					if (nodeBounds.contains(shot.getX(), shot.getY())) {
 						// If we hit an image region on a transparent pixel, ignore it
 						TargetRegion region = (TargetRegion)node;
 						if (region.getType() == RegionType.IMAGE) {
 							Image currentImage = ((ImageRegion)region).getImage();
-							int adjustedX = (int)(shot.getX() - node.getBoundsInParent().getMinX());
-							int adjustedY = (int)(shot.getY() - node.getBoundsInParent().getMinY());
+							int adjustedX = (int)(shot.getX() - nodeBounds.getMinX());
+							int adjustedY = (int)(shot.getY() - nodeBounds.getMinY());
 							
 							if (currentImage.getHeight() > adjustedY && 
 								currentImage.getWidth() > adjustedX && 

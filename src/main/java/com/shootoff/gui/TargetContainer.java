@@ -130,10 +130,8 @@ public class TargetContainer {
 		        
 		        if (right) originXDelta *= -1.0;
 		        
-		        for (Node node : target.getChildren()) {
-		        	node.setLayoutX(node.getLayoutX() + originXDelta);
-		        	node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
-		        }
+	        	target.setLayoutX(target.getLayoutX() + originXDelta);
+	        	target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
     		} else if (top || bottom) {
 		        double gap;
 		        
@@ -160,11 +158,9 @@ public class TargetContainer {
 		        double originYDelta = newOriginY - currentOriginY;
 		        
 		        if (bottom) originYDelta *= -1.0;
-		        
-		        for (Node node : target.getChildren()) {
-		        	node.setLayoutY(node.getLayoutY() + originYDelta); 
-		        	node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
-		        }
+		   
+	        	target.setLayoutY(target.getLayoutY() + originYDelta); 
+	        	target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
 	        }
     	});
     }
@@ -208,13 +204,10 @@ public class TargetContainer {
 					double newWidth = currentWidth + SCALE_DELTA;
 					double scaleDelta = (newWidth - currentWidth) / currentWidth;
 					
-					for (Node node : target.getChildren()) {
-						if (event.isShiftDown()) {
-							node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
-		
-						} else {
-							node.setLayoutX(node.getLayoutX() - MOVEMENT_DELTA);
-						}
+					if (event.isShiftDown()) {
+						target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+					} else {
+						target.setLayoutX(target.getLayoutX() - MOVEMENT_DELTA);
 					}
 				}
 
@@ -224,14 +217,11 @@ public class TargetContainer {
 				{
 					double newWidth = currentWidth - SCALE_DELTA;
 					double scaleDelta = (newWidth - currentWidth) / currentWidth;
-					
-					for (Node node : target.getChildren()) {
-						if (event.isShiftDown()) {
-							node.setScaleX(node.getScaleX() * (1.0 - scaleDelta));
-		
-						} else {
-							node.setLayoutX(node.getLayoutX() + MOVEMENT_DELTA);
-						}
+
+					if (event.isShiftDown()) {
+						target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+					} else {
+						target.setLayoutX(target.getLayoutX() + MOVEMENT_DELTA);
 					}
 				}
 				
@@ -242,13 +232,10 @@ public class TargetContainer {
 					double newHeight = currentHeight + SCALE_DELTA;
 					double scaleDelta = (newHeight - currentHeight) / currentHeight;
 					
-					for (Node node : target.getChildren()) {
-						if (event.isShiftDown()) {
-							node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
-		
-						} else {
-							node.setLayoutY(node.getLayoutY() - MOVEMENT_DELTA);
-						}
+					if (event.isShiftDown()) {
+						target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+					} else {
+						target.setLayoutY(target.getLayoutY() - MOVEMENT_DELTA);
 					}
 				}
 				
@@ -259,13 +246,10 @@ public class TargetContainer {
 					double newHeight = currentHeight - SCALE_DELTA;
 					double scaleDelta = (newHeight - currentHeight) / currentHeight;
 					
-					for (Node node : target.getChildren()) {
-						if (event.isShiftDown()) {
-							node.setScaleY(node.getScaleY() * (1.0 - scaleDelta));
-		
-						} else {
-							node.setLayoutY(node.getLayoutY() + MOVEMENT_DELTA);
-						}
+					if (event.isShiftDown()) {
+						target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+					} else {
+						target.setLayoutY(target.getLayoutY() + MOVEMENT_DELTA);
 					}
 				}
 				
