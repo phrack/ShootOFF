@@ -18,6 +18,8 @@
 
 package com.shootoff.gui;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +47,7 @@ import com.shootoff.targets.io.TargetIO;
 import javafx.animation.Animation.Status;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -261,14 +264,35 @@ public class CanvasManager {
 						// If we hit an image region on a transparent pixel, ignore it
 						TargetRegion region = (TargetRegion)node;
 						if (region.getType() == RegionType.IMAGE) {
+							// The image you get from the image view is its original size
+							// We need to resize it if it has changed size to accurately
+							// determine if a pixel is transparent
 							Image currentImage = ((ImageRegion)region).getImage();
+							
 							int adjustedX = (int)(shot.getX() - nodeBounds.getMinX());
 							int adjustedY = (int)(shot.getY() - nodeBounds.getMinY());
 							
-							if (currentImage.getHeight() > adjustedY && 
-								currentImage.getWidth() > adjustedX && 
-									currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
-								continue;
+							if (currentImage.getWidth() != nodeBounds.getWidth() ||
+									currentImage.getHeight() != nodeBounds.getHeight()) {
+							
+								BufferedImage bufferedOriginal = SwingFXUtils.fromFXImage(currentImage, null);
+								
+							    java.awt.Image tmp = bufferedOriginal.getScaledInstance((int)nodeBounds.getWidth(), 
+							    		(int)nodeBounds.getHeight(), java.awt.Image.SCALE_SMOOTH);
+							    BufferedImage bufferedResized = new BufferedImage((int)nodeBounds.getWidth(), (int)nodeBounds.getHeight(), 
+							    		BufferedImage.TYPE_INT_ARGB);
+	
+							    Graphics2D g2d = bufferedResized.createGraphics();
+							    g2d.drawImage(tmp, 0, 0, null);
+							    g2d.dispose();
+							    
+								if (bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
+									continue;
+								}
+							} else {
+								if (currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
+									continue;
+								}
 							}
 						}
 						
