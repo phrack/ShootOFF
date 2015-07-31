@@ -268,7 +268,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		// Show coords of mouse when in canvas during debug mode
 		if (config.inDebugMode()) {
 			canvasManager.getCanvasGroup().setOnMouseMoved((event) -> {
-					shootOFFStage.setTitle(defaultWindowTitle + " (" + event.getX() + ", " + event.getY() + ")");
+					shootOFFStage.setTitle(defaultWindowTitle + String.format("(%.1f, %.1f)", event.getX(), event.getY()));
 				});
 			
 			canvasManager.getCanvasGroup().setOnMouseExited((event) -> {
