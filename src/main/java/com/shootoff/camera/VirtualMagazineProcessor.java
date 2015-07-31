@@ -47,4 +47,8 @@ public class VirtualMagazineProcessor implements ShotProcessor {
 		return true;
 	}
 
+	@Override
+	public void reset() {
+		roundCount = config.getVirtualMagazineCapacity();
+	}
 }

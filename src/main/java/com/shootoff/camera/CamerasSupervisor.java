@@ -59,6 +59,10 @@ public class CamerasSupervisor {
 		for (CameraManager manager : managers) {
 			manager.reset();
 		}
+		
+		for (ShotProcessor processor : config.getShotProcessors()) {
+			processor.reset();
+		}
 	}
 	
 	public void setStreamingAll(boolean isStreaming) {

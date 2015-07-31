@@ -51,4 +51,9 @@ public class DeduplicationProcessor implements ShotProcessor {
 		
 		return true;
 	}
+
+	@Override
+	public void reset() {
+		lastShot = Optional.empty();
+	}
 }

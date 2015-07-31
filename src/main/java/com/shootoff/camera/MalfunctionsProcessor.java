@@ -46,4 +46,7 @@ public class MalfunctionsProcessor implements ShotProcessor {
 		
 		return true;
 	}
+
+	@Override
+	public void reset() {}
 }
