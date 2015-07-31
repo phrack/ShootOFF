@@ -286,11 +286,15 @@ public class CanvasManager {
 							    g2d.drawImage(tmp, 0, 0, null);
 							    g2d.dispose();
 							    
-								if (bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
+								if (adjustedX > bufferedResized.getWidth() ||
+									adjustedY > bufferedResized.getHeight() || 
+										bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
 									continue;
 								}
 							} else {
-								if (currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
+								if (adjustedX > currentImage.getWidth() ||
+									adjustedY > currentImage.getHeight() ||
+										currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
 									continue;
 								}
 							}
