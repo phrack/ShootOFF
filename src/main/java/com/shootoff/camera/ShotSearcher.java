@@ -161,7 +161,7 @@ public class ShotSearcher implements Runnable {
 		
 		// More than one pixel must be a specific color otherwise the shot is likely just noise
 		if (Math.abs(redCount - greenCount) < 2) {
-			logger.debug("Shot Processing: No color detected for suspected shot ({}, {}), "
+			logger.trace("Shot Processing: No color detected for suspected shot ({}, {}), "
 					+ "redCount = {}, greenCount = {}",
 					x, y, redCount, greenCount);
 			return Optional.empty();
