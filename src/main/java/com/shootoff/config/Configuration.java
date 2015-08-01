@@ -50,6 +50,7 @@ import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
 import com.shootoff.plugins.TrainingProtocol;
+import com.shootoff.session.SessionRecorder;
 
 public class Configuration {
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
@@ -107,6 +108,7 @@ public class Configuration {
 	private boolean useMalfunctions = false;
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
+	private Optional<SessionRecorder> sessionRecorder;
 	private TrainingProtocol currentProtocol = null;
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
@@ -505,6 +507,10 @@ public class Configuration {
 		}
 	}
 	
+	public void setSessionRecorder(SessionRecorder sessionRecorder) {
+		this.sessionRecorder = Optional.ofNullable(sessionRecorder);
+	}
+	
 	public void setProtocol(TrainingProtocol protocol) {
 		if (currentProtocol != null) currentProtocol.destroy();
 		
@@ -587,6 +593,10 @@ public class Configuration {
 
 	public boolean inDebugMode() {
 		return debugMode;
+	}
+	
+	public Optional<SessionRecorder> getSessionRecorder() {
+		return sessionRecorder;
 	}
 	
 	public Set<ShotProcessor> getShotProcessors() {
