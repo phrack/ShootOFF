@@ -31,6 +31,10 @@ public class DeduplicationProcessor implements ShotProcessor {
 		DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
 	}
 	
+	protected Optional<Shot> getLastShot() {
+		return lastShot;
+	}
+	
 	@Override
 	public boolean processShot(Shot shot) {
 		if (lastShot.isPresent()) {

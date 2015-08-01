@@ -43,4 +43,30 @@ public class TestVirtualMagazineProcessor {
 		assertTrue(magazineProcessor.processShot(shot));
 		assertFalse(magazineProcessor.processShot(shot));
 	}
+	
+	@Test 
+	public void testReset() {
+		final int expectedCapacity = 4;
+		
+		config.setVirtualMagazineCapacity(expectedCapacity);
+		
+		VirtualMagazineProcessor magazineProcessor = null;
+		
+		for (ShotProcessor s : config.getShotProcessors()) {
+			if (s instanceof VirtualMagazineProcessor) magazineProcessor = (VirtualMagazineProcessor)s;
+		}
+		
+		magazineProcessor.setUseTTS(false);
+		
+		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);
+		
+		magazineProcessor.processShot(shot);
+		magazineProcessor.processShot(shot);
+		
+		assertEquals(2, magazineProcessor.getRountCount());
+		
+		magazineProcessor.reset();
+		
+		assertEquals(expectedCapacity, magazineProcessor.getRountCount());
+	}
 }

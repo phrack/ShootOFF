@@ -35,6 +35,10 @@ public class VirtualMagazineProcessor implements ShotProcessor {
 		this.useTTS = useTTS; 
 	}
 	
+	protected int getRountCount() {
+		return roundCount;
+	}
+	
 	@Override
 	public boolean processShot(Shot shot) {
 		if (roundCount == 0) {
