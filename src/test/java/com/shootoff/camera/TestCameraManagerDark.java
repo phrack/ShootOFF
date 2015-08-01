@@ -67,8 +67,8 @@ public class TestCameraManagerDark {
 		assertEquals(168.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 		
-		assertEquals(430, shots.get(1).getX(), 1);
-		assertEquals(134.5, shots.get(1).getY(), 1);
+		assertEquals(428.5, shots.get(1).getX(), 1);
+		assertEquals(129.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
 	
@@ -167,48 +167,47 @@ public class TestCameraManagerDark {
 		
 		assertEquals(10, shots.size());
 		
-		assertEquals(473.0, shots.get(0).getX(), 1);
+		assertEquals(472.5, shots.get(0).getX(), 1);
 		assertEquals(63.0, shots.get(0).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(0).getColor());
 
-		// Dupe of shot above
-		assertEquals(472.0, shots.get(1).getX(), 1);
-		assertEquals(61.0, shots.get(1).getY(), 1);
+		assertEquals(474.0, shots.get(1).getX(), 1);
+		assertEquals(99.5, shots.get(1).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(1).getColor());
 
-		// Dupe of shot above
-		assertEquals(471.0, shots.get(2).getX(), 1);
-		assertEquals(59.0, shots.get(2).getY(), 1);
+		// Dupe of the shot above
+		assertEquals(474.5, shots.get(2).getX(), 1);
+		assertEquals(101.0, shots.get(2).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(2).getColor());
 
-		assertEquals(473.5, shots.get(3).getX(), 1);
-		assertEquals(99.5, shots.get(3).getY(), 1);
+		assertEquals(337.5, shots.get(3).getX(), 1);
+		assertEquals(97.0, shots.get(3).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(3).getColor());
 
-		assertEquals(337.5, shots.get(4).getX(), 1);
-		assertEquals(97.0, shots.get(4).getY(), 1);
+		assertEquals(204.0, shots.get(4).getX(), 1);
+		assertEquals(101.0, shots.get(4).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(4).getColor());
 
-		assertEquals(205.5, shots.get(5).getX(), 1);
-		assertEquals(99.0, shots.get(5).getY(), 1);
+		assertEquals(200.0, shots.get(5).getX(), 1);
+		assertEquals(233.5, shots.get(5).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(5).getColor());
 
-		assertEquals(199.5, shots.get(6).getX(), 1);
-		assertEquals(234.0, shots.get(6).getY(), 1);
+		assertEquals(496.0, shots.get(6).getX(), 1);
+		assertEquals(224.0, shots.get(6).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(6).getColor());
 
-		assertEquals(496.0, shots.get(7).getX(), 1);
-		assertEquals(224.0, shots.get(7).getY(), 1);
+		assertEquals(478.5, shots.get(7).getX(), 1);
+		assertEquals(281.0, shots.get(7).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(7).getColor());
 
-		assertEquals(479.0, shots.get(8).getX(), 1);
-		assertEquals(281.0, shots.get(8).getY(), 1);
+		assertEquals(207.5, shots.get(8).getX(), 1);
+		assertEquals(280.5, shots.get(8).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(8).getColor());
 
-		assertEquals(207.5, shots.get(9).getX(), 1);
-		assertEquals(280.5, shots.get(9).getY(), 1);
+		// Dupe of the shot above
+		assertEquals(206.5, shots.get(9).getX(), 1);
+		assertEquals(281.0, shots.get(9).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(9).getColor());
-
 	}
 	
 	@Test

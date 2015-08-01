@@ -118,38 +118,50 @@ public class ShotSearcher implements Runnable {
 			}
 		}
 	}
+	
+	private enum PixelColor {
+		RED, GREEN, NONE
+	}
+	
+	private PixelColor getPixelColor(int rgb) {
+		java.awt.Color c = new java.awt.Color(rgb);
 
-	private Optional<Color> detectColor(int x, int y) {      
-		final int colorDetectionRadius = minShotDim;
+		float[] hsb = java.awt.Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
+		
+		boolean nearWhite = hsb[1] < 0.1 && hsb[2] > 0.9;
+		boolean nearBlack = hsb[2] < 0.1;
+		
+		if (!nearWhite && !nearBlack) {
+		    float deg = hsb[0]*360;
+		    if (deg >= 0 && deg <  50) return PixelColor.RED;
+		    else if (deg >=  90 && deg < 180) return PixelColor.GREEN;
+		    else if (deg >= 200) return PixelColor.RED;
+		}
+		
+		return PixelColor.NONE;
+	}
+
+	private Optional<Color> detectColor(int x, int y) {
 		int redCount = 0;
 		int greenCount = 0;
 		
 		// Get the color of pixels down and right to count
 		// the number of reds and greens
-		for (int offsetX = x, offsetY = y; 
-				offsetX < currentFrame.getWidth() && offsetX - x < colorDetectionRadius &&
-				offsetY < currentFrame.getHeight() && offsetY - y < colorDetectionRadius;
-				offsetX++, offsetY++)
+		int[] rgbs = currentFrame.getRGB(x, y, minShotDim, minShotDim, null, 0, minShotDim);
+		
+		for (int rgb : rgbs) {
+			PixelColor c = getPixelColor(rgb);
 			
-		{
-			java.awt.Color c = new java.awt.Color(currentFrame.getRGB(offsetX, offsetY));
-
-			float[] hsb = java.awt.Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
-			
-			boolean nearWhite = hsb[1] < 0.1 && hsb[2] > 0.9;
-			boolean nearBlack = hsb[2] < 0.1;
-			
-			if (!nearWhite && !nearBlack) {
-			    float deg = hsb[0]*360;
-			    if (deg >= 0 && deg <  30) redCount++;
-			    else if (deg >=  90 && deg < 150) greenCount++;
-			    else if (deg >= 33) redCount++;
+			if (c == PixelColor.RED) {
+				redCount++;
+			} else if (c == PixelColor.GREEN) {
+				greenCount++;
 			}
 		}
 		
 		// More than one pixel must be a specific color otherwise the shot is likely just noise
 		if (Math.abs(redCount - greenCount) < 2) {
-			logger.trace("Shot Processing: No color detected for suspected shot ({}, {}), "
+			logger.debug("Shot Processing: No color detected for suspected shot ({}, {}), "
 					+ "redCount = {}, greenCount = {}",
 					x, y, redCount, greenCount);
 			return Optional.empty();
