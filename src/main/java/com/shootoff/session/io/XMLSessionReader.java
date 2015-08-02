@@ -120,8 +120,8 @@ public class XMLSessionReader {
 				events.get(currentCameraName).add(
 						new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), 
 								Integer.parseInt(attributes.getValue("index")), 
-								Integer.parseInt(attributes.getValue("newWidth")),
-								Integer.parseInt(attributes.getValue("newHeight"))));
+								Double.parseDouble(attributes.getValue("newWidth")),
+								Double.parseDouble(attributes.getValue("newHeight"))));
 				
 				break;
 				

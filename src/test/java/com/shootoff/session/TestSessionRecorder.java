@@ -54,8 +54,8 @@ public class TestSessionRecorder {
 		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
 		assertEquals(cameraName, events.get(2).getCameraName());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(10, ((TargetResizedEvent)events.get(2)).getNewWidth());
-		assertEquals(20, ((TargetResizedEvent)events.get(2)).getNewHeight());
+		assertEquals(10, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);
 		
 		assertEquals(EventType.TARGET_MOVED, events.get(3).getType());
 		assertEquals(cameraName, events.get(3).getCameraName());
@@ -83,8 +83,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(0).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(0)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(0)).getNewWidth());
-		assertEquals(45, ((TargetResizedEvent)events.get(0)).getNewHeight());
+		assertEquals(12, ((TargetResizedEvent)events.get(0)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(0)).getNewHeight(), 1);
 	}
 	
 	@Test
@@ -104,8 +104,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(0).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(0)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(0)).getNewWidth());
-		assertEquals(45, ((TargetResizedEvent)events.get(0)).getNewHeight());
+		assertEquals(12, ((TargetResizedEvent)events.get(0)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(0)).getNewHeight(), 1);
 		
 		events = sessionRecorder.getCameraEvents(cameraName2);
 		
@@ -113,8 +113,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(0).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(0)).getTargetIndex());
-		assertEquals(55, ((TargetResizedEvent)events.get(0)).getNewWidth());
-		assertEquals(20, ((TargetResizedEvent)events.get(0)).getNewHeight());
+		assertEquals(55, ((TargetResizedEvent)events.get(0)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(0)).getNewHeight(), 1);
 	}
 	
 	@Test
@@ -131,8 +131,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(0).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(0)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(0)).getNewWidth());
-		assertEquals(20, ((TargetResizedEvent)events.get(0)).getNewHeight());	
+		assertEquals(12, ((TargetResizedEvent)events.get(0)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(0)).getNewHeight(), 1);	
 		
 		assertEquals(EventType.SHOT, events.get(1).getType());
 		assertEquals(shot, ((ShotEvent)events.get(1)).getShot());
@@ -142,8 +142,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(2)).getNewWidth());
-		assertEquals(45, ((TargetResizedEvent)events.get(2)).getNewHeight());	
+		assertEquals(12, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);	
 	}
 	
 	@Test
@@ -165,8 +165,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(1).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(1)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(1)).getNewWidth());
-		assertEquals(45, ((TargetResizedEvent)events.get(1)).getNewHeight());
+		assertEquals(12, ((TargetResizedEvent)events.get(1)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(1)).getNewHeight(), 1);
 	}
 	
 	@Test
@@ -229,8 +229,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(0).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(0)).getTargetIndex());
-		assertEquals(6, ((TargetResizedEvent)events.get(0)).getNewWidth());
-		assertEquals(7, ((TargetResizedEvent)events.get(0)).getNewHeight());
+		assertEquals(6, ((TargetResizedEvent)events.get(0)).getNewWidth(), 1);
+		assertEquals(7, ((TargetResizedEvent)events.get(0)).getNewHeight(), 1);
 		
 		assertEquals(EventType.TARGET_MOVED, events.get(1).getType());
 		assertEquals(targetIndex, ((TargetMovedEvent)events.get(1)).getTargetIndex());
@@ -263,8 +263,8 @@ public class TestSessionRecorder {
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(1).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(1)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(1)).getNewWidth());
-		assertEquals(45, ((TargetResizedEvent)events.get(1)).getNewHeight());	
+		assertEquals(12, ((TargetResizedEvent)events.get(1)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(1)).getNewHeight(), 1);	
 		
 	}
 }

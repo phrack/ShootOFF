@@ -58,9 +58,9 @@ public class XMLSessionWriter implements EventVisitor {
 	}
 
 	@Override
-	public void visitTargetResize(long timestamp, int targetIndex, int newWidth, int newHeight) {
+	public void visitTargetResize(long timestamp, int targetIndex, double newWidth, double newHeight) {
 		xmlBody.append(String.format("\t\t<targetResized timestamp=\"%d\" index=\"%d\" "
-				+ "newWidth=\"%d\" newHeight=\"%d\" />\n", timestamp, targetIndex, newWidth, newHeight));
+				+ "newWidth=\"%f\" newHeight=\"%f\" />\n", timestamp, targetIndex, newWidth, newHeight));
 	}
 
 	@Override

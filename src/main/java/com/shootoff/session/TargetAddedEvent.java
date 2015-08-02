@@ -1,5 +1,7 @@
 package com.shootoff.session;
 
+import java.io.File;
+
 public class TargetAddedEvent implements Event{
 	private final String cameraName;
 	private final long timestamp;
@@ -28,5 +30,13 @@ public class TargetAddedEvent implements Event{
 	@Override
 	public long getTimestamp() {
 		return timestamp;
+	}
+	
+	@Override
+	public String toString() {
+		String target = targetName.substring(targetName.lastIndexOf(File.separator) + 1,
+				targetName.lastIndexOf('.'));
+		
+		return String.format("target added (%s)", target);
 	}
 }

@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import com.shootoff.camera.Shot;
 
+import javafx.scene.paint.Color;
+
 public class ShotEvent implements Event {
 	private final String cameraName;
 	private final long timestamp;
@@ -44,5 +46,18 @@ public class ShotEvent implements Event {
 	@Override
 	public long getTimestamp() {
 		return timestamp;
+	}
+	
+	@Override
+	public String toString() {
+		String colorName;
+		
+		if (shot.getColor().equals(Color.RED)) {
+			colorName = "red";
+		} else {
+			colorName = "green";
+		}
+		
+		return String.format("%s shot (%.2f, %.2f)", colorName, shot.getX(), shot.getY());
 	}
 }

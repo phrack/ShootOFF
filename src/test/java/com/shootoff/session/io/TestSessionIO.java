@@ -83,8 +83,8 @@ public class TestSessionIO {
 		assertEquals(targetName, ((TargetAddedEvent)events.get(2)).getTargetName());
 		
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(3)).getTargetIndex());
-		assertEquals(10, ((TargetResizedEvent)events.get(3)).getNewWidth());
-		assertEquals(20, ((TargetResizedEvent)events.get(3)).getNewHeight());
+		assertEquals(10, ((TargetResizedEvent)events.get(3)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(3)).getNewHeight(), 1);
 		
 		assertEquals(targetIndex, ((TargetMovedEvent)events.get(4)).getTargetIndex());
 		assertEquals(4, ((TargetMovedEvent)events.get(4)).getNewX());

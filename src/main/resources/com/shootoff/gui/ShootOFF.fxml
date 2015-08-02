@@ -38,6 +38,7 @@
           <Menu fx:id="trainingMenu" mnemonicParsing="false" text="Training">
             <items>
                   <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
+                  <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <RadioMenuItem mnemonicParsing="false" onAction="#clickedNoneProtocol" selected="true" text="None">
                       <toggleGroup>

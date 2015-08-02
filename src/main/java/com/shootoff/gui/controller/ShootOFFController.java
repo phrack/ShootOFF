@@ -97,6 +97,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu editTargetMenu;
 	@FXML private Menu trainingMenu;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
+	@FXML private MenuItem showSessionViewerMenuItem;
 	@FXML private ToggleGroup trainingToggleGroup;
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
@@ -271,16 +272,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 		
-		String cameraName;
-		
-		if (config.getWebcamsUserName(webcam).isPresent()) {
-			cameraName = config.getWebcamsUserName(webcam).get();
-		} else {
-			cameraName = webcam.getName();
-		}
-		
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, 
-				cameraName, shotEntries);
+				webcamName, shotEntries);
 		camerasSupervisor.addCameraManager(webcam, canvasManager);
 		canvasManager.setContextMenu(createContextMenu());
 		
@@ -486,6 +479,27 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			config.setSessionRecorder(new SessionRecorder());
 			toggleSessionRecordingMenuItem.setText("Stop Recording");
 		}
+	}
+	
+	@FXML
+	public void showSessionViewerMenuItemClicked(ActionEvent event) throws IOException {
+		showSessionViewerMenuItem.setDisable(true);
+
+		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
+		loader.load();
+			
+		Stage sessionViewerStage = new Stage();
+			
+	    sessionViewerStage.setTitle("Session Viewer");
+	    sessionViewerStage.setScene(new Scene(loader.getRoot()));
+	    sessionViewerStage.show();
+	        
+	    SessionViewerController sessionViewerController = (SessionViewerController)loader.getController();
+        sessionViewerController.init();
+
+        sessionViewerStage.setOnCloseRequest((e) -> { 
+        		showSessionViewerMenuItem.setDisable(false);
+        	});
 	}
 	
 	@FXML 

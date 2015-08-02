@@ -29,4 +29,9 @@ public class TargetRemovedEvent implements Event {
 	public long getTimestamp() {
 		return timestamp;
 	}
+	
+	@Override
+	public String toString() {
+		return "target removed";
+	}
 }

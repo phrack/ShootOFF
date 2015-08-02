@@ -41,4 +41,9 @@ public class TargetMovedEvent implements Event {
 	public long getTimestamp() {
 		return timestamp;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("target moved (%d, %d)", newX, newY);
+	}
 }

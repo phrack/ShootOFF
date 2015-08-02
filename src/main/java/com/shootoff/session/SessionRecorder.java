@@ -71,7 +71,7 @@ public class SessionRecorder {
 		}
 	}
 	
-	public void recordTargetResized(String cameraName, int targetIndex, int newWidth, int newHeight) {
+	public void recordTargetResized(String cameraName, int targetIndex, double newWidth, double newHeight) {
 		// Remove all resize events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, targetIndex);
 		

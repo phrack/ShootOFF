@@ -4,10 +4,10 @@ public class TargetResizedEvent implements Event {
 	private final String cameraName;
 	private final long timestamp;
 	private final int targetIndex;
-	private final int newWidth;
-	private final int newHeight;
+	private final double newWidth;
+	private final double newHeight;
 	
-	public TargetResizedEvent(String cameraName, long timestamp, int targetIndex, int newWidth, int newHeight) {
+	public TargetResizedEvent(String cameraName, long timestamp, int targetIndex, double newWidth, double newHeight) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.targetIndex = targetIndex;
@@ -24,11 +24,11 @@ public class TargetResizedEvent implements Event {
 		return targetIndex;
 	}
 	
-	public int getNewWidth() {
+	public double getNewWidth() {
 		return newWidth;
 	}
 	
-	public int getNewHeight() {
+	public double getNewHeight() {
 		return newHeight;
 	}
 	
@@ -40,5 +40,10 @@ public class TargetResizedEvent implements Event {
 	@Override
 	public long getTimestamp() {
 		return timestamp;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("target resized (%.2f, %.2f)", newWidth, newHeight);
 	}
 }
