@@ -24,14 +24,16 @@ public class MockCanvasManager extends CanvasManager {
 	private long startTime = 0;
 	
 	public MockCanvasManager(Configuration config) {
-		super(new Group(), config, new CamerasSupervisor(config), FXCollections.observableArrayList());
+		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()), 
+				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
 		this.useShotProcessors = false;
 	}
 	
 	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
-		super(new Group(), config, new CamerasSupervisor(config), FXCollections.observableArrayList());
+		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()), 
+				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
 		this.useShotProcessors = useShotProcessors;

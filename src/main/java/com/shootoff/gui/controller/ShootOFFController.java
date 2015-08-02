@@ -22,7 +22,10 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +52,8 @@ import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingProtocol;
 import com.shootoff.plugins.TrainingProtocolBase;
+import com.shootoff.session.SessionRecorder;
+import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -91,6 +96,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu addTargetMenu;
 	@FXML private Menu editTargetMenu;
 	@FXML private Menu trainingMenu;
+	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private ToggleGroup trainingToggleGroup;
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
@@ -130,6 +136,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			
 			for (Stage streamDebuggerStage : streamDebuggerStages) {
 				streamDebuggerStage.close();
+			}
+			
+			if (config.getSessionRecorder().isPresent()) {
+				toggleSessionRecordingMenuItem.fire();
 			}
 		});
 		
@@ -261,7 +271,16 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 		
-		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, shotEntries);
+		String cameraName;
+		
+		if (config.getWebcamsUserName(webcam).isPresent()) {
+			cameraName = config.getWebcamsUserName(webcam).get();
+		} else {
+			cameraName = webcam.getName();
+		}
+		
+		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, 
+				cameraName, shotEntries);
 		camerasSupervisor.addCameraManager(webcam, canvasManager);
 		canvasManager.setContextMenu(createContextMenu());
 		
@@ -452,6 +471,22 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
         preferencesStage.show();
         ((PreferencesController)loader.getController()).setConfig(config, this);
     }
+	
+	@FXML
+	public void toggleSessionRecordingMenuItemClicked(ActionEvent event) {
+		if (config.getSessionRecorder().isPresent()) {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+			SessionIO.saveSession(config.getSessionRecorder().get(), 
+					new File("sessions/" + dateFormat.format(new Date()) + ".xml"));
+			
+			config.setSessionRecorder(null);
+			
+			toggleSessionRecordingMenuItem.setText("Record Session");
+		} else {
+			config.setSessionRecorder(new SessionRecorder());
+			toggleSessionRecordingMenuItem.setText("Stop Recording");
+		}
+	}
 	
 	@FXML 
 	public void startArenaClicked(ActionEvent event) throws IOException {		

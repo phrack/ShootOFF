@@ -22,7 +22,6 @@ import com.shootoff.config.Configuration;
 
 import javafx.scene.Cursor;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
  
 /**
@@ -40,6 +39,8 @@ public class TargetContainer {
     private final Configuration config;
     private final CanvasManager parent;
     private final boolean userDeletable;
+    private final String cameraName;
+    private final int targetIndex;
     private boolean move;
     private boolean resize;
     private boolean top;
@@ -51,11 +52,13 @@ public class TargetContainer {
     private double y;
     
     public TargetContainer(Group target, Configuration config, CanvasManager parent,
-    		boolean userDeletable) {
+    		boolean userDeletable, String cameraName, int targetIndex) {
         this.target = target;
         this.config = config;
         this.parent = parent;
         this.userDeletable = userDeletable;
+        this.cameraName = cameraName;
+        this.targetIndex = targetIndex;
         
         mousePressed();
         mouseDragged();
@@ -91,14 +94,18 @@ public class TargetContainer {
 
         		double deltaX = event.getX() - x;
         		double deltaY = event.getY() - y;
-        	        		
-	        	for (Node node : target.getChildren()) {
-		            node.setLayoutX(node.getLayoutX() + deltaX);
-		            node.setLayoutY(node.getLayoutY() + deltaY);
-	        	}
-	        	
+        	        	
+        		
+	            target.setLayoutX(target.getLayoutX() + deltaX);
+	            target.setLayoutY(target.getLayoutY() + deltaY);
+	            	        	
 	        	x = event.getX();
 	        	y = event.getY();
+	        	
+				if (config.getSessionRecorder().isPresent()) {
+					config.getSessionRecorder().get().recordTargetMoved(cameraName, 
+							targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+				}
 	        	
 	            return;
 	        }
@@ -162,6 +169,17 @@ public class TargetContainer {
 	        	target.setLayoutY(target.getLayoutY() + originYDelta); 
 	        	target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
 	        }
+	        
+			if (config.getSessionRecorder().isPresent()) {
+				config.getSessionRecorder().get().recordTargetMoved(cameraName, 
+						targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+			}
+			
+			if (config.getSessionRecorder().isPresent()) {
+				config.getSessionRecorder().get().recordTargetResized(cameraName, 
+						targetIndex, (int)target.getBoundsInParent().getWidth(), 
+						(int)target.getBoundsInParent().getHeight());
+			}
     	});
     }
     
@@ -206,8 +224,19 @@ public class TargetContainer {
 					
 					if (event.isShiftDown()) {
 						target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetResized(cameraName, 
+									targetIndex, (int)target.getBoundsInParent().getWidth(), 
+									(int)target.getBoundsInParent().getHeight());
+						}
 					} else {
 						target.setLayoutX(target.getLayoutX() - MOVEMENT_DELTA);
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetMoved(cameraName, 
+									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+						}
 					}
 				}
 
@@ -220,8 +249,19 @@ public class TargetContainer {
 
 					if (event.isShiftDown()) {
 						target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetResized(cameraName, 
+									targetIndex, (int)target.getBoundsInParent().getWidth(), 
+									(int)target.getBoundsInParent().getHeight());
+						}
 					} else {
 						target.setLayoutX(target.getLayoutX() + MOVEMENT_DELTA);
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetMoved(cameraName, 
+									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+						}
 					}
 				}
 				
@@ -234,8 +274,19 @@ public class TargetContainer {
 					
 					if (event.isShiftDown()) {
 						target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetResized(cameraName, 
+									targetIndex, (int)target.getBoundsInParent().getWidth(), 
+									(int)target.getBoundsInParent().getHeight());
+						}
 					} else {
 						target.setLayoutY(target.getLayoutY() - MOVEMENT_DELTA);
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetMoved(cameraName, 
+									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+						}
 					}
 				}
 				
@@ -248,8 +299,19 @@ public class TargetContainer {
 					
 					if (event.isShiftDown()) {
 						target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetResized(cameraName, 
+									targetIndex, (int)target.getBoundsInParent().getWidth(), 
+									(int)target.getBoundsInParent().getHeight());
+						}
 					} else {
 						target.setLayoutY(target.getLayoutY() + MOVEMENT_DELTA);
+						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordTargetMoved(cameraName, 
+									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+						}
 					}
 				}
 				

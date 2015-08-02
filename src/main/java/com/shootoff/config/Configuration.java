@@ -108,7 +108,7 @@ public class Configuration {
 	private boolean useMalfunctions = false;
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
-	private Optional<SessionRecorder> sessionRecorder;
+	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingProtocol currentProtocol = null;
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();

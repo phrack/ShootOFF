@@ -63,6 +63,7 @@ public class CanvasManager {
 	private final Group canvasGroup;
 	private final Configuration config;
 	private final CamerasSupervisor camerasSupervisor;
+	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots;
@@ -78,10 +79,11 @@ public class CanvasManager {
 	private Optional<Bounds> projectionBounds = Optional.empty();
 	
 	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor, 
-			ObservableList<ShotEntry> shotEntries) {
+			String cameraName, ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
+		this.cameraName = cameraName;
 		this.shotEntries = shotEntries;
 		shots = Collections.synchronizedList(new ArrayList<Shot>());
 	
@@ -316,6 +318,13 @@ public class CanvasManager {
 									shot.getX(), shot.getY(), region.getType(), tagList.toString());	
 						}
 						
+						if (config.getSessionRecorder().isPresent()) {
+							config.getSessionRecorder().get().recordShot(cameraName, 
+									shot,
+									Optional.of(targets.indexOf(target)), 
+									Optional.of(target.getChildren().indexOf(node)));
+						}
+						
 						return Optional.of((TargetRegion)node);
 					}
 				}
@@ -324,6 +333,13 @@ public class CanvasManager {
 		
 		logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", 
 				shot.getX(), shot.getY());
+		
+		if (config.getSessionRecorder().isPresent()) {
+			config.getSessionRecorder().get().recordShot(cameraName, 
+					shot,
+					Optional.empty(), 
+					Optional.empty());
+		}
 		
 		return Optional.empty();
 	}
@@ -460,18 +476,28 @@ public class CanvasManager {
 				});
 			
 			addTarget(target.get(), true);
+			
+			if (config.getSessionRecorder().isPresent()) {
+				config.getSessionRecorder().get().recordTargetAdded(cameraName, targetFile.getName());
+			}
 		}
+		
 		return target;
 	}
 	
 	public void addTarget(Group target, boolean userDeletable) {
 		Platform.runLater(() -> { canvasGroup.getChildren().add(target); });
-		new TargetContainer(target, config, this, userDeletable);
+		new TargetContainer(target, config, this, userDeletable, cameraName, targets.size());
 		targets.add(target);
 	}
 	
 	public void removeTarget(Group target) {
 		Platform.runLater(() -> { canvasGroup.getChildren().remove(target); });
+		
+		if (config.getSessionRecorder().isPresent()) {
+			config.getSessionRecorder().get().recordTargetRemoved(cameraName, targets.indexOf(target));
+		}
+		
 		targets.remove(target);
 	}
 	
