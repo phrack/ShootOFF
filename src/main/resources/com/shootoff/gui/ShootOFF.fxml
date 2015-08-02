@@ -52,6 +52,12 @@
                  <MenuItem fx:id="startArenaMenuItem" mnemonicParsing="false" onAction="#startArenaClicked" text="Start Arena" />
                   <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
                   <Menu fx:id="addArenaTargetMenu" disable="true" mnemonicParsing="false" text="Add Target" />
+                  <Menu fx:id="arenaBackgroundMenu" disable="true" mnemonicParsing="false" text="Background">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#openArenaBackgroundMenuItemClicked" text="Open..." />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                    </items>
+                  </Menu>
                   <MenuItem fx:id="toggleArenaShotsMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaShotsClicked" text="Show Shot Markers" />
               </items>
             </Menu>

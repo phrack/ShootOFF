@@ -29,6 +29,7 @@ import com.shootoff.gui.CanvasManager;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -50,6 +51,15 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage = (Stage)arenaAnchor.getScene().getWindow();
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
+		
+		arenaAnchor.widthProperty().addListener((e) -> {
+				canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+			});
+		
+		arenaAnchor.heightProperty().addListener((e) -> {
+			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+		});
+		
 		arenaAnchor.setStyle("-fx-background-color: #696969;");
 	}
 	
@@ -75,6 +85,10 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	public void close() {
 		arenaStage.close();
+	}
+	
+	public void setBackground(Image img) {
+		canvasManager.updateBackground(img, Optional.empty());
 	}
 	
 	@FXML

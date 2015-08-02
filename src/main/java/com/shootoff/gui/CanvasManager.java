@@ -118,6 +118,11 @@ public class CanvasManager {
 		this.contextMenu = Optional.of(menu);
 	}
 	
+	public void setBackgroundFit(double width, double height) {
+		background.setFitWidth(width);
+		background.setFitHeight(height);
+	}
+	
 	public void updateBackground(Image img, Optional<Bounds> projectionBounds) {
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {

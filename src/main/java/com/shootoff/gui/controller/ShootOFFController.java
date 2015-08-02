@@ -21,6 +21,7 @@ package com.shootoff.gui.controller;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -104,6 +105,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private MenuItem startArenaMenuItem;
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
 	@FXML private Menu addArenaTargetMenu;
+	@FXML private Menu arenaBackgroundMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
 	
 	private String defaultWindowTitle;
@@ -123,6 +125,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		this.camerasSupervisor = new CamerasSupervisor(config);
 		
 		findTargets();
+		initDefaultBackgrounds();
 		registerTrainingProtocols();
 		registerProjectorProtocols();
 		
@@ -539,6 +542,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void toggleProjectorMenus(boolean isDisabled) {
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
+		arenaBackgroundMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
 		
 		for (MenuItem m : projectorProtocolMenuItems) m.setDisable(isDisabled);
@@ -593,6 +597,41 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			calibrationConfigPane = null;
 			arenaController.calibrated();
 		}		
+	}
+	
+	private void initDefaultBackgrounds() {
+		addDefaultBackground("Indoor Range", "/arena/backgrounds/indoor_range.gif");
+		addDefaultBackground("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
+		addDefaultBackground("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
+	}
+	
+	private void addDefaultBackground(String menuName, String resourceName) {
+		MenuItem backgroundMenuItem = new MenuItem(menuName);
+		
+		backgroundMenuItem.setOnAction((e) -> {
+				InputStream is = this.getClass().getResourceAsStream(resourceName);
+				Image img = new Image(is);
+				arenaController.setBackground(img);
+			});
+		
+		arenaBackgroundMenu.getItems().add(backgroundMenuItem);
+	}
+	
+	public void openArenaBackgroundMenuItemClicked(ActionEvent event) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Select Arena Background");
+		fileChooser.setInitialDirectory(new File("targets"));
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"),
+                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif")
+            );
+        
+		File backgroundFile = fileChooser.showOpenDialog(shootOFFStage);
+		
+		if (backgroundFile != null) {
+			Image img = new Image(backgroundFile.toURI().toString());
+			arenaController.setBackground(img);
+		}
 	}
 	
 	public void toggleArenaShotsClicked(ActionEvent event) {

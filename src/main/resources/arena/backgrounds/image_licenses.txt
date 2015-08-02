@@ -1,0 +1,9 @@
+The following images were not created by ShootOFF contributors and have their own licenses:
+
+indoor_range.gif: https://commons.wikimedia.org/wiki/File:25m_Raumschiessanlage.jpg
+
+
+kiang_west_savanna.gif: https://commons.wikimedia.org/wiki/File:Kiang_West_savanna.jpg
+Photo by eigenes Bild License: CC-BY-SA 3.0
+
+outdoor_range.gif: https://commons.wikimedia.org/wiki/File:Gun_Range_100_Yards.JPG
