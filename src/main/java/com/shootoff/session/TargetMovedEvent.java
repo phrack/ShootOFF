@@ -1,16 +1,23 @@
 package com.shootoff.session;
 
 public class TargetMovedEvent implements Event {
+	private final String cameraName;
 	private final long timestamp;
 	private final int targetIndex;
 	private final int newX;
 	private final int newY;
 	
-	public TargetMovedEvent(long timestamp, int targetIndex, int newX, int newY) {
+	public TargetMovedEvent(String cameraName, long timestamp, int targetIndex, int newX, int newY) {
+		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.targetIndex = targetIndex;
 		this.newX = newX;
 		this.newY = newY;
+	}
+	
+	@Override
+	public String getCameraName() {
+		return cameraName;
 	}
 	
 	public int getTargetIndex() {

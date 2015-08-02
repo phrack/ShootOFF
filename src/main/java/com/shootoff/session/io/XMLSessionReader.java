@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,7 +35,7 @@ public class XMLSessionReader {
 		this.sessionFile = sessionFile;
 	}
 	
-	public List<Event> load() {
+	public Map<String, List<Event>> load() {
 		try {
 			InputStream xmlInput = new FileInputStream(sessionFile);
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
@@ -45,13 +47,14 @@ public class XMLSessionReader {
 			e.printStackTrace();
 		}
 		
-		return new ArrayList<Event>();
+		return new HashMap<String, List<Event>>();
 	}
 	
 	private class SessionXMLHandler extends DefaultHandler {
-		private final List<Event> events = new ArrayList<Event>();
+		private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
+		private String currentCameraName = "";
 		
-		public List<Event> getEvents() {
+		public Map<String, List<Event>> getEvents() {
 			return events;
 		}
 		
@@ -59,6 +62,11 @@ public class XMLSessionReader {
                 Attributes attributes) throws SAXException {
 			
 			switch (qName) {
+			case "camera":
+				currentCameraName = attributes.getValue("name");
+				events.put(currentCameraName, new ArrayList<Event>());
+				break;
+			
 			case "shot":
 				Color c;
 				
@@ -88,36 +96,41 @@ public class XMLSessionReader {
 					hitRegionIndex = Optional.of(index);
 				}
 				
-				events.add(new ShotEvent(Long.parseLong(attributes.getValue("timestamp")), shot, 
-						targetIndex, hitRegionIndex));
+				events.get(currentCameraName).add(
+						new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot, 
+								targetIndex, hitRegionIndex));
 				
 				break;
 
 			case "targetAdded":
-				events.add(new TargetAddedEvent(Long.parseLong(attributes.getValue("timestamp")), 
-						attributes.getValue("name")));
+				events.get(currentCameraName).add(
+						new TargetAddedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), 
+								attributes.getValue("name")));
 				
 				break;
 				
 			case "targetRemoved":
-				events.add(new TargetRemovedEvent(Long.parseLong(attributes.getValue("timestamp")), 
-						Integer.parseInt(attributes.getValue("index"))));
+				events.get(currentCameraName).add(
+						new TargetRemovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), 
+								Integer.parseInt(attributes.getValue("index"))));
 				
 				break;
 				
 			case "targetResized":
-				events.add(new TargetResizedEvent(Long.parseLong(attributes.getValue("timestamp")), 
-						Integer.parseInt(attributes.getValue("index")), 
-						Integer.parseInt(attributes.getValue("newWidth")),
-						Integer.parseInt(attributes.getValue("newHeight"))));
+				events.get(currentCameraName).add(
+						new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), 
+								Integer.parseInt(attributes.getValue("index")), 
+								Integer.parseInt(attributes.getValue("newWidth")),
+								Integer.parseInt(attributes.getValue("newHeight"))));
 				
 				break;
 				
 			case "targetMoved":
-				events.add(new TargetMovedEvent(Long.parseLong(attributes.getValue("timestamp")), 
-						Integer.parseInt(attributes.getValue("index")), 
-						Integer.parseInt(attributes.getValue("newX")),
-						Integer.parseInt(attributes.getValue("newY"))));
+				events.get(currentCameraName).add(
+						new TargetMovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), 
+								Integer.parseInt(attributes.getValue("index")), 
+								Integer.parseInt(attributes.getValue("newX")),
+								Integer.parseInt(attributes.getValue("newY"))));
 				break;
 			}
 		}

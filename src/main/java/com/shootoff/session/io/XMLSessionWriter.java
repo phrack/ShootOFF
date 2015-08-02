@@ -14,6 +14,16 @@ public class XMLSessionWriter implements EventVisitor {
 	public XMLSessionWriter(File sessionFile) {
 		this.sessionFile = sessionFile;
 	}
+	
+	@Override
+	public void visitCamera(String cameraName) {
+		xmlBody.append(String.format("\t<camera name=\"%s\">\n", cameraName));
+	}
+	
+	@Override
+	public void visitCameraEnd() {
+		xmlBody.append("\t</camera>\n");
+	}
 
 	@Override
 	public void visitShot(long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex) {

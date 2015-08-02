@@ -22,6 +22,8 @@ import javafx.scene.paint.Color;
 
 public class TestSessionIO {
 	private SessionRecorder sessionRecorder;
+	private String cameraName1;
+	private String cameraName2;
 	private Shot redShot;
 	private Shot greenShot;
 	private String targetName;
@@ -31,19 +33,22 @@ public class TestSessionIO {
 	@Before
 	public void setUp() {
 		sessionRecorder = new SessionRecorder();
+		cameraName1 = "Default";
+		cameraName2 = "Another Camera";
 		redShot = new Shot(Color.RED, 10, 11, 3, 2);
 		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
 		targetIndex = 1;
 		hitRegionIndex = 0;
 		
-		sessionRecorder.recordShot(redShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordShot(greenShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordTargetAdded(targetName);
-		sessionRecorder.recordTargetResized(targetIndex, 10, 20);
-		sessionRecorder.recordTargetMoved(targetIndex, 4, 3);
-		sessionRecorder.recordTargetRemoved(targetIndex);
-		sessionRecorder.recordShot(greenShot, Optional.empty(), Optional.empty());
+		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
+		sessionRecorder.recordTargetAdded(cameraName1, targetName);
+		sessionRecorder.recordTargetAdded(cameraName2, targetName);
+		sessionRecorder.recordTargetResized(cameraName1, targetIndex, 10, 20);
+		sessionRecorder.recordTargetMoved(cameraName1, targetIndex, 4, 3);
+		sessionRecorder.recordTargetRemoved(cameraName1, targetIndex);
+		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty());
 	}
 
 	@Test
@@ -55,7 +60,7 @@ public class TestSessionIO {
 		
 		assertTrue(sessionRecorder.isPresent());
 		
-		List<Event> events = sessionRecorder.get().getEvents();
+		List<Event> events = sessionRecorder.get().getCameraEvents(cameraName1);
 		
 		assertEquals(7, events.size());
 
@@ -95,7 +100,12 @@ public class TestSessionIO {
 		assertFalse(((ShotEvent)events.get(6)).getTargetIndex().isPresent());
 		assertFalse(((ShotEvent)events.get(6)).getHitRegionIndex().isPresent());
 		
+		events = sessionRecorder.get().getCameraEvents(cameraName2);
+		
+		assertEquals(1, events.size());
+		
+		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
+		
 		tempXMLTarget.delete();
 	}
-
 }

@@ -1,38 +1,55 @@
 package com.shootoff.session;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
 
 public class SessionRecorder {
 	private final long startTime;
-	private final List<Event> events = new ArrayList<Event>();
+	private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
 	
 	public SessionRecorder() {
 		startTime = System.currentTimeMillis();
 	}
 	
-	public void addEvents(List<Event> events) {
-		this.events.addAll(events);
+	public void addEvents(Map<String, List<Event>> events) {
+		for (String cameraName : events.keySet()) {
+			this.events.put(cameraName, events.get(cameraName));
+		}
 	}
 	
-	public void recordShot(Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex) {
-		events.add(new ShotEvent(System.currentTimeMillis() - startTime, shot, targetIndex, hitRegionIndex));
+	public List<Event> getCameraEvents(String cameraName) {
+		if (events.containsKey(cameraName)) {
+			return events.get(cameraName);
+		} else {
+			List<Event> eventList = new ArrayList<Event>();
+			events.put(cameraName, eventList);
+			return eventList;
+		}
 	}
 	
-	public void recordTargetAdded(String targetName) {
-		events.add(new TargetAddedEvent(System.currentTimeMillis() - startTime, targetName));
+	public void recordShot(String cameraName, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex) {
+		getCameraEvents(cameraName).add(
+				new ShotEvent(cameraName, System.currentTimeMillis() - startTime, shot, targetIndex, hitRegionIndex));
 	}
 	
-	public void recordTargetRemoved(int targetIndex) {
-		events.add(new TargetRemovedEvent(System.currentTimeMillis() - startTime, targetIndex));
+	public void recordTargetAdded(String cameraName, String targetName) {
+		getCameraEvents(cameraName).add(
+				new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
+	}
+	
+	public void recordTargetRemoved(String cameraName, int targetIndex) {
+		getCameraEvents(cameraName).add(
+				new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, targetIndex));
 	}
 
-	private void collapseTargetEvents(EventType type, int targetIndex) {
-		ListIterator<Event> it = events.listIterator(events.size());
+	private void collapseTargetEvents(String cameraName, EventType type, int targetIndex) {
+		ListIterator<Event> it = getCameraEvents(cameraName).listIterator(getCameraEvents(cameraName).size());
 		
 		while (it.hasPrevious()) {
 			Event e = it.previous();
@@ -54,21 +71,23 @@ public class SessionRecorder {
 		}
 	}
 	
-	public void recordTargetResized(int targetIndex, int newWidth, int newHeight) {
+	public void recordTargetResized(String cameraName, int targetIndex, int newWidth, int newHeight) {
 		// Remove all resize events immediately before this one
-		collapseTargetEvents(EventType.TARGET_RESIZED, targetIndex);
+		collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, targetIndex);
 		
-		events.add(new TargetResizedEvent(System.currentTimeMillis() - startTime, targetIndex, newWidth, newHeight));
+		getCameraEvents(cameraName).add(
+				new TargetResizedEvent(cameraName, System.currentTimeMillis() - startTime, targetIndex, newWidth, newHeight));
 	}
 	
-	public void recordTargetMoved(int targetIndex, int newX, int newY) {
+	public void recordTargetMoved(String cameraName, int targetIndex, int newX, int newY) {
 		// Remove all move events immediately before this one
-		collapseTargetEvents(EventType.TARGET_MOVED, targetIndex);
+		collapseTargetEvents(cameraName, EventType.TARGET_MOVED, targetIndex);
 		
-		events.add(new TargetMovedEvent(System.currentTimeMillis() - startTime, targetIndex, newX, newY));
+		getCameraEvents(cameraName).add(
+				new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime, targetIndex, newX, newY));
 	}
 	
-	public List<Event> getEvents() {
+	public Map<String, List<Event>> getEvents() {
 		return events;
 	}
 }

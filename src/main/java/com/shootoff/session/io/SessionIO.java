@@ -2,6 +2,7 @@ package com.shootoff.session.io;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.session.Event;
@@ -23,40 +24,46 @@ public class SessionIO {
 			return;
 		}
 		
-		for (Event e : sessionRecorder.getEvents()) {
-			switch (e.getType()) {
-			case SHOT:
-				ShotEvent se = (ShotEvent)e;
-				visitor.visitShot(se.getTimestamp(), se.getShot(), se.getTargetIndex(), se.getHitRegionIndex());
-				break;
-				
-			case TARGET_ADDED:
-				TargetAddedEvent tae = (TargetAddedEvent)e;
-				visitor.visitTargetAdd(tae.getTimestamp(), tae.getTargetName());
-				break;
-				
-			case TARGET_REMOVED:
-				TargetRemovedEvent tre = (TargetRemovedEvent)e;
-				visitor.visitTargetRemove(tre.getTimestamp(), tre.getTargetIndex());
-				break;
-				
-			case TARGET_RESIZED:
-				TargetResizedEvent trre = (TargetResizedEvent)e;
-				visitor.visitTargetResize(trre.getTimestamp(), trre.getTargetIndex(), trre.getNewWidth(), trre.getNewHeight());
-				break;
-				
-			case TARGET_MOVED:
-				TargetMovedEvent tme = (TargetMovedEvent)e;
-				visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());				
-				break;
+		for (String cameraName : sessionRecorder.getEvents().keySet()) {
+			visitor.visitCamera(cameraName);
+			
+			for (Event e : sessionRecorder.getCameraEvents(cameraName)) {
+				switch (e.getType()) {
+				case SHOT:
+					ShotEvent se = (ShotEvent)e;
+					visitor.visitShot(se.getTimestamp(), se.getShot(), se.getTargetIndex(), se.getHitRegionIndex());
+					break;
+					
+				case TARGET_ADDED:
+					TargetAddedEvent tae = (TargetAddedEvent)e;
+					visitor.visitTargetAdd(tae.getTimestamp(), tae.getTargetName());
+					break;
+					
+				case TARGET_REMOVED:
+					TargetRemovedEvent tre = (TargetRemovedEvent)e;
+					visitor.visitTargetRemove(tre.getTimestamp(), tre.getTargetIndex());
+					break;
+					
+				case TARGET_RESIZED:
+					TargetResizedEvent trre = (TargetResizedEvent)e;
+					visitor.visitTargetResize(trre.getTimestamp(), trre.getTargetIndex(), trre.getNewWidth(), trre.getNewHeight());
+					break;
+					
+				case TARGET_MOVED:
+					TargetMovedEvent tme = (TargetMovedEvent)e;
+					visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());				
+					break;
+				}
 			}
+			
+			visitor.visitCameraEnd();
 		}
 		
 		visitor.visitEnd();
 	}
 	
 	public static Optional<SessionRecorder> loadSession(File sessionFile) {
-		List<Event> events = null;
+		Map<String, List<Event>> events = null;
 		
 		if (sessionFile.getName().endsWith("xml")) {
 			events = new XMLSessionReader(sessionFile).load();
