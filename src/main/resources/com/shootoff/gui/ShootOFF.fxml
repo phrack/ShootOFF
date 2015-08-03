@@ -40,7 +40,7 @@
                   <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
                   <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <RadioMenuItem mnemonicParsing="false" onAction="#clickedNoneProtocol" selected="true" text="None">
+                  <RadioMenuItem fx:id="noneTrainingMenuItem" mnemonicParsing="false" onAction="#clickedNoneProtocol" selected="true" text="None">
                       <toggleGroup>
             	  		   <ToggleGroup fx:id="trainingToggleGroup" />
                       </toggleGroup>

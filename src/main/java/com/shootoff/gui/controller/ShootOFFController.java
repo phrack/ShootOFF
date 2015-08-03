@@ -98,6 +98,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu addTargetMenu;
 	@FXML private Menu editTargetMenu;
 	@FXML private Menu trainingMenu;
+	@FXML private RadioMenuItem noneTrainingMenuItem;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
 	@FXML private ToggleGroup trainingToggleGroup;
@@ -527,6 +528,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        toggleArenaCalibrationMenuItem.fire();
 	        
 	        arenaStage.setOnCloseRequest((e) -> {
+	        		if (config.getProtocol().isPresent() && 
+	        				config.getProtocol().get() instanceof ProjectorTrainingProtocolBase) {
+	        			noneTrainingMenuItem.setSelected(true);
+	        			noneTrainingMenuItem.fire();
+	        		}
 	        		toggleArenaShotsMenuItem.setText("Show Shot Markers");
 	        		if (calibrationTarget != null) {
 	        			stopCalibration();
