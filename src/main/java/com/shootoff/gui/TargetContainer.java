@@ -124,8 +124,6 @@ public class TargetContainer {
 	        if(!isInResizeZone(event)) {
 	        	move = true;
 	        	
-	        	x = event.getX();
-	        	y = event.getY();
 	            return;
 	        }
 	        
@@ -147,12 +145,8 @@ public class TargetContainer {
         		double deltaX = event.getX() - x;
         		double deltaY = event.getY() - y;
         	        	
-        		
 	            target.setLayoutX(target.getLayoutX() + deltaX);
 	            target.setLayoutY(target.getLayoutY() + deltaY);
-	            	        	
-	        	x = event.getX();
-	        	y = event.getY();
 	        	
 				if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 					config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
@@ -237,6 +231,9 @@ public class TargetContainer {
     
     private void mouseMoved() {
     	target.setOnMouseMoved((event) -> {
+        	x = event.getX();
+        	y = event.getY();
+    		
     		if (isTopZone(event)) {
     			target.setCursor(Cursor.N_RESIZE);
     		} else if (isBottomZone(event)) {
