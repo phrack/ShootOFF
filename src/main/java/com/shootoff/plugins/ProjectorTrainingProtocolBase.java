@@ -58,7 +58,7 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	public void reset() {
 		camerasSupervisor.reset();
 		if (config.getProtocol().isPresent()) 
-			config.getProtocol().get().reset(arenaController.getCanvasManager().getTargets());	
+			config.getProtocol().get().reset(arenaController.getCanvasManager().getTargetGroups());	
 	}
 	
 	/**

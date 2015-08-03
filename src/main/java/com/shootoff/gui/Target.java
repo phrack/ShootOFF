@@ -34,7 +34,7 @@ import javafx.scene.input.MouseEvent;
  * 
  * @author phrack
  */
-public class TargetContainer {
+public class Target {
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
     private static final int RESIZE_MARGIN = 5;
@@ -55,7 +55,7 @@ public class TargetContainer {
     private double x;
     private double y;
     
-    public TargetContainer(Group target, Configuration config, CanvasManager parent,
+    public Target(Group target, Configuration config, CanvasManager parent,
     		boolean userDeletable, String cameraName, int targetIndex) {
         this.target = target;
         this.config = Optional.of(config);
@@ -71,7 +71,7 @@ public class TargetContainer {
         keyPressed();
     }
     
-    public TargetContainer(Group target) {
+    public Target(Group target) {
         this.target = target;
         this.config = Optional.empty();
         this.parent = null;
@@ -86,7 +86,7 @@ public class TargetContainer {
         keyPressed();
     }
     
-    public Group getTarget() {
+    public Group getTargetGroup() {
     	return target;
     }
     

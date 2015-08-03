@@ -67,7 +67,7 @@ public class CanvasManager {
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots;
-	private final List<Group> targets = new ArrayList<Group>();
+	private final List<Target> targets = new ArrayList<Target>();
 	
 	private ProgressIndicator progress;
 	private Optional<ContextMenu> contextMenu;
@@ -162,8 +162,8 @@ public class CanvasManager {
 		startTime = System.currentTimeMillis();
 		
 		// Reset animations
-		for (Group target : targets) {
-			for (Node node : target.getChildren()) {
+		for (Target target : targets) {
+			for (Node node : target.getTargetGroup().getChildren()) {
 				TargetRegion region = (TargetRegion)node;
 				
 				if (region.getType() == RegionType.IMAGE) ((ImageRegion)region).reset();
@@ -259,13 +259,15 @@ public class CanvasManager {
 	}
 	
 	private Optional<TargetRegion> checkHit(Shot shot) {
-		for (Group target : targets) {
-			if (target.getBoundsInParent().contains(shot.getX(), shot.getY())) {				
+		for (Target target : targets) {
+			Group targetGroup = target.getTargetGroup();
+			
+			if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {				
 				// Target was hit, see if a specific region was hit
-				for (int i = target.getChildren().size() - 1; i >= 0; i--) {
-					Node node = target.getChildren().get(i);
+				for (int i = targetGroup.getChildren().size() - 1; i >= 0; i--) {
+					Node node = targetGroup.getChildren().get(i);
 					
-					Bounds nodeBounds = target.getLocalToParentTransform().transform(node.getBoundsInParent());
+					Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 					
 					if (nodeBounds.contains(shot.getX(), shot.getY())) {
 						// If we hit an image region on a transparent pixel, ignore it
@@ -326,8 +328,8 @@ public class CanvasManager {
 						if (config.getSessionRecorder().isPresent()) {
 							config.getSessionRecorder().get().recordShot(cameraName, 
 									shot,
-									Optional.of(targets.indexOf(target)), 
-									Optional.of(target.getChildren().indexOf(node)));
+									Optional.of(targets.indexOf(targetGroup)), 
+									Optional.of(targetGroup.getChildren().indexOf(node)));
 						}
 						
 						return Optional.of((TargetRegion)node);
@@ -447,9 +449,9 @@ public class CanvasManager {
 	}
 	
 	private Optional<TargetRegion> getTargetRegionByName(TargetRegion region, String name) {
-		for (Group target : targets) {
-			if (target.getChildren().contains(region)) {
-				for (Node node : target.getChildren()) {
+		for (Target target : targets) {
+			if (target.getTargetGroup().getChildren().contains(region)) {
+				for (Node node : target.getTargetGroup().getChildren()) {
 					TargetRegion r = (TargetRegion)node;
 					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
 				}
@@ -492,8 +494,7 @@ public class CanvasManager {
 	
 	public void addTarget(Group target, boolean userDeletable) {
 		Platform.runLater(() -> { canvasGroup.getChildren().add(target); });
-		new TargetContainer(target, config, this, userDeletable, cameraName, targets.size());
-		targets.add(target);
+		targets.add(new Target(target, config, this, userDeletable, cameraName, targets.size()));
 	}
 	
 	public void removeTarget(Group target) {
@@ -506,8 +507,12 @@ public class CanvasManager {
 		targets.remove(target);
 	}
 	
-	public List<Group> getTargets() {
-		return targets;
+	public List<Group> getTargetGroups() {
+		List<Group> targetGroups = new ArrayList<Group>();
+		
+		for (Target target : targets) targetGroups.add(target.getTargetGroup());
+		
+		return targetGroups;
 	}
 	
 	private void toggleTargetSelection(Optional<Group> newSelection) {

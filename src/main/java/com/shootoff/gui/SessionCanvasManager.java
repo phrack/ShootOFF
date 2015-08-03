@@ -23,10 +23,10 @@ import javafx.scene.Node;
 
 public class SessionCanvasManager {
 	private final Group canvas;
-	private final Map<Event, TargetContainer> eventToContainer = new HashMap<Event, TargetContainer>();
+	private final Map<Event, Target> eventToContainer = new HashMap<Event, Target>();
 	private final Map<Event, Point2D> eventToPosition = new HashMap<Event, Point2D>();
 	private final Map<Event, Dimension2D> eventToDimension = new HashMap<Event, Dimension2D>();
-	private final List<TargetContainer> targets = new ArrayList<TargetContainer>();
+	private final List<Target> targets = new ArrayList<Target>();
 	
 	public SessionCanvasManager(Group canvas) {
 		this.canvas = canvas;
@@ -46,7 +46,7 @@ public class SessionCanvasManager {
 		case TARGET_REMOVED:
 			TargetRemovedEvent tre = (TargetRemovedEvent)e;
 			eventToContainer.put(e, targets.get(tre.getTargetIndex()));
-			canvas.getChildren().remove(targets.get(tre.getTargetIndex()).getTarget());
+			canvas.getChildren().remove(targets.get(tre.getTargetIndex()).getTargetGroup());
 			targets.remove(tre.getTargetIndex());
 			break;
 			
@@ -71,14 +71,14 @@ public class SessionCanvasManager {
 			break;
 			
 		case TARGET_ADDED:
-			canvas.getChildren().remove(eventToContainer.get(e).getTarget());
+			canvas.getChildren().remove(eventToContainer.get(e).getTargetGroup());
 			targets.remove(eventToContainer.get(e));
 			break;
 			
 		case TARGET_REMOVED:
 			TargetRemovedEvent tre = (TargetRemovedEvent)e;
-			TargetContainer oldTarget = eventToContainer.get(e);
-			canvas.getChildren().add(oldTarget.getTarget());
+			Target oldTarget = eventToContainer.get(e);
+			canvas.getChildren().add(oldTarget.getTargetGroup());
 			targets.add(tre.getTargetIndex(), oldTarget);
 			break;
 			
@@ -112,7 +112,7 @@ public class SessionCanvasManager {
 			}
 			
 			canvas.getChildren().add(target.get());
-			TargetContainer targetContainer = new TargetContainer(target.get());
+			Target targetContainer = new Target(target.get());
 			eventToContainer.put(e, targetContainer);
 			targets.add(targetContainer);
 		}

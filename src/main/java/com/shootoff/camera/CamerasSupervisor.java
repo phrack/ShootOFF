@@ -110,7 +110,7 @@ public class CamerasSupervisor {
 		List<Group> targets = new ArrayList<Group>();
 		
 		for (CameraManager manager : managers) {
-			targets.addAll(manager.getCanvasManager().getTargets());
+			targets.addAll(manager.getCanvasManager().getTargetGroups());
 		}
 		
 		return targets;

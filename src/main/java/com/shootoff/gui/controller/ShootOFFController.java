@@ -405,7 +405,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					knownTargets.addAll(camerasSupervisor.getTargets());
 					
 					if (arenaController != null) {
-						knownTargets.addAll(arenaController.getCanvasManager().getTargets());
+						knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
 					}
 					
 					TrainingProtocol newProtocol = (TrainingProtocol)ctor.newInstance(knownTargets);
@@ -434,7 +434,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				try {
 					Constructor<?> ctor = protocol.getClass().getConstructor(List.class);
 					TrainingProtocol newProtocol = (TrainingProtocol)ctor.newInstance(
-							arenaController.getCanvasManager().getTargets());
+							arenaController.getCanvasManager().getTargetGroups());
 					((ProjectorTrainingProtocolBase)newProtocol).init(config, camerasSupervisor, 
 							shotTimerTable, arenaController);
 					newProtocol.init();
@@ -702,7 +702,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			knownTargets.addAll(camerasSupervisor.getTargets());
 			
 			if (arenaController != null) {
-				knownTargets.addAll(arenaController.getCanvasManager().getTargets());
+				knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
 			}
 			
 			config.getProtocol().get().reset(knownTargets);
