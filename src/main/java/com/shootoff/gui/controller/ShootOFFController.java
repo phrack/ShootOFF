@@ -43,6 +43,7 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.CalibrationConfigPane;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
+import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
@@ -116,7 +117,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	private ProjectorArenaController arenaController;
 	private CalibrationConfigPane calibrationConfigPane;
-	private Group calibrationGroup;
+	private Target calibrationTarget;
 	private CameraManager calibratingManager;
 	private List<MenuItem> projectorProtocolMenuItems = new ArrayList<MenuItem>();
 	
@@ -566,26 +567,26 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 			calibratingManager = camerasSupervisor.getCameraManager(
 					cameraTabPane.getSelectionModel().getSelectedIndex());
-			calibrationGroup = new Group();
+			Group calibrationGroup = new Group();
 			calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
 			calibrationGroup.getChildren().add(calibrationRectangle);
 			
 			calibratingManager.setDetecting(false);
 			calibratingManager.setProjectionBounds(null);
-			calibratingManager.getCanvasManager().addTarget(null, calibrationGroup, false);
+			calibrationTarget = calibratingManager.getCanvasManager().addTarget(null, calibrationGroup, false);
 			
 		} else {
 			toggleArenaCalibrationMenuItem.setText("Calibrate");
 			
 			calibrationConfigPane.close();
 			
-			calibratingManager.getCanvasManager().removeTarget(calibrationGroup);
-			calibratingManager.getCanvasManager().setProjectorArena(arenaController, calibrationGroup.getBoundsInParent());
+			calibratingManager.getCanvasManager().removeTarget(calibrationTarget);
+			calibratingManager.getCanvasManager().setProjectorArena(arenaController, calibrationTarget.getTargetGroup().getBoundsInParent());
 			calibratingManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
 			calibratingManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
 			
 			if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
-				calibratingManager.setProjectionBounds(calibrationGroup.getBoundsInParent());
+				calibratingManager.setProjectionBounds(calibrationTarget.getTargetGroup().getBoundsInParent());
 			} else {
 				calibratingManager.setProjectionBounds(null);
 			}
@@ -593,7 +594,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			calibratingManager.setDetecting(true);
 			
 			calibratingManager = null;
-			calibrationGroup = null;
+			calibrationTarget = null;
 			calibrationConfigPane = null;
 			arenaController.calibrated();
 		}		

@@ -271,7 +271,7 @@ public class Target {
 			
 			switch (event.getCode()) {
 			case DELETE:
-				if (userDeletable) parent.removeTarget(targetGroup);
+				if (userDeletable) parent.removeTarget(this);
 				break;
 				
 			case LEFT:

@@ -461,7 +461,7 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
-	public Optional<Group> addTarget(File targetFile) {
+	public Optional<Target> addTarget(File targetFile) {
 		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
 		
 		if (targetGroup.isPresent()) {		
@@ -482,23 +482,28 @@ public class CanvasManager {
 					targetGroup.get().requestFocus();
 				});
 			
-			addTarget(targetFile, targetGroup.get(), true);
+			Optional<Target> target = Optional.of(addTarget(targetFile, targetGroup.get(), true));
 			
 			if (config.getSessionRecorder().isPresent()) {
 				config.getSessionRecorder().get().recordTargetAdded(cameraName, targetFile.getName());
 			}
+			
+			return target;
 		}
 		
-		return targetGroup;
+		return Optional.empty();
 	}
 	
-	public void addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
+	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
 		Platform.runLater(() -> { canvasGroup.getChildren().add(targetGroup); });
-		targets.add(new Target(targetFile, targetGroup, config, this, userDeletable, cameraName, targets.size()));
+		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, cameraName, targets.size());
+		targets.add(newTarget);
+		
+		return newTarget;
 	}
 	
-	public void removeTarget(Group target) {
-		Platform.runLater(() -> { canvasGroup.getChildren().remove(target); });
+	public void removeTarget(Target target) {
+		Platform.runLater(() -> { canvasGroup.getChildren().remove(target.getTargetGroup()); });
 		
 		if (config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordTargetRemoved(cameraName, targets.indexOf(target));

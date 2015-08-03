@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import javafx.scene.Group;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class ShootDontShoot extends ProjectorTrainingProtocolBase implements TrainingProtocol {
@@ -49,8 +50,8 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	private ProjectorTrainingProtocolBase thisSuper;
 	private int missedTargets = 0;
 	private int badHits = 0;
-	private List<Group> shootTargets = new ArrayList<Group>();
-	private List<Group> dontShootTargets = new ArrayList<Group>();
+	private List<Target> shootTargets = new ArrayList<Target>();
+	private List<Target> dontShootTargets = new ArrayList<Target>();
 	
 	public ShootDontShoot() {}
 	
@@ -83,9 +84,9 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 				thisSuper.showTextOnFeed(String.format("missed targets: %d\nbad hits: %d", 
 						missedTargets, badHits)); 
 				
-				for (Group target : shootTargets) thisSuper.removeTarget(target);
+				for (Target target : shootTargets) thisSuper.removeTarget(target);
 				shootTargets.clear();
-				for (Group target : dontShootTargets) thisSuper.removeTarget(target);
+				for (Target target : dontShootTargets) thisSuper.removeTarget(target);
 				dontShootTargets.clear();
 				
 		        addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
@@ -112,7 +113,7 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	 		    	+ "with the red ring, don't shoot the other targets.");
 	}
 
-	private void addTargets(List<Group> targets, String target) {
+	private void addTargets(List<Target> targets, String target) {
 		int count = new Random().nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1) 
 				+ MIN_TARGETS_PER_ROUND;
 
@@ -120,25 +121,23 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 			int x = new Random().nextInt(((int)super.getArenaWidth() - 100) + 1) + 0;
 			int y = new Random().nextInt(((int)super.getArenaHeight() - 100) + 1) + 0;
 
-			Optional<Group> newTarget = super.addTarget(new File(target), x, y);
+			Optional<Target> newTarget = super.addTarget(new File(target), x, y);
 			if (newTarget.isPresent()) targets.add(newTarget.get());
 		}
 	}
 	
-	private Optional<Group> removeTarget(List<Group> targets, TargetRegion region) {
-		Iterator<Group> it = targets.iterator();
+	private void removeTarget(List<Target> targets, TargetRegion region) {
+		Iterator<Target> it = targets.iterator();
 		
 		while (it.hasNext()) {
-			Group target = it.next();
+			Target target = it.next();
 			
-			if (target.getChildren().contains(region)) {
+			if (target.getTargetGroup().getChildren().contains(region)) {
 				super.removeTarget(target);
 				it.remove();
-				return Optional.of(target);
+				return;
 			}
 		}
-		
-		return Optional.empty();
 	}
 	
 	@Override
@@ -148,16 +147,14 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 				switch (hitRegion.get().getTag("subtarget")) {
 				case "shoot":
 					{
-						Optional<Group> target = removeTarget(shootTargets, hitRegion.get());
-						if (target.isPresent()) shootTargets.remove(target);
+						removeTarget(shootTargets, hitRegion.get());
 						super.setShotTimerColumnText(TARGET_COL_NAME, "shoot");
 					}
 					break;
 					
 				case "dont_shoot":
 					{
-						Optional<Group> target = removeTarget(dontShootTargets, hitRegion.get());
-						if (target.isPresent()) dontShootTargets.remove(target);
+						removeTarget(dontShootTargets, hitRegion.get());
 						badHits++;
 						super.setShotTimerColumnText(TARGET_COL_NAME, "dont_shoot");
 						TextToSpeech.say("Bad shoot!");
@@ -176,9 +173,9 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
         missedTargets = 0;
         badHits = 0;
         
-		for (Group target : shootTargets) super.removeTarget(target);
+		for (Target target : shootTargets) super.removeTarget(target);
 		shootTargets.clear();
-		for (Group target : dontShootTargets) super.removeTarget(target);
+		for (Target target : dontShootTargets) super.removeTarget(target);
 		dontShootTargets.clear();
 		
         addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");

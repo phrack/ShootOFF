@@ -24,19 +24,19 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.TableView;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.ShotEntry;
+import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
 
 public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaController arenaController;
-	private final List<Group> targets = new ArrayList<Group>();
+	private final List<Target> targets = new ArrayList<Target>();
 	
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
@@ -70,22 +70,18 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	 * 
 	 * @return	the group that was loaded from the target file
 	 */
-	public Optional<Group> addTarget(File target, double x, double y) {
-		Optional<Group> newTarget = arenaController.getCanvasManager().addTarget(target);
+	public Optional<Target> addTarget(File target, double x, double y) {
+		Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
 		
 		if (newTarget.isPresent()) {
-			for (Node node : newTarget.get().getChildren()) {
-				node.setLayoutX(x);
-				node.setLayoutY(y);
-			}
-			
+			newTarget.get().setPosition(x, y);
 			targets.add(newTarget.get());
 		}
 		
 		return newTarget;
 	}
 	
-	public void removeTarget(Group target) {
+	public void removeTarget(Target target) {
 		arenaController.getCanvasManager().removeTarget(target);
 		targets.remove(target);
 	}
@@ -113,7 +109,7 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	public void destroy() {
 		super.destroy();
 		
-		for (Group target : targets) arenaController.getCanvasManager().removeTarget(target);
+		for (Target target : targets) arenaController.getCanvasManager().removeTarget(target);
 		
 		targets.clear();
 	}
