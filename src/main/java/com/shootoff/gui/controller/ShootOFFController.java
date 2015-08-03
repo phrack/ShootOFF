@@ -572,7 +572,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			
 			calibratingManager.setDetecting(false);
 			calibratingManager.setProjectionBounds(null);
-			calibratingManager.getCanvasManager().addTarget(calibrationGroup, false);
+			calibratingManager.getCanvasManager().addTarget(null, calibrationGroup, false);
 			
 		} else {
 			toggleArenaCalibrationMenuItem.setText("Calibrate");

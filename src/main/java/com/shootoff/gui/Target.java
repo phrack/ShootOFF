@@ -18,6 +18,7 @@
 
 package com.shootoff.gui;
 
+import java.io.File;
 import java.util.Optional;
 
 import com.shootoff.config.Configuration;
@@ -39,7 +40,8 @@ public class Target {
 	private static final int SCALE_DELTA = 1;
     private static final int RESIZE_MARGIN = 5;
     
-    private final Group target;
+    private final File targetFile;
+    private final Group targetGroup;
     private final Optional<Configuration> config;
     private final CanvasManager parent;
     private final boolean userDeletable;
@@ -55,9 +57,10 @@ public class Target {
     private double x;
     private double y;
     
-    public Target(Group target, Configuration config, CanvasManager parent,
+    public Target(File targetFile, Group target, Configuration config, CanvasManager parent,
     		boolean userDeletable, String cameraName, int targetIndex) {
-        this.target = target;
+    	this.targetFile = targetFile;
+        this.targetGroup = target;
         this.config = Optional.of(config);
         this.parent = parent;
         this.userDeletable = userDeletable;
@@ -72,7 +75,8 @@ public class Target {
     }
     
     public Target(Group target) {
-        this.target = target;
+    	this.targetFile = null;
+        this.targetGroup = target;
         this.config = Optional.empty();
         this.parent = null;
         this.userDeletable = false;
@@ -86,13 +90,17 @@ public class Target {
         keyPressed();
     }
     
+    public File targetFile() {
+    	return targetFile;
+    }
+    
     public Group getTargetGroup() {
-    	return target;
+    	return targetGroup;
     }
     
     public void setPosition(double x, double y) {
-    	target.setLayoutX(x);
-    	target.setLayoutY(y);
+    	targetGroup.setLayoutX(x);
+    	targetGroup.setLayoutY(y);
     }
     
     public Point2D getPosition() {
@@ -100,27 +108,27 @@ public class Target {
     }
     
     public void setDimensions(double newWidth, double newHeight) { 	
-		double currentWidth = target.getBoundsInParent().getWidth();
-		double currentHeight = target.getBoundsInParent().getHeight();
+		double currentWidth = targetGroup.getBoundsInParent().getWidth();
+		double currentHeight = targetGroup.getBoundsInParent().getHeight();
     	
 		if (currentWidth != newWidth) {
 			double scaleXDelta = 1.0 + ((newWidth - currentWidth) / currentWidth);
-			target.setScaleX(target.getScaleX() * scaleXDelta);
+			targetGroup.setScaleX(targetGroup.getScaleX() * scaleXDelta);
 		}
 		
 		if (currentHeight != newHeight) {
 			double scaleYDelta = 1.0 + ((newHeight - currentHeight) / currentHeight);
-			target.setScaleY(target.getScaleY() * scaleYDelta);
+			targetGroup.setScaleY(targetGroup.getScaleY() * scaleYDelta);
 		}
     }
     
     public Dimension2D getDimension() {
-    	return new Dimension2D(target.getBoundsInParent().getWidth(), 
-    			target.getBoundsInParent().getHeight());
+    	return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), 
+    			targetGroup.getBoundsInParent().getHeight());
     }
     
     private void mousePressed() {
-        target.setOnMousePressed((event) -> {
+        targetGroup.setOnMousePressed((event) -> {
 	        if(!isInResizeZone(event)) {
 	        	move = true;
 	        	
@@ -136,7 +144,7 @@ public class Target {
     }
  
     private void mouseDragged() {
-    	target.setOnMouseDragged((event) -> {
+    	targetGroup.setOnMouseDragged((event) -> {
     		if (!resize && !move) return;
     		
 	        if(move) {
@@ -145,12 +153,12 @@ public class Target {
         		double deltaX = event.getX() - x;
         		double deltaY = event.getY() - y;
         	        	
-	            target.setLayoutX(target.getLayoutX() + deltaX);
-	            target.setLayoutY(target.getLayoutY() + deltaY);
+	            targetGroup.setLayoutX(targetGroup.getLayoutX() + deltaX);
+	            targetGroup.setLayoutY(targetGroup.getLayoutY() + deltaY);
 	        	
 				if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 					config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-							targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+							targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 				}
 	        	
 	            return;
@@ -160,16 +168,16 @@ public class Target {
 		        double gap; // The gap between the mouse and nearest target edge
 		        
 		        if (right) {
-		        	gap = event.getX() - target.getLayoutBounds().getMaxX();
+		        	gap = event.getX() - targetGroup.getLayoutBounds().getMaxX();
 		        } else {
-		        	gap = event.getX() - target.getLayoutBounds().getMinX();
+		        	gap = event.getX() - targetGroup.getLayoutBounds().getMinX();
 		        }
 		        
-		        double currentWidth = target.getBoundsInParent().getWidth(); 
+		        double currentWidth = targetGroup.getBoundsInParent().getWidth(); 
 		        double newWidth = currentWidth + gap;
 		        double scaleDelta = (newWidth - currentWidth) / currentWidth;
 		       
-		        double currentOriginX = target.getBoundsInParent().getMinX();
+		        double currentOriginX = targetGroup.getBoundsInParent().getMinX();
 		        double newOriginX;
 		        
 		        if (right) {
@@ -183,22 +191,22 @@ public class Target {
 		        
 		        if (right) originXDelta *= -1.0;
 		        
-	        	target.setLayoutX(target.getLayoutX() + originXDelta);
-	        	target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+	        	targetGroup.setLayoutX(targetGroup.getLayoutX() + originXDelta);
+	        	targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
     		} else if (top || bottom) {
 		        double gap;
 		        
 		        if (bottom) {
-		        	gap = event.getY() - target.getLayoutBounds().getMaxY();
+		        	gap = event.getY() - targetGroup.getLayoutBounds().getMaxY();
 		        } else {
-		        	gap = event.getY() - target.getLayoutBounds().getMinY();
+		        	gap = event.getY() - targetGroup.getLayoutBounds().getMinY();
 		        }    
 		        
-		        double currentHeight = target.getBoundsInParent().getHeight(); 
+		        double currentHeight = targetGroup.getBoundsInParent().getHeight(); 
 		        double newHeight = currentHeight + gap;
 		        double scaleDelta = (newHeight - currentHeight) / currentHeight;
 		       
-		        double currentOriginY = target.getBoundsInParent().getMinY();
+		        double currentOriginY = targetGroup.getBoundsInParent().getMinY();
 		        double newOriginY;
 		        
 		        if (bottom) {
@@ -212,58 +220,58 @@ public class Target {
 		        
 		        if (bottom) originYDelta *= -1.0;
 		   
-	        	target.setLayoutY(target.getLayoutY() + originYDelta); 
-	        	target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+	        	targetGroup.setLayoutY(targetGroup.getLayoutY() + originYDelta); 
+	        	targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 	        }
 	        
 			if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 				config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-						targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+						targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 			}
 			
 			if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 				config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-						targetIndex, target.getBoundsInParent().getWidth(), 
-						target.getBoundsInParent().getHeight());
+						targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+						targetGroup.getBoundsInParent().getHeight());
 			}
     	});
     }
     
     private void mouseMoved() {
-    	target.setOnMouseMoved((event) -> {
+    	targetGroup.setOnMouseMoved((event) -> {
         	x = event.getX();
         	y = event.getY();
     		
     		if (isTopZone(event)) {
-    			target.setCursor(Cursor.N_RESIZE);
+    			targetGroup.setCursor(Cursor.N_RESIZE);
     		} else if (isBottomZone(event)) {
-	       		target.setCursor(Cursor.S_RESIZE);
+	       		targetGroup.setCursor(Cursor.S_RESIZE);
 	       	} else if (isLeftZone(event)) {
-	       		target.setCursor(Cursor.W_RESIZE);
+	       		targetGroup.setCursor(Cursor.W_RESIZE);
 	       	} else if (isRightZone(event)) {
-	       		target.setCursor(Cursor.E_RESIZE);
+	       		targetGroup.setCursor(Cursor.E_RESIZE);
 	       	} else {
-	       		target.setCursor(Cursor.DEFAULT);
+	       		targetGroup.setCursor(Cursor.DEFAULT);
 	        }
     	});
     }
     
     private void mouseReleased() {
-    	target.setOnMouseReleased((event) -> {    		
+    	targetGroup.setOnMouseReleased((event) -> {    		
     		resize = false;
     		move = false;
-        	target.setCursor(Cursor.DEFAULT);
+        	targetGroup.setCursor(Cursor.DEFAULT);
     	});
     }
     
     private void keyPressed() {
-		target.setOnKeyPressed((event) -> {	
-			double currentWidth = target.getBoundsInParent().getWidth();
-			double currentHeight = target.getBoundsInParent().getHeight();
+		targetGroup.setOnKeyPressed((event) -> {	
+			double currentWidth = targetGroup.getBoundsInParent().getWidth();
+			double currentHeight = targetGroup.getBoundsInParent().getHeight();
 			
 			switch (event.getCode()) {
 			case DELETE:
-				if (userDeletable) parent.removeTarget(target);
+				if (userDeletable) parent.removeTarget(targetGroup);
 				break;
 				
 			case LEFT:
@@ -272,19 +280,19 @@ public class Target {
 					double scaleDelta = (newWidth - currentWidth) / currentWidth;
 					
 					if (event.isShiftDown()) {
-						target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+						targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, target.getBoundsInParent().getWidth(), 
-									target.getBoundsInParent().getHeight());
+									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
-						target.setLayoutX(target.getLayoutX() - MOVEMENT_DELTA);
+						targetGroup.setLayoutX(targetGroup.getLayoutX() - MOVEMENT_DELTA);
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -297,19 +305,19 @@ public class Target {
 					double scaleDelta = (newWidth - currentWidth) / currentWidth;
 
 					if (event.isShiftDown()) {
-						target.setScaleX(target.getScaleX() * (1.0 - scaleDelta));
+						targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, target.getBoundsInParent().getWidth(), 
-									target.getBoundsInParent().getHeight());
+									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
-						target.setLayoutX(target.getLayoutX() + MOVEMENT_DELTA);
+						targetGroup.setLayoutX(targetGroup.getLayoutX() + MOVEMENT_DELTA);
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -322,19 +330,19 @@ public class Target {
 					double scaleDelta = (newHeight - currentHeight) / currentHeight;
 					
 					if (event.isShiftDown()) {
-						target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+						targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, target.getBoundsInParent().getWidth(), 
-									target.getBoundsInParent().getHeight());
+									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
-						target.setLayoutY(target.getLayoutY() - MOVEMENT_DELTA);
+						targetGroup.setLayoutY(targetGroup.getLayoutY() - MOVEMENT_DELTA);
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -347,19 +355,19 @@ public class Target {
 					double scaleDelta = (newHeight - currentHeight) / currentHeight;
 					
 					if (event.isShiftDown()) {
-						target.setScaleY(target.getScaleY() * (1.0 - scaleDelta));
+						targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, target.getBoundsInParent().getWidth(), 
-									target.getBoundsInParent().getHeight());
+									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
-						target.setLayoutY(target.getLayoutY() + MOVEMENT_DELTA);
+						targetGroup.setLayoutY(targetGroup.getLayoutY() + MOVEMENT_DELTA);
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)target.getLayoutX(), (int)target.getLayoutY());
+									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -374,19 +382,19 @@ public class Target {
     }
   
     private boolean isTopZone(MouseEvent event) {
-    	return event.getY() < (target.getLayoutBounds().getMinY() + RESIZE_MARGIN);	
+    	return event.getY() < (targetGroup.getLayoutBounds().getMinY() + RESIZE_MARGIN);	
     }
     
     private boolean isBottomZone(MouseEvent event) {
-    	return event.getY() > (target.getLayoutBounds().getMaxY() - RESIZE_MARGIN);
+    	return event.getY() > (targetGroup.getLayoutBounds().getMaxY() - RESIZE_MARGIN);
     }
     
     private boolean isLeftZone(MouseEvent event) {
-    	return event.getX() < (target.getLayoutBounds().getMinX() + RESIZE_MARGIN);	
+    	return event.getX() < (targetGroup.getLayoutBounds().getMinX() + RESIZE_MARGIN);	
     }
     
     private boolean isRightZone(MouseEvent event) {
-    	return event.getX() > (target.getLayoutBounds().getMaxX() - RESIZE_MARGIN) ;
+    	return event.getX() > (targetGroup.getLayoutBounds().getMaxX() - RESIZE_MARGIN) ;
     }
  
     private boolean isInResizeZone(MouseEvent event) { 

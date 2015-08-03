@@ -462,11 +462,11 @@ public class CanvasManager {
 	}
 	
 	public Optional<Group> addTarget(File targetFile) {
-		Optional<Group> target = TargetIO.loadTarget(targetFile);
+		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
 		
-		if (target.isPresent()) {		
+		if (targetGroup.isPresent()) {		
 			// Make sure visible:false regions are hidden
-			for (Node node : target.get().getChildren()) {
+			for (Node node : targetGroup.get().getChildren()) {
 				TargetRegion region = (TargetRegion)node;
 
 				if (region.tagExists("visible") && 
@@ -476,25 +476,25 @@ public class CanvasManager {
 				}
 			}
 			
-			target.get().setOnMouseClicked((event) -> {
-					toggleTargetSelection(target);
-					selectedTarget = target;
-					target.get().requestFocus();
+			targetGroup.get().setOnMouseClicked((event) -> {
+					toggleTargetSelection(targetGroup);
+					selectedTarget = targetGroup;
+					targetGroup.get().requestFocus();
 				});
 			
-			addTarget(target.get(), true);
+			addTarget(targetFile, targetGroup.get(), true);
 			
 			if (config.getSessionRecorder().isPresent()) {
 				config.getSessionRecorder().get().recordTargetAdded(cameraName, targetFile.getName());
 			}
 		}
 		
-		return target;
+		return targetGroup;
 	}
 	
-	public void addTarget(Group target, boolean userDeletable) {
-		Platform.runLater(() -> { canvasGroup.getChildren().add(target); });
-		targets.add(new Target(target, config, this, userDeletable, cameraName, targets.size()));
+	public void addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
+		Platform.runLater(() -> { canvasGroup.getChildren().add(targetGroup); });
+		targets.add(new Target(targetFile, targetGroup, config, this, userDeletable, cameraName, targets.size()));
 	}
 	
 	public void removeTarget(Group target) {
