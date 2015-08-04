@@ -166,6 +166,10 @@ public class TrainingProtocolBase {
 	public void showTextOnFeed(String message) {
 		if (config.inDebugMode()) System.out.println(message);
 		
+		if (config.getSessionRecorder().isPresent()) {
+			config.getSessionRecorder().get().recordProtocolFeedMessage(message);
+		}
+		
 		Platform.runLater(() -> {
 				for (Label protocolLabel : protocolLabels.values())
 					protocolLabel.setText(message);

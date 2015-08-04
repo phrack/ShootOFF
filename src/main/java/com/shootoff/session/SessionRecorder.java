@@ -32,6 +32,10 @@ public class SessionRecorder {
 		}
 	}
 	
+	public Map<String, List<Event>> getEvents() {
+		return events;
+	}
+	
 	public List<Event> getCameraEvents(String cameraName) {
 		if (events.containsKey(cameraName)) {
 			return events.get(cameraName);
@@ -137,7 +141,12 @@ public class SessionRecorder {
 				new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex(), newX, newY));
 	}
 	
-	public Map<String, List<Event>> getEvents() {
-		return events;
+	public void recordProtocolFeedMessage(String message) {
+		// Add an event for this message to each camera
+		
+		for (String cameraName : seenTargets.keySet()) {
+			getCameraEvents(cameraName).add(
+				new ProtocolFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
+		}
 	}
 }

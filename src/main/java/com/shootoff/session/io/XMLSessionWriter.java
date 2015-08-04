@@ -68,6 +68,11 @@ public class XMLSessionWriter implements EventVisitor {
 		xmlBody.append(String.format("\t\t<targetMoved timestamp=\"%d\" index=\"%d\" "
 				+ "newX=\"%d\" newY=\"%d\" />\n", timestamp, targetIndex, newX, newY));
 	}
+	
+	@Override
+	public void visitProtocolFeedMessage(long timestamp, String message) {
+		xmlBody.append(String.format("\t\t<protocolFeedMessage timestamp=\"%d\">%s\n\t\t</protocolFeedMessage>\n", timestamp, message));
+	}
 
 	@Override
 	public void visitEnd() {

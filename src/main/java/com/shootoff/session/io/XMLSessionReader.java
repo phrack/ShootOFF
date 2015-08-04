@@ -20,6 +20,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.session.Event;
+import com.shootoff.session.ProtocolFeedMessageEvent;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
 import com.shootoff.session.TargetMovedEvent;
@@ -30,6 +31,9 @@ import javafx.scene.paint.Color;
 
 public class XMLSessionReader {
 	private final File sessionFile;
+	
+	private long lastTimestamp;
+	private boolean protocolFeedMessage = false;
 	
 	public XMLSessionReader(File sessionFile) {
 		this.sessionFile = sessionFile;
@@ -132,7 +136,21 @@ public class XMLSessionReader {
 								Integer.parseInt(attributes.getValue("newX")),
 								Integer.parseInt(attributes.getValue("newY"))));
 				break;
+				
+			case "protocolFeedMessage":
+				Long.parseLong(attributes.getValue("timestamp"));
+				protocolFeedMessage = true;
 			}
+		}
+		
+		public void characters(char ch[], int start, int length) throws SAXException {
+			if (protocolFeedMessage) {
+				events.get(currentCameraName).add(
+						new ProtocolFeedMessageEvent(currentCameraName, lastTimestamp, 
+								new String(ch, start, length)));
+				
+				protocolFeedMessage = false;
+			}	
 		}
 	}
 }

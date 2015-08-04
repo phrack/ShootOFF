@@ -15,6 +15,7 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
 import com.shootoff.session.Event;
+import com.shootoff.session.ProtocolFeedMessageEvent;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
@@ -34,6 +35,7 @@ public class TestSessionIO {
 	private String targetName;
 	private int targetIndex;
 	private int hitRegionIndex;
+	private String protocolMessage;
 	
 	@Before
 	public void setUp() throws ConfigurationException {
@@ -44,6 +46,7 @@ public class TestSessionIO {
 		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
 		targetIndex = 1;
+		protocolMessage = "This is a\n\t test";
 		
 		Configuration config = new Configuration(new String[0]);
 		Target target = new Target(new File(targetName), new Group(), 
@@ -51,14 +54,15 @@ public class TestSessionIO {
 		
 		hitRegionIndex = 0;
 		
-		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(target), Optional.of(hitRegionIndex));
-		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex));
 		sessionRecorder.recordTargetAdded(cameraName1, target);
 		sessionRecorder.recordTargetAdded(cameraName2, target);
 		sessionRecorder.recordTargetResized(cameraName1, target, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName1, target, 4, 3);
+		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(target), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex));
 		sessionRecorder.recordTargetRemoved(cameraName1, target);
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty());
+		sessionRecorder.recordProtocolFeedMessage(protocolMessage);
 	}
 
 	@Test
@@ -72,34 +76,34 @@ public class TestSessionIO {
 		
 		List<Event> events = sessionRecorder.get().getCameraEvents(cameraName1);
 		
-		assertEquals(7, events.size());
+		assertEquals(8, events.size());
+		
+		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
+		
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(1)).getTargetIndex());
+		assertEquals(10, ((TargetResizedEvent)events.get(1)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(1)).getNewHeight(), 1);
+		
+		assertEquals(targetIndex, ((TargetMovedEvent)events.get(2)).getTargetIndex());
+		assertEquals(4, ((TargetMovedEvent)events.get(2)).getNewX());
+		assertEquals(3, ((TargetMovedEvent)events.get(2)).getNewY());
 
-		assertEquals(Color.RED, ((ShotEvent)events.get(0)).getShot().getColor());
-		assertEquals(redShot.getX(), ((ShotEvent)events.get(0)).getShot().getX(), 1);
-		assertEquals(redShot.getY(), ((ShotEvent)events.get(0)).getShot().getY(), 1);
-		assertEquals(redShot.getTimestamp(), ((ShotEvent)events.get(0)).getShot().getTimestamp());
-		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(0)).getShot().getMarker().getRadiusX(), 1);
-		assertEquals(targetIndex, ((ShotEvent)events.get(0)).getTargetIndex().get().intValue());
-		assertEquals(hitRegionIndex, ((ShotEvent)events.get(0)).getHitRegionIndex().get().intValue());
+		assertEquals(Color.RED, ((ShotEvent)events.get(3)).getShot().getColor());
+		assertEquals(redShot.getX(), ((ShotEvent)events.get(3)).getShot().getX(), 1);
+		assertEquals(redShot.getY(), ((ShotEvent)events.get(3)).getShot().getY(), 1);
+		assertEquals(redShot.getTimestamp(), ((ShotEvent)events.get(3)).getShot().getTimestamp());
+		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(3)).getShot().getMarker().getRadiusX(), 1);
+		assertEquals(targetIndex, ((ShotEvent)events.get(3)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
 		
-		assertEquals(Color.GREEN, ((ShotEvent)events.get(1)).getShot().getColor());
-		assertEquals(greenShot.getX(), ((ShotEvent)events.get(1)).getShot().getX(), 1);
-		assertEquals(greenShot.getY(), ((ShotEvent)events.get(1)).getShot().getY(), 1);
-		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(1)).getShot().getTimestamp());
-		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(1)).getShot().getMarker().getRadiusX(), 1);
-		assertEquals(targetIndex, ((ShotEvent)events.get(1)).getTargetIndex().get().intValue());
-		assertEquals(hitRegionIndex, ((ShotEvent)events.get(1)).getHitRegionIndex().get().intValue());
-		
-		assertEquals(targetName, ((TargetAddedEvent)events.get(2)).getTargetName());
-		
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(3)).getTargetIndex());
-		assertEquals(10, ((TargetResizedEvent)events.get(3)).getNewWidth(), 1);
-		assertEquals(20, ((TargetResizedEvent)events.get(3)).getNewHeight(), 1);
-		
-		assertEquals(targetIndex, ((TargetMovedEvent)events.get(4)).getTargetIndex());
-		assertEquals(4, ((TargetMovedEvent)events.get(4)).getNewX());
-		assertEquals(3, ((TargetMovedEvent)events.get(4)).getNewY());
-		
+		assertEquals(Color.GREEN, ((ShotEvent)events.get(4)).getShot().getColor());
+		assertEquals(greenShot.getX(), ((ShotEvent)events.get(4)).getShot().getX(), 1);
+		assertEquals(greenShot.getY(), ((ShotEvent)events.get(4)).getShot().getY(), 1);
+		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(4)).getShot().getTimestamp());
+		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(4)).getShot().getMarker().getRadiusX(), 1);
+		assertEquals(targetIndex, ((ShotEvent)events.get(4)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(4)).getHitRegionIndex().get().intValue());
+
 		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(5)).getTargetIndex());
 		
 		assertEquals(Color.GREEN, ((ShotEvent)events.get(6)).getShot().getColor());
@@ -110,11 +114,15 @@ public class TestSessionIO {
 		assertFalse(((ShotEvent)events.get(6)).getTargetIndex().isPresent());
 		assertFalse(((ShotEvent)events.get(6)).getHitRegionIndex().isPresent());
 		
+		assertEquals(protocolMessage, ((ProtocolFeedMessageEvent)events.get(7)).getMessage());
+		
 		events = sessionRecorder.get().getCameraEvents(cameraName2);
 		
-		assertEquals(1, events.size());
+		assertEquals(2, events.size());
 		
 		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
+		
+		assertEquals(protocolMessage, ((ProtocolFeedMessageEvent)events.get(1)).getMessage());
 		
 		tempXMLTarget.delete();
 	}
