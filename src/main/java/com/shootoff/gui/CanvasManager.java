@@ -464,18 +464,7 @@ public class CanvasManager {
 	public Optional<Target> addTarget(File targetFile) {
 		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
 		
-		if (targetGroup.isPresent()) {		
-			// Make sure visible:false regions are hidden
-			for (Node node : targetGroup.get().getChildren()) {
-				TargetRegion region = (TargetRegion)node;
-
-				if (region.tagExists("visible") && 
-						region.getTag("visible").equals("false")) {
-					
-					node.setVisible(false);
-				}
-			}
-			
+		if (targetGroup.isPresent()) {	
 			targetGroup.get().setOnMouseClicked((event) -> {
 					toggleTargetSelection(targetGroup);
 					selectedTarget = targetGroup;

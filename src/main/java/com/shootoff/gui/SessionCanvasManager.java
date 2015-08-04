@@ -13,13 +13,11 @@ import com.shootoff.session.TargetAddedEvent;
 import com.shootoff.session.TargetMovedEvent;
 import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
-import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 
 public class SessionCanvasManager {
 	private final Group canvas;
@@ -100,17 +98,6 @@ public class SessionCanvasManager {
 		Optional<Group> target = TargetIO.loadTarget(new File("targets/" + e.getTargetName()));
 		
 		if (target.isPresent()) {		
-			// Make sure visible:false regions are hidden
-			for (Node node : target.get().getChildren()) {
-				TargetRegion region = (TargetRegion)node;
-
-				if (region.tagExists("visible") && 
-						region.getTag("visible").equals("false")) {
-					
-					node.setVisible(false);
-				}
-			}
-			
 			canvas.getChildren().add(target.get());
 			Target targetContainer = new Target(target.get());
 			eventToContainer.put(e, targetContainer);

@@ -115,9 +115,17 @@ public class TargetIO {
 		}
 		
 		Group targetGroup = new Group();
-		for (Node region : regions) {
-			if (((TargetRegion)region).getType() != RegionType.IMAGE) region.setOpacity(DEFAULT_OPACITY);
-			targetGroup.getChildren().add(region);
+		for (Node node : regions) {
+			TargetRegion region = (TargetRegion)node;
+			
+			if (region.tagExists("visible") && 
+					region.getTag("visible").equals("false")) {
+				
+				node.setVisible(false);
+			}
+			
+			if (region.getType() != RegionType.IMAGE) node.setOpacity(DEFAULT_OPACITY);
+			targetGroup.getChildren().add(node);
 		}
 		
 		return Optional.of(targetGroup);
