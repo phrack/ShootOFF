@@ -108,7 +108,7 @@ public class Target {
     }
     
     public Point2D getPosition() {
-    	return new Point2D(x, y);
+    	return new Point2D(targetGroup.getLayoutX(), targetGroup.getLayoutY());
     }
     
     public void setDimensions(double newWidth, double newHeight) { 	
