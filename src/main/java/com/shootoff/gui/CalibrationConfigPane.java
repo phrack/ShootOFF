@@ -40,16 +40,15 @@ public class CalibrationConfigPane extends BorderPane {
 		
 		minimizeDetectionRadioButton.setSelected(true);
 		
-		detectEverywhere.setStyle("-fx-background-color: darkgray;");
 		detectEverywhere.setTextFill(Color.WHITE);
-		minimizeDetectionRadioButton.setStyle("-fx-background-color: darkgray;");
 		minimizeDetectionRadioButton.setTextFill(Color.WHITE);
-		cropRadioButton.setStyle("-fx-background-color: darkgray;");
 		cropRadioButton.setTextFill(Color.WHITE);
 		
-		this.setLeft(detectEverywhere);
+		this.setTop(detectEverywhere);
 		this.setCenter(minimizeDetectionRadioButton);
-		this.setRight(cropRadioButton);
+		this.setBottom(cropRadioButton);
+		
+		this.setStyle("-fx-background-color: darkgray;");
 		
 		parent.getChildren().add(this);
 	}

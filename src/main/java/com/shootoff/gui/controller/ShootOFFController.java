@@ -167,12 +167,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 		
 		TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
-		timeCol.setPrefWidth(65);
+		timeCol.setMinWidth(85);
 		timeCol.setCellValueFactory(
                 new PropertyValueFactory<ShotEntry, String>("timestamp"));
 		
 		TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
-		laserCol.setPrefWidth(65);
+		laserCol.setMinWidth(85);
 		laserCol.setCellValueFactory(
                 new PropertyValueFactory<ShotEntry, String>("color"));
 		
@@ -559,8 +559,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	@FXML
 	public void toggleArenaCalibrationClicked(ActionEvent event) {
-		final int DEFAULT_DIM = 30;
-		final int DEFAULT_POS = 100;
+		final int DEFAULT_DIM = 75;
+		final int DEFAULT_POS = 150;
 		
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");

@@ -8,7 +8,7 @@
 
 <BorderPane fx:id="targetEditorPane" onKeyPressed="#canvasKeyPressed" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.TargetEditorController">
    <top>
-      <ToolBar prefHeight="40.0" prefWidth="622.0" BorderPane.alignment="CENTER">
+      <ToolBar prefHeight="40.0" BorderPane.alignment="CENTER">
         <items>
           <Button maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveTarget" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_floppy.png&quot;); -fx-background-position: center;">
                <tooltip>

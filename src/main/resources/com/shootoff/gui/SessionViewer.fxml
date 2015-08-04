@@ -7,20 +7,20 @@
 
 <HBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.SessionViewerController">
    <children>
-      <ListView fx:id="sessionListView" prefHeight="200.0" prefWidth="200.0" />
+      <ListView fx:id="sessionListView" HBox.hgrow="ALWAYS" />
       <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
             <TabPane fx:id="cameraTabPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" />
             <HBox prefHeight="32.0" prefWidth="32.0">
                <children>
-                  <Button mnemonicParsing="false" onAction="#previousButtonClicked" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_skip_backward.png&quot;); -fx-background-position: center;" />
-                  <Button mnemonicParsing="false" onAction="#nextButtonClicked" prefHeight="32.0" prefWidth="32.0" style="-fx-background-position: center; -fx-background-image: url(&quot;images/gnome_media_skip_forward.png&quot;);" />
+                  <Button mnemonicParsing="false" onAction="#previousButtonClicked" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_skip_backward.png&quot;); -fx-background-position: center;" />
+                  <Button mnemonicParsing="false" onAction="#nextButtonClicked" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="32.0" style="-fx-background-position: center; -fx-background-image: url(&quot;images/gnome_media_skip_forward.png&quot;);" />
                   <Slider fx:id="timeSlider" HBox.hgrow="ALWAYS" />
                   <Label fx:id="timeLabel" text="00:00:00" />
                </children>
             </HBox>
          </children>
       </VBox>
-      <ListView fx:id="eventsListView" prefHeight="200.0" prefWidth="200.0" />
+      <ListView fx:id="eventsListView" HBox.hgrow="ALWAYS" />
    </children>
 </HBox>

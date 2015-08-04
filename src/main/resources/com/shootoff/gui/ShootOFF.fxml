@@ -76,7 +76,7 @@
             <Insets />
          </VBox.margin>
       </HBox>
-      <GridPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="35.0" VBox.vgrow="NEVER">
+      <GridPane maxHeight="-Infinity" minHeight="-Infinity" VBox.vgrow="NEVER">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
          </columnConstraints>
