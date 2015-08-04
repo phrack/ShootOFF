@@ -20,6 +20,7 @@ public class MockCanvasManager extends CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(MockCanvasManager.class);
 	private final List<Shot> shots = new ArrayList<Shot>();
 	private final Configuration config;
+	private final String cameraName;
 	private final boolean useShotProcessors;
 	private long startTime = 0;
 	
@@ -28,6 +29,7 @@ public class MockCanvasManager extends CanvasManager {
 				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
+		this.cameraName = "Default";
 		this.useShotProcessors = false;
 	}
 	
@@ -36,9 +38,14 @@ public class MockCanvasManager extends CanvasManager {
 				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
+		this.cameraName = "Default";
 		this.useShotProcessors = useShotProcessors;
 	}
 
+	public String getCameraName() {
+		return cameraName;
+	}
+	
 	@Override
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();

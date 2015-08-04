@@ -114,6 +114,10 @@ public class CanvasManager {
 		});
 	}	
 	
+	public String getCameraName() {
+		return cameraName;
+	}
+	
 	public void setContextMenu(ContextMenu menu) {
 		this.contextMenu = Optional.of(menu);
 	}
@@ -473,8 +477,8 @@ public class CanvasManager {
 			
 			Optional<Target> target = Optional.of(addTarget(targetFile, targetGroup.get(), true));
 			
-			if (config.getSessionRecorder().isPresent()) {
-				config.getSessionRecorder().get().recordTargetAdded(cameraName, targetFile.getName());
+			if (config.getSessionRecorder().isPresent() && target.isPresent()) {
+				config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
 			}
 			
 			return target;
@@ -485,7 +489,7 @@ public class CanvasManager {
 	
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
 		Platform.runLater(() -> { canvasGroup.getChildren().add(targetGroup); });
-		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, cameraName, targets.size());
+		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, targets.size());
 		targets.add(newTarget);
 		
 		return newTarget;
@@ -495,7 +499,7 @@ public class CanvasManager {
 		Platform.runLater(() -> { canvasGroup.getChildren().remove(target.getTargetGroup()); });
 		
 		if (config.getSessionRecorder().isPresent()) {
-			config.getSessionRecorder().get().recordTargetRemoved(cameraName, targets.indexOf(target));
+			config.getSessionRecorder().get().recordTargetRemoved(cameraName, target);
 		}
 		
 		targets.remove(target);

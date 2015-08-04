@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Target;
 
 public class SessionRecorder {
 	private final long startTime;
@@ -38,14 +39,14 @@ public class SessionRecorder {
 				new ShotEvent(cameraName, System.currentTimeMillis() - startTime, shot, targetIndex, hitRegionIndex));
 	}
 	
-	public void recordTargetAdded(String cameraName, String targetName) {
+	public void recordTargetAdded(String cameraName, Target target) {
 		getCameraEvents(cameraName).add(
-				new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
+				new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetFile().getName()));
 	}
 	
-	public void recordTargetRemoved(String cameraName, int targetIndex) {
+	public void recordTargetRemoved(String cameraName, Target target) {
 		getCameraEvents(cameraName).add(
-				new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, targetIndex));
+				new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex()));
 	}
 
 	private void collapseTargetEvents(String cameraName, EventType type, int targetIndex) {

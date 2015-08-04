@@ -2,6 +2,7 @@ package com.shootoff.session;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.gui.Target;
 
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 public class TestSessionRecorder {
@@ -18,25 +24,31 @@ public class TestSessionRecorder {
 	private Shot shot;
 	private String targetName;
 	private int targetIndex;
+	private Target target;
 	private int hitRegionIndex;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws ConfigurationException {
 		sessionRecorder = new SessionRecorder(); 
 		cameraName = "Default";
 		shot = new Shot(Color.RED, 0, 0, 0, 2);
 		targetName = "bullseye.target";
 		targetIndex = 1;
+		
+		Configuration config = new Configuration(new String[0]);
+		
+		target = new Target(new File(targetName), new Group(), config, 
+				new MockCanvasManager(config), false, targetIndex);
 		hitRegionIndex = 0;
 	}
 	
 	@Test
 	public void testOneOfEach() {
 		sessionRecorder.recordShot(cameraName, shot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordTargetAdded(cameraName, targetName);
+		sessionRecorder.recordTargetAdded(cameraName, target);
 		sessionRecorder.recordTargetResized(cameraName, targetIndex, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 4, 3);
-		sessionRecorder.recordTargetRemoved(cameraName, targetIndex);
+		sessionRecorder.recordTargetRemoved(cameraName, target);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		

@@ -58,13 +58,13 @@ public class Target {
     private double y;
     
     public Target(File targetFile, Group target, Configuration config, CanvasManager parent,
-    		boolean userDeletable, String cameraName, int targetIndex) {
+    		boolean userDeletable, int targetIndex) {
     	this.targetFile = targetFile;
         this.targetGroup = target;
         this.config = Optional.of(config);
         this.parent = parent;
         this.userDeletable = userDeletable;
-        this.cameraName = cameraName;
+        this.cameraName = parent.getCameraName();
         this.targetIndex = targetIndex;
         
         mousePressed();
@@ -90,12 +90,16 @@ public class Target {
         keyPressed();
     }
     
-    public File targetFile() {
+    public File getTargetFile() {
     	return targetFile;
     }
     
     public Group getTargetGroup() {
     	return targetGroup;
+    }
+    
+    public int getTargetIndex() {
+    	return targetIndex;
     }
     
     public void setPosition(double x, double y) {

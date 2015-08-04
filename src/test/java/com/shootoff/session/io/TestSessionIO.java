@@ -10,6 +10,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.gui.Target;
 import com.shootoff.session.Event;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.ShotEvent;
@@ -18,6 +22,7 @@ import com.shootoff.session.TargetMovedEvent;
 import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 public class TestSessionIO {
@@ -31,7 +36,7 @@ public class TestSessionIO {
 	private int hitRegionIndex;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws ConfigurationException {
 		sessionRecorder = new SessionRecorder();
 		cameraName1 = "Default";
 		cameraName2 = "Another Camera";
@@ -39,15 +44,20 @@ public class TestSessionIO {
 		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
 		targetIndex = 1;
+		
+		Configuration config = new Configuration(new String[0]);
+		Target target = new Target(new File(targetName), new Group(), 
+				config, new MockCanvasManager(config), false, targetIndex);
+		
 		hitRegionIndex = 0;
 		
 		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordTargetAdded(cameraName1, targetName);
-		sessionRecorder.recordTargetAdded(cameraName2, targetName);
+		sessionRecorder.recordTargetAdded(cameraName1, target);
+		sessionRecorder.recordTargetAdded(cameraName2, target);
 		sessionRecorder.recordTargetResized(cameraName1, targetIndex, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName1, targetIndex, 4, 3);
-		sessionRecorder.recordTargetRemoved(cameraName1, targetIndex);
+		sessionRecorder.recordTargetRemoved(cameraName1, target);
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty());
 	}
 
