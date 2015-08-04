@@ -138,7 +138,7 @@ public class XMLSessionReader {
 				break;
 				
 			case "protocolFeedMessage":
-				Long.parseLong(attributes.getValue("timestamp"));
+				lastTimestamp = Long.parseLong(attributes.getValue("timestamp"));
 				protocolFeedMessage = true;
 			}
 		}

@@ -143,7 +143,6 @@ public class SessionRecorder {
 	
 	public void recordProtocolFeedMessage(String message) {
 		// Add an event for this message to each camera
-		
 		for (String cameraName : seenTargets.keySet()) {
 			getCameraEvents(cameraName).add(
 				new ProtocolFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));

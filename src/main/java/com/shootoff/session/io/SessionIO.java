@@ -58,6 +58,7 @@ public class SessionIO {
 				case PROTOCOL_FEED_MESSAGE:
 					ProtocolFeedMessageEvent pfme = (ProtocolFeedMessageEvent)e;
 					visitor.visitProtocolFeedMessage(pfme.getTimestamp(), pfme.getMessage());
+					break;
 				}
 			}
 			
