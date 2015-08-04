@@ -332,7 +332,7 @@ public class CanvasManager {
 						if (config.getSessionRecorder().isPresent()) {
 							config.getSessionRecorder().get().recordShot(cameraName, 
 									shot,
-									Optional.of(targets.indexOf(targetGroup)), 
+									Optional.of(target), 
 									Optional.of(targetGroup.getChildren().indexOf(node)));
 						}
 						

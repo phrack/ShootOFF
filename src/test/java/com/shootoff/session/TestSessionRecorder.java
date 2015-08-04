@@ -44,10 +44,10 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testOneOfEach() {
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex));
 		sessionRecorder.recordTargetAdded(cameraName, target);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 10, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 4, 3);
+		sessionRecorder.recordTargetResized(cameraName, target, 10, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 4, 3);
 		sessionRecorder.recordTargetRemoved(cameraName, target);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
@@ -84,10 +84,10 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testCollapseResizesBasic() {
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -103,12 +103,12 @@ public class TestSessionRecorder {
 	public void testCollapseResizesMultipleCameras() {
 		String cameraName2 = "AnotherCamera";
 		
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetResized(cameraName2, targetIndex, 50, 10);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetResized(cameraName2, targetIndex, 55, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetResized(cameraName2, target, 50, 10);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetResized(cameraName2, target, 55, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -131,11 +131,11 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testCollapseResizesShotInMiddle() {
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
+		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex));
+		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -160,11 +160,11 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testCollapseResizesMoveInMiddle() {
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 4, 3);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 4, 3);
+		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -183,10 +183,10 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testCollapseMovesBasic() {
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -200,11 +200,11 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testCollapseMovesShotInMiddle() {
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
+		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex));
+		sessionRecorder.recordTargetMoved(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -229,11 +229,11 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void testCollapseMovesResizeInMiddle() {
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 6, 7);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 6, 7);
+		sessionRecorder.recordTargetMoved(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -252,17 +252,17 @@ public class TestSessionRecorder {
 	
 	@Test
 	public void TestCollapseMingledMovesAndResizes() {
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 6, 7);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 13, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 13, 40);
-		sessionRecorder.recordTargetMoved(cameraName, targetIndex, 12, 45);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 11, 20);
-		sessionRecorder.recordTargetResized(cameraName, targetIndex, 12, 45);
+		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 6, 7);
+		sessionRecorder.recordTargetMoved(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 13, 40);
+		sessionRecorder.recordTargetMoved(cameraName, target, 12, 45);
+		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
+		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -277,6 +277,5 @@ public class TestSessionRecorder {
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(1)).getTargetIndex());
 		assertEquals(12, ((TargetResizedEvent)events.get(1)).getNewWidth(), 1);
 		assertEquals(45, ((TargetResizedEvent)events.get(1)).getNewHeight(), 1);	
-		
 	}
 }

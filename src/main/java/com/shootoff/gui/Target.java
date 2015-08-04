@@ -162,7 +162,7 @@ public class Target {
 	        	
 				if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 					config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-							targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
+							this, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 				}
 	        	
 	            return;
@@ -230,12 +230,12 @@ public class Target {
 	        
 			if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 				config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-						targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
+						this, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 			}
 			
 			if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 				config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-						targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+						this, targetGroup.getBoundsInParent().getWidth(), 
 						targetGroup.getBoundsInParent().getHeight());
 			}
     	});
@@ -288,7 +288,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									this, targetGroup.getBoundsInParent().getWidth(), 
 									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
@@ -296,7 +296,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
+									this, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -313,7 +313,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									this, targetGroup.getBoundsInParent().getWidth(), 
 									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
@@ -321,7 +321,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
+									this, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -338,7 +338,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									this, targetGroup.getBoundsInParent().getWidth(), 
 									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
@@ -346,7 +346,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
+									this, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}
@@ -363,7 +363,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetResized(cameraName, 
-									targetIndex, targetGroup.getBoundsInParent().getWidth(), 
+									this, targetGroup.getBoundsInParent().getWidth(), 
 									targetGroup.getBoundsInParent().getHeight());
 						}
 					} else {
@@ -371,7 +371,7 @@ public class Target {
 						
 						if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 							config.get().getSessionRecorder().get().recordTargetMoved(cameraName, 
-									targetIndex, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
+									this, (int)targetGroup.getLayoutX(), (int)targetGroup.getLayoutY());
 						}
 					}
 				}

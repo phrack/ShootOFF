@@ -51,12 +51,12 @@ public class TestSessionIO {
 		
 		hitRegionIndex = 0;
 		
-		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
-		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(targetIndex), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(target), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex));
 		sessionRecorder.recordTargetAdded(cameraName1, target);
 		sessionRecorder.recordTargetAdded(cameraName2, target);
-		sessionRecorder.recordTargetResized(cameraName1, targetIndex, 10, 20);
-		sessionRecorder.recordTargetMoved(cameraName1, targetIndex, 4, 3);
+		sessionRecorder.recordTargetResized(cameraName1, target, 10, 20);
+		sessionRecorder.recordTargetMoved(cameraName1, target, 4, 3);
 		sessionRecorder.recordTargetRemoved(cameraName1, target);
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty());
 	}
