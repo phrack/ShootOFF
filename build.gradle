@@ -6,9 +6,13 @@ apply plugin: 'eclipse'
 def javaHome = System.properties['java.home']
 
 def archivePath = 'build/dist/ShootOFF.jar'
-def libTempDir = "build/dist/libs"
+def libTempDir = 'build/dist/libs'
 def mainClassName = 'com.shootoff.Main'
-def version = '3.0'
+
+def keyStore = 'shootoff_cs.jks'
+def keyAlias = 'cscert'
+def tsaURL = 'http://timestamp.comodoca.com/rfc3161'
+def version = '3.2'
 
 repositories {
     mavenCentral()
@@ -99,5 +103,24 @@ task fxJar(dependsOn: build){
                 fileset(dir: libTempDir + '/../')
             }
         }
+    }
+}
+
+task fxSignedJar(dependsOn: fxJar){
+    doFirst { 
+        assert file(keyStore).exists() 
+    }
+
+    doLast {
+        def keyPassword = System.console().readPassword("\nPlease enter key passphrase: ")
+        keyPassword = new String(keyPassword)
+
+        ant.signjar(
+                jar: archivePath,
+                keystore: keyStore,
+                storepass: keyPassword,
+                alias: keyAlias,
+                tsaurl: tsaURL
+        )
     }
 }
