@@ -7,12 +7,15 @@ def javaHome = System.properties['java.home']
 
 def archivePath = 'build/dist/ShootOFF.jar'
 def libTempDir = 'build/dist/libs'
+def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
+def version = '3.2'
+def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
 def keyAlias = 'cscert'
 def tsaURL = 'http://timestamp.comodoca.com/rfc3161'
-def version = '3.2'
+
 
 repositories {
     mavenCentral()
@@ -102,6 +105,12 @@ task fxJar(dependsOn: build){
             antfx.resources() {
                 fileset(dir: libTempDir + '/../')
             }
+            delegate.manifest {
+                attribute(name: 'Codebase', value: '*')
+                attribute(name: 'Permissions', value: 'all-permissions')
+		attribute(name: 'Application-Name', value: 'ShootOFF')
+		attribute(name: 'Created-By', value: 'ShootOFF')
+            }
         }
     }
 }
@@ -122,5 +131,99 @@ task fxSignedJar(dependsOn: fxJar){
                 alias: keyAlias,
                 tsaurl: tsaURL
         )
+    }
+}
+
+task fxWebstartSignedJar(dependsOn: fxJar){
+    doFirst { 
+        assert file(keyStore).exists() 
+    }
+
+    doLast {
+        def keyPassword = System.console().readPassword("\nPlease enter key passphrase: ")
+        keyPassword = new String(keyPassword)
+
+        ant.signjar(
+                keystore: keyStore,
+                storepass: keyPassword,
+                alias: keyAlias,
+                tsaurl: tsaURL,
+                lazy: true
+        ) {
+                ant.fileset(
+                        dir: 'build/dist/',
+                        includes: 'ShootOFF.jar'
+                )
+
+                ant.fileset(
+                        dir: 'build/dist/',
+                        includes: 'libs/*.jar',
+                )
+        }
+    }
+}
+
+task fxDeploy(dependsOn: fxWebstartSignedJar){
+    def antfx = NamespaceBuilder.newInstance(
+            ant,
+            'javafx:com.sun.javafx.tools.ant')
+
+    doLast {
+        antfx.deploy(
+                outdir: "${project.buildDir}/webstart",
+                outfile: project.name
+        ) {
+            antfx.application(
+                    mainClass: mainClassName
+            )
+
+            antfx.platform(
+                    javafx: '8.0+',
+                    j2se: '1.8+'
+            )
+
+            antfx.info(
+                    title: project.name,
+                    vendor: project.name,
+                    license: license,
+                    description: 'Software to enhance laser dry fire training'
+            ) {
+
+                antfx.icon(
+                        href: 'icon_32x32.png'
+                )
+            }
+
+            antfx.permissions(
+                    elevated: true,
+                    cachecertificates: true
+            )
+
+
+            antfx.preferences(
+                    shortcut: true,
+                    install: false,
+                    menu: false
+            )
+
+
+            antfx.resources {
+                antfx.fileset(
+                        dir: 'build/dist/',
+                        includes: 'ShootOFF.jar'
+                )
+
+                antfx.fileset(
+                        dir: 'build/dist/',
+                        includes: 'libs/*.jar',
+                )
+
+                antfx.fileset(
+                        type: 'icon',
+                        dir: 'src/main/resources/images/',
+                        includes: 'icon_32x32.png'
+                )
+            }
+        }
     }
 }
