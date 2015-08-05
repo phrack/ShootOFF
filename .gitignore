@@ -8,6 +8,10 @@
 *.war
 *.ear
 
+# Keystores
+
+*.jks
+
 # Eclipse files
 .project
 .metadata
