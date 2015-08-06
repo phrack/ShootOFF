@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="ShootOFF.jnlp">
+  <information>
+    <title>ShootOFF</title>
+    <vendor>ShootOFF</vendor>
+    <description>Software to enhance laser dry fire training</description>
+    <icon href="icon_32x32.png" />
+    <offline-allowed/>
+  <shortcut><desktop/></shortcut>
+  </information>
+  <resources>
+    <j2se version="1.8+" href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="ShootOFF.jar" size="3508707" download="eager" />
+    <jar href="libs/bridj-0.7.0.jar" size="974226" download="eager" />
+    <jar href="libs/commons-cli-1.3.1.jar" size="61171" download="eager" />
+    <jar href="libs/commons-collections-3.2.1.jar" size="628808" download="eager" />
+    <jar href="libs/commons-io-2.0.1.jar" size="176371" download="eager" />
+    <jar href="libs/commons-lang-2.6.jar" size="304242" download="eager" />
+    <jar href="libs/dx-1.7.jar" size="1052518" download="eager" />
+    <jar href="libs/emotionml-checker-java-1.1.jar" size="29640" download="eager" />
+    <jar href="libs/freetts-1.0.jar" size="299894" download="eager" />
+    <jar href="libs/freetts-de-1.0.jar" size="8722" download="eager" />
+    <jar href="libs/freetts-en_us-1.0.jar" size="882531" download="eager" />
+    <jar href="libs/guava-14.0.1.jar" size="2338072" download="eager" />
+    <jar href="libs/hsqldb-2.0.0.jar" size="1319569" download="eager" />
+    <jar href="libs/httpcore-4.1.jar" size="203930" download="eager" />
+    <jar href="libs/httpcore-nio-4.1.jar" size="217492" download="eager" />
+    <jar href="libs/jtok-core-1.9.1.jar" size="99807" download="eager" />
+    <jar href="libs/jwnl-1.3.3.jar" size="190904" download="eager" />
+    <jar href="libs/log4j-1.2.16.jar" size="515204" download="eager" />
+    <jar href="libs/logback-classic-1.0.0.jar" size="269572" download="eager" />
+    <jar href="libs/logback-core-1.0.0.jar" size="361502" download="eager" />
+    <jar href="libs/marytts-common-5.1.2.jar" size="176573" download="eager" />
+    <jar href="libs/marytts-lang-en-5.1.2.jar" size="6954840" download="eager" />
+    <jar href="libs/marytts-runtime-5.1.2.jar" size="1121238" download="eager" />
+    <jar href="libs/marytts-signalproc-5.1.2.jar" size="1375832" download="eager" />
+    <jar href="libs/opennlp-maxent-3.0.3.jar" size="145090" download="eager" />
+    <jar href="libs/opennlp-tools-1.5.3.jar" size="879771" download="eager" />
+    <jar href="libs/slf4j-api-1.7.12.jar" size="40791" download="eager" />
+    <jar href="libs/slf4j-log4j12-1.6.1.jar" size="16176" download="eager" />
+    <jar href="libs/slf4j-simple-1.7.12.jar" size="17124" download="eager" />
+    <jar href="libs/swing-layout-1.0.3.jar" size="125706" download="eager" />
+    <jar href="libs/trove4j-2.0.2.jar" size="801204" download="eager" />
+    <jar href="libs/voice-cmu-slt-hsmm-5.1.2.jar" size="1250274" download="eager" />
+    <jar href="libs/webcam-capture-0.3.10.jar" size="424393" download="eager" />
+    <jar href="libs/xuggle-xuggler-5.4.jar" size="40350889" download="eager" />
+    <jar href="libs/shootoff-writable-resources.jar" size="1493373" download="eager" />
+  </resources>
+<security>
+  <all-permissions/>
+</security>
+  <jfx:javafx-desc  width="0" height="0" main-class="com.shootoff.Main"  name="ShootOFF" />
+  <update check="background"/>
+</jnlp>
