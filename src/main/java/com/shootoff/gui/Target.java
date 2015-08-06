@@ -22,7 +22,12 @@ import java.io.File;
 import java.util.Optional;
 
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.RegionType;
+import com.shootoff.targets.TargetRegion;
+import com.shootoff.targets.animation.SpriteAnimation;
 
+import javafx.animation.Animation.Status;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
@@ -31,7 +36,8 @@ import javafx.scene.input.MouseEvent;
  
 /**
  * This class wraps a group that represents a target so that the target
- * can be moved and resized using the mouse.
+ * can be moved and resized using the mouse and individual regions
+ * can be animated.
  * 
  * @author phrack
  */
@@ -130,6 +136,57 @@ public class Target {
     	return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), 
     			targetGroup.getBoundsInParent().getHeight());
     }
+    
+	public void animate(TargetRegion region, String args[]) {
+		ImageRegion imageRegion;
+		
+		if (args == null) {
+			imageRegion = (ImageRegion)region;
+		} else {
+			Optional<TargetRegion> r = parent.getTargetRegionByName(region, args[0]);
+			
+			if (r.isPresent()) {
+				imageRegion = (ImageRegion)r.get();
+			} else {
+				System.err.format("Request to animate region named %s, but it "
+						+ "doesn't exist.", args[0]);
+				return;
+			}
+		}
+		
+		// Don't repeat animations for fallen targets
+		if (!imageRegion.onFirstFrame()) return;
+		
+		if (imageRegion.getAnimation().isPresent()) {
+			imageRegion.getAnimation().get().play();
+		} else {
+			System.err.println("Request to animate region, but region does "
+					+ "not contain an animation.");
+		}
+	}
+	
+	public void reverseAnimation(TargetRegion region) {
+		if (region.getType() != RegionType.IMAGE) {
+			System.err.println("A reversal was requested on a non-image region.");
+			return;
+		}
+		
+		ImageRegion imageRegion = (ImageRegion)region;
+		if (imageRegion.getAnimation().isPresent()) {
+			SpriteAnimation animation = imageRegion.getAnimation().get();
+
+			if (animation.getStatus() == Status.RUNNING) {
+				animation.setOnFinished((e) -> {
+						animation.reverse();
+						animation.setOnFinished(null);
+					});
+			} else {
+				animation.reverse();
+			}
+		} else {
+			System.err.println("A reversal was requested on an image region that isn't animated.");
+		}
+	}
     
     private void mousePressed() {
         targetGroup.setOnMousePressed((event) -> {

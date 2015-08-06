@@ -41,10 +41,8 @@ import com.shootoff.plugins.TrainingProtocolBase;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
-import com.shootoff.targets.animation.SpriteAnimation;
 import com.shootoff.targets.io.TargetIO;
 
-import javafx.animation.Animation.Status;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -217,8 +215,8 @@ public class CanvasManager {
 		}
 		
 		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
-		Optional<TargetRegion> hitRegion = checkHit(shot);
-		if (hitRegion.isPresent() && hitRegion.get().tagExists("command")) executeRegionCommands(hitRegion.get());
+		Optional<Hit> hit = checkHit(shot);
+		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 		
 		boolean processedShot = false;
 		
@@ -237,7 +235,8 @@ public class CanvasManager {
 			}
 		}
 		
-		if (currentProtocol.isPresent() && !processedShot) currentProtocol.get().shotListener(shot, hitRegion);
+		if (currentProtocol.isPresent() && !processedShot) 
+			currentProtocol.get().shotListener(shot, Optional.of(hit.get().getHitRegion()));
 	}
 	
 	public boolean addArenaShot(Shot shot) {
@@ -245,10 +244,13 @@ public class CanvasManager {
 		drawShot(shot);
 		
 		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
-		Optional<TargetRegion> hitRegion = checkHit(shot);
-		if (hitRegion.isPresent() && hitRegion.get().tagExists("command")) executeRegionCommands(hitRegion.get());
+		Optional<Hit> hit = checkHit(shot);
+		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
+			executeRegionCommands(hit.get());
+		}
+		
 		if (currentProtocol.isPresent()) {
-			currentProtocol.get().shotListener(shot, hitRegion);
+			currentProtocol.get().shotListener(shot, Optional.of(hit.get().getHitRegion()));
 			return true;
 		}
 		
@@ -262,7 +264,25 @@ public class CanvasManager {
 			});
 	}
 	
-	private Optional<TargetRegion> checkHit(Shot shot) {
+	private class Hit {
+		private final Target target;
+		private final TargetRegion hitRegion;
+		
+		public Hit(Target target, TargetRegion hitRegion) {
+			this.target = target;
+			this.hitRegion = hitRegion;
+		}
+		
+		public Target getTarget() {
+			return target;
+		}
+		
+		public TargetRegion getHitRegion() {
+			return hitRegion;
+		}
+	}
+	
+	private Optional<Hit> checkHit(Shot shot) {
 		for (Target target : targets) {
 			Group targetGroup = target.getTargetGroup();
 			
@@ -336,7 +356,7 @@ public class CanvasManager {
 									Optional.of(targetGroup.getChildren().indexOf(node)));
 						}
 						
-						return Optional.of((TargetRegion)node);
+						return Optional.of(new Hit(target, (TargetRegion)node));
 					}
 				}
 			}
@@ -355,8 +375,8 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
-	private void executeRegionCommands(TargetRegion region) {
-		String commandsSource = region.getTag("command");
+	private void executeRegionCommands(Hit hit) {
+		String commandsSource = hit.getHitRegion().getTag("command");
 		String commands[]  = commandsSource.split(";");		
 		
 		for (String command : commands) {
@@ -378,18 +398,18 @@ public class CanvasManager {
 				break;
 				
 			case "animate":
-				animate(region, args);
+				hit.getTarget().animate(hit.getHitRegion(), args);
 				break;
 				
 			case "reverse":
-				reverseAnimation(region);
+				hit.getTarget().reverseAnimation(hit.getHitRegion());
 				break;
 				
 			case "play_sound":
 				// If there is a second parameter, we should look to see if it's an
 				// image region that is down and if so, don't play the sound
 				if (args.length == 2) {
-					Optional<TargetRegion> namedRegion = getTargetRegionByName(region, args[1]);
+					Optional<TargetRegion> namedRegion = getTargetRegionByName(hit.getHitRegion(), args[1]);
 					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
 						if (!((ImageRegion)namedRegion.get()).onFirstFrame()) break;
 					}
@@ -401,58 +421,7 @@ public class CanvasManager {
 		}
 	}
 	
-	private void animate(TargetRegion region, String args[]) {
-		ImageRegion imageRegion;
-		
-		if (args == null) {
-			imageRegion = (ImageRegion)region;
-		} else {
-			Optional<TargetRegion> r = getTargetRegionByName(region, args[0]);
-			
-			if (r.isPresent()) {
-				imageRegion = (ImageRegion)r.get();
-			} else {
-				System.err.format("Request to animate region named %s, but it "
-						+ "doesn't exist.", args[0]);
-				return;
-			}
-		}
-		
-		// Don't repeat animations for fallen targets
-		if (!imageRegion.onFirstFrame()) return;
-		
-		if (imageRegion.getAnimation().isPresent()) {
-			imageRegion.getAnimation().get().play();
-		} else {
-			System.err.println("Request to animate region, but region does "
-					+ "not contain an animation.");
-		}
-	}
-	
-	private void reverseAnimation(TargetRegion region) {
-		if (region.getType() != RegionType.IMAGE) {
-			System.err.println("A reversal was requested on a non-image region.");
-			return;
-		}
-		
-		ImageRegion imageRegion = (ImageRegion)region;
-		if (imageRegion.getAnimation().isPresent()) {
-			SpriteAnimation animation = imageRegion.getAnimation().get();
-
-			if (animation.getStatus() == Status.RUNNING) {
-				animation.setOnFinished((e) -> {
-						animation.reverse();
-						animation.setOnFinished(null);
-					});
-			} else {
-				animation.reverse();
-			}
-		} else {
-			System.err.println("A reversal was requested on an image region that isn't animated.");
-		}
-	}
-	
-	private Optional<TargetRegion> getTargetRegionByName(TargetRegion region, String name) {
+	protected Optional<TargetRegion> getTargetRegionByName(TargetRegion region, String name) {
 		for (Target target : targets) {
 			if (target.getTargetGroup().getChildren().contains(region)) {
 				for (Node node : target.getTargetGroup().getChildren()) {
