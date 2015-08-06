@@ -19,6 +19,7 @@
 package com.shootoff.gui;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 import com.shootoff.config.Configuration;
@@ -32,6 +33,7 @@ import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
  
 /**
@@ -50,6 +52,7 @@ public class Target {
     private final Group targetGroup;
     private final Optional<Configuration> config;
     private final CanvasManager parent;
+    private final Optional<List<Target>> targets;
     private final boolean userDeletable;
     private final String cameraName;
     private final int targetIndex;
@@ -69,6 +72,7 @@ public class Target {
         this.targetGroup = target;
         this.config = Optional.of(config);
         this.parent = parent;
+        this.targets = Optional.empty();
         this.userDeletable = userDeletable;
         this.cameraName = parent.getCameraName();
         this.targetIndex = targetIndex;
@@ -80,11 +84,12 @@ public class Target {
         keyPressed();
     }
     
-    public Target(Group target) {
+    public Target(Group target, List<Target> targets) {
     	this.targetFile = null;
         this.targetGroup = target;
         this.config = Optional.empty();
         this.parent = null;
+        this.targets = Optional.of(targets);
         this.userDeletable = false;
         this.cameraName = null;
         this.targetIndex = 0;
@@ -137,13 +142,32 @@ public class Target {
     			targetGroup.getBoundsInParent().getHeight());
     }
     
+	protected static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region, String name) {
+		for (Target target : targets) {
+			if (target.getTargetGroup().getChildren().contains(region)) {
+				for (Node node : target.getTargetGroup().getChildren()) {
+					TargetRegion r = (TargetRegion)node;
+					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
+				}
+			}
+		}
+		
+		return Optional.empty();
+	}
+    
 	public void animate(TargetRegion region, String args[]) {
 		ImageRegion imageRegion;
 		
 		if (args == null) {
 			imageRegion = (ImageRegion)region;
 		} else {
-			Optional<TargetRegion> r = parent.getTargetRegionByName(region, args[0]);
+			Optional<TargetRegion> r;
+			
+			if (targets.isPresent()) {
+				r = getTargetRegionByName(targets.get(), region, args[0]);
+			} else {
+				r = getTargetRegionByName(parent.getTargets(), region, args[0]);
+			}
 			
 			if (r.isPresent()) {
 				imageRegion = (ImageRegion)r.get();

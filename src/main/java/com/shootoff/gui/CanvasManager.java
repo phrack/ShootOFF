@@ -409,7 +409,7 @@ public class CanvasManager {
 				// If there is a second parameter, we should look to see if it's an
 				// image region that is down and if so, don't play the sound
 				if (args.length == 2) {
-					Optional<TargetRegion> namedRegion = getTargetRegionByName(hit.getHitRegion(), args[1]);
+					Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(), args[1]);
 					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
 						if (!((ImageRegion)namedRegion.get()).onFirstFrame()) break;
 					}
@@ -419,19 +419,6 @@ public class CanvasManager {
 				break;
 			}
 		}
-	}
-	
-	protected Optional<TargetRegion> getTargetRegionByName(TargetRegion region, String name) {
-		for (Target target : targets) {
-			if (target.getTargetGroup().getChildren().contains(region)) {
-				for (Node node : target.getTargetGroup().getChildren()) {
-					TargetRegion r = (TargetRegion)node;
-					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
-				}
-			}
-		}
-		
-		return Optional.empty();
 	}
 	
 	public Optional<Target> addTarget(File targetFile) {
@@ -472,6 +459,10 @@ public class CanvasManager {
 		}
 		
 		targets.remove(target);
+	}
+	
+	public List<Target> getTargets() {
+		return targets;
 	}
 	
 	public List<Group> getTargetGroups() {
