@@ -9,6 +9,7 @@ def archivePath = 'build/dist/ShootOFF.jar'
 def libTempDir = 'build/dist/libs'
 def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
+def writableResources = 'shootoff-writable-resources.jar'
 def version = '3.2'
 def license = 'GPLv3'
 
@@ -103,13 +104,13 @@ task fxJar(dependsOn: build){
             fileset(dir: sourceSets.main.output.classesDir)
             fileset(dir: sourceSets.main.output.resourcesDir)
             antfx.resources() {
-                fileset(dir: libTempDir + '/../')
+                fileset(dir: 'build/dist/', includes: 'libs/*.jar')
             }
             delegate.manifest {
                 attribute(name: 'Codebase', value: '*')
                 attribute(name: 'Permissions', value: 'all-permissions')
-		attribute(name: 'Application-Name', value: 'ShootOFF')
-		attribute(name: 'Created-By', value: 'ShootOFF')
+                attribute(name: 'Application-Name', value: 'ShootOFF')
+                attribute(name: 'Created-By', value: 'ShootOFF')
             }
         }
     }
@@ -134,7 +135,24 @@ task fxSignedJar(dependsOn: fxJar){
     }
 }
 
-task fxWebstartSignedJar(dependsOn: fxJar){
+task fxJarWritableResources() {
+    def antfx = NamespaceBuilder.newInstance(
+            ant,
+            'javafx:com.sun.javafx.tools.ant')
+
+    doLast {
+        ant.jar(destfile: 'build/dist/libs/' + writableResources) {
+            fileset(dir: 'build/dist/', includes: 'targets/**')
+            fileset(dir: 'build/dist/', includes: 'sounds/**')
+            fileset(dir: 'build/dist/', includes: 'shootoff.properties')
+        }
+    }
+}
+
+task fxWebstartSignedJar(){
+    dependsOn(fxJar)
+    dependsOn(fxJarWritableResources)
+
     doFirst { 
         assert file(keyStore).exists() 
     }
@@ -174,7 +192,8 @@ task fxDeploy(dependsOn: fxWebstartSignedJar){
                 outfile: project.name
         ) {
             antfx.application(
-                    mainClass: mainClassName
+                    mainClass: mainClassName,
+                    name: 'ShootOFF'
             )
 
             antfx.platform(
@@ -188,7 +207,6 @@ task fxDeploy(dependsOn: fxWebstartSignedJar){
                     license: license,
                     description: 'Software to enhance laser dry fire training'
             ) {
-
                 antfx.icon(
                         href: 'icon_32x32.png'
                 )
@@ -206,7 +224,6 @@ task fxDeploy(dependsOn: fxWebstartSignedJar){
                     menu: false
             )
 
-
             antfx.resources {
                 antfx.fileset(
                         dir: 'build/dist/',
@@ -216,6 +233,13 @@ task fxDeploy(dependsOn: fxWebstartSignedJar){
                 antfx.fileset(
                         dir: 'build/dist/',
                         includes: 'libs/*.jar',
+                        excludes: 'libs/' + writableResources
+                )
+
+                antfx.fileset(
+                        requiredFor: 'startup',
+                        dir: 'build/dist/',
+                        includes: 'libs/' + writableResources
                 )
 
                 antfx.fileset(

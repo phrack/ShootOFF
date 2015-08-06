@@ -18,7 +18,13 @@
 
 package com.shootoff;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import com.shootoff.camera.Camera;
 import com.shootoff.config.Configuration;
@@ -32,8 +38,47 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+	// For Java Web Start we include a JAR that has our writable resources (shootoff.properties,
+	// sounds folder, and targets folder). We need to extract it if we find it then delete it.
+	private void extractWebstartResources() {
+		File writableResources = new File("libs/shootoff-writable-resources.jar");
+		File properties = new File("shootoff.properties");
+		
+		if (writableResources.exists() && !properties.exists()) {
+			try {
+				JarFile jar = new JarFile(writableResources);
+				
+				Enumeration<JarEntry> enumEntries = jar.entries();
+				while (enumEntries.hasMoreElements()) {
+				    JarEntry entry = (java.util.jar.JarEntry) enumEntries.nextElement();
+				    
+				    if (entry.getName().startsWith("META-INF")) continue;
+				    
+				    File f = new File(entry.getName());
+				    if (entry.isDirectory()) {
+				        f.mkdir();
+				    } else {				    
+					    InputStream is = jar.getInputStream(entry);
+					    FileOutputStream fos = new FileOutputStream(f);
+					    while (is.available() > 0) {
+					        fos.write(is.read());
+					    }
+					    fos.close();
+					    is.close();
+				    }
+				}
+				
+				jar.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	@Override
 	public void start(Stage primaryStage) throws IOException, ConfigurationException {
+		extractWebstartResources();
+		
 		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
 		Configuration config = new Configuration("shootoff.properties", args);
 		
