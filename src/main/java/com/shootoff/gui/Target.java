@@ -181,17 +181,15 @@ public class Target {
 	public void animate(TargetRegion region, List<String> args) {
 		ImageRegion imageRegion;
 		
-		if (args == null) {
+		if (args.size() == 0) {
 			imageRegion = (ImageRegion)region;
 		} else {
 			Optional<TargetRegion> r;
 			
-			if (targets.isPresent() && args.size() > 0) {
+			if (targets.isPresent()) {
 				r = getTargetRegionByName(targets.get(), region, args.get(0));
-			} else if (args.size() > 0) {
-				r = getTargetRegionByName(parent.getTargets(), region, args.get(0));
 			} else {
-				r = Optional.of(region);
+				r = getTargetRegionByName(parent.getTargets(), region, args.get(0));
 			}
 			
 			if (r.isPresent()) {
