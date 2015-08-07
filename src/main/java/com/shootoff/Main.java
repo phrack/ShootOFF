@@ -85,7 +85,7 @@ public class Main extends Application {
 		// This initializes the TTS engine
 		TextToSpeech.say("");
 		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/shootoff/gui/ShootOFF.fxml"));
+		FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
 	    loader.load();   
 		
 		Scene scene = new Scene(loader.getRoot());

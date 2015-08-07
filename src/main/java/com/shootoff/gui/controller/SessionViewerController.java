@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.gui.SessionCanvasManager;
 import com.shootoff.session.Event;
 import com.shootoff.session.SessionRecorder;
@@ -38,6 +41,7 @@ public class SessionViewerController {
 	@FXML private Label timeLabel;
 	@FXML private ListView<Event> eventsListView;
 	
+	private final Logger logger = LoggerFactory.getLogger(SessionViewerController.class);
 	private final ObservableList<File> sessionEntries = FXCollections.observableArrayList();
 	private final ObservableList<Event> eventEntries = FXCollections.observableArrayList();
 	private final Map<String, SessionCanvasManager> cameraGroups = new HashMap<String, SessionCanvasManager>();
@@ -145,8 +149,14 @@ public class SessionViewerController {
 		File targetsFolder = new File("sessions");
 		List<File> sessions = new ArrayList<File>();
 		
-		for (File file : targetsFolder.listFiles(new FileFilter("xml"))) {
-			sessions.add(file);
+		File[] sessionFiles = targetsFolder.listFiles(new FileFilter("xml"));
+		
+		if (sessionFiles != null) {
+			for (File file : sessionFiles) {
+				sessions.add(file);
+			}
+		} else {
+			logger.error("Failed to find session files because a list of files could not be retrieved");
 		}
 		
 		return sessions;

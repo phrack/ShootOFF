@@ -159,7 +159,7 @@ public class PreferencesController {
 		          label.setText("");
 		          return;
 		        }
-		        label.setText(Math.round(newValue.intValue()) + "");
+		        label.setText(String.valueOf(newValue.intValue()));
 		      }
 		    });
 	}

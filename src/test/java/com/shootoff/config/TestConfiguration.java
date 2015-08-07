@@ -226,7 +226,7 @@ public class TestConfiguration {
 	@Test
 	public void testReadConfigFile() throws IOException, ConfigurationException {
 		Configuration config = new Configuration(
-				getClass().getResourceAsStream("/test.properties"),
+				TestConfiguration.class.getResourceAsStream("/test.properties"),
 				"test.properties");
 
 		assertEquals(40, config.getDetectionRate());
@@ -241,14 +241,14 @@ public class TestConfiguration {
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());
-		assertTrue(config.getMalfunctionsProbability() == (float)43.15);
+		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(false, config.inDebugMode());
 	}
 	
 	@Test
 	public void testReadConfigFileCmdLineOverride() throws IOException, ConfigurationException {
 		Configuration config = new Configuration(
-				getClass().getResourceAsStream("/test.properties"),
+				TestConfiguration.class.getResourceAsStream("/test.properties"),
 				"test.properties",
 				new String[] {"-i", "20"});
 
@@ -260,7 +260,7 @@ public class TestConfiguration {
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());
-		assertTrue(config.getMalfunctionsProbability() == (float)43.15);
+		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(false, config.inDebugMode());
 	}
 	
@@ -279,7 +279,7 @@ public class TestConfiguration {
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());
-		assertTrue(config.getMalfunctionsProbability() == (float)43.15);
+		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(true, config.inDebugMode());
 	}
 	
@@ -301,7 +301,7 @@ public class TestConfiguration {
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());
-		assertTrue(config.getMalfunctionsProbability() == (float)43.15);
+		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(true, config.inDebugMode());
 	}
 }

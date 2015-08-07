@@ -269,7 +269,7 @@ public class TestSessionRecorder {
 	}
 	
 	@Test
-	public void TestCollapseMingledMovesAndResizes() {
+	public void testCollapseMingledMovesAndResizes() {
 		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
 		sessionRecorder.recordTargetResized(cameraName, target, 6, 7);

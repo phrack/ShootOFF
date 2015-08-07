@@ -38,7 +38,7 @@ public class TestCameraManagerBright {
 	
 	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
 		Object processingLock = new Object();
-		File videoFile = new  File(getClass().getResource(videoPath).getFile());
+		File videoFile = new  File(TestCameraManagerBright.class.getResource(videoPath).getFile());
 		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
 				projectionBounds);
 		

@@ -32,6 +32,9 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import marytts.util.io.FileFilter;
 
 import com.shootoff.camera.Camera;
@@ -113,6 +116,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
+	private final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 	
@@ -383,8 +387,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void findTargets() {
 		File targetsFolder = new File("targets");
 		
-		for (File file : targetsFolder.listFiles(new FileFilter("target"))) {
-			newTarget(file);
+		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
+		
+		if (targetFiles != null) {
+			for (File file : targetFiles) {
+				newTarget(file);
+			}
+		} else {
+			logger.error("Failed to find target files because a list of files could not be retrieved");
 		}
 	}
 	
