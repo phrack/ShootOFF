@@ -19,6 +19,8 @@
 package com.shootoff.gui;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -142,6 +144,27 @@ public class Target {
     			targetGroup.getBoundsInParent().getHeight());
     }
     
+    protected static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
+		String commandsSource = region.getTag("command");
+		List<String> commands = Arrays.asList(commandsSource.split(";"));		
+		
+		for (String command : commands) {
+			int openParen = command.indexOf('(');
+			String commandName;
+			List<String> args;
+			
+			if (openParen > 0) {
+				commandName = command.substring(0, openParen);
+				args = Arrays.asList(command.substring(openParen + 1, command.indexOf(')')).split(","));
+			} else {
+				commandName = command;
+				args = new ArrayList<String>();
+			}
+			
+			commandProcessor.process(commands, commandName, args);
+		}
+    }
+    
 	protected static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region, String name) {
 		for (Target target : targets) {
 			if (target.getTargetGroup().getChildren().contains(region)) {
@@ -155,7 +178,7 @@ public class Target {
 		return Optional.empty();
 	}
     
-	public void animate(TargetRegion region, String args[]) {
+	public void animate(TargetRegion region, List<String> args) {
 		ImageRegion imageRegion;
 		
 		if (args == null) {
@@ -163,17 +186,19 @@ public class Target {
 		} else {
 			Optional<TargetRegion> r;
 			
-			if (targets.isPresent()) {
-				r = getTargetRegionByName(targets.get(), region, args[0]);
+			if (targets.isPresent() && args.size() > 0) {
+				r = getTargetRegionByName(targets.get(), region, args.get(0));
+			} else if (args.size() > 0) {
+				r = getTargetRegionByName(parent.getTargets(), region, args.get(0));
 			} else {
-				r = getTargetRegionByName(parent.getTargets(), region, args[0]);
+				r = Optional.of(region);
 			}
 			
 			if (r.isPresent()) {
 				imageRegion = (ImageRegion)r.get();
 			} else {
 				System.err.format("Request to animate region named %s, but it "
-						+ "doesn't exist.", args[0]);
+						+ "doesn't exist.", args.get(0));
 				return;
 			}
 		}

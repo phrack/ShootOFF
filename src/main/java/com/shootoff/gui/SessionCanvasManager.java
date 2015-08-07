@@ -2,7 +2,6 @@ package com.shootoff.gui;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,37 +129,9 @@ public class SessionCanvasManager {
 		TargetRegion region = (TargetRegion)target.getTargetGroup().getChildren().get(se.getHitRegionIndex().get());
 		
 		if (!region.tagExists("command")) return;
-		
-		String commandsSource = region.getTag("command");
-		List<String> commands = Arrays.asList(commandsSource.split(";"));		
-		
-		for (String command : commands) {
-			int openParen = command.indexOf('(');
-			String commandName;
-			String args[];
-			
-			if (openParen > 0) {
-				commandName = command.substring(0, openParen);
-				args = command.substring(openParen + 1, command.indexOf(')')).split(",");
-			} else {
-				commandName = command;
-				args = null;
-			}
-			
-			if (!undo) {
-				switch (commandName) {
-				case "animate":
-					target.animate(region, args);
-					break;
-					
-				case "reverse":
-					target.reverseAnimation(region);
-					break;
-				}
-			} else {
-				// If we are undoing a reverse animation we should just play it like
-				// normal
-				if (commands.contains("reverse")) {
+
+		Target.parseCommandTag(region, (commands, commandName, args) -> {
+				if (!undo) {
 					switch (commandName) {
 					case "animate":
 						target.animate(region, args);
@@ -171,19 +142,32 @@ public class SessionCanvasManager {
 						break;
 					}
 				} else {
-					// If we are undoing a non-reverse animation we need to reset
-					// the animated region
-					if (commandName.equals("animate")) {
-						if (region.getType() == RegionType.IMAGE) {
-							((ImageRegion)region).reset();
-						} else {
-							Optional<TargetRegion> t = Target.getTargetRegionByName(targets, region, args[0]);
-							if (t.isPresent()) ((ImageRegion)t.get()).reset();
+					// If we are undoing a reverse animation we should just play it like
+					// normal
+					if (commands.contains("reverse")) {
+						switch (commandName) {
+						case "animate":
+							target.animate(region, args);
+							break;
+							
+						case "reverse":
+							target.reverseAnimation(region);
+							break;
+						}
+					} else {
+						// If we are undoing a non-reverse animation we need to reset
+						// the animated region
+						if (commandName.equals("animate")) {
+							if (region.getType() == RegionType.IMAGE) {
+								((ImageRegion)region).reset();
+							} else {
+								Optional<TargetRegion> t = Target.getTargetRegionByName(targets, region, args.get(0));
+								if (t.isPresent()) ((ImageRegion)t.get()).reset();
+							}
 						}
 					}
 				}
-			}
-		}
+			});
 	}
 	
 	private void addTarget(TargetAddedEvent e) {

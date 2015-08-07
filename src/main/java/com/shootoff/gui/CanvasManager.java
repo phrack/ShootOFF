@@ -376,49 +376,34 @@ public class CanvasManager {
 	}
 	
 	private void executeRegionCommands(Hit hit) {
-		String commandsSource = hit.getHitRegion().getTag("command");
-		String commands[]  = commandsSource.split(";");		
-		
-		for (String command : commands) {
-			int openParen = command.indexOf('(');
-			String commandName;
-			String args[];
-			
-			if (openParen > 0) {
-				commandName = command.substring(0, openParen);
-				args = command.substring(openParen + 1, command.indexOf(')')).split(",");
-			} else {
-				commandName = command;
-				args = null;
-			}
-			
-			switch (commandName) {
-			case "reset":
-				camerasSupervisor.reset();
-				break;
-				
-			case "animate":
-				hit.getTarget().animate(hit.getHitRegion(), args);
-				break;
-				
-			case "reverse":
-				hit.getTarget().reverseAnimation(hit.getHitRegion());
-				break;
-				
-			case "play_sound":
-				// If there is a second parameter, we should look to see if it's an
-				// image region that is down and if so, don't play the sound
-				if (args.length == 2) {
-					Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(), args[1]);
-					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
-						if (!((ImageRegion)namedRegion.get()).onFirstFrame()) break;
+		Target.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {	
+				switch (commandName) {
+				case "reset":
+					camerasSupervisor.reset();
+					break;
+					
+				case "animate":
+					hit.getTarget().animate(hit.getHitRegion(), args);
+					break;
+					
+				case "reverse":
+					hit.getTarget().reverseAnimation(hit.getHitRegion());
+					break;
+					
+				case "play_sound":
+					// If there is a second parameter, we should look to see if it's an
+					// image region that is down and if so, don't play the sound
+					if (args.size() == 2) {
+						Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(), args.get(1));
+						if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
+							if (!((ImageRegion)namedRegion.get()).onFirstFrame()) break;
+						}
 					}
+					
+					TrainingProtocolBase.playSound(args.get(0));
+					break;
 				}
-				
-				TrainingProtocolBase.playSound(args[0]);
-				break;
-			}
-		}
+			});
 	}
 	
 	public Optional<Target> addTarget(File targetFile) {
