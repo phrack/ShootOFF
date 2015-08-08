@@ -67,8 +67,14 @@ public class SessionViewerController {
 						currentSession = session.get();
 						updateCameraTabs();
 						
-						String cameraName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
-						listCameraEvents(cameraName);
+						Tab selectedTab = cameraTabPane.getSelectionModel().getSelectedItem();
+						
+						if (selectedTab != null) {
+							String cameraName = selectedTab.getText();
+							listCameraEvents(cameraName);
+						} else {
+							eventEntries.clear();
+						}
 					}
 				}
             });
