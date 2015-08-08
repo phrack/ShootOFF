@@ -64,14 +64,8 @@ public class TestSessionIO {
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty());
 		sessionRecorder.recordProtocolFeedMessage(protocolMessage);
 	}
-
-	@Test
-	public void testXMLSerialization() {
-		File tempXMLTarget = new File("temp_session.xml");
-		SessionIO.saveSession(sessionRecorder, tempXMLTarget);
-				
-		Optional<SessionRecorder> sessionRecorder = SessionIO.loadSession(tempXMLTarget);
-		
+	
+	private void checkSession (Optional<SessionRecorder> sessionRecorder) {
 		assertTrue(sessionRecorder.isPresent());
 		
 		List<Event> events = sessionRecorder.get().getCameraEvents(cameraName1);
@@ -123,7 +117,27 @@ public class TestSessionIO {
 		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
 		
 		assertEquals(protocolMessage, ((ProtocolFeedMessageEvent)events.get(1)).getMessage());
+	}
+
+	@Test
+	public void testXMLSerialization() {
+		File tempXMLSession = new File("temp_session.xml");
+		SessionIO.saveSession(sessionRecorder, tempXMLSession);
+				
+		Optional<SessionRecorder> sessionRecorder = SessionIO.loadSession(tempXMLSession);
+		checkSession(sessionRecorder);
 		
-		tempXMLTarget.delete();
+		tempXMLSession.delete();
+	}
+	
+	@Test
+	public void testJSONSerialization() {
+		File tempJSONSession = new File("temp_session.json");
+		SessionIO.saveSession(sessionRecorder, tempJSONSession);
+		
+		Optional<SessionRecorder> sessionRecorder = SessionIO.loadSession(tempJSONSession);
+		checkSession(sessionRecorder);
+		
+		tempJSONSession.delete();
 	}
 }
