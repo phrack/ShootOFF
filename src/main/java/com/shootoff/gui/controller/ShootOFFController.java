@@ -638,6 +638,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		arenaBackgroundMenu.getItems().add(backgroundMenuItem);
 	}
+
+	@FXML
+	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
+		arenaController.setBackground(null);
+	}
 	
 	public void openArenaBackgroundMenuItemClicked(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();

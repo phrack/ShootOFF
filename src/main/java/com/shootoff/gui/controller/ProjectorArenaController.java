@@ -60,7 +60,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
 		});
 		
-		arenaAnchor.setStyle("-fx-background-color: #696969;");
+		arenaAnchor.setStyle("-fx-background-color: #333333;");
 	}
 	
 	public void toggleArena() throws IOException {
