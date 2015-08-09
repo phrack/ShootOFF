@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -41,10 +42,17 @@ public class Main extends Application {
 	// For Java Web Start we include a JAR that has our writable resources (shootoff.properties,
 	// sounds folder, and targets folder). We need to extract it if we find it then delete it.
 	private void extractWebstartResources() {
-		File writableResources = new File("libs/shootoff-writable-resources.jar");
-		File properties = new File("shootoff.properties");
+		InputStream resources = Main.class.getResourceAsStream("/libs/shootoff-writable-resources.jar");
 		
-		if (writableResources.exists() && !properties.exists()) {
+		if (resources != null && new File("shootoff.properties").exists() == false) {
+			File writableResources = new File("shootoff-writable-resources.jar");
+			
+			try {
+				Files.copy(resources, writableResources.toPath());
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		
 			JarFile jar = null;
 			
 			try {
