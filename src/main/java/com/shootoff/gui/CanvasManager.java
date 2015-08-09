@@ -129,8 +129,13 @@ public class CanvasManager {
 	public void updateBackground(Image img, Optional<Bounds> projectionBounds) {
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {
-					canvasGroup.getChildren().clear();
-					canvasGroup.getChildren().add(background);
+					if (canvasGroup.getChildren().isEmpty()) {
+						canvasGroup.getChildren().add(background);
+					} else {
+						// Remove the wait spinner and replace it 
+						// with the background
+						canvasGroup.getChildren().set(0, background);
+					}
 				});
 		}
 		
