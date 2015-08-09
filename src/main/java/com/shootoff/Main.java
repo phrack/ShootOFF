@@ -45,8 +45,10 @@ public class Main extends Application {
 		File properties = new File("shootoff.properties");
 		
 		if (writableResources.exists() && !properties.exists()) {
+			JarFile jar = null;
+			
 			try {
-				JarFile jar = new JarFile(writableResources);
+				jar = new JarFile(writableResources);
 				
 				Enumeration<JarEntry> enumEntries = jar.entries();
 				while (enumEntries.hasMoreElements()) {
@@ -67,10 +69,14 @@ public class Main extends Application {
 					    is.close();
 				    }
 				}
-				
-				jar.close();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} finally {
+				try {
+					if (jar != null) jar.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

@@ -128,15 +128,21 @@ public class JSONSessionWriter implements EventVisitor {
 		JSONObject session = new JSONObject();
 		session.put("cameras", cameras);
 		
+		FileWriter file = null;
+		
 		try {
-
-			FileWriter file = new FileWriter(sessionFile);
+			file = new FileWriter(sessionFile);
 			file.write(session.toJSONString());
 			file.flush();
-			file.close();
-
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			try {
+				if (file != null) file.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+					
 		}
 	}
 }

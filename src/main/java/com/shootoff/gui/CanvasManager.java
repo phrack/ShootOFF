@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -235,8 +236,12 @@ public class CanvasManager {
 			}
 		}
 		
-		if (currentProtocol.isPresent() && !processedShot) 
-			currentProtocol.get().shotListener(shot, Optional.of(hit.get().getHitRegion()));
+		if (currentProtocol.isPresent() && !processedShot) {
+			Optional<TargetRegion> hitRegion = Optional.empty();
+			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
+			
+			currentProtocol.get().shotListener(shot, hitRegion);
+		}
 	}
 	
 	public boolean addArenaShot(Shot shot) {
@@ -267,7 +272,7 @@ public class CanvasManager {
 			});
 	}
 	
-	private class Hit {
+	private static class Hit {
 		private final Target target;
 		private final TargetRegion hitRegion;
 		
@@ -340,11 +345,11 @@ public class CanvasManager {
 							Map<String, String> tags = region.getAllTags();
 							
 							StringBuilder tagList = new StringBuilder();
-							for (Iterator<String> it = tags.keySet().iterator(); it.hasNext();) {
-								String tagName = it.next();
-								tagList.append(tagName);
+							for (Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
+								Entry<String, String> entry = it.next();
+								tagList.append(entry.getKey());
 								tagList.append(":");
-								tagList.append(tags.get(tagName));
+								tagList.append(entry.getValue());
 								if (it.hasNext()) tagList.append(", ");
 							}
 						

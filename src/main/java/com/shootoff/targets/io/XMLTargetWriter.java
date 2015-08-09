@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class XMLTargetWriter implements RegionVisitor {
 	private final File targetFile;
@@ -32,9 +33,9 @@ public class XMLTargetWriter implements RegionVisitor {
 	}
 	
 	private void addTags(Map<String, String> tags) {
-		for (String name : tags.keySet()) {
+		for (Entry<String, String> entry : tags.entrySet()) {
 			xmlBody.append(String.format("\t\t<tag name=\"%s\" value=\"%s\" />%n",
-					name, tags.get(name)));
+					entry.getKey(), entry.getValue()));
 		}
 	}
 	

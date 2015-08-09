@@ -20,6 +20,7 @@ package com.shootoff.gui;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -71,8 +72,8 @@ public class TagEditorPanel extends Pane {
         tagTable.getColumns().addAll(nameCol, valueCol);
         ObservableList<Tag> data = FXCollections.observableArrayList();
         
-        for (String name : tags.keySet())
-        	data.add(new Tag(name, tags.get(name)));
+        for (Entry<String, String> entry : tags.entrySet())
+        	data.add(new Tag(entry.getKey(), entry.getValue()));
         
         tagTable.setItems(data);
         
@@ -99,7 +100,7 @@ public class TagEditorPanel extends Pane {
 		return tagMap;
 	}
 	
-	public class Tag {
+	public static class Tag {
 		private String name;
 		private String value;
 		

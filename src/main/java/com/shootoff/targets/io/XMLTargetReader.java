@@ -70,7 +70,7 @@ public class XMLTargetReader {
 		return new ArrayList<Node>();
 	}
 	
-	private class TargetXMLHandler extends DefaultHandler {
+	private static class TargetXMLHandler extends DefaultHandler {
 		List<Node> regions = new ArrayList<Node>();
 		TargetRegion currentRegion;
 		List<Double> polygonPoints = null;

@@ -27,9 +27,7 @@ public class SessionRecorder {
 	}
 	
 	public void addEvents(Map<String, List<Event>> events) {
-		for (String cameraName : events.keySet()) {
-			this.events.put(cameraName, events.get(cameraName));
-		}
+		this.events.putAll(events);
 	}
 	
 	public Map<String, List<Event>> getEvents() {

@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -274,11 +275,11 @@ public class Configuration {
 		Properties prop = new Properties();
 		
 		StringBuilder webcamList = new StringBuilder();
-		for (String webcamName : webcams.keySet()) {
+		for (Entry<String, Camera> entry : webcams.entrySet()) {
 			if (webcamList.length() > 0) webcamList.append(",");
-			webcamList.append(webcamName);
+			webcamList.append(entry.getKey());
 			webcamList.append(":");
-			webcamList.append(webcams.get(webcamName).getName());
+			webcamList.append(entry.getValue().getName());
 		}
 		
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
@@ -526,8 +527,8 @@ public class Configuration {
 	}
 	
 	public Optional<String> getWebcamsUserName(Camera webcam) {
-		for (String userName : webcams.keySet()) {
-			if (webcams.get(userName).equals(webcam)) return Optional.of(userName);
+		for (Entry<String, Camera> entry : webcams.entrySet()) {
+			if (entry.getValue().equals(webcam)) return Optional.of(entry.getKey());
 		}
 		
 		return Optional.empty();

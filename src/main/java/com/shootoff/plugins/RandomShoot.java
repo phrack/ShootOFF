@@ -107,7 +107,7 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 		
         int count = new Random().nextInt((subtargets.size() - 1) + 1) + 1;
         for (int i : new Random().ints(count, 0, subtargets.size()).toArray()) {
-        	currentSubtargets.push(new Integer(i));
+        	currentSubtargets.push(Integer.valueOf(i));
         }
 	}
         

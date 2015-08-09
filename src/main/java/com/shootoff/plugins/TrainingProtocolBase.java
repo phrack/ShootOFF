@@ -234,8 +234,8 @@ public class TrainingProtocolBase {
 	 * Removes all objects the training protocol has added to the GUI.
 	 */
 	public void destroy() {
-		for (String name : protocolColumns.keySet()) {
-			shotTimerTable.getColumns().remove(protocolColumns.get(name));
+		for (TableColumn<ShotEntry, String> column : protocolColumns.values()) {
+			shotTimerTable.getColumns().remove(column);
 		}
 		
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
