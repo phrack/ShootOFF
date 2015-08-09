@@ -17,7 +17,7 @@ public class XMLSessionWriter implements EventVisitor {
 	
 	@Override
 	public void visitCamera(String cameraName) {
-		xmlBody.append(String.format("\t<camera name=\"%s\">\n", cameraName));
+		xmlBody.append(String.format("\t<camera name=\"%s\">%n", cameraName));
 	}
 	
 	@Override
@@ -42,36 +42,36 @@ public class XMLSessionWriter implements EventVisitor {
 		}
 		
 		xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
-				+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />\n", 
+				+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n", 
 				timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
 				(int)shot.getMarker().getRadiusX(), targIndex, hitRegIndex));
 	}
 
 	@Override
 	public void visitTargetAdd(long timestamp, String targetName) {
-		xmlBody.append(String.format("\t\t<targetAdded timestamp=\"%d\" name=\"%s\" />\n", timestamp, targetName));
+		xmlBody.append(String.format("\t\t<targetAdded timestamp=\"%d\" name=\"%s\" />%n", timestamp, targetName));
 	}
 
 	@Override
 	public void visitTargetRemove(long timestamp, int targetIndex) {
-		xmlBody.append(String.format("\t\t<targetRemoved timestamp=\"%d\" index=\"%d\" />\n", timestamp, targetIndex));
+		xmlBody.append(String.format("\t\t<targetRemoved timestamp=\"%d\" index=\"%d\" />%n", timestamp, targetIndex));
 	}
 
 	@Override
 	public void visitTargetResize(long timestamp, int targetIndex, double newWidth, double newHeight) {
 		xmlBody.append(String.format("\t\t<targetResized timestamp=\"%d\" index=\"%d\" "
-				+ "newWidth=\"%f\" newHeight=\"%f\" />\n", timestamp, targetIndex, newWidth, newHeight));
+				+ "newWidth=\"%f\" newHeight=\"%f\" />%n", timestamp, targetIndex, newWidth, newHeight));
 	}
 
 	@Override
 	public void visitTargetMove(long timestamp, int targetIndex, int newX, int newY) {
 		xmlBody.append(String.format("\t\t<targetMoved timestamp=\"%d\" index=\"%d\" "
-				+ "newX=\"%d\" newY=\"%d\" />\n", timestamp, targetIndex, newX, newY));
+				+ "newX=\"%d\" newY=\"%d\" />%n", timestamp, targetIndex, newX, newY));
 	}
 	
 	@Override
 	public void visitProtocolFeedMessage(long timestamp, String message) {
-		xmlBody.append(String.format("\t\t<protocolFeedMessage timestamp=\"%d\">%s\n\t\t</protocolFeedMessage>\n", timestamp, message));
+		xmlBody.append(String.format("\t\t<protocolFeedMessage timestamp=\"%d\">%s%n\t\t</protocolFeedMessage>%n", timestamp, message));
 	}
 
 	@Override

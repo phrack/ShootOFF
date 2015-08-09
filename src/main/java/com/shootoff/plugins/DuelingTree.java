@@ -145,7 +145,7 @@ public class DuelingTree extends ProjectorTrainingProtocolBase implements Traini
 	
 	private void roundOver() {
 		if (continueProtocol) {
-			thisSuper.showTextOnFeed(String.format("left score: %d\nright score: %d", leftScore, rightScore));
+			thisSuper.showTextOnFeed(String.format("left score: %d%nright score: %d", leftScore, rightScore));
 			super.pauseShotDetection(true);
 			executorService.schedule(new NewRound(), NEW_ROUND_DELAY, TimeUnit.SECONDS);
 		}

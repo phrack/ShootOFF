@@ -39,7 +39,7 @@ public class TestShotSearcher {
 
 	private List<Shot> findShots(String imagePath) throws IOException, InterruptedException {
 		BufferedImage testFrame = ImageIO.read(
-				getClass().getResourceAsStream(imagePath));
+				TestShotSearcher.class.getResourceAsStream(imagePath));
 
 		BufferedImage grayScale = new BufferedImage(testFrame.getWidth(),
 				testFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);

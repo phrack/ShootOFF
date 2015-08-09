@@ -179,6 +179,8 @@ public class Configuration {
 					configName);
 		}
 		
+		inputStream.close();
+		
 		if (prop.containsKey(WEBCAMS_PROP)) {
 			List<String> webcamNames = new ArrayList<String>();
 			List<String> webcamInternalNames = new ArrayList<String>();
@@ -295,6 +297,8 @@ public class Configuration {
 		
 		OutputStream outputStream = new FileOutputStream(configName);
 		prop.store(outputStream, "ShootOFF Configuration");
+		outputStream.flush();
+		outputStream.close();
 	}
 	
 	private void parseCmdLine(String[] args) throws ConfigurationException {

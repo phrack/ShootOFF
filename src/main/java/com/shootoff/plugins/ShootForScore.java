@@ -91,11 +91,11 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
         String message = "score: 0";
 
         if (redScore > 0 && greenScore > 0) {
-        	message = String.format("red score: %d\ngreen score: %d", redScore, greenScore);
+        	message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
         }
         
         if (redScore > 0 && greenScore > 0) {
-        	message = String.format("red score: %d\ngreen score: %d", redScore, greenScore);
+        	message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
         } else if (redScore > 0) {
         	message = String.format("red score: %d", redScore);
         } else if (greenScore > 0) {

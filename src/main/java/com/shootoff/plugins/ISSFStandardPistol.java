@@ -176,7 +176,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 			StringBuilder message = new StringBuilder();
 			
 			for (Integer time : ROUND_TIMES) {
-				message.append(String.format("%ss score: %d\n", time, sessionScores.get(time)));
+				message.append(String.format("%ss score: %d%n", time, sessionScores.get(time)));
 			}
 			
 			super.showTextOnFeed(message.toString() + "total score: " + runningScore);

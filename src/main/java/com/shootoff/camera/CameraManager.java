@@ -332,7 +332,7 @@ public class CameraManager {
 
 					startDetectionCycle = System.currentTimeMillis();
 					final BufferedImage frame = currentFrame;
-					detectionExecutor.submit(new Thread(() -> {detectShots(frame, averages);}));
+					detectionExecutor.submit(() -> {detectShots(frame, averages);});
 				}
 			}
 			

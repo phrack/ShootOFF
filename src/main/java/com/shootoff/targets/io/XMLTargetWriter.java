@@ -33,7 +33,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	
 	private void addTags(Map<String, String> tags) {
 		for (String name : tags.keySet()) {
-			xmlBody.append(String.format("\t\t<tag name=\"%s\" value=\"%s\" />\n",
+			xmlBody.append(String.format("\t\t<tag name=\"%s\" value=\"%s\" />%n",
 					name, tags.get(name)));
 		}
 	}
@@ -43,7 +43,7 @@ public class XMLTargetWriter implements RegionVisitor {
 			Map<String, String> tags) {
 		
 		xmlBody.append(String.format(
-				"\t<image x=\"%f\" y=\"%f\" file=\"%s\">\n", 
+				"\t<image x=\"%f\" y=\"%f\" file=\"%s\">%n", 
 				x, y, imageFile.getPath()));
 		
 		addTags(tags);
@@ -57,7 +57,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	
 		xmlBody.append(String.format(
 				"\t<rectangle x=\"%f\" y=\"%f\" width=\"%f\" "
-				+ "height=\"%f\" fill=\"%s\">\n", 
+				+ "height=\"%f\" fill=\"%s\">%n", 
 				x, y, width, height, fill));
 		
 		addTags(tags);
@@ -71,7 +71,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	
 		xmlBody.append(String.format(
 				"\t<ellipse centerX=\"%f\" centerY=\"%f\" radiusX=\"%f\" "
-				+ "radiusY=\"%f\" fill=\"%s\">\n", 
+				+ "radiusY=\"%f\" fill=\"%s\">%n", 
 				centerX, centerY, radiusX, radiusY, fill));
 		
 		addTags(tags);
@@ -84,10 +84,10 @@ public class XMLTargetWriter implements RegionVisitor {
 			Map<String, String> tags) {
 	
 		xmlBody.append(String.format(
-				"\t<polygon fill=\"%s\">\n", fill));
+				"\t<polygon fill=\"%s\">%n", fill));
 		
 		for (int i = 0; i < points.length - 1; i += 2) {
-			xmlBody.append(String.format("\t\t<point x=\"%f\" y=\"%f\" />\n",
+			xmlBody.append(String.format("\t\t<point x=\"%f\" y=\"%f\" />%n",
 					points[i], points[i+1]));
 		}
 		

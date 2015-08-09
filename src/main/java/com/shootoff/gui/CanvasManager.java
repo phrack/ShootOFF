@@ -250,7 +250,10 @@ public class CanvasManager {
 		}
 		
 		if (currentProtocol.isPresent()) {
-			currentProtocol.get().shotListener(shot, Optional.of(hit.get().getHitRegion()));
+			Optional<TargetRegion> hitRegion = Optional.empty();
+			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
+			
+			currentProtocol.get().shotListener(shot, hitRegion);
 			return true;
 		}
 		

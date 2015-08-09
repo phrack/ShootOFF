@@ -81,7 +81,7 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 					TextToSpeech.say(String.format("You missed %d targets.", shootTargets.size()));
 				}
 				
-				thisSuper.showTextOnFeed(String.format("missed targets: %d\nbad hits: %d", 
+				thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", 
 						missedTargets, badHits)); 
 				
 				for (Target target : shootTargets) thisSuper.removeTarget(target);
