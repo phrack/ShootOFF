@@ -28,13 +28,13 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 			CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
 	
-	public void updateFilter(int x, int y, Color c) {
-		int currentLum = calcLums(c);
+	public void updateFilter(int x, int y, int currentRGB) {
+		int currentLum = PixelTransformer.calcLums(currentRGB);
 		
         if (lumsMovingAverage[y][x] == 0)
         {
             lumsMovingAverage[y][x] = currentLum;
-            colorMovingAverage.setRGB(x,y, c.getRGB());
+            colorMovingAverage.setRGB(x,y, currentRGB);
 
             return;
         }
@@ -43,22 +43,19 @@ public class BrightnessPixelTransformer implements PixelTransformer {
         lumsMovingAverage[y][x] = ((lumsMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
 
 		// Update the average color
-		Color maC = new Color(colorMovingAverage.getRGB(x,y));
-		int averageRed = ((maC.getRed() * (CameraManager.INIT_FRAME_COUNT-1)) + c.getRed()) / 
+		int rgb = colorMovingAverage.getRGB(x,y);
+		int averageRed = ((((rgb >> 16) & 0xFF) * (CameraManager.INIT_FRAME_COUNT-1)) + ((currentRGB >> 16) & 0xFF)) / 
 				CameraManager.INIT_FRAME_COUNT;
-		int averageGreen = ((maC.getGreen() * (CameraManager.INIT_FRAME_COUNT-1)) + c.getGreen()) / 
+		int averageGreen = ((((rgb >> 8) & 0xFF) * (CameraManager.INIT_FRAME_COUNT-1)) + ((currentRGB >> 8) & 0xFF)) / 
 				CameraManager.INIT_FRAME_COUNT;
-		int averageBlue = ((maC.getBlue() * (CameraManager.INIT_FRAME_COUNT-1)) + c.getBlue()) / 
+		int averageBlue = (((rgb & 0xFF) * (CameraManager.INIT_FRAME_COUNT-1)) + (currentRGB & 0xFF)) / 
 				CameraManager.INIT_FRAME_COUNT;
 
-		Color newAverage = new Color(averageRed, averageGreen, averageBlue);
-		colorMovingAverage.setRGB(x, y, newAverage.getRGB());
-	}
-
-	private int calcLums(Color c) {
-		return (c.getRed() + c.getRed() + c.getRed() +
-				c.getBlue() +
-				c.getGreen() + c.getGreen() + c.getGreen() + c.getGreen()) >> 3;
+		rgb = ((255 & 0xFF) << 24) |
+                 ((averageRed & 0xFF) << 16) |
+                 ((averageGreen & 0xFF) << 8)  |
+                 ((averageBlue & 0xFF) << 0);
+		colorMovingAverage.setRGB(x, y, rgb);
 	}
 	
 	private boolean isRedBrighter(Color currentC, Color averageC, LightingCondition lightCondition) {

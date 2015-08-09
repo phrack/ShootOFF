@@ -385,14 +385,12 @@ public class CameraManager {
 			
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
-					Color c = new Color(frame.getRGB(x, y));
+					int rgb = frame.getRGB(x, y);
 
-					pixelTransformer.updateFilter(x, y, c);
+					pixelTransformer.updateFilter(x, y, rgb);
 
-					totalLum += (c.getRed() + c.getRed() + c.getRed() +
-							c.getBlue() +
-							c.getGreen() + c.getGreen() + c.getGreen() + c.getGreen()) >> 3;
-					totalRed += c.getRed();
+					totalLum += PixelTransformer.calcLums(rgb);
+					totalRed += (rgb >> 16) & 0xFF;
 				}
 			}
 
