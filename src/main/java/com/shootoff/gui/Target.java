@@ -53,7 +53,7 @@ public class Target {
     private final File targetFile;
     private final Group targetGroup;
     private final Optional<Configuration> config;
-    private final CanvasManager parent;
+    private final Optional<CanvasManager> parent;
     private final Optional<List<Target>> targets;
     private final boolean userDeletable;
     private final String cameraName;
@@ -73,7 +73,7 @@ public class Target {
     	this.targetFile = targetFile;
         this.targetGroup = target;
         this.config = Optional.of(config);
-        this.parent = parent;
+        this.parent = Optional.of(parent);
         this.targets = Optional.empty();
         this.userDeletable = userDeletable;
         this.cameraName = parent.getCameraName();
@@ -90,7 +90,7 @@ public class Target {
     	this.targetFile = null;
         this.targetGroup = target;
         this.config = Optional.empty();
-        this.parent = null;
+        this.parent = Optional.empty();
         this.targets = Optional.of(targets);
         this.userDeletable = false;
         this.cameraName = null;
@@ -188,8 +188,10 @@ public class Target {
 			
 			if (targets.isPresent()) {
 				r = getTargetRegionByName(targets.get(), region, args.get(0));
+			} else if (parent.isPresent()) {
+				r = getTargetRegionByName(parent.get().getTargets(), region, args.get(0));
 			} else {
-				r = getTargetRegionByName(parent.getTargets(), region, args.get(0));
+				r = Optional.empty();
 			}
 			
 			if (r.isPresent()) {
@@ -379,7 +381,7 @@ public class Target {
 			
 			switch (event.getCode()) {
 			case DELETE:
-				if (userDeletable) parent.removeTarget(this);
+				if (userDeletable && parent.isPresent()) parent.get().removeTarget(this);
 				break;
 				
 			case LEFT:
