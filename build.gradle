@@ -53,6 +53,10 @@ task copyLibs(type:Copy) {
     into libTempDir
     exclude "*jfxrt.jar"
     exclude "*java2html.jar"
+    exclude "*junit*.jar"
+    exclude "*slf4j-log4j12*.jar"
+    exclude "*freetts-de*.jar"
+    exclude "*logback*.jar"
 }
 
 dependencies {
@@ -168,8 +172,7 @@ task fxWebstartSignedJar(){
                 keystore: keyStore,
                 storepass: keyPassword,
                 alias: keyAlias,
-                tsaurl: tsaURL,
-                lazy: true
+                tsaurl: tsaURL
         ) {
                 ant.fileset(
                         dir: 'build/dist/',

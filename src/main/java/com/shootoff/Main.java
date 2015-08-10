@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -40,15 +42,33 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 	// For Java Web Start we include a JAR that has our writable resources (shootoff.properties,
-	// sounds folder, and targets folder). We need to extract it if we find it then delete it.
+	// sounds folder, and targets folder). We need to extract it into the shootoff 
+	// home directory if we are missing those resources or the resources in the JWS cache
+	// are newer.
 	private void extractWebstartResources() {
-		InputStream resources = Main.class.getResourceAsStream("/libs/shootoff-writable-resources.jar");
-		
-		if (resources != null && new File("shootoff.properties").exists() == false) {
+		final String resourcesPath = "/libs/shootoff-writable-resources.jar";
+		final InputStream resources = Main.class.getResourceAsStream(resourcesPath);
+
+		if (resources != null) {
 			File writableResources = new File("shootoff-writable-resources.jar");
 			
+			boolean newerResources = false;
+			
 			try {
-				Files.copy(resources, writableResources.toPath());
+				newerResources = writableResources.exists() && 
+						writableResources.length() != new File(Main.class.getResource(resourcesPath).toURI()).length();
+			} catch (URISyntaxException e1) {
+				e1.printStackTrace();
+			}
+
+			// If there is not a newer version of the writable resources and we already
+			// have the configuration file at a minimum, nothing to do
+			if (!newerResources && new File("shootoff.properties").exists()) 
+				return;
+			
+			// Update the writable resources jar in ShootOFF home and extract it
+			try {
+				Files.copy(resources, writableResources.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
@@ -86,12 +106,21 @@ public class Main extends Application {
 					e.printStackTrace();
 				}
 			}
+		} else {
+			System.err.println("Can't find writable resources JAR");
 		}
 	}
 	
 	@Override
 	public void start(Stage primaryStage) throws IOException, ConfigurationException {
-		extractWebstartResources();
+		if (System.getProperty("javawebstart.version", null) != null) {
+			File shootoffHome = new File(System.getProperty("user.home") + "/.shootoff");
+			if (!shootoffHome.exists()) shootoffHome.mkdirs();
+			System.setProperty("user.dir", shootoffHome.getAbsolutePath());
+			extractWebstartResources();
+		}
+		
+		System.out.println(System.getProperty("user.dir"));
 		
 		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
 		Configuration config = new Configuration("shootoff.properties", args);
