@@ -120,8 +120,6 @@ public class Main extends Application {
 			extractWebstartResources();
 		}
 		
-		System.out.println(System.getProperty("user.dir"));
-		
 		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
 		Configuration config = new Configuration("shootoff.properties", args);
 		
