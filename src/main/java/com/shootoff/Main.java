@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
@@ -46,24 +45,21 @@ public class Main extends Application {
 	// home directory if we are missing those resources or the resources in the JWS cache
 	// are newer.
 	private void extractWebstartResources() {
-		final String resourcesPath = "/libs/shootoff-writable-resources.jar";
-		final InputStream resources = Main.class.getResourceAsStream(resourcesPath);
+		final String resourcesPath = "libs/shootoff-writable-resources.jar";
+		final InputStream resources = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcesPath);
 
 		if (resources != null) {
-			File writableResources = new File("shootoff-writable-resources.jar");
+			String shootoffHome = System.getProperty("shootoff.home");
 			
-			boolean newerResources = false;
+			File writableResources = new File(shootoffHome + File.separator + "shootoff-writable-resources.jar");
 			
-			try {
-				newerResources = writableResources.exists() && 
-						writableResources.length() != new File(Main.class.getResource(resourcesPath).toURI()).length();
-			} catch (URISyntaxException e1) {
-				e1.printStackTrace();
-			}
-
+			long loadedLength = new File(Thread.currentThread().getContextClassLoader().getResource("/" + resourcesPath).getFile()).length();
+			boolean newerResources = writableResources.exists() && 
+						writableResources.length() != loadedLength;
+			
 			// If there is not a newer version of the writable resources and we already
 			// have the configuration file at a minimum, nothing to do
-			if (!newerResources && new File("shootoff.properties").exists()) 
+			if (!newerResources && new File(shootoffHome + File.separator + "shootoff.properties").exists()) 
 				return;
 			
 			// Update the writable resources jar in ShootOFF home and extract it
@@ -84,7 +80,7 @@ public class Main extends Application {
 				    
 				    if (entry.getName().startsWith("META-INF")) continue;
 				    
-				    File f = new File(entry.getName());
+				    File f = new File(shootoffHome + File.separator + entry.getName());
 				    if (entry.isDirectory()) {
 				        f.mkdir();
 				    } else {				    
@@ -114,14 +110,17 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) throws IOException, ConfigurationException {
 		if (System.getProperty("javawebstart.version", null) != null) {
-			File shootoffHome = new File(System.getProperty("user.home") + "/.shootoff");
+			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
 			if (!shootoffHome.exists()) shootoffHome.mkdirs();
-			System.setProperty("user.dir", shootoffHome.getAbsolutePath());
+			System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
 			extractWebstartResources();
+		} else {
+			System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		}
 		
 		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
-		Configuration config = new Configuration("shootoff.properties", args);
+		Configuration config = new Configuration(System.getProperty("shootoff.home") + File.separator + 
+				"shootoff.properties", args);
 		
 		// This initializes the TTS engine
 		TextToSpeech.say("");

@@ -385,7 +385,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private void findTargets() {
-		File targetsFolder = new File("targets");
+		File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
 		
 		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
 		
@@ -485,7 +485,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (config.getSessionRecorder().isPresent()) {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
 			SessionIO.saveSession(config.getSessionRecorder().get(), 
-					new File("sessions/" + dateFormat.format(new Date()) + ".xml"));
+					new File(System.getProperty("shootoff.home") + File.separator + "sessions/" + dateFormat.format(new Date()) + ".xml"));
 			
 			config.setSessionRecorder(null);
 			
@@ -647,7 +647,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void openArenaBackgroundMenuItemClicked(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Arena Background");
-		fileChooser.setInitialDirectory(new File("targets"));
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"),
                 new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif")

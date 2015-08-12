@@ -191,7 +191,7 @@ public class PreferencesController {
 	private Optional<File> selectSoundFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Shot Sound");
-		fileChooser.setInitialDirectory(new File("sounds"));
+		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "sounds"));
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Sound File", "*.mp3", "*.wav")
             );

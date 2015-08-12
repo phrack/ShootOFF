@@ -189,7 +189,8 @@ public class SessionCanvasManager {
 	}
 	
 	private void addTarget(TargetAddedEvent e) {
-		Optional<Group> target = TargetIO.loadTarget(new File("targets/" + e.getTargetName()));
+		Optional<Group> target = TargetIO.loadTarget(
+				new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
 		
 		if (target.isPresent()) {		
 			canvas.getChildren().add(target.get());

@@ -36,29 +36,6 @@ configurations {
     jfxant
 }
 
-task copyConfig(type:Copy) {
-    from 'shootoff.properties' into 'build/dist'
-}
-
-task copyTargets(type:Copy) {
-    from 'targets' into 'build/dist/targets'
-}
-
-task copySounds(type:Copy) {
-    from 'sounds' into 'build/dist/sounds'
-}
-
-task copyLibs(type:Copy) {
-    from { configurations.default.collect { it.isDirectory() ? it : it } }
-    into libTempDir
-    exclude "*jfxrt.jar"
-    exclude "*java2html.jar"
-    exclude "*junit*.jar"
-    exclude "*slf4j-log4j12*.jar"
-    exclude "*freetts-de*.jar"
-    exclude "*logback*.jar"
-}
-
 dependencies {
     jfxant files("$javaHome" + "/../lib/ant-javafx.jar")
     
@@ -85,11 +62,50 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
+task copyConfig(type:Copy) {
+    from 'shootoff.properties' into 'build/dist'
+}
+
+task copyTargets(type:Copy) {
+    from 'targets' into 'build/dist/targets'
+}
+
+task copySounds(type:Copy) {
+    from 'sounds' into 'build/dist/sounds'
+}
+
+task copyLibs(type:Copy) {
+    from { configurations.default.collect { it.isDirectory() ? it : it } }
+    into libTempDir
+    exclude "*jfxrt.jar"
+    exclude "*java2html.jar"
+    exclude "*junit*.jar"
+    exclude "*slf4j-log4j12*.jar"
+    exclude "*freetts-de*.jar"
+    exclude "*logback*.jar"
+}
+
+task updateJars() {
+    doLast {
+        FileCollection jars = files { file(libTempDir).listFiles() }
+
+        jars.each {File jar ->
+            ant.jar(update: "true", destfile: "${jar.path}/") {
+                delegate.manifest {
+                    attribute(name: 'Trusted-Library', value: 'true')
+                    attribute(name: 'Permissions', value: 'all-permissions')
+                }
+            } 
+        }
+    }
+}
+
 task fxJar(dependsOn: build){
     dependsOn('copyConfig')
     dependsOn('copyTargets')
     dependsOn('copySounds')
     dependsOn('copyLibs')
+    dependsOn('updateJars')
 
     def antfx = NamespaceBuilder.newInstance(
             ant,
@@ -116,6 +132,7 @@ task fxJar(dependsOn: build){
             delegate.manifest {
                 attribute(name: 'Codebase', value: '*')
                 attribute(name: 'Permissions', value: 'all-permissions')
+                attribute(name: 'Trusted-Library', value: 'true')
                 attribute(name: 'Application-Name', value: 'ShootOFF')
                 attribute(name: 'Created-By', value: 'ShootOFF')
             }
@@ -152,6 +169,12 @@ task fxJarWritableResources() {
             fileset(dir: 'build/dist/', includes: 'targets/**')
             fileset(dir: 'build/dist/', includes: 'sounds/**')
             fileset(dir: 'build/dist/', includes: 'shootoff.properties')
+
+            delegate.manifest {
+                attribute(name: 'Codebase', value: '*')
+                attribute(name: 'Trusted-Library', value: 'true')
+                attribute(name: 'Permissions', value: 'all-permissions')
+            }
         }
     }
 }
