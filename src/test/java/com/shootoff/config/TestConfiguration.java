@@ -15,6 +15,7 @@ public class TestConfiguration {
 	
 	@Before
 	public void setUp() throws ConfigurationException, IOException {
+		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		String[] emptyArgs = new String[0];
 		defaultConfig = new Configuration(emptyArgs);
 	}
@@ -28,9 +29,9 @@ public class TestConfiguration {
 		assertEquals(false, defaultConfig.ignoreLaserColor());
 		assertEquals("None", defaultConfig.getIgnoreLaserColorName());
 		assertEquals(false, defaultConfig.useRedLaserSound());
-		assertEquals("sounds/walther_ppq.wav", defaultConfig.getRedLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/walther_ppq.wav", defaultConfig.getRedLaserSound().getPath());
 		assertEquals(false, defaultConfig.useGreenLaserSound());
-		assertEquals("sounds/walther_ppq.wav", defaultConfig.getGreenLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/walther_ppq.wav", defaultConfig.getGreenLaserSound().getPath());
 		assertEquals(false, defaultConfig.useVirtualMagazine());
 		assertEquals(7, defaultConfig.getVirtualMagazineCapacity());
 		assertEquals(false, defaultConfig.useMalfunctions());
@@ -235,9 +236,9 @@ public class TestConfiguration {
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
 		assertEquals(true, config.useRedLaserSound());
-		assertEquals("sounds/metal_clang.wav", config.getRedLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/metal_clang.wav", config.getRedLaserSound().getPath());
 		assertEquals(false, config.useGreenLaserSound());
-		assertEquals("sounds/beep.wav", config.getGreenLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/beep.wav", config.getGreenLaserSound().getPath());
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());
