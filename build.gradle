@@ -1,4 +1,14 @@
+import groovyx.gpars.GParsPool
 import groovy.xml.NamespaceBuilder
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'org.codehaus.gpars', name: 'gpars', version: '1.1.0'
+    }
+}
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -38,7 +48,7 @@ configurations {
 
 dependencies {
     jfxant files("$javaHome" + "/../lib/ant-javafx.jar")
-    
+
     // webcam-capture depends on slf4j, but uses and older and incomplete version that
     // throws errors about missing a logger
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.12'
@@ -93,7 +103,6 @@ task updateJars() {
             ant.jar(update: "true", destfile: "${jar.path}/") {
                 delegate.manifest {
                     attribute(name: 'Trusted-Library', value: 'true')
-                    attribute(name: 'Permissions', value: 'all-permissions')
                 }
             } 
         }
@@ -171,9 +180,7 @@ task fxJarWritableResources() {
             fileset(dir: 'build/dist/', includes: 'shootoff.properties')
 
             delegate.manifest {
-                attribute(name: 'Codebase', value: '*')
                 attribute(name: 'Trusted-Library', value: 'true')
-                attribute(name: 'Permissions', value: 'all-permissions')
             }
         }
     }
@@ -201,11 +208,26 @@ task fxWebstartSignedJar(){
                         dir: 'build/dist/',
                         includes: 'ShootOFF.jar'
                 )
+        }
 
+        def path = ant.path {
                 ant.fileset(
                         dir: 'build/dist/',
                         includes: 'libs/*.jar',
                 )
+        }
+
+        GParsPool.withPool {
+            path.list().eachParallel { f ->       
+                def antLocal = project.createAntBuilder()
+                antLocal.signjar(
+                        jar: f,
+                        keystore: keyStore,
+                        storepass: keyPassword,
+                        alias: keyAlias,
+                        tsaurl: tsaURL
+                )
+            }
         }
     }
 }
