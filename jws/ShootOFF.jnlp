@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="ShootOFF.jnlp">
+<jnlp spec="1.0" codebase="http://shootoffapp.com" xmlns:jfx="http://javafx.com" href="ShootOFF.jnlp">
   <information>
     <title>ShootOFF</title>
     <vendor>ShootOFF</vendor>
