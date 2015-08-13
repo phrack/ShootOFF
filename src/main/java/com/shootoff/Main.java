@@ -45,7 +45,7 @@ public class Main extends Application {
 	// home directory if we are missing those resources or the resources in the JWS cache
 	// are newer.
 	private void extractWebstartResources() {
-		final String resourcesPath = "libs/shootoff-writable-resources.jar";
+		final String resourcesPath = "shootoff-writable-resources.jar";
 		final InputStream resources = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcesPath);
 
 		if (resources != null) {
@@ -53,21 +53,21 @@ public class Main extends Application {
 			
 			File writableResources = new File(shootoffHome + File.separator + "shootoff-writable-resources.jar");
 			
-			long loadedLength = new File(Thread.currentThread().getContextClassLoader().getResource("/" + resourcesPath).getFile()).length();
-			boolean newerResources = writableResources.exists() && 
-						writableResources.length() != loadedLength;
-			
-			// If there is not a newer version of the writable resources and we already
-			// have the configuration file at a minimum, nothing to do
-			if (!newerResources && new File(shootoffHome + File.separator + "shootoff.properties").exists()) 
-				return;
+			long oldLength = 0;
+			if (writableResources.exists()) oldLength = writableResources.length();
 			
 			// Update the writable resources jar in ShootOFF home and extract it
+			long newLength = 0;
 			try {
-				Files.copy(resources, writableResources.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				newLength = Files.copy(resources, writableResources.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
+			
+			// If there is not a newer version of the writable resources and we already
+			// have the configuration file at a minimum, nothing to do
+			if (oldLength == newLength && new File(shootoffHome + File.separator + "shootoff.properties").exists()) 
+				return;
 		
 			JarFile jar = null;
 			
