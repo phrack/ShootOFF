@@ -379,9 +379,15 @@ public class Configuration {
 					String.format(MARKER_RADIUS_MESSAGE, laserIntensity));
 		}
 		
+		if (!redLaserSound.isAbsolute()) 
+			redLaserSound = new File(System.getProperty("shootoff.home") + File.separator + redLaserSound.getPath());
+		
 		if (useRedLaserSound && !redLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
+		
+		if (!greenLaserSound.isAbsolute()) 
+			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 		
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
@@ -569,6 +575,10 @@ public class Configuration {
 	}
 	
 	public File getRedLaserSound() {
+		if (!redLaserSound.isAbsolute()) 
+			redLaserSound = new File(System.getProperty("shootoff.home") + File.separator + redLaserSound.getPath());
+
+		
 		return redLaserSound;
 	}
 	
@@ -577,6 +587,9 @@ public class Configuration {
 	}
 	
 	public File getGreenLaserSound() {
+		if (!greenLaserSound.isAbsolute()) 
+			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+
 		return greenLaserSound;
 	}
 
