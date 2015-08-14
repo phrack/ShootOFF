@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -296,7 +297,10 @@ public class CanvasManager {
 	}
 	
 	private Optional<Hit> checkHit(Shot shot) {
-		for (Target target : targets) {
+		// Targets are in order of when they were added, thus we must search in reverse
+		// to ensure shots register for the top target when targets overlap
+		for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
+			Target target = li.previous();
 			Group targetGroup = target.getTargetGroup();
 			
 			if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {				
