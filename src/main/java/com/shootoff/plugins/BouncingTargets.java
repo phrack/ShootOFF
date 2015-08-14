@@ -8,10 +8,21 @@ import java.util.Random;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
+import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import com.shootoff.camera.Shot;
@@ -19,9 +30,9 @@ import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class BouncingTargets extends ProjectorTrainingProtocolBase implements TrainingProtocol {
-	private final int SHOOT_COUNT = 4;
-	private final int DONT_SHOOT_COUNT = 1;
-	private static final int MAX_VELOCITY = 10;
+	private int shootCount = 4;
+	private int dontShootCount = 1;
+	private static int maxVelocity = 10;
 
 	private static final List<BouncingTarget> shootTargets = new ArrayList<BouncingTarget>();
 	private static final List<BouncingTarget> dontShootTargets = new ArrayList<BouncingTarget>();
@@ -39,15 +50,74 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 	
 	@Override
 	public void init() {
-		// TODO: ask use to configure # of shoot and don't shoot targets and velocity
+		collectSettings();
+		
 		super.showTextOnFeed("Score: 0");
 		
-        addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", SHOOT_COUNT);
-        addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", DONT_SHOOT_COUNT);
+        addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
+        addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
 
         targetAnimation = new Timeline(new KeyFrame(Duration.millis(20), e -> updateTargets()));
         targetAnimation.setCycleCount(Timeline.INDEFINITE);
         targetAnimation.play();
+	}
+	
+	private void collectSettings() {
+		super.pauseShotDetection(true);
+		
+		final Stage bouncingTargetsStage = new Stage();
+		final GridPane bouncingTargetsPane = new GridPane();
+		
+		final ColumnConstraints cc = new ColumnConstraints(100);
+		cc.setHalignment(HPos.CENTER);
+		bouncingTargetsPane.getColumnConstraints().addAll(new ColumnConstraints(), cc);
+		 
+		final int MAX_TARGETS = 10;
+		final int MAX_VELOCITY = 30;
+		 
+		final int SHOOT_DEFAULT_COUNT = 4-1;
+		final int DONT_SHOOT_DEFAULT_COUNT = 1-1;
+		final int DEFAULT_MAX_VELOCITY = 10;
+		 
+		final ObservableList<String> targetCounts = FXCollections.observableArrayList();
+		for (int i = 1; i <= MAX_TARGETS; i++) targetCounts.add(Integer.toString(i));
+		final ComboBox<String> shootTargetsComboBox = new ComboBox<String>(targetCounts);
+		shootTargetsComboBox.getSelectionModel().select(SHOOT_DEFAULT_COUNT);
+		bouncingTargetsPane.add(new Label("Shoot Targets:"), 0, 0);
+		bouncingTargetsPane.add(shootTargetsComboBox, 1, 0);
+		 
+		final ComboBox<String> dontShootTargetsComboBox = new ComboBox<String>(targetCounts);
+		dontShootTargetsComboBox.getSelectionModel().select(DONT_SHOOT_DEFAULT_COUNT);
+		bouncingTargetsPane.add(new Label("Don't Shoot Targets:"), 0, 1);
+		bouncingTargetsPane.add(dontShootTargetsComboBox, 1, 1);
+		 
+		final ObservableList<String> maxVelocity = FXCollections.observableArrayList();
+		for (int i = 1; i <= MAX_VELOCITY; i++) maxVelocity.add(Integer.toString(i));
+		final ComboBox<String> maxVelocityComboBox = new ComboBox<String>(maxVelocity);
+		maxVelocityComboBox.getSelectionModel().select(DEFAULT_MAX_VELOCITY-1);
+		bouncingTargetsPane.add(new Label("Max Target Speed:"), 0, 2);
+		bouncingTargetsPane.add(maxVelocityComboBox, 1, 2);
+		 
+		final Button okButton = new Button("OK");
+		okButton.setDefaultButton(true);
+		bouncingTargetsPane.add(okButton, 1, 3);
+ 
+		okButton.setOnAction((e) -> {
+			 	shootCount = Integer.parseInt(shootTargetsComboBox.getSelectionModel().getSelectedItem());
+			 	dontShootCount = Integer.parseInt(dontShootTargetsComboBox.getSelectionModel().getSelectedItem());
+			 	BouncingTargets.maxVelocity = Integer.parseInt(maxVelocityComboBox.getSelectionModel().getSelectedItem());
+			 	
+			 	bouncingTargetsStage.close();
+			 });
+ 
+		final Scene scene = new Scene(bouncingTargetsPane, 250, 110);
+		bouncingTargetsStage.initOwner(super.getShootOFFStage());
+		bouncingTargetsStage.initModality(Modality.WINDOW_MODAL);
+		bouncingTargetsStage.setTitle("Bouncing Targets Settings");
+		bouncingTargetsStage.setScene(scene);
+		bouncingTargetsStage.showAndWait();
+		
+		super.pauseShotDetection(false);
 	}
 	
 	private void updateTargets() {
@@ -65,8 +135,8 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 			
 			Random r = new Random();
 			
-			dx = r.nextInt(MAX_VELOCITY + 1);
-			dy = r.nextInt(MAX_VELOCITY + 1);
+			dx = r.nextInt(maxVelocity + 1) + 1;
+			dy = r.nextInt(maxVelocity + 1) + 1;
 			
 			if (r.nextBoolean()) dx *= -1;
 			if (r.nextBoolean()) dy *= -1;	
@@ -97,13 +167,13 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 				
 				if (targetBounds.intersects(bBounds)) {
 					final boolean atRight = targetBounds.getMaxX() > bBounds.getMinX() &&
-							targetBounds.getMaxX() - bBounds.getMinX() < MAX_VELOCITY * 2;
+							targetBounds.getMaxX() - bBounds.getMinX() < maxVelocity * 2;
 					final boolean atLeft = bBounds.getMaxX() > bBounds.getMinX() &&
-							bBounds.getMaxX() - bBounds.getMinX() < MAX_VELOCITY * 2;
+							bBounds.getMaxX() - bBounds.getMinX() < maxVelocity * 2;
 					final boolean atBottom = targetBounds.getMaxY() > bBounds.getMinY() &&
-							targetBounds.getMaxY() - bBounds.getMinY() < MAX_VELOCITY * 2;
+							targetBounds.getMaxY() - bBounds.getMinY() < maxVelocity * 2;
 					final boolean atTop = bBounds.getMaxY() > targetBounds.getMinY() &&
-							bBounds.getMaxY() - targetBounds.getMinY() < MAX_VELOCITY * 2;
+							bBounds.getMaxY() - targetBounds.getMinY() < maxVelocity * 2;
 		      
 					if ((atRight || atLeft) && (atBottom || atTop)) {
 						return CollisionType.COLLISION_BOTH;
@@ -119,16 +189,17 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 		}
 		
 	    public void moveTarget() {
+	        Bounds b = target.getTargetGroup().getBoundsInParent();
 	        Point2D p = target.getPosition();
 	        Dimension2D d = target.getDimension();
 	        CollisionType ct = checkCollision();
-	        
-	        if (p.getX() <= 1 || p.getX() + d.getWidth() > thisSuper.getArenaWidth() || 
+	  
+	        if (b.getMinX() <= 1 || b.getMinX() + d.getWidth() > thisSuper.getArenaWidth() || 
 	        		ct == CollisionType.COLLISION_X || ct == CollisionType.COLLISION_BOTH) {
 	        	dx *= -1;
 	        }
 	        
-	        if (p.getY() <= 1 || p.getY() + d.getHeight() > thisSuper.getArenaHeight() || 
+	        if (b.getMinY() <= 1 || b.getMinY() + d.getHeight() > thisSuper.getArenaHeight() || 
 	        		ct == CollisionType.COLLISION_X || ct == CollisionType.COLLISION_BOTH) {
 	        	dy *= -1;
 	        }
@@ -143,10 +214,10 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 			
 			if (newTarget.isPresent()) {
 				// Randomly place the target
-				int maxX = (int)(super.getArenaWidth() - newTarget.get().getDimension().getWidth());
+				int maxX = (int)(super.getArenaWidth() - newTarget.get().getDimension().getWidth() - 50);
 				int x = new Random().nextInt(maxX + 1) + 1;
 				
-				int maxY = (int)(super.getArenaHeight()  - newTarget.get().getDimension().getHeight());
+				int maxY = (int)(super.getArenaHeight()  - newTarget.get().getDimension().getHeight()- 50);
 				int y = new Random().nextInt(maxY + 1) + 1;
 			
 				newTarget.get().setPosition(x, y);
@@ -191,10 +262,21 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
-		// TODO: re-prompt for config
-		// TODO: remove existing targets and add new ones
-		// TODO: stop old animation and make new one
+	public void reset(List<Group> targets) {	
+		targetAnimation.stop();
+		
+		for (BouncingTarget b : shootTargets) super.removeTarget(b.getTarget());
+		shootTargets.clear();
+		for (BouncingTarget b : dontShootTargets) super.removeTarget(b.getTarget());
+		dontShootTargets.clear();
+		
+		collectSettings();
+		
+        addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
+        addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
+
+        targetAnimation.play();
+        
 		score = 0;
 		super.showTextOnFeed("Score: 0");
 	}

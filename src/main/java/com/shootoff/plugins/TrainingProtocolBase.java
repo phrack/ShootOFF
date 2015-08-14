@@ -103,6 +103,10 @@ public class TrainingProtocolBase {
 		return this;
 	}
 	
+	public Stage getShootOFFStage() {
+		return (Stage)shotTimerTable.getScene().getWindow();
+	}
+	
 	public void getDelayedStartInterval(DelayedStartListener listener) {
 		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
@@ -113,7 +117,7 @@ public class TrainingProtocolBase {
 		
 		Stage delayedStartIntervalStage = new Stage();
 		
-		delayedStartIntervalStage.initOwner((Stage)shotTimerTable.getScene().getWindow());
+		delayedStartIntervalStage.initOwner(getShootOFFStage());
 		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
 		delayedStartIntervalStage.setTitle("Preferences");
 		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
