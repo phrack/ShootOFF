@@ -48,6 +48,7 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
+import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.ProjectorTrainingProtocolBase;
@@ -433,6 +434,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private void registerProjectorProtocols() {
+		addProjectorTrainingProtocol(new BouncingTargets());
 		addProjectorTrainingProtocol(new DuelingTree());
 		addProjectorTrainingProtocol(new ShootDontShoot());
 	}
