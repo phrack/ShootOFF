@@ -50,8 +50,8 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	private ProjectorTrainingProtocolBase thisSuper;
 	private int missedTargets = 0;
 	private int badHits = 0;
-	private List<Target> shootTargets = new ArrayList<Target>();
-	private List<Target> dontShootTargets = new ArrayList<Target>();
+	private final List<Target> shootTargets = new ArrayList<Target>();
+	private final List<Target> dontShootTargets = new ArrayList<Target>();
 	
 	public ShootDontShoot() {}
 	
