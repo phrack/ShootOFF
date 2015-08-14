@@ -252,6 +252,7 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 				case "dont_shoot":
 					{
 						super.playSound("sounds/beep.wav");
+						TextToSpeech.say(String.format("Your score was %d", score));
 						score = 0;
 						super.showTextOnFeed("Score: 0");
 					}
