@@ -77,7 +77,9 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 			if (continueProtocol) {
 				missedTargets += shootTargets.size();
 				
-				if (shootTargets.size() > 0) {
+				if (shootTargets.size() == 1) {
+					TextToSpeech.say(String.format("You missed %d target.", shootTargets.size()));
+				} else if (shootTargets.size() > 1) {
 					TextToSpeech.say(String.format("You missed %d targets.", shootTargets.size()));
 				}
 				
@@ -182,6 +184,8 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
         addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
         
         super.showTextOnFeed("missed targets: 0\nbad hits: 0");
+        
+        continueProtocol = true;
         
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
