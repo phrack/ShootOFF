@@ -57,7 +57,9 @@ public class SessionViewerController {
 		
 		sessionListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<File>() {
 				public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
-					Optional<SessionRecorder> session = SessionIO.loadSession(newFile);
+					Optional<SessionRecorder> session = SessionIO.loadSession(
+							new File(System.getProperty("shootoff.home") + File.separator +
+									"sessions" + File.separator + newFile.getName()));
 					
 					if (session.isPresent()) {
 						refreshFromSlider = false;
@@ -159,7 +161,7 @@ public class SessionViewerController {
 		
 		if (sessionFiles != null) {
 			for (File file : sessionFiles) {
-				sessions.add(file);
+				sessions.add(new File(file.getName()));
 			}
 		} else {
 			logger.error("Failed to find session files because a list of files could not be retrieved");
