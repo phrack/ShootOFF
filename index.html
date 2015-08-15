@@ -9,6 +9,19 @@
 
   ga('create', 'UA-66374084-1', 'auto');
   ga('send', 'pageview');
+  
+  /**
+* Function that tracks a click on an outbound link in Google Analytics.
+* This function takes a valid URL string as an argument, and uses that URL string
+* as the event label.
+*/
+var trackOutboundLink = function(url) {
+   ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
+     function () {
+     document.location = url;
+     }
+   });
+}
 
 </script>
   	
@@ -79,7 +92,7 @@
           <h1 class="headline">Welcome to <span class="redd">ShootOFF</span></h1>
           <h3 class="sub-headline">An open source framework to enhance laser dry fire training</h3>
 
-          <div class="col-xs-6"><a class="btn btn-my-red" href="https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip">Get ShootOFF</a></div>
+          <div class="col-xs-6"><a class="btn btn-my-red" onclick=”trackOutboundLink('https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip'); return false;" href="https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip">Get ShootOFF</a></div>
           <div class="col-xs-6"><a class="btn btn-my-wh" href="#about">Learn More</a></div>
 
           <img class="img-responsive w-img" src="img/demo.png" alt="demo preview">
@@ -367,7 +380,7 @@
           Download the ZIP by clicking the download button below, extract its contents, and double click ShootOFF.jar. 
           Linux users may need to use the command line instead: java -jar ShootOFF.jar.
       </h5>
-      <a style="float:none;" class="btn btn-my-red" href="https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip">Get ShootOFF</a>
+      <a style="float:none;" class="btn btn-my-red" onclick=”trackOutboundLink('https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip'); return false;" href="https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip">Get ShootOFF</a>
       </div>
     </div>
     </div>
@@ -593,8 +606,8 @@ gratitude for this project, please make us feel good by letting us know!</p>
 
         <div class="col-md-4 f-p">
           <h4 class="f-title">Download</h4>
-          <p>The current stable version of ShootOFF is version 3.1, see <a class="l-ab" target="_blank" href="#">what's new</a>. (Ensure you have the latest version of Java installed.) </p>
-          <a class="btn btn-my-red f-button" href="https://github.com/phrack/ShootOFF/releases/download/v3.1-FINAL/shootoff-3.1-final.zip">Get ShootOFF</a>
+          <p>The current stable version of ShootOFF is version 3.2, see <a class="l-ab" target="_blank" href="#">what's new</a>. (Ensure you have the latest version of Java installed.) </p>
+          <a class="btn btn-my-red f-button" onclick=”trackOutboundLink('https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip'); return false;" href="https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip">Get ShootOFF</a>
         </div>
 
         </div>
