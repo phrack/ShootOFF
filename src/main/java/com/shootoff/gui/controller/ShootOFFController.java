@@ -138,8 +138,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
-		shootOFFStage.getIcons().add(
-				   new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png"))); 
+		shootOFFStage.getIcons().addAll(
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_16x16.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_32x32.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_48x48.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_64x64.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_256x256.png"))); 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
 			if (config.getProtocol().isPresent()) config.getProtocol().get().destroy();
