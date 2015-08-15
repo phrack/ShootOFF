@@ -230,11 +230,11 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 	@Override
 	public ProtocolMetadata getInfo() {
 	    return new ProtocolMetadata("Bouncing Targets", "1.0", "phrack",
- 		    	"This protocol randomly moves shoot and don't shoot targets around "
- 		    	+ " the arena. All targets bounce off the arena bounds and targets of "
- 		    	+ " the same type bounce off of each other. Don't shoot targets are "
- 		    	+ " always able to overlap shoot targets. Your score is how many shoot "
- 		    	+ " targets you have hit since shooting your last don't shoot target.");
+	    		"This protocol randomly moves shoot (gray ring) and don't shoot (red ring) targets"
+	    		+ " around the arena. All targets bounce off the arena bounds and targets of the "
+	    		+ "same type can bounce off of each other. Don't shoot targets are always able to "
+	    		+ "overlap shoot targets. This protocol is scored. Your score is the tally of how "
+	    		+ "many shoot targets you have hit since shooting your last don't shoot target.");
 	}
 
 	@Override
