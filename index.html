@@ -30,23 +30,6 @@ var trackOutboundLink = function(url, new_window) {
   }
 }
 
-/** 
-* Add an onclick event to all links with class name "track", which will trigger
-* the above defined trackOutboundLink function
-*/
-$(document).ready(function(){
-  // set google analytics onclick link event on each link with class track
-  $('a.track').each(function(index, element){
-    element = $(element);
-    var link = element.attr('href');
-    var new_window = element.attr('target') == '_blank' ? true : false;
-    element.click(function(){
-      trackOutboundLink(link, new_window);
-      return false;
-    });
-  });
-});
-
 </script>
   	
     <meta charset="utf-8">
@@ -725,6 +708,24 @@ function onScroll(event){
         }
     });
 }
+
+/** 
+* Add an onclick event to all links with class name "track", which will trigger
+* the above defined trackOutboundLink function
+*/
+$(document).ready(function(){
+  // set google analytics onclick link event on each link with class track
+  $('a.track').each(function(index, element){
+    element = $(element);
+    var link = element.attr('href');
+    var new_window = element.attr('target') == '_blank' ? true : false;
+    element.click(function(){
+      trackOutboundLink(link, new_window);
+      return false;
+    });
+  });
+});
+
     </script>
 
 
