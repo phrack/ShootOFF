@@ -26,7 +26,9 @@ var trackOutboundLink = function(url, new_window) {
     }
   });
   if (new_window){
-    window.open(url);
+    //window.open(url);
+    // No good solution for this right now.  Just use the current tab.
+    document.location = url;
   }
 }
 
