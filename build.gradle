@@ -174,7 +174,7 @@ task fxJarWritableResources() {
             'javafx:com.sun.javafx.tools.ant')
 
     doLast {
-        ant.jar(destfile: 'build/dist/libs/' + writableResources) {
+        ant.jar(destfile: 'build/dist/' + writableResources) {
             fileset(dir: 'build/dist/', includes: 'targets/**')
             fileset(dir: 'build/dist/', includes: 'sounds/**')
             fileset(dir: 'build/dist/', includes: 'shootoff.properties')
@@ -206,7 +206,7 @@ task fxWebstartSignedJar(){
         ) {
                 ant.fileset(
                         dir: 'build/dist/',
-                        includes: 'ShootOFF.jar'
+                        includes: '*.jar'
                 )
         }
 
@@ -283,14 +283,7 @@ task fxDeploy(dependsOn: fxWebstartSignedJar){
 
                 antfx.fileset(
                         dir: 'build/dist/',
-                        includes: 'libs/*.jar',
-                        excludes: 'libs/' + writableResources
-                )
-
-                antfx.fileset(
-                        requiredFor: 'startup',
-                        dir: 'build/dist/',
-                        includes: 'libs/' + writableResources
+                        includes: 'libs/*.jar'
                 )
 
                 antfx.fileset(
