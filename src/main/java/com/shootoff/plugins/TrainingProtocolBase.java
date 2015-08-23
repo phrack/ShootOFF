@@ -29,6 +29,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 
 import com.shootoff.camera.CamerasSupervisor;
@@ -224,11 +225,19 @@ public class TrainingProtocolBase {
 		if (audioInputStream != null) {
 			AudioFormat format = audioInputStream.getFormat();
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
+			
+			Clip clip = null;
+			
 			try {
-				Clip clip = (Clip) AudioSystem.getLine(info);
+				clip = (Clip) AudioSystem.getLine(info);
 				clip.open(audioInputStream);
 				clip.start();
+				
+				clip.addLineListener((e) -> {
+						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
+					});
 			} catch (LineUnavailableException | IOException e) {
+				if (clip != null) clip.close();
 				e.printStackTrace();
 			}
 		} 
