@@ -27,11 +27,13 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -81,7 +83,23 @@ public class CameraSelectorScene extends Stage {
 	    
 	    webcamListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		webcamListView.setItems(webcams);
-		pane.setCenter(webcamListView);
+		
+		pane.setTop(webcamListView);
+		
+		final Button okButton = new Button("OK");
+		okButton.setDefaultButton(true);
+		okButton.setOnAction((event) -> {
+				addSelection();
+			});
+		
+		final Button cancelButton = new Button("Cancel");
+		cancelButton.setOnAction((event) -> {
+				this.close();
+			});
+		
+		HBox h = new HBox(okButton, cancelButton);
+		h.setSpacing(10);
+		pane.setRight(h);
 		
 		Scene scene = new Scene(pane);
 		this.setScene(scene);
@@ -89,7 +107,7 @@ public class CameraSelectorScene extends Stage {
 	}
 	
 	private void addSelection() {
-		ObservableList<String> selectedNames = 
+		final ObservableList<String> selectedNames = 
 				webcamListView.getSelectionModel().getSelectedItems();
 		
 		if (selectedNames.isEmpty()) return;
