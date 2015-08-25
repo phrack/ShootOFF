@@ -43,8 +43,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -138,14 +140,14 @@ public class Main extends Application {
             }
         };
         
-        final ProgressDialog progressDialog = new ProgressDialog(task);
+        final ProgressDialog progressDialog = new ProgressDialog("Downloading Resources...", 
+        		"Download required resources (targets, sounds, etc.)...", task);
         final HttpURLConnection con = connection;
         task.setOnSucceeded((value) -> {
         		progressDialog.close();
         		con.disconnect();
         		if (task.getValue()) {
         			extractWebstartResources();
-        			runShootOFF();
         		}
         	});
         
@@ -170,61 +172,103 @@ public class Main extends Application {
 		}
 	}
 
-	private void extractWebstartResources() {		
-		JarFile jar = null;
-			
-		try {
-			jar = new JarFile(resourcesFile);
-			
-			Enumeration<JarEntry> enumEntries = jar.entries();
-			while (enumEntries.hasMoreElements()) {
-			    JarEntry entry = (java.util.jar.JarEntry) enumEntries.nextElement();
-			    
-			    if (entry.getName().startsWith("META-INF")) continue;
-			    
-			    File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
-			    if (entry.isDirectory()) {
-			        if (!f.mkdir()) 
-			        	throw new IOException("Failed to make directory while extracting JAR: " + entry.getName());
-			    } else {				    
-				    InputStream is = jar.getInputStream(entry);
-				    FileOutputStream fos = new FileOutputStream(f);
-				    while (is.available() > 0) {
-				        fos.write(is.read());
-				    }
-				    fos.close();
-				    is.close();
-			    }
+	private void extractWebstartResources() {	
+		Task<Boolean> task = new Task<Boolean>() {
+			@Override
+			protected Boolean call() throws Exception {
+				JarFile jar = null;
+				
+				try {
+					jar = new JarFile(resourcesFile);
+					
+					Enumeration<JarEntry> enumEntries = jar.entries();
+					int fileCount = 0;
+					while (enumEntries.hasMoreElements()) {
+						JarEntry entry = (JarEntry)enumEntries.nextElement();
+						if (!entry.getName().startsWith("META-INF") && !entry.isDirectory()) fileCount++;
+					}
+					
+					enumEntries = jar.entries();
+					int currentCount = 0;
+					while (enumEntries.hasMoreElements()) {
+					    JarEntry entry = (JarEntry)enumEntries.nextElement();
+					    
+					    if (entry.getName().startsWith("META-INF")) continue;
+					    
+					    File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
+					    if (entry.isDirectory()) {
+					        if (!f.mkdir()) 
+					        	throw new IOException("Failed to make directory while extracting JAR: " + entry.getName());
+					    } else {			    	
+						    InputStream is = jar.getInputStream(entry);
+						    FileOutputStream fos = new FileOutputStream(f);
+						    while (is.available() > 0) {
+						        fos.write(is.read());
+						    }
+						    fos.close();
+						    is.close();
+						    
+						    currentCount++;
+						    updateProgress(((double)currentCount / (double)fileCount) * 100, 100);
+					    }
+					}
+					
+					updateProgress(100, 100);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				} finally {
+					try {
+						if (jar != null) jar.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				return true;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (jar != null) jar.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		};
+		
+        final ProgressDialog progressDialog = new ProgressDialog("Extracting Resources...", 
+        		"Extracting required resources (targets, sounds, etc.)...", task);
+        task.setOnSucceeded((value) -> {
+        		progressDialog.close();
+        		if (task.getValue()) {
+        			runShootOFF();
+        		}
+        	});
+        
+        new Thread(task).start();    
 	}
 	
     public static class ProgressDialog {
         private final Stage stage = new Stage();
+        private final Label messageLabel = new Label();
         private final ProgressBar pb = new ProgressBar();
         private final ProgressIndicator pin = new ProgressIndicator();
 
-        public ProgressDialog(final Task<?> task) {
-            stage.setTitle("Downloading Resources...");
+        public ProgressDialog(String dialogTitle, String dialogMessage, final Task<?> task) {
+            stage.setTitle(dialogTitle);
             stage.initModality(Modality.APPLICATION_MODAL);
 
             pb.setProgress(-1F);
             pin.setProgress(-1F);
+            
+            messageLabel.setText(dialogMessage);
 
             final HBox hb = new HBox();
             hb.setSpacing(5);
             hb.setAlignment(Pos.CENTER);
             hb.getChildren().addAll(pb, pin);
 
-            Scene scene = new Scene(hb);
+            pb.prefWidthProperty().bind(hb.widthProperty().subtract(hb.getSpacing() * 6));
+            
+            BorderPane bp = new BorderPane();
+            bp.setTop(messageLabel);
+            bp.setBottom(hb);
+            
+            Scene scene = new Scene(bp);
+            
             stage.setScene(scene);
             stage.show();
             
