@@ -110,7 +110,7 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 			 	bouncingTargetsStage.close();
 			 });
  
-		final Scene scene = new Scene(bouncingTargetsPane, 250, 110);
+		final Scene scene = new Scene(bouncingTargetsPane);
 		bouncingTargetsStage.initOwner(super.getShootOFFStage());
 		bouncingTargetsStage.initModality(Modality.WINDOW_MODAL);
 		bouncingTargetsStage.setTitle("Bouncing Targets Settings");
