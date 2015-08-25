@@ -1,5 +1,5 @@
 <html><head>
-  <SCRIPT src="http://java.com/js/dtjava.js"></SCRIPT>
+  <SCRIPT src="https://java.com/js/dtjava.js"></SCRIPT>
 <script>
     function launchApplication(jnlpfile) {
         dtjava.launch(            {
