@@ -141,7 +141,7 @@ public class Main extends Application {
         };
         
         final ProgressDialog progressDialog = new ProgressDialog("Downloading Resources...", 
-        		"Download required resources (targets, sounds, etc.)...", task);
+        		"Downloading required resources (targets, sounds, etc.)...", task);
         final HttpURLConnection con = connection;
         task.setOnSucceeded((value) -> {
         		progressDialog.close();
