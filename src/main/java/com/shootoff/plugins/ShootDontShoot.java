@@ -35,7 +35,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 
-public class ShootDontShoot extends ProjectorTrainingProtocolBase implements TrainingProtocol {
+public class ShootDontShoot extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String TARGET_COL_NAME = "TARGET";
 	private final static int TARGET_COL_WIDTH = 60;
 	
@@ -46,8 +46,8 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	private static final int CORE_POOL_SIZE = 2;
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	
-	private boolean continueProtocol = true;
-	private ProjectorTrainingProtocolBase thisSuper;
+	private boolean continueExercise = true;
+	private ProjectorTrainingExerciseBase thisSuper;
 	private int missedTargets = 0;
 	private int badHits = 0;
 	private final List<Target> shootTargets = new ArrayList<Target>();
@@ -74,7 +74,7 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	private class NewRound implements Callable<Void> {
 		@Override
 		public Void call() throws Exception {
-			if (continueProtocol) {
+			if (continueExercise) {
 				missedTargets += shootTargets.size();
 				
 				if (shootTargets.size() == 1) {
@@ -96,7 +96,7 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 		        
 		        thisSuper.clearShots();
 				
-				if (continueProtocol) executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+				if (continueExercise) executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 			}
 			
 			return null;
@@ -104,14 +104,14 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	}
 
 	@Override
-	public ProtocolMetadata getInfo() {
-	    return new ProtocolMetadata("Shoot Don't Shoot", "1.0", "phrack",
-	 		    	"This protocol randomly puts up targets and gives you 10 seconds "
+	public ExerciseMetadata getInfo() {
+	    return new ExerciseMetadata("Shoot Don't Shoot", "1.0", "phrack",
+	 		    	"This exercise randomly puts up targets and gives you 10 seconds "
 	 		    	+ "to decide which ones to shoot and which ones to ignore. If "
 	 		    	+ "you do not shoot a target you are supposed to shoot, it gets "
-	 		    	+ "added to your missed targets counter and the protocol says "
+	 		    	+ "added to your missed targets counter and the exercise says "
 	 		    	+ "how many targets you missed. If you hit a target you were not "
-	 		    	+ "supposed to hit, the protocol says 'bad shoot!'. Shoot the targets "
+	 		    	+ "supposed to hit, the exercise says 'bad shoot!'. Shoot the targets "
 	 		    	+ "with the red ring, don't shoot the other targets.");
 	}
 
@@ -169,7 +169,7 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 
 	@Override
 	public void reset(List<Group> targets) {
-		continueProtocol = false;
+		continueExercise = false;
 		executorService.shutdownNow();
 		
         missedTargets = 0;
@@ -185,7 +185,7 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
         
         super.showTextOnFeed("missed targets: 0\nbad hits: 0");
         
-        continueProtocol = true;
+        continueExercise = true;
         
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
@@ -195,6 +195,6 @@ public class ShootDontShoot extends ProjectorTrainingProtocolBase implements Tra
 	public void destroy() {
 		super.destroy();
 		executorService.shutdownNow();
-		continueProtocol = false;
+		continueExercise = false;
 	}
 }

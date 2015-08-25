@@ -35,7 +35,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
 
-public class ISSFStandardPistol extends TrainingProtocolBase implements TrainingProtocol, DelayedStartListener {
+public class ISSFStandardPistol extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private final static String SCORE_COL_NAME = "Score";
 	private final static int SCORE_COL_WIDTH = 60;
 	private final static String ROUND_COL_NAME = "Round";
@@ -44,7 +44,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 	private static final int CORE_POOL_SIZE = 4;
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	private ScheduledFuture<Void> endRound;
-	private TrainingProtocolBase thisSuper;
+	private TrainingExerciseBase thisSuper;
 	private static int[] ROUND_TIMES = {150, 20, 10};
 	private int roundTimeIndex = 0;
 	private int round = 1;
@@ -53,7 +53,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 	private Map<Integer, Integer> sessionScores = new HashMap<Integer, Integer>();
 	private int delayMin = 4;
 	private int delayMax = 8;
-	private boolean repeatProtocol = true;
+	private boolean repeatExercise = true;
 	
 	public ISSFStandardPistol() {}
 	
@@ -94,7 +94,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() throws Exception {
-			if (repeatProtocol) {
+			if (repeatExercise) {
 				TextToSpeech.say("Shooter... make ready");
 				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
             	executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
@@ -109,8 +109,8 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 		public Void call() throws Exception {
 			shotCount = 0;
 			
-			if (repeatProtocol) {
-				TrainingProtocolBase.playSound("sounds/beep.wav");
+			if (repeatExercise) {
+				TrainingExerciseBase.playSound("sounds/beep.wav");
 				thisSuper.pauseShotDetection(false);
 				endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
 			}
@@ -122,7 +122,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 	private class EndRound implements Callable<Void> {
 		@Override
 		public Void call() throws Exception {
-			if (repeatProtocol) {
+			if (repeatExercise) {
 				thisSuper.pauseShotDetection(true);
 				TextToSpeech.say("Round over");
 				
@@ -149,11 +149,11 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 	}
 	
 	@Override
-	public ProtocolMetadata getInfo() {
-		return new ProtocolMetadata("ISSF 25M Standard Pistol", "1.0", "phrack",
-				 "This protocol implements the ISSF event describe at: "
+	public ExerciseMetadata getInfo() {
+		return new ExerciseMetadata("ISSF 25M Standard Pistol", "1.0", "phrack",
+				 "This exercise implements the ISSF event describe at: "
 						 + "http://www.pistol.org.au/events/disciplines/issf. You "
-						 + "can use any scored target with this protocol, but use "
+						 + "can use any scored target with this exercise, but use "
 						 + "the ISSF target for the most authentic experience.");
 	}
 
@@ -200,7 +200,7 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
 
 	@Override
 	public void reset(List<Group> targets) {
-        repeatProtocol = false;
+        repeatExercise = false;
         executorService.shutdownNow();
        
         setInitialValues();
@@ -216,14 +216,14 @@ public class ISSFStandardPistol extends TrainingProtocolBase implements Training
         
 		super.showTextOnFeed("");
 		
-		repeatProtocol = true;
+		repeatExercise = true;
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 	
 	@Override 
 	public void destroy() {
-		repeatProtocol = false;
+		repeatExercise = false;
 		executorService.shutdownNow();
 		super.destroy();
 	}

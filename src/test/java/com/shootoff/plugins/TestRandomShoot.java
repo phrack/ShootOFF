@@ -55,12 +55,12 @@ public class TestRandomShoot {
 		
 		RandomShoot rs = new RandomShoot(targets);
 		
-		assertEquals("This training protocol requires a target with subtargets\n", stringOut.toString());
+		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString());
 		stringOut.reset();
 		
 		rs.reset(targets);
 		
-		assertEquals("This training protocol requires a target with subtargets\n", stringOut.toString());
+		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString());
 	}
 
 	@Test

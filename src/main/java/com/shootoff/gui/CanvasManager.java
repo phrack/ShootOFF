@@ -38,8 +38,8 @@ import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
-import com.shootoff.plugins.TrainingProtocol;
-import com.shootoff.plugins.TrainingProtocolBase;
+import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
@@ -216,12 +216,12 @@ public class CanvasManager {
 		drawShot(shot);
 		
 		if (config.useRedLaserSound() && color.equals(Color.RED)) {
-			TrainingProtocolBase.playSound(config.getRedLaserSound());
+			TrainingExerciseBase.playSound(config.getRedLaserSound());
 		} else if (config.useGreenLaserSound() && color.equals(Color.GREEN)) {
-			TrainingProtocolBase.playSound(config.getGreenLaserSound());
+			TrainingExerciseBase.playSound(config.getGreenLaserSound());
 		}
 		
-		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
+		Optional<TrainingExercise> currentExercise = config.getExercise();
 		Optional<Hit> hit = checkHit(shot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 		
@@ -242,11 +242,11 @@ public class CanvasManager {
 			}
 		}
 		
-		if (currentProtocol.isPresent() && !processedShot) {
+		if (currentExercise.isPresent() && !processedShot) {
 			Optional<TargetRegion> hitRegion = Optional.empty();
 			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
 			
-			currentProtocol.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hitRegion);
 		}
 	}
 	
@@ -254,17 +254,17 @@ public class CanvasManager {
 		shots.add(shot);
 		drawShot(shot);
 		
-		Optional<TrainingProtocol> currentProtocol = config.getProtocol();
+		Optional<TrainingExercise> currentExercise = config.getExercise();
 		Optional<Hit> hit = checkHit(shot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
 			executeRegionCommands(hit.get());
 		}
 		
-		if (currentProtocol.isPresent()) {
+		if (currentExercise.isPresent()) {
 			Optional<TargetRegion> hitRegion = Optional.empty();
 			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
 			
-			currentProtocol.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hitRegion);
 			return true;
 		}
 		
@@ -417,7 +417,7 @@ public class CanvasManager {
 						}
 					}
 					
-					TrainingProtocolBase.playSound(args.get(0));
+					TrainingExerciseBase.playSound(args.get(0));
 					break;
 				}
 			});

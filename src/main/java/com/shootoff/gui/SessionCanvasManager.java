@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.session.Event;
-import com.shootoff.session.ProtocolFeedMessageEvent;
+import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
 import com.shootoff.session.TargetMovedEvent;
@@ -44,16 +44,16 @@ import javafx.scene.control.Label;
 
 public class SessionCanvasManager {
 	private final Group canvas;
-	private final Label protocolLabel = new Label();
+	private final Label exerciseLabel = new Label();
 	private final Map<Event, Target> eventToContainer = new HashMap<Event, Target>();
 	private final Map<Event, Point2D> eventToPosition = new HashMap<Event, Point2D>();
-	private final Map<Event, String> eventToProtocolMessage = new HashMap<Event, String>();
+	private final Map<Event, String> eventToExerciseMessage = new HashMap<Event, String>();
 	private final Map<Event, Dimension2D> eventToDimension = new HashMap<Event, Dimension2D>();
 	private final List<Target> targets = new ArrayList<Target>();
 	
 	public SessionCanvasManager(Group canvas) {
 		this.canvas = canvas;
-		canvas.getChildren().add(protocolLabel);
+		canvas.getChildren().add(exerciseLabel);
 	}
 	
 	public void doEvent(Event e) {
@@ -92,10 +92,10 @@ public class SessionCanvasManager {
 			targets.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
 			break;
 			
-		case PROTOCOL_FEED_MESSAGE:
-			ProtocolFeedMessageEvent pfme = (ProtocolFeedMessageEvent)e;
-			eventToProtocolMessage.put(e, protocolLabel.getText());
-			protocolLabel.setText(pfme.getMessage());
+		case EXERCISE_FEED_MESSAGE:
+			ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent)e;
+			eventToExerciseMessage.put(e, exerciseLabel.getText());
+			exerciseLabel.setText(pfme.getMessage());
 			break;
 		}
 	}
@@ -136,8 +136,8 @@ public class SessionCanvasManager {
 			targets.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
 			break;
 			
-		case PROTOCOL_FEED_MESSAGE:
-			protocolLabel.setText(eventToProtocolMessage.get(e));
+		case EXERCISE_FEED_MESSAGE:
+			exerciseLabel.setText(eventToExerciseMessage.get(e));
 			break;
 		}
 	}

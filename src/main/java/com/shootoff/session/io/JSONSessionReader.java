@@ -35,7 +35,7 @@ import org.json.simple.parser.ParseException;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.session.Event;
-import com.shootoff.session.ProtocolFeedMessageEvent;
+import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
 import com.shootoff.session.TargetMovedEvent;
@@ -139,9 +139,9 @@ public class JSONSessionReader {
 										((Long)event.get("newY")).intValue()));
 						break;
 						
-					case "protocolFeedMessage":
+					case "exerciseFeedMessage":
 						events.get(cameraName).add(
-								new ProtocolFeedMessageEvent(cameraName, (Long)event.get("timestamp"),
+								new ExerciseFeedMessageEvent(cameraName, (Long)event.get("timestamp"),
 										(String)event.get("message")));
 						break;
 					}

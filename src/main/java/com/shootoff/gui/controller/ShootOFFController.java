@@ -51,13 +51,13 @@ import com.shootoff.gui.TargetListener;
 import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
-import com.shootoff.plugins.ProjectorTrainingProtocolBase;
+import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.TimedHolsterDrill;
-import com.shootoff.plugins.TrainingProtocol;
-import com.shootoff.plugins.TrainingProtocolBase;
+import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
@@ -125,7 +125,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private CalibrationConfigPane calibrationConfigPane;
 	private Target calibrationTarget;
 	private CameraManager arenaCameraManager;
-	private List<MenuItem> projectorProtocolMenuItems = new ArrayList<MenuItem>();
+	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 	
 	public void init(Configuration config) {
 		this.config = config;
@@ -133,8 +133,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		findTargets();
 		initDefaultBackgrounds();
-		registerTrainingProtocols();
-		registerProjectorProtocols();
+		registerTrainingExercises();
+		registerProjectorExercises();
 		
 		shootOFFStage = (Stage)mainMenu.getScene().getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
@@ -147,7 +147,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_256x256.png"))); 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
-			if (config.getProtocol().isPresent()) config.getProtocol().get().destroy();
+			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 			if (arenaController != null) arenaController.close();
 			
 			for (Stage streamDebuggerStage : streamDebuggerStages) {
@@ -404,20 +404,20 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 	}
 	
-	private void registerTrainingProtocols() {
-		addTrainingProtocol(new ISSFStandardPistol());
-		addTrainingProtocol(new RandomShoot());
-		addTrainingProtocol(new ShootForScore());
-		addTrainingProtocol(new TimedHolsterDrill());
+	private void registerTrainingExercises() {
+		addTrainingExercise(new ISSFStandardPistol());
+		addTrainingExercise(new RandomShoot());
+		addTrainingExercise(new ShootForScore());
+		addTrainingExercise(new TimedHolsterDrill());
 	}
 	
-	private void addTrainingProtocol(TrainingProtocol protocol) {
-		RadioMenuItem protocolItem = new RadioMenuItem(protocol.getInfo().getName());
-		protocolItem.setToggleGroup(trainingToggleGroup);
+	private void addTrainingExercise(TrainingExercise exercise) {
+		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
+		exerciseItem.setToggleGroup(trainingToggleGroup);
 		
-		protocolItem.setOnAction((e) -> {
+		exerciseItem.setOnAction((e) -> {
 				try {
-					Constructor<?> ctor = protocol.getClass().getConstructor(List.class);
+					Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 					
 					List<Group> knownTargets = new ArrayList<Group>();
 					knownTargets.addAll(camerasSupervisor.getTargets());
@@ -426,50 +426,50 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 						knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
 					}
 					
-					TrainingProtocol newProtocol = (TrainingProtocol)ctor.newInstance(knownTargets);
-					((TrainingProtocolBase)newProtocol).init(config, camerasSupervisor, shotTimerTable);
-					newProtocol.init();
-					config.setProtocol(newProtocol);
+					TrainingExercise newExercise = (TrainingExercise)ctor.newInstance(knownTargets);
+					((TrainingExerciseBase)newExercise).init(config, camerasSupervisor, shotTimerTable);
+					newExercise.init();
+					config.setExercise(newExercise);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			});
 		
-		trainingMenu.getItems().add(protocolItem);
+		trainingMenu.getItems().add(exerciseItem);
 	}
 	
-	private void registerProjectorProtocols() {
-		addProjectorTrainingProtocol(new BouncingTargets());
-		addProjectorTrainingProtocol(new DuelingTree());
-		addProjectorTrainingProtocol(new ShootDontShoot());
+	private void registerProjectorExercises() {
+		addProjectorTrainingExercise(new BouncingTargets());
+		addProjectorTrainingExercise(new DuelingTree());
+		addProjectorTrainingExercise(new ShootDontShoot());
 	}
 	
-	private void addProjectorTrainingProtocol(TrainingProtocol protocol) {
-		RadioMenuItem protocolItem = new RadioMenuItem(protocol.getInfo().getName());
-		protocolItem.setToggleGroup(trainingToggleGroup);	
-		if (arenaController == null) protocolItem.setDisable(true);
+	private void addProjectorTrainingExercise(TrainingExercise exercise) {
+		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
+		exerciseItem.setToggleGroup(trainingToggleGroup);	
+		if (arenaController == null) exerciseItem.setDisable(true);
 		
-		protocolItem.setOnAction((e) -> {
+		exerciseItem.setOnAction((e) -> {
 				try {
-					Constructor<?> ctor = protocol.getClass().getConstructor(List.class);
-					TrainingProtocol newProtocol = (TrainingProtocol)ctor.newInstance(
+					Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+					TrainingExercise newExercise = (TrainingExercise)ctor.newInstance(
 							arenaController.getCanvasManager().getTargetGroups());
-					((ProjectorTrainingProtocolBase)newProtocol).init(config, camerasSupervisor, 
+					((ProjectorTrainingExerciseBase)newExercise).init(config, camerasSupervisor, 
 							shotTimerTable, arenaController);
-					newProtocol.init();
-					config.setProtocol(newProtocol);
+					newExercise.init();
+					config.setExercise(newExercise);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			});
 		
-		trainingMenu.getItems().add(protocolItem);
-		projectorProtocolMenuItems.add(protocolItem);
+		trainingMenu.getItems().add(exerciseItem);
+		projectorExerciseMenuItems.add(exerciseItem);
 	}
 	
 	@FXML 
-	public void clickedNoneProtocol(ActionEvent event) {
-		config.setProtocol(null);
+	public void clickedNoneExercise(ActionEvent event) {
+		config.setExercise(null);
 	}
 	
 	@FXML 
@@ -545,8 +545,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        toggleArenaCalibrationMenuItem.fire();
 	        
 	        arenaStage.setOnCloseRequest((e) -> {
-	        		if (config.getProtocol().isPresent() && 
-	        				config.getProtocol().get() instanceof ProjectorTrainingProtocolBase) {
+	        		if (config.getExercise().isPresent() && 
+	        				config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
 	        			noneTrainingMenuItem.setSelected(true);
 	        			noneTrainingMenuItem.fire();
 	        		}
@@ -571,7 +571,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		arenaBackgroundMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
 		
-		for (MenuItem m : projectorProtocolMenuItems) m.setDisable(isDisabled);
+		for (MenuItem m : projectorExerciseMenuItems) m.setDisable(isDisabled);
 	}
 	
 	@FXML
@@ -730,7 +730,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void resetClicked(ActionEvent event) {
 		camerasSupervisor.reset();
 		
-		if (config.getProtocol().isPresent()) {
+		if (config.getExercise().isPresent()) {
 			List<Group> knownTargets = new ArrayList<Group>();
 			knownTargets.addAll(camerasSupervisor.getTargets());
 			
@@ -738,7 +738,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
 			}
 			
-			config.getProtocol().get().reset(knownTargets);
+			config.getExercise().get().reset(knownTargets);
 		}
 	}
 	

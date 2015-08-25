@@ -38,7 +38,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.session.Event;
-import com.shootoff.session.ProtocolFeedMessageEvent;
+import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
 import com.shootoff.session.TargetMovedEvent;
@@ -51,7 +51,7 @@ public class XMLSessionReader {
 	private final File sessionFile;
 	
 	private long lastTimestamp;
-	private boolean protocolFeedMessage = false;
+	private boolean exerciseFeedMessage = false;
 	
 	public XMLSessionReader(File sessionFile) {
 		this.sessionFile = sessionFile;
@@ -155,19 +155,19 @@ public class XMLSessionReader {
 								Integer.parseInt(attributes.getValue("newY"))));
 				break;
 				
-			case "protocolFeedMessage":
+			case "exerciseFeedMessage":
 				lastTimestamp = Long.parseLong(attributes.getValue("timestamp"));
-				protocolFeedMessage = true;
+				exerciseFeedMessage = true;
 			}
 		}
 		
 		public void characters(char ch[], int start, int length) throws SAXException {
-			if (protocolFeedMessage) {
+			if (exerciseFeedMessage) {
 				events.get(currentCameraName).add(
-						new ProtocolFeedMessageEvent(currentCameraName, lastTimestamp, 
+						new ExerciseFeedMessageEvent(currentCameraName, lastTimestamp, 
 								new String(ch, start, length)));
 				
-				protocolFeedMessage = false;
+				exerciseFeedMessage = false;
 			}	
 		}
 	}

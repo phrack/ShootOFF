@@ -88,8 +88,8 @@ public class XMLSessionWriter implements EventVisitor {
 	}
 	
 	@Override
-	public void visitProtocolFeedMessage(long timestamp, String message) {
-		xmlBody.append(String.format("\t\t<protocolFeedMessage timestamp=\"%d\">%s%n\t\t</protocolFeedMessage>%n", timestamp, message));
+	public void visitExerciseFeedMessage(long timestamp, String message) {
+		xmlBody.append(String.format("\t\t<exerciseFeedMessage timestamp=\"%d\">%s%n\t\t</exerciseFeedMessage>%n", timestamp, message));
 	}
 
 	@Override

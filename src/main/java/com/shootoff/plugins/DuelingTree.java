@@ -32,16 +32,16 @@ import javafx.scene.Node;
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
-public class DuelingTree extends ProjectorTrainingProtocolBase implements TrainingProtocol {
+public class DuelingTree extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String HIT_COL_NAME = "Hit By";
 	private final static int HIT_COL_WIDTH = 60;
 
 	private static final int NEW_ROUND_DELAY = 5; // s
 	private static final int CORE_POOL_SIZE = 2;
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-	private TrainingProtocolBase thisSuper;
+	private TrainingExerciseBase thisSuper;
 	
-    private boolean continueProtocol = true;
+    private boolean continueExercise = true;
     private boolean isResetting = false;
     private int leftScore = 0;
     private int rightScore = 0;
@@ -89,17 +89,17 @@ public class DuelingTree extends ProjectorTrainingProtocolBase implements Traini
 		}
 		
 		if (!foundTarget) {
-			TextToSpeech.say("This training protocol requires a dueling tree target");	
-			continueProtocol = false;
+			TextToSpeech.say("This training exercise requires a dueling tree target");	
+			continueExercise = false;
 		}
 		
 		return foundTarget;
 	}
 	
 	@Override
-	public ProtocolMetadata getInfo() {
-		return new ProtocolMetadata("Dueling Tree", "1.0", "phrack",
-	    	    	"This protocol works with the dueling tree target. Challenge "
+	public ExerciseMetadata getInfo() {
+		return new ExerciseMetadata("Dueling Tree", "1.0", "phrack",
+	    	    	"This exercise works with the dueling tree target. Challenge "
 	    	    	+ "a friend, assign a side (left or right) to each participant, "
 	    	    	+ "and try to shoot the plates from your side to your friend's "
 	    	    	+ "side. A round ends when all plates are on one person's side.");
@@ -107,7 +107,7 @@ public class DuelingTree extends ProjectorTrainingProtocolBase implements Traini
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (!continueProtocol) return;
+		if (!continueExercise) return;
 		
 		if (hitRegion.isPresent()) {
 			TargetRegion r = hitRegion.get();
@@ -144,7 +144,7 @@ public class DuelingTree extends ProjectorTrainingProtocolBase implements Traini
 	}
 	
 	private void roundOver() {
-		if (continueProtocol) {
+		if (continueExercise) {
 			thisSuper.showTextOnFeed(String.format("left score: %d%nright score: %d", leftScore, rightScore));
 			super.pauseShotDetection(true);
 			executorService.schedule(new NewRound(), NEW_ROUND_DELAY, TimeUnit.SECONDS);
@@ -180,7 +180,7 @@ public class DuelingTree extends ProjectorTrainingProtocolBase implements Traini
 
 	@Override
 	public void destroy() {
-		continueProtocol = false;
+		continueExercise = false;
 		executorService.shutdownNow();
 		super.destroy();
 	}

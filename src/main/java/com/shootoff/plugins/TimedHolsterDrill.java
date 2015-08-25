@@ -32,16 +32,16 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
 
-public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingProtocol, DelayedStartListener {
+public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private final static String LENGTH_COL_NAME = "Length";
 	private final static int LENGTH_COL_WIDTH = 60;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 2;
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-	private TrainingProtocolBase thisSuper;
+	private TrainingExerciseBase thisSuper;
 	private int delayMin = 4;
 	private int delayMax = 8;
-	private boolean repeatProtocol = true;
+	private boolean repeatExercise = true;
 	private long beepTime = 0;
 	
 	public TimedHolsterDrill() {}
@@ -66,7 +66,7 @@ public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingP
 			TextToSpeech.say("shooter... make ready");
 			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 			
-			if (repeatProtocol)
+			if (repeatExercise)
 				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 		
 			return null;
@@ -76,8 +76,8 @@ public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingP
 	private class Round implements Callable<Void> {
 		@Override
 		public Void call() throws Exception {
-			if (repeatProtocol) {
-	            TrainingProtocolBase.playSound("sounds/beep.wav");
+			if (repeatExercise) {
+	            TrainingExerciseBase.playSound("sounds/beep.wav");
 	            thisSuper.pauseShotDetection(false);
 	            beepTime = System.currentTimeMillis();
 	            
@@ -96,16 +96,16 @@ public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingP
 	}
 	
 	@Override
-	public ProtocolMetadata getInfo() {
-		return new ProtocolMetadata("Timed Holster Drill", "1.0", "phrack",
-			    "This protocol does not require a target, but one may be used "
-			    		+ "to give the shooter something to shoot at. When the protocol "
+	public ExerciseMetadata getInfo() {
+		return new ExerciseMetadata("Timed Holster Drill", "1.0", "phrack",
+			    "This exercise does not require a target, but one may be used "
+			    		+ "to give the shooter something to shoot at. When the exercise "
 			    		+ "is started you are asked to enter a range for randomly "
 			    		+ "delayed starts. You are then given 10 seconds to position "
 			    		+ "yourself. After a random wait (within the entered range) a "
 			    		+ "beep tells you to draw their pistol from it's holster, "
 			    		+ "fire at your target, and finally re-holster. This process is "
-			    		+ "repeated as long as this protocol is on.");
+			    		+ "repeated as long as this exercise is on.");
 	}
 
 	@Override
@@ -116,17 +116,17 @@ public class TimedHolsterDrill extends TrainingProtocolBase implements TrainingP
 
 	@Override
 	public void reset(List<Group> targets) {
-		repeatProtocol = false;
+		repeatExercise = false;
 		executorService.shutdownNow();		
 		super.getDelayedStartInterval(this);
-		repeatProtocol = true;
+		repeatExercise = true;
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 	
 	@Override
 	public void destroy() {
-		repeatProtocol = false;
+		repeatExercise = false;
 		executorService.shutdownNow();
 		super.destroy();
 	}

@@ -50,7 +50,7 @@ import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
-import com.shootoff.plugins.TrainingProtocol;
+import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.session.SessionRecorder;
 
 public class Configuration {
@@ -110,7 +110,7 @@ public class Configuration {
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
-	private TrainingProtocol currentProtocol = null;
+	private TrainingExercise currentExercise = null;
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
@@ -522,10 +522,10 @@ public class Configuration {
 		this.sessionRecorder = Optional.ofNullable(sessionRecorder);
 	}
 	
-	public void setProtocol(TrainingProtocol protocol) {
-		if (currentProtocol != null) currentProtocol.destroy();
+	public void setExercise(TrainingExercise exercise) {
+		if (currentExercise != null) currentExercise.destroy();
 		
-		currentProtocol = protocol;
+		currentExercise = exercise;
 	}
 
 	public Map<String, Camera> getWebcams() {
@@ -621,9 +621,9 @@ public class Configuration {
 		return shotProcessors;
 	}
 	
-	public Optional<TrainingProtocol> getProtocol() {
-		if (currentProtocol == null) return Optional.empty();
+	public Optional<TrainingExercise> getExercise() {
+		if (currentExercise == null) return Optional.empty();
 		
-		return Optional.of(currentProtocol);
+		return Optional.of(currentExercise);
 	}
 }

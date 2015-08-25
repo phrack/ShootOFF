@@ -29,7 +29,7 @@ public class ShotEntry {
 	private final Shot shot;
 	private final String color;
 	private final String timestamp;
-	private final Map<String, String> protocolData = new HashMap<String, String>();
+	private final Map<String, String> exerciseData = new HashMap<String, String>();
 	
 	public ShotEntry(Shot shot) {
 		this.shot = shot;
@@ -55,16 +55,16 @@ public class ShotEntry {
 		return shot;
 	}
 	
-	public void setProtocolValue(String name, String value) {
-		protocolData.put(name, value);
+	public void setExerciseValue(String name, String value) {
+		exerciseData.put(name, value);
 	}
 	
-	public String getProtocolValue(String name) {
-		if (protocolData.containsKey(name)) return protocolData.get(name);
+	public String getExerciseValue(String name) {
+		if (exerciseData.containsKey(name)) return exerciseData.get(name);
 		else return "";
 	}
 	
-	public void clearProtocolData() {
-		protocolData.clear();
+	public void clearExerciseData() {
+		exerciseData.clear();
 	}
 }

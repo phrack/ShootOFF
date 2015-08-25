@@ -55,27 +55,27 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /** 
- * This class implements common training protocol operations. All
- * training protocols should extend it.
+ * This class implements common training exercise operations. All
+ * training exercises should extend it.
  * 
  * @author phrack
  */
-public class TrainingProtocolBase {
+public class TrainingExerciseBase {
 	@SuppressWarnings("unused")
 	private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
 	
-	private final Map<CanvasManager, Label> protocolLabels = new HashMap<CanvasManager, Label>();
-	private final Map<String, TableColumn<ShotEntry, String>> protocolColumns = 
+	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
+	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = 
 			new HashMap<String, TableColumn<ShotEntry, String>>();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
-	public TrainingProtocolBase() {}
+	public TrainingExerciseBase() {}
 	
-	public TrainingProtocolBase(List<Group> targets) {
+	public TrainingExerciseBase(List<Group> targets) {
 		this.targets = targets;
 	}
 	
@@ -86,21 +86,21 @@ public class TrainingProtocolBase {
 		this.shotTimerTable = shotTimerTable;
 		
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
-			Label protocolLabel = new Label();
-			protocolLabel.setTextFill(Color.WHITE);
-			canvasManager.getCanvasGroup().getChildren().add(protocolLabel);
-			protocolLabels.put(canvasManager, protocolLabel);
+			Label exerciseLabel = new Label();
+			exerciseLabel.setTextFill(Color.WHITE);
+			canvasManager.getCanvasGroup().getChildren().add(exerciseLabel);
+			exerciseLabels.put(canvasManager, exerciseLabel);
 		}
 	}
 	
 	/**
-	 * Returns the current instance of this class. This metehod exists so that we can
+	 * Returns the current instance of this class. This method exists so that we can
 	 * call methods in this class when in an internal class (e.g. to implement Callable)
 	 * that doesn't have access to super.
 	 * 
 	 * @return the current instance of this class
 	 */
-	public TrainingProtocolBase getInstance() {
+	public TrainingExerciseBase getInstance() {
 		return this;
 	}
 	
@@ -141,11 +141,11 @@ public class TrainingProtocolBase {
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
 		     public ObservableValue<String> call(CellDataFeatures<ShotEntry, String> p) {
-		         return new SimpleStringProperty(p.getValue().getProtocolValue(name));
+		         return new SimpleStringProperty(p.getValue().getExerciseValue(name));
 		     }
 		  });
 		
-		protocolColumns.put(name, newCol);
+		exerciseColumns.put(name, newCol);
 		shotTimerTable.getColumns().add(newCol);
 	}
 	
@@ -158,7 +158,7 @@ public class TrainingProtocolBase {
 	public void setShotTimerColumnText(String name, String value) {
 		if (shotTimerTable != null) {
 			Platform.runLater(() -> {
-					shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setProtocolValue(name, value);
+					shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
 				});
 		}
 	}
@@ -172,12 +172,12 @@ public class TrainingProtocolBase {
 		if (config.inDebugMode()) System.out.println(message);
 		
 		if (config.getSessionRecorder().isPresent()) {
-			config.getSessionRecorder().get().recordProtocolFeedMessage(message);
+			config.getSessionRecorder().get().recordExerciseFeedMessage(message);
 		}
 		
 		Platform.runLater(() -> {
-				for (Label protocolLabel : protocolLabels.values())
-					protocolLabel.setText(message);
+				for (Label exerciseLabel : exerciseLabels.values())
+					exerciseLabel.setText(message);
 			});
 	}
 	
@@ -193,7 +193,7 @@ public class TrainingProtocolBase {
 	 */
 	public void reset() {
 		camerasSupervisor.reset();
-		if (config.getProtocol().isPresent()) config.getProtocol().get().reset(camerasSupervisor.getTargets());	
+		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());	
 	}
 	
 	/**
@@ -244,18 +244,18 @@ public class TrainingProtocolBase {
 	}
 	
 	/**
-	 * Removes all objects the training protocol has added to the GUI.
+	 * Removes all objects the training exercise has added to the GUI.
 	 */
 	public void destroy() {
-		for (TableColumn<ShotEntry, String> column : protocolColumns.values()) {
+		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 			shotTimerTable.getColumns().remove(column);
 		}
 		
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
-			canvasManager.getCanvasGroup().getChildren().remove(protocolLabels.get(canvasManager));
+			canvasManager.getCanvasGroup().getChildren().remove(exerciseLabels.get(canvasManager));
 		}
 		
-		protocolLabels.clear();
+		exerciseLabels.clear();
 		
 		pauseShotDetection(false);
 	}

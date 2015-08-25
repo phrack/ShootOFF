@@ -26,7 +26,7 @@ public class TestSessionRecorder {
 	private int targetIndex;
 	private Target target;
 	private int hitRegionIndex;
-	private String protocolMessage;
+	private String exerciseMessage;
 	
 	@Before
 	public void setUp() throws ConfigurationException {
@@ -41,7 +41,7 @@ public class TestSessionRecorder {
 		target = new Target(new File(targetName), new Group(), config, 
 				new MockCanvasManager(config), false, targetIndex);
 		hitRegionIndex = 0;
-		protocolMessage = "This is a test";
+		exerciseMessage = "This is a test";
 	}
 	
 	@Test
@@ -51,7 +51,7 @@ public class TestSessionRecorder {
 		sessionRecorder.recordTargetResized(cameraName, target, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 4, 3);
 		sessionRecorder.recordTargetRemoved(cameraName, target);
-		sessionRecorder.recordProtocolFeedMessage(protocolMessage);
+		sessionRecorder.recordExerciseFeedMessage(exerciseMessage);
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
@@ -82,9 +82,9 @@ public class TestSessionRecorder {
 		assertEquals(cameraName, events.get(4).getCameraName());
 		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(4)).getTargetIndex());
 		
-		assertEquals(EventType.PROTOCOL_FEED_MESSAGE, events.get(5).getType());
+		assertEquals(EventType.EXERCISE_FEED_MESSAGE, events.get(5).getType());
 		assertEquals(cameraName, events.get(5).getCameraName());
-		assertEquals(protocolMessage, ((ProtocolFeedMessageEvent)events.get(5)).getMessage());
+		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(5)).getMessage());
 		
 		assertEquals(6, events.size());
 	}

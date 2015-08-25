@@ -18,13 +18,13 @@
 
 package com.shootoff.plugins;
 
-public class ProtocolMetadata {
+public class ExerciseMetadata {
 	private final String name;
 	private final String version;
 	private final String creator;
 	private final String description;
 
-	public ProtocolMetadata(String name, String version, String creator,
+	public ExerciseMetadata(String name, String version, String creator,
 			String description) {
 		this.name = name;
 		this.version = version;

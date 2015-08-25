@@ -30,7 +30,7 @@ import javafx.scene.Node;
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
-public class RandomShoot extends TrainingProtocolBase implements TrainingProtocol {
+public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
 	private final List<String> subtargets = new ArrayList<String>();
 	private final Stack<Integer> currentSubtargets = new Stack<Integer>();
 	
@@ -51,7 +51,7 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 	
 	/**
 	 * Returns the list of all known subtargets. This method exists to make this
-	 * protocol easier to test.
+	 * exercise easier to test.
 	 * 
 	 * @return	a list of all known subtargets
 	 */
@@ -61,7 +61,7 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 	
 	/**
 	 * Returns the current subtarget stack. This method exists to make this
-	 * protocol easier to test.
+	 * exercise easier to test.
 	 * 
 	 * @return	current subtarget stack
 	 */
@@ -74,7 +74,7 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
      * there is no target with substargets, this method uses TTS
      * to tell the user
      * 
-     * @param targets	a list of all targets known to this protocolo
+     * @param targets	a list of all targets known to this exercise
      * @return	<tt>true</tt> if we found subtargets, <tt>false</tt> otherwise
      */
 	private boolean fetchSubtargets(List<Group> targets) {
@@ -97,7 +97,7 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 		if (foundTarget && subtargets.size() > 0) {
 			return true;
 		} else {
-			TextToSpeech.say("This training protocol requires a target with subtargets");
+			TextToSpeech.say("This training exercise requires a target with subtargets");
 	        return false;		
 		}	
 	}
@@ -130,9 +130,9 @@ public class RandomShoot extends TrainingProtocolBase implements TrainingProtoco
 	}
 
 	@Override
-	public ProtocolMetadata getInfo() {
-		return new ProtocolMetadata("Random Shoot", "1.0", "phrack",
-		    	   "This protocol works with targets that have subtarget tags "
+	public ExerciseMetadata getInfo() {
+		return new ExerciseMetadata("Random Shoot", "1.0", "phrack",
+		    	   "This exercise works with targets that have subtarget tags "
 		    	    	   + "assigned to some regions. Subtargets are selected at random "
 		    	    	   + "and the shooter is asked to shoot those subtargets in order. "
 		    	    	   + "If a subtarget is shot out of order or the shooter misses, the "

@@ -15,7 +15,7 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
 import com.shootoff.session.Event;
-import com.shootoff.session.ProtocolFeedMessageEvent;
+import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
@@ -35,7 +35,7 @@ public class TestSessionIO {
 	private String targetName;
 	private int targetIndex;
 	private int hitRegionIndex;
-	private String protocolMessage;
+	private String exerciseMessage;
 	
 	@Before
 	public void setUp() throws ConfigurationException {
@@ -46,7 +46,7 @@ public class TestSessionIO {
 		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
 		targetIndex = 1;
-		protocolMessage = "This is a\n\t test";
+		exerciseMessage = "This is a\n\t test";
 		
 		Configuration config = new Configuration(new String[0]);
 		Target target = new Target(new File(targetName), new Group(), 
@@ -62,7 +62,7 @@ public class TestSessionIO {
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex));
 		sessionRecorder.recordTargetRemoved(cameraName1, target);
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty());
-		sessionRecorder.recordProtocolFeedMessage(protocolMessage);
+		sessionRecorder.recordExerciseFeedMessage(exerciseMessage);
 	}
 	
 	private void checkSession (Optional<SessionRecorder> sessionRecorder) {
@@ -108,7 +108,7 @@ public class TestSessionIO {
 		assertFalse(((ShotEvent)events.get(6)).getTargetIndex().isPresent());
 		assertFalse(((ShotEvent)events.get(6)).getHitRegionIndex().isPresent());
 		
-		assertEquals(protocolMessage, ((ProtocolFeedMessageEvent)events.get(7)).getMessage());
+		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(7)).getMessage());
 		
 		events = sessionRecorder.get().getCameraEvents(cameraName2);
 		
@@ -116,7 +116,7 @@ public class TestSessionIO {
 		
 		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
 		
-		assertEquals(protocolMessage, ((ProtocolFeedMessageEvent)events.get(1)).getMessage());
+		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(1)).getMessage());
 	}
 
 	@Test

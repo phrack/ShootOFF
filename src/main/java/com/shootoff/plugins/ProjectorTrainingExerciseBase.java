@@ -32,7 +32,7 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
 
-public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
+public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaController arenaController;
@@ -40,9 +40,9 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
-	public ProjectorTrainingProtocolBase() {}
+	public ProjectorTrainingExerciseBase() {}
 	
-	public ProjectorTrainingProtocolBase(List<Group> targets) {
+	public ProjectorTrainingExerciseBase(List<Group> targets) {
 		super(targets);
 	}
 	
@@ -57,8 +57,8 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	@Override
 	public void reset() {
 		camerasSupervisor.reset();
-		if (config.getProtocol().isPresent()) 
-			config.getProtocol().get().reset(arenaController.getCanvasManager().getTargetGroups());	
+		if (config.getExercise().isPresent()) 
+			config.getExercise().get().reset(arenaController.getCanvasManager().getTargetGroups());	
 	}
 	
 	/**
@@ -101,7 +101,7 @@ public class ProjectorTrainingProtocolBase extends TrainingProtocolBase {
 	 * 
 	 * @return the current instance of this class
 	 */
-	public ProjectorTrainingProtocolBase getInstance() {
+	public ProjectorTrainingExerciseBase getInstance() {
 		return this;
 	}
 	

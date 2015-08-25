@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.session.Event;
-import com.shootoff.session.ProtocolFeedMessageEvent;
+import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.TargetAddedEvent;
@@ -75,9 +75,9 @@ public class SessionIO {
 					visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());				
 					break;
 					
-				case PROTOCOL_FEED_MESSAGE:
-					ProtocolFeedMessageEvent pfme = (ProtocolFeedMessageEvent)e;
-					visitor.visitProtocolFeedMessage(pfme.getTimestamp(), pfme.getMessage());
+				case EXERCISE_FEED_MESSAGE:
+					ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent)e;
+					visitor.visitExerciseFeedMessage(pfme.getTimestamp(), pfme.getMessage());
 					break;
 				}
 			}

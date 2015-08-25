@@ -29,7 +29,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 
-public class BouncingTargets extends ProjectorTrainingProtocolBase implements TrainingProtocol {
+public class BouncingTargets extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private int shootCount = 4;
 	private int dontShootCount = 1;
 	private static int maxVelocity = 10;
@@ -37,7 +37,7 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 	private static final List<BouncingTarget> shootTargets = new ArrayList<BouncingTarget>();
 	private static final List<BouncingTarget> dontShootTargets = new ArrayList<BouncingTarget>();
 	
-	private static ProjectorTrainingProtocolBase thisSuper;
+	private static ProjectorTrainingExerciseBase thisSuper;
 	private Timeline targetAnimation;
 	private int score = 0;
 	
@@ -228,12 +228,12 @@ public class BouncingTargets extends ProjectorTrainingProtocolBase implements Tr
 	}
 
 	@Override
-	public ProtocolMetadata getInfo() {
-	    return new ProtocolMetadata("Bouncing Targets", "1.0", "phrack",
-	    		"This protocol randomly moves shoot (gray ring) and don't shoot (red ring) targets"
+	public ExerciseMetadata getInfo() {
+	    return new ExerciseMetadata("Bouncing Targets", "1.0", "phrack",
+	    		"This exercise randomly moves shoot (gray ring) and don't shoot (red ring) targets"
 	    		+ " around the arena. All targets bounce off the arena bounds and targets of the "
 	    		+ "same type can bounce off of each other. Don't shoot targets are always able to "
-	    		+ "overlap shoot targets. This protocol is scored. Your score is the tally of how "
+	    		+ "overlap shoot targets. This exercise is scored. Your score is the tally of how "
 	    		+ "many shoot targets you have hit since shooting your last don't shoot target.");
 	}
 

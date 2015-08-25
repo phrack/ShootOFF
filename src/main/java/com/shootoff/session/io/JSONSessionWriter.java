@@ -131,9 +131,9 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitProtocolFeedMessage(long timestamp, String message) {
+	public void visitExerciseFeedMessage(long timestamp, String message) {
 		JSONObject event = new JSONObject();
-		event.put("type", "protocolFeedMessage");
+		event.put("type", "exerciseFeedMessage");
 		event.put("timestamp", timestamp);
 		event.put("message", message);
 		

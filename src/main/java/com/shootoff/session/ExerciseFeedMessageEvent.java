@@ -18,12 +18,12 @@
 
 package com.shootoff.session;
 
-public class ProtocolFeedMessageEvent implements Event {
+public class ExerciseFeedMessageEvent implements Event {
 	private final String cameraName;
 	private final long timestamp;
 	private final String message;
 	
-	public ProtocolFeedMessageEvent(String cameraName, long timestamp, String message) {
+	public ExerciseFeedMessageEvent(String cameraName, long timestamp, String message) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.message = message;
@@ -31,7 +31,7 @@ public class ProtocolFeedMessageEvent implements Event {
 
 	@Override
 	public EventType getType() {
-		return EventType.PROTOCOL_FEED_MESSAGE;
+		return EventType.EXERCISE_FEED_MESSAGE;
 	}
 	
 	public String getMessage() {
@@ -50,6 +50,6 @@ public class ProtocolFeedMessageEvent implements Event {
 	
 	@Override
 	public String toString() {
-		return "training protocol feed message";
+		return "training exercise feed message";
 	}
 }

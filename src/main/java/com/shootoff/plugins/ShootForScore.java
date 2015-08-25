@@ -27,7 +27,7 @@ import javafx.scene.paint.Color;
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
-public class ShootForScore extends TrainingProtocolBase implements TrainingProtocol {
+public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
 	private final static String POINTS_COL_NAME = "Score";
 	private final static int POINTS_COL_WIDTH = 60;
 	
@@ -47,7 +47,7 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
 	
 	/**
 	 * Returns the score for the red player. This method exists to make this
-	 * protocol easier to test.
+	 * exercise easier to test.
 	 * 
 	 * @return	red's score
 	 */
@@ -57,7 +57,7 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
 	
 	/**
 	 * Returns the score for the green player. This method exists to make this
-	 * protocol easier to test.
+	 * exercise easier to test.
 	 * 
 	 * @return	green's score
 	 */
@@ -66,9 +66,9 @@ public class ShootForScore extends TrainingProtocolBase implements TrainingProto
 	}
 	
 	@Override
-	public ProtocolMetadata getInfo() {	    	    
-		return new ProtocolMetadata("Shoot for Score", "1.0", "phrack",
-	    	    "This protocol works with targets that have score tags "
+	public ExerciseMetadata getInfo() {	    	    
+		return new ExerciseMetadata("Shoot for Score", "1.0", "phrack",
+	    	    "This exercise works with targets that have score tags "
 	    	    		+ "assigned to regions. Any time a target region is hit, "
 	    	    		+ "the number of points assigned to that region are added "
 	    	    		+ "to your total score.");
