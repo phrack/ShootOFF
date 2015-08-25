@@ -215,6 +215,9 @@ public class TrainingExerciseBase {
 	}
 	
 	public static void playSound(File soundFile) {
+		if (!soundFile.isAbsolute()) 
+			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
+		
 		AudioInputStream audioInputStream = null;
 
 		try {
