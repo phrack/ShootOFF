@@ -170,7 +170,9 @@ public class Main extends Application {
 			resourcesAlert.setHeaderText("Missing Required Resources!");
 			resourcesAlert.setResizable(true);
 			resourcesAlert.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
-					+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.");
+					+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
+					+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
+					+ "the website.");
 			resourcesAlert.showAndWait();
 		} else {
 			runShootOFF();
