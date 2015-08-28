@@ -90,7 +90,10 @@ public class Main extends Application {
 		long remoteFileLength = connection.getContentLength();
 
 		if (remoteFileLength == 0) {
-			System.err.println("Remote writable resources file query returned 0 len");
+			System.err.println("Remote writable resources file query returned 0 len.");
+			connection.disconnect();
+			tryRunningShootOFF();
+			return;
 		}
 		
 		if (resourcesFile.exists() && remoteFileLength == resourcesFile.length()) {
@@ -148,6 +151,8 @@ public class Main extends Application {
         		con.disconnect();
         		if (task.getValue()) {
         			extractWebstartResources();
+        		} else {
+        			tryRunningShootOFF();
         		}
         	});
         
@@ -197,7 +202,7 @@ public class Main extends Application {
 					    
 					    File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 					    if (entry.isDirectory()) {
-					        if (!f.mkdir()) 
+					        if (!f.exists() && !f.mkdir()) 
 					        	throw new IOException("Failed to make directory while extracting JAR: " + entry.getName());
 					    } else {			    	
 						    InputStream is = jar.getInputStream(entry);
@@ -235,6 +240,8 @@ public class Main extends Application {
         		progressDialog.close();
         		if (task.getValue()) {
         			runShootOFF();
+        		} else {
+        			tryRunningShootOFF();
         		}
         	});
         
