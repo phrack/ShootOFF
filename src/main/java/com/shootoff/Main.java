@@ -19,14 +19,19 @@
 package com.shootoff;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
 import java.util.Enumeration;
+import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -52,9 +57,134 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+	private final String RESOURCES_METADATA_NAME = "shootoff-writable-resources.xml";
 	private final String RESOURCES_JAR_NAME = "shootoff-writable-resources.jar";
-	private File resourcesFile;
+	private File resourcesMetadataFile;
+	private File resourcesJARFile;
 	private Stage primaryStage;
+	
+
+	private static class ResourcesInfo {
+		private String version;
+		private long fileSize;
+		private String xml;
+		
+		public ResourcesInfo(String version, long fileSize, String xml) {
+			this.version = version;
+			this.fileSize = fileSize;
+			this.xml = xml;
+		}
+		
+		public String getVersion() {
+			return version;
+		}
+		
+		public long getFileSize() {
+			return fileSize;
+		}
+		
+		public String getXML() {
+			return xml;
+		}
+	}
+	
+	private Optional<String> parseField(String metadataXML, String fieldName) {
+		String tagName = "<resources";
+		int tagStart = metadataXML.indexOf(tagName);
+		
+		if (tagStart == -1) {
+			System.err.println("Couldn't parse resources tag from resources metadata");
+			tryRunningShootOFF();
+			return Optional.empty();	
+		}
+		
+		tagStart += tagName.length();
+		
+		fieldName += "=\"";
+		int dataStart = metadataXML.indexOf(fieldName, tagStart);
+		
+		if (dataStart == -1) {
+			System.err.println(String.format("Couldn't parse %s field from resources metadata", fieldName));
+			tryRunningShootOFF();
+			return Optional.empty();
+		}
+		
+		dataStart += fieldName.length();
+		
+		int dataEnd = metadataXML.indexOf("\"", dataStart);
+		
+		return Optional.of(metadataXML.substring(dataStart, dataEnd));
+	}
+	
+	private Optional<ResourcesInfo> deserializeMetadataXML(String metadataXML) {
+		Optional<String> version = parseField(metadataXML, "version");
+		Optional<String> fileSize = parseField(metadataXML, "fileSize");
+		
+		if (version.isPresent() && fileSize.isPresent()) {
+			return Optional.of(new ResourcesInfo(version.get(), Long.parseLong(fileSize.get()), metadataXML));
+		}
+		
+		return Optional.empty();
+	}
+	
+	private Optional<ResourcesInfo> getWebstartResourcesInfo(File metadataFile) {
+		if (!metadataFile.exists()) {
+			System.err.println("Local metadata file unavailable");
+			return Optional.empty();
+		}
+		
+		try {
+			String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()));
+			return deserializeMetadataXML(metadataXML);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return Optional.empty();
+	}
+	
+	private Optional<ResourcesInfo> getWebstartResourcesInfo(String metadataAddress) {
+		HttpURLConnection connection = null;
+		InputStream stream = null;
+		
+		try {
+			connection = (HttpURLConnection)new URL(metadataAddress).openConnection();
+			stream = connection.getInputStream();
+		} catch (UnknownHostException e) {
+			System.err.println("Could not connect to remote host " + e.getMessage() + " to download writable resources.");
+			tryRunningShootOFF();
+			return Optional.empty();
+		} catch (IOException e) {
+			if (connection != null) connection.disconnect();
+
+			System.err.println("Failed to get stream to download writable resources file");
+			e.printStackTrace();
+			tryRunningShootOFF();
+			return Optional.empty();
+		}
+		
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder metadataXML = new StringBuilder();
+        
+        try {
+	        String line;
+	        while ((line = br.readLine()) != null) {
+	        	if (metadataXML.length() > 0) metadataXML.append("\n");
+	            metadataXML.append(line);
+	        }
+        } catch (IOException e) {
+			if (connection != null) connection.disconnect();
+
+			System.err.println("Failed to read resources metadata");
+			e.printStackTrace();
+			tryRunningShootOFF();
+			return Optional.empty();
+        }
+		
+		connection.disconnect();
+		
+		return deserializeMetadataXML(metadataXML.toString());
+	}
 	
 	/**
 	 * Writable resources (e.g. shootoff.properties, sounds, targets, etc.) cannot be included in 
@@ -67,7 +197,7 @@ public class Main extends Application {
 	 * 
 	 * @param fileAddress	the url (e.g. http://example.com/file.jar) that contains ShootOFF's writable resources
 	 */
-	private void downloadWebstartResources(String fileAddress) {
+	private void downloadWebstartResources(ResourcesInfo ri, String fileAddress) {
 		HttpURLConnection connection = null;
 		InputStream stream = null;
 		
@@ -87,18 +217,12 @@ public class Main extends Application {
 			return;
 		}
 		
-		long remoteFileLength = connection.getContentLength();
+		long remoteFileLength = ri.getFileSize();
 
 		if (remoteFileLength == 0) {
 			System.err.println("Remote writable resources file query returned 0 len.");
 			connection.disconnect();
 			tryRunningShootOFF();
-			return;
-		}
-		
-		if (resourcesFile.exists() && remoteFileLength == resourcesFile.length()) {
-			connection.disconnect();
-			runShootOFF();
 			return;
 		}
 		
@@ -110,7 +234,7 @@ public class Main extends Application {
     			FileOutputStream fileOutputStream = null;
     			
     			try {
-    				fileOutputStream = new FileOutputStream(resourcesFile);
+    				fileOutputStream = new FileOutputStream(resourcesJARFile);
 	    	
     				long totalDownloaded = 0;
 	    			int count;
@@ -150,6 +274,15 @@ public class Main extends Application {
         		progressDialog.close();
         		con.disconnect();
         		if (task.getValue()) {
+        			try {
+        				PrintWriter out = new PrintWriter(resourcesMetadataFile);
+        				out.print(ri.getXML());
+        				out.close();
+        			} catch (IOException e) {
+        				System.err.println("Could't update metadata file: " + e.getMessage());
+        				e.printStackTrace();
+        			}
+        			
         			extractWebstartResources();
         		} else {
         			tryRunningShootOFF();
@@ -186,7 +319,7 @@ public class Main extends Application {
 				JarFile jar = null;
 				
 				try {
-					jar = new JarFile(resourcesFile);
+					jar = new JarFile(resourcesJARFile);
 					
 					Enumeration<JarEntry> enumEntries = jar.entries();
 					int fileCount = 0;
@@ -342,8 +475,25 @@ public class Main extends Application {
 			
 			System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
 			
-			resourcesFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
-			downloadWebstartResources("http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
+			resourcesMetadataFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
+			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
+			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo("http://shootoffapp.com/jws/" + RESOURCES_METADATA_NAME);
+		
+			if (!localRI.isPresent() && remoteRI.isPresent()) {
+				resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
+				downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
+			} else if (localRI.isPresent() && remoteRI.isPresent()) {
+				if (!localRI.get().getVersion().equals(remoteRI.get().getVersion())) {
+					System.out.println(String.format("Local version: %s, Remote version: %s", 
+							localRI.get().getVersion(), remoteRI.get().getVersion()));
+					resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
+					downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);				
+				} else {
+					runShootOFF();
+				}
+			} else {
+				System.err.println("Could not locate local or remote resources metadata");
+			}
 		} else {
 			System.setProperty("shootoff.home", System.getProperty("user.dir"));
 			runShootOFF();
