@@ -55,8 +55,11 @@ dependencies {
     // bridj is here because webcam-capture depends on it but fetches 0.6.2, which
     // does not play nicely with stackguard in newer versions of the JVM.
     compile group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'    
-    compile group: 'com.github.sarxos', name: 'webcam-capture', version: '0.3.10'
+    compile group: 'com.github.sarxos', name: 'webcam-capture', version: '0.3.+'
+    compile group: 'com.github.sarxos', name: 'webcam-capture-driver-ipcam', version: '0.3.+'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.+'
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.+'
+    compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.+'
 
     // tts dependencies
     compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.+'

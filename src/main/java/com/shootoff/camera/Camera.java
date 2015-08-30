@@ -20,10 +20,22 @@ package com.shootoff.camera;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamCompositeDriver;
+import com.github.sarxos.webcam.WebcamException;
+import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
+import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
+import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry;
+import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
+import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
 
 public class Camera {
 	// These are used in a hack to get this code to work on Mac.
@@ -38,7 +50,15 @@ public class Camera {
 	private static final Webcam defaultWebcam;
 	private static final List<Camera> knownWebcams;
 	
+	public static class CompositeDriver extends WebcamCompositeDriver {
+		public CompositeDriver() {
+			add(new WebcamDefaultDriver());
+			add(new IpCamDriver());
+		}
+	}
+	
 	static {
+		Webcam.setDriver( new CompositeDriver());
 		String os = System.getProperty("os.name");
 		
 		if (os != null && os.equals("Mac OS X")) {
@@ -58,12 +78,70 @@ public class Camera {
 		}
 	}
 	
-	private Webcam webcam;
+	public static Camera registerIpCamera(String cameraName, URL cameraURL) throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
+		// These are here because webcam-capture wraps this exception in a WebcamException if the 
+		// URL has a syntax issue. We don't want to use webcam-capture classes outside of this
+		// class, thus to handle this error we need to artificially cause it earlier if it is
+		// going to be a problem.
+		cameraURL.toURI();
+		
+		try {
+			IpCamDevice ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
+			
+			// If a camera can't  be reached, webcam capture seems to freeze indefinitely. This is done
+			// to add an artificial timeout.
+			Thread t = new Thread(() -> ipcam.getResolution());
+			t.start();
+			final int ipcamTimeout = 3000;
+			try {
+				t.join(ipcamTimeout);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			if (t.isAlive()) {
+				IpCamDeviceRegistry.unregister(cameraName);
+				throw new TimeoutException();
+			}
+			
+			return new Camera(ipcam);
+		} catch (WebcamException we) {
+			if (we.getCause() instanceof UnknownHostException) {
+				throw (UnknownHostException)we.getCause();
+			}
+			
+			throw we;
+		}
+	}
+	
+	public static boolean unregisterIpCamera(String cameraName) {
+		return IpCamDeviceRegistry.unregister(cameraName);
+	}
+	
+	private final Webcam webcam;
+	private final boolean isIpCam;
 	
 	private Camera(Webcam webcam) {
 		this.webcam = webcam;
+		this.isIpCam = false;
 	}
 	
+	private Camera(IpCamDevice ipcam) {
+		this.isIpCam = true;
+		
+		for (Camera webcam : getWebcams()) {
+			if (webcam.getName().equals(ipcam.getName())) {
+				this.webcam = webcam.getWebcam();
+				return;
+			}
+		}
+		
+		this.webcam = null;
+	}
+	
+	protected Webcam getWebcam() {
+		return webcam;
+	}
 	
 	public static Camera getDefault() {
 		if (isMac) {
@@ -93,6 +171,10 @@ public class Camera {
 	
 	public BufferedImage getImage() {
 		return webcam.getImage();
+	}
+	
+	public boolean isIpCam() {
+		return isIpCam;
 	}
 	
 	public boolean open() {

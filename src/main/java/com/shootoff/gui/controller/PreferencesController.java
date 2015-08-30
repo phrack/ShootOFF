@@ -212,7 +212,7 @@ public class PreferencesController {
 	@FXML
 	public void addCameraClicked(ActionEvent event) {
 		CameraSelectorScene cameraSelector = new CameraSelectorScene(
-				preferencesStage, configuredCameras);
+				config, preferencesStage, configuredCameras);
 		
 		cameraSelector.setOnHidden((e) -> {
 				if (!cameraSelector.getSelectedWebcams().isEmpty()) {

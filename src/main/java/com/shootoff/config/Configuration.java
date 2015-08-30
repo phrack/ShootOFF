@@ -25,16 +25,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeoutException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
 
 import org.apache.commons.cli.CommandLine;
@@ -54,6 +61,7 @@ import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.session.SessionRecorder;
 
 public class Configuration {
+	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
 	private static final String DETECTION_RATE_PROP = "shootoff.detectionrate";
 	private static final String LASER_INTENSITY_PROP = "shootoff.laserintensity";
@@ -94,7 +102,8 @@ public class Configuration {
 	private InputStream configInput;
 	private String configName;
 	
-	private Map<String, Camera> webcams =  new HashMap<String, Camera>();
+	private Map<String, URL> ipcams = new HashMap<String, URL>();
+	private Map<String, Camera> webcams = new HashMap<String, Camera>();
 	private int detectionRate = 70;
 	private int laserIntensity = 230;
 	private int markerRadius = 4;
@@ -182,6 +191,15 @@ public class Configuration {
 		
 		inputStream.close();
 		
+		if (prop.containsKey(IPCAMS_PROP)) {
+			for (String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
+				String[] names = nameString.split("\\|");
+				if (names.length > 1) {
+					registerIpCam(names[0], names[1]);;
+				}
+			}
+		}
+		
 		if (prop.containsKey(WEBCAMS_PROP)) {
 			List<String> webcamNames = new ArrayList<String>();
 			List<String> webcamInternalNames = new ArrayList<String>();
@@ -191,6 +209,12 @@ public class Configuration {
 				if (names.length > 1) {
 					webcamNames.add(names[0]);
 					webcamInternalNames.add(names[1]);
+				}
+			}
+			
+			for (String webcamName : webcamNames) {
+				if (ipcams.containsKey(webcamName)) {
+					
 				}
 			}
 			
@@ -274,6 +298,14 @@ public class Configuration {
 		
 		Properties prop = new Properties();
 		
+		StringBuilder ipcamList = new StringBuilder();
+		for (Entry<String, URL> entry : ipcams.entrySet()) {
+			if (ipcamList.length() > 0) ipcamList.append(",");
+			ipcamList.append(entry.getKey());
+			ipcamList.append("|");
+			ipcamList.append(entry.getValue().toString());
+		}
+		
 		StringBuilder webcamList = new StringBuilder();
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
 			if (webcamList.length() > 0) webcamList.append(",");
@@ -282,6 +314,7 @@ public class Configuration {
 			webcamList.append(entry.getValue().getName());
 		}
 		
+		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(DETECTION_RATE_PROP, String.valueOf(detectionRate));
 		prop.setProperty(LASER_INTENSITY_PROP, String.valueOf(laserIntensity));
@@ -411,6 +444,47 @@ public class Configuration {
 		}
 	}
 	
+	public Optional<Camera> registerIpCam(String cameraName, String cameraURL) {
+		try {
+			URL url = new URL(cameraURL);
+			Camera cam = Camera.registerIpCamera(cameraName, url);
+			ipcams.put(cameraName, url);
+			return Optional.of(cam);
+		} catch (MalformedURLException | URISyntaxException ue) {
+			Alert ipcamURLAlert = new Alert(AlertType.ERROR);
+			ipcamURLAlert.setTitle("Malformed URL");
+			ipcamURLAlert.setHeaderText("IPCam URL is Malformed!");
+			ipcamURLAlert.setResizable(true);
+			ipcamURLAlert.setContentText("IPCam URL is not valid: \n\n" + ue.getMessage());
+			ipcamURLAlert.showAndWait();
+		} catch (UnknownHostException uhe) {
+			Alert ipcamHostAlert = new Alert(AlertType.ERROR);
+			ipcamHostAlert.setTitle("Unknown Host");
+			ipcamHostAlert.setHeaderText("IPCam URL Unknown!");
+			ipcamHostAlert.setResizable(true);
+			ipcamHostAlert.setContentText("The IPCam at " + cameraURL +  " cannot be resolved. Ensure the URL is correct "
+					+ "and that you are either connected to the internet or on the same network as the camera." );
+			ipcamHostAlert.showAndWait();
+		} catch (TimeoutException te) {
+			Alert ipcamTimeoutAlert = new Alert(AlertType.ERROR);
+			ipcamTimeoutAlert.setTitle("IPCam Timeout");
+			ipcamTimeoutAlert.setHeaderText("Connection to IPCam Reached Timeout!");
+			ipcamTimeoutAlert.setResizable(true);
+			ipcamTimeoutAlert.setContentText("Could not communicate with the IP at " + cameraURL + 
+					". Please check the following:\n\n"
+					+ "-The IPCam URL is correct\n"
+					+ "-You are connected to the Internet (for external cameras)"
+					+ "-You are connected to the same network as the camera (for local cameras)" );
+			ipcamTimeoutAlert.showAndWait();					
+		}
+		
+		return Optional.empty();
+	}
+	
+	public void unregisterIpCam(String cameraName) {
+		if (Camera.unregisterIpCamera(cameraName)) ipcams.remove(cameraName);
+	}
+	
 	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
 		this.webcams.clear();
 		
@@ -528,6 +602,10 @@ public class Configuration {
 		currentExercise = exercise;
 	}
 
+	public Map<String, URL> getRegistedIpCams() {
+		return ipcams;
+	}
+	
 	public Map<String, Camera> getWebcams() {
 		return webcams;
 	}

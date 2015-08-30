@@ -19,6 +19,7 @@
 package com.shootoff.gui;
 
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,14 +62,14 @@ public class ImageCell extends TextFieldListCell<String> {
                 if (userDefinedCameraNames == null) {
                 	for (Camera webcam : webcams) {
                 		if (webcam.getName().equals(item)) {
-                				webcamImg = Optional.of(fetchWebcamImage(webcam));
+                			webcamImg = fetchWebcamImage(webcam);
                 			break;
                 		}
                 	}
                 } else {
                     int cameraIndex = userDefinedCameraNames.indexOf(item);
                     if (cameraIndex >= 0) {
-                    	webcamImg = Optional.of(fetchWebcamImage(webcams.get(cameraIndex)));	
+                    	webcamImg = fetchWebcamImage(webcams.get(cameraIndex));	
                     }
                 }
                 
@@ -83,9 +84,9 @@ public class ImageCell extends TextFieldListCell<String> {
         });
     }
     
-    private Image fetchWebcamImage(Camera webcam) {
+    private Optional<Image> fetchWebcamImage(Camera webcam) {
     	if (imageCache.containsKey(webcam)) {
-    		return imageCache.get(webcam);
+    		return Optional.of(imageCache.get(webcam));
     	}
     	
     	boolean cameraOpened = false;
@@ -96,13 +97,20 @@ public class ImageCell extends TextFieldListCell<String> {
 			cameraOpened = true;
 		}
 
-		Image webcamImg = SwingFXUtils.toFXImage(webcam.getImage(), null);
-		imageCache.put(webcam, webcamImg);
+		Image webcamImg = null;
+		if (webcam.isOpen()) {
+			BufferedImage img = webcam.getImage();
+			
+			if (img != null) {
+				webcamImg = SwingFXUtils.toFXImage(img, null);
+				imageCache.put(webcam, webcamImg);
+			}
+		}
 		
 		if (cameraOpened == true) {
 			webcam.close();
 		}
 		
-		return webcamImg;
+		return Optional.ofNullable(webcamImg);
     }
 }
