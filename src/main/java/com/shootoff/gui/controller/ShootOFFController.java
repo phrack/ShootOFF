@@ -23,10 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,6 +142,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_64x64.png")),
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png")),
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_256x256.png"))); 
+		
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
 			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
@@ -490,9 +488,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML
 	public void toggleSessionRecordingMenuItemClicked(ActionEvent event) {
 		if (config.getSessionRecorder().isPresent()) {
-			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
 			SessionIO.saveSession(config.getSessionRecorder().get(), 
-					new File(System.getProperty("shootoff.home") + File.separator + "sessions/" + dateFormat.format(new Date()) + ".xml"));
+					new File(System.getProperty("shootoff.home") + File.separator + "sessions/" + 
+							config.getSessionRecorder().get().getSessionName() + ".xml"));
 			
 			config.setSessionRecorder(null);
 			

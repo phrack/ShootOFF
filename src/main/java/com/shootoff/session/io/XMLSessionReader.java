@@ -118,9 +118,15 @@ public class XMLSessionReader {
 					hitRegionIndex = Optional.of(index);
 				}
 				
+				Optional<File> videoFile = Optional.empty();
+				String videoFilePath = attributes.getValue("videoFile");
+				if (videoFilePath != null) {
+					videoFile = Optional.of(new File(videoFilePath));
+				}
+				
 				events.get(currentCameraName).add(
 						new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot, 
-								targetIndex, hitRegionIndex));
+								targetIndex, hitRegionIndex, videoFile));
 				
 				break;
 

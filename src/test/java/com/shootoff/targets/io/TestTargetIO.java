@@ -87,7 +87,7 @@ public class TestTargetIO {
 				ImageRegion img = (ImageRegion)region;
 				assertEquals(this.img.getX(), img.getX(), 0.5);
 				assertEquals(this.img.getY(), img.getY(), 0.5);
-				assertEquals(this.img.getImageFile(), img.getImageFile());
+				assertEquals(this.img.getImageFile(), img.getImageFile().getPath());
 				assertEquals("2", this.img.getTag("1"));
 				break;
 			case RECTANGLE:

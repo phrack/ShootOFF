@@ -22,6 +22,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -88,8 +91,12 @@ public class CameraManager {
 
 	private boolean recordingStream = false;
 	private boolean isFirstStreamFrame = true;
-	private IMediaWriter videoWriteStream;
+	private IMediaWriter videoWriterStream;
 	private long recordingStartTime;
+	
+	private boolean recordingShots = false;
+	private List<ShotRecorder> shotRecorders = new ArrayList<ShotRecorder>();
+ 	
 	private boolean[][] sectorStatuses;
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
@@ -157,6 +164,7 @@ public class CameraManager {
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
+		if (recordingShots) stopRecordingShots();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -181,8 +189,8 @@ public class CameraManager {
 
 	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
-		videoWriteStream = ToolFactory.makeWriter(videoFile.getName());
-		videoWriteStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, FEED_WIDTH, FEED_HEIGHT);
+		videoWriterStream = ToolFactory.makeWriter(videoFile.getName());
+		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, FEED_WIDTH, FEED_HEIGHT);
 		recordingStartTime = System.currentTimeMillis();
 		isFirstStreamFrame = true;
 
@@ -191,9 +199,33 @@ public class CameraManager {
 
 	public void stopRecordingStream() {
 		recordingStream = false;
-		videoWriteStream.close();
+		videoWriterStream.close();
 	}
-
+	
+	public void startRecordingShots() {
+		String sessionName = null;
+		if (config.getSessionRecorder().isPresent()) {
+			sessionName = config.getSessionRecorder().get().getSessionName();
+			
+			File sessionVideoFolder = new File(System.getProperty("shootoff.home") + File.separator + 
+					"sessions" + File.separator + config.getSessionRecorder().get().getSessionName());
+			
+			if (!sessionVideoFolder.exists()) {
+				if (!sessionVideoFolder.mkdirs()) {
+					logger.error("Could not create video folder for session: {}", sessionVideoFolder.getAbsolutePath());
+				}
+			}
+		}
+		
+		shotRecorders.add(new ShotRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName));
+		recordingShots = true;
+	}
+	
+	public void stopRecordingShots() {
+		for (ShotRecorder r : shotRecorders) r.close();
+		recordingShots = false;
+	}
+	
 	public Image getCurrentFrame() {
 		if (webcam.isPresent()) {
 			return SwingFXUtils.toFXImage(webcam.get().getImage(), null);
@@ -299,6 +331,30 @@ public class CameraManager {
 						continue;
 					}
 				}
+				
+				if (recordingShots) {
+					Iterator<ShotRecorder> it = shotRecorders.iterator();
+					List<ShotRecorder> newRecorders = new ArrayList<ShotRecorder>();
+					while (it.hasNext()) {
+						ShotRecorder r = it.next();
+						
+						if (r.isComplete()) {
+							r.close();
+							it.remove();
+							
+							String sessionName = null;
+							if (config.getSessionRecorder().isPresent()) {
+								sessionName = config.getSessionRecorder().get().getSessionName();
+							}
+							
+							newRecorders.add(new ShotRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName));
+						} else {
+							r.recordFrame(currentFrame);
+						}
+					}
+					
+					shotRecorders.addAll(newRecorders);
+				}
 
 				if (recordingStream) {
 					BufferedImage image = ConverterFactory.convertToType(currentFrame, BufferedImage.TYPE_3BYTE_BGR);
@@ -310,7 +366,7 @@ public class CameraManager {
 					frame.setQuality(0);
 					isFirstStreamFrame = false;
 
-					videoWriteStream.encodeVideo(0, frame);
+					videoWriterStream.encodeVideo(0, frame);
 				}
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
@@ -473,8 +529,20 @@ public class CameraManager {
 					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
+			Optional<ShotRecorder> shotRecorder = Optional.empty();
+			
+			if (recordingShots) {
+				// Find first recorder that doesn't already have a shot to use
+				for (ShotRecorder r : shotRecorders) {
+					if (!r.hasShot()) {
+						shotRecorder = Optional.of(r);
+						break;
+					}
+				}
+			}
+			
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					frame, grayScale, projectionBounds, cropFeedToProjection);
+					frame, grayScale, projectionBounds, cropFeedToProjection, shotRecorder);
 			
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();

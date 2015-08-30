@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
+import com.shootoff.camera.ShotRecorder;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.plugins.TrainingExercise;
@@ -104,9 +105,9 @@ public class CanvasManager {
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
-					addShot(Color.RED, event.getX(), event.getY());
+					addShot(Color.RED, event.getX(), event.getY(), Optional.empty());
 				} else if (event.isControlDown()) {
-					addShot(Color.GREEN, event.getX(), event.getY());
+					addShot(Color.GREEN, event.getX(), event.getY(), Optional.empty());
 				}
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
@@ -199,7 +200,7 @@ public class CanvasManager {
 		this.showShots = showShots;
 	}
 	
-	public void addShot(Color color, double x, double y) {
+	public void addShot(Color color, double x, double y, Optional<ShotRecorder> shotRecorder) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, config.getMarkerRadius());
@@ -222,7 +223,7 @@ public class CanvasManager {
 		}
 		
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot);
+		Optional<Hit> hit = checkHit(shot, shotRecorder);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 		
 		boolean processedShot = false;
@@ -238,7 +239,7 @@ public class CanvasManager {
 						(shot.getX() - b.getMinX()) * x_scale, (shot.getY() - b.getMinY()) * y_scale,
 						shot.getTimestamp(), config.getMarkerRadius());
 				
-				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
+				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, shotRecorder);
 			}
 		}
 		
@@ -250,12 +251,12 @@ public class CanvasManager {
 		}
 	}
 	
-	public boolean addArenaShot(Shot shot) {
+	public boolean addArenaShot(Shot shot, Optional<ShotRecorder> shotRecorder) {
 		shots.add(shot);
 		drawShot(shot);
 		
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot);
+		Optional<Hit> hit = checkHit(shot, shotRecorder);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
 			executeRegionCommands(hit.get());
 		}
@@ -296,7 +297,13 @@ public class CanvasManager {
 		}
 	}
 	
-	private Optional<Hit> checkHit(Shot shot) {
+	private Optional<Hit> checkHit(Shot shot, Optional<ShotRecorder> shotRecorder) {
+		Optional<File> videoFile = Optional.empty();
+		
+		if (shotRecorder.isPresent()) {
+			videoFile = Optional.of(shotRecorder.get().getVideoFile());
+		}
+		
 		// Targets are in order of when they were added, thus we must search in reverse
 		// to ensure shots register for the top target when targets overlap
 		for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
@@ -370,7 +377,8 @@ public class CanvasManager {
 							config.getSessionRecorder().get().recordShot(cameraName, 
 									shot,
 									Optional.of(target), 
-									Optional.of(targetGroup.getChildren().indexOf(node)));
+									Optional.of(targetGroup.getChildren().indexOf(node)),
+									videoFile);
 						}
 						
 						return Optional.of(new Hit(target, (TargetRegion)node));
@@ -386,7 +394,8 @@ public class CanvasManager {
 			config.getSessionRecorder().get().recordShot(cameraName, 
 					shot,
 					Optional.empty(), 
-					Optional.empty());
+					Optional.empty(),
+					videoFile);
 		}
 		
 		return Optional.empty();

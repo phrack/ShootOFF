@@ -18,6 +18,7 @@
 
 package com.shootoff.session;
 
+import java.io.File;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
@@ -30,13 +31,16 @@ public class ShotEvent implements Event {
 	private final Shot shot;
 	private final Optional<Integer> targetIndex;
 	private final Optional<Integer> hitRegionIndex;
+	private final Optional<File> videoFile;
 	
-	public ShotEvent(String cameraName, long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex) {
+	public ShotEvent(String cameraName, long timestamp, Shot shot, Optional<Integer> targetIndex, 
+			Optional<Integer> hitRegionIndex, Optional<File> videoFile) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp; 
 		this.shot = shot;
 		this.targetIndex = targetIndex;
 		this.hitRegionIndex = hitRegionIndex;
+		this.videoFile = videoFile;
 	}
 
 	@Override
@@ -54,6 +58,10 @@ public class ShotEvent implements Event {
 	
 	public Optional<Integer> getHitRegionIndex() {
 		return hitRegionIndex;
+	}
+	
+	public Optional<File> getVideoFile() {
+		return videoFile;
 	}
 	
 	@Override

@@ -47,7 +47,7 @@ public class TestSessionRecorder {
 	@Test
 	public void testOneOfEach() {
 		sessionRecorder.recordTargetAdded(cameraName, target);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
 		sessionRecorder.recordTargetResized(cameraName, target, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 4, 3);
 		sessionRecorder.recordTargetRemoved(cameraName, target);
@@ -65,6 +65,7 @@ public class TestSessionRecorder {
 		assertEquals(Color.RED, ((ShotEvent)events.get(1)).getShot().getColor());
 		assertEquals(targetIndex, ((ShotEvent)events.get(1)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(1)).getHitRegionIndex().get().intValue());
+		assertFalse(((ShotEvent)events.get(1)).getVideoFile().isPresent());
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
 		assertEquals(cameraName, events.get(2).getCameraName());
@@ -143,7 +144,8 @@ public class TestSessionRecorder {
 	public void testCollapseResizesShotInMiddle() {
 		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
 		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex));
+		File videoFile = new File("test.mp4");
+		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoFile));
 		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
 		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
@@ -162,6 +164,8 @@ public class TestSessionRecorder {
 		assertEquals(Color.RED, ((ShotEvent)events.get(3)).getShot().getColor());
 		assertEquals(targetIndex, ((ShotEvent)events.get(3)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
+		assertTrue(((ShotEvent)events.get(3)).getVideoFile().isPresent());
+		assertEquals(videoFile, ((ShotEvent)events.get(3)).getVideoFile().get());
 		
 		assertEquals(EventType.TARGET_RESIZED, events.get(4).getType());
 		assertEquals(targetIndex, ((TargetResizedEvent)events.get(4)).getTargetIndex());
@@ -218,7 +222,7 @@ public class TestSessionRecorder {
 	public void testCollapseMovesShotInMiddle() {
 		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex));
+		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
 		sessionRecorder.recordTargetMoved(cameraName, target, 13, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 12, 45);
 		
@@ -237,6 +241,7 @@ public class TestSessionRecorder {
 		assertEquals(Color.RED, ((ShotEvent)events.get(3)).getShot().getColor());
 		assertEquals(targetIndex, ((ShotEvent)events.get(3)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
+		assertFalse(((ShotEvent)events.get(3)).getVideoFile().isPresent());
 		
 		assertEquals(EventType.TARGET_MOVED, events.get(4).getType());
 		assertEquals(targetIndex, ((TargetMovedEvent)events.get(4)).getTargetIndex());

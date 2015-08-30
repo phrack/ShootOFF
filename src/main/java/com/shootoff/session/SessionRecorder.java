@@ -18,7 +18,11 @@
 
 package com.shootoff.session;
 
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,12 +39,15 @@ import javafx.geometry.Point2D;
 
 public class SessionRecorder {
 	private final long startTime;
+	private final String sessionName;
 	private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
 	private final Map<String, Set<Target>> seenTargets = new HashMap<String, Set<Target>>();
 	
 	private volatile boolean ignoreTargetCheck = false;
 	
 	public SessionRecorder() {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+		sessionName = dateFormat.format(new Date());
 		startTime = System.currentTimeMillis();
 	}
 	
@@ -50,6 +57,10 @@ public class SessionRecorder {
 	
 	public Map<String, List<Event>> getEvents() {
 		return events;
+	}
+	
+	public String getSessionName() {
+		return sessionName;
 	}
 	
 	public List<Event> getCameraEvents(String cameraName) {
@@ -84,7 +95,8 @@ public class SessionRecorder {
 		}
 	}
 	
-	public void recordShot(String cameraName, Shot shot, Optional<Target> target, Optional<Integer> hitRegionIndex) {
+	public void recordShot(String cameraName, Shot shot, Optional<Target> target, Optional<Integer> hitRegionIndex,
+			Optional<File> videoFile) {
 		Optional<Integer> targetIndex = Optional.empty();
 		
 		if (target.isPresent()) {
@@ -92,8 +104,10 @@ public class SessionRecorder {
 			if (!ignoreTargetCheck) checkTarget(cameraName, target.get());
 		}
 		
+		long timestamp = System.currentTimeMillis() - startTime;
+		
 		getCameraEvents(cameraName).add(
-				new ShotEvent(cameraName, System.currentTimeMillis() - startTime, shot, targetIndex, hitRegionIndex));
+				new ShotEvent(cameraName, timestamp, shot, targetIndex, hitRegionIndex, videoFile));
 	}
 	
 	public void recordTargetAdded(String cameraName, Target target) {

@@ -52,7 +52,7 @@ public class SessionIO {
 				switch (e.getType()) {
 				case SHOT:
 					ShotEvent se = (ShotEvent)e;
-					visitor.visitShot(se.getTimestamp(), se.getShot(), se.getTargetIndex(), se.getHitRegionIndex());
+					visitor.visitShot(se.getTimestamp(), se.getShot(), se.getTargetIndex(), se.getHitRegionIndex(), se.getVideoFile());
 					break;
 					
 				case TARGET_ADDED:

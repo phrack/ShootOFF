@@ -44,7 +44,8 @@ public class XMLSessionWriter implements EventVisitor {
 	}
 
 	@Override
-	public void visitShot(long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex) {
+	public void visitShot(long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex,
+			Optional<File> videoFile) {
 		int targIndex;
 		if (targetIndex.isPresent()) {
 			targIndex = targetIndex.get();
@@ -59,10 +60,19 @@ public class XMLSessionWriter implements EventVisitor {
 			hitRegIndex = -1;
 		}
 		
-		xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
-				+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n", 
-				timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
-				(int)shot.getMarker().getRadiusX(), targIndex, hitRegIndex));
+		if (videoFile.isPresent()) {
+			xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
+					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\""
+					+ " videoFile=\"%s\" />%n",
+					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
+					(int)shot.getMarker().getRadiusX(), targIndex, hitRegIndex, videoFile.get().getPath()));
+			
+		} else {
+			xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
+					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n", 
+					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
+					(int)shot.getMarker().getRadiusX(), targIndex, hitRegIndex));
+		}
 	}
 
 	@Override
