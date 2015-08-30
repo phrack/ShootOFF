@@ -86,9 +86,9 @@ public class CameraManager {
 	private Optional<Integer> minimumShotDimension = Optional.empty();
 	private Optional<DebuggerListener> debuggerListener = Optional.empty();
 
-	private boolean recording = false;
-	private boolean isFirstFrame = true;
-	private IMediaWriter videoWriter;
+	private boolean recordingStream = false;
+	private boolean isFirstStreamFrame = true;
+	private IMediaWriter videoWriteStream;
 	private long recordingStartTime;
 	private boolean[][] sectorStatuses;
 
@@ -156,7 +156,7 @@ public class CameraManager {
 
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
-		if (recording) stopRecording();
+		if (recordingStream) stopRecordingStream();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -179,19 +179,19 @@ public class CameraManager {
 		limitDetectProjection = limitDetection;
 	}
 
-	public void startRecording(File videoFile) {
+	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
-		videoWriter = ToolFactory.makeWriter(videoFile.getName());
-		videoWriter.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, FEED_WIDTH, FEED_HEIGHT);
+		videoWriteStream = ToolFactory.makeWriter(videoFile.getName());
+		videoWriteStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, FEED_WIDTH, FEED_HEIGHT);
 		recordingStartTime = System.currentTimeMillis();
-		isFirstFrame = true;
+		isFirstStreamFrame = true;
 
-		recording = true;
+		recordingStream = true;
 	}
 
-	public void stopRecording() {
-		recording = false;
-		videoWriter.close();
+	public void stopRecordingStream() {
+		recordingStream = false;
+		videoWriteStream.close();
 	}
 
 	public Image getCurrentFrame() {
@@ -300,17 +300,17 @@ public class CameraManager {
 					}
 				}
 
-				if (recording) {
+				if (recordingStream) {
 					BufferedImage image = ConverterFactory.convertToType(currentFrame, BufferedImage.TYPE_3BYTE_BGR);
 					IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 					IVideoPicture frame = converter.toPicture(image,
 							(System.currentTimeMillis() - recordingStartTime) * 1000);
-					frame.setKeyFrame(isFirstFrame);
+					frame.setKeyFrame(isFirstStreamFrame);
 					frame.setQuality(0);
-					isFirstFrame = false;
+					isFirstStreamFrame = false;
 
-					videoWriter.encodeVideo(0, frame);
+					videoWriteStream.encodeVideo(0, frame);
 				}
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {

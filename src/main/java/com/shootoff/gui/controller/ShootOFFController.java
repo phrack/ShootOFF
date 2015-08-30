@@ -377,10 +377,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 						
 						String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
 						String videoName = tabName + ".mp4";
-						cameraManager.startRecording(new File(videoName));
+						cameraManager.startRecordingStream(new File(videoName));
 					} else {
 						recordMenuItem.setText("Start Recording");
-						cameraManager.stopRecording();
+						cameraManager.stopRecordingStream();
 					}
 				});
 			
