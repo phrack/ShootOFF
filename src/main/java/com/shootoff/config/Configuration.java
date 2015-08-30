@@ -212,12 +212,6 @@ public class Configuration {
 				}
 			}
 			
-			for (String webcamName : webcamNames) {
-				if (ipcams.containsKey(webcamName)) {
-					
-				}
-			}
-			
 			for (Camera webcam : Camera.getWebcams()) {
 				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
 				if (cameraIndex >= 0) {
