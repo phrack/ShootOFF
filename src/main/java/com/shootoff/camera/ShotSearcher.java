@@ -143,9 +143,18 @@ public class ShotSearcher implements Runnable {
 		int redCount = 0;
 		int greenCount = 0;
 		
-		// Get the color of pixels down and right to count
-		// the number of reds and greens
-		int[] rgbs = currentFrame.getRGB(x, y, minShotDim, minShotDim, null, 0, minShotDim);
+		// Count the colors of pixels in a small patch of pixels that should mostly be shot pixels
+		int colorPatchWidth = minShotDim;
+		if (x + minShotDim > currentFrame.getWidth()) {
+			colorPatchWidth = currentFrame.getWidth() - x;
+		}
+		
+		int colorPatchHeight = minShotDim;
+		if (y + minShotDim > currentFrame.getHeight()) {
+			colorPatchHeight = currentFrame.getHeight() - y;
+		}
+		
+		int[] rgbs = currentFrame.getRGB(x, y, colorPatchWidth, colorPatchHeight, null, 0, minShotDim);
 		
 		for (int rgb : rgbs) {
 			PixelColor c = getPixelColor(rgb);

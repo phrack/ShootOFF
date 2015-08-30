@@ -94,7 +94,26 @@ public class TestShotSearcher {
 		assertEquals(175, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 	}
+	
+	@Test
+	public void testNoInterenceOneEdgeShotSide() throws IOException, InterruptedException {
+		List<Shot> shots = findShots("/shotsearcher/no_interference_one_edge_shot_side.png");
 
+		// Dim is too small since most of the shot is cut off
+		assertEquals(0, shots.size());
+	}
+
+	@Test
+	public void testNoInterenceOneEdgeShotBottom() throws IOException, InterruptedException {
+		List<Shot> shots = findShots("/shotsearcher/no_interference_one_edge_shot_bottom.png");
+
+		assertEquals(1, shots.size());
+		
+		assertEquals(401, shots.get(0).getX(), 1);
+		assertEquals(357.5, shots.get(0).getY(), 1);
+		assertEquals(Color.RED, shots.get(0).getColor());
+	}
+	
 	@Test
 	public void testNoInterenceOneShotSectorOff() throws IOException, InterruptedException {
 		// Turn off the sector the shot is in
