@@ -418,6 +418,7 @@ public class CameraManager {
 
 			frame.setRGB(x, y, new Color((int)r, c.getGreen(), (int)b).getRGB());
 		}
+		
 		private void detectShots(BufferedImage frame, AverageFrameComponents averages) {
 			if (!isDetecting) return;
 
