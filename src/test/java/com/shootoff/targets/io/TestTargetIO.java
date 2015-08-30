@@ -37,6 +37,8 @@ public class TestTargetIO {
 
 	@Before
 	public void setUp() {
+		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+		
 		Map<String, String> imgTags = new HashMap<String, String>();
 		imgTags.put("1", "2");
 		img = new ImageRegion(6, 6, new File("targets" + File.separator + "plate.gif"));
@@ -87,7 +89,7 @@ public class TestTargetIO {
 				ImageRegion img = (ImageRegion)region;
 				assertEquals(this.img.getX(), img.getX(), 0.5);
 				assertEquals(this.img.getY(), img.getY(), 0.5);
-				assertEquals(this.img.getImageFile(), img.getImageFile().getPath());
+				assertEquals(this.img.getImageFile().getAbsolutePath(), img.getImageFile().getAbsolutePath());
 				assertEquals("2", this.img.getTag("1"));
 				break;
 			case RECTANGLE:
