@@ -34,9 +34,6 @@ public class ShotRecorder {
 		videoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
 				relativeVideoFile.getPath());
 		
-		System.out.println(relativeVideoFile.getPath());
-		System.out.println(videoFile.getPath());
-		
 		videoWriter = ToolFactory.makeWriter(videoFile.getPath());
 		videoWriter.addVideoStream(0, 0, codec, CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT);
 		

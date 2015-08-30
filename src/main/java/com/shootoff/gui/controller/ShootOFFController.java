@@ -497,6 +497,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			toggleSessionRecordingMenuItem.setText("Record Session");
 		} else {
 			config.setSessionRecorder(new SessionRecorder());
+			camerasSupervisor.getCameraManager(
+					cameraTabPane.getSelectionModel().getSelectedIndex()).startRecordingShots();
 			toggleSessionRecordingMenuItem.setText("Stop Recording");
 		}
 	}
