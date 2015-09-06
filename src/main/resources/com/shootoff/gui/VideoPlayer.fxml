@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<HBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.VideoPlayerController">
+   <children>
+      <VBox prefHeight="200.0" prefWidth="100.0">
+         <children>
+            <TabPane fx:id="videoTabPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" />
+            <HBox prefHeight="32.0" prefWidth="32.0">
+               <children>
+                  <Button minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#nextButtonClicked" prefHeight="32.0" prefWidth="32.0" style="-fx-background-position: center; -fx-background-image: url(&quot;images/gnome_media_skip_forward.png&quot;);" />
+                  <Button fx:id="togglePlaybackButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#togglePlaybackButtonClicked" prefHeight="32.0" prefWidth="32.0" />
+                  <Slider fx:id="timeSlider" HBox.hgrow="ALWAYS" />
+                  <Label fx:id="timeLabel" text="00:00:00" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</HBox>

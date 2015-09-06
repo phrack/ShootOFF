@@ -1,6 +1,6 @@
 The following images were not created by ShootOFF contributors and have their own licenses:
 
-gnome_media_floppy.png, gnome_image_x_generic.png -- GNU/GPL
+gnome_*.png -- GNU/GPL
 tags.png -- Freeware by Midtone Design Studios
 bring_forward.png -- LGPL
 send_backward.png -- LGPL
