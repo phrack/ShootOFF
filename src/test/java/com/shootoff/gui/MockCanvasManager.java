@@ -2,7 +2,6 @@ package com.shootoff.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
-import com.shootoff.camera.ShotRecorder;
 import com.shootoff.config.Configuration;
 
 import javafx.collections.FXCollections;
@@ -49,7 +47,7 @@ public class MockCanvasManager extends CanvasManager {
 	}
 	
 	@Override
-	public void addShot(Color color, double x, double y, Optional<ShotRecorder> shotRecorder) {
+	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, config.getMarkerRadius());

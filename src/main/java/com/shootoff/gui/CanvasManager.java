@@ -33,6 +33,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
@@ -105,9 +106,9 @@ public class CanvasManager {
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
-					addShot(Color.RED, event.getX(), event.getY(), Optional.empty());
+					addShot(Color.RED, event.getX(), event.getY());
 				} else if (event.isControlDown()) {
-					addShot(Color.GREEN, event.getX(), event.getY(), Optional.empty());
+					addShot(Color.GREEN, event.getX(), event.getY());
 				}
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
@@ -200,10 +201,14 @@ public class CanvasManager {
 		this.showShots = showShots;
 	}
 	
-	public void addShot(Color color, double x, double y, Optional<ShotRecorder> shotRecorder) {
+	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+		
+		if (config.getSessionRecorder().isPresent()) {
+			for (CameraManager cm : config.getRecordingManagers()) cm.notifyShot(shot);
+		}
 		
 		for (ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) {
@@ -223,7 +228,7 @@ public class CanvasManager {
 		}
 		
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, shotRecorder);
+		Optional<Hit> hit = checkHit(shot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 		
 		boolean processedShot = false;
@@ -239,7 +244,7 @@ public class CanvasManager {
 						(shot.getX() - b.getMinX()) * x_scale, (shot.getY() - b.getMinY()) * y_scale,
 						shot.getTimestamp(), config.getMarkerRadius());
 				
-				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, shotRecorder);
+				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
 			}
 		}
 		
@@ -251,12 +256,12 @@ public class CanvasManager {
 		}
 	}
 	
-	public boolean addArenaShot(Shot shot, Optional<ShotRecorder> shotRecorder) {
+	public boolean addArenaShot(Shot shot) {
 		shots.add(shot);
 		drawShot(shot);
 		
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, shotRecorder);
+		Optional<Hit> hit = checkHit(shot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
 			executeRegionCommands(hit.get());
 		}
@@ -297,11 +302,25 @@ public class CanvasManager {
 		}
 	}
 	
-	private Optional<Hit> checkHit(Shot shot, Optional<ShotRecorder> shotRecorder) {
-		Optional<File> videoFile = Optional.empty();
+	private Optional<Hit> checkHit(Shot shot) {
+		Optional<String> videoString = Optional.empty();
 		
-		if (shotRecorder.isPresent()) {
-			videoFile = Optional.of(shotRecorder.get().getVideoFile());
+		if (config.getSessionRecorder().isPresent()) {
+			if (!config.getRecordingManagers().isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				
+				for (CameraManager cm : config.getRecordingManagers()) {
+					ShotRecorder r = cm.getRevelantRecorder(shot);
+					
+					if (sb.length() > 0) {
+						sb.append(",");
+					}
+					
+					sb.append(r.getCameraName());
+					sb.append(":");
+					sb.append(r.getVideoFile().getPath());
+				}
+			}
 		}
 		
 		// Targets are in order of when they were added, thus we must search in reverse
@@ -378,7 +397,7 @@ public class CanvasManager {
 									shot,
 									Optional.of(target), 
 									Optional.of(targetGroup.getChildren().indexOf(node)),
-									videoFile);
+									videoString);
 						}
 						
 						return Optional.of(new Hit(target, (TargetRegion)node));
@@ -395,7 +414,7 @@ public class CanvasManager {
 					shot,
 					Optional.empty(), 
 					Optional.empty(),
-					videoFile);
+					videoString);
 		}
 		
 		return Optional.empty();

@@ -57,7 +57,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitShot(long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex,
-			Optional<File> videoFile) {
+			Optional<String> videoString) {
 		JSONObject event = new JSONObject();
 		event.put("type", "shot");
 		event.put("timestamp", timestamp);
@@ -79,8 +79,8 @@ public class JSONSessionWriter implements EventVisitor {
 			event.put("hitRegionIndex", -1);
 		}
 		
-		if (videoFile.isPresent()) {
-			event.put("videoFile", videoFile.get().getPath());
+		if (videoString.isPresent()) {
+			event.put("videos", videoString.get());
 		}
 		
 		currentCameraEvents.add(event);

@@ -53,6 +53,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
 import com.shootoff.camera.Camera;
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
@@ -118,6 +119,7 @@ public class Configuration {
 	private boolean useMalfunctions = false;
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
+	private Set<CameraManager> recordingManagers = new HashSet<CameraManager>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
 
@@ -586,7 +588,19 @@ public class Configuration {
 		}
 	}
 	
+	public void registerRecordingCameraManager(CameraManager cm) {
+		recordingManagers.add(cm);
+	}
+
+	public void unregisterRecordingCameraManager(CameraManager cm) {
+		recordingManagers.remove(cm);
+	}
+	
 	public void setSessionRecorder(SessionRecorder sessionRecorder) {
+		if (sessionRecorder == null) {
+			for (CameraManager cm : recordingManagers) cm.stopRecordingShots();
+		}
+		
 		this.sessionRecorder = Optional.ofNullable(sessionRecorder);
 	}
 	
@@ -687,6 +701,10 @@ public class Configuration {
 	
 	public Optional<SessionRecorder> getSessionRecorder() {
 		return sessionRecorder;
+	}
+	
+	public Set<CameraManager> getRecordingManagers() {
+		return recordingManagers;
 	}
 	
 	public Set<ShotProcessor> getShotProcessors() {

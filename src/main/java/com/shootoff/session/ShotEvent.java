@@ -19,6 +19,8 @@
 package com.shootoff.session;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
@@ -31,16 +33,26 @@ public class ShotEvent implements Event {
 	private final Shot shot;
 	private final Optional<Integer> targetIndex;
 	private final Optional<Integer> hitRegionIndex;
-	private final Optional<File> videoFile;
+	private final Optional<String> videoString;
+	private final Map<String, File> videos = new HashMap<String, File>();
 	
 	public ShotEvent(String cameraName, long timestamp, Shot shot, Optional<Integer> targetIndex, 
-			Optional<Integer> hitRegionIndex, Optional<File> videoFile) {
+			Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp; 
 		this.shot = shot;
 		this.targetIndex = targetIndex;
 		this.hitRegionIndex = hitRegionIndex;
-		this.videoFile = videoFile;
+		this.videoString = videoString;
+		
+		if (videoString.isPresent()) {
+			String[] videoSet = videoString.get().split(",");
+			
+			for (String video : videoSet) {
+				String[] v = video.split(":");
+				videos.put(v[0], new File(v[1]));
+			}
+		}
 	}
 
 	@Override
@@ -60,8 +72,12 @@ public class ShotEvent implements Event {
 		return hitRegionIndex;
 	}
 	
-	public Optional<File> getVideoFile() {
-		return videoFile;
+	public Optional<String> getVideoString() {
+		return videoString;
+	}
+	
+	public Map<String, File> getVideos() {		
+		return videos;
 	}
 	
 	@Override

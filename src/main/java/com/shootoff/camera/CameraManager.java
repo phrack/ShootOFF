@@ -23,8 +23,10 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -95,7 +97,8 @@ public class CameraManager {
 	private long recordingStartTime;
 	
 	private boolean recordingShots = false;
-	private List<ShotRecorder> shotRecorders = new ArrayList<ShotRecorder>();
+	private RollingRecorder rollingRecorder;
+	private Map<Shot, ShotRecorder> shotRecorders = new HashMap<Shot, ShotRecorder>();
  	
 	private boolean[][] sectorStatuses;
 
@@ -202,6 +205,14 @@ public class CameraManager {
 		videoWriterStream.close();
 	}
 	
+	public void notifyShot(Shot shot) {
+		shotRecorders.put(shot, rollingRecorder.fork());
+	}
+	
+	public ShotRecorder getRevelantRecorder(Shot shot) {
+		return shotRecorders.get(shot);
+	}
+	
 	public void startRecordingShots() {
 		String sessionName = null;
 		if (config.getSessionRecorder().isPresent()) {
@@ -217,13 +228,30 @@ public class CameraManager {
 			}
 		}
 		
-		shotRecorders.add(new ShotRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName));
+		String cameraName = "UNNAMED";
+		
+		if (webcam.isPresent()) {
+			Optional<String> userCameraName = config.getWebcamsUserName(webcam.get());
+			
+			if (userCameraName.isPresent()) {
+				cameraName = userCameraName.get();
+			} else {
+				cameraName = webcam.get().getName();
+			}
+		}
+		
+		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName);
+		config.registerRecordingCameraManager(this);
 		recordingShots = true;
 	}
 	
 	public void stopRecordingShots() {
-		for (ShotRecorder r : shotRecorders) r.close();
 		recordingShots = false;
+		for (ShotRecorder r : shotRecorders.values()) r.close();
+		shotRecorders.clear();
+		rollingRecorder.close();
+		rollingRecorder = null;
+		config.unregisterRecordingCameraManager(this);
 	}
 	
 	public Image getCurrentFrame() {
@@ -333,27 +361,19 @@ public class CameraManager {
 				}
 				
 				if (recordingShots) {
-					Iterator<ShotRecorder> it = shotRecorders.iterator();
-					List<ShotRecorder> newRecorders = new ArrayList<ShotRecorder>();
-					while (it.hasNext()) {
-						ShotRecorder r = it.next();
-						
-						if (r.isComplete()) {
-							r.close();
-							it.remove();
-							
-							String sessionName = null;
-							if (config.getSessionRecorder().isPresent()) {
-								sessionName = config.getSessionRecorder().get().getSessionName();
-							}
-							
-							newRecorders.add(new ShotRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName));
+					rollingRecorder.recordFrame(currentFrame);
+					
+					List<Shot> removeKeys = new ArrayList<Shot>();
+					for (Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
+						if (r.getValue().isComplete()) {
+							r.getValue().close();
+							removeKeys.add(r.getKey());
 						} else {
-							r.recordFrame(currentFrame);
+							r.getValue().recordFrame(currentFrame);
 						}
 					}
 					
-					shotRecorders.addAll(newRecorders);
+					for (Shot s : removeKeys) shotRecorders.remove(s);
 				}
 
 				if (recordingStream) {
@@ -529,20 +549,8 @@ public class CameraManager {
 					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
 			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
-			Optional<ShotRecorder> shotRecorder = Optional.empty();
-			
-			if (recordingShots) {
-				// Find first recorder that doesn't already have a shot to use
-				for (ShotRecorder r : shotRecorders) {
-					if (!r.hasShot()) {
-						shotRecorder = Optional.of(r);
-						break;
-					}
-				}
-			}
-			
 			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					frame, grayScale, projectionBounds, cropFeedToProjection, shotRecorder);
+					frame, grayScale, projectionBounds, cropFeedToProjection);
 			
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();

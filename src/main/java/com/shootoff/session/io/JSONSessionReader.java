@@ -106,15 +106,11 @@ public class JSONSessionReader {
 							hitRegionIndex = Optional.of(index);
 						}
 						
-						Optional<File> videoFile = Optional.empty();
-						String videoFilePath = (String)event.get("videoFile");
-						if (videoFilePath != null) {
-							videoFile = Optional.of(new File(videoFilePath));
-						}
+						Optional<String> videoString = Optional.ofNullable((String)event.get("videos"));
 						
 						events.get(cameraName).add(
 								new ShotEvent(cameraName, (Long)event.get("timestamp"), shot, 
-										targetIndex, hitRegionIndex, videoFile));
+										targetIndex, hitRegionIndex, videoString));
 						break;
 						
 					case "targetAdded":

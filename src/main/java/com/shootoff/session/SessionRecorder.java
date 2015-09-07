@@ -18,7 +18,6 @@
 
 package com.shootoff.session;
 
-import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ public class SessionRecorder {
 	}
 	
 	public void recordShot(String cameraName, Shot shot, Optional<Target> target, Optional<Integer> hitRegionIndex,
-			Optional<File> videoFile) {
+			Optional<String> videoString) {
 		Optional<Integer> targetIndex = Optional.empty();
 		
 		if (target.isPresent()) {
@@ -107,7 +106,7 @@ public class SessionRecorder {
 		long timestamp = System.currentTimeMillis() - startTime;
 		
 		getCameraEvents(cameraName).add(
-				new ShotEvent(cameraName, timestamp, shot, targetIndex, hitRegionIndex, videoFile));
+				new ShotEvent(cameraName, timestamp, shot, targetIndex, hitRegionIndex, videoString));
 	}
 	
 	public void recordTargetAdded(String cameraName, Target target) {

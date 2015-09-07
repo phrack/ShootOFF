@@ -30,7 +30,7 @@ public class TestSessionIO {
 	private SessionRecorder sessionRecorder;
 	private String cameraName1;
 	private String cameraName2;
-	private File videoFile;
+	private String videoString;
 	private Shot redShot;
 	private Shot greenShot;
 	private String targetName;
@@ -43,7 +43,7 @@ public class TestSessionIO {
 		sessionRecorder = new SessionRecorder();
 		cameraName1 = "Default";
 		cameraName2 = "Another Camera";
-		videoFile = new File("test.mp4");
+		videoString = "camera1:test/file.mp4,camera2:what/ax.vid";
 		redShot = new Shot(Color.RED, 10, 11, 3, 2);
 		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
@@ -60,8 +60,8 @@ public class TestSessionIO {
 		sessionRecorder.recordTargetAdded(cameraName2, target);
 		sessionRecorder.recordTargetResized(cameraName1, target, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName1, target, 4, 3);
-		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoFile));
-		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoFile));
+		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
+		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
 		sessionRecorder.recordTargetRemoved(cameraName1, target);
 		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty(), Optional.empty());
 		sessionRecorder.recordExerciseFeedMessage(exerciseMessage);
@@ -91,7 +91,10 @@ public class TestSessionIO {
 		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(3)).getShot().getMarker().getRadiusX(), 1);
 		assertEquals(targetIndex, ((ShotEvent)events.get(3)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
-		assertEquals(videoFile, ((ShotEvent)events.get(3)).getVideoFile().get());
+		assertEquals(videoString, ((ShotEvent)events.get(3)).getVideoString().get());
+		assertEquals(2, ((ShotEvent)events.get(3)).getVideos().size());
+		assertEquals(new File("test/file.mp4"), ((ShotEvent)events.get(3)).getVideos().get("camera1"));
+		assertEquals(new File("what/ax.vid"), ((ShotEvent)events.get(3)).getVideos().get("camera2"));
 		
 		assertEquals(Color.GREEN, ((ShotEvent)events.get(4)).getShot().getColor());
 		assertEquals(greenShot.getX(), ((ShotEvent)events.get(4)).getShot().getX(), 1);
@@ -100,7 +103,10 @@ public class TestSessionIO {
 		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(4)).getShot().getMarker().getRadiusX(), 1);
 		assertEquals(targetIndex, ((ShotEvent)events.get(4)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(4)).getHitRegionIndex().get().intValue());
-		assertEquals(videoFile, ((ShotEvent)events.get(4)).getVideoFile().get());
+		assertEquals(videoString, ((ShotEvent)events.get(4)).getVideoString().get());
+		assertEquals(2, ((ShotEvent)events.get(4)).getVideos().size());
+		assertEquals(new File("test/file.mp4"), ((ShotEvent)events.get(4)).getVideos().get("camera1"));
+		assertEquals(new File("what/ax.vid"), ((ShotEvent)events.get(4)).getVideos().get("camera2"));
 		
 		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(5)).getTargetIndex());
 		
@@ -111,7 +117,7 @@ public class TestSessionIO {
 		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(6)).getShot().getMarker().getRadiusX(), 1);
 		assertFalse(((ShotEvent)events.get(6)).getTargetIndex().isPresent());
 		assertFalse(((ShotEvent)events.get(6)).getHitRegionIndex().isPresent());
-		assertFalse(((ShotEvent)events.get(6)).getVideoFile().isPresent());
+		assertFalse(((ShotEvent)events.get(6)).getVideoString().isPresent());
 		
 		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(7)).getMessage());
 		
