@@ -118,14 +118,14 @@ public class TrainingExerciseBase {
 		
 		Stage delayedStartIntervalStage = new Stage();
 		
+		DelayedStartIntervalController controller = (DelayedStartIntervalController)loader.getController();
+		controller.init(listener);
+		
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
 		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
 		delayedStartIntervalStage.setTitle("Preferences");
 		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
-		delayedStartIntervalStage.show();
-		
-		DelayedStartIntervalController controller = (DelayedStartIntervalController)loader.getController();
-		controller.init(listener);
+		delayedStartIntervalStage.showAndWait();
 	}
 	
 	/**
