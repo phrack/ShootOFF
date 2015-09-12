@@ -124,6 +124,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private CameraManager arenaCameraManager;
 	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 	
+	private Stage sessionViewerStage;
+	
 	public void init(Configuration config) {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
@@ -154,6 +156,16 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			
 			if (config.getSessionRecorder().isPresent()) {
 				toggleSessionRecordingMenuItem.fire();
+			}
+			
+			if (showSessionViewerMenuItem.isDisable()) {
+				sessionViewerStage.close();
+			}
+			
+			if (!config.getVideoPlayers().isEmpty()) {
+				for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
+					videoPlayer.getStage().close();
+				}
 			}
 		});
 		
@@ -508,14 +520,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
 		loader.load();
 			
-		Stage sessionViewerStage = new Stage();
+		sessionViewerStage = new Stage();
 			
 	    sessionViewerStage.setTitle("Session Viewer");
 	    sessionViewerStage.setScene(new Scene(loader.getRoot()));
 	    sessionViewerStage.show();
 	        
 	    SessionViewerController sessionViewerController = (SessionViewerController)loader.getController();
-        sessionViewerController.init();
+        sessionViewerController.init(config);
 
         sessionViewerStage.setOnCloseRequest((e) -> { 
         		showSessionViewerMenuItem.setDisable(false);

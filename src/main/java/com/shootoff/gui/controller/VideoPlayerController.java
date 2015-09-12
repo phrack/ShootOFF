@@ -31,6 +31,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 
 public class VideoPlayerController implements PlaybackListener {
 	@FXML private TabPane videoTabPane;
@@ -215,5 +216,9 @@ public class VideoPlayerController implements PlaybackListener {
 			togglePlaybackButton.setGraphic(new ImageView(new Image(
 					VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
 		}
+	}
+	
+	public Stage getStage() {
+		return (Stage)togglePlaybackButton.getScene().getWindow();
 	}
 }

@@ -58,6 +58,7 @@ import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
+import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.session.SessionRecorder;
 
@@ -120,6 +121,7 @@ public class Configuration {
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
 	private Set<CameraManager> recordingManagers = new HashSet<CameraManager>();
+	private Set<VideoPlayerController> videoPlayers = new HashSet<VideoPlayerController>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
 
@@ -438,6 +440,18 @@ public class Configuration {
 			throw new ConfigurationException(
 					String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
 		}
+	}
+	
+	public void registerVideoPlayer(VideoPlayerController videoPlayer) {
+		videoPlayers.add(videoPlayer);
+	}
+	
+	public void unregisterVideoPlayer(VideoPlayerController videoPlayer) {
+		videoPlayers.remove(videoPlayer);
+	}
+	
+	public Set<VideoPlayerController> getVideoPlayers() {
+		return videoPlayers;
 	}
 	
 	public Optional<Camera> registerIpCam(String cameraName, String cameraURL) {

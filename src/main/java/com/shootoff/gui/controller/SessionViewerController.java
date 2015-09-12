@@ -1,6 +1,7 @@
 package com.shootoff.gui.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,9 +15,11 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.config.Configuration;
 import com.shootoff.gui.SessionCanvasManager;
 import com.shootoff.session.Event;
 import com.shootoff.session.SessionRecorder;
+import com.shootoff.session.ShotEvent;
 import com.shootoff.session.io.SessionIO;
 
 import javafx.beans.value.ChangeListener;
@@ -25,13 +28,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
 public class SessionViewerController {
@@ -51,7 +57,10 @@ public class SessionViewerController {
 	private boolean refreshFromSelection = true;
 	private SessionRecorder currentSession;
 	
-	public void init() {
+	private Configuration config;
+	
+	public void init(Configuration config) {
+		this.config = config;
 		sessionEntries.addAll(findSessions());
 		sessionListView.setItems(sessionEntries);
 		
@@ -124,6 +133,38 @@ public class SessionViewerController {
 			}
         });
 		
+		eventsListView.setOnMouseClicked((event) -> {
+				if (event.getClickCount() < 2) return;
+				
+				Event selectedEvent = eventEntries.get(eventsListView.getSelectionModel().getSelectedIndex());
+				if (selectedEvent instanceof ShotEvent) {
+					ShotEvent se = (ShotEvent)selectedEvent;
+					
+					if (!se.getVideoString().isPresent()) return;
+					
+					FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
+					try {
+						loader.load();
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
+					
+					Stage videoPlayerStage = new Stage();
+					
+					VideoPlayerController controller = (VideoPlayerController)loader.getController();
+					controller.init(se.getVideos());
+					
+					videoPlayerStage.setTitle("Video Player");
+					videoPlayerStage.setScene(new Scene(loader.getRoot()));
+					videoPlayerStage.show();
+					
+					config.registerVideoPlayer(controller);
+					controller.getStage().setOnCloseRequest((closeEvent) -> {
+							config.unregisterVideoPlayer(controller);
+						});
+				}
+			});
+		
 		eventsListView.setItems(eventEntries);
 		
 		timeSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -177,7 +218,7 @@ public class SessionViewerController {
 		
 		for (String cameraName : currentSession.getEvents().keySet()) {
 			Group canvas = new Group();
-			cameraGroups.put(cameraName, new SessionCanvasManager(canvas));
+			cameraGroups.put(cameraName, new SessionCanvasManager(canvas, config));
 			
 			Tab cameraTab = new Tab(cameraName);
 			cameraTab.setContent(new AnchorPane(canvas));

@@ -19,12 +19,15 @@
 package com.shootoff.gui;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.shootoff.config.Configuration;
+import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;
@@ -37,10 +40,13 @@ import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 
 public class SessionCanvasManager {
 	private final Group canvas;
@@ -50,9 +56,11 @@ public class SessionCanvasManager {
 	private final Map<Event, String> eventToExerciseMessage = new HashMap<Event, String>();
 	private final Map<Event, Dimension2D> eventToDimension = new HashMap<Event, Dimension2D>();
 	private final List<Target> targets = new ArrayList<Target>();
+	private final Configuration config;
 	
-	public SessionCanvasManager(Group canvas) {
+	public SessionCanvasManager(Group canvas, Configuration config) {
 		this.canvas = canvas;
+		this.config = config;
 		canvas.getChildren().add(exerciseLabel);
 	}
 	
@@ -62,6 +70,33 @@ public class SessionCanvasManager {
 			ShotEvent se = (ShotEvent)e;
 			canvas.getChildren().add(se.getShot().getMarker());
 			se.getShot().getMarker().setVisible(true);
+			
+			if (se.getVideoString().isPresent()) {
+				se.getShot().getMarker().setOnMouseClicked((event) -> {
+						if (event.getClickCount() < 2) return;
+					
+						FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
+						try {
+							loader.load();
+						} catch (IOException ioe) {
+							ioe.printStackTrace();
+						}
+						
+						Stage videoPlayerStage = new Stage();
+						
+						VideoPlayerController controller = (VideoPlayerController)loader.getController();
+						controller.init(se.getVideos());
+						
+						videoPlayerStage.setTitle("Video Player");
+						videoPlayerStage.setScene(new Scene(loader.getRoot()));
+						videoPlayerStage.show();
+						
+						config.registerVideoPlayer(controller);
+						controller.getStage().setOnCloseRequest((closeEvent) -> {
+								config.unregisterVideoPlayer(controller);
+							});
+					});
+			}
 			
 			if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
 				animateTarget(se, false);

@@ -50,7 +50,7 @@ public class ShotEvent implements Event {
 			
 			for (String video : videoSet) {
 				String[] v = video.split(":");
-				videos.put(v[0], new File(v[1]));
+				videos.put(v[0], new File("sessions" + File.separator + v[1]));
 			}
 		}
 	}
