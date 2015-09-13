@@ -213,4 +213,26 @@ public class Camera {
 	public void setViewSize(Dimension size) {
 		webcam.setViewSize(size);
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((webcam == null) ? 0 : webcam.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Camera other = (Camera) obj;
+		if (!this.getName().equals(other.getName()))
+			return false;
+		return true;
+	}
 }

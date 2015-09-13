@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import com.shootoff.camera.Camera;
 
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.image.Image;
@@ -35,7 +34,7 @@ import javafx.scene.image.ImageView;
 import javafx.util.converter.DefaultStringConverter;
 
 public class ImageCell extends TextFieldListCell<String> {
-	private static final Map<Camera, Image> imageCache = new HashMap<Camera, Image>();
+	private static final Map<Camera, ImageView> imageCache = new HashMap<Camera, ImageView>();
 	private final List<Camera> webcams;
 	private final List<String> userDefinedCameraNames;
 	
@@ -44,6 +43,23 @@ public class ImageCell extends TextFieldListCell<String> {
 		this.userDefinedCameraNames = userDefinedCameraNames;
 		
 		this.setConverter(new DefaultStringConverter());
+		
+		for (Camera c : webcams) {
+			if (imageCache.containsKey(c)) continue;
+			
+			ImageView iv = new ImageView();
+            iv.setFitWidth(100);
+            iv.setFitHeight(75);
+			imageCache.put(c, iv);
+			
+			new Thread(() -> {
+					Optional<Image> img = fetchWebcamImage(c);
+					
+					if (img.isPresent()) {
+						imageCache.get(c).setImage(img.get());
+					}
+				}).start();
+		}
 	}
 	
     @Override
@@ -55,40 +71,30 @@ public class ImageCell extends TextFieldListCell<String> {
         	setText(null);
         	return;
         }
+
+    	Optional<ImageView> webcamIV = Optional.empty();
         
-        Platform.runLater(() -> {
-            	Optional<Image> webcamImg = Optional.empty();
-                
-                if (userDefinedCameraNames == null) {
-                	for (Camera webcam : webcams) {
-                		if (webcam.getName().equals(item)) {
-                			webcamImg = fetchWebcamImage(webcam);
-                			break;
-                		}
-                	}
-                } else {
-                    int cameraIndex = userDefinedCameraNames.indexOf(item);
-                    if (cameraIndex >= 0) {
-                    	webcamImg = fetchWebcamImage(webcams.get(cameraIndex));	
-                    }
-                }
-                
-                if (webcamImg.isPresent()) {
-                    ImageView img = new ImageView(webcamImg.get());
-                    img.setFitWidth(100);
-                    img.setFitHeight(75);
-                    
-                    setGraphic(img);
-                    setText(item);
-                }
-        });
+        if (userDefinedCameraNames == null) {
+        	for (Camera webcam : webcams) {
+        		if (webcam.getName().equals(item)) {
+        			webcamIV = Optional.of(imageCache.get(webcam));
+        		}
+        	}
+        } else {
+            int cameraIndex = userDefinedCameraNames.indexOf(item);
+            if (cameraIndex >= 0) {
+            	webcamIV = Optional.of(imageCache.get(webcams.get(cameraIndex)));	
+            }
+        }
+        
+        if (webcamIV.isPresent()) {
+            setGraphic(webcamIV.get());
+        }
+        
+        setText(item);
     }
     
     private Optional<Image> fetchWebcamImage(Camera webcam) {
-    	if (imageCache.containsKey(webcam)) {
-    		return Optional.of(imageCache.get(webcam));
-    	}
-    	
     	boolean cameraOpened = false;
     	
 		if (!webcam.isOpen()) {
@@ -103,7 +109,6 @@ public class ImageCell extends TextFieldListCell<String> {
 			
 			if (img != null) {
 				webcamImg = SwingFXUtils.toFXImage(img, null);
-				imageCache.put(webcam, webcamImg);
 			}
 		}
 		

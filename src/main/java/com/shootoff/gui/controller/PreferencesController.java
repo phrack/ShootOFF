@@ -215,13 +215,13 @@ public class PreferencesController {
 				config, preferencesStage, configuredCameras);
 		
 		cameraSelector.setOnHidden((e) -> {
-				if (!cameraSelector.getSelectedWebcams().isEmpty()) {
-					for (Camera webcam : cameraSelector.getSelectedWebcams()) {
-						boolean changed = configuredNames.add(webcam.getName());
-						configuredCameras.add(webcam);
-						
-		    			if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
-					}
+				if (cameraSelector.getSelectedWebcams().isEmpty()) return;
+
+				for (Camera webcam : cameraSelector.getSelectedWebcams()) {
+					boolean changed = configuredNames.add(webcam.getName());
+					configuredCameras.add(webcam);
+					
+	    			if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
 				}
 			});
 	}
