@@ -12,7 +12,6 @@ import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 import com.xuggle.xuggler.ICodec;
-import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IPixelFormat;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
@@ -25,6 +24,7 @@ public class RollingRecorder {
 	private final String extension;
 	private final String sessionName;
 	private final String cameraName;
+	
 	private long startTime;
 	private long timestamp;
 	private long timeOffset = 0;
@@ -32,10 +32,8 @@ public class RollingRecorder {
 	private File videoFile;
 	private IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
-	
 	private boolean forking = false;
 	
-	private boolean haveForked = false;
 	
 	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName) {
 		this.codec = codec;
@@ -69,10 +67,9 @@ public class RollingRecorder {
 
 		videoWriter.encodeVideo(0, f);
 		
-		if (!haveForked && timestamp >= ShotRecorder.RECORD_LENGTH * 3) {
+		if (timestamp >= ShotRecorder.RECORD_LENGTH * 3) {
 			logger.debug("Rolling video file {}", relativeVideoFile.getPath());
 			fork(false);
-			haveForked = true;
 		}
 	}
 	
@@ -107,17 +104,22 @@ public class RollingRecorder {
 			// We aren't rolling this file because it got too big,
 			// the video is being forked (probably because there was
 			// a shot)	
+			File rollingRelativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
+			File rollingVideoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
+					rollingRelativeVideoFile.getPath());
 
-			IContainer container = IContainer.make();  
-			container.open(this.videoFile.getPath(), IContainer.Type.READ, null);
+			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
+			videoWriter = ToolFactory.makeWriter(rollingVideoFile.getPath(), r);
+			r.addListener(videoWriter);
+			while (r.readPacket() != null);
 			
-			container.seekKeyFrame(0, container.getFileSize(), container.getFileSize(), 
-					container.getFileSize(), IContainer.SEEK_FLAG_BYTE);
-			
-			videoWriter = ToolFactory.makeWriter(this.videoFile.getPath(), container);
-			 
 			startTime = System.currentTimeMillis();
 			timeOffset = timestamp;
+			
+			this.videoFile.delete();
+			
+			this.relativeVideoFile = rollingRelativeVideoFile;
+			this.videoFile = rollingVideoFile;
 		} else {
 			// Start adding new frames to the new video as it's the new
 			// canonical video file to peel end frames off of.

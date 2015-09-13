@@ -167,7 +167,6 @@ public class CameraManager {
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
-		if (recordingShots) stopRecordingShots();
 	}
 
 	public void setStreaming(boolean isStreaming) {
