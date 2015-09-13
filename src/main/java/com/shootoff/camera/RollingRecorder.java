@@ -171,7 +171,15 @@ public class RollingRecorder {
 			return videoWriter;
 		}
 	}
-	
+
+	/**
+	 * Cut the end of a video off into its own file starting at startingTimestamp.
+	 * For example, if you have a 15 second video and the startingTimestamp is
+	 * at 10 seconds, this will create a new video that has the last 5 seconds
+	 * of the original video.
+	 * 
+	 * @author phrack
+	 */
 	private static class Cutter extends MediaListenerAdapter {
 		private final IMediaWriter writer;
 		private final long startingTimestamp;
