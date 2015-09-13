@@ -33,8 +33,7 @@ public class RollingRecorder {
 	private IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
 	private boolean forking = false;
-	
-	
+		
 	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName) {
 		this.codec = codec;
 		this.extension = extension;
@@ -98,7 +97,7 @@ public class RollingRecorder {
 		
 		while (reader.readPacket() == null);
 		
-		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getCutDuration(), cutter.getMediaWriter());
+		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getLastTimestamp(), cutter.getMediaWriter());
 		
 		if (keepOld) {
 			// We aren't rolling this file because it got too big,
@@ -186,8 +185,8 @@ public class RollingRecorder {
 		private long startTimestamp = -1;
 		private long lastTimestamp;
 		
-		public Cutter(File newVideoFile, ICodec.ID codec, long startingTimestamp) {
-			this.startingTimestamp = startingTimestamp;
+		public Cutter(File newVideoFile, ICodec.ID codec, long startingTimestamp /* ms */) {			
+			this.startingTimestamp = startingTimestamp * 1000;
 			writer = ToolFactory.makeWriter(newVideoFile.getPath());
 			writer.addVideoStream(0, 0, codec, CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT);
 		}
@@ -195,7 +194,7 @@ public class RollingRecorder {
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			// < 0 means the file we are rolling off of has < RECORD_LENGTH seconds of footage
-			if (event.getTimeStamp() / 1000 >= startingTimestamp || startingTimestamp < 0) {
+			if (event.getTimeStamp() >= startingTimestamp || startingTimestamp < 0) {
 				IVideoPicture picture = event.getPicture();
 				
 				if (startTimestamp == -1) {
@@ -214,11 +213,7 @@ public class RollingRecorder {
 		}
 		
 		public long getLastTimestamp() {
-			return lastTimestamp;
-		}
-		
-		public long getCutDuration() {
-			return (lastTimestamp - startTimestamp) / 1000;
+			return lastTimestamp / 1000;
 		}
 	}
 	
