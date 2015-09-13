@@ -131,6 +131,13 @@ public class ImageCell extends TextFieldListCell<String> {
         setText(item);
     }
     
+    public static void registerIPCam(Camera camera) {
+		ImageView iv = new ImageView();
+        iv.setFitWidth(100);
+        iv.setFitHeight(75);
+		imageCache.put(camera, iv);
+    }
+    
     private Optional<ImageView> fetchWebcamImageView(String webcamName) {
     	Optional<ImageView> webcamIV = Optional.empty();
         
