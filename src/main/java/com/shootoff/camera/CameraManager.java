@@ -23,11 +23,11 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -98,7 +98,7 @@ public class CameraManager {
 	
 	private boolean recordingShots = false;
 	private RollingRecorder rollingRecorder;
-	private Map<Shot, ShotRecorder> shotRecorders = new HashMap<Shot, ShotRecorder>();
+	private Map<Shot, ShotRecorder> shotRecorders = new ConcurrentHashMap<Shot, ShotRecorder>();
  	
 	private boolean[][] sectorStatuses;
 

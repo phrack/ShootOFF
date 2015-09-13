@@ -203,6 +203,7 @@ public class CanvasManager {
 	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
+		
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, config.getMarkerRadius());
 		
@@ -318,7 +319,7 @@ public class CanvasManager {
 					
 					sb.append(r.getCameraName());
 					sb.append(":");
-					sb.append(r.getVideoFile().getPath());
+					sb.append(r.getRelativeVideoFile().getPath());
 				}
 			}
 		}

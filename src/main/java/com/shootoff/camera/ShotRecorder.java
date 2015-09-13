@@ -6,9 +6,7 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
-import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.IPixelFormat;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
@@ -28,19 +26,14 @@ public class ShotRecorder {
 	private final IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
 	
-	public ShotRecorder(File relativeVideoFile, File videoFile, IMediaWriter videoWriter, String cameraName) {
+	public ShotRecorder(File relativeVideoFile, File videoFile, long lastTimestamp, IMediaWriter videoWriter, String cameraName) {
 		this.relativeVideoFile = relativeVideoFile;
 		this.videoFile = videoFile;
 		this.videoWriter = videoWriter;
 		this.cameraName = cameraName;
 		
-		IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
-		r.open();
-		
 		startTime = System.currentTimeMillis();
-		timeOffset = r.getContainer().getDuration();
-		
-		r.close();
+		timeOffset = lastTimestamp;
 		
 		logger.debug("Started recording shot video: {}", videoFile.getName());
 	}
@@ -60,8 +53,12 @@ public class ShotRecorder {
 		videoWriter.encodeVideo(0, f);
 	}
 	
-	public File getVideoFile() {
+	public File getRelativeVideoFile() {
 		return relativeVideoFile;
+	}
+	
+	public File getVideoFile() {
+		return videoFile;
 	}
 	
 	public String getCameraName() {
@@ -75,6 +72,6 @@ public class ShotRecorder {
 	public void close() {
 		videoWriter.close();
 		
-		logger.debug("Stopped recording shot video: {}, timeOffset = {}", videoFile.getName(), timeOffset);
+		logger.debug("Stopped recording shot video: {}, timeOffset = {}", relativeVideoFile.getPath(), timeOffset);
 	}
 }

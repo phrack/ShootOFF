@@ -6,12 +6,26 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.xuggle.mediatool.IMediaListener;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.mediatool.event.IAddStreamEvent;
+import com.xuggle.mediatool.event.IAudioSamplesEvent;
+import com.xuggle.mediatool.event.ICloseCoderEvent;
+import com.xuggle.mediatool.event.ICloseEvent;
+import com.xuggle.mediatool.event.IFlushEvent;
+import com.xuggle.mediatool.event.IOpenCoderEvent;
+import com.xuggle.mediatool.event.IOpenEvent;
+import com.xuggle.mediatool.event.IReadPacketEvent;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
+import com.xuggle.mediatool.event.IWriteHeaderEvent;
+import com.xuggle.mediatool.event.IWritePacketEvent;
+import com.xuggle.mediatool.event.IWriteTrailerEvent;
 import com.xuggle.xuggler.ICodec;
+import com.xuggle.xuggler.IContainer;
+import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IPixelFormat;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
@@ -25,6 +39,7 @@ public class RollingRecorder {
 	private final String sessionName;
 	private final String cameraName;
 	private long startTime;
+	private long timestamp;
 	private long timeOffset = 0;
 	private File relativeVideoFile;
 	private File videoFile;
@@ -42,7 +57,7 @@ public class RollingRecorder {
 		this.cameraName = cameraName;
 		
 		startTime = System.currentTimeMillis();
-		relativeVideoFile =  new File(sessionName + File.separator + String.valueOf(System.nanoTime()) + extension);
+		relativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
 		videoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
 				relativeVideoFile.getPath());
 		
@@ -58,10 +73,8 @@ public class RollingRecorder {
 		BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
 		IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-		long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
-		
-		if (haveForked) System.out.println(timestamp);
-		
+		timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
+	
 		IVideoPicture f = converter.toPicture(image, timestamp * 1000);
 		f.setKeyFrame(isFirstShotFrame);
 		f.setQuality(0);
@@ -70,6 +83,7 @@ public class RollingRecorder {
 		videoWriter.encodeVideo(0, f);
 		
 		if (!haveForked && timestamp >= ShotRecorder.RECORD_LENGTH * 3) {
+			logger.debug("Rolling video file {}", relativeVideoFile.getPath());
 			fork(false);
 			haveForked = true;
 		}
@@ -78,9 +92,15 @@ public class RollingRecorder {
 	private ForkContext fork(boolean keepOld) {
 		forking = true;
 		
-		videoWriter.close();
+		if (videoWriter.isOpen()) videoWriter.close();
 		
-		File relativeVideoFile =  new File(sessionName + File.separator + String.valueOf(System.nanoTime()) + extension);
+		File relativeVideoFile;
+		if (!keepOld) {
+			relativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
+		} else {
+			relativeVideoFile =  new File(sessionName + File.separator + String.valueOf(System.nanoTime()) + extension);
+		}
+		
 		File videoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
 				relativeVideoFile.getPath());
 		
@@ -89,31 +109,28 @@ public class RollingRecorder {
 		
 		IMediaReader reader = ToolFactory.makeReader(this.videoFile.getPath());
 		reader.open();
-		reader.setCloseOnEofOnly(false);
 		Cutter cutter = new Cutter(videoFile, codec, (reader.getContainer().getDuration() / 1000) - ShotRecorder.RECORD_LENGTH);
 		reader.addListener(cutter);
 		
 		while (reader.readPacket() == null);
 		
-		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getMediaWriter());
+		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getLastTimestamp(), cutter.getMediaWriter());
 		
 		if (keepOld) {
 			// We aren't rolling this file because it got too big,
 			// the video is being forked (probably because there was
-			// a shot)
-			// TODO: Why isn't this appending to the end?			
-			videoWriter = ToolFactory.makeWriter(this.videoFile.getPath(), reader);
+			// a shot)	
+
+			IContainer container = IContainer.make();  
+			container.open(this.videoFile.getPath(), IContainer.Type.READ, null);
 			
-			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
-			r.open();
+			container.seekKeyFrame(0, container.getFileSize(), container.getFileSize(), 
+					container.getFileSize(), IContainer.SEEK_FLAG_BYTE);
 			
+			videoWriter = ToolFactory.makeWriter(this.videoFile.getPath(), container);
+			 
 			startTime = System.currentTimeMillis();
-			timeOffset = r.getContainer().getDuration();
-			
-			r.close();
-			
-			// TODO: Remove debug code
-			System.out.println(startTime + " " + timeOffset);
+			timeOffset = timestamp;
 		} else {
 			// Start adding new frames to the new video as it's the new
 			// canonical video file to peel end frames off of.
@@ -132,17 +149,20 @@ public class RollingRecorder {
 	
 	public ShotRecorder fork() {
 		ForkContext context = fork(true);
-		return new ShotRecorder(context.getRelativeVideoFile(), context.getVideoFile(), context.getVideoWriter(), cameraName);
+		return new ShotRecorder(context.getRelativeVideoFile(), context.getVideoFile(), 
+				context.getLastTimestamp(), context.getVideoWriter(), cameraName);
 	}
 	
 	private static class ForkContext {
 		private final File relativeVideoFile;
 		private final File videoFile;
+		private final long lastTimestamp;
 		private final IMediaWriter videoWriter;
 	
-		public ForkContext(File relativeVideoFile, File videoFile, IMediaWriter videoWriter) {
+		public ForkContext(File relativeVideoFile, File videoFile, long lastTimestamp, IMediaWriter videoWriter) {
 			this.relativeVideoFile = relativeVideoFile;
 			this.videoFile = videoFile;
+			this.lastTimestamp = lastTimestamp;
 			this.videoWriter = videoWriter;
 		}
 		
@@ -154,6 +174,10 @@ public class RollingRecorder {
 			return videoFile;
 		}
 
+		public long getLastTimestamp() {
+			return lastTimestamp;
+		}
+		
 		public IMediaWriter getVideoWriter() {
 			return videoWriter;
 		}
