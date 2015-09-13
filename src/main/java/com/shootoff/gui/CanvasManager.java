@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.ShotRecorder;
@@ -201,21 +202,37 @@ public class CanvasManager {
 		this.showShots = showShots;
 	}
 	
+	private void notifyShot(Shot shot) {
+		if (config.getSessionRecorder().isPresent()) {
+			for (CameraManager cm : config.getRecordingManagers()) cm.notifyShot(shot);
+		}
+	}
+	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, config.getMarkerRadius());
-		
-		if (config.getSessionRecorder().isPresent()) {
-			for (CameraManager cm : config.getRecordingManagers()) cm.notifyShot(shot);
-		}
-		
+	
+		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) {
+				rejectingProcessor = Optional.of(processor);
 				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
-				return;
+				break;
 			}
+		}
+		
+		if (rejectingProcessor.isPresent()) {
+			// Record video for rejected shots as long as they weren't rejected
+			// for being dupes
+			if (rejectingProcessor.get() instanceof DeduplicationProcessor == false) {
+				notifyShot(shot);
+			}
+			
+			return;
+		} else {
+			notifyShot(shot);
 		}
 		
 		shotEntries.add(new ShotEntry(shot));
