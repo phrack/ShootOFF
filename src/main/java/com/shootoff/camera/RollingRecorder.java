@@ -106,17 +106,19 @@ public class RollingRecorder {
 			File rollingRelativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
 			File rollingVideoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
 					rollingRelativeVideoFile.getPath());
-
+			
 			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
-			videoWriter = ToolFactory.makeWriter(rollingVideoFile.getPath(), r);
-			r.addListener(videoWriter);
-			while (r.readPacket() != null);
+			r.open();
+			Cutter copy = new Cutter(rollingVideoFile, codec, 0);
+			r.addListener(cutter);
+			while (r.readPacket() == null);
 			
 			startTime = System.currentTimeMillis();
-			timeOffset = timestamp;
+			timeOffset = copy.getLastTimestamp();
 			
 			this.videoFile.delete();
 			
+			this.videoWriter = copy.getMediaWriter();
 			this.relativeVideoFile = rollingRelativeVideoFile;
 			this.videoFile = rollingVideoFile;
 		} else {
