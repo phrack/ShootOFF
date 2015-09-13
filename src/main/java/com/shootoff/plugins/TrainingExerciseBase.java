@@ -123,7 +123,7 @@ public class TrainingExerciseBase {
 		
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
 		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
-		delayedStartIntervalStage.setTitle("Preferences");
+		delayedStartIntervalStage.setTitle("Delayed Start Interval");
 		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
 		delayedStartIntervalStage.showAndWait();
 	}
