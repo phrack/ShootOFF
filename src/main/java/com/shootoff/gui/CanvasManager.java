@@ -321,6 +321,8 @@ public class CanvasManager {
 					sb.append(":");
 					sb.append(r.getRelativeVideoFile().getPath());
 				}
+				
+				videoString = Optional.of(sb.toString());
 			}
 		}
 		

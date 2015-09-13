@@ -640,7 +640,7 @@ public class Configuration {
 		recordingManagers.remove(cm);
 	}
 	
-	public void unregisterAllRecordingCameramManagers() {
+	public void unregisterAllRecordingCameraManagers() {
 		recordingManagers.clear();
 	}
 	

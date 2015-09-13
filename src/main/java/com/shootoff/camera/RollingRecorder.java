@@ -101,7 +101,7 @@ public class RollingRecorder {
 		
 		while (reader.readPacket() == null);
 		
-		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getLastTimestamp(), cutter.getMediaWriter());
+		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getCutDuration(), cutter.getMediaWriter());
 		
 		if (keepOld) {
 			// We aren't rolling this file because it got too big,
@@ -204,7 +204,11 @@ public class RollingRecorder {
 		}
 		
 		public long getLastTimestamp() {
-			return lastTimestamp / 1000;
+			return lastTimestamp;
+		}
+		
+		public long getCutDuration() {
+			return (lastTimestamp - startTimestamp) / 1000;
 		}
 	}
 	

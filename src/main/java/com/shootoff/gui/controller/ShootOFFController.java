@@ -233,7 +233,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	@Override
 	public void cameraConfigUpdated() {
-		config.unregisterAllRecordingCameramManagers();
+		config.unregisterAllRecordingCameraManagers();
 		addConfiguredCameras();
 	}
 	

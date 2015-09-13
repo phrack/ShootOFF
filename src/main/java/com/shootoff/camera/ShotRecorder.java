@@ -26,14 +26,14 @@ public class ShotRecorder {
 	private final IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
 	
-	public ShotRecorder(File relativeVideoFile, File videoFile, long lastTimestamp, IMediaWriter videoWriter, String cameraName) {
+	public ShotRecorder(File relativeVideoFile, File videoFile, long cutDuration, IMediaWriter videoWriter, String cameraName) {
 		this.relativeVideoFile = relativeVideoFile;
 		this.videoFile = videoFile;
 		this.videoWriter = videoWriter;
 		this.cameraName = cameraName;
 		
 		startTime = System.currentTimeMillis();
-		timeOffset = lastTimestamp;
+		timeOffset = cutDuration;
 		
 		logger.debug("Started recording shot video: {}", videoFile.getName());
 	}
