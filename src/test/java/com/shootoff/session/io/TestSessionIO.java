@@ -93,8 +93,8 @@ public class TestSessionIO {
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
 		assertEquals(videoString, ((ShotEvent)events.get(3)).getVideoString().get());
 		assertEquals(2, ((ShotEvent)events.get(3)).getVideos().size());
-		assertEquals(new File("test/file.mp4"), ((ShotEvent)events.get(3)).getVideos().get("camera1"));
-		assertEquals(new File("what/ax.vid"), ((ShotEvent)events.get(3)).getVideos().get("camera2"));
+		assertEquals(new File("sessions/test/file.mp4"), ((ShotEvent)events.get(3)).getVideos().get("camera1"));
+		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(3)).getVideos().get("camera2"));
 		
 		assertEquals(Color.GREEN, ((ShotEvent)events.get(4)).getShot().getColor());
 		assertEquals(greenShot.getX(), ((ShotEvent)events.get(4)).getShot().getX(), 1);
@@ -105,8 +105,8 @@ public class TestSessionIO {
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(4)).getHitRegionIndex().get().intValue());
 		assertEquals(videoString, ((ShotEvent)events.get(4)).getVideoString().get());
 		assertEquals(2, ((ShotEvent)events.get(4)).getVideos().size());
-		assertEquals(new File("test/file.mp4"), ((ShotEvent)events.get(4)).getVideos().get("camera1"));
-		assertEquals(new File("what/ax.vid"), ((ShotEvent)events.get(4)).getVideos().get("camera2"));
+		assertEquals(new File("sessions/test/file.mp4"), ((ShotEvent)events.get(4)).getVideos().get("camera1"));
+		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(4)).getVideos().get("camera2"));
 		
 		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(5)).getTargetIndex());
 		
