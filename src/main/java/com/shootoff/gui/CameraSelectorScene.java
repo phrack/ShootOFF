@@ -164,7 +164,7 @@ public class CameraSelectorScene extends Stage {
 				Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText());
 				
 				if (cam.isPresent()) {
-					ImageCell.registerIPCam(cam.get());
+					ImageCell.cacheCamera(cam.get());
 					
 					if (!configuredCameras.contains(cam.get())) {
 						unconfiguredWebcams.add(cam.get());

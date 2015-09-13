@@ -53,10 +53,7 @@ public class ImageCell extends TextFieldListCell<String> {
 		for (Camera c : webcams) {
 			if (imageCache.containsKey(c)) continue;
 			
-			ImageView iv = new ImageView();
-            iv.setFitWidth(100);
-            iv.setFitHeight(75);
-			imageCache.put(c, iv);
+			cacheCamera(c);
 			
 			new Thread(() -> {
 					Optional<Image> img = fetchWebcamImage(c);
@@ -131,7 +128,7 @@ public class ImageCell extends TextFieldListCell<String> {
         setText(item);
     }
     
-    public static void registerIPCam(Camera camera) {
+    public static void cacheCamera(Camera camera) {
 		ImageView iv = new ImageView();
         iv.setFitWidth(100);
         iv.setFitHeight(75);
