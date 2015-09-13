@@ -21,15 +21,18 @@ package com.shootoff.gui.controller;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.shootoff.camera.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CameraSelectorScene;
+import com.shootoff.gui.DesignateShotRecorderListener;
 import com.shootoff.gui.ImageCell;
 
 import javafx.beans.value.ChangeListener;
@@ -52,7 +55,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class PreferencesController {
+public class PreferencesController implements DesignateShotRecorderListener {
 	@FXML private ListView<String> webcamListView;
 	@FXML private Slider detectionRateSlider;
 	@FXML private Label detectionRateLabel;
@@ -78,6 +81,7 @@ public class PreferencesController {
 	private Configuration config;
 	private CameraConfigListener cameraConfigListener; 
 	private boolean cameraConfigChanged = false;
+	private final Set<Camera> recordingCameras = new HashSet<Camera>();
 	private final List<Camera> configuredCameras = new ArrayList<Camera>();
 	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 	
@@ -94,7 +98,8 @@ public class PreferencesController {
 	            ListCell<String>>() {
 	                @Override 
 	                public ListCell<String> call(ListView<String> list) {
-	                    return new ImageCell(configuredCameras, configuredNames);
+	                    return new ImageCell(configuredCameras, configuredNames, Optional.of(PreferencesController.this),
+	                    		Optional.of(config.getRecordingCameras()));
 	                }
 	            }
 	        );
@@ -164,6 +169,26 @@ public class PreferencesController {
 		    });
 	}
 	
+	@Override
+	public void registerShotRecorder(String webcamName) {
+		for (Camera c : configuredCameras) {
+			if (c.getName().equals(webcamName)) {
+				cameraConfigChanged = recordingCameras.add(c);
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void unregisterShotRecorder(String webcamName) {
+		for (Camera c : configuredCameras) {
+			if (c.getName().equals(webcamName)) {
+				cameraConfigChanged = recordingCameras.remove(c);
+				break;
+			}
+		}
+	}
+	
 	@FXML 
 	public void redLaserSoundCheckBoxClicked(ActionEvent event) {
 		redLaserSoundTextField.setDisable(!redLaserSoundCheckBox.isSelected());
@@ -229,6 +254,7 @@ public class PreferencesController {
 	@FXML 
 	public void okClicked(ActionEvent event) throws ConfigurationException, IOException {
 		config.setWebcams(configuredNames, configuredCameras);
+		config.setRecordingCameras(recordingCameras);
 		config.setDetectionRate((int)detectionRateSlider.getValue());
 		config.setLaserIntensity((int)laserIntensitySlider.getValue());
 		config.setMarkerRadius((int)markerRadiusSlider.getValue());

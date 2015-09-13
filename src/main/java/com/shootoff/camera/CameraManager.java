@@ -241,7 +241,6 @@ public class CameraManager {
 		}
 		
 		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName);
-		config.registerRecordingCameraManager(this);
 		recordingShots = true;
 	}
 	
@@ -251,7 +250,6 @@ public class CameraManager {
 		shotRecorders.clear();
 		rollingRecorder.close();
 		rollingRecorder = null;
-		config.unregisterRecordingCameraManager(this);
 	}
 	
 	public Image getCurrentFrame() {

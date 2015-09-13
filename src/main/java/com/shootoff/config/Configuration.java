@@ -65,6 +65,7 @@ import com.shootoff.session.SessionRecorder;
 public class Configuration {
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
+	private static final String RECORDING_WEBCAMS_PROP = "shootoff.webcams.recording";
 	private static final String DETECTION_RATE_PROP = "shootoff.detectionrate";
 	private static final String LASER_INTENSITY_PROP = "shootoff.laserintensity";
 	private static final String MARKER_RADIUS_PROP = "shootoff.markerradius";
@@ -120,6 +121,7 @@ public class Configuration {
 	private boolean useMalfunctions = false;
 	private float malfunctionsProbability = (float)10.0;
 	private boolean debugMode = false;
+	private Set<Camera> recordingCameras = new HashSet<Camera>();
 	private Set<CameraManager> recordingManagers = new HashSet<CameraManager>();
 	private Set<VideoPlayerController> videoPlayers = new HashSet<VideoPlayerController>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
@@ -224,6 +226,19 @@ public class Configuration {
 			}
 		}
 		
+		Set<Camera> recordingCameras = new HashSet<Camera>();
+		if (prop.containsKey(RECORDING_WEBCAMS_PROP)) {
+			for (String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP).split(",")) {
+				for (Camera webcam : webcams.values()) {
+					if (webcam.getName().equals(nameString)) {
+						recordingCameras.add(webcam);
+						continue;
+					}
+				}
+			}
+		}
+		setRecordingCameras(recordingCameras);
+		
 		if (prop.containsKey(DETECTION_RATE_PROP)) {
 			setDetectionRate(
 					Integer.parseInt(prop.getProperty(DETECTION_RATE_PROP)));
@@ -312,8 +327,15 @@ public class Configuration {
 			webcamList.append(entry.getValue().getName());
 		}
 		
+		StringBuilder recordingWebcamList = new StringBuilder();
+		for (Camera c : recordingCameras) {
+			if (recordingWebcamList.length() > 0) recordingWebcamList.append(",");
+			recordingWebcamList.append(c.getName());
+		}		
+		
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
+		prop.setProperty(RECORDING_WEBCAMS_PROP, recordingWebcamList.toString());
 		prop.setProperty(DETECTION_RATE_PROP, String.valueOf(detectionRate));
 		prop.setProperty(LASER_INTENSITY_PROP, String.valueOf(laserIntensity));
 		prop.setProperty(MARKER_RADIUS_PROP, String.valueOf(markerRadius));
@@ -602,6 +624,14 @@ public class Configuration {
 		}
 	}
 	
+	public void setRecordingCameras(Set<Camera> recordingCameras) {
+		this.recordingCameras = recordingCameras;
+	}
+	
+	public Set<Camera> getRecordingCameras() {
+		return recordingCameras;
+	}
+	
 	public void registerRecordingCameraManager(CameraManager cm) {
 		recordingManagers.add(cm);
 	}
@@ -610,11 +640,11 @@ public class Configuration {
 		recordingManagers.remove(cm);
 	}
 	
+	public void unregisterAllRecordingCameramManagers() {
+		recordingManagers.clear();
+	}
+	
 	public void setSessionRecorder(SessionRecorder sessionRecorder) {
-		if (sessionRecorder == null) {
-			for (CameraManager cm : recordingManagers) cm.stopRecordingShots();
-		}
-		
 		this.sessionRecorder = Optional.ofNullable(sessionRecorder);
 	}
 	

@@ -84,7 +84,7 @@ public class CameraSelectorScene extends Stage {
 	            ListCell<String>>() {
 	                @Override 
 	                public ListCell<String> call(ListView<String> list) {
-	                    return new ImageCell(unconfiguredWebcams, null);
+	                    return new ImageCell(unconfiguredWebcams, null, Optional.empty(), Optional.empty());
 	                }
 	            }
 	        );

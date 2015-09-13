@@ -233,6 +233,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	@Override
 	public void cameraConfigUpdated() {
+		config.unregisterAllRecordingCameramManagers();
 		addConfiguredCameras();
 	}
 	
@@ -299,7 +300,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, 
 				webcamName, shotEntries);
-		camerasSupervisor.addCameraManager(webcam, canvasManager);
+		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, canvasManager);
+		
+		if (config.getRecordingCameras().contains(webcam)) {
+			config.registerRecordingCameraManager(cameraManager);
+		}
+		
 		canvasManager.setContextMenu(createContextMenu());
 		
 		// Show coords of mouse when in canvas during debug mode
@@ -500,6 +506,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML
 	public void toggleSessionRecordingMenuItemClicked(ActionEvent event) {
 		if (config.getSessionRecorder().isPresent()) {
+			for (CameraManager cm : config.getRecordingManagers()) {
+				cm.stopRecordingShots();
+			}
+			
 			SessionIO.saveSession(config.getSessionRecorder().get(), 
 					new File(System.getProperty("shootoff.home") + File.separator + "sessions/" + 
 							config.getSessionRecorder().get().getSessionName() + ".xml"));
@@ -509,6 +519,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			toggleSessionRecordingMenuItem.setText("Record Session");
 		} else {
 			config.setSessionRecorder(new SessionRecorder());
+			
+			for (CameraManager cm : config.getRecordingManagers()) {
+				cm.startRecordingShots();
+			}
+			
 			toggleSessionRecordingMenuItem.setText("Stop Recording");
 		}
 	}
