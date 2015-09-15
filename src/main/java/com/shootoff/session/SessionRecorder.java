@@ -94,8 +94,8 @@ public class SessionRecorder {
 		}
 	}
 	
-	public void recordShot(String cameraName, Shot shot, Optional<Target> target, Optional<Integer> hitRegionIndex,
-			Optional<String> videoString) {
+	public void recordShot(String cameraName, Shot shot, boolean isMalfunction, boolean isReload,
+			Optional<Target> target, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		Optional<Integer> targetIndex = Optional.empty();
 		
 		if (target.isPresent()) {
@@ -106,7 +106,7 @@ public class SessionRecorder {
 		long timestamp = System.currentTimeMillis() - startTime;
 		
 		getCameraEvents(cameraName).add(
-				new ShotEvent(cameraName, timestamp, shot, targetIndex, hitRegionIndex, videoString));
+				new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
 	}
 	
 	public void recordTargetAdded(String cameraName, Target target) {

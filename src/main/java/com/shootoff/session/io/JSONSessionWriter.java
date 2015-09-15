@@ -56,8 +56,9 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitShot(long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex,
-			Optional<String> videoString) {
+	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload, 
+			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+		
 		JSONObject event = new JSONObject();
 		event.put("type", "shot");
 		event.put("timestamp", timestamp);
@@ -66,6 +67,8 @@ public class JSONSessionWriter implements EventVisitor {
 		event.put("y", shot.getY());
 		event.put("shotTimestamp", shot.getTimestamp());		
 		event.put("markerRadius", (int)shot.getMarker().getRadiusX());
+		event.put("isMalfunction", isMalfunction);
+		event.put("isReload", isReload);
 		
 		if (targetIndex.isPresent()) {
 			event.put("targetIndex", targetIndex.get());

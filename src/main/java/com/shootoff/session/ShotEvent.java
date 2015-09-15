@@ -31,16 +31,20 @@ public class ShotEvent implements Event {
 	private final String cameraName;
 	private final long timestamp;
 	private final Shot shot;
+	private final boolean isMalfunction;
+	private final boolean isReload;
 	private final Optional<Integer> targetIndex;
 	private final Optional<Integer> hitRegionIndex;
 	private final Optional<String> videoString;
 	private final Map<String, File> videos = new HashMap<String, File>();
 	
-	public ShotEvent(String cameraName, long timestamp, Shot shot, Optional<Integer> targetIndex, 
-			Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+	public ShotEvent(String cameraName, long timestamp, Shot shot, boolean isMalfunction, boolean isReload, 
+			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp; 
 		this.shot = shot;
+		this.isMalfunction = isMalfunction;
+		this.isReload = isReload;
 		this.targetIndex = targetIndex;
 		this.hitRegionIndex = hitRegionIndex;
 		this.videoString = videoString;
@@ -62,6 +66,14 @@ public class ShotEvent implements Event {
 	
 	public Shot getShot() {
 		return shot;
+	}
+	
+	public boolean isMalfunction() {
+		return isMalfunction;
+	}
+	
+	public boolean isReload() {
+		return isReload;
 	}
 	
 	public Optional<Integer> getTargetIndex() {

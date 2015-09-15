@@ -47,7 +47,9 @@ public class TestSessionRecorder {
 	@Test
 	public void testOneOfEach() {
 		sessionRecorder.recordTargetAdded(cameraName, target);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
+		sessionRecorder.recordShot(cameraName, shot, false, false, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
+		sessionRecorder.recordShot(cameraName, shot, true, false, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
+		sessionRecorder.recordShot(cameraName, shot, false, true, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
 		sessionRecorder.recordTargetResized(cameraName, target, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 4, 3);
 		sessionRecorder.recordTargetRemoved(cameraName, target);
@@ -55,39 +57,69 @@ public class TestSessionRecorder {
 		
 		List<Event> events = sessionRecorder.getCameraEvents(cameraName);
 		
-		assertEquals(EventType.TARGET_ADDED, events.get(0).getType());
-		assertEquals(cameraName, events.get(0).getCameraName());
-		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
+		final int TARGET_ADDED_INDEX = 0;
+		assertEquals(EventType.TARGET_ADDED, events.get(TARGET_ADDED_INDEX).getType());
+		assertEquals(cameraName, events.get(TARGET_ADDED_INDEX).getCameraName());
+		assertEquals(targetName, ((TargetAddedEvent)events.get(TARGET_ADDED_INDEX)).getTargetName());
 		
-		assertEquals(EventType.SHOT, events.get(1).getType());
-		assertEquals(cameraName, events.get(1).getCameraName());
-		assertEquals(shot, ((ShotEvent)events.get(1)).getShot());
-		assertEquals(Color.RED, ((ShotEvent)events.get(1)).getShot().getColor());
-		assertEquals(targetIndex, ((ShotEvent)events.get(1)).getTargetIndex().get().intValue());
-		assertEquals(hitRegionIndex, ((ShotEvent)events.get(1)).getHitRegionIndex().get().intValue());
-		assertFalse(((ShotEvent)events.get(1)).getVideoString().isPresent());
+		final int SHOT_INDEX = 1;
+		assertEquals(EventType.SHOT, events.get(SHOT_INDEX).getType());
+		assertEquals(cameraName, events.get(SHOT_INDEX).getCameraName());
+		assertEquals(shot, ((ShotEvent)events.get(SHOT_INDEX)).getShot());
+		assertEquals(Color.RED, ((ShotEvent)events.get(SHOT_INDEX)).getShot().getColor());
+		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).isMalfunction());
+		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).isReload());
+		assertEquals(targetIndex, ((ShotEvent)events.get(SHOT_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(SHOT_INDEX)).getHitRegionIndex().get().intValue());
+		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).getVideoString().isPresent());
 		
-		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
-		assertEquals(cameraName, events.get(2).getCameraName());
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(10, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
-		assertEquals(20, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);
+		final int SHOT_MALFUNCTION_INDEX = 2;
+		assertEquals(EventType.SHOT, events.get(SHOT_MALFUNCTION_INDEX).getType());
+		assertEquals(cameraName, events.get(SHOT_MALFUNCTION_INDEX).getCameraName());
+		assertEquals(shot, ((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).getShot());
+		assertEquals(Color.RED, ((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).getShot().getColor());
+		assertTrue(((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).isMalfunction());
+		assertFalse(((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).isReload());
+		assertEquals(targetIndex, ((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).getHitRegionIndex().get().intValue());
+		assertFalse(((ShotEvent)events.get(SHOT_MALFUNCTION_INDEX)).getVideoString().isPresent());
 		
-		assertEquals(EventType.TARGET_MOVED, events.get(3).getType());
-		assertEquals(cameraName, events.get(3).getCameraName());
-		assertEquals(targetIndex, ((TargetMovedEvent)events.get(3)).getTargetIndex());
-		assertEquals(4, ((TargetMovedEvent)events.get(3)).getNewX());
-		assertEquals(3, ((TargetMovedEvent)events.get(3)).getNewY());
+		final int SHOT_RELOAD_INDEX = 3;
+		assertEquals(EventType.SHOT, events.get(SHOT_RELOAD_INDEX).getType());
+		assertEquals(cameraName, events.get(SHOT_RELOAD_INDEX).getCameraName());
+		assertEquals(shot, ((ShotEvent)events.get(SHOT_RELOAD_INDEX)).getShot());
+		assertEquals(Color.RED, ((ShotEvent)events.get(SHOT_RELOAD_INDEX)).getShot().getColor());
+		assertFalse(((ShotEvent)events.get(SHOT_RELOAD_INDEX)).isMalfunction());
+		assertTrue(((ShotEvent)events.get(SHOT_RELOAD_INDEX)).isReload());
+		assertEquals(targetIndex, ((ShotEvent)events.get(SHOT_RELOAD_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(SHOT_RELOAD_INDEX)).getHitRegionIndex().get().intValue());
+		assertFalse(((ShotEvent)events.get(SHOT_RELOAD_INDEX)).getVideoString().isPresent());
 		
-		assertEquals(EventType.TARGET_REMOVED, events.get(4).getType());
-		assertEquals(cameraName, events.get(4).getCameraName());
-		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(4)).getTargetIndex());
+		final int TARGET_RESIZED_INDEX = 4;
+		assertEquals(EventType.TARGET_RESIZED, events.get(TARGET_RESIZED_INDEX).getType());
+		assertEquals(cameraName, events.get(TARGET_RESIZED_INDEX).getCameraName());
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(10, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 		
-		assertEquals(EventType.EXERCISE_FEED_MESSAGE, events.get(5).getType());
-		assertEquals(cameraName, events.get(5).getCameraName());
-		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(5)).getMessage());
+		final int TARGET_MOVED_INDEX = 5;
+		assertEquals(EventType.TARGET_MOVED, events.get(TARGET_MOVED_INDEX).getType());
+		assertEquals(cameraName, events.get(TARGET_MOVED_INDEX).getCameraName());
+		assertEquals(targetIndex, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getTargetIndex());
+		assertEquals(4, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getNewX());
+		assertEquals(3, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getNewY());
 		
-		assertEquals(6, events.size());
+		final int TARGET_REMOVED_INDEX = 6;
+		assertEquals(EventType.TARGET_REMOVED, events.get(TARGET_REMOVED_INDEX).getType());
+		assertEquals(cameraName, events.get(TARGET_REMOVED_INDEX).getCameraName());
+		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(TARGET_REMOVED_INDEX)).getTargetIndex());
+		
+		final int EXERCISE_FEED_INDEX = 7;
+		assertEquals(EventType.EXERCISE_FEED_MESSAGE, events.get(EXERCISE_FEED_INDEX).getType());
+		assertEquals(cameraName, events.get(EXERCISE_FEED_INDEX).getCameraName());
+		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(EXERCISE_FEED_INDEX)).getMessage());
+		
+		assertEquals(8, events.size());
 	}
 	
 	@Test
@@ -145,7 +177,7 @@ public class TestSessionRecorder {
 		sessionRecorder.recordTargetResized(cameraName, target, 11, 20);
 		sessionRecorder.recordTargetResized(cameraName, target, 12, 20);
 		String videoString = "c:test/x.vid";
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
+		sessionRecorder.recordShot(cameraName, shot, false, false, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
 		sessionRecorder.recordTargetResized(cameraName, target, 13, 20);
 		sessionRecorder.recordTargetResized(cameraName, target, 12, 45);
 		
@@ -222,7 +254,7 @@ public class TestSessionRecorder {
 	public void testCollapseMovesShotInMiddle() {
 		sessionRecorder.recordTargetMoved(cameraName, target, 11, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 12, 20);
-		sessionRecorder.recordShot(cameraName, shot, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
+		sessionRecorder.recordShot(cameraName, shot, false, false, Optional.of(target), Optional.of(hitRegionIndex), Optional.empty());
 		sessionRecorder.recordTargetMoved(cameraName, target, 13, 20);
 		sessionRecorder.recordTargetMoved(cameraName, target, 12, 45);
 		

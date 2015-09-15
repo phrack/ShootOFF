@@ -102,6 +102,10 @@ public class XMLSessionReader {
 						Double.parseDouble(attributes.getValue("y")), Long.parseLong(attributes.getValue("shotTimestamp")), 
 						Integer.parseInt(attributes.getValue("markerRadius")));
 				
+				boolean isMalfunction = Boolean.parseBoolean(attributes.getValue("isMalfunction"));
+				
+				boolean isReload = Boolean.parseBoolean(attributes.getValue("isReload"));
+				
 				Optional<Integer> targetIndex;
 				int index = Integer.parseInt(attributes.getValue("targetIndex")); 
 				if (index == -1) {
@@ -122,7 +126,7 @@ public class XMLSessionReader {
 				
 				events.get(currentCameraName).add(
 						new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot, 
-								targetIndex, hitRegionIndex, videoString));
+								isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
 				
 				break;
 

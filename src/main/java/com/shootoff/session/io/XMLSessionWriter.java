@@ -44,8 +44,9 @@ public class XMLSessionWriter implements EventVisitor {
 	}
 
 	@Override
-	public void visitShot(long timestamp, Shot shot, Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex,
-			Optional<String> videoString) {
+	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload, 
+			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+		
 		int targIndex;
 		if (targetIndex.isPresent()) {
 			targIndex = targetIndex.get();
@@ -62,16 +63,18 @@ public class XMLSessionWriter implements EventVisitor {
 		
 		if (videoString.isPresent()) {
 			xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
-					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\""
-					+ " videos=\"%s\" />%n",
+					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" isMalfunction=\"%b\""
+					+ " isReload=\"%b\" targetIndex=\"%d\" hitRegionIndex=\"%d\" videos=\"%s\" />%n",
 					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
-					(int)shot.getMarker().getRadiusX(), targIndex, hitRegIndex, videoString.get()));
+					(int)shot.getMarker().getRadiusX(), isMalfunction, isReload, targIndex, hitRegIndex, 
+					videoString.get()));
 			
 		} else {
 			xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
-					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n", 
+					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" isMalfunction=\"%b\""
+					+ " isReload=\"%b\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n", 
 					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
-					(int)shot.getMarker().getRadiusX(), targIndex, hitRegIndex));
+					(int)shot.getMarker().getRadiusX(), isMalfunction, isReload, targIndex, hitRegIndex));
 		}
 	}
 

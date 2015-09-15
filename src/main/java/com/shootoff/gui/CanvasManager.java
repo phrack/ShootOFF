@@ -36,9 +36,11 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.DeduplicationProcessor;
+import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.ShotRecorder;
+import com.shootoff.camera.VirtualMagazineProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.plugins.TrainingExercise;
@@ -208,6 +210,30 @@ public class CanvasManager {
 		}
 	}
 	
+	private Optional<String> createVideoString(Shot shot) {
+		if (config.getSessionRecorder().isPresent() && 
+				!config.getRecordingManagers().isEmpty()) {
+			
+			StringBuilder sb = new StringBuilder();
+			
+			for (CameraManager cm : config.getRecordingManagers()) {
+				ShotRecorder r = cm.getRevelantRecorder(shot);
+				
+				if (sb.length() > 0) {
+					sb.append(",");
+				}
+				
+				sb.append(r.getCameraName());
+				sb.append(":");
+				sb.append(r.getRelativeVideoFile().getPath());
+			}
+			
+			return Optional.of(sb.toString());
+		}
+		
+		return Optional.empty();
+	}
+	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
@@ -226,8 +252,24 @@ public class CanvasManager {
 		if (rejectingProcessor.isPresent()) {
 			// Record video for rejected shots as long as they weren't rejected
 			// for being dupes
+			if (!config.getSessionRecorder().isPresent()) return;
+			
 			if (rejectingProcessor.get() instanceof DeduplicationProcessor == false) {
 				notifyShot(shot);
+			
+				Optional<String> videoString = createVideoString(shot);
+				
+				if (rejectingProcessor.get() instanceof MalfunctionsProcessor) {
+					config.getSessionRecorder().get().recordShot(cameraName, 
+							shot, true, false, Optional.empty(), 
+							Optional.empty(),
+							videoString);		
+ 				} else if (rejectingProcessor.get() instanceof VirtualMagazineProcessor) {
+					config.getSessionRecorder().get().recordShot(cameraName, 
+							shot, false, true, Optional.empty(), 
+							Optional.empty(),
+							videoString);		
+ 				}
 			}
 			
 			return;
@@ -321,27 +363,7 @@ public class CanvasManager {
 	}
 	
 	private Optional<Hit> checkHit(Shot shot) {
-		Optional<String> videoString = Optional.empty();
-		
-		if (config.getSessionRecorder().isPresent()) {
-			if (!config.getRecordingManagers().isEmpty()) {
-				StringBuilder sb = new StringBuilder();
-				
-				for (CameraManager cm : config.getRecordingManagers()) {
-					ShotRecorder r = cm.getRevelantRecorder(shot);
-					
-					if (sb.length() > 0) {
-						sb.append(",");
-					}
-					
-					sb.append(r.getCameraName());
-					sb.append(":");
-					sb.append(r.getRelativeVideoFile().getPath());
-				}
-				
-				videoString = Optional.of(sb.toString());
-			}
-		}
+		Optional<String> videoString = createVideoString(shot);
 		
 		// Targets are in order of when they were added, thus we must search in reverse
 		// to ensure shots register for the top target when targets overlap
@@ -414,8 +436,7 @@ public class CanvasManager {
 						
 						if (config.getSessionRecorder().isPresent()) {
 							config.getSessionRecorder().get().recordShot(cameraName, 
-									shot,
-									Optional.of(target), 
+									shot, false, false, Optional.of(target), 
 									Optional.of(targetGroup.getChildren().indexOf(node)),
 									videoString);
 						}
@@ -431,9 +452,7 @@ public class CanvasManager {
 		
 		if (config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordShot(cameraName, 
-					shot,
-					Optional.empty(), 
-					Optional.empty(),
+					shot, false, false, Optional.empty(), Optional.empty(),
 					videoString);
 		}
 		

@@ -46,6 +46,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class SessionCanvasManager {
@@ -69,6 +70,13 @@ public class SessionCanvasManager {
 		case SHOT:
 			ShotEvent se = (ShotEvent)e;
 			canvas.getChildren().add(se.getShot().getMarker());
+			
+			if (se.isMalfunction()) {
+				se.getShot().getMarker().setFill(Color.ORANGE);
+			} else if (se.isReload()) {
+				se.getShot().getMarker().setFill(Color.LIGHTSKYBLUE);
+			}
+			
 			se.getShot().getMarker().setVisible(true);
 			
 			if (se.getVideoString().isPresent()) {

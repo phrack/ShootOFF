@@ -90,6 +90,10 @@ public class JSONSessionReader {
 								(Long)event.get("shotTimestamp"), 
 								((Long)event.get("markerRadius")).intValue());
 						
+						boolean isMalfunction = (boolean)event.get("isMalfunction");
+						
+						boolean isReload = (boolean)event.get("isReload");
+						
 						Optional<Integer> targetIndex;
 						int index = ((Long)event.get("targetIndex")).intValue(); 
 						if (index == -1) {
@@ -109,7 +113,7 @@ public class JSONSessionReader {
 						Optional<String> videoString = Optional.ofNullable((String)event.get("videos"));
 						
 						events.get(cameraName).add(
-								new ShotEvent(cameraName, (Long)event.get("timestamp"), shot, 
+								new ShotEvent(cameraName, (Long)event.get("timestamp"), shot, isMalfunction, isReload,
 										targetIndex, hitRegionIndex, videoString));
 						break;
 						

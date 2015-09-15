@@ -60,10 +60,10 @@ public class TestSessionIO {
 		sessionRecorder.recordTargetAdded(cameraName2, target);
 		sessionRecorder.recordTargetResized(cameraName1, target, 10, 20);
 		sessionRecorder.recordTargetMoved(cameraName1, target, 4, 3);
-		sessionRecorder.recordShot(cameraName1, redShot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
-		sessionRecorder.recordShot(cameraName1, greenShot, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
+		sessionRecorder.recordShot(cameraName1, redShot, false, false, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
+		sessionRecorder.recordShot(cameraName1, greenShot, true, false, Optional.of(target), Optional.of(hitRegionIndex), Optional.of(videoString));
 		sessionRecorder.recordTargetRemoved(cameraName1, target);
-		sessionRecorder.recordShot(cameraName1, greenShot, Optional.empty(), Optional.empty(), Optional.empty());
+		sessionRecorder.recordShot(cameraName1, greenShot, false, true, Optional.empty(), Optional.empty(), Optional.empty());
 		sessionRecorder.recordExerciseFeedMessage(exerciseMessage);
 	}
 	
@@ -89,6 +89,8 @@ public class TestSessionIO {
 		assertEquals(redShot.getY(), ((ShotEvent)events.get(3)).getShot().getY(), 1);
 		assertEquals(redShot.getTimestamp(), ((ShotEvent)events.get(3)).getShot().getTimestamp());
 		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(3)).getShot().getMarker().getRadiusX(), 1);
+		assertFalse(((ShotEvent)events.get(3)).isMalfunction());
+		assertFalse(((ShotEvent)events.get(3)).isReload());
 		assertEquals(targetIndex, ((ShotEvent)events.get(3)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
 		assertEquals(videoString, ((ShotEvent)events.get(3)).getVideoString().get());
@@ -101,6 +103,8 @@ public class TestSessionIO {
 		assertEquals(greenShot.getY(), ((ShotEvent)events.get(4)).getShot().getY(), 1);
 		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(4)).getShot().getTimestamp());
 		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(4)).getShot().getMarker().getRadiusX(), 1);
+		assertTrue(((ShotEvent)events.get(4)).isMalfunction());
+		assertFalse(((ShotEvent)events.get(4)).isReload());
 		assertEquals(targetIndex, ((ShotEvent)events.get(4)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(4)).getHitRegionIndex().get().intValue());
 		assertEquals(videoString, ((ShotEvent)events.get(4)).getVideoString().get());
@@ -115,6 +119,8 @@ public class TestSessionIO {
 		assertEquals(greenShot.getY(), ((ShotEvent)events.get(6)).getShot().getY(), 1);
 		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(6)).getShot().getTimestamp());
 		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(6)).getShot().getMarker().getRadiusX(), 1);
+		assertFalse(((ShotEvent)events.get(6)).isMalfunction());
+		assertTrue(((ShotEvent)events.get(6)).isReload());
 		assertFalse(((ShotEvent)events.get(6)).getTargetIndex().isPresent());
 		assertFalse(((ShotEvent)events.get(6)).getHitRegionIndex().isPresent());
 		assertFalse(((ShotEvent)events.get(6)).getVideoString().isPresent());
