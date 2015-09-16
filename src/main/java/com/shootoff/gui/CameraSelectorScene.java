@@ -98,7 +98,7 @@ public class CameraSelectorScene extends Stage {
 	    webcamListView.setOnKeyPressed((event) -> {
 	    		if (event.getCode() == KeyCode.ENTER) {
 	    			addSelection();
-	    		}else if (event.getCode() == KeyCode.DELETE) {
+	    		}else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
 	    			removeSelectedIpCams();
 	    		}
 	    	});

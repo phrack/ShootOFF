@@ -105,7 +105,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	        );
 		
 	    webcamListView.setOnKeyPressed((event) -> {
-	    		if (event.getCode() == KeyCode.DELETE) {
+	    		if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
 	    			ObservableList<String> selectedNames =
 	    					webcamListView.getSelectionModel().getSelectedItems();
 	    			

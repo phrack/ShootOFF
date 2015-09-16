@@ -378,9 +378,10 @@ public class Target {
 		targetGroup.setOnKeyPressed((event) -> {	
 			double currentWidth = targetGroup.getBoundsInParent().getWidth();
 			double currentHeight = targetGroup.getBoundsInParent().getHeight();
-			
+
 			switch (event.getCode()) {
 			case DELETE:
+			case BACK_SPACE:
 				if (userDeletable && parent.isPresent()) parent.get().removeTarget(this);
 				break;
 				

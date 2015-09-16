@@ -384,6 +384,7 @@ public class TargetEditorController {
 		
 		switch (event.getCode()) {
 		case DELETE:
+		case BACK_SPACE:
 			targetRegions.remove(selected);
 			canvasPane.getChildren().remove(selected);
 			toggleShapeControls(false);
