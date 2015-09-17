@@ -291,11 +291,11 @@ public class CanvasManager {
 		ShotEntry shotEntry;
 		
 		if (hadMalfunction || hadReload) {
-			shotEntry = new ShotEntry(shot, lastShot, hadMalfunction, hadReload);
+			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
 			hadMalfunction = false;
 			hadReload = false;
 		} else {
-			shotEntry = new ShotEntry(shot, lastShot, false, false);
+			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
 		}
 		
 		shotEntries.add(shotEntry);

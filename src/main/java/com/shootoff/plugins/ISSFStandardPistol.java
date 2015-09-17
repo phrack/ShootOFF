@@ -30,6 +30,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javafx.scene.Group;
+import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
@@ -54,6 +55,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private int delayMin = 4;
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
+	private boolean coloredRows = false;
 	
 	public ISSFStandardPistol() {}
 	
@@ -110,6 +112,14 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 			shotCount = 0;
 			
 			if (repeatExercise) {
+				if (coloredRows) {
+					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+				} else {
+					thisSuper.setShotTimerRowColor(null);
+				}
+				
+				coloredRows = !coloredRows;
+				
 				TrainingExerciseBase.playSound("sounds/beep.wav");
 				thisSuper.pauseShotDetection(false);
 				endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);

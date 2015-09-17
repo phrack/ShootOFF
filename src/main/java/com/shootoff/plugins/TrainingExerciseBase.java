@@ -66,6 +66,7 @@ public class TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
+	private boolean changedRowColor = false;
 	
 	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
 	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = 
@@ -164,6 +165,18 @@ public class TrainingExerciseBase {
 	}
 	
 	/**
+	 * Set the background color for rows for shots added to the shot timer after this
+	 * method is called. 
+	 * 
+	 * @param c		the color to use in the style string for the row. Set to null to
+	 * 				return the row color to the default color
+	 */
+	public void setShotTimerRowColor(Color c) {
+		changedRowColor = true;
+		config.setShotTimerRowColor(c);
+	}
+	
+	/**
 	 * Shows a message on every single webcam feed.
 	 * 
 	 * @param message	the message to show on every webcam feed
@@ -193,6 +206,7 @@ public class TrainingExerciseBase {
 	 */
 	public void reset() {
 		camerasSupervisor.reset();
+		if (changedRowColor) config.setShotTimerRowColor(null);
 		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());	
 	}
 	
@@ -250,6 +264,8 @@ public class TrainingExerciseBase {
 	 * Removes all objects the training exercise has added to the GUI.
 	 */
 	public void destroy() {
+		if (changedRowColor) config.setShotTimerRowColor(null);
+		
 		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 			shotTimerTable.getColumns().remove(column);
 		}

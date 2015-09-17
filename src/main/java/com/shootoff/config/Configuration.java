@@ -126,8 +126,9 @@ public class Configuration {
 	private Set<VideoPlayerController> videoPlayers = new HashSet<VideoPlayerController>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
+	private Optional<Color> shotRowColor = Optional.empty();
 
-	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
+ 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 	
@@ -628,6 +629,10 @@ public class Configuration {
 		this.recordingCameras = recordingCameras;
 	}
 	
+	public void setShotTimerRowColor(Color c) {
+		shotRowColor = Optional.ofNullable(c);
+	}
+	
 	public Set<Camera> getRecordingCameras() {
 		return recordingCameras;
 	}
@@ -759,5 +764,9 @@ public class Configuration {
 		if (currentExercise == null) return Optional.empty();
 		
 		return Optional.of(currentExercise);
+	}
+	
+	public Optional<Color> getShotTimerRowColor() {
+		return shotRowColor;
 	}
 }

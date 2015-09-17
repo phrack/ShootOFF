@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javafx.scene.Group;
+import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
@@ -43,6 +44,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
 	private long beepTime = 0;
+	private boolean coloredRows = false;
 	
 	public TimedHolsterDrill() {}
 	
@@ -77,6 +79,14 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		@Override
 		public Void call() throws Exception {
 			if (repeatExercise) {
+				if (coloredRows) {
+					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+				} else {
+					thisSuper.setShotTimerRowColor(null);
+				}
+				
+				coloredRows = !coloredRows;
+				
 	            TrainingExerciseBase.playSound("sounds/beep.wav");
 	            thisSuper.pauseShotDetection(false);
 	            beepTime = System.currentTimeMillis();

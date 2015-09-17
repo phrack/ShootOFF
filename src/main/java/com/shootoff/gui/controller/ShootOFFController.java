@@ -83,6 +83,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Alert.AlertType;
@@ -231,6 +232,24 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        }
 	    });
 		
+		shotTimerTable.setRowFactory(tableView -> new TableRow<ShotEntry>() {
+	            @Override
+	            protected void updateItem(ShotEntry item, boolean empty){
+	            	super.updateItem(item, empty);
+	            	
+	                if (item == null || empty) {
+	                    setStyle("");
+	                    return;
+	                }
+	            	
+	            	if (item.getRowColor().isPresent()) {
+	            		setStyle("-fx-background-color: " + toWebCode(item.getRowColor().get()));
+	            	} else {
+	            		setStyle("");
+	            	}
+	            }
+	    	});
+		
 		splitCol.setCellFactory(column -> {
 		        return new TableCell<ShotEntry, ShotEntry.SplitData>() {
 		            @Override
@@ -246,11 +265,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		                setText(item.getSplit());
 		                
 		                if (item.hadMalfunction()) {
-		                    this.setStyle("-fx-background-color: orange");
+		                    setStyle("-fx-background-color: orange");
 		                } else if (item.hadReload()) {
-		                	this.setStyle("-fx-background-color: lightskyblue");
-		                } else {
-		                    setTextFill(Color.BLACK);
+		                	setStyle("-fx-background-color: lightskyblue");
+		                } else if (item.getRowColor().isPresent()) {
+		                	setStyle("-fx-background-color: " + toWebCode(item.getRowColor().get()));
+		            	} else {
 		                    setStyle("");
 		                }
 		            }
@@ -263,6 +283,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
+	
+    private String toWebCode( Color color )
+    {
+        return String.format( "#%02X%02X%02X",
+            (int)( color.getRed() * 255 ),
+            (int)( color.getGreen() * 255 ),
+            (int)( color.getBlue() * 255 ) );
+    }
 	
 	@Override
 	public void cameraConfigUpdated() {
