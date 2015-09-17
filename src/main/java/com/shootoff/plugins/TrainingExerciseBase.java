@@ -206,7 +206,12 @@ public class TrainingExerciseBase {
 	 */
 	public void reset() {
 		camerasSupervisor.reset();
-		if (changedRowColor) config.setShotTimerRowColor(null);
+		
+		if (changedRowColor) {
+			config.setShotTimerRowColor(null);
+			changedRowColor = false;
+		}
+		
 		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());	
 	}
 	
@@ -264,7 +269,10 @@ public class TrainingExerciseBase {
 	 * Removes all objects the training exercise has added to the GUI.
 	 */
 	public void destroy() {
-		if (changedRowColor) config.setShotTimerRowColor(null);
+		if (changedRowColor) {
+			config.setShotTimerRowColor(null);
+			changedRowColor = false;
+		}
 		
 		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 			shotTimerTable.getColumns().remove(column);
