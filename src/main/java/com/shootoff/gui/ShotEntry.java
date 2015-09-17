@@ -20,6 +20,7 @@ package com.shootoff.gui;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javafx.scene.paint.Color;
 
@@ -27,11 +28,12 @@ import com.shootoff.camera.Shot;
 
 public class ShotEntry {
 	private final Shot shot;
-	private final String color;
 	private final String timestamp;
+	private final String color;
+	private final SplitData split;
 	private final Map<String, String> exerciseData = new HashMap<String, String>();
 	
-	public ShotEntry(Shot shot) {
+	public ShotEntry(Shot shot, Optional<Shot> lastShot, boolean hadMalfunction, boolean hadReload) {
 		this.shot = shot;
 		
 		if (shot.getColor().equals(Color.RED)) {
@@ -40,7 +42,41 @@ public class ShotEntry {
 			color = "green";
 		}
 		
-		timestamp = String.format("%.2f", ((float)shot.getTimestamp()) / (float)1000);
+		float timestampS = ((float)shot.getTimestamp()) / (float)1000;
+		timestamp = String.format("%.2f", timestampS);
+		
+		String split;
+		if (lastShot.isPresent()) {
+			split = String.format("%.2f", timestampS - (float)(lastShot.get().getTimestamp() / 1000));
+		} else {
+			split = "-";
+		}
+		
+		this.split = new SplitData(split, hadMalfunction, hadReload);
+	}
+	
+	public static class SplitData {
+		private final String split;
+		private final boolean hadMalfunction;
+		private final boolean hadReload;
+		
+		public SplitData(String split, boolean hadMalfunction, boolean hadReload) {
+			this.split = split;
+			this.hadMalfunction = hadMalfunction;
+			this.hadReload = hadReload;
+		}
+		
+		public String getSplit() {
+			return split;
+		}
+
+		public boolean hadMalfunction() {
+			return hadMalfunction;
+		}
+
+		public boolean hadReload() {
+			return hadReload;
+		}
 	}
 	
 	public String getColor() {
@@ -49,6 +85,10 @@ public class ShotEntry {
 	
 	public String getTimestamp() {
 		return timestamp;
+	}
+	
+	public SplitData getSplit() {
+		return split;
 	}
 	
 	public Shot getShot() {

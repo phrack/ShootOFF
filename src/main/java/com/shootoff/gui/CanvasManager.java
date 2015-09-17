@@ -79,6 +79,8 @@ public class CanvasManager {
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
+	private boolean hadMalfunction = false;
+	private boolean hadReload = false;
 	
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
@@ -243,6 +245,12 @@ public class CanvasManager {
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) {
+				if (processor instanceof MalfunctionsProcessor) {
+					hadMalfunction = true;
+				} else if (processor instanceof VirtualMagazineProcessor) {
+					hadReload = true;
+				}
+				
 				rejectingProcessor = Optional.of(processor);
 				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
 				break;
@@ -277,7 +285,20 @@ public class CanvasManager {
 			notifyShot(shot);
 		}
 		
-		shotEntries.add(new ShotEntry(shot));
+		Optional<Shot> lastShot = Optional.empty();
+		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() -1).getShot());
+		
+		ShotEntry shotEntry;
+		
+		if (hadMalfunction || hadReload) {
+			shotEntry = new ShotEntry(shot, lastShot, hadMalfunction, hadReload);
+			hadMalfunction = false;
+			hadReload = false;
+		} else {
+			shotEntry = new ShotEntry(shot, lastShot, false, false);
+		}
+		
+		shotEntries.add(shotEntry);
 		shots.add(shot);
 		drawShot(shot);
 		

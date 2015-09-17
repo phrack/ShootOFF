@@ -81,6 +81,7 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleGroup;
@@ -191,6 +192,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		timeCol.setCellValueFactory(
                 new PropertyValueFactory<ShotEntry, String>("timestamp"));
 		
+		TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<ShotEntry, ShotEntry.SplitData>("Split");
+		splitCol.setMinWidth(85);
+		splitCol.setCellValueFactory(
+                new PropertyValueFactory<ShotEntry, ShotEntry.SplitData>("split"));
+		
 		TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
 		laserCol.setMinWidth(85);
 		laserCol.setCellValueFactory(
@@ -225,7 +231,34 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        }
 	    });
 		
+		splitCol.setCellFactory(column -> {
+		        return new TableCell<ShotEntry, ShotEntry.SplitData>() {
+		            @Override
+		            public void updateItem(ShotEntry.SplitData item, boolean empty) {
+		                super.updateItem(item, empty);
+		                
+		                if (item == null || empty) {
+		                    setText(null);
+		                    setStyle("");
+		                    return;
+		                }
+		                
+		                setText(item.getSplit());
+		                
+		                if (item.hadMalfunction()) {
+		                    this.setStyle("-fx-background-color: orange");
+		                } else if (item.hadReload()) {
+		                	this.setStyle("-fx-background-color: lightskyblue");
+		                } else {
+		                    setTextFill(Color.BLACK);
+		                    setStyle("");
+		                }
+		            }
+		        };
+			});
+		
 		shotTimerTable.getColumns().add(timeCol);
+		shotTimerTable.getColumns().add(splitCol);
 		shotTimerTable.getColumns().add(laserCol);
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
