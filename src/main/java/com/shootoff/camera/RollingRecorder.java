@@ -124,7 +124,7 @@ public class RollingRecorder {
 			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
 			r.open();
 			Cutter copy = new Cutter(rollingVideoFile, codec, 0);
-			r.addListener(cutter);
+			r.addListener(copy);
 			while (r.readPacket() == null);
 			
 			timeOffset = copy.getLastTimestamp();
