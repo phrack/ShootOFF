@@ -2,6 +2,9 @@ package com.shootoff.camera;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,9 @@ public class RollingRecorder {
 	private IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
 	private boolean forking = false;
+	private boolean recording = true;
+	
+	private final List<IVideoPicture> bufferedFrames = new ArrayList<IVideoPicture>();
 		
 	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName) {
 		this.codec = codec;
@@ -42,8 +48,7 @@ public class RollingRecorder {
 		
 		startTime = System.currentTimeMillis();
 		relativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
-		videoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
-				relativeVideoFile.getPath());
+		videoFile = new File(System.getProperty("shootoff.sessions") + File.separator + relativeVideoFile.getPath());
 		
 		videoWriter = ToolFactory.makeWriter(videoFile.getPath());
 		videoWriter.addVideoStream(0, 0, codec, CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT);
@@ -52,8 +57,6 @@ public class RollingRecorder {
 	}
 	
 	public void recordFrame(BufferedImage frame) {
-		if (forking) return;
-		
 		BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
 		IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
@@ -62,20 +65,31 @@ public class RollingRecorder {
 		IVideoPicture f = converter.toPicture(image, timestamp * 1000);
 		f.setKeyFrame(isFirstShotFrame);
 		f.setQuality(0);
-		isFirstShotFrame = false;
-
-		videoWriter.encodeVideo(0, f);
 		
-		if (timestamp >= ShotRecorder.RECORD_LENGTH * 3) {
-			logger.debug("Rolling video file {}", relativeVideoFile.getPath());
-			fork(false);
+		if (forking) {
+			synchronized(bufferedFrames) {
+				bufferedFrames.add(f);
+			}
+		} else {
+			isFirstShotFrame = false;
+	
+			synchronized(videoWriter) {
+				if (recording) videoWriter.encodeVideo(0, f);
+			}
+			
+			if (timestamp >= ShotRecorder.RECORD_LENGTH * 3) {
+				logger.debug("Rolling video file {}, timestamp = {} ms" , relativeVideoFile.getPath(), timestamp);
+				fork(false);
+			}
 		}
 	}
 	
 	private ForkContext fork(boolean keepOld) {
 		forking = true;
 		
-		if (videoWriter.isOpen()) videoWriter.close();
+		synchronized(videoWriter) {
+			if (videoWriter.isOpen()) videoWriter.close();
+		}
 		
 		File relativeVideoFile;
 		if (!keepOld) {
@@ -84,16 +98,16 @@ public class RollingRecorder {
 			relativeVideoFile =  new File(sessionName + File.separator + String.valueOf(System.nanoTime()) + extension);
 		}
 		
-		File videoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
-				relativeVideoFile.getPath());
-		
-		logger.debug("Forking video file {} to {}, keepOld = {}", this.relativeVideoFile.getPath(), 
-				relativeVideoFile.getPath(), keepOld);
-		
+		File videoFile = new File(System.getProperty("shootoff.sessions") + File.separator + relativeVideoFile.getPath());
+				
 		IMediaReader reader = ToolFactory.makeReader(this.videoFile.getPath());
 		reader.open();
-		Cutter cutter = new Cutter(videoFile, codec, (reader.getContainer().getDuration() / 1000) - ShotRecorder.RECORD_LENGTH);
+		long startCutTimestamp = (reader.getContainer().getDuration() / 1000) - ShotRecorder.RECORD_LENGTH;	
+		Cutter cutter = new Cutter(videoFile, codec, startCutTimestamp);
 		reader.addListener(cutter);
+		
+		logger.debug("Forking video file {} to {}, keepOld = {}, start cutting at = {} ms", this.relativeVideoFile.getPath(), 
+				relativeVideoFile.getPath(), keepOld, startCutTimestamp);
 		
 		while (reader.readPacket() == null);
 		
@@ -104,7 +118,7 @@ public class RollingRecorder {
 			// the video is being forked (probably because there was
 			// a shot)	
 			File rollingRelativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
-			File rollingVideoFile = new File(System.getProperty("shootoff.home") + File.separator + "sessions" + File.separator + 
+			File rollingVideoFile = new File(System.getProperty("shootoff.sessions") + File.separator + 
 					rollingRelativeVideoFile.getPath());
 			
 			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
@@ -113,12 +127,13 @@ public class RollingRecorder {
 			r.addListener(cutter);
 			while (r.readPacket() == null);
 			
-			startTime = System.currentTimeMillis();
 			timeOffset = copy.getLastTimestamp();
 			
 			this.videoFile.delete();
 			
-			this.videoWriter = copy.getMediaWriter();
+			synchronized(videoWriter) {
+				this.videoWriter = copy.getMediaWriter();
+			}
 			this.relativeVideoFile = rollingRelativeVideoFile;
 			this.videoFile = rollingVideoFile;
 		} else {
@@ -127,10 +142,24 @@ public class RollingRecorder {
 			this.videoFile.delete();
 			this.relativeVideoFile = relativeVideoFile;
 			this.videoFile = videoFile;
-			videoWriter = cutter.getMediaWriter();
-			startTime = System.currentTimeMillis();
+			synchronized(videoWriter) {
+				videoWriter = cutter.getMediaWriter();
+			}
 			timeOffset = cutter.getLastTimestamp();
 		}
+		
+		synchronized(bufferedFrames) {
+			Iterator<IVideoPicture> it = bufferedFrames.iterator();
+			
+			while (it.hasNext()) {
+				synchronized(videoWriter) {
+					videoWriter.encodeVideo(0, it.next());
+				}
+				it.remove();
+			}
+		}
+		
+		startTime = System.currentTimeMillis();
 		
 		forking = false;
 		
@@ -220,7 +249,10 @@ public class RollingRecorder {
 	}
 	
 	public void close() {
-		videoWriter.close();
+		recording = false;
+		synchronized(videoWriter) {
+			videoWriter.close();
+		}
 		videoFile.delete();
 	}
 }

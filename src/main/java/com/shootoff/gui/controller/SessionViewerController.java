@@ -195,10 +195,10 @@ public class SessionViewerController {
 	}
 	
 	private List<File> findSessions () {
-		File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions");
+		File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
 		List<File> sessions = new ArrayList<File>();
 		
-		File[] sessionFiles = targetsFolder.listFiles(new FileFilter("xml"));
+		File[] sessionFiles = sessionsFolder.listFiles(new FileFilter("xml"));
 		
 		if (sessionFiles != null) {
 			for (File file : sessionFiles) {

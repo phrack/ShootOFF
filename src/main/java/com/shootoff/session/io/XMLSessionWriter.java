@@ -108,7 +108,7 @@ public class XMLSessionWriter implements EventVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			File sessionsFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions");
+			File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
 			if (!sessionsFolder.exists()) sessionsFolder.mkdir();
 			
 			PrintWriter out = new PrintWriter(sessionFile);
