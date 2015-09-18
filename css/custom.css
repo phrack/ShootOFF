@@ -98,7 +98,7 @@ body {
 }
 
 
-.btn{width: 150px;}
+.btn{width: 200px;}
 
 .btn-my-red {
 	float:right;font-variant: small-caps;
@@ -925,4 +925,31 @@ body {
     	.targets:before, .configuration:before, .magazine:before, .drills:before, .record:before{content:none !important;}
     }
 }
+/*Learn More + Launch from Browser*/
 
+.lmb{display: block;}
+.lmb2{display: none;}
+
+/*Learn More + Launch from Browser*/
+
+/*Custom Modal*/
+
+.m-header{background-color:#1A1A1A !important;}
+.m-header-title{text-align:center;color:#f9f9f9 !important;}
+.m-body{background-color:#f9f9f9 !important;height: auto !important;}
+.m-text{text-align:center;opacity:0.7;}
+.m-text2{text-align:center;opacity:0.7;margin-top:15px;}
+.m-footer{background-color:#1A1A1A !important;text-align:center;}
+.m-footer a{float:none !important;}
+/*Custom Modal*/
+
+
+
+/* Modal Form */
+.m-form{margin: 0 auto;text-align: center;}
+.question{margin-top:15px;}
+.question p{font-size: 16px;}
+.m-input{text-align:center;width:80%;height:35px;}
+.years{margin-top:15px;}
+.years p{font-size: 16px;}
+/* Modal Form */
