@@ -247,8 +247,10 @@ public class CameraManager {
 		recordingShots = false;
 		for (ShotRecorder r : shotRecorders.values()) r.close();
 		shotRecorders.clear();
-		rollingRecorder.close();
-		rollingRecorder = null;
+		if (rollingRecorder != null) {
+			rollingRecorder.close();
+			rollingRecorder = null;
+		}
 	}
 	
 	public Image getCurrentFrame() {
