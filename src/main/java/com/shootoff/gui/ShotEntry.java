@@ -50,7 +50,7 @@ public class ShotEntry {
 		
 		String split;
 		if (lastShot.isPresent()) {
-			split = String.format("%.2f", timestampS - (float)(lastShot.get().getTimestamp() / 1000));
+			split = String.format("%.2f", timestampS - ((float)lastShot.get().getTimestamp() / (float)1000));
 		} else {
 			split = "-";
 		}

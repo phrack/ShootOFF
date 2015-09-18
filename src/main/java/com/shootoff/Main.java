@@ -179,6 +179,12 @@ public class Main extends Application {
 			e.printStackTrace();
 			tryRunningShootOFF();
 			return Optional.empty();
+        } finally {
+        	try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
 		
 		connection.disconnect();

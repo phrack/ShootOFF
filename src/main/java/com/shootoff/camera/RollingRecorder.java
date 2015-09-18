@@ -129,7 +129,9 @@ public class RollingRecorder {
 			
 			timeOffset = copy.getLastTimestamp();
 			
-			this.videoFile.delete();
+			if (!this.videoFile.delete()) {
+				logger.warn("Failed to delete expired rolling video file: {}, keepOld = {}", this.videoFile.getPath(), keepOld);
+			}
 			
 			synchronized(videoWriter) {
 				this.videoWriter = copy.getMediaWriter();
@@ -139,7 +141,9 @@ public class RollingRecorder {
 		} else {
 			// Start adding new frames to the new video as it's the new
 			// canonical video file to peel end frames off of.
-			this.videoFile.delete();
+			if (!this.videoFile.delete()) {
+				logger.warn("Failed to delete expired rolling video file: {}, keepOld = {}", this.videoFile.getPath(), keepOld);
+			}
 			this.relativeVideoFile = relativeVideoFile;
 			this.videoFile = videoFile;
 			synchronized(videoWriter) {
@@ -253,6 +257,8 @@ public class RollingRecorder {
 		synchronized(videoWriter) {
 			videoWriter.close();
 		}
-		videoFile.delete();
+		if (!videoFile.delete()) {
+			logger.warn("Failed to delete expired rolling video file on close: {}", videoFile.getPath());
+		}
 	}
 }
