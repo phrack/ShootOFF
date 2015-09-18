@@ -35,7 +35,7 @@ public class ShotRecorder {
 		startTime = System.currentTimeMillis();
 		timeOffset = cutDuration;
 		
-		logger.debug("Started recording shot video: {}", videoFile.getName());
+		logger.debug("Started recording shot video: {}, cut duration = {} ms", videoFile.getName(), cutDuration);
 	}
 	
 	public void recordFrame(BufferedImage frame) {
