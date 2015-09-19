@@ -629,6 +629,7 @@ public class Configuration {
 		} else {
 			System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
 		}
+		
 	}
 	
 	public void setRecordingCameras(Set<Camera> recordingCameras) {

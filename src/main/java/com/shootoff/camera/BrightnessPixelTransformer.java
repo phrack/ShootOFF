@@ -143,7 +143,7 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 			
 		if ((redratio > 1.5 && redadv>.005 && lumsMovingAverage[x][y]>100) || (greenratio > 1.5 && greenadv>.005 && lumsMovingAverage[x][y]>100)) {
 			logger.warn("updateFilter{} {} {} - {} {} {} - {} {} {} - {} {} - {} {} - {}", 
-				CameraManager.TESTING_framecount, x, y,
+				CameraManager.getFrameCount(), x, y,
 				((float)currentC.getRed()/(float)averageC.getRed()), ((float)currentC.getGreen()/(float)averageC.getGreen()), ((float)currentC.getBlue()/(float)averageC.getBlue()),
 				redratio, greenratio, blueratio,
 				gbratio, rbratio,

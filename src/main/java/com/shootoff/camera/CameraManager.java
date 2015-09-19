@@ -103,7 +103,13 @@ public class CameraManager {
  	
 	private boolean[][] sectorStatuses;
 	
-	public static int TESTING_framecount = 0;
+	private static int frameCount = 0;
+	
+	public static int getFrameCount() {
+		return frameCount;
+	}
+
+	private static double webcamFPS;
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -540,7 +546,7 @@ public class CameraManager {
 			float db = 1 - (dr - 1);*/
 			
 			//logger.warn("FRAME: {}", TESTING_framecount);
-			TESTING_framecount++;
+			frameCount++;
 			
 			/*BufferedImage grayScale = new BufferedImage(frame.getWidth(),
 					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
@@ -551,42 +557,58 @@ public class CameraManager {
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).grayScale = grayScale;*/
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = frame;
 			
+			ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
+			
+			int count = 0;
+			
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
 			
-					// If the color temperatures (using just the red component as an
-					// approximation) are only a bit off from ideal step up the heat.
-					// We don't want to make big changes or it will blow up in dark
-					// rooms by trying to do huge corrections that max r and zero b
-					// components in rgb pixels.
-					/*if (averageRed < IDEAL_R_AVERAGE && dr < 2f) {
-						adjustColorTemperature(workingCopy, x, y, dr, db);
-					}*/
-					
-					//pixelTransformer.applyFilter(workingCopy, x, y, averages.getLightingCondition());
-					
-					ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
-					int count = 0;
+
 					
 					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(frame, x, y, pixelTransformerInitialized))
 					{
-						if (possibleShots.size()<=20)
+						if (possibleShots.size()<=200)
 							possibleShots.add(new Pair<Integer, Integer>(x,y));
 						count++;
 					}
 					
-					if (count<=20)	
-						for (Pair<Integer,Integer> shotxy : possibleShots)
-							((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
+
+				}
+			}
+
+			long start = System.currentTimeMillis();
+			long current = 0;
+			if (count<=200)
+			{
+				for (Pair<Integer,Integer> shotxy : possibleShots)
+				{
+					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
+
+					
+					if (webcam.isPresent())
+					{
+						current = System.currentTimeMillis();
+						
+						double time = (double)count*((current-start)/1000.0f);
+						double frameDuration = 2*(1/(double)webcamFPS);
+						
+
+						if (time > frameDuration)
+						{
+							logger.warn("Skipping frame shot detection due to processing time - {} {}", time, frameDuration);
+							break;
+						}
+						start = current;
+					}
 				}
 			}
 
 
-
 			
-			if (webcam.isPresent() && (TESTING_framecount%30)==0) {
+			if (webcam.isPresent() && (frameCount%30)==0) {
 				
-				double webcamFPS = webcam.get().getFPS();
+				webcamFPS = webcam.get().getFPS();
 				
 				
 				DeduplicationProcessor.setThreshold((int)(webcamFPS/3));

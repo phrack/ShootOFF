@@ -65,8 +65,6 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	private final static float BLUE_HUE_LOW = .5f;
 	private final static float BLUE_HUE_HIGH = .78f;
 
-	private final BufferedImage colorMovingAverage = new BufferedImage(CameraManager.FEED_WIDTH,
-			CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
 
 	
@@ -99,11 +97,11 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	
 	public boolean findShotWithFrame(BufferedImage frame, int x, int y)
 	{
-			//logger.warn("Entered findShot {} {}", x, y);
+			logger.debug("Entered findShotWithFrame {} {}", x, y);
 			
 			javafx.scene.paint.Color tempcolor = javafx.scene.paint.Color.rgb(0, 0, 0);
 			Shot shot = new Shot(tempcolor, x, y, 
-					CameraManager.TESTING_framecount, config.getMarkerRadius());
+					CameraManager.getFrameCount(), config.getMarkerRadius());
 
 			
 			if (!((DeduplicationProcessor) config.getDeduplicationProcessor()).processShotLookahead(shot))
@@ -156,16 +154,6 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	}
 	
 	protected Optional<PixelColor> detectColor(double x, double y, double shotWidth, double shotHeight) {
-		int redCount = 0;
-		int greenCount = 0;
-		
-		//logger.warn("SIZE {} {} {} {}", x, y, shotWidth, shotHeight);
-
-		float redavg=0;
-		float greenavg=0;
-		
-		float redadvavg=0;
-		float greenadvavg=0;
 		
 		double red_color_distance=0;
 		double green_color_distance=0;
@@ -186,90 +174,32 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 				java.awt.Color currentC = new java.awt.Color(currentFrame.getRGB(xpix, ypix));
 				//java.awt.Color averageC = new java.awt.Color(colorMovingAverage.getRGB(xpix, ypix));
 				
-				/*float IDEAL_R_AVERAGE = 171;
-				float dr = IDEAL_R_AVERAGE / averageC.getRed();
-				float db = 1 - (dr - 1);
-				if (averageC.getRed() < IDEAL_R_AVERAGE && dr < 2f) {
-					float r = currentC.getRed() * dr;
-					if (r > 255) r = 255;
-					if (r < 0) r = 0;
-					float b = currentC.getBlue() * db;
-					if (b > 255) b = 255;
-					if (b < 0) b = 0;
-					//currentC = new Color((int)r, currentC.getGreen(), (int)b);
-				}*/
-				
-				/*float redratio = (float)currentC.getRed()/(float)averageC.getRed();
-				float greenratio = (float)currentC.getGreen()/(float)averageC.getGreen();
-				float blueratio = (float)currentC.getBlue()/(float)averageC.getBlue();
-				
-				
-				float gbratio = (greenratio+blueratio)/2;
-				float rbratio = (redratio+blueratio)/2;
-				
-				redadvavg = redadvavg+(redratio-gbratio);
-				greenadvavg = greenadvavg+(greenratio-rbratio);
-				
-				redavg += redratio;
-				greenavg += greenratio;
-				*/
-				
 				red_color_distance = red_color_distance+ColorDistance(currentC, Color.RED);
 				green_color_distance = green_color_distance+ColorDistance(currentC, Color.GREEN);
-				
-				/*PixelColor c = getPixelColor(currentC.getRGB());
-				if (c == PixelColor.RED)
-					redCount++;
-				else if (c == PixelColor.GREEN)
-					greenCount++;
-				 */
+
 			}
 		}
 		
-		/*redavg = redavg / count;
-		greenavg = greenavg / count;
-		
-		redadvavg = redadvavg / count;
-		greenadvavg = greenadvavg / count;
-		
-		float diff = redavg - greenavg;
-		
-		float diffadv = redadvavg-greenadvavg;
-		*/
 		red_color_distance = red_color_distance / count;
 		green_color_distance = green_color_distance / count;
 		
 		double color_diff = red_color_distance - green_color_distance;
 
 		if (Math.abs(color_diff) < 1) {
-			logger.warn("Shot Processing: No color detected for suspected shot ({}, {}), "
-					+ "redCount = {}, greenCount = {} - {} {} - {} {} - {} - {}",
-					x, y, redCount, greenCount, redavg, greenavg, redadvavg, greenadvavg, color_diff, count);
+			logger.debug("Shot Processing: No color detected for suspected shot ({}, {}), "
+					+ "{} - {} - {}",
+					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.empty();
 		} else if (color_diff < 0) {
-			logger.warn("Shot Processing: Detected red shot ({}, {}), redCount = {}, greenCount = {} - {} {} - {} {} - {} - {}",
-					x, y, redCount, greenCount, redavg, greenavg, redadvavg, greenadvavg, color_diff, count);
+			logger.debug("Shot Processing: Detected red shot ({}, {}), {} - {} - {}",
+					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.of(PixelColor.RED);
 		} else {
-			logger.warn("Shot Processing: Detected green shot ({}, {}), redCount = {}, greenCount = {} - {} {} - {} {} - {} - {}",
-					x, y, redCount, greenCount, redavg, greenavg, redadvavg, greenadvavg, color_diff, count);
+			logger.debug("Shot Processing: Detected green shot ({}, {}), {} - {} - {}",
+					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.of(PixelColor.GREEN);
 		}
 		
-		/*if (redCount == greenCount) {
-			logger.warn("Shot Processing: No color detected for suspected shot ({}, {}), "
-					+ "redCount = {}, greenCount = {} - {} {} - {} {} -{ }",
-					x, y, redCount, greenCount, redavg, greenavg, redadvavg, greenadvavg, count);
-			return Optional.empty();
-		} else if (redCount > 0) {
-			logger.warn("Shot Processing: Detected red shot ({}, {}), redCount = {}, greenCount = {} - {} {} - {} {} -{ }",
-					x, y, redCount, greenCount, redavg, greenavg, redadvavg, greenadvavg, count);
-			return Optional.of(PixelColor.RED);
-		} else {
-			logger.warn("Shot Processing: Detected green shot ({}, {}), redCount = {}, greenCount = {} - {} {} - {} {} -{ }",
-					x, y, redCount, greenCount, redavg, greenavg, redadvavg, greenadvavg, count);
-			return Optional.of(PixelColor.GREEN);
-		}*/
 	}
 	
 	public double ColorDistance(Color c1, Color c2)
@@ -292,6 +222,9 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		int currentLum;
 		int maLum;
 		
+		logger.trace("Entering approximateCenterWithColor {} {}", x, y);
+		
+		
 		// We need to see a certain number of dark pixels because the shot
 		// does not have sharp borders (we may hit a dark pixel right away
 		// even though it's not the real edge otherwise)
@@ -301,22 +234,21 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			currentLum = PixelTransformer.calcLums(frame.getRGB((int)x, (int)maxY));
 			maLum = lumsMovingAverage[(int)x][(int)maxY];
 			
-			//logger.warn("{} {} {} {} {}", currentLum, maLum, blackCount, minY, maxY);
+			logger.trace("{} {} {} {} {}", currentLum, maLum, blackCount, minY, maxY);
 			if ((currentLum-maLum)<((255-maLum)/2))
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 			if (maxY-minY>minShotDim*3) break;
 		}
-		//logger.warn("minY {} maxY {}", minY, maxY);
+		logger.trace("minY {} maxY {}", minY, maxY);
 		
 		if (maxY-minY >= borderWidth) maxY -= borderWidth-1;
 
 		double shotHeight = maxY - minY + 1;		
 		double centerY = minY + (shotHeight / 2);
 
-
-		//logger.warn("minY {} maxY {}", minY, maxY);
-		//logger.warn("sH {} cY {}", shotHeight, centerY);
+		logger.trace("minY {} maxY {}", minY, maxY);
+		logger.trace("sH {} cY {}", shotHeight, centerY);
 
 
 		double shotWidth = 0;
@@ -328,7 +260,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 				currentLum = PixelTransformer.calcLums(frame.getRGB(xx, yy));
 				maLum = lumsMovingAverage[xx][yy];
 				
-				//logger.warn("{} {} {} {} {}", currentLum, maLum, blackCount, xx, yy);
+				logger.trace("{} {} {} {} {}", currentLum, maLum, blackCount, xx, yy);
 				
 				
 				if ((currentLum-maLum)<((255-maLum)/2))
@@ -344,7 +276,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			
 			if (width >= shotWidth) shotWidth = width;
 			
-			//logger.warn("w {} sW {} mSD {} xx {}", width, shotWidth, minShotDim, xx);
+			logger.trace("w {} sW {} mSD {} xx {}", width, shotWidth, minShotDim, xx);
 			
 		}
 
@@ -354,17 +286,17 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		
 		// If the width and height of the shot are really small it's a false positive
 		if (totalArea < minShotDim) {
-			logger.warn("Suspected shot rejected: Dimensions Too Small "
+			logger.debug("Suspected shot rejected: Dimensions Too Small "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.empty(), Optional.empty());
 			// Really big is bad too
 		} else if (totalArea > minShotDim * 7) {
-			logger.warn("Suspected shot rejected: Dimensions Too big "
+			logger.debug("Suspected shot rejected: Dimensions Too big "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.empty(), Optional.empty());
 		}
 		
-		logger.warn("SHOT: {} {} {} {} {} {}", x, y, centerX, centerY, shotWidth, shotHeight);
+		logger.trace("SHOT: {} {} {} {} {} {}", x, y, centerX, centerY, shotWidth, shotHeight);
 
 		
 		return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.of(new Point2D(centerX, centerY)), detectColor(minX, minY, shotWidth, shotHeight));
@@ -384,46 +316,12 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
         if (lumsMovingAverage[x][y] == -1)
         {
             lumsMovingAverage[x][y] = currentLum;
-            //colorMovingAverage.setRGB(x,y, currentRGB);
             return false;
 
         }
 
         // Update the average brightness
     	lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
-		// Update the average color
-		//int rgb = colorMovingAverage.getRGB(x,y);
-		
-		/*double red = Math.pow(((rgb >> 16) & 0xFF),2);
-		double blue = Math.pow(((rgb >> 8) & 0xFF),2);
-		double green = Math.pow((rgb & 0xFF),2);
-		
-		double currentred = Math.pow(((currentRGB >> 16) & 0xFF),2);
-		double currentblue = Math.pow(((currentRGB >> 8) & 0xFF),2);
-		double currentgreen = Math.pow((currentRGB & 0xFF),2);*/
-		
-		//sqrt((R1^2+R2^2)/2),sqrt((G1^2+G2^2)/2),sqrt((B1^2+B2^2)/2)
-		/*int averageRed = (int) Math.sqrt((red * (CameraManager.INIT_FRAME_COUNT-1) + currentred) / CameraManager.INIT_FRAME_COUNT);
-		int averageGreen = (int) Math.sqrt((green * (CameraManager.INIT_FRAME_COUNT-1) + currentgreen) / CameraManager.INIT_FRAME_COUNT);
-		int averageBlue = (int) Math.sqrt((blue * (CameraManager.INIT_FRAME_COUNT-1) + currentblue) / CameraManager.INIT_FRAME_COUNT);
-		*/
-		
-		/*int averageRed = ((((rgb >> 16) & 0xFF) * (CameraManager.INIT_FRAME_COUNT-1)) + ((currentRGB >> 16) & 0xFF)) / 
-				CameraManager.INIT_FRAME_COUNT;
-		int averageGreen = ((((rgb >> 8) & 0xFF) * (CameraManager.INIT_FRAME_COUNT-1)) + ((currentRGB >> 8) & 0xFF)) / 
-				CameraManager.INIT_FRAME_COUNT;
-		int averageBlue = (((rgb & 0xFF) * (CameraManager.INIT_FRAME_COUNT-1)) + (currentRGB & 0xFF)) / 
-				CameraManager.INIT_FRAME_COUNT;
-
-		rgb = ((255 & 0xFF) << 24) |
-                 ((averageRed & 0xFF) << 16) |
-                 ((averageGreen & 0xFF) << 8)  |
-                 ((averageBlue & 0xFF) << 0);
-		*/
-		
-		//rgb =  ( ((((currentRGB) ^ (colorMovingAverage.getRGB(x,y))) & 0xfffefefe) >> 1) + ((currentRGB) & (colorMovingAverage.getRGB(x,y))) );
-		
-		//colorMovingAverage.setRGB(x, y, rgb);
 		
 		
 		if (!pixelTransformerInitialized)
@@ -434,20 +332,6 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			
 		if ((currentLum-lumsMovingAverage[x][y]) < 15)
 			return false;
-
-		/*java.awt.Color averageC = new java.awt.Color(colorMovingAverage.getRGB(x, y));
-		float redratio = (float)currentC.getRed()/(float)averageC.getRed();
-		float greenratio = (float)currentC.getGreen()/(float)averageC.getGreen();
-		float blueratio = (float)currentC.getBlue()/(float)averageC.getBlue();
-		
-		float gbratio = (greenratio+blueratio)/2;
-		float rbratio = (redratio+blueratio)/2;
-		
-		float redadv = redratio-gbratio;
-		float greenadv = greenratio-rbratio;
-		
-		if ((redratio > 1.25 && redadv>.005) || (greenratio > 1.25 && greenadv>.005))
-			return true;*/
 		
 		return true;
 

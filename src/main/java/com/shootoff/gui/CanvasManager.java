@@ -239,7 +239,7 @@ public class CanvasManager {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
-				CameraManager.TESTING_framecount, config.getMarkerRadius());
+				CameraManager.getFrameCount(), config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
