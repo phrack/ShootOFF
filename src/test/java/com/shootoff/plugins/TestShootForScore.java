@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,34 +70,34 @@ public class TestShootForScore {
 	}
 	
 	@Test 
-	public void testReset() {
+	public void testReset() throws UnsupportedEncodingException {
 		sfs.reset(targets);
-		assertEquals("score: 0\n", stringOut.toString());
+		assertEquals("score: 0\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 	
 	@Test 
-	public void testJustRed() {
+	public void testJustRed() throws UnsupportedEncodingException {
 		// Miss
 		sfs.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
-		assertEquals("", stringOut.toString());
+		assertEquals("", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Hit ten
 		sfs.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(tenRegion));
-		assertEquals("red score: 10\n", stringOut.toString());
+		assertEquals("red score: 10\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Hit five
 		sfs.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(fiveRegion));
-		assertEquals("red score: 15\n", stringOut.toString());
+		assertEquals("red score: 15\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		assertEquals(15, sfs.getRedScore());
 		assertEquals(0, sfs.getGreenScore());
 		
 		sfs.reset(targets);
-		assertEquals("score: 0\n", stringOut.toString());
+		assertEquals("score: 0\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		assertEquals(0, sfs.getRedScore());
@@ -104,27 +105,27 @@ public class TestShootForScore {
 	}
 	
 	@Test
-	public void testJustGreen() {
+	public void testJustGreen() throws UnsupportedEncodingException {
 		// Miss
 		sfs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
-		assertEquals("", stringOut.toString());
+		assertEquals("", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Hit ten
 		sfs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(tenRegion));
-		assertEquals("green score: 10\n", stringOut.toString());
+		assertEquals("green score: 10\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Hit five
 		sfs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(fiveRegion));
-		assertEquals("green score: 15\n", stringOut.toString());
+		assertEquals("green score: 15\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		assertEquals(0, sfs.getRedScore());
 		assertEquals(15, sfs.getGreenScore());
 		
 		sfs.reset(targets);
-		assertEquals("score: 0\n", stringOut.toString());
+		assertEquals("score: 0\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		assertEquals(0, sfs.getRedScore());
@@ -133,15 +134,15 @@ public class TestShootForScore {
 	
 	
 	@Test
-	public void testRedAndGreen() {
+	public void testRedAndGreen() throws UnsupportedEncodingException {
 		// Red hit ten
 		sfs.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(tenRegion));
-		assertEquals("red score: 10\n", stringOut.toString());
+		assertEquals("red score: 10\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Green hit five
 		sfs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(fiveRegion));
-		assertEquals("red score: 10\ngreen score: 5\n", stringOut.toString());
+		assertEquals("red score: 10\ngreen score: 5\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		assertEquals(10, sfs.getRedScore());

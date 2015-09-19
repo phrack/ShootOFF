@@ -55,12 +55,12 @@ public class TestRandomShoot {
 		
 		RandomShoot rs = new RandomShoot(targets);
 		
-		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString());
+		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		rs.reset(targets);
 		
-		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString());
+		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString("UTF-8"));
 	}
 
 	@Test
@@ -83,14 +83,14 @@ public class TestRandomShoot {
 		
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 		
-		assertTrue(stringOut.toString().startsWith("shoot subtarget " + firstSubtarget));
+		assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + firstSubtarget));
 		stringOut.reset();
 		
 		// Simulate missing a shot
 		
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
 		
-		assertEquals("shoot " + firstSubtarget + "\n", stringOut.toString());
+		assertEquals("shoot " + firstSubtarget + "\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Simulate a hit
@@ -111,7 +111,7 @@ public class TestRandomShoot {
 			assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());
 		} else {
 			String nextSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
-			assertTrue(stringOut.toString().startsWith("shoot subtarget " + nextSubtarget));
+			assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + nextSubtarget));
 			stringOut.reset();
 		}
 	}	

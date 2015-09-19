@@ -40,6 +40,9 @@ public class TestSessionIO {
 	
 	@Before
 	public void setUp() throws ConfigurationException {
+		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+		System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+		
 		sessionRecorder = new SessionRecorder();
 		cameraName1 = "Default";
 		cameraName2 = "Another Camera";

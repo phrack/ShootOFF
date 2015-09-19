@@ -58,8 +58,9 @@ public class XMLSessionReader {
 	}
 	
 	public Map<String, List<Event>> load() {
+		InputStream xmlInput = null;
 		try {
-			InputStream xmlInput = new FileInputStream(sessionFile);
+			xmlInput = new FileInputStream(sessionFile);
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			SessionXMLHandler handler = new SessionXMLHandler();
 			saxParser.parse(xmlInput, handler);
@@ -67,6 +68,14 @@ public class XMLSessionReader {
 			return handler.getEvents();
 		} catch (IOException | ParserConfigurationException | SAXException e) {
 			e.printStackTrace();
+		} finally {
+			if (xmlInput != null) {
+				try {
+					xmlInput.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		return new HashMap<String, List<Event>>();

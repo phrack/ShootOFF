@@ -56,8 +56,9 @@ public class XMLTargetReader {
 	}
 	
 	public List<Node> load() {
+		InputStream xmlInput = null;
 		try {
-			InputStream xmlInput = new FileInputStream(targetFile);
+			xmlInput = new FileInputStream(targetFile);
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			TargetXMLHandler handler   = new TargetXMLHandler();
 			saxParser.parse(xmlInput, handler);
@@ -65,6 +66,14 @@ public class XMLTargetReader {
 			return handler.getRegions();
 		} catch (IOException | ParserConfigurationException | SAXException e) {
 			e.printStackTrace();
+		} finally {
+			if (xmlInput != null) {
+				try {
+					xmlInput.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		return new ArrayList<Node>();
