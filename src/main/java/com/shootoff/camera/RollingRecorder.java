@@ -34,6 +34,7 @@ public class RollingRecorder {
 	private File relativeVideoFile;
 	private File videoFile;
 	private IMediaWriter videoWriter;
+	private final Object videoWriterLock = new Object();
 	private boolean isFirstShotFrame = true;
 	private boolean forking = false;
 	private boolean recording = true;
@@ -73,7 +74,7 @@ public class RollingRecorder {
 		} else {
 			isFirstShotFrame = false;
 	
-			synchronized(videoWriter) {
+			synchronized(videoWriterLock) {
 				if (recording) videoWriter.encodeVideo(0, f);
 			}
 			
@@ -87,7 +88,7 @@ public class RollingRecorder {
 	private ForkContext fork(boolean keepOld) {
 		forking = true;
 		
-		synchronized(videoWriter) {
+		synchronized(videoWriterLock) {
 			if (videoWriter.isOpen()) videoWriter.close();
 		}
 		
@@ -133,7 +134,7 @@ public class RollingRecorder {
 				logger.warn("Failed to delete expired rolling video file: {}, keepOld = {}", this.videoFile.getPath(), keepOld);
 			}
 			
-			synchronized(videoWriter) {
+			synchronized(videoWriterLock) {
 				this.videoWriter = copy.getMediaWriter();
 			}
 			this.relativeVideoFile = rollingRelativeVideoFile;
@@ -146,7 +147,7 @@ public class RollingRecorder {
 			}
 			this.relativeVideoFile = relativeVideoFile;
 			this.videoFile = videoFile;
-			synchronized(videoWriter) {
+			synchronized(videoWriterLock) {
 				videoWriter = cutter.getMediaWriter();
 			}
 			timeOffset = cutter.getLastTimestamp();
@@ -156,7 +157,7 @@ public class RollingRecorder {
 			Iterator<IVideoPicture> it = bufferedFrames.iterator();
 			
 			while (it.hasNext()) {
-				synchronized(videoWriter) {
+				synchronized(videoWriterLock) {
 					videoWriter.encodeVideo(0, it.next());
 				}
 				it.remove();
@@ -254,7 +255,7 @@ public class RollingRecorder {
 	
 	public void close() {
 		recording = false;
-		synchronized(videoWriter) {
+		synchronized(videoWriterLock) {
 			videoWriter.close();
 		}
 		if (!videoFile.delete()) {
