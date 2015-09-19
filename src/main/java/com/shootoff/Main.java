@@ -459,9 +459,24 @@ public class Main extends Application {
 		}
     }
     
+    public static void closeNoCamera() {
+		Alert cameraAlert = new Alert(AlertType.ERROR);
+		cameraAlert.setTitle("No Webcams");
+		cameraAlert.setHeaderText("No Webcams Found!");
+		cameraAlert.setResizable(true);
+		cameraAlert.setContentText("ShootOFF needs a webcam to function. Now closing...");
+		cameraAlert.showAndWait();
+		System.exit(-1);
+    }
+    
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
+		
+		String os = System.getProperty("os.name"); 
+		if (os != null && os.equals("Mac OS X") && Camera.getWebcams().isEmpty()) {
+			closeNoCamera();
+		}
 		
 		if (System.getProperty("javawebstart.version", null) != null) {
 			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");

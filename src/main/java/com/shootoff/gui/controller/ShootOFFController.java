@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import marytts.util.io.FileFilter;
 
+import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
@@ -176,13 +177,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			if (defaultCamera != null) {
 				if (!addCameraTab("Default", defaultCamera)) cameraLockFailure(defaultCamera, true);
 			} else {
-				Alert cameraAlert = new Alert(AlertType.ERROR);
-				cameraAlert.setTitle("No Webcams");
-				cameraAlert.setHeaderText("No Webcams Found!");
-				cameraAlert.setResizable(true);
-				cameraAlert.setContentText("ShootOFF needs a webcam to function. Now closing...");
-				cameraAlert.showAndWait();
-				System.exit(-1);
+				Main.closeNoCamera();
 			}
 		} else {
 			addConfiguredCameras();
