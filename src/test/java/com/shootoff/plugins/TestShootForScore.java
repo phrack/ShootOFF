@@ -29,16 +29,17 @@ import com.shootoff.targets.io.TargetIO;
 public class TestShootForScore {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream = new PrintStream(stringOut);
+	private PrintStream stringOutStream;
 	private List<Group> targets;
 	private TargetRegion tenRegion;
 	private TargetRegion fiveRegion;
 	private ShootForScore sfs;
 	
 	@Before
-	public void setUp() throws ConfigurationException {
+	public void setUp() throws ConfigurationException, UnsupportedEncodingException {
 		new JFXPanel(); // Initialize the JFX toolkit
 		
+		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 		

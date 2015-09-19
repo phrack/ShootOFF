@@ -32,7 +32,7 @@ import com.shootoff.targets.io.TargetIO;
 public class TestDuelingTree {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream = new PrintStream(stringOut);
+	private PrintStream stringOutStream;
 	private List<Group> targets;
 	private List<TargetRegion> leftPaddles;
 	private List<TargetRegion> rightPaddles;
@@ -42,6 +42,7 @@ public class TestDuelingTree {
 	public void setUp() throws ConfigurationException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
 		new JFXPanel(); // Initialize the JFX toolkit
 		
+		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
 		TextToSpeech.silence(true);

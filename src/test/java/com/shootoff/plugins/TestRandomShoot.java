@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,12 +33,13 @@ import com.shootoff.targets.io.TargetIO;
 public class TestRandomShoot {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream = new PrintStream(stringOut);
+	private PrintStream stringOutStream;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws UnsupportedEncodingException {
 		new JFXPanel(); // Initialize the JFX toolkit
 		
+		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		TextToSpeech.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);

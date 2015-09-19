@@ -76,67 +76,77 @@ public class TestSessionIO {
 		List<Event> events = sessionRecorder.get().getCameraEvents(cameraName1);
 		
 		assertEquals(8, events.size());
-		
-		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
-		
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(1)).getTargetIndex());
-		assertEquals(10, ((TargetResizedEvent)events.get(1)).getNewWidth(), 1);
-		assertEquals(20, ((TargetResizedEvent)events.get(1)).getNewHeight(), 1);
-		
-		assertEquals(targetIndex, ((TargetMovedEvent)events.get(2)).getTargetIndex());
-		assertEquals(4, ((TargetMovedEvent)events.get(2)).getNewX());
-		assertEquals(3, ((TargetMovedEvent)events.get(2)).getNewY());
 
-		assertEquals(Color.RED, ((ShotEvent)events.get(3)).getShot().getColor());
-		assertEquals(redShot.getX(), ((ShotEvent)events.get(3)).getShot().getX(), 1);
-		assertEquals(redShot.getY(), ((ShotEvent)events.get(3)).getShot().getY(), 1);
-		assertEquals(redShot.getTimestamp(), ((ShotEvent)events.get(3)).getShot().getTimestamp());
-		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(3)).getShot().getMarker().getRadiusX(), 1);
-		assertFalse(((ShotEvent)events.get(3)).isMalfunction());
-		assertFalse(((ShotEvent)events.get(3)).isReload());
-		assertEquals(targetIndex, ((ShotEvent)events.get(3)).getTargetIndex().get().intValue());
-		assertEquals(hitRegionIndex, ((ShotEvent)events.get(3)).getHitRegionIndex().get().intValue());
-		assertEquals(videoString, ((ShotEvent)events.get(3)).getVideoString().get());
-		assertEquals(2, ((ShotEvent)events.get(3)).getVideos().size());
-		assertEquals(new File("sessions/test/file.mp4"), ((ShotEvent)events.get(3)).getVideos().get("camera1"));
-		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(3)).getVideos().get("camera2"));
+		final int CAM1_TARGET_ADDED_INDEX = 0;
+		assertEquals(targetName, ((TargetAddedEvent)events.get(CAM1_TARGET_ADDED_INDEX)).getTargetName());
 		
-		assertEquals(Color.GREEN, ((ShotEvent)events.get(4)).getShot().getColor());
-		assertEquals(greenShot.getX(), ((ShotEvent)events.get(4)).getShot().getX(), 1);
-		assertEquals(greenShot.getY(), ((ShotEvent)events.get(4)).getShot().getY(), 1);
-		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(4)).getShot().getTimestamp());
-		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(4)).getShot().getMarker().getRadiusX(), 1);
-		assertTrue(((ShotEvent)events.get(4)).isMalfunction());
-		assertFalse(((ShotEvent)events.get(4)).isReload());
-		assertEquals(targetIndex, ((ShotEvent)events.get(4)).getTargetIndex().get().intValue());
-		assertEquals(hitRegionIndex, ((ShotEvent)events.get(4)).getHitRegionIndex().get().intValue());
-		assertEquals(videoString, ((ShotEvent)events.get(4)).getVideoString().get());
-		assertEquals(2, ((ShotEvent)events.get(4)).getVideos().size());
-		assertEquals(new File("sessions/test/file.mp4"), ((ShotEvent)events.get(4)).getVideos().get("camera1"));
-		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(4)).getVideos().get("camera2"));
+		final int CAM1_TARGET_RESIZED_INDEX = 1;
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(10, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 		
-		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(5)).getTargetIndex());
+		final int CAM1_TARGET_MOVED_INDEX = 2;
+		assertEquals(targetIndex, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getTargetIndex());
+		assertEquals(4, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getNewX());
+		assertEquals(3, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getNewY());
+
+		final int CAM1_SHOT_RED_INDEX = 3;
+		assertEquals(Color.RED, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getShot().getColor());
+		assertEquals(redShot.getX(), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getShot().getX(), 1);
+		assertEquals(redShot.getY(), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getShot().getY(), 1);
+		assertEquals(redShot.getTimestamp(), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getShot().getTimestamp());
+		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getShot().getMarker().getRadiusX(), 1);
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).isMalfunction());
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).isReload());
+		assertEquals(targetIndex, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getHitRegionIndex().get().intValue());
+		assertEquals(videoString, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getVideoString().get());
+		assertEquals(2, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getVideos().size());
+		assertEquals(new File("sessions/test/file.mp4"), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getVideos().get("camera1"));
+		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getVideos().get("camera2"));
 		
-		assertEquals(Color.GREEN, ((ShotEvent)events.get(6)).getShot().getColor());
-		assertEquals(greenShot.getX(), ((ShotEvent)events.get(6)).getShot().getX(), 1);
-		assertEquals(greenShot.getY(), ((ShotEvent)events.get(6)).getShot().getY(), 1);
-		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(6)).getShot().getTimestamp());
-		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(6)).getShot().getMarker().getRadiusX(), 1);
-		assertFalse(((ShotEvent)events.get(6)).isMalfunction());
-		assertTrue(((ShotEvent)events.get(6)).isReload());
-		assertFalse(((ShotEvent)events.get(6)).getTargetIndex().isPresent());
-		assertFalse(((ShotEvent)events.get(6)).getHitRegionIndex().isPresent());
-		assertFalse(((ShotEvent)events.get(6)).getVideoString().isPresent());
+		final int CAM1_SHOT_GREEN_ONE_INDEX = 4;
+		assertEquals(Color.GREEN, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getColor());
+		assertEquals(greenShot.getX(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getX(), 1);
+		assertEquals(greenShot.getY(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getY(), 1);
+		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getTimestamp());
+		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getMarker().getRadiusX(), 1);
+		assertTrue(((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).isMalfunction());
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).isReload());
+		assertEquals(targetIndex, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(hitRegionIndex, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getHitRegionIndex().get().intValue());
+		assertEquals(videoString, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideoString().get());
+		assertEquals(2, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideos().size());
+		assertEquals(new File("sessions/test/file.mp4"), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideos().get("camera1"));
+		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideos().get("camera2"));
 		
-		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(7)).getMessage());
+		final int CAM1_TARGET_REMOVED_INDEX = 5;
+		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(CAM1_TARGET_REMOVED_INDEX)).getTargetIndex());
+		
+		final int CAM1_SHOT_GREEN_TWO_INDEX = 6;
+		assertEquals(Color.GREEN, ((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getColor());
+		assertEquals(greenShot.getX(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getX(), 1);
+		assertEquals(greenShot.getY(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getY(), 1);
+		assertEquals(greenShot.getTimestamp(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getTimestamp());
+		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getMarker().getRadiusX(), 1);
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).isMalfunction());
+		assertTrue(((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).isReload());
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getTargetIndex().isPresent());
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getHitRegionIndex().isPresent());
+		assertFalse(((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getVideoString().isPresent());
+		
+		final int CAM1_EXERCISE_MESSAGE_INDEX = 7;
+		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(CAM1_EXERCISE_MESSAGE_INDEX)).getMessage());
 		
 		events = sessionRecorder.get().getCameraEvents(cameraName2);
 		
 		assertEquals(2, events.size());
 		
-		assertEquals(targetName, ((TargetAddedEvent)events.get(0)).getTargetName());
+		final int CAM2_ADD_TARGET_INDEX = 0;
+		assertEquals(targetName, ((TargetAddedEvent)events.get(CAM2_ADD_TARGET_INDEX)).getTargetName());
 		
-		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(1)).getMessage());
+		final int CAM2_EXERCISE_MESSAGE_INDEX = 1;
+		assertEquals(exerciseMessage, ((ExerciseFeedMessageEvent)events.get(CAM2_EXERCISE_MESSAGE_INDEX)).getMessage());
 	}
 
 	@Test
