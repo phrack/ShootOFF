@@ -568,8 +568,7 @@ public class CameraManager {
 					
 					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(frame, x, y, pixelTransformerInitialized))
 					{
-						if (possibleShots.size()<=200)
-							possibleShots.add(new Pair<Integer, Integer>(x,y));
+						possibleShots.add(new Pair<Integer, Integer>(x,y));
 						count++;
 					}
 					
@@ -579,31 +578,27 @@ public class CameraManager {
 
 			long start = System.currentTimeMillis();
 			long current = 0;
-			if (count<=200)
+			for (Pair<Integer,Integer> shotxy : possibleShots)
 			{
-				for (Pair<Integer,Integer> shotxy : possibleShots)
+				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
+
+				
+				if (webcam.isPresent())
 				{
-					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
-
+					current = System.currentTimeMillis();
 					
-					if (webcam.isPresent())
-					{
-						current = System.currentTimeMillis();
-						
-						double time = (double)count*((current-start)/1000.0f);
-						double frameDuration = 2*(1/(double)webcamFPS);
-						
+					double time = (double)count*((current-start)/1000.0f);
+					double frameDuration = 2*(1/(double)webcamFPS);
+					
 
-						if (time > frameDuration)
-						{
-							logger.warn("Skipping frame shot detection due to processing time - {} {}", time, frameDuration);
-							break;
-						}
-						start = current;
+					if (time > frameDuration)
+					{
+						logger.warn("Skipping frame shot detection due to processing time - {} {}", time, frameDuration);
+						break;
 					}
+					start = current;
 				}
 			}
-
 
 			
 			if (webcam.isPresent() && (frameCount%30)==0) {
