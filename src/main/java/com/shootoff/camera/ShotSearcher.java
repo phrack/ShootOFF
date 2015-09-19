@@ -29,23 +29,23 @@ import com.shootoff.gui.CanvasManager;
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
+import java.awt.Color;
 
 public class ShotSearcher implements Runnable {
 	public static final int SECTOR_COLUMNS = 3;
 	public static final int SECTOR_ROWS = 3;
 
 	private final Logger logger = LoggerFactory.getLogger(ShotSearcher.class);
-	private final Configuration config;
-	private final CanvasManager canvasManager;
-	private final boolean[][] sectorStatuses;
-	private final BufferedImage currentFrame;
-	private final BufferedImage grayScale;
-	private final Optional<Bounds> projectionBounds;
-	private final boolean cropped;
+	protected final Configuration config;
+	protected final CanvasManager canvasManager;
+	protected final boolean[][] sectorStatuses;
+	protected BufferedImage currentFrame;
+	protected BufferedImage grayScale;
+	protected final Optional<Bounds> projectionBounds;
+	protected final boolean cropped;
 
-	private int borderWidth = 3; // px
-	private int minShotDim = 6; // px
+	protected int borderWidth = 3; // px
+	protected int minShotDim = 6; // px
 
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
 			BufferedImage currentFrame, BufferedImage grayScale, Optional<Bounds> projectionBounds,
@@ -57,6 +57,7 @@ public class ShotSearcher implements Runnable {
 		this.grayScale = grayScale;
 		this.projectionBounds = projectionBounds;
 		this.cropped = cropped;
+
 	}
 
 	public void setCenterApproxBorderSize(int width) {
@@ -85,8 +86,10 @@ public class ShotSearcher implements Runnable {
 			}
 		}
 	}
+	
 
-	private void findShot(int startX, int endX, int startY, int endY) {
+
+	protected void findShot(int startX, int endX, int startY, int endY) {
 		for (int x = startX; x < endX; x++) {
 			for (int y = startY; y < endY; y++) {
 				if ((grayScale.getRGB(x, y) & 0xFF) > config.getLaserIntensity()) {
@@ -102,13 +105,14 @@ public class ShotSearcher implements Runnable {
 							logger.debug("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {}), {}",
 									x, y, center.get().getX(),
 									center.get().getY(), areaColor.get());
+							javafx.scene.paint.Color tempcolor = javafx.scene.paint.Color.rgb(areaColor.get().getRed(), areaColor.get().getGreen(), areaColor.get().getBlue());
 
 							if (cropped && projectionBounds.isPresent()) {
 								Bounds b = projectionBounds.get();
-								canvasManager.addShot(areaColor.get(), center.get().getX() + b.getMinX(),
+								canvasManager.addShot(tempcolor, center.get().getX() + b.getMinX(),
 										center.get().getY() + b.getMinY());
 							} else {
-								canvasManager.addShot(areaColor.get(), center.get().getX(),
+								canvasManager.addShot(tempcolor, center.get().getX(),
 										center.get().getY());
 							}
 							return;
@@ -119,11 +123,11 @@ public class ShotSearcher implements Runnable {
 		}
 	}
 	
-	private enum PixelColor {
-		RED, GREEN, NONE
+	protected enum PixelColor {
+		RED, GREEN, BLUE, NONE
 	}
 	
-	private PixelColor getPixelColor(int rgb) {
+	protected PixelColor getPixelColor(int rgb) {
 		float[] hsb = java.awt.Color.RGBtoHSB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, null);
 		
 		boolean nearWhite = hsb[1] < 0.1 && hsb[2] > 0.9;
@@ -139,7 +143,8 @@ public class ShotSearcher implements Runnable {
 		return PixelColor.NONE;
 	}
 
-	private Optional<Color> detectColor(int x, int y) {
+
+	protected Optional<Color> detectColor(int x, int y) {
 		int redCount = 0;
 		int greenCount = 0;
 		
@@ -168,16 +173,16 @@ public class ShotSearcher implements Runnable {
 		
 		// More than one pixel must be a specific color otherwise the shot is likely just noise
 		if (Math.abs(redCount - greenCount) < 2) {
-			logger.trace("Shot Processing: No color detected for suspected shot ({}, {}), "
+			logger.warn("Shot Processing: No color detected for suspected shot ({}, {}), "
 					+ "redCount = {}, greenCount = {}",
 					x, y, redCount, greenCount);
 			return Optional.empty();
 		} else if (redCount > greenCount) {
-			logger.trace("Shot Processing: Detected red shot ({}, {}), redCount = {}, greenCount = {}",
+			logger.warn("Shot Processing: Detected red shot ({}, {}), redCount = {}, greenCount = {}",
 					x, y, redCount, greenCount);
 			return Optional.of(Color.RED);
 		} else {
-			logger.trace("Shot Processing: Detected green shot ({}, {}), redCount = {}, greenCount = {}",
+			logger.warn("Shot Processing: Detected green shot ({}, {}), redCount = {}, greenCount = {}",
 					x, y, redCount, greenCount);
 			return Optional.of(Color.GREEN);
 		}
@@ -190,7 +195,7 @@ public class ShotSearcher implements Runnable {
 	 * @param y initial y coordinate of the shot location
 	 * @return the approximate center of the shot
 	 */
-	private Optional<Point2D> approximateCenter(double x, double y) {
+	protected Optional<Point2D> approximateCenter(double x, double y) {
 		double minX = x, minY = y;
 		double maxY = y;
 
@@ -233,11 +238,13 @@ public class ShotSearcher implements Runnable {
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
 			// Really big is bad too
-		} else if (shotWidth > minShotDim * 3 || shotHeight > minShotDim * 3) {
+		} else if (shotWidth > minShotDim * 5 || shotHeight > minShotDim * 5) {
 			logger.debug("Suspected shot rejected: Dimensions Too big "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
 		}
+		
+		logger.warn("SHOT: {} {} {} {}", x, y, centerX, centerY);
 
 		return Optional.of(new Point2D(centerX, centerY));
 	}

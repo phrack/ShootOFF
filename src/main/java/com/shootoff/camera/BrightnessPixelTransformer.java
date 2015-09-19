@@ -20,27 +20,57 @@ package com.shootoff.camera;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
+
+import javafx.geometry.Bounds;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.shootoff.config.Configuration;
+import com.shootoff.gui.CanvasManager;
 
 public class BrightnessPixelTransformer implements PixelTransformer {
+	
+	private final Logger logger = LoggerFactory.getLogger(BrightnessPixelTransformer.class);
+	
 	private final static int BRIGHTNESS_INDEX = 2;
 	
 	private final BufferedImage colorMovingAverage = new BufferedImage(CameraManager.FEED_WIDTH,
 			CameraManager.FEED_HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_HEIGHT][CameraManager.FEED_WIDTH];
 	
-	public void updateFilter(int x, int y, int currentRGB) {
+	private boolean initialized = false;
+
+
+	
+	public void updateFilter(BufferedImage frame, int x, int y) {
+		int currentRGB = frame.getRGB(x,y);
 		int currentLum = PixelTransformer.calcLums(currentRGB);
 		
-        if (lumsMovingAverage[y][x] == 0)
+        if (this.initialized == false)
         {
-            lumsMovingAverage[y][x] = currentLum;
+            lumsMovingAverage[x][y] = currentLum;
             colorMovingAverage.setRGB(x,y, currentRGB);
+            
+            if (x == CameraManager.FEED_WIDTH-1 && y == CameraManager.FEED_HEIGHT-1)
+            	this.initialized = true;
 
             return;
         }
         
+		/*if (x == 236 && y == 169)
+		{
+			Color currentC = new Color(currentRGB);
+			Color averageC = new Color(colorMovingAverage.getRGB(x, y));
+			logger.warn("updateFilter {} {} {} - {} {} {} - {} {} {} - {}", currentC.getRed(), currentC.getGreen(), currentC.getBlue(),
+					averageC.getRed(), averageC.getGreen(), averageC.getBlue(),
+					((float)currentC.getRed()/(float)averageC.getRed()), ((float)currentC.getGreen()/(float)averageC.getGreen()), ((float)currentC.getBlue()/(float)averageC.getBlue()),
+					lumsMovingAverage[x][y]);
+		}*/
+        
         // Update the average brightness
-        lumsMovingAverage[y][x] = ((lumsMovingAverage[y][x] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
+        lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
 
 		// Update the average color
 		int rgb = colorMovingAverage.getRGB(x,y);
@@ -95,10 +125,32 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 		return percentGreenBigger >= threshold  && currentC.getGreen() >= averageC.getBlue();
 	}
 
-	public void applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition) {
-		int maLum = lumsMovingAverage[y][x];
+	public boolean applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition) {
+		int maLum = lumsMovingAverage[x][y];
 
 		Color currentC = new Color(frame.getRGB(x, y));
+		Color averageC = new Color(colorMovingAverage.getRGB(x, y));
+		
+		float redratio = (float)currentC.getRed()/(float)averageC.getRed();
+		float greenratio = (float)currentC.getGreen()/(float)averageC.getGreen();
+		float blueratio = (float)currentC.getBlue()/(float)averageC.getBlue();
+		
+		float gbratio = (greenratio+blueratio)/2;
+		float rbratio = (redratio+blueratio)/2;
+		
+		float redadv = redratio-gbratio;
+		float greenadv = greenratio-rbratio;
+			
+		if ((redratio > 1.5 && redadv>.005 && lumsMovingAverage[x][y]>100) || (greenratio > 1.5 && greenadv>.005 && lumsMovingAverage[x][y]>100)) {
+			logger.warn("updateFilter{} {} {} - {} {} {} - {} {} {} - {} {} - {} {} - {}", 
+				CameraManager.TESTING_framecount, x, y,
+				((float)currentC.getRed()/(float)averageC.getRed()), ((float)currentC.getGreen()/(float)averageC.getGreen()), ((float)currentC.getBlue()/(float)averageC.getBlue()),
+				redratio, greenratio, blueratio,
+				gbratio, rbratio,
+				redadv, greenadv,
+				lumsMovingAverage[x][y]);
+			return true;
+		}
 
 		// We only care about dimming pixels that are brighter than average
 		 if (maLum > CameraManager.IDEAL_LUM) {
@@ -108,9 +160,10 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 			 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition) && 
 					 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition)) {
                     float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
-                    hsbvals[BRIGHTNESS_INDEX] *= CameraManager.IDEAL_LUM / (float)maLum;
+                    hsbvals[BRIGHTNESS_INDEX] *= (CameraManager.IDEAL_LUM / (float)maLum);
                     frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
 		 	}
 		 }
+		 return false;
 	}
 }

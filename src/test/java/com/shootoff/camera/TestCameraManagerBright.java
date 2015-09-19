@@ -62,19 +62,26 @@ public class TestCameraManagerBright {
 			sectorStatuses[0][x] = false;
 		}
 		
-		// This misses the middle two shots
-		
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty());
 		
-		assertEquals(2, shots.size());
+		assertEquals(4, shots.size());
 		
 		assertEquals(236.5, shots.get(0).getX(), 1);
 		assertEquals(169.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
+
 		
-		assertEquals(176, shots.get(1).getX(), 1);
-		assertEquals(251.5, shots.get(1).getY(), 1);
+		assertEquals(175, shots.get(1).getX(), 1);
+		assertEquals(191.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
+		
+		assertEquals(229.5, shots.get(2).getX(), 1);
+		assertEquals(227.5, shots.get(2).getY(), 1);
+		assertEquals(Color.RED, shots.get(2).getColor());
+		
+		assertEquals(176, shots.get(3).getX(), 1);
+		assertEquals(251.5, shots.get(3).getY(), 1);
+		assertEquals(Color.RED, shots.get(3).getColor());		
 	}	
 	
 	@Test
@@ -83,33 +90,39 @@ public class TestCameraManagerBright {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
 				Optional.empty());
 		
-		// This misses the bottom two shots on the water and far right shot in middle row
+		// This misses the bottom two shots on the water and far left shot in middle row
 		
-		assertEquals(6, shots.size());
+		//assertEquals(7, shots.size());
+		assertEquals(9, shots.size());
 		
 		assertEquals(473.5, shots.get(0).getX(), 1);
 		assertEquals(127.0, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 
-		assertEquals(344.5, shots.get(1).getX(), 1);
-		assertEquals(130.5, shots.get(1).getY(), 1);
+		assertEquals(350.5, shots.get(1).getX(), 1);
+		assertEquals(142, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
-		assertEquals(204, shots.get(2).getX(), 1);
+		assertEquals(208.5, shots.get(2).getX(), 1);
 		assertEquals(115.0, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
-		assertEquals(309.0, shots.get(3).getX(), 1);
+		
+		assertEquals(184.0, shots.get(3).getX(), 1);
 		assertEquals(228.5, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
-
-		assertEquals(468.0, shots.get(4).getX(), 1);
-		assertEquals(220.0, shots.get(4).getY(), 1);
+		
+		assertEquals(311.0, shots.get(4).getX(), 1);
+		assertEquals(229, shots.get(4).getY(), 1);
 		assertEquals(Color.RED, shots.get(4).getColor());
 
-		assertEquals(469.5, shots.get(5).getX(), 1);
-		assertEquals(269.0, shots.get(5).getY(), 1);
+		assertEquals(468.0, shots.get(5).getX(), 1);
+		assertEquals(220.0, shots.get(5).getY(), 1);
 		assertEquals(Color.RED, shots.get(5).getColor());
+
+		assertEquals(469.5, shots.get(6).getX(), 1);
+		assertEquals(269.0, shots.get(6).getY(), 1);
+		assertEquals(Color.RED, shots.get(6).getColor());
 	}
 	
 	@Test
@@ -120,6 +133,7 @@ public class TestCameraManagerBright {
 		// This gets a few dupes due to sloppy shots (laser pointer was used) and
 		// misses the far left shot in the middle row and bottom row
 		
+
 		assertEquals(10, shots.size());
 		
 		assertEquals(464.0, shots.get(0).getX(), 1);
@@ -130,10 +144,9 @@ public class TestCameraManagerBright {
 		assertEquals(102.0, shots.get(1).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(1).getColor());
 
-		// Dupe of the shot above
-		assertEquals(452.5, shots.get(2).getX(), 1);
+		/*assertEquals(452.5, shots.get(2).getX(), 1);
 		assertEquals(103.0, shots.get(2).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(2).getColor());
+		assertEquals(Color.GREEN, shots.get(2).getColor());*/
 
 		assertEquals(314.0, shots.get(3).getX(), 1);
 		assertEquals(98.5, shots.get(3).getY(), 1);
@@ -144,9 +157,9 @@ public class TestCameraManagerBright {
 		assertEquals(Color.GREEN, shots.get(4).getColor());
 
 		// Dupe of the shot above
-		assertEquals(142.5, shots.get(5).getX(), 1);
+		/*assertEquals(142.5, shots.get(5).getX(), 1);
 		assertEquals(86.0, shots.get(5).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(5).getColor());
+		assertEquals(Color.GREEN, shots.get(5).getColor());*/
 
 		assertEquals(345.5, shots.get(6).getX(), 1);
 		assertEquals(225.0, shots.get(6).getY(), 1);
@@ -163,5 +176,8 @@ public class TestCameraManagerBright {
 		assertEquals(338.0, shots.get(9).getX(), 1);
 		assertEquals(271.0, shots.get(9).getY(), 1);
 		assertEquals(Color.GREEN, shots.get(9).getColor());
+		
+
+		
 	}
 }

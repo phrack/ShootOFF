@@ -55,6 +55,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
+import javafx.util.Pair;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -73,7 +74,7 @@ public class CameraManager {
 	public static final int INIT_FRAME_COUNT = 5; // Used by current pixel transformer to decide how many frames
 												  // to use for initialization
 
-	private final PixelTransformer pixelTransformer = new BrightnessPixelTransformer();
+	private final PixelTransformer pixelTransformer;
 
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	private final Optional<Camera> webcam;
@@ -101,6 +102,8 @@ public class CameraManager {
 	private Map<Shot, ShotRecorder> shotRecorders = new ConcurrentHashMap<Shot, ShotRecorder>();
  	
 	private boolean[][] sectorStatuses;
+	
+	public static int TESTING_framecount = 0;
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -108,6 +111,9 @@ public class CameraManager {
 		this.canvasManager = canvas;
 		this.config = config;
 
+		this.pixelTransformer = new ShotSearchingBrightnessPixelTransformer(config, canvasManager, sectorStatuses,
+				projectionBounds, cropFeedToProjection);
+		
 		init(new Detector());
 	}
 
@@ -122,6 +128,9 @@ public class CameraManager {
 			setLimitDetectProjection(true);
 			setProjectionBounds(projectionBounds.get());
 		}
+		
+		this.pixelTransformer = new ShotSearchingBrightnessPixelTransformer(config, canvasManager, sectorStatuses,
+				projectionBounds, cropFeedToProjection);
 
 		Detector detector = new Detector();
 		
@@ -308,14 +317,13 @@ public class CameraManager {
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			BufferedImage currentFrame = event.getImage();
-			AverageFrameComponents averages = averageFrameComponents(currentFrame);
+			//AverageFrameComponents averages = averageFrameComponents(currentFrame);
 			
 			if (pixelTransformerInitialized == false) {
 				seenFrames++;
 				if (seenFrames == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
-			} else {
-				detectShots(currentFrame, averages);
 			}
+			detectShots(currentFrame, pixelTransformerInitialized);
 		}
 
 		@Override
@@ -342,14 +350,16 @@ public class CameraManager {
 					return;
 				}
 				
-				final AverageFrameComponents averages = averageFrameComponents(currentFrame);
+				//final AverageFrameComponents averages = averageFrameComponents(currentFrame);
+
+				detectShots(currentFrame, pixelTransformerInitialized);
 				
 				if (pixelTransformerInitialized == false) {
 					seenFrames++;
 					if (seenFrames == INIT_FRAME_COUNT) { 
-						if (averages.getLightingCondition() == LightingCondition.VERY_BRIGHT) {
+						/*if (averages.getLightingCondition() == LightingCondition.VERY_BRIGHT) {
 							showBrightnessWarning();
-						}
+						}*/
 						
 						pixelTransformerInitialized = true;
 					} else {
@@ -405,7 +415,9 @@ public class CameraManager {
 
 					startDetectionCycle = System.currentTimeMillis();
 					final BufferedImage frame = currentFrame;
-					detectionExecutor.submit(() -> {detectShots(frame, averages);});
+					//detectionExecutor.submit(() -> {detectShots(frame, averages);});
+					//detectionExecutor.submit(() -> {detectShots(frame, pixelTransformerInitialized);});
+					
 				}
 			}
 			
@@ -434,7 +446,7 @@ public class CameraManager {
 				} 
 			}
 		}
-
+		
 		private AverageFrameComponents averageFrameComponents(BufferedImage frame) {
 			long totalLum = 0;
 			long totalRed = 0;
@@ -456,21 +468,23 @@ public class CameraManager {
 				maxY = frame.getHeight();
 			}
 			
-			for (int x = minX; x < maxX; x++) {
+			/*for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
-					int rgb = frame.getRGB(x, y);
+					//int rgb = frame.getRGB(x, y);
 
-					pixelTransformer.updateFilter(x, y, rgb);
+					pixelTransformer.updateFilter(frame, x, y);
 
-					totalLum += PixelTransformer.calcLums(rgb);
-					totalRed += (rgb >> 16) & 0xFF;
+					//totalLum += PixelTransformer.calcLums(rgb);
+					//totalRed += (rgb >> 16) & 0xFF;
 				}
-			}
+			}*/
 
-			float totalPixels = (float)(frame.getWidth() * frame.getHeight());
+			//float totalPixels = (float)(frame.getWidth() * frame.getHeight());
 
-			return new AverageFrameComponents((float)(totalLum) / totalPixels,
-					(float)(totalRed) / totalPixels);
+			//return new AverageFrameComponents((float)(totalLum) / totalPixels,
+			//		(float)(totalRed) / totalPixels);
+			
+			return null;
 		}
 
 		/* This is not perfect because it treats color temps as linear.
@@ -492,11 +506,10 @@ public class CameraManager {
 			frame.setRGB(x, y, new Color((int)r, c.getGreen(), (int)b).getRGB());
 		}
 		
-		private void detectShots(BufferedImage frame, AverageFrameComponents averages) {
+		private void detectShots(BufferedImage frame, boolean pixelTransformerInitialized) {
 			if (!isDetecting) return;
 
-			BufferedImage workingCopy = new BufferedImage(frame.getWidth(), frame.getHeight(),
-					BufferedImage.TYPE_INT_RGB);
+			BufferedImage workingCopy = frame;
 			
 			int minX;
 			int maxX;
@@ -514,7 +527,7 @@ public class CameraManager {
 				minY = (int)projectionBounds.get().getMinY();
 				maxY = (int)projectionBounds.get().getMaxY();
 			} else {
-				workingCopy.createGraphics().drawImage(frame, 0, 0, null);
+				//workingCopy.createGraphics().drawImage(frame, 0, 0, null);
 				
 				minX = 0;
 				maxX = frame.getWidth();
@@ -522,9 +535,22 @@ public class CameraManager {
 				maxY = frame.getHeight();
 			}
 
-			float averageRed = averages.getAverageRed();
+			/*float averageRed = averages.getAverageRed();
 			float dr = IDEAL_R_AVERAGE / averageRed;
-			float db = 1 - (dr - 1);
+			float db = 1 - (dr - 1);*/
+			
+			//logger.warn("FRAME: {}", TESTING_framecount);
+			TESTING_framecount++;
+			
+			/*BufferedImage grayScale = new BufferedImage(frame.getWidth(),
+					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
+
+			//ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
+			//		frame, grayScale, projectionBounds, cropFeedToProjection);
+			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).grayScale = grayScale;*/
+			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = frame;
+			
 			
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
@@ -534,25 +560,33 @@ public class CameraManager {
 					// We don't want to make big changes or it will blow up in dark
 					// rooms by trying to do huge corrections that max r and zero b
 					// components in rgb pixels.
-					if (averageRed < IDEAL_R_AVERAGE && dr < 2f) {
+					/*if (averageRed < IDEAL_R_AVERAGE && dr < 2f) {
 						adjustColorTemperature(workingCopy, x, y, dr, db);
+					}*/
+					
+					//pixelTransformer.applyFilter(workingCopy, x, y, averages.getLightingCondition());
+					
+					ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
+					
+					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(frame, x, y, pixelTransformerInitialized))
+					{
+						if (possibleShots.size()<20)
+							possibleShots.add(new Pair<Integer, Integer>(x,y));
 					}
 					
-					pixelTransformer.applyFilter(workingCopy, x, y, averages.getLightingCondition());
+					if (possibleShots.size()<20)	
+						for (Pair<Integer,Integer> shotxy : possibleShots)
+							((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
 				}
 			}
 
-			BufferedImage grayScale = new BufferedImage(frame.getWidth(),
-					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
-			ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-					frame, grayScale, projectionBounds, cropFeedToProjection);
+
 			
 			if (webcam.isPresent()) {
 				double webcamFPS = webcam.get().getFPS();
 				if (debuggerListener.isPresent()) {
-					debuggerListener.get().updateFeedData(webcamFPS, averages.getLightingCondition());
+					//debuggerListener.get().updateFeedData(webcamFPS, averages.getLightingCondition());
 				}
 				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
@@ -563,14 +597,14 @@ public class CameraManager {
 			}
 
 			if (centerApproxBorderSize.isPresent()) {
-				shotSearcher.setCenterApproxBorderSize(centerApproxBorderSize.get());
+				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).setCenterApproxBorderSize(centerApproxBorderSize.get());
 			}
 
 			if (minimumShotDimension.isPresent()) {
-				shotSearcher.setMinimumShotDimension(minimumShotDimension.get());
+				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).setMinimumShotDimension(minimumShotDimension.get());
 			}
 
-			new Thread(shotSearcher).start();
+			//new Thread(shotSearcher).start();
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(workingCopy);

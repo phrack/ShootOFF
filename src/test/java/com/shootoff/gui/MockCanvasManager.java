@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
@@ -50,7 +51,7 @@ public class MockCanvasManager extends CanvasManager {
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+				CameraManager.TESTING_framecount, config.getMarkerRadius());
 		
 		if (useShotProcessors) {
 			for (ShotProcessor p : config.getShotProcessors()) {
@@ -61,6 +62,7 @@ public class MockCanvasManager extends CanvasManager {
 			}
 		}
 		
+		logger.info("Processing Shot: Shot Validated {} {}", shot.getX(), shot.getY());
 		shots.add(shot);
 	}
 	

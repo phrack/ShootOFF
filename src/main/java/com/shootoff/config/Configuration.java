@@ -130,18 +130,22 @@ public class Configuration {
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
+	private DeduplicationProcessor deduplicationProcessor = null;
 	
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		readConfigurationFile();
-		shotProcessors.add(new DeduplicationProcessor());
+		
+		deduplicationProcessor = new DeduplicationProcessor();
+		shotProcessors.add(deduplicationProcessor);
 	}
 	
 	public Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
-		shotProcessors.add(new DeduplicationProcessor());
+		deduplicationProcessor = new DeduplicationProcessor();
+		shotProcessors.add(deduplicationProcessor);
 	}
 	
 	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException, ConfigurationException {
@@ -150,7 +154,8 @@ public class Configuration {
 		parseCmdLine(args);
 		readConfigurationFile();
 		parseCmdLine(args); // Parse twice so that we guarantee debug is set and override config file
-		shotProcessors.add(new DeduplicationProcessor());
+		deduplicationProcessor = new DeduplicationProcessor();
+		shotProcessors.add(deduplicationProcessor);
 	}
 	
 	/**
@@ -168,13 +173,15 @@ public class Configuration {
 		parseCmdLine(args);
 		readConfigurationFile();
 		parseCmdLine(args);
-		shotProcessors.add(new DeduplicationProcessor());
+		deduplicationProcessor = new DeduplicationProcessor();
+		shotProcessors.add(deduplicationProcessor);
 	}
 
 	public Configuration(String[] args) throws ConfigurationException {
 		configName = DEFAULT_CONFIG_FILE;
 		parseCmdLine(args);
-		shotProcessors.add(new DeduplicationProcessor());
+		deduplicationProcessor = new DeduplicationProcessor();
+		shotProcessors.add(deduplicationProcessor);
 	}
 	
 	private void readConfigurationFile() throws IOException, ConfigurationException {
@@ -749,6 +756,10 @@ public class Configuration {
 	
 	public Set<CameraManager> getRecordingManagers() {
 		return recordingManagers;
+	}
+	
+	public ShotProcessor getDeduplicationProcessor() {
+		return deduplicationProcessor;
 	}
 	
 	public Set<ShotProcessor> getShotProcessors() {

@@ -21,8 +21,8 @@ package com.shootoff.camera;
 import java.awt.image.BufferedImage;
 
 public interface PixelTransformer {
-	public void updateFilter(int x, int y, int rgb);
-	public void applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition);
+	public void updateFilter(BufferedImage frame, int x, int y);
+	public boolean applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition);
 	public static int calcLums(int rgb) {
 		int r = (rgb >> 16) & 0xFF;
 		int g = (rgb >> 8) & 0xFF;

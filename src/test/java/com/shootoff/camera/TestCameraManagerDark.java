@@ -131,7 +131,12 @@ public class TestCameraManagerDark {
 		
 		// Misses very middle shot and both water shots
 				
-		assertEquals(6, shots.size());
+		//assertEquals(6, shots.size());
+		
+		// No longer misses middle shot
+		// Still misses water shots
+		assertEquals(7, shots.size());
+
 		
 		assertEquals(467.5, shots.get(0).getX(), 1);
 		assertEquals(120.5, shots.get(0).getY(), 1);
@@ -165,7 +170,8 @@ public class TestCameraManagerDark {
 		
 		// Misses middle shots on middle and bottom row
 		
-		assertEquals(10, shots.size());
+		//assertEquals(10, shots.size());
+		assertEquals(9, shots.size());
 		
 		assertEquals(472.5, shots.get(0).getX(), 1);
 		assertEquals(63.0, shots.get(0).getY(), 1);
@@ -205,9 +211,9 @@ public class TestCameraManagerDark {
 		assertEquals(Color.GREEN, shots.get(8).getColor());
 
 		// Dupe of the shot above
-		assertEquals(206.5, shots.get(9).getX(), 1);
+		/*assertEquals(206.5, shots.get(9).getX(), 1);
 		assertEquals(281.0, shots.get(9).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(9).getColor());
+		assertEquals(Color.GREEN, shots.get(9).getColor());*/
 	}
 	
 	@Test

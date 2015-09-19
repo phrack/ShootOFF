@@ -60,7 +60,8 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;import javafx.scene.paint.Color;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class CanvasManager {
@@ -238,7 +239,7 @@ public class CanvasManager {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+				CameraManager.TESTING_framecount, config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
@@ -248,6 +249,7 @@ public class CanvasManager {
 				break;
 			}
 		}
+		
 		
 		if (rejectingProcessor.isPresent()) {
 			// Record video for rejected shots as long as they weren't rejected
