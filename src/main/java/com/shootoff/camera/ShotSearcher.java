@@ -130,15 +130,15 @@ public class ShotSearcher implements Runnable {
 	protected PixelColor getPixelColor(int rgb) {
 		float[] hsb = java.awt.Color.RGBtoHSB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF, null);
 		
-		boolean nearWhite = hsb[1] < 0.1 && hsb[2] > 0.9;
-		boolean nearBlack = hsb[2] < 0.1;
+		//boolean nearWhite = hsb[1] < 0.1 && hsb[2] > 0.9;
+		//boolean nearBlack = hsb[2] < 0.1;
 		
-		if (!nearWhite && !nearBlack) {
+		//if (!nearWhite && !nearBlack) {
 		    float deg = hsb[0]*360;
 		    if (deg >= 0 && deg <  50) return PixelColor.RED;
 		    else if (deg >=  90 && deg < 180) return PixelColor.GREEN;
 		    else if (deg >= 200) return PixelColor.RED;
-		}
+		//}
 		
 		return PixelColor.NONE;
 	}

@@ -112,7 +112,7 @@ public class CameraManager {
 		this.config = config;
 
 		this.pixelTransformer = new ShotSearchingBrightnessPixelTransformer(config, canvasManager, sectorStatuses,
-				projectionBounds, cropFeedToProjection);
+				null, projectionBounds, cropFeedToProjection);
 		
 		init(new Detector());
 	}
@@ -130,7 +130,7 @@ public class CameraManager {
 		}
 		
 		this.pixelTransformer = new ShotSearchingBrightnessPixelTransformer(config, canvasManager, sectorStatuses,
-				projectionBounds, cropFeedToProjection);
+				null, projectionBounds, cropFeedToProjection);
 
 		Detector detector = new Detector();
 		
@@ -551,7 +551,6 @@ public class CameraManager {
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).grayScale = grayScale;*/
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = frame;
 			
-			
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
 			
@@ -567,14 +566,16 @@ public class CameraManager {
 					//pixelTransformer.applyFilter(workingCopy, x, y, averages.getLightingCondition());
 					
 					ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
+					int count = 0;
 					
 					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(frame, x, y, pixelTransformerInitialized))
 					{
-						if (possibleShots.size()<20)
+						if (possibleShots.size()<=20)
 							possibleShots.add(new Pair<Integer, Integer>(x,y));
+						count++;
 					}
 					
-					if (possibleShots.size()<20)	
+					if (count<=20)	
 						for (Pair<Integer,Integer> shotxy : possibleShots)
 							((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
 				}
@@ -583,8 +584,13 @@ public class CameraManager {
 
 
 			
-			if (webcam.isPresent()) {
+			if (webcam.isPresent() && (TESTING_framecount%30)==0) {
+				
 				double webcamFPS = webcam.get().getFPS();
+				
+				
+				DeduplicationProcessor.setThreshold((int)(webcamFPS/3));
+				
 				if (debuggerListener.isPresent()) {
 					//debuggerListener.get().updateFeedData(webcamFPS, averages.getLightingCondition());
 				}

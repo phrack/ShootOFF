@@ -24,12 +24,20 @@ public interface PixelTransformer {
 	public void updateFilter(BufferedImage frame, int x, int y);
 	public boolean applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition);
 	public static int calcLums(int rgb) {
+		
+		//#------------------------------#
+		//# For sRGB (and NTSC Rec. 709) #
+		//#------------------------------#
+		//  Y = 0.2126 Red + 0.7152 Green + 0.0722 Blue
+		// http://www.odelama.com/data-analysis/How-to-Compute-RGB-Image-Standard-Deviation-from-Channels-Statistics/
+		
 		int r = (rgb >> 16) & 0xFF;
 		int g = (rgb >> 8) & 0xFF;
 		int b = rgb & 0xFF;
 		
-		return (r + r + r +
+		/*return (r + r + r +
 				b +
-				g + g + g + g) >> 3;
+				g + g + g + g) >> 3;*/
+		return (int)((float)r*.2126 + (float)g*.7152 + (float)b*.0722);
 	}
 }

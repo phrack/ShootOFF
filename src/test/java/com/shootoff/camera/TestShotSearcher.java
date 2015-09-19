@@ -47,8 +47,9 @@ public class TestShotSearcher {
 		grayScale.createGraphics().drawImage(testFrame, 0, 0, null);
 		
 		Thread searcher = new Thread(
-				new ShotSearcher(config, mockManager, sectorStatuses,
-						testFrame, grayScale, Optional.empty(), false));
+				new ShotSearchingBrightnessPixelTransformer(config, mockManager, sectorStatuses,
+						testFrame, Optional.empty(), false));
+		
 		searcher.start();
 		searcher.join();
 

@@ -32,11 +32,19 @@ public class DeduplicationProcessor implements ShotProcessor {
 	private static double DISTANCE_THRESHOLD_X = 640 * DISTANCE_THRESHOLD;
 	private static double DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
 	
-	private static int TIME_THRESHOLD = 5; // This is Miculek constant because it's based on how fast Jerry Miculek
+	private static int TIME_THRESHOLD = 10; // This is Miculek constant because it's based on how fast Jerry Miculek
 	// can pull the trigger. It's a safe bet ShootOFF users aren't faster :).	
 	
+	public static int getThreshold() {
+		return TIME_THRESHOLD;
+	}
+
+	public static void setThreshold(int tIME_THRESHOLD) {
+		TIME_THRESHOLD = tIME_THRESHOLD;
+	}
+
 	private final Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
-	
+
 
 	public DeduplicationProcessor() {
 
@@ -56,16 +64,14 @@ public class DeduplicationProcessor implements ShotProcessor {
 			// If two shots have the same color, appear to have happened fast than Jerry Miculek can shoot
 			// and are very close to each other, ignore the new shot
 			
-			// Ignore color for now
-			//shot.getColor().equals(lastShot.get().getColor()) && 
-			if (
+			if (	shot.getColor().equals(lastShot.get().getColor()) && 
 					shot.getTimestamp() - lastShot.get().getTimestamp() <= TIME_THRESHOLD &&
 					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
 					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
 				return false;
 			}
 			
-			logger.warn("processShot {} {}", shot.getTimestamp(), lastShot.get().getTimestamp());
+			logger.debug("processShot {} {}", shot.getTimestamp(), lastShot.get().getTimestamp());
 		}
 
 		
@@ -75,6 +81,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 	}
 	
 	public boolean processShotLookahead(Shot shot) {
+		
 		if (lastShot.isPresent()) {
 
 			

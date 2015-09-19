@@ -58,9 +58,9 @@ public class TestCameraManagerBright {
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
 		// Turn off the top sectors because they are all just noise.
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+		/*for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
 			sectorStatuses[0][x] = false;
-		}
+		}*/
 		
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty());
 		
