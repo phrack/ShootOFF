@@ -236,8 +236,10 @@ public class CameraManager {
 				cameraName = userCameraName.get();
 			} else {
 				cameraName = webcam.get().getName();
-			}
+			}	
 		}
+	
+		setDetecting(false);
 		
 		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName);
 		recordingShots = true;
@@ -251,6 +253,8 @@ public class CameraManager {
 			rollingRecorder.close();
 			rollingRecorder = null;
 		}
+		
+		setDetecting(true);
 	}
 	
 	public Image getCurrentFrame() {
