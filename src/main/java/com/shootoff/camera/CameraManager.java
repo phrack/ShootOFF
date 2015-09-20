@@ -89,6 +89,7 @@ public class CameraManager {
 
 	private boolean isStreaming = true;
 	private boolean isDetecting = true;
+	private boolean shownBrightnessWarning = false;
 	private boolean cropFeedToProjection = false;
 	private boolean limitDetectProjection = false;
 	private Optional<Integer> centerApproxBorderSize = Optional.empty();
@@ -483,17 +484,17 @@ public class CameraManager {
 				if (avgPossibleShotsDetected == -1)
 					avgPossibleShotsDetected = shotCount;
 				else
-					avgPossibleShotsDetected = (((webcamFPS-1)*avgPossibleShotsDetected)+shotCount)/webcamFPS;
+					avgPossibleShotsDetected = (((webcamFPS-1)*avgPossibleShotsDetected)+Math.min(shotCount,500))/webcamFPS;
 			}
 			
-			if (avgPossibleShotsDetected > 40)
+			if (avgPossibleShotsDetected >= 500 && frameCount>90)
 				showBrightnessWarning();
 
 			long start = System.currentTimeMillis();
 			long current = 0;
 			shotCount = 0;
 			
-			if (avgPossibleShotsDetected < 15)
+			if (avgPossibleShotsDetected < 50)
 			{
 				for (Pair<Integer,Integer> shotxy : possibleShots)
 				{
@@ -525,7 +526,7 @@ public class CameraManager {
 				
 				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
 				
-				logger.debug("webcamFPS {} avgPossibleShotsDetected {}", webcamFPS, avgPossibleShotsDetected);
+				logger.debug("webcamFPS {} avgPossibleShotsDetected {} frameCount {}", webcamFPS, avgPossibleShotsDetected, frameCount);
 				
 				DeduplicationProcessor.setThreshold((int)(webcamFPS/4));
 				
@@ -597,6 +598,10 @@ public class CameraManager {
 		}
 		
 		private void showBrightnessWarning() {
+
+			if (shownBrightnessWarning)
+				return;
+			shownBrightnessWarning = true;
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.WARNING);
 
