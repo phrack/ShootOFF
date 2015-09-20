@@ -68,9 +68,10 @@ public class CameraManager {
 	public static final int LIGHTING_CONDITION__BRIGHT_THRESHOLD = 90; 	
 	
 	public static final float IDEAL_R_AVERAGE = 171; // Determined by averaging all of the red pixels per frame
-												     // for a video recorded using a webcam with hw settings that
-												     // worked well
+    // for a video recorded using a webcam with hw settings that
+    // worked well
 	public static final float IDEAL_LUM = 136;		 // See comment above
+	
 	public static final int INIT_FRAME_COUNT = 5; // Used by current pixel transformer to decide how many frames
 												  // to use for initialization
 
@@ -343,7 +344,6 @@ public class CameraManager {
 		}
 
 		private void streamCameraFrames() {			
-			long startDetectionCycle = System.currentTimeMillis();
 
 			while (isStreaming) {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
@@ -355,8 +355,6 @@ public class CameraManager {
 					detectionExecutor.shutdown();
 					return;
 				}
-				
-				//final AverageFrameComponents averages = averageFrameComponents(currentFrame);
 
 				detectShots(currentFrame, pixelTransformerInitialized);
 				
@@ -416,101 +414,11 @@ public class CameraManager {
 					canvasManager.updateBackground(img, Optional.empty());
 				}
 
-				if (System.currentTimeMillis() -
-						startDetectionCycle >= config.getDetectionRate()) {
-
-					startDetectionCycle = System.currentTimeMillis();
-					final BufferedImage frame = currentFrame;
-					//detectionExecutor.submit(() -> {detectShots(frame, averages);});
-					//detectionExecutor.submit(() -> {detectShots(frame, pixelTransformerInitialized);});
-					
-				}
 			}
 			
 			detectionExecutor.shutdown();
 		}
 
-		private class AverageFrameComponents {
-			private final float averageLum;
-			private final float averageRed;
-
-			public AverageFrameComponents(float lum, float red) {
-				averageLum = lum; averageRed = red;
-			}
-			
-			public float getAverageRed() {
-				return averageRed;
-			}
-			
-			public LightingCondition getLightingCondition() {
-				if (averageLum > LIGHTING_CONDITION_VERY_BRIGHT_THRESHOLD) {
-					return LightingCondition.VERY_BRIGHT;
-				} else if (averageLum > LIGHTING_CONDITION__BRIGHT_THRESHOLD) {
-					return LightingCondition.BRIGHT;
-				} else {
-					return LightingCondition.DARK;
-				} 
-			}
-		}
-		
-		private AverageFrameComponents averageFrameComponents(BufferedImage frame) {
-			long totalLum = 0;
-			long totalRed = 0;
-			
-			int minX;
-			int maxX;
-			int minY;
-			int maxY;
-			
-			if (limitDetectProjection && projectionBounds.isPresent()) {
-				minX = (int)projectionBounds.get().getMinX();
-				maxX = (int)projectionBounds.get().getMaxX();
-				minY = (int)projectionBounds.get().getMinY();
-				maxY = (int)projectionBounds.get().getMaxY();
-			} else {
-				minX = 0;
-				maxX = frame.getWidth();
-				minY = 0;
-				maxY = frame.getHeight();
-			}
-			
-			/*for (int x = minX; x < maxX; x++) {
-				for (int y = minY; y < maxY; y++) {
-					//int rgb = frame.getRGB(x, y);
-
-					pixelTransformer.updateFilter(frame, x, y);
-
-					//totalLum += PixelTransformer.calcLums(rgb);
-					//totalRed += (rgb >> 16) & 0xFF;
-				}
-			}*/
-
-			//float totalPixels = (float)(frame.getWidth() * frame.getHeight());
-
-			//return new AverageFrameComponents((float)(totalLum) / totalPixels,
-			//		(float)(totalRed) / totalPixels);
-			
-			return null;
-		}
-
-		/* This is not perfect because it treats color temps as linear.
-		 * Essentially we use the difference between the ideal average r
-		 * component and the average for the current frame to adjust red
-		 * and blue up or down to get roughly the ideal color temperature
-		 * for shot detection.
-		 */
-		private void adjustColorTemperature(BufferedImage frame, int x, int y, float dr, float db) {
-			Color c = new Color(frame.getRGB(x, y));
-
-			float r = c.getRed() * dr;
-			if (r > 255) r = 255;
-			if (r < 0) r = 0;
-			float b = c.getBlue() * db;
-			if (b > 255) b = 255;
-			if (b < 0) b = 0;
-
-			frame.setRGB(x, y, new Color((int)r, c.getGreen(), (int)b).getRGB());
-		}
 		
 		private void detectShots(BufferedImage frame, boolean pixelTransformerInitialized) {
 			if (!isDetecting) return;
@@ -522,7 +430,7 @@ public class CameraManager {
 			int minY;
 			int maxY;
 
-			if (limitDetectProjection && projectionBounds.isPresent()) {
+			if ((cropFeedToProjection || limitDetectProjection) && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
 				BufferedImage subFrame = frame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 						(int)b.getWidth(), (int)b.getHeight());
@@ -532,6 +440,7 @@ public class CameraManager {
 				maxX = (int)projectionBounds.get().getMaxX();
 				minY = (int)projectionBounds.get().getMinY();
 				maxY = (int)projectionBounds.get().getMaxY();
+				
 			} else {
 				//workingCopy.createGraphics().drawImage(frame, 0, 0, null);
 				
@@ -539,23 +448,12 @@ public class CameraManager {
 				maxX = frame.getWidth();
 				minY = 0;
 				maxY = frame.getHeight();
+				
 			}
 
-			/*float averageRed = averages.getAverageRed();
-			float dr = IDEAL_R_AVERAGE / averageRed;
-			float db = 1 - (dr - 1);*/
-			
-			//logger.warn("FRAME: {}", TESTING_framecount);
 			frameCount++;
-			
-			/*BufferedImage grayScale = new BufferedImage(frame.getWidth(),
-					frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-			grayScale.createGraphics().drawImage(workingCopy, 0, 0, null);
 
-			//ShotSearcher shotSearcher = new ShotSearcher(config, canvasManager, sectorStatuses,
-			//		frame, grayScale, projectionBounds, cropFeedToProjection);
-			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).grayScale = grayScale;*/
-			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = frame;
+			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = workingCopy;
 			
 			ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
 			
@@ -566,7 +464,7 @@ public class CameraManager {
 			
 
 					
-					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(frame, x, y, pixelTransformerInitialized))
+					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized))
 					{
 						possibleShots.add(new Pair<Integer, Integer>(x,y));
 						count++;
@@ -580,7 +478,7 @@ public class CameraManager {
 			long current = 0;
 			for (Pair<Integer,Integer> shotxy : possibleShots)
 			{
-				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(frame, shotxy.getKey(), shotxy.getValue());
+				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, shotxy.getKey(), shotxy.getValue());
 
 				
 				if (webcam.isPresent())
@@ -604,7 +502,6 @@ public class CameraManager {
 			if (webcam.isPresent() && (frameCount%30)==0) {
 				
 				webcamFPS = webcam.get().getFPS();
-				
 				
 				DeduplicationProcessor.setThreshold((int)(webcamFPS/3));
 				
