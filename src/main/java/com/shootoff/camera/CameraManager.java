@@ -74,6 +74,8 @@ public class CameraManager {
 	
 	public static final int INIT_FRAME_COUNT = 5; // Used by current pixel transformer to decide how many frames
 												  // to use for initialization
+	
+	public static final int DEFAULT_FPS = 30;
 
 	private final PixelTransformer pixelTransformer;
 
@@ -106,11 +108,13 @@ public class CameraManager {
 	
 	private static int frameCount = 0;
 	
+	private static double avgPossibleShotsDetected = -1;
+	
 	public static int getFrameCount() {
 		return frameCount;
 	}
 
-	private static double webcamFPS;
+	private static double webcamFPS = DEFAULT_FPS;
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -457,7 +461,7 @@ public class CameraManager {
 			
 			ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
 			
-			int count = 0;
+			int shotCount = 0;
 			
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
@@ -467,46 +471,66 @@ public class CameraManager {
 					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized))
 					{
 						possibleShots.add(new Pair<Integer, Integer>(x,y));
-						count++;
+						shotCount++;
 					}
 					
 
 				}
 			}
+			
+			if (pixelTransformerInitialized)
+			{
+				if (avgPossibleShotsDetected == -1)
+					avgPossibleShotsDetected = shotCount;
+				else
+					avgPossibleShotsDetected = (((webcamFPS-1)*avgPossibleShotsDetected)+shotCount)/webcamFPS;
+			}
+			
+			if (avgPossibleShotsDetected > 40)
+				showBrightnessWarning();
 
 			long start = System.currentTimeMillis();
 			long current = 0;
-			for (Pair<Integer,Integer> shotxy : possibleShots)
+			shotCount = 0;
+			
+			if (avgPossibleShotsDetected < 15)
 			{
-				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, shotxy.getKey(), shotxy.getValue());
-
-				
-				if (webcam.isPresent())
+				for (Pair<Integer,Integer> shotxy : possibleShots)
 				{
-					current = System.currentTimeMillis();
+					shotCount++;
 					
-					double time = (double)count*((current-start)/1000.0f);
-					double frameDuration = 2*(1/(double)webcamFPS);
+					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, shotxy.getKey(), shotxy.getValue());
+	
 					
-
-					if (time > frameDuration)
+					if (webcam.isPresent() && ((shotCount%10)==0))
 					{
-						logger.warn("Skipping frame shot detection due to processing time - {} {}", time, frameDuration);
-						break;
+						current = System.currentTimeMillis();
+						
+						double time = 10.0f*((current-start)/1000.0f);
+						double frameDuration = 2*(1/(double)webcamFPS);
+						
+	
+						if (time > frameDuration)
+						{
+							logger.warn("Skipping frame shot detection due to processing time - {} {}", time, frameDuration);
+							break;
+						}
+						start = current;
 					}
-					start = current;
+					
 				}
 			}
-
 			
-			if (webcam.isPresent() && (frameCount%30)==0) {
+			if (webcam.isPresent() && (frameCount%DEFAULT_FPS)==0) {
 				
-				webcamFPS = webcam.get().getFPS();
+				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
 				
-				DeduplicationProcessor.setThreshold((int)(webcamFPS/3));
+				logger.debug("webcamFPS {} avgPossibleShotsDetected {}", webcamFPS, avgPossibleShotsDetected);
+				
+				DeduplicationProcessor.setThreshold((int)(webcamFPS/4));
 				
 				if (debuggerListener.isPresent()) {
-					//debuggerListener.get().updateFeedData(webcamFPS, averages.getLightingCondition());
+					debuggerListener.get().updateFeedData(webcamFPS, null);
 				}
 				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
@@ -523,8 +547,6 @@ public class CameraManager {
 			if (minimumShotDimension.isPresent()) {
 				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).setMinimumShotDimension(minimumShotDimension.get());
 			}
-
-			//new Thread(shotSearcher).start();
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(workingCopy);
