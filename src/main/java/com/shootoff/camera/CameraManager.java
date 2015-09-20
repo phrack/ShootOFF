@@ -342,6 +342,14 @@ public class CameraManager {
 					return;
 				}
 				
+				// Previously this was between averageFrameComponents and detectShots
+				// You can't do that....have to be the same for both.
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					Bounds b = projectionBounds.get();
+					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
+							(int)b.getWidth(), (int)b.getHeight());
+				}
+				
 				final AverageFrameComponents averages = averageFrameComponents(currentFrame);
 				
 				if (pixelTransformerInitialized == false) {
@@ -386,11 +394,6 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
-				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					Bounds b = projectionBounds.get();
-					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
-							(int)b.getWidth(), (int)b.getHeight());
-				}
 
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
 
