@@ -46,6 +46,7 @@ public class ShotSearcher implements Runnable {
 
 	private int borderWidth = 3; // px
 	private int minShotDim = 6; // px
+	private int maxShotDim = minShotDim*3; // px
 
 	public ShotSearcher(Configuration config, CanvasManager canvasManager, boolean[][] sectorStatuses,
 			BufferedImage currentFrame, BufferedImage grayScale, Optional<Bounds> projectionBounds,
@@ -65,6 +66,7 @@ public class ShotSearcher implements Runnable {
 
 	public void setMinimumShotDimension(int minDim) {
 		minShotDim = minDim;
+		maxShotDim = 3*minDim;
 	}
 
 	@Override
@@ -203,25 +205,44 @@ public class ShotSearcher implements Runnable {
 			if ((grayScale.getRGB((int)x, (int)maxY) & 0xFF) <= config.getLaserIntensity())
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
+			
+			// If it is too tall, no reason to go through the rest.
+			if (maxY-minY > maxShotDim) 
+			{
+				logger.debug("Suspected shot rejected: Dimensions Too big "
+						+ "(x={}, y={}, height={} max={})", x, y, maxY-minY, maxShotDim);
+				return Optional.empty();
+			}
 		}
 
-		blackCount = 0;
 		if (minY >= borderWidth) minY -= borderWidth;
 		double shotHeight = maxY - minY;
 		double centerY = minY + (shotHeight / 2);
 
 		double shotWidth = 0;
 		for (int yy = (int)minY; yy < maxY; yy++) {
+			// This needs to be inside the loop or else we default
+			// to having a maxed out blackCount
+			// I actually saw this bug in action when I was writing my shot detection
+			blackCount = 0;
 			int xx = (int)minX;
 			for (; xx < grayScale.getWidth(); xx++) {
 				if ((grayScale.getRGB((int)xx, (int)yy) & 0xFF) <= config.getLaserIntensity())
 					blackCount++; else blackCount = 0;
 				if (blackCount == borderWidth) break;
+				
+				// If it is bigger already, no reason to go further in this loop
+				if (xx-minX > maxShotDim) break;
 			}
 		
 			if (xx > borderWidth) xx -= borderWidth;
 			double width = xx - minX;
-			if (width >= shotWidth && width < minShotDim) shotWidth = width;
+			
+			// This used to check if width < minShotDim which doesn't make any sense to me.
+			// Why would we limit the width? If it gets too wide that it is a good sign
+			// that it is a false positive OR we'd be putting the shot in the wrong place
+			// if we didn't keep going to get maximum width
+			if (width >= shotWidth && width <= maxShotDim+1) shotWidth = width;
 		}
 
 		double centerX = minX + (shotWidth / 2);
@@ -233,7 +254,7 @@ public class ShotSearcher implements Runnable {
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
 			// Really big is bad too
-		} else if (shotWidth > minShotDim * 3 || shotHeight > minShotDim * 3) {
+		} else if (shotWidth > maxShotDim || shotHeight > maxShotDim) {
 			logger.debug("Suspected shot rejected: Dimensions Too big "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
