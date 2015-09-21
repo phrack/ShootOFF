@@ -140,20 +140,23 @@ public class TestShotSearcher {
 
 	@Test
 	public void testInterenceOneShot() throws IOException, InterruptedException {
+		config.setIgnoreLaserColor(true);
+		config.setIgnoreLaserColorName("green");
+		
 		List<Shot> shots = findShots("/shotsearcher/interference_one_shot.png");
 		
 		assertEquals(5, shots.size());
-
+		
 		assertEquals(171.5, shots.get(0).getX(), 1);
 		assertEquals(124.0, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 
-		assertEquals(2, shots.get(1).getX(), 1);
-		assertEquals(214, shots.get(1).getY(), 1);
+		assertEquals(8.0, shots.get(1).getX(), 1);
+		assertEquals(192.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
-		assertEquals(162.5, shots.get(2).getX(), 1);
-		assertEquals(179, shots.get(2).getY(), 1);
+		assertEquals(164.0, shots.get(2).getX(), 1);
+		assertEquals(179.0, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
 		assertEquals(54.0, shots.get(3).getX(), 1);
@@ -161,8 +164,8 @@ public class TestShotSearcher {
 		assertEquals(Color.RED, shots.get(3).getColor());
 
 		// Real shot
-		assertEquals(410.5, shots.get(4).getX(), 1);
-		assertEquals(331.5, shots.get(4).getY(), 1);
+		assertEquals(411.5, shots.get(4).getX(), 1);
+		assertEquals(331.0, shots.get(4).getY(), 1);
 		assertEquals(Color.RED, shots.get(4).getColor());
 	}
 }

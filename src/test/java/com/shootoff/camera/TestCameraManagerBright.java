@@ -91,15 +91,15 @@ public class TestCameraManagerBright {
 		assertEquals(127.0, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 
-		assertEquals(344.5, shots.get(1).getX(), 1);
+		assertEquals(345.0, shots.get(1).getX(), 1);
 		assertEquals(130.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
-		assertEquals(204, shots.get(2).getX(), 1);
+		assertEquals(206.5, shots.get(2).getX(), 1);
 		assertEquals(115.0, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
-		assertEquals(309.0, shots.get(3).getX(), 1);
+		assertEquals(309.5, shots.get(3).getX(), 1);
 		assertEquals(228.5, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
 
