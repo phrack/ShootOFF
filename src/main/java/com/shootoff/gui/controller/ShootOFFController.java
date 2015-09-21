@@ -662,11 +662,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
-			
-			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
-			calibrationConfigPane = new CalibrationConfigPane(tabAnchor);
-			
+						
 			arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+			calibrationConfigPane = new CalibrationConfigPane(tabAnchor, 
+					calibrationTarget.isPresent() && !(arenaCameraManager.isLimitingDetectionToProjection() || arenaCameraManager.isCroppingFeedToProjection()),
+					arenaCameraManager.isLimitingDetectionToProjection(), arenaCameraManager.isCroppingFeedToProjection());
 			arenaCameraManager.setDetecting(false);
 			arenaCameraManager.setProjectionBounds(null);
 			

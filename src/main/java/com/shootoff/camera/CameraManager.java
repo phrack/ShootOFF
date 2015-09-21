@@ -188,6 +188,14 @@ public class CameraManager {
 	public void setLimitDetectProjection(boolean limitDetection) {
 		limitDetectProjection = limitDetection;
 	}
+	
+	public boolean isCroppingFeedToProjection() {
+		return cropFeedToProjection;
+	}
+	
+	public boolean isLimitingDetectionToProjection() {
+		return limitDetectProjection;
+	}
 
 	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
