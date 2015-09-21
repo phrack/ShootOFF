@@ -37,8 +37,9 @@ import com.shootoff.gui.CanvasManager;
 
 public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implements PixelTransformer {
 	
-	protected int minShotDim = 9; // px
+	protected int minShotDim = 12; // px
 	
+	protected int maxShotDim = minShotDim*5; // px
 	
 	public ShotSearchingBrightnessPixelTransformer(Configuration config,
 			CanvasManager canvasManager, boolean[][] sectorStatuses,
@@ -58,13 +59,6 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	
 	private final static int BRIGHTNESS_INDEX = 2;
 	
-	
-	private final static float GREEN_HUE_LOW = .18f;
-	private final static float GREEN_HUE_HIGH = .45f;
-	
-	private final static float BLUE_HUE_LOW = .5f;
-	private final static float BLUE_HUE_HIGH = .78f;
-
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
 
 	
@@ -97,7 +91,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	
 	public boolean findShotWithFrame(BufferedImage frame, int x, int y)
 	{
-			logger.debug("Entered findShotWithFrame {} {}", x, y);
+			logger.warn("Entered findShotWithFrame {} {}", x, y);
 			
 			javafx.scene.paint.Color tempcolor = javafx.scene.paint.Color.rgb(0, 0, 0);
 			Shot shot = new Shot(tempcolor, x, y, 
@@ -234,21 +228,21 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			currentLum = PixelTransformer.calcLums(frame.getRGB((int)x, (int)maxY));
 			maLum = lumsMovingAverage[(int)x][(int)maxY];
 			
-			logger.trace("{} {} {} {} {}", currentLum, maLum, blackCount, minY, maxY);
+			logger.warn("{} {} {} {} {}", currentLum, maLum, blackCount, minY, maxY);
 			if ((currentLum-maLum)<((255-maLum)/2))
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
-			if (maxY-minY>minShotDim*3) break;
+			if (maxY-minY>maxShotDim) break;
 		}
-		logger.trace("minY {} maxY {}", minY, maxY);
+		logger.warn("minY {} maxY {}", minY, maxY);
 		
 		if (maxY-minY >= borderWidth) maxY -= borderWidth-1;
 
 		double shotHeight = maxY - minY + 1;		
 		double centerY = minY + (shotHeight / 2);
 
-		logger.trace("minY {} maxY {}", minY, maxY);
-		logger.trace("sH {} cY {}", shotHeight, centerY);
+		logger.warn("minY {} maxY {}", minY, maxY);
+		logger.warn("sH {} cY {}", shotHeight, centerY);
 
 
 		double shotWidth = 0;
@@ -260,13 +254,13 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 				currentLum = PixelTransformer.calcLums(frame.getRGB(xx, yy));
 				maLum = lumsMovingAverage[xx][yy];
 				
-				logger.trace("{} {} {} {} {}", currentLum, maLum, blackCount, xx, yy);
+				logger.warn("{} {} {} {} {}", currentLum, maLum, blackCount, xx, yy);
 				
 				
 				if ((currentLum-maLum)<((255-maLum)/2))
 					blackCount++; else blackCount = 0;
 				if (blackCount == borderWidth) break;
-				if (xx-minX > minShotDim*3) break;
+				if (xx-minX > maxShotDim) break;
 			}
 		
 			double width = xx - minX + 1;
@@ -276,7 +270,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			
 			if (width >= shotWidth) shotWidth = width;
 			
-			logger.trace("w {} sW {} mSD {} xx {}", width, shotWidth, minShotDim, xx);
+			logger.warn("w {} sW {} mSD {} xx {}", width, shotWidth, minShotDim, xx);
 			
 		}
 
@@ -286,12 +280,12 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		
 		// If the width and height of the shot are really small it's a false positive
 		if (totalArea < minShotDim) {
-			logger.debug("Suspected shot rejected: Dimensions Too Small "
+			logger.warn("Suspected shot rejected: Dimensions Too Small "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.empty(), Optional.empty());
 			// Really big is bad too
-		} else if (totalArea > minShotDim * 7) {
-			logger.debug("Suspected shot rejected: Dimensions Too big "
+		} else if (totalArea > maxShotDim) {
+			logger.warn("Suspected shot rejected: Dimensions Too big "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.empty(), Optional.empty());
 		}

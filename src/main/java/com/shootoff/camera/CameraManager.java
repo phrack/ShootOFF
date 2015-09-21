@@ -20,6 +20,7 @@ package com.shootoff.camera;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -305,7 +306,6 @@ public class CameraManager {
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 		private boolean pixelTransformerInitialized = false;
-		private int seenFrames = 0;
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 		
 		@Override
@@ -329,11 +329,9 @@ public class CameraManager {
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			BufferedImage currentFrame = event.getImage();
-			//AverageFrameComponents averages = averageFrameComponents(currentFrame);
-			
+
 			if (pixelTransformerInitialized == false) {
-				seenFrames++;
-				if (seenFrames == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
+				if (frameCount == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
 			}
 			detectShots(currentFrame, pixelTransformerInitialized);
 		}
@@ -361,15 +359,16 @@ public class CameraManager {
 					return;
 				}
 
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					Bounds b = projectionBounds.get();
+					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
+							(int)b.getWidth(), (int)b.getHeight());
+				}
+				
 				detectShots(currentFrame, pixelTransformerInitialized);
 				
 				if (pixelTransformerInitialized == false) {
-					seenFrames++;
-					if (seenFrames == INIT_FRAME_COUNT) { 
-						/*if (averages.getLightingCondition() == LightingCondition.VERY_BRIGHT) {
-							showBrightnessWarning();
-						}*/
-						
+					if (frameCount == INIT_FRAME_COUNT) { 				
 						pixelTransformerInitialized = true;
 					} else {
 						continue;
@@ -405,12 +404,6 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
-				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					Bounds b = projectionBounds.get();
-					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
-							(int)b.getWidth(), (int)b.getHeight());
-				}
-
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
 
 				if (cropFeedToProjection) {
@@ -435,7 +428,7 @@ public class CameraManager {
 			int minY;
 			int maxY;
 
-			if ((cropFeedToProjection || limitDetectProjection) && projectionBounds.isPresent()) {
+			if (limitDetectProjection && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
 				BufferedImage subFrame = frame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 						(int)b.getWidth(), (int)b.getHeight());
@@ -460,7 +453,7 @@ public class CameraManager {
 
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = workingCopy;
 			
-			ArrayList<Pair<Integer,Integer>> possibleShots = new ArrayList<Pair<Integer,Integer>>();
+			ArrayList<Point> possibleShots = new ArrayList<Point>();
 			
 			int shotCount = 0;
 			
@@ -471,14 +464,15 @@ public class CameraManager {
 					
 					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized))
 					{
-						possibleShots.add(new Pair<Integer, Integer>(x,y));
+						possibleShots.add(new Point(x,y));
 						shotCount++;
 					}
 					
 
 				}
 			}
-			
+
+
 			if (pixelTransformerInitialized)
 			{
 				if (avgPossibleShotsDetected == -1)
@@ -490,17 +484,27 @@ public class CameraManager {
 			if (avgPossibleShotsDetected >= 500 && frameCount>90)
 				showBrightnessWarning();
 
+			ArrayList<Point> centers = new ArrayList<Point>();
+			if (shotCount>0)
+			{
+				PixelClusterManager pixelClusterManager = new PixelClusterManager(possibleShots);
+				pixelClusterManager.clusterPixels();
+				centers = pixelClusterManager.dumpClusters();
+			}
+			
+			
 			long start = System.currentTimeMillis();
 			long current = 0;
 			shotCount = 0;
+
 			
 			if (avgPossibleShotsDetected < 50)
 			{
-				for (Pair<Integer,Integer> shotxy : possibleShots)
+				for (Point shotxy : centers)
 				{
 					shotCount++;
 					
-					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, shotxy.getKey(), shotxy.getValue());
+					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, shotxy.x, shotxy.y);
 	
 					
 					if (webcam.isPresent() && ((shotCount%10)==0))
