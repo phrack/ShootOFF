@@ -223,7 +223,6 @@ public class ShotSearcher implements Runnable {
 		for (int yy = (int)minY; yy < maxY; yy++) {
 			// This needs to be inside the loop or else we default
 			// to having a maxed out blackCount
-			// I actually saw this bug in action when I was writing my shot detection
 			blackCount = 0;
 			int xx = (int)minX;
 			for (; xx < grayScale.getWidth(); xx++) {
@@ -238,10 +237,6 @@ public class ShotSearcher implements Runnable {
 			if (xx > borderWidth) xx -= borderWidth;
 			double width = xx - minX;
 			
-			// This used to check if width < minShotDim which doesn't make any sense to me.
-			// Why would we limit the width? If it gets too wide that it is a good sign
-			// that it is a false positive OR we'd be putting the shot in the wrong place
-			// if we didn't keep going to get maximum width
 			if (width >= shotWidth && width <= maxShotDim+1) shotWidth = width;
 		}
 
@@ -253,7 +248,7 @@ public class ShotSearcher implements Runnable {
 			logger.debug("Suspected shot rejected: Dimensions Too Small "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
 			return Optional.empty();
-			// Really big is bad too
+		// Really big is bad too
 		} else if (shotWidth > maxShotDim || shotHeight > maxShotDim) {
 			logger.debug("Suspected shot rejected: Dimensions Too big "
 					+ "(x={}, y={}, width={} height={} min={})", x, y, shotWidth, shotHeight, minShotDim);
