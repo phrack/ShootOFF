@@ -642,6 +642,13 @@ body {
 	padding-left: 10px;
 	margin-top:-7px;
 }
+
+.record:after{
+	content: url('../img/record.svg');
+	position: absolute;
+	margin-left: 10px;
+	margin-top:-7px;
+}
 /* -- /Left --*/
 
 
@@ -690,15 +697,6 @@ body {
 
 /* -- /Right --*/
 
-
-
-
-.record:before{
-	content: url('../img/record.svg');
-	position: absolute;
-	margin-left: -38px;
-	margin-top:-7px;
-}
 
 .new{
 	margin:0 auto;padding:15px;background-color:#f0f0f0;text-align:center;
