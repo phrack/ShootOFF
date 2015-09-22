@@ -56,8 +56,10 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;import javafx.scene.paint.Color;
@@ -119,7 +121,25 @@ public class CanvasManager {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
 			}
 		});
-	}	
+	}
+	
+	private void jdk8094135Warning() {
+			Platform.runLater(() -> {
+				Alert cameraAlert = new Alert(AlertType.ERROR);
+				cameraAlert.setTitle("Internal Error");
+				cameraAlert.setHeaderText("Internal Error -- Likely Too Many false Shots");
+				cameraAlert.setResizable(true);
+				cameraAlert.setContentText("An internal error due to JDK bug 8094135 occured in Java that will cause all "
+						+ "of your shots to be lost. This error is most likely to occur when you are getting a lot of false "
+						+ "shots due to poor lighting conditions and/or a poor camera setup. Please put the camera in front "
+						+ "of the shooter and turn off any bright lights in front of the camera that are the same height as "
+						+ "the shooter. If problems persist you may need to restart ShootOFF.");
+				cameraAlert.show();
+				
+				shots.clear();
+				shotEntries.clear();
+			});
+	}
 	
 	public String getCameraName() {
 		return cameraName;
@@ -169,7 +189,11 @@ public class CanvasManager {
 			}
 			
 			shots.clear();
-			if (shotEntries != null) shotEntries.clear();
+			try {
+				if (shotEntries != null) shotEntries.clear();
+			} catch (NullPointerException npe) {
+				jdk8094135Warning();
+			}
 			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
 		}); 
 	}
@@ -306,7 +330,12 @@ public class CanvasManager {
 			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
 		}
 		
-		shotEntries.add(shotEntry);
+		try {
+			shotEntries.add(shotEntry);
+		} catch (NullPointerException npe) {
+			jdk8094135Warning();
+		}
+		
 		shots.add(shot);
 		drawShot(shot);
 		
