@@ -64,10 +64,12 @@ var trackOutboundLink = function(url, new_window) {
   {
       if (deployJava.versionCheck("1.8.0+")) 
       {
-          $("#bt-download").html('Download Standalone');
-          $("#tirekov").html('Download Standalone');
-          $(".lmb").css({"display": "none"});
-          $(".lmb2").css({"display": "block"});
+        $("#tirekov").html('Download Standalone');
+        $(".lmb2").css({"display": "block"});
+      }
+
+      else{
+        $(".wst").css({"width": "100%"});
       }
   }
   </script>
@@ -112,12 +114,11 @@ var trackOutboundLink = function(url, new_window) {
           <h3 class="sub-headline">A virtual shooting range to enhance laser dry fire training</h3>
 
           <div class="col-xs-6">
-  		 <a id="bt-download" class="btn btn-my-red" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
-	  </div>
-	  <div class="col-xs-6">
-   		<a class="btn btn-my-wh lmb" href="#about">Learn More</a>
-   		<a class="btn btn-my-wh lmb2" href="ShootOFF.jnlp" onclick="return launchApplication('ShootOFF.jnlp');">Launch From Browser</a>
-	  </div>
+             <a id="bt-download" class="btn btn-my-red" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
+          </div>
+          <div class="col-xs-6">
+             <a class="btn btn-my-wh" href="#about">Learn More</a>
+          </div>
 
           	<img class="img-responsive w-img" src="img/demo.png" alt="demo preview">
 
@@ -670,9 +671,9 @@ gratitude for this project, please make us feel good by letting us know!</p>
       <div class="modal-body m-body">
         <p class="m-text">Lorem ipsum dolor sit amet, nullam quaeque oportere pro no, per eu argumentum repudiandae, mei numquam facilisi ut. Moderatius efficiendi te nam. </p>
 
-        <form class="m-form" action="yourfile.x" method="post" id="survey_form">
+        <form class="m-form" action="process.php" method="post" id="survey_form">
 
-            <div class="qestion">
+            <div class="question">
               <p>First Question Goes Here?</p>
               <input class="m-input" id="Question1" name="Question1" type="text" value="" placeholder="Write your Answer Here">
             </div>
@@ -706,13 +707,25 @@ gratitude for this project, please make us feel good by letting us know!</p>
 
       </div>
       <div class="modal-footer m-footer">
-        <a id="tirekov" type="submit" value="Submit" class="btn btn-my-red track" data-dismiss="modal">Get ShootOFF</a></div>
+
+        <div class="container" style="width:100%;">
+          <div class="row">
+
+            <div class="col-xs-6 wst">
+              <a id="tirekov" type="submit" value="Submit" class="btn btn-my-red track" data-dismiss="modal">Get ShootOFF</a>
+            </div>
+            <div class="col-xs-6 wst2">
+              <a class="btn btn-my-wh lmb2" href="ShootOFF.jnlp" onclick="return launchApplication('ShootOFF.jnlp');">Launch From Browser</a>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
 <!--/Modal -->
-
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

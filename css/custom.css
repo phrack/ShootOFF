@@ -915,6 +915,8 @@ body {
     	.gpl-row{padding:10px;padding-top:30px;}
     	.f-soc{display: none;}
     	.f-ssoc{width: 100%;}
+    	.wst2{width: 100% !important;}
+    	.wst{width: 100% !important;}
     }
 
     /* Custom, iPhone Retina */ 
