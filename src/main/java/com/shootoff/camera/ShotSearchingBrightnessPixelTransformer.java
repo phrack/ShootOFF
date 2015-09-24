@@ -1,5 +1,5 @@
 /*
- * ShootOFF - Software for Laser Dry Fire Training
+7 * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2015 phrack
  *
  * This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	public ShotSearchingBrightnessPixelTransformer(Configuration config,
 			CanvasManager canvasManager, boolean[][] sectorStatuses,
 			BufferedImage currentFrame, Optional<Bounds> projectionBounds, boolean cropped) {
-		super(config, canvasManager, sectorStatuses, currentFrame, null,
+		super(config, canvasManager, sectorStatuses, null, null,
 				projectionBounds, cropped);
 
 
@@ -89,65 +89,68 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	
 	
 	
-	public boolean findShotWithFrame(BufferedImage frame, int x, int y)
+	public boolean findShotWithFrame(BufferedImage frame, int frameCount, int x, int y)
 	{
-			logger.warn("Entered findShotWithFrame {} {}", x, y);
-			
-			javafx.scene.paint.Color tempcolor = javafx.scene.paint.Color.rgb(0, 0, 0);
-			Shot shot = new Shot(tempcolor, x, y, 
-					CameraManager.getFrameCount(), config.getMarkerRadius());
+		logger.trace("Entered findShotWithFrame {} {}", x, y);
+		
+		javafx.scene.paint.Color tempcolor = javafx.scene.paint.Color.rgb(0, 0, 0);
+		Shot shot = new Shot(tempcolor, x, y, 
+				frameCount, config.getMarkerRadius());
 
-			
-			if (!((DeduplicationProcessor) config.getDeduplicationProcessor()).processShotLookahead(shot))
-				return false;
+		
+		if (!((DeduplicationProcessor) config.getDeduplicationProcessor()).processShotLookahead(shot))
+		{
+			logger.info("Shot rejected by DeuplicationProcessor Lookahead {} {}", x, y);
+			return false;
+		}
+		
+		Pair<Optional<Point2D>, Optional<PixelColor>> pair = approximateCenterWithColor(frame, x, y);
+		
+		Optional<Point2D> center = pair.getKey();
+		
+		Optional<PixelColor> areaColor = pair.getValue();
+		
+		
+		if (areaColor.isPresent()) {
 
-			
-			Pair<Optional<Point2D>, Optional<PixelColor>> pair = approximateCenterWithColor(frame, x, y);
-			
-			Optional<Point2D> center = pair.getKey();
-			
-			Optional<PixelColor> areaColor = pair.getValue();
-			
-			
-			if (areaColor.isPresent()) {
+			if (center.isPresent()) {
+				
+				if (areaColor.get() == PixelColor.RED)
+					tempcolor = javafx.scene.paint.Color.RED;
+				if (areaColor.get() == PixelColor.GREEN)
+					tempcolor = javafx.scene.paint.Color.GREEN;
+				if (areaColor.get() == PixelColor.BLUE)
+					tempcolor = javafx.scene.paint.Color.BLUE;
 
-				if (center.isPresent()) {
+				
+				if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
+						tempcolor.equals(config.getIgnoreLaserColor().get()))
+							return false;
+
+				
+
+				
+				logger.info("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {}), {}",
+						x, y, center.get().getX(),
+						center.get().getY(), areaColor.get());
+
+				if (cropped && projectionBounds.isPresent()) {
+					Bounds b = projectionBounds.get();
 					
-					if (areaColor.get() == PixelColor.RED)
-						tempcolor = javafx.scene.paint.Color.RED;
-					if (areaColor.get() == PixelColor.GREEN)
-						tempcolor = javafx.scene.paint.Color.GREEN;
-					if (areaColor.get() == PixelColor.BLUE)
-						tempcolor = javafx.scene.paint.Color.BLUE;
-
-					
-					if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
-							tempcolor.equals(config.getIgnoreLaserColor().get()))
-								return false;
-
-					
-
-					
-					logger.debug("Suspected shot accepted: Original Coords ({}, {}), Center ({}, {}), {}",
-							x, y, center.get().getX(),
-							center.get().getY(), areaColor.get());
-
-					if (cropped && projectionBounds.isPresent()) {
-						Bounds b = projectionBounds.get();
-						
-						canvasManager.addShot(tempcolor, center.get().getX() + b.getMinX(),
-								center.get().getY() + b.getMinY());
-					} else {
-						canvasManager.addShot(tempcolor, center.get().getX(),
-								center.get().getY());
-					}
-					return true;
+					canvasManager.addShot(tempcolor, center.get().getX() + b.getMinX(),
+							center.get().getY() + b.getMinY());
+				} else {
+					canvasManager.addShot(tempcolor, center.get().getX(),
+							center.get().getY());
 				}
+				return true;
 			}
+		}
+		logger.info("Shot rejected by lack of areaColor or center");
 		return false;
 	}
 	
-	protected Optional<PixelColor> detectColor(double x, double y, double shotWidth, double shotHeight) {
+	protected Optional<PixelColor> detectColor(BufferedImage frame, double x, double y, double shotWidth, double shotHeight) {
 		
 		double red_color_distance=0;
 		double green_color_distance=0;
@@ -165,7 +168,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 
 			for (int ypix = starty; ypix < endy; ypix++)
 			{
-				java.awt.Color currentC = new java.awt.Color(currentFrame.getRGB(xpix, ypix));
+				java.awt.Color currentC = new java.awt.Color(frame.getRGB(xpix, ypix));
 				//java.awt.Color averageC = new java.awt.Color(colorMovingAverage.getRGB(xpix, ypix));
 				
 				red_color_distance = red_color_distance+ColorDistance(currentC, Color.RED);
@@ -180,16 +183,16 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		double color_diff = red_color_distance - green_color_distance;
 
 		if (Math.abs(color_diff) < 1) {
-			logger.debug("Shot Processing: No color detected for suspected shot ({}, {}), "
+			logger.info("Shot Processing: No color detected for suspected shot ({}, {}), "
 					+ "{} - {} - {}",
 					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.empty();
 		} else if (color_diff < 0) {
-			logger.debug("Shot Processing: Detected red shot ({}, {}), {} - {} - {}",
+			logger.info("Shot Processing: Detected red shot ({}, {}), {} - {} - {}",
 					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.of(PixelColor.RED);
 		} else {
-			logger.debug("Shot Processing: Detected green shot ({}, {}), {} - {} - {}",
+			logger.info("Shot Processing: Detected green shot ({}, {}), {} - {} - {}",
 					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.of(PixelColor.GREEN);
 		}
@@ -228,21 +231,21 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			currentLum = PixelTransformer.calcLums(frame.getRGB((int)x, (int)maxY));
 			maLum = lumsMovingAverage[(int)x][(int)maxY];
 			
-			logger.warn("{} {} {} {} {}", currentLum, maLum, blackCount, minY, maxY);
+			logger.trace("{} {} {} {} {}", currentLum, maLum, blackCount, minY, maxY);
 			if ((currentLum-maLum)<((255-maLum)/2))
 				blackCount++; else blackCount = 0;
 			if (blackCount == borderWidth) break;
 			if (maxY-minY>maxShotDim) break;
 		}
-		logger.warn("minY {} maxY {}", minY, maxY);
+		logger.trace("minY {} maxY {}", minY, maxY);
 		
 		if (maxY-minY >= borderWidth) maxY -= borderWidth-1;
 
 		double shotHeight = maxY - minY + 1;		
 		double centerY = minY + (shotHeight / 2);
 
-		logger.warn("minY {} maxY {}", minY, maxY);
-		logger.warn("sH {} cY {}", shotHeight, centerY);
+		logger.trace("minY {} maxY {}", minY, maxY);
+		logger.trace("sH {} cY {}", shotHeight, centerY);
 
 
 		double shotWidth = 0;
@@ -254,7 +257,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 				currentLum = PixelTransformer.calcLums(frame.getRGB(xx, yy));
 				maLum = lumsMovingAverage[xx][yy];
 				
-				logger.warn("{} {} {} {} {}", currentLum, maLum, blackCount, xx, yy);
+				logger.trace("{} {} {} {} {}", currentLum, maLum, blackCount, xx, yy);
 				
 				
 				if ((currentLum-maLum)<((255-maLum)/2))
@@ -270,7 +273,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			
 			if (width >= shotWidth) shotWidth = width;
 			
-			logger.warn("w {} sW {} mSD {} xx {}", width, shotWidth, minShotDim, xx);
+			logger.trace("w {} sW {} mSD {} xx {}", width, shotWidth, minShotDim, xx);
 			
 		}
 
@@ -293,7 +296,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		logger.trace("SHOT: {} {} {} {} {} {}", x, y, centerX, centerY, shotWidth, shotHeight);
 
 		
-		return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.of(new Point2D(centerX, centerY)), detectColor(minX, minY, shotWidth, shotHeight));
+		return new Pair<Optional<Point2D>, Optional<PixelColor>>(Optional.of(new Point2D(centerX, centerY)), detectColor(frame, minX, minY, shotWidth, shotHeight));
 	}
 	
 	public void updateFilter(BufferedImage frame, int x, int y)
@@ -302,6 +305,7 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	}
 	
 	public boolean updateFilter(BufferedImage frame, int x, int y, boolean pixelTransformerInitialized) {
+		boolean result = false;
 		java.awt.Color currentC = new java.awt.Color(frame.getRGB(x, y));
 		int currentRGB = currentC.getRGB();
 		
@@ -314,20 +318,25 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 
         }
 
+
+		
+		if (!pixelTransformerInitialized)
+			result = false;
+
+		else if ((currentLum-lumsMovingAverage[x][y])<((255-lumsMovingAverage[x][y])/2) || lumsMovingAverage[x][y]>250)
+			result = false;
+			
+		else if ((currentLum-lumsMovingAverage[x][y]) < 15)
+			result = false;
+		else
+			result = true;
+		
+		
         // Update the average brightness
     	lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
 		
 		
-		if (!pixelTransformerInitialized)
-			return false;
-
-		if ((currentLum-lumsMovingAverage[x][y])<((255-lumsMovingAverage[x][y])/2) || lumsMovingAverage[x][y]>250)
-			return false;
-			
-		if ((currentLum-lumsMovingAverage[x][y]) < 15)
-			return false;
-		
-		return true;
+		return result;
 
 	}
 	

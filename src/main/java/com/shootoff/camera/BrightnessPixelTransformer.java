@@ -126,44 +126,7 @@ public class BrightnessPixelTransformer implements PixelTransformer {
 	}
 
 	public boolean applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition) {
-		int maLum = lumsMovingAverage[x][y];
 
-		Color currentC = new Color(frame.getRGB(x, y));
-		Color averageC = new Color(colorMovingAverage.getRGB(x, y));
-		
-		float redratio = (float)currentC.getRed()/(float)averageC.getRed();
-		float greenratio = (float)currentC.getGreen()/(float)averageC.getGreen();
-		float blueratio = (float)currentC.getBlue()/(float)averageC.getBlue();
-		
-		float gbratio = (greenratio+blueratio)/2;
-		float rbratio = (redratio+blueratio)/2;
-		
-		float redadv = redratio-gbratio;
-		float greenadv = greenratio-rbratio;
-			
-		if ((redratio > 1.5 && redadv>.005 && lumsMovingAverage[x][y]>100) || (greenratio > 1.5 && greenadv>.005 && lumsMovingAverage[x][y]>100)) {
-			logger.warn("updateFilter{} {} {} - {} {} {} - {} {} {} - {} {} - {} {} - {}", 
-				CameraManager.getFrameCount(), x, y,
-				((float)currentC.getRed()/(float)averageC.getRed()), ((float)currentC.getGreen()/(float)averageC.getGreen()), ((float)currentC.getBlue()/(float)averageC.getBlue()),
-				redratio, greenratio, blueratio,
-				gbratio, rbratio,
-				redadv, greenadv,
-				lumsMovingAverage[x][y]);
-			return true;
-		}
-
-		// We only care about dimming pixels that are brighter than average
-		 if (maLum > CameraManager.IDEAL_LUM) {
-			 // If the current pixels is brighter than normal and it's not because
-			 // red grew by quit a bit, dim the pixel. If it is brighter and red
-			 // grew by quite a bit it might be a shot
-			 if (!isRedBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition) && 
-					 !isGreenBrighter(currentC, new Color(colorMovingAverage.getRGB(x, y)), lightCondition)) {
-                    float[] hsbvals = Color.RGBtoHSB(currentC.getRed(), currentC.getGreen(), currentC.getBlue(), null);
-                    hsbvals[BRIGHTNESS_INDEX] *= (CameraManager.IDEAL_LUM / (float)maLum);
-                    frame.setRGB(x, y, Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]));
-		 	}
-		 }
 		 return false;
 	}
 }

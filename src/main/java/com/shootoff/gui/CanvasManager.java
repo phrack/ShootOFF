@@ -235,7 +235,7 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
-	public void addShot(Color color, double x, double y) {
+	public void addShot(Color color,  double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 

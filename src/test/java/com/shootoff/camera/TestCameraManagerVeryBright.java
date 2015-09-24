@@ -34,6 +34,8 @@ public class TestCameraManagerVeryBright {
 				sectorStatuses[y][x] = true;
 			}
 		}
+		
+		CameraManager.setFrameCount(0);
 	}
 	
 	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {

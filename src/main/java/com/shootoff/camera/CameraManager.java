@@ -108,9 +108,10 @@ public class CameraManager {
  	
 	private boolean[][] sectorStatuses;
 	
+	// FIX ME: SHOULD NOT BE STATIC
 	private static int frameCount = 0;
 	
-	private static double avgPossibleShotsDetected = -1;
+	private double avgPossibleShotsDetected = -1;
 	
 	public static int getFrameCount() {
 		return frameCount;
@@ -151,6 +152,8 @@ public class CameraManager {
 	    reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 	    reader.addListener(detector);
 
+	    logger.warn("opening {}", videoFile.getAbsolutePath());
+	    
 	    setSectorStatuses(sectorStatuses);
 	    
 	    while (reader.readPacket() == null)
@@ -303,6 +306,10 @@ public class CameraManager {
 		this.debuggerListener = Optional.ofNullable(thresholdListener);
 	}
 
+	public static void setFrameCount(int frameCount) {
+		CameraManager.frameCount = frameCount;
+	}
+
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 		private boolean pixelTransformerInitialized = false;
@@ -330,10 +337,7 @@ public class CameraManager {
 		{
 			BufferedImage currentFrame = event.getImage();
 
-			if (pixelTransformerInitialized == false) {
-				if (frameCount == INIT_FRAME_COUNT) pixelTransformerInitialized = true;
-			}
-			detectShots(currentFrame, pixelTransformerInitialized);
+			shotDetection(currentFrame);
 		}
 
 		@Override
@@ -345,6 +349,7 @@ public class CameraManager {
 			
 			detectionExecutor.shutdown();
 		}
+
 
 		private void streamCameraFrames() {			
 
@@ -365,15 +370,8 @@ public class CameraManager {
 							(int)b.getWidth(), (int)b.getHeight());
 				}
 				
-				detectShots(currentFrame, pixelTransformerInitialized);
-				
-				if (pixelTransformerInitialized == false) {
-					if (frameCount == INIT_FRAME_COUNT) { 				
-						pixelTransformerInitialized = true;
-					} else {
-						continue;
-					}
-				}
+				if (!shotDetection(currentFrame))
+					continue;
 				
 				if (recordingShots) {
 					rollingRecorder.recordFrame(currentFrame);
@@ -418,8 +416,27 @@ public class CameraManager {
 		}
 
 		
+		
+		private boolean shotDetection(BufferedImage currentFrame)
+		{
+			setFrameCount(getFrameCount() + 1);
+
+			if (pixelTransformerInitialized == false) {
+				if (getFrameCount() == INIT_FRAME_COUNT) { 				
+					pixelTransformerInitialized = true;
+				} else {
+					return false;
+				}
+			}
+			
+			detectShots(currentFrame, pixelTransformerInitialized);
+			
+			return true;
+		}
+		
 		private void detectShots(BufferedImage frame, boolean pixelTransformerInitialized) {
 			if (!isDetecting) return;
+			
 
 			BufferedImage workingCopy = frame;
 			
@@ -448,8 +465,6 @@ public class CameraManager {
 				maxY = frame.getHeight();
 				
 			}
-
-			frameCount++;
 
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = workingCopy;
 			
@@ -481,30 +496,39 @@ public class CameraManager {
 					avgPossibleShotsDetected = (((webcamFPS-1)*avgPossibleShotsDetected)+Math.min(shotCount,500))/webcamFPS;
 			}
 			
-			if (avgPossibleShotsDetected >= 500 && frameCount>90)
+			if (avgPossibleShotsDetected >= 500 && getFrameCount()>90)
 				showBrightnessWarning();
 
-			ArrayList<Point> centers = new ArrayList<Point>();
-			if (shotCount>0)
-			{
-				PixelClusterManager pixelClusterManager = new PixelClusterManager(possibleShots);
-				pixelClusterManager.clusterPixels();
-				centers = pixelClusterManager.dumpClusters();
-			}
+
 			
 			
 			long start = System.currentTimeMillis();
 			long current = 0;
-			shotCount = 0;
+			
+			
+			if (avgPossibleShotsDetected >= 50 || (shotCount >= 100))
+				logger.warn("avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
+
 
 			
-			if (avgPossibleShotsDetected < 50)
+			if (avgPossibleShotsDetected < 50 && (shotCount > 0 && shotCount < 100))
 			{
+				
+				ArrayList<Point> centers = new ArrayList<Point>();
+				PixelClusterManager pixelClusterManager = new PixelClusterManager(possibleShots);
+				pixelClusterManager.clusterPixels();
+				centers = pixelClusterManager.dumpClusters();
+				
+				shotCount = 0;
+				
 				for (Point shotxy : centers)
 				{
+					
+					logger.info("Calling findShotWithFrame for {} - {} {}", shotCount, shotxy.x, shotxy.y);
+					
 					shotCount++;
 					
-					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, shotxy.x, shotxy.y);
+					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, getFrameCount(), shotxy.x, shotxy.y);
 	
 					
 					if (webcam.isPresent() && ((shotCount%10)==0))
@@ -526,11 +550,11 @@ public class CameraManager {
 				}
 			}
 			
-			if (webcam.isPresent() && (frameCount%DEFAULT_FPS)==0) {
+			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
 				
 				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
 				
-				logger.debug("webcamFPS {} avgPossibleShotsDetected {} frameCount {}", webcamFPS, avgPossibleShotsDetected, frameCount);
+				logger.debug("webcamFPS {} avgPossibleShotsDetected {} frameCount {}", webcamFPS, avgPossibleShotsDetected, getFrameCount());
 				
 				DeduplicationProcessor.setThreshold((int)(webcamFPS/4));
 				
@@ -545,13 +569,13 @@ public class CameraManager {
 				}
 			}
 
-			if (centerApproxBorderSize.isPresent()) {
+			/*if (centerApproxBorderSize.isPresent()) {
 				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).setCenterApproxBorderSize(centerApproxBorderSize.get());
 			}
 
 			if (minimumShotDimension.isPresent()) {
 				((ShotSearchingBrightnessPixelTransformer) pixelTransformer).setMinimumShotDimension(minimumShotDimension.get());
-			}
+			}*/
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(workingCopy);

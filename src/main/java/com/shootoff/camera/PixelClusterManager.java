@@ -50,7 +50,7 @@ public class PixelClusterManager {
 						int ry = thisPoint.y+h; 
 						Point nearPoint = new Point(rx,ry);
 						if (points.contains(nearPoint))
-							logger.warn("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint), !pixelMapping.containsKey(nearPoint));
+							logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint), !pixelMapping.containsKey(nearPoint));
 						
 						if (points.contains(nearPoint) && !pixelMapping.containsKey(nearPoint))
 						{
@@ -82,7 +82,7 @@ public class PixelClusterManager {
 				if (next.getValue() == i)
 				{
 					cluster.add(next.getKey());
-					logger.warn("Cluster {}: {}", i, next.getKey());
+					logger.trace("Cluster {}: {}", i, next.getKey());
 					averageX += next.getKey().x;
 					averageY += next.getKey().y;
 				}
@@ -92,9 +92,9 @@ public class PixelClusterManager {
 			averageY = averageY / cluster.size();
 			
 			
-			logger.warn("Cluster {}: avg x {} avg y {}", i, averageX, averageY);
+			logger.warn("Cluster {} - {}: avg x {} avg y {}", i, cluster.size(), averageX, averageY);
 			
-			if (cluster.size() > 9)
+			if (cluster.size() >= 9)
 				centers.add(new Point((int)averageX,(int)averageY));
 			
 		}
