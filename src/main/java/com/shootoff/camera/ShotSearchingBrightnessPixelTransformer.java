@@ -19,6 +19,8 @@
 package com.shootoff.camera;
 
 import java.awt.image.BufferedImage;
+
+
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.ShotSearcher.PixelColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
+import com.sun.org.apache.xml.internal.security.encryption.Transforms;
 
 public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implements PixelTransformer {
 	
@@ -60,7 +63,8 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	private final static int BRIGHTNESS_INDEX = 2;
 	
 	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
-
+	
+	private final double[][] colorDiffMovingAverage = new double[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
 	
 	@Override
 	public void run() {
@@ -177,22 +181,24 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 			}
 		}
 		
-		red_color_distance = red_color_distance / count;
-		green_color_distance = green_color_distance / count;
+		// Unnecessary divisions? Just use < count below
+		/*red_color_distance = red_color_distance / count;
+		green_color_distance = green_color_distance / count;*/
 		
+		// Shorter distance = smaller number
 		double color_diff = red_color_distance - green_color_distance;
 
-		if (Math.abs(color_diff) < 1) {
+		if (Math.abs(color_diff) < count) {
 			logger.info("Shot Processing: No color detected for suspected shot ({}, {}), "
-					+ "{} - {} - {}",
+					+ "{} - {} - {} - {}",
 					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.empty();
 		} else if (color_diff < 0) {
-			logger.info("Shot Processing: Detected red shot ({}, {}), {} - {} - {}",
+			logger.info("Shot Processing: Detected red shot ({}, {}), {} - {} - {} - {}",
 					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.of(PixelColor.RED);
 		} else {
-			logger.info("Shot Processing: Detected green shot ({}, {}), {} - {} - {}",
+			logger.info("Shot Processing: Detected green shot ({}, {}), {} - {} - {} - {}",
 					x, y, red_color_distance, green_color_distance, color_diff, count);
 			return Optional.of(PixelColor.GREEN);
 		}
@@ -304,37 +310,44 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		System.exit(1);
 	}
 	
-	public boolean updateFilter(BufferedImage frame, int x, int y, boolean pixelTransformerInitialized) {
-		boolean result = false;
+	public Optional<Pixel> updateFilter(BufferedImage frame, int x, int y, boolean pixelTransformerInitialized) {
+		
+		Optional<Pixel> result = Optional.empty();
 		java.awt.Color currentC = new java.awt.Color(frame.getRGB(x, y));
 		int currentRGB = currentC.getRGB();
 		
 		int currentLum = PixelTransformer.calcLums(currentRGB);
 		
+		double colorDiff = Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN);
+		
         if (lumsMovingAverage[x][y] == -1)
         {
             lumsMovingAverage[x][y] = currentLum;
-            return false;
+            colorDiffMovingAverage[x][y] = colorDiff;
+            return Optional.empty();
 
         }
 
 
 		
 		if (!pixelTransformerInitialized)
-			result = false;
+			result = Optional.empty();
 
 		else if ((currentLum-lumsMovingAverage[x][y])<((255-lumsMovingAverage[x][y])/2) || lumsMovingAverage[x][y]>250)
-			result = false;
+			result = Optional.empty();
 			
 		else if ((currentLum-lumsMovingAverage[x][y]) < 15)
-			result = false;
+			result = Optional.empty();
 		else
-			result = true;
+			
+			result = Optional.of(new Pixel(x,y, currentC, currentLum, lumsMovingAverage[x][y], colorDiffMovingAverage[x][y]));
 		
 		
         // Update the average brightness
     	lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
 		
+    	// Update the color distance
+    	colorDiffMovingAverage[x][y] = ((colorDiffMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + colorDiff) / CameraManager.INIT_FRAME_COUNT;
 		
 		return result;
 

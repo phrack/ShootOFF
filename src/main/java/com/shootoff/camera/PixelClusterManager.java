@@ -17,21 +17,21 @@ public class PixelClusterManager {
 	
 	private int numberOfRegions = -1;
 	
-	private ArrayList<Point> points;
+	private ArrayList<Pixel> points;
 	
-	HashMap<Point, Integer> pixelMapping = new HashMap<Point, Integer>();
+	HashMap<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 
-	PixelClusterManager(ArrayList<Point> p)
+	PixelClusterManager(ArrayList<Pixel> p)
 	{
 			points = p;
 	}
 	
 	void clusterPixels()
 	{
-		Stack<Point> mustExamine = new Stack<Point>();
+		Stack<Pixel> mustExamine = new Stack<Pixel>();
 		
 
-		for (Point point : points)
+		for (Pixel point : points)
 		{
 
 			if (!pixelMapping.containsKey(point))
@@ -48,12 +48,14 @@ public class PixelClusterManager {
 					{
 						int rx = thisPoint.x+w; 
 						int ry = thisPoint.y+h; 
-						Point nearPoint = new Point(rx,ry);
+						Pixel nearPoint = new Pixel(rx,ry);
 						if (points.contains(nearPoint))
 							logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint), !pixelMapping.containsKey(nearPoint));
 						
 						if (points.contains(nearPoint) && !pixelMapping.containsKey(nearPoint))
 						{
+							nearPoint = points.get(points.indexOf(nearPoint));
+							
 							mustExamine.push(nearPoint);
 							pixelMapping.put(nearPoint, numberOfRegions);
 						}
@@ -64,21 +66,23 @@ public class PixelClusterManager {
 		
 	}
 	
-	public ArrayList<Point> dumpClusters()
+	public ArrayList<PixelCluster> dumpClusters()
 	{
-		ArrayList<Point> centers = new ArrayList<Point>();
+		ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
 		
 		for (int i = 0; i <= numberOfRegions; i++)
 		{
-			ArrayList<Point> cluster = new ArrayList<Point>();
+			PixelCluster cluster = new PixelCluster();
 			
 			double averageX = 0;
 			double averageY = 0;
 			
+			
+			// FIX ME: We don't need to iterate over this more than once to get the pixel into the right cluster.
 			Iterator it = pixelMapping.entrySet().iterator();
 			while (it.hasNext())
 			{
-				HashMap.Entry<Point, Integer> next = (Entry<Point, Integer>) it.next();
+				HashMap.Entry<Pixel, Integer> next = (Entry<Pixel, Integer>) it.next();
 				if (next.getValue() == i)
 				{
 					cluster.add(next.getKey());
@@ -88,16 +92,22 @@ public class PixelClusterManager {
 				}
 				
 			}
+			
+			logger.warn("Cluster {} - {}", i, cluster.size());
+			
+			// It's too small, bail out early
+			if (cluster.size() < 6)
+				continue;
+			
+			
 			averageX = averageX / cluster.size();
 			averageY = averageY / cluster.size();
+
 			
+			cluster.setCenterPixel(new Pixel((int)averageX,(int)averageY));
 			
-			logger.warn("Cluster {} - {}: avg x {} avg y {}", i, cluster.size(), averageX, averageY);
-			
-			if (cluster.size() >= 9)
-				centers.add(new Point((int)averageX,(int)averageY));
-			
+			clusters.add(cluster);
 		}
-		return centers;
+		return clusters;
 	}
 }

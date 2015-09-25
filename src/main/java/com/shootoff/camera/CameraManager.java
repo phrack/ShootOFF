@@ -468,7 +468,8 @@ public class CameraManager {
 
 			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).currentFrame = workingCopy;
 			
-			ArrayList<Point> possibleShots = new ArrayList<Point>();
+				
+			ArrayList<Pixel> possibleShots = new ArrayList<Pixel>();
 			
 			int shotCount = 0;
 			
@@ -476,10 +477,10 @@ public class CameraManager {
 				for (int y = minY; y < maxY; y++) {
 			
 
-					
-					if(((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized))
+					Optional<Pixel> pixel = ((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized);
+					if(pixel.isPresent())
 					{
-						possibleShots.add(new Point(x,y));
+						possibleShots.add(pixel.get());
 						shotCount++;
 					}
 					
@@ -506,30 +507,32 @@ public class CameraManager {
 			long current = 0;
 			
 			
-			if (avgPossibleShotsDetected >= 50 || (shotCount >= 100))
+			if (avgPossibleShotsDetected >= 50 || (shotCount >= 300))
 				logger.warn("avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
 
 
 			
-			if (avgPossibleShotsDetected < 50 && (shotCount > 0 && shotCount < 100))
+			if (avgPossibleShotsDetected < 50 && (shotCount >= 6 && shotCount < 300))
 			{
 				
-				ArrayList<Point> centers = new ArrayList<Point>();
+				ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
 				PixelClusterManager pixelClusterManager = new PixelClusterManager(possibleShots);
 				pixelClusterManager.clusterPixels();
-				centers = pixelClusterManager.dumpClusters();
+				clusters = pixelClusterManager.dumpClusters();
 				
 				shotCount = 0;
 				
-				for (Point shotxy : centers)
+				for (PixelCluster cluster : clusters)
 				{
+					Pixel shotxy = cluster.getCenterPixel();
 					
-					logger.info("Calling findShotWithFrame for {} - {} {}", shotCount, shotxy.x, shotxy.y);
+					logger.info("Calling findShotWithFrame for {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
 					
 					shotCount++;
 					
-					((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, getFrameCount(), shotxy.x, shotxy.y);
+					//((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, getFrameCount(), shotxy.x, shotxy.y);
 	
+					addShot(cluster);
 					
 					if (webcam.isPresent() && ((shotCount%10)==0))
 					{
@@ -579,6 +582,33 @@ public class CameraManager {
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(workingCopy);
+			}
+		}
+		
+		private void addShot(PixelCluster pc)
+		{
+			Optional<javafx.scene.paint.Color> color = pc.getPredictedColorJavafx();
+			int x = pc.getCenterPixel().x;
+			int y = pc.getCenterPixel().y;
+			
+			if (!color.isPresent())
+				return;
+			
+			if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
+					color.get().equals(config.getIgnoreLaserColor().get()))
+				return;
+			
+			logger.info("Suspected shot accepted: Center ({}, {}), {}",
+					x, y, color.get());
+
+			if (cropFeedToProjection && projectionBounds.isPresent()) {
+				Bounds b = projectionBounds.get();
+				
+				canvasManager.addShot(color.get(), x + b.getMinX(),
+						y + b.getMinY());
+			} else {
+				canvasManager.addShot(color.get(), x,
+						y);
 			}
 		}
 		
