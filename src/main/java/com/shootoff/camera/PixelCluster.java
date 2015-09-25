@@ -35,6 +35,8 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		
 		double lumDiff = 0;
 		
+		double result = 0;
+		
 		for (Pixel pixel : this)
 		{
 			
@@ -46,10 +48,12 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		lumDiff = lumDiff / this.size();
 		diff = diff / this.size();
 		
-		logger.warn("getColorDifference {} {} - {} {} - {}", centerPixel.x, centerPixel.y, diff, lumDiff, diff - lumDiff);
+		result = (5*diff - 4*lumDiff)/9;
+		
+		logger.warn("getColorDifference {} {} - {} {} - {}", centerPixel.x, centerPixel.y, diff, lumDiff, result);
 		
 		
-		return (diff - lumDiff);
+		return result;
 	}
 
 
