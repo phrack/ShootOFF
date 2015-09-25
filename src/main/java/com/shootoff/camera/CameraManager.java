@@ -508,11 +508,11 @@ public class CameraManager {
 			
 			
 			if (avgPossibleShotsDetected >= 50 || (shotCount >= 300))
-				logger.warn("avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
+				logger.info("avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
 
 
 			
-			if (avgPossibleShotsDetected < 50 && (shotCount >= 6 && shotCount < 300))
+			if (avgPossibleShotsDetected < 50 && (shotCount >= 9 && shotCount < 300))
 			{
 				
 				ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
@@ -526,7 +526,7 @@ public class CameraManager {
 				{
 					Pixel shotxy = cluster.getCenterPixel();
 					
-					logger.info("Calling findShotWithFrame for {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
+					//logger.info("Calling findShotWithFrame for {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
 					
 					shotCount++;
 					
@@ -557,7 +557,7 @@ public class CameraManager {
 				
 				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
 				
-				logger.debug("webcamFPS {} avgPossibleShotsDetected {} frameCount {}", webcamFPS, avgPossibleShotsDetected, getFrameCount());
+				logger.trace("webcamFPS {} avgPossibleShotsDetected {} frameCount {}", webcamFPS, avgPossibleShotsDetected, getFrameCount());
 				
 				DeduplicationProcessor.setThreshold((int)(webcamFPS/4));
 				

@@ -93,10 +93,10 @@ public class PixelClusterManager {
 				
 			}
 			
-			logger.warn("Cluster {} - {}", i, cluster.size());
+			logger.trace("Cluster {} - {}", i, cluster.size());
 			
 			// It's too small, bail out early
-			if (cluster.size() < 6)
+			if (cluster.size() < 9)
 				continue;
 			
 			
