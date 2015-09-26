@@ -92,6 +92,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -222,6 +223,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		        	
 		        	for (ShotEntry selected : change.getAddedSubList()) {
 		        		selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
+		        		
+		        		// Move all selected shots to top the of their z-stack to ensure visibility
+		        		for (CanvasManager cm : camerasSupervisor.getCanvasManagers()) {
+		        			Shape marker = selected.getShot().getMarker();
+		        			if (cm.getCanvasGroup().getChildren().indexOf(marker) < cm.getCanvasGroup().getChildren().size() - 1) {
+		        				cm.getCanvasGroup().getChildren().remove(marker);
+		        				cm.getCanvasGroup().getChildren().add(cm.getCanvasGroup().getChildren().size(), marker);
+		        			}
+		        		}
 		        	}
 	        	}
 	        }
