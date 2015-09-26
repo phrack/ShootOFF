@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <target>
-	<image x="182.000000" y="22.500000" file="targets/pepper_popper.gif">
+	<image x="154.500000" y="0.000000" file="targets/pepper_popper.gif">
 		<tag name="name" value="pepper_popper" />
 		<tag name="command" value="play_sound(sounds/steel_sound_1.wav)" />
 	</image>
-	<ellipse centerX="291.500000" centerY="129.500000" radiusX="108.000000" radiusY="106.000000" fill="black">
+	<ellipse centerX="266.500000" centerY="40.500000" radiusX="26.000000" radiusY="21.000000" fill="black">
 		<tag name="command" value="animate(pepper_popper);play_sound(sounds/steel_sound_1.wav,pepper_popper)" />
 		<tag name="visible" value="false" />
 	</ellipse>
+	<rectangle x="238.500000" y="41.500000" width="57.000000" height="83.000000" fill="black">
+		<tag name="command" value="animate(pepper_popper);play_sound(sounds/steel_sound_1.wav,pepper_popper)" />
+		<tag name="visible" value="false" />
+	</rectangle>
 </target>
