@@ -104,9 +104,9 @@ public class PixelClusterManager {
 					
 					
 					cluster.add(nextPixel);
-					logger.trace("Cluster {}: {}", i, nextPixel);
-					averageX += nextPixel.x;
-					averageY += nextPixel.y;
+					logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, nextPixel.getConnectedness());
+					averageX += nextPixel.x * nextPixel.getConnectedness();
+					averageY += nextPixel.y * nextPixel.getConnectedness();
 					
 					avgconnectedness += nextPixel.getConnectedness();
 					
@@ -115,20 +115,24 @@ public class PixelClusterManager {
 				
 			}
 			
+			
+			logger.trace("Cluster {} - {} - connectedness {} - {} {}", i, cluster.size(), avgconnectedness, averageX, averageY);
+			
+			averageX = (averageX / avgconnectedness);
+			averageY = (averageY / avgconnectedness);
+
 			avgconnectedness = avgconnectedness / cluster.size();
 			
-			logger.trace("Cluster {} - {} - connectedness {}", i, cluster.size(), avgconnectedness);
+			logger.trace("Cluster {} - {} - connectedness {} - {} {}", i, cluster.size(), avgconnectedness, averageX, averageY);
 			
 			// It's too small or not well connected, bail out early
 			if (cluster.size() < 9 || avgconnectedness < 4.75)
 				continue;
 			
-			
-			averageX = averageX / cluster.size();
-			averageY = averageY / cluster.size();
 
 			
-			cluster.setCenterPixel(new Pixel((int)averageX,(int)averageY));
+			cluster.centerPixelX = averageX;
+			cluster.centerPixelY = averageY;
 			
 			clusters.add(cluster);
 		}

@@ -554,9 +554,8 @@ public class CameraManager {
 				{
 					public void perform(PixelCluster cluster)
 					{
-						Pixel shotxy = cluster.getCenterPixel();
 						
-						logger.trace("Adding shot {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
+						//logger.trace("Adding shot {} - {} {} - Predicted color: {}", shotCount, cluster.centerPixelX, cluster.centerPixelY, cluster.getPredictedColor());
 						
 						shotCount++;
 						
@@ -602,8 +601,8 @@ public class CameraManager {
 		private void addShot(PixelCluster pc)
 		{
 			Optional<javafx.scene.paint.Color> color = pc.getPredictedColorJavafx();
-			int x = pc.getCenterPixel().x;
-			int y = pc.getCenterPixel().y;
+			double x = pc.centerPixelX;
+			double y = pc.centerPixelY;
 			
 			if (!color.isPresent())
 				return;

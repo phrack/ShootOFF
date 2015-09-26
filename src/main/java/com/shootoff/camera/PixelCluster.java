@@ -17,18 +17,10 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	private static final long serialVersionUID = 8652050835557402069L;
 
 	
-	private Pixel centerPixel;
-
-
-	public Pixel getCenterPixel() {
-		return centerPixel;
-	}
-
-
-	public void setCenterPixel(Pixel centerPixel) {
-		this.centerPixel = centerPixel;
-	}
+	public double centerPixelX;
+	public double centerPixelY;
 	
+
 	public double getColorDifference()
 	{
 		double diff = 0;
@@ -43,22 +35,29 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		int redder_withcma = 0;
 		int greener_withcma = 0;
 		int i = 0;
+		
+		double avgconnectedness = 0;
+		
 		for (Pixel pixel : this)
 		{
 			
+			avgconnectedness += pixel.getConnectedness();
+			
+			
 			double rcd = pixel.redColorDistance();
 			double gcd = pixel.greenColorDistance();
-			double cddiff = rcd-gcd;
 			
-			double pixel_ca = pixel.getColorAverage();
+			double cddiff = ((rcd-gcd) / pixel.getConnectedness());
 			
-			double weighted_cd_withcma = (cddiff*2-pixel_ca)/3;
+			double pixel_ca = pixel.getColorAverage() / pixel.getConnectedness();
+			
+			double weighted_cd_withcma = ((cddiff*2-pixel_ca)/3);
 			
 			lumDiff = lumDiff + pixel_ca;
 			
 			
 			logger.trace("{} {} - {}", i, cddiff, pixel_ca);
-			diff = diff + (rcd - gcd);
+			diff = diff + cddiff;
 			
 			if (Math.abs(rcd-gcd)>10)
 			{
@@ -68,7 +67,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 					greener++;
 			}
 				
-			if (Math.abs(weighted_cd_withcma)>10)
+			if (Math.abs(weighted_cd_withcma*pixel.getConnectedness())>10)
 			{
 				if (weighted_cd_withcma<0)
 					redder_withcma++;
@@ -80,12 +79,12 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 			
 		}
 		
-		lumDiff = lumDiff / this.size();
-		diff = diff / this.size();
+		lumDiff = (lumDiff * avgconnectedness) / this.size();
+		diff = (diff * avgconnectedness) / this.size();
 		
 		result = (diff*2 - lumDiff)/3;
 		
-		logger.trace("getColorDifference {} -  {} {} - {} {} - {} - {} {} - {} {}", this.size(), centerPixel.x, centerPixel.y, diff, lumDiff, result, redder, greener, redder_withcma, greener_withcma);
+		logger.trace("getColorDifference {} -  {} {} - {} {} - {} - {} {} - {} {}", this.size(), centerPixelX, centerPixelY, diff, lumDiff, result, redder, greener, redder_withcma, greener_withcma);
 		
 		
 		return result;
