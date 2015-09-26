@@ -54,6 +54,7 @@ public class SpriteAnimation extends Transition {
 
     public void reset() {
     	isReversed = false;
+    	lastIndex = 0;
     	setRate(Math.abs(getRate()));
     	imageView.setImage(getFirstFrame());
     }
