@@ -87,14 +87,15 @@ public class TestRandomShoot {
 		
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 		
-		assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + firstSubtarget));
+		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").split("\n")[0]);
 		stringOut.reset();
 		
 		// Simulate missing a shot
 		
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
 		
-		assertEquals("shoot " + firstSubtarget + "\n", stringOut.toString("UTF-8"));
+		assertEquals(String.format("sounds/voice/shootoff-shoot.wav\nsounds/voice/shootoff-%s.wav\n", firstSubtarget),
+				stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Simulate a hit

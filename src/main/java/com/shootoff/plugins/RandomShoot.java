@@ -126,7 +126,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 		while (it.hasNext()) {
 			Integer index = it.next();
 			
-			if (!it.hasNext()) soundFiles.add(new File("sounds/voice/shootoff-and.wav"));
+			if (!it.hasNext() && currentSubtargets.size() > 1) soundFiles.add(new File("sounds/voice/shootoff-and.wav"));
 			
 			soundFiles.add(new File(String.format("sounds/voice/shootoff-%s.wav", 
 					subtargets.get(index))));

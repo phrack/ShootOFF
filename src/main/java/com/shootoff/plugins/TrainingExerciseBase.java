@@ -297,8 +297,12 @@ public class TrainingExerciseBase {
 	}
 	
 	public static void playSounds(List<File> soundFiles) {
-		SoundQueue sq = new SoundQueue(soundFiles);
-		sq.play();
+		if (isSilenced) {
+			soundFiles.forEach(System.out::println);
+		} else {
+			SoundQueue sq = new SoundQueue(soundFiles);
+			sq.play();
+		}
 	}
 	
 	private static class SoundQueue implements LineListener {
