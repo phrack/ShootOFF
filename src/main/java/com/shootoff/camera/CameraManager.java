@@ -525,14 +525,14 @@ public class CameraManager {
 			long current = 0;
 			
 			
-			if (avgPossibleShotsDetected >= 100 || (shotCount >= 200))
+			if (avgPossibleShotsDetected >= 100 || (shotCount >= 250))
 			{
 				
 				logger.info("HIGH MOTION - IGNORING FRAME - avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
 			}
 
 			
-			if (avgPossibleShotsDetected < 50 && (shotCount >= 9 && shotCount < 200))
+			if (avgPossibleShotsDetected < 50 && (shotCount >= 9 && shotCount < 250))
 			{
 				
 				ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
@@ -548,7 +548,7 @@ public class CameraManager {
 					{
 						Pixel shotxy = cluster.getCenterPixel();
 						
-						logger.info("Calling findShotWithFrame for {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
+						logger.trace("Adding shot {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
 						
 						shotCount++;
 						

@@ -85,7 +85,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		
 		result = (diff*2 - lumDiff)/3;
 		
-		logger.warn("getColorDifference {} -  {} {} - {} {} - {} - {} {} - {} {}", this.size(), centerPixel.x, centerPixel.y, diff, lumDiff, result, redder, greener, redder_withcma, greener_withcma);
+		logger.trace("getColorDifference {} -  {} {} - {} {} - {} - {} {} - {} {}", this.size(), centerPixel.x, centerPixel.y, diff, lumDiff, result, redder, greener, redder_withcma, greener_withcma);
 		
 		
 		return result;

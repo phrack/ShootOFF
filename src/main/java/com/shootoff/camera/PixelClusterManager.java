@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 
+import org.openimaj.util.function.Operation;
+import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,10 @@ public class PixelClusterManager {
 			}
 			while (mustExamine.size() > 0)
 			{
-				Point thisPoint = mustExamine.pop();
+				Pixel thisPoint = mustExamine.pop();
+				
+				int connectedness = 0;
+				
 				for(int h=-1;h<=1;h++)
 					for(int w=-1;w<=1;w++) 
 					{
@@ -52,19 +57,29 @@ public class PixelClusterManager {
 						if (points.contains(nearPoint))
 							logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint), !pixelMapping.containsKey(nearPoint));
 						
+						
+						if (points.contains(nearPoint) && pixelMapping.containsKey(nearPoint) && pixelMapping.get(nearPoint).intValue()==numberOfRegions)
+						{
+							connectedness++;
+						}
+						
 						if (points.contains(nearPoint) && !pixelMapping.containsKey(nearPoint))
 						{
+							
 							nearPoint = points.get(points.indexOf(nearPoint));
 							
 							mustExamine.push(nearPoint);
 							pixelMapping.put(nearPoint, numberOfRegions);
+							
 						}
 					}
-						
+				
+				thisPoint.setConnectedness(connectedness);
 			}
 		}
 		
 	}
+	
 	
 	public ArrayList<PixelCluster> dumpClusters()
 	{
@@ -77,27 +92,35 @@ public class PixelClusterManager {
 			double averageX = 0;
 			double averageY = 0;
 			
+			double avgconnectedness = 0;
 			
-			Iterator it = pixelMapping.entrySet().iterator();
+			Iterator<Entry<Pixel, Integer>> it = pixelMapping.entrySet().iterator();
 			while (it.hasNext())
 			{
 				HashMap.Entry<Pixel, Integer> next = (Entry<Pixel, Integer>) it.next();
 				if (next.getValue() == i)
 				{
-					cluster.add(next.getKey());
-					logger.trace("Cluster {}: {}", i, next.getKey());
-					averageX += next.getKey().x;
-					averageY += next.getKey().y;
+					Pixel nextPixel = next.getKey();
+					
+					
+					cluster.add(nextPixel);
+					logger.trace("Cluster {}: {}", i, nextPixel);
+					averageX += nextPixel.x;
+					averageY += nextPixel.y;
+					
+					avgconnectedness += nextPixel.getConnectedness();
 					
 					pixelMapping.remove(next);
 				}
 				
 			}
 			
-			logger.trace("Cluster {} - {}", i, cluster.size());
+			avgconnectedness = avgconnectedness / cluster.size();
 			
-			// It's too small, bail out early
-			if (cluster.size() < 9)
+			logger.trace("Cluster {} - {} - connectedness {}", i, cluster.size(), avgconnectedness);
+			
+			// It's too small or not well connected, bail out early
+			if (cluster.size() < 9 || avgconnectedness < 4.75)
 				continue;
 			
 			

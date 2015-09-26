@@ -66,13 +66,7 @@ public class TestCameraManagerLifecam {
 		
 		assertEquals(9, shots.size());
 		
-		/*assertEquals(629.5, shots.get(0).getX(), 1);
-		assertEquals(168.5, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
-		
-		assertEquals(428.5, shots.get(1).getX(), 1);
-		assertEquals(129.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());*/
+
 	}
 	
 	
@@ -82,13 +76,7 @@ public class TestCameraManagerLifecam {
 		
 		assertEquals(9, shots.size());
 		
-		/*assertEquals(629.5, shots.get(0).getX(), 1);
-		assertEquals(168.5, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
-		
-		assertEquals(428.5, shots.get(1).getX(), 1);
-		assertEquals(129.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());*/
+
 	}
 	
 	
@@ -98,13 +86,25 @@ public class TestCameraManagerLifecam {
 		
 		assertEquals(9, shots.size());
 		
-		/*assertEquals(629.5, shots.get(0).getX(), 1);
-		assertEquals(168.5, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
+
+	}
+	
+	@Test
+	public void testLifecamMotion() {
+		List<Shot> shots = findShots("/shotsearcher/lifecam-motion-in-room.avi", Optional.empty());
 		
-		assertEquals(428.5, shots.get(1).getX(), 1);
-		assertEquals(129.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());*/
+		assertEquals(0, shots.size());
+		
+
+	}
+	
+	@Test
+	public void testLifecamDuelTree() {
+		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-tree-green.avi", Optional.empty());
+		
+		assertEquals(10, shots.size());
+		
+
 	}
 	
 }
