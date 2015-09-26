@@ -57,14 +57,19 @@ public class Pixel extends Point {
 		return colorDistance(Color.GREEN);
 	}
 	
+	
+	// Both of these have their green turned down from "43" to "25".
+	// There is just too much of a bias for green in these algorithms at high brightness
+	// This isn't surprising, these are linear approximations of "real" color distances (CIELAB DeltaE)
+	// It is not a perfect fit across the spectrum, so we have to correct for its problems
 	public double colorDistance(Color c2)
 	{
-	    return Math.sqrt(22*Math.pow(color.getRed()-c2.getRed(),2) + 43*Math.pow(color.getGreen()-c2.getGreen(),2) + 35*Math.pow(color.getBlue()-c2.getBlue(),2));
+	    return Math.sqrt(22*Math.pow(color.getRed()-c2.getRed(),2) + 25*Math.pow(color.getGreen()-c2.getGreen(),2) + 35*Math.pow(color.getBlue()-c2.getBlue(),2));
 	} 
 	
 	public static double colorDistance(Color color, Color c2)
 	{
-	    return Math.sqrt(22*Math.pow(color.getRed()-c2.getRed(),2) + 43*Math.pow(color.getGreen()-c2.getGreen(),2) + 35*Math.pow(color.getBlue()-c2.getBlue(),2));
+	    return Math.sqrt(22*Math.pow(color.getRed()-c2.getRed(),2) + 25*Math.pow(color.getGreen()-c2.getGreen(),2) + 35*Math.pow(color.getBlue()-c2.getBlue(),2));
 	}
 	public double getColorAverage() {
 		return colorAverage;

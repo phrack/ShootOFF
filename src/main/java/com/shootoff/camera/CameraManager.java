@@ -507,12 +507,14 @@ public class CameraManager {
 			long current = 0;
 			
 			
-			if (avgPossibleShotsDetected >= 50 || (shotCount >= 300))
-				logger.info("avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
-
+			if (avgPossibleShotsDetected >= 100 || (shotCount >= 200))
+			{
+				
+				logger.info("HIGH MOTION - IGNORING FRAME - avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
+			}
 
 			
-			if (avgPossibleShotsDetected < 50 && (shotCount >= 9 && shotCount < 300))
+			if (avgPossibleShotsDetected < 50 && (shotCount >= 9 && shotCount < 200))
 			{
 				
 				ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();

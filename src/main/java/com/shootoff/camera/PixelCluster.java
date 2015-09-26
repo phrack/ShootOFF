@@ -37,20 +37,55 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		
 		double result = 0;
 		
+		int redder = 0;
+		int greener = 0;
+		
+		int redder_withcma = 0;
+		int greener_withcma = 0;
+		int i = 0;
 		for (Pixel pixel : this)
 		{
 			
-			lumDiff = lumDiff + pixel.getColorAverage();
+			double rcd = pixel.redColorDistance();
+			double gcd = pixel.greenColorDistance();
+			double cddiff = rcd-gcd;
 			
-			diff = diff + (pixel.redColorDistance() - pixel.greenColorDistance());
+			double pixel_ca = pixel.getColorAverage();
+			
+			double weighted_cd_withcma = (cddiff*2-pixel_ca)/3;
+			
+			lumDiff = lumDiff + pixel_ca;
+			
+			
+			logger.trace("{} {} - {}", i, cddiff, pixel_ca);
+			diff = diff + (rcd - gcd);
+			
+			if (Math.abs(rcd-gcd)>10)
+			{
+				if (rcd<gcd)
+					redder++;
+				else
+					greener++;
+			}
+				
+			if (Math.abs(weighted_cd_withcma)>10)
+			{
+				if (weighted_cd_withcma<0)
+					redder_withcma++;
+				else
+					greener_withcma++;
+			}
+			
+			i++;
+			
 		}
 		
 		lumDiff = lumDiff / this.size();
 		diff = diff / this.size();
 		
-		result = (5*diff - 4*lumDiff)/9;
+		result = (diff*2 - lumDiff)/3;
 		
-		logger.warn("getColorDifference {} {} - {} {} - {}", centerPixel.x, centerPixel.y, diff, lumDiff, result);
+		logger.warn("getColorDifference {} -  {} {} - {} {} - {} - {} {} - {} {}", this.size(), centerPixel.x, centerPixel.y, diff, lumDiff, result, redder, greener, redder_withcma, greener_withcma);
 		
 		
 		return result;

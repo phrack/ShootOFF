@@ -62,10 +62,13 @@ public class DeduplicationProcessor implements ShotProcessor {
 			logger.trace("processShot {} {}", shot.getTimestamp(), lastShot.get().getTimestamp());
 
 			
+			// FIX ME MAYBE? Color detection is disabled
+			//shot.getColor().equals(lastShot.get().getColor()) && 
+			
 			// If two shots have the same color, appear to have happened fast than Jerry Miculek can shoot
 			// and are very close to each other, ignore the new shot
 			
-			if (	shot.getColor().equals(lastShot.get().getColor()) && 
+			if (	
 					shot.getTimestamp() - lastShot.get().getTimestamp() <= TIME_THRESHOLD &&
 					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
 					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
