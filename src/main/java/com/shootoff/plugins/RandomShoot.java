@@ -20,6 +20,8 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -113,21 +115,33 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
         
 	private void saySubtargets() {
-        StringBuilder sentence = new StringBuilder("shoot subtarget ");
- 
-        sentence.append(subtargets.get(currentSubtargets.get(currentSubtargets.size() - 1)));
-        
-        for (int i = currentSubtargets.size() - 2; i >= 0; i--) {
-        	sentence.append(" then ");
-        	sentence.append(subtargets.get(currentSubtargets.get(i)));
-        }
-        
-        TextToSpeech.say(sentence.toString());
+		List<File> soundFiles = new ArrayList<File>();
+		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
+		
+		Stack<Integer> temp = new Stack<Integer>();
+		temp.addAll(currentSubtargets);
+		Collections.reverse(temp);
+		Iterator<Integer> it = temp.iterator();
+		
+		while (it.hasNext()) {
+			Integer index = it.next();
+			
+			if (!it.hasNext()) soundFiles.add(new File("sounds/voice/shootoff-and.wav"));
+			
+			soundFiles.add(new File(String.format("sounds/voice/shootoff-%s.wav", 
+					subtargets.get(index))));
+		}
+		
+		super.playSounds(soundFiles);
     }
 	
 	private void sayCurrentSubtarget() {
-		String sentence = "shoot " + subtargets.get(currentSubtargets.peek());
-		TextToSpeech.say(sentence);
+		List<File> soundFiles = new ArrayList<File>();
+		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
+		soundFiles.add(new File(String.format("sounds/voice/shootoff-%s.wav", 
+				subtargets.get(currentSubtargets.peek()))));
+		
+		super.playSounds(soundFiles);
 	}
 
 	@Override

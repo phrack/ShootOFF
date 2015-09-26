@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -30,6 +31,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 
 import com.shootoff.camera.CamerasSupervisor;
@@ -250,6 +252,10 @@ public class TrainingExerciseBase {
 	}
 	
 	public static void playSound(File soundFile) {
+		playSound(soundFile, Optional.empty());
+	}
+	
+	private static void playSound(File soundFile, Optional<LineListener> listener) {
 		if (isSilenced) {
 			System.out.println(soundFile.getPath());
 			return;
@@ -276,14 +282,49 @@ public class TrainingExerciseBase {
 				clip.open(audioInputStream);
 				clip.start();
 				
-				clip.addLineListener((e) -> {
-						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
-					});
+				if (listener.isPresent()) {
+					clip.addLineListener(listener.get());
+				} else {
+					clip.addLineListener((e) -> {
+							if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
+						});
+				}
 			} catch (LineUnavailableException | IOException e) {
 				if (clip != null) clip.close();
 				e.printStackTrace();
 			}
 		} 
+	}
+	
+	public static void playSounds(List<File> soundFiles) {
+		SoundQueue sq = new SoundQueue(soundFiles);
+		sq.play();
+	}
+	
+	private static class SoundQueue implements LineListener {
+		private final List<File> soundFiles;
+		private int queueIndex = 0;
+		
+		public SoundQueue(List<File> soundFiles) {
+			this.soundFiles = soundFiles;
+		}
+		
+		public void play() {
+			playSound(soundFiles.get(queueIndex), Optional.of(this));
+		}
+		
+		@Override
+		public void update(LineEvent event) { 
+			if (event.getType().equals(LineEvent.Type.STOP)) {
+				event.getLine().close();
+				
+				queueIndex++;
+				
+				if (queueIndex < soundFiles.size()) {
+					playSound(soundFiles.get(queueIndex), Optional.of(this));
+				}
+			}
+		}
 	}
 	
 	/**
