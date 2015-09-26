@@ -94,7 +94,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 	public String getPredictedColor() {
 		double colorDist = getColorDifference();
-		if (Math.abs(colorDist) < 5) {
+		if (Math.abs(colorDist) < 2) {
 			return "None";
 			//return Optional.empty();
 		} else if (colorDist < 0) {
@@ -109,7 +109,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	public Optional<javafx.scene.paint.Color> getPredictedColorJavafx()
 	{
 		double colorDist = getColorDifference();
-		if (Math.abs(colorDist) < 5) {
+		if (Math.abs(colorDist) < 2) {
 			return Optional.empty();
 		} else if (colorDist < 0) {
 			return Optional.of(javafx.scene.paint.Color.RED);

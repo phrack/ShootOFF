@@ -66,6 +66,8 @@ public class TestCameraManagerLogitech {
 		
 		assertEquals(9, shots.size());
 		
+		// Seems to have a bit of trouble with the shot color
+		
 		/*assertEquals(629.5, shots.get(0).getX(), 1);
 		assertEquals(168.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
@@ -81,6 +83,8 @@ public class TestCameraManagerLogitech {
 		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green.avi", Optional.empty());
 		
 		assertEquals(9, shots.size());
+		
+		// Seems to have a bit of trouble with the shot color
 		
 		/*assertEquals(629.5, shots.get(0).getX(), 1);
 		assertEquals(168.5, shots.get(0).getY(), 1);

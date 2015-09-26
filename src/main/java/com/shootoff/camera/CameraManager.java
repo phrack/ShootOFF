@@ -19,6 +19,8 @@
 package com.shootoff.camera;
 
 import java.awt.Color;
+
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -57,6 +59,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.util.Pair;
+
+import org.openimaj.util.function.Operation;
+import org.openimaj.util.parallel.Parallel;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -112,6 +117,8 @@ public class CameraManager {
 	private static int frameCount = 0;
 	
 	private double avgPossibleShotsDetected = -1;
+	
+	private Integer shotCount = 0;
 	
 	public static int getFrameCount() {
 		return frameCount;
@@ -471,22 +478,33 @@ public class CameraManager {
 				
 			ArrayList<Pixel> possibleShots = new ArrayList<Pixel>();
 			
-			int shotCount = 0;
+			shotCount = 0;
 			
-			for (int x = minX; x < maxX; x++) {
-				for (int y = minY; y < maxY; y++) {
 			
+			// It might be slightly faster to do x inside of y instead of vice-versa
+			Parallel.forIndex(minY, maxY, 1, new Operation<Integer>()
+			{
 
-					Optional<Pixel> pixel = ((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized);
-					if(pixel.isPresent())
-					{
-						possibleShots.add(pixel.get());
-						shotCount++;
+				public void perform (Integer y) {
+					for (int x = minX; x < maxX; x++) {
+							Optional<Pixel> pixel = ((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized);
+							if(pixel.isPresent())
+							{
+								
+								synchronized (possibleShots)
+								{
+									possibleShots.add(pixel.get());
+								}
+								synchronized (shotCount)
+								{
+									shotCount++;
+								}
+							}
 					}
-					
 
 				}
-			}
+			
+			});
 
 
 			if (pixelTransformerInitialized)
@@ -524,35 +542,21 @@ public class CameraManager {
 				
 				shotCount = 0;
 				
-				for (PixelCluster cluster : clusters)
+				Parallel.forEach(clusters, new Operation<PixelCluster>()
 				{
-					Pixel shotxy = cluster.getCenterPixel();
-					
-					//logger.info("Calling findShotWithFrame for {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
-					
-					shotCount++;
-					
-					//((ShotSearchingBrightnessPixelTransformer) pixelTransformer).findShotWithFrame(workingCopy, getFrameCount(), shotxy.x, shotxy.y);
-	
-					addShot(cluster);
-					
-					if (webcam.isPresent() && ((shotCount%10)==0))
+					public void perform(PixelCluster cluster)
 					{
-						current = System.currentTimeMillis();
+						Pixel shotxy = cluster.getCenterPixel();
 						
-						double time = 10.0f*((current-start)/1000.0f);
-						double frameDuration = 2*(1/(double)webcamFPS);
+						logger.info("Calling findShotWithFrame for {} - {} {} - Predicted color: {}", shotCount, shotxy.x, shotxy.y, cluster.getPredictedColor());
 						
-	
-						if (time > frameDuration)
-						{
-							logger.warn("Skipping frame shot detection due to processing time - {} {}", time, frameDuration);
-							break;
-						}
-						start = current;
+						shotCount++;
+						
+						addShot(cluster);
+						
 					}
-					
-				}
+				});
+				
 			}
 			
 			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {

@@ -78,7 +78,6 @@ public class PixelClusterManager {
 			double averageY = 0;
 			
 			
-			// FIX ME: We don't need to iterate over this more than once to get the pixel into the right cluster.
 			Iterator it = pixelMapping.entrySet().iterator();
 			while (it.hasNext())
 			{
@@ -89,6 +88,8 @@ public class PixelClusterManager {
 					logger.trace("Cluster {}: {}", i, next.getKey());
 					averageX += next.getKey().x;
 					averageY += next.getKey().y;
+					
+					pixelMapping.remove(next);
 				}
 				
 			}
