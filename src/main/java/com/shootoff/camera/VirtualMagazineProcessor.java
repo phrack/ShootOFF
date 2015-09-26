@@ -18,8 +18,10 @@
 
 package com.shootoff.camera;
 
+import java.io.File;
+
 import com.shootoff.config.Configuration;
-import com.shootoff.plugins.TextToSpeech;
+import com.shootoff.plugins.TrainingExerciseBase;
 
 public class VirtualMagazineProcessor implements ShotProcessor {
 	private final Configuration config;
@@ -43,7 +45,7 @@ public class VirtualMagazineProcessor implements ShotProcessor {
 	public boolean processShot(Shot shot) {
 		if (roundCount == 0) {
 			roundCount = config.getVirtualMagazineCapacity();
-			if (useTTS) TextToSpeech.say("reload!");
+			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
 			return false;
 		}
 		

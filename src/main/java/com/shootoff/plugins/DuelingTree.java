@@ -18,6 +18,7 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -89,7 +90,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 		}
 		
 		if (!foundTarget) {
-			TextToSpeech.say("This training exercise requires a dueling tree target");	
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-duelingtree-warning.wav"));	
 			continueExercise = false;
 		}
 		

@@ -18,6 +18,7 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -65,7 +66,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() {
-			TextToSpeech.say("shooter... make ready");
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
 			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 			
 			if (repeatExercise)

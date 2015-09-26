@@ -41,6 +41,7 @@ public class TestRandomShoot {
 		
 		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		TextToSpeech.silence(true);
+		TrainingExerciseBase.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 	}
@@ -48,6 +49,7 @@ public class TestRandomShoot {
 	@After
 	public void tearDown() {
 		TextToSpeech.silence(false);
+		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
 	}
 
@@ -57,12 +59,12 @@ public class TestRandomShoot {
 		
 		RandomShoot rs = new RandomShoot(targets);
 		
-		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString("UTF-8"));
+		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		rs.reset(targets);
 		
-		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString("UTF-8"));
+		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8"));
 	}
 
 	@Test

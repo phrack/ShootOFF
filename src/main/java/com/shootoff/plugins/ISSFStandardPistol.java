@@ -18,6 +18,7 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		@Override
 		public Void call() throws Exception {
 			if (repeatExercise) {
-				TextToSpeech.say("Shooter... make ready");
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
 				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
             	executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 			}
@@ -134,7 +135,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		public Void call() throws Exception {
 			if (repeatExercise) {
 				thisSuper.pauseShotDetection(true);
-				TextToSpeech.say("Round over");
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
 				
 				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 				

@@ -46,6 +46,7 @@ public class TestDuelingTree {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
 		TextToSpeech.silence(true);
+		TrainingExerciseBase.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 		
@@ -87,6 +88,7 @@ public class TestDuelingTree {
 	@After
 	public void tearDown() {
 		TextToSpeech.silence(false);
+		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
 	}
 
@@ -99,14 +101,14 @@ public class TestDuelingTree {
 		DuelingTree dt = new DuelingTree(targets);
 		dt.init(config, new CamerasSupervisor(config), null, null);
 		
-		assertEquals("This training exercise requires a dueling tree target\n", stringOut.toString("UTF-8"));
+		assertEquals("sounds/voice/shootoff-duelingtree-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		dt.reset(targets);
 		
 		assertEquals("left score: 0\n"
 				      + "right score: 0\n"
-				      + "This training exercise requires a dueling tree target\n", stringOut.toString("UTF-8"));
+				      + "sounds/voice/shootoff-duelingtree-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 	

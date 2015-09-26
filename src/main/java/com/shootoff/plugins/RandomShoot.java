@@ -18,6 +18,7 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,7 +98,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 		if (foundTarget && subtargets.size() > 0) {
 			return true;
 		} else {
-			TextToSpeech.say("This training exercise requires a target with subtargets");
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-subtargets-warning.wav"));
 	        return false;		
 		}	
 	}

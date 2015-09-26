@@ -61,6 +61,8 @@ import javafx.util.Callback;
  * @author phrack
  */
 public class TrainingExerciseBase {
+	private static boolean isSilenced = false;
+	
 	@SuppressWarnings("unused")
 	private List<Group> targets;
 	private Configuration config;
@@ -92,6 +94,20 @@ public class TrainingExerciseBase {
 			canvasManager.getCanvasGroup().getChildren().add(exerciseLabel);
 			exerciseLabels.put(canvasManager, exerciseLabel);
 		}
+	}
+	
+	/**
+	 * Allows sounds to be silenced or on. If silenced, instead of 
+	 * playing a sound the file name will be printed to stdout. This 
+	 * exists so that components can be easily tested even if they 
+	 * are reliant on sounds. 
+	 * 
+	 * @param isSilenced set to <tt>true</tt> if sound file names
+	 * 					 should instead be printed to stdout,
+	 * 					 <tt>false</tt> for normal operation.
+	 */
+	public static void silence(boolean isSilenced) {
+		TrainingExerciseBase.isSilenced = isSilenced;
 	}
 	
 	/**
@@ -234,6 +250,11 @@ public class TrainingExerciseBase {
 	}
 	
 	public static void playSound(File soundFile) {
+		if (isSilenced) {
+			System.out.println(soundFile.getPath());
+			return;
+		}
+		
 		if (!soundFile.isAbsolute()) 
 			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
 		

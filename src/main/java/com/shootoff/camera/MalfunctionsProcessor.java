@@ -18,10 +18,11 @@
 
 package com.shootoff.camera;
 
+import java.io.File;
 import java.util.Random;
 
 import com.shootoff.config.Configuration;
-import com.shootoff.plugins.TextToSpeech;
+import com.shootoff.plugins.TrainingExerciseBase;
 
 public class MalfunctionsProcessor implements ShotProcessor {
 	private final Random rand;
@@ -40,7 +41,7 @@ public class MalfunctionsProcessor implements ShotProcessor {
 	@Override
 	public boolean processShot(Shot shot) {
 		if (rand.nextFloat() < prob) {
-			if (useTTS) TextToSpeech.say("malfunction");
+			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
 			return false;
 		}
 		
