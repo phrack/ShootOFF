@@ -27,30 +27,42 @@ import javafx.scene.paint.Color;
 public class CalibrationConfigPane extends BorderPane {
 	private final Pane parent;
 	private final ToggleGroup configToggleGroup = new ToggleGroup();
-	private final RadioButton detectEverywhere = new RadioButton("Detect everywhere");
+	private final RadioButton detectEverywhereRadioButton = new RadioButton("Detect everywhere");
 	private final RadioButton minimizeDetectionRadioButton = new RadioButton("Only detect in projector bounds"); 
 	private final RadioButton cropRadioButton = new RadioButton("Crop feed to projector bounds");
 	
 	public CalibrationConfigPane(Pane parent) {
 		this.parent = parent;
 		
-		detectEverywhere.setToggleGroup(configToggleGroup);
+		detectEverywhereRadioButton.setToggleGroup(configToggleGroup);
 		minimizeDetectionRadioButton.setToggleGroup(configToggleGroup);
 		cropRadioButton.setToggleGroup(configToggleGroup);
 		
 		minimizeDetectionRadioButton.setSelected(true);
 		
-		detectEverywhere.setTextFill(Color.WHITE);
+		detectEverywhereRadioButton.setTextFill(Color.WHITE);
 		minimizeDetectionRadioButton.setTextFill(Color.WHITE);
 		cropRadioButton.setTextFill(Color.WHITE);
 		
-		this.setTop(detectEverywhere);
+		this.setTop(detectEverywhereRadioButton);
 		this.setCenter(minimizeDetectionRadioButton);
 		this.setBottom(cropRadioButton);
 		
 		this.setStyle("-fx-background-color: darkgray;");
 		
 		parent.getChildren().add(this);
+	}
+	
+	public CalibrationConfigPane(Pane parent, boolean detectEverywhere, boolean limitDetection, boolean cropProjection) {
+		this(parent);
+		
+		if (detectEverywhere) {
+			detectEverywhereRadioButton.setSelected(true);
+		} else if (limitDetection) {
+			minimizeDetectionRadioButton.setSelected(true);
+		} else if (cropProjection) {
+			cropRadioButton.setSelected(true);
+		}
 	}
 	
 	public boolean limitDetectProjection() {

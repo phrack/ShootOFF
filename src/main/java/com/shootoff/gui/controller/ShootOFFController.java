@@ -120,7 +120,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	private ProjectorArenaController arenaController;
 	private CalibrationConfigPane calibrationConfigPane;
-	private Target calibrationTarget;
+	private Optional<Target> calibrationTarget = Optional.empty();
 	private CameraManager arenaCameraManager;
 	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 	
@@ -606,32 +606,41 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
-			
-			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
-			calibrationConfigPane = new CalibrationConfigPane(tabAnchor);
-			
-			RectangleRegion calibrationRectangle =  new RectangleRegion(DEFAULT_DIM, DEFAULT_DIM, 
-					DEFAULT_POS, DEFAULT_POS);
-			calibrationRectangle.setFill(Color.PURPLE);
-			calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
 
-			arenaCameraManager = camerasSupervisor.getCameraManager(
-					cameraTabPane.getSelectionModel().getSelectedIndex());
-			Group calibrationGroup = new Group();
-			calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
-			calibrationGroup.getChildren().add(calibrationRectangle);
+			arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+
+			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+			calibrationConfigPane = new CalibrationConfigPane(tabAnchor, 
+					calibrationTarget.isPresent() 
+					&& !(arenaCameraManager.isLimitingDetectionToProjection() 
+							|| arenaCameraManager.isCroppingFeedToProjection()),
+					arenaCameraManager.isLimitingDetectionToProjection(), arenaCameraManager.isCroppingFeedToProjection());
 			
 			arenaCameraManager.setDetecting(false);
 			arenaCameraManager.setProjectionBounds(null);
-			calibrationTarget = arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false);
+			
+			if (!calibrationTarget.isPresent()) {
+				RectangleRegion calibrationRectangle =  new RectangleRegion(DEFAULT_DIM, DEFAULT_DIM, 
+						DEFAULT_POS, DEFAULT_POS);
+				calibrationRectangle.setFill(Color.PURPLE);
+				calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
+	
+				Group calibrationGroup = new Group();
+				calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
+				calibrationGroup.getChildren().add(calibrationRectangle);
+				
+				calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
+			} else {
+				arenaCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
+			}
 			
 		} else {
-			arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, calibrationTarget.getTargetGroup().getBoundsInParent());
+			arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, calibrationTarget.get().getTargetGroup().getBoundsInParent());
 			arenaCameraManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
 			arenaCameraManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
 			
 			if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
-				arenaCameraManager.setProjectionBounds(calibrationTarget.getTargetGroup().getBoundsInParent());
+				arenaCameraManager.setProjectionBounds(calibrationTarget.get().getTargetGroup().getBoundsInParent());
 			} else {
 				arenaCameraManager.setProjectionBounds(null);
 			}
@@ -645,10 +654,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		calibrationConfigPane.close();
 		
-		arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget);
+		if (calibrationTarget.isPresent()) 
+			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
+		
 		arenaCameraManager.setDetecting(true);
 		
-		calibrationTarget = null;
 		calibrationConfigPane = null;
 		arenaController.calibrated();
 	}

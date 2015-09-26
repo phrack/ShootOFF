@@ -515,9 +515,15 @@ public class CanvasManager {
 	}
 	
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
-		Platform.runLater(() -> { canvasGroup.getChildren().add(targetGroup); });
 		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, targets.size());
 		targets.add(newTarget);
+		
+				
+		return addTarget(newTarget);
+	}
+			
+	public Target addTarget(Target newTarget) {
+		Platform.runLater(() -> { canvasGroup.getChildren().add(newTarget.getTargetGroup()); });
 		
 		return newTarget;
 	}

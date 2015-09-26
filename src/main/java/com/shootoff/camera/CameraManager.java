@@ -220,6 +220,14 @@ public class CameraManager {
 	public void setLimitDetectProjection(boolean limitDetection) {
 		limitDetectProjection = limitDetection;
 	}
+	
+	public boolean isCroppingFeedToProjection() {
+		return cropFeedToProjection;
+	}
+	
+	public boolean isLimitingDetectionToProjection() {
+		return limitDetectProjection;
+	}
 
 	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
@@ -458,10 +466,10 @@ public class CameraManager {
 						(int)b.getWidth(), (int)b.getHeight());
 				workingCopy.createGraphics().drawImage(subFrame, (int)b.getMinX(), (int)b.getMinY(), null);
 				
-				minX = (int)projectionBounds.get().getMinX();
-				maxX = (int)projectionBounds.get().getMaxX();
-				minY = (int)projectionBounds.get().getMinY();
-				maxY = (int)projectionBounds.get().getMaxY();
+				minX = (int)b.getMinX();
+				maxX = (int)b.getMaxX();
+				minY = (int)b.getMinY();
+				maxY = (int)b.getMaxY();
 				
 			} else {
 				//workingCopy.createGraphics().drawImage(frame, 0, 0, null);
