@@ -17,6 +17,8 @@ public class Pixel extends Point {
 	private int lumAverage;
 	private Color color;
 	private double colorAverage;
+	private java.lang.Float[] cielabColor;
+	
 	private int connectedness = 0;
 	
 	public Pixel(int x, int y, Color color, int currentLum, int lumAverage, double colorAverage) {
@@ -26,6 +28,17 @@ public class Pixel extends Point {
 		this.lumAverage = lumAverage;
 		this.colorAverage = colorAverage;
 	}
+	
+	public Pixel(int x, int y, Color color, int currentLum, int lumAverage, double colorAverage, java.lang.Float[] cielabColor) {
+		super(x,y);
+		this.color = color;
+		this.currentLum = currentLum;
+		this.lumAverage = lumAverage;
+		this.colorAverage = colorAverage;
+		this.cielabColor = cielabColor;
+	}
+	
+	
 	public Pixel(int x, int y) {
 		super(x,y);
 	}
@@ -58,22 +71,42 @@ public class Pixel extends Point {
 
 	public double redColorDistance()
 	{
-		return colorDistance(Color.RED);
+		return colorDistance(new Color(0xFF0000));
 	}
 	
 	public double greenColorDistance()
 	{
-		return colorDistance(Color.GREEN);
+		return colorDistance(new Color(0x00FF00));
 	}
 	
+	/*public double redColorDeltaDistance()
+	{
+		return ShotSearchingBrightnessPixelTransformer.deltaE_red(cielabColor);
+	}
 	
-	// Green turned down from "43" to "25".
+	public double greenColorDeltaDistance()
+	{
+		return ShotSearchingBrightnessPixelTransformer.deltaE_green(cielabColor);
+	}*/
+	
+
+	public double redColorDistance(Color c2)
+	{
+		return colorDistance(c2, new Color(0xFF0000));
+	}
+	
+	public double greenColorDistance(Color c2)
+	{
+		return colorDistance(c2, new Color(0x00FF00));
+	}
+	
+	// Green turned down from "43" to "20".
 	// There is just too much of a bias for green in these algorithms at high brightness
 	// This isn't surprising, these are linear approximations of "real" color distances (CIELAB DeltaE)
 	// It is not a perfect fit across the spectrum, so we have to correct for its problems	
 	public static double colorDistance(Color color, Color c2)
 	{
-	    return Math.sqrt(22*Math.pow(color.getRed()-c2.getRed(),2) + 25*Math.pow(color.getGreen()-c2.getGreen(),2) + 35*Math.pow(color.getBlue()-c2.getBlue(),2));
+	    return Math.sqrt(22*Math.pow(color.getRed()-c2.getRed(),2) + 43*Math.pow(color.getGreen()-c2.getGreen(),2) + 35*Math.pow(color.getBlue()-c2.getBlue(),2));
 	}
 
 	
@@ -87,5 +120,9 @@ public class Pixel extends Point {
 	}
 	public void setColorAverage(double colorAverage) {
 		this.colorAverage = colorAverage;
-	} 
+	}
+	
+	
+
+	
 }

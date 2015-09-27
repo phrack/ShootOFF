@@ -25,6 +25,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +62,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.util.Pair;
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.parallel.Parallel;
@@ -113,12 +117,13 @@ public class CameraManager {
  	
 	private boolean[][] sectorStatuses;
 	
+	
+	BufferedImage prevFrame = null;
+	
 	// FIX ME: SHOULD NOT BE STATIC
 	private static int frameCount = 0;
 	
 	private double avgPossibleShotsDetected = -1;
-	
-	private Integer shotCount = 0;
 	
 	public static int getFrameCount() {
 		return frameCount;
@@ -366,6 +371,7 @@ public class CameraManager {
 		}
 
 
+
 		private void streamCameraFrames() {			
 
 			while (isStreaming) {
@@ -445,39 +451,32 @@ public class CameraManager {
 			}
 			
 			detectShots(currentFrame, pixelTransformerInitialized);
+		
+			
+
+			prevFrame = currentFrame;
 			
 			return true;
 		}
+		
+
 		
 		private void detectShots(BufferedImage frame, boolean pixelTransformerInitialized) {
 			if (!isDetecting) return;
 			
 
-			BufferedImage workingCopy = frame;
-			
-			int minX;
-			int maxX;
-			int minY;
-			int maxY;
+
+			final BufferedImage workingCopy;
 
 			if (limitDetectProjection && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
 				BufferedImage subFrame = frame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 						(int)b.getWidth(), (int)b.getHeight());
-				workingCopy.createGraphics().drawImage(subFrame, (int)b.getMinX(), (int)b.getMinY(), null);
-				
-				minX = (int)b.getMinX();
-				maxX = (int)b.getMaxX();
-				minY = (int)b.getMinY();
-				maxY = (int)b.getMaxY();
+				workingCopy = subFrame;
 				
 			} else {
-				//workingCopy.createGraphics().drawImage(frame, 0, 0, null);
 				
-				minX = 0;
-				maxX = frame.getWidth();
-				minY = 0;
-				maxY = frame.getHeight();
+				workingCopy = frame;
 				
 			}
 
@@ -486,15 +485,13 @@ public class CameraManager {
 				
 			ArrayList<Pixel> possibleShots = new ArrayList<Pixel>();
 			
-			shotCount = 0;
-			
-			
+
 			// It might be slightly faster to do x inside of y instead of vice-versa
-			Parallel.forIndex(minY, maxY, 1, new Operation<Integer>()
+			Parallel.forIndex(0, workingCopy.getHeight(), 1, new Operation<Integer>()
 			{
 
 				public void perform (Integer y) {
-					for (int x = minX; x < maxX; x++) {
+					for (int x = 0; x < workingCopy.getWidth(); x++) {
 							Optional<Pixel> pixel = ((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateFilter(workingCopy, x, y, pixelTransformerInitialized);
 							if(pixel.isPresent())
 							{
@@ -503,68 +500,62 @@ public class CameraManager {
 								{
 									possibleShots.add(pixel.get());
 								}
-								synchronized (shotCount)
-								{
-									shotCount++;
-								}
+
 							}
 					}
 
 				}
 			
 			});
+			
+			logger.trace("possibleShots {}", possibleShots.size());
+			
+			//ArrayList<Pixel> possibleShots = ((ShotSearchingBrightnessPixelTransformer) pixelTransformer).updateDataAndGetPossibleShots(workingCopy, pixelTransformerInitialized);
 
 
 			if (pixelTransformerInitialized)
 			{
 				if (avgPossibleShotsDetected == -1)
-					avgPossibleShotsDetected = shotCount;
+					avgPossibleShotsDetected = possibleShots.size();
 				else
-					avgPossibleShotsDetected = (((webcamFPS-1)*avgPossibleShotsDetected)+Math.min(shotCount,500))/webcamFPS;
-			}
-			
-			if (avgPossibleShotsDetected >= 500 && getFrameCount()>90)
-				showBrightnessWarning();
-
-
+					avgPossibleShotsDetected = (((webcamFPS-1)*avgPossibleShotsDetected)+Math.min(possibleShots.size(),500))/webcamFPS;
 			
 			
-			long start = System.currentTimeMillis();
-			long current = 0;
-			
-			
-			if (avgPossibleShotsDetected >= 100 || (shotCount >= 250))
-			{
+				if (avgPossibleShotsDetected >= 500 && getFrameCount()>90)
+					showBrightnessWarning();
+	
 				
-				logger.info("HIGH MOTION - IGNORING FRAME - avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, shotCount);
-			}
-
-			
-			if (avgPossibleShotsDetected < 50 && (shotCount >= 9 && shotCount < 250))
-			{
-				
-				ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
-				PixelClusterManager pixelClusterManager = new PixelClusterManager(possibleShots);
-				pixelClusterManager.clusterPixels();
-				clusters = pixelClusterManager.dumpClusters();
-				
-				shotCount = 0;
-				
-				Parallel.forEach(clusters, new Operation<PixelCluster>()
+				if (getFrameCount()>30 && (avgPossibleShotsDetected >= 100 || (possibleShots.size() >= 250)))
 				{
-					public void perform(PixelCluster cluster)
-					{
-						
-						//logger.trace("Adding shot {} - {} {} - Predicted color: {}", shotCount, cluster.centerPixelX, cluster.centerPixelY, cluster.getPredictedColor());
-						
-						shotCount++;
-						
-						addShot(cluster);
-						
-					}
-				});
+					
+					logger.info("HIGH MOTION - IGNORING FRAME - avgPossibleShotsDetected {} shotCount {}", avgPossibleShotsDetected, possibleShots.size());
+				}
+	
 				
+				if (avgPossibleShotsDetected < 50 && (possibleShots.size() >= 9 && possibleShots.size() < 250))
+				{
+					
+					ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
+					PixelClusterManager pixelClusterManager = new PixelClusterManager(possibleShots);
+					pixelClusterManager.clusterPixels();
+					clusters = pixelClusterManager.dumpClusters();
+					
+	
+					Parallel.forEach(clusters, new Operation<PixelCluster>()
+					{
+						public void perform(PixelCluster cluster)
+						{
+
+							addShot(workingCopy, cluster);
+
+							
+						}
+					});
+					
+				}
 			}
+			
+			((ShotSearchingBrightnessPixelTransformer) pixelTransformer).applyFilter();
 			
 			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
 				
@@ -598,9 +589,12 @@ public class CameraManager {
 			}
 		}
 		
-		private void addShot(PixelCluster pc)
+		private void addShot(BufferedImage workingCopy, PixelCluster pc)
 		{
-			Optional<javafx.scene.paint.Color> color = pc.getPredictedColorJavafx();
+			Optional<javafx.scene.paint.Color> color = pc.getPredictedColorJavafxNew(workingCopy, ((ShotSearchingBrightnessPixelTransformer) pixelTransformer).getColorDiffMovingAverage());
+
+			Optional<javafx.scene.paint.Color> color_alt = pc.getPredictedColorJavafxNew(workingCopy, prevFrame);
+			
 			double x = pc.centerPixelX;
 			double y = pc.centerPixelY;
 			
@@ -611,10 +605,41 @@ public class CameraManager {
 					color.get().equals(config.getIgnoreLaserColor().get()))
 				return;
 			
-			logger.info("Suspected shot accepted: Center ({}, {}), {}",
-					x, y, color.get());
+			logger.info("Suspected shot accepted: Center ({}, {}), {} - alt {}",
+					x, y, color.get(), color_alt.get());
+			
+			
+			Shot shot = new Shot(color.get(), x, y, 
+					CameraManager.getFrameCount(), config.getMarkerRadius());
+			
+			
+			/*if (config.getDeduplicationProcessor().processShotLookahead(shot)) {
+				File outputfile = new File(String.format("shot-%d-%d_orig.png",(int)pc.centerPixelX, (int)pc.centerPixelY));
+				try {
+					ImageIO.write(workingCopy, "png", outputfile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for (Pixel p : pc)
+				{
+					if (color.get() == javafx.scene.paint.Color.GREEN)
+						workingCopy.setRGB(p.x, p.y, 0x00FF00);
+					else
+						workingCopy.setRGB(p.x, p.y, 0xFF0000);
+				}
+				outputfile = new File(String.format("shot-%d-%d.png",(int)pc.centerPixelX, (int)pc.centerPixelY));
+				try {
+					ImageIO.write(workingCopy, "png", outputfile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}*/
+			
+			
 
-			if (cropFeedToProjection && projectionBounds.isPresent()) {
+			if ((limitDetectProjection || cropFeedToProjection) && projectionBounds.isPresent()) {
 				Bounds b = projectionBounds.get();
 				
 				canvasManager.addShot(color.get(), x + b.getMinX(),
@@ -623,6 +648,9 @@ public class CameraManager {
 				canvasManager.addShot(color.get(), x,
 						y);
 			}
+			
+
+			
 		}
 		
 		private void showMissingCameraError() {

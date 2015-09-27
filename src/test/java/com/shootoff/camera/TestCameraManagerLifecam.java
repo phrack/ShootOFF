@@ -66,6 +66,8 @@ public class TestCameraManagerLifecam {
 		
 		assertEquals(9, shots.size());
 		
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 
 	}
 	
@@ -75,6 +77,9 @@ public class TestCameraManagerLifecam {
 		List<Shot> shots = findShots("/shotsearcher/lifecam-outdoor-green.avi", Optional.empty());
 		
 		assertEquals(9, shots.size());
+		
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 		
 
 	}
@@ -86,7 +91,8 @@ public class TestCameraManagerLifecam {
 		
 		assertEquals(9, shots.size());
 		
-
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 	}
 	
 	@Test
@@ -94,7 +100,6 @@ public class TestCameraManagerLifecam {
 		List<Shot> shots = findShots("/shotsearcher/lifecam-motion-in-room.avi", Optional.empty());
 		
 		assertEquals(0, shots.size());
-		
 
 	}
 	
@@ -104,7 +109,8 @@ public class TestCameraManagerLifecam {
 		
 		assertEquals(10, shots.size());
 		
-
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 	}
 	
 }

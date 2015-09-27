@@ -126,7 +126,7 @@ public class PixelClusterManager {
 			logger.trace("Cluster {} - {} - connectedness {} - {} {}", i, cluster.size(), avgconnectedness, averageX, averageY);
 			
 			// It's too small or not well connected, bail out early
-			if (cluster.size() < 9 || avgconnectedness < 4.75)
+			if (cluster.size() < 9 || avgconnectedness < 4.5)
 				continue;
 			
 

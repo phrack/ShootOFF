@@ -759,7 +759,7 @@ public class Configuration {
 		return recordingManagers;
 	}
 	
-	public ShotProcessor getDeduplicationProcessor() {
+	public DeduplicationProcessor getDeduplicationProcessor() {
 		return deduplicationProcessor;
 	}
 	

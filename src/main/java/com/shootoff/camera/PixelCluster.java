@@ -1,6 +1,8 @@
 package com.shootoff.camera;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -21,11 +23,96 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	public double centerPixelY;
 	
 
+	public double getColorDifference(BufferedImage frame, BufferedImage prevFrame)
+	{
+		ArrayList<Pixel> visited = new ArrayList<Pixel>();
+		
+		double diff = 0;
+		double lumDiff = 0;
+		for (Pixel pixel : this)
+		{
+			if (pixel.getConnectedness()<8)
+			{
+				for(int h=-1;h<=1;h++)
+					for(int w=-1;w<=1;w++) 
+					{
+						int rx = pixel.x+w; 
+						int ry = pixel.y+h; 
+						Pixel nearPoint = new Pixel(rx,ry);
+						if (!this.contains(nearPoint) && !visited.contains(nearPoint))
+						{
+							
+							java.awt.Color npColor = new java.awt.Color(frame.getRGB(rx, ry));
+							java.awt.Color prevnpColor = new java.awt.Color(prevFrame.getRGB(rx, ry));
+
+							double rcd = pixel.redColorDistance(npColor);
+							double gcd = pixel.greenColorDistance(npColor);
+							diff += (rcd-gcd);
+							
+							
+							double prevrcd = pixel.redColorDistance(prevnpColor);
+							double prevgcd = pixel.greenColorDistance(prevnpColor);
+							lumDiff += (prevrcd-prevgcd);
+							
+							visited.add(nearPoint);
+							
+							logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd-gcd), (prevrcd-prevgcd));
+						}
+					}
+			}
+		}
+		
+		logger.trace("Done visiting_alt - {}", diff-lumDiff);
+		
+		return diff-lumDiff;
+	}
+	
+	public double getColorDifference(BufferedImage frame, double[][] colorDiffMovingAverage)
+	{
+		ArrayList<Pixel> visited = new ArrayList<Pixel>();
+		
+		double diff = 0;
+		double lumDiff = 0;
+		for (Pixel pixel : this)
+		{
+			if (pixel.getConnectedness()<8)
+			{
+				for(int h=-1;h<=1;h++)
+					for(int w=-1;w<=1;w++) 
+					{
+						int rx = pixel.x+w; 
+						int ry = pixel.y+h; 
+						Pixel nearPoint = new Pixel(rx,ry);
+						if (!this.contains(nearPoint) && !visited.contains(nearPoint))
+						{
+							
+							java.awt.Color npColor = new java.awt.Color(frame.getRGB(rx, ry));
+
+							double rcd = pixel.redColorDistance(npColor);
+							double gcd = pixel.greenColorDistance(npColor);
+							diff += (rcd-gcd);
+							lumDiff += colorDiffMovingAverage[rx][ry];
+							
+							visited.add(nearPoint);
+							
+							logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd-gcd), colorDiffMovingAverage[rx][ry]);
+						}
+					}
+			}
+		}
+		
+		logger.trace("Done visiting - {}", diff-lumDiff);
+		
+		return diff-lumDiff;
+	}
+	
 	public double getColorDifference()
 	{
 		double diff = 0;
 		
 		double lumDiff = 0;
+		
+		double scaledDiff = 0;
 		
 		double result = 0;
 		
@@ -36,28 +123,39 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		int greener_withcma = 0;
 		int i = 0;
 		
-		double avgconnectedness = 0;
+		double avglum = 0;
+		double avgmalum = 0;
+		double avgcdness = 0;
+		
+
 		
 		for (Pixel pixel : this)
 		{
 			
-			avgconnectedness += pixel.getConnectedness();
+			i++;
+			if (pixel.getCurrentLum() > 240)
+				continue;
+			
+			avglum += (double)pixel.getCurrentLum();
+			avgcdness += (double)pixel.getConnectedness();
+			avgmalum += (double)pixel.getLumAverage();
 			
 			
 			double rcd = pixel.redColorDistance();
 			double gcd = pixel.greenColorDistance();
 			
-			double cddiff = ((rcd-gcd) / pixel.getConnectedness());
+			double cddiff = (rcd-gcd);
 			
-			double pixel_ca = pixel.getColorAverage() / pixel.getConnectedness();
+			double pixel_ca = pixel.getColorAverage();
 			
-			double weighted_cd_withcma = ((cddiff*2-pixel_ca)/3);
-			
+
 			lumDiff = lumDiff + pixel_ca;
-			
-			
-			logger.trace("{} {} - {}", i, cddiff, pixel_ca);
 			diff = diff + cddiff;
+			
+			scaledDiff = scaledDiff + ((diff - lumDiff)/(double)pixel.getCurrentLum());
+			
+			logger.trace("{} - avglum {} - avgmalum {} - {} {} - {} - {}", i, (double)pixel.getCurrentLum(), (double)pixel.getLumAverage(), cddiff, pixel_ca, (cddiff-pixel_ca), scaledDiff);
+
 			
 			if (Math.abs(rcd-gcd)>10)
 			{
@@ -66,25 +164,22 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 				else
 					greener++;
 			}
-				
-			if (Math.abs(weighted_cd_withcma*pixel.getConnectedness())>10)
-			{
-				if (weighted_cd_withcma<0)
-					redder_withcma++;
-				else
-					greener_withcma++;
-			}
-			
-			i++;
-			
+
 		}
 		
-		lumDiff = (lumDiff * avgconnectedness) / this.size();
-		diff = (diff * avgconnectedness) / this.size();
 		
-		result = (diff*2 - lumDiff)/3;
 		
-		logger.trace("getColorDifference {} -  {} {} - {} {} - {} - {} {} - {} {}", this.size(), centerPixelX, centerPixelY, diff, lumDiff, result, redder, greener, redder_withcma, greener_withcma);
+		logger.trace("getColorDifference1 {} - {} {} - {}", avglum, diff, lumDiff, (diff-lumDiff));
+
+		avgmalum = avgmalum / this.size();
+		avglum = avglum / this.size();
+		avgcdness = avgcdness / this.size();
+
+		
+		//result = (diff - lumDiff);
+		result = scaledDiff;
+		
+		logger.trace("getColorDifference {} -  {} {} | {} {} | {} {} - {}", this.size(), avglum, avgcdness, centerPixelX, centerPixelY, diff, lumDiff, result);
 		
 		
 		return result;
@@ -108,6 +203,33 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	public Optional<javafx.scene.paint.Color> getPredictedColorJavafx()
 	{
 		double colorDist = getColorDifference();
+		if (Math.abs(colorDist) < 2) {
+			return Optional.empty();
+		} else if (colorDist < 0) {
+			return Optional.of(javafx.scene.paint.Color.RED);
+		} else {
+			return Optional.of(javafx.scene.paint.Color.GREEN);
+		}
+	}
+	
+	public Optional<javafx.scene.paint.Color> getPredictedColorJavafxNew(BufferedImage frame, double[][] colorDiffMovingAverage)
+	{
+		double colorDist = getColorDifference(frame, colorDiffMovingAverage);
+		
+		logger.trace("getcolorjavafx {} - {}", colorDist, (colorDist<0));
+		
+		if (Math.abs(colorDist) < 2) {
+			return Optional.empty();
+		} else if (colorDist < 0) {
+			return Optional.of(javafx.scene.paint.Color.RED);
+		} else {
+			return Optional.of(javafx.scene.paint.Color.GREEN);
+		}
+	}
+	
+	public Optional<javafx.scene.paint.Color> getPredictedColorJavafxNew(BufferedImage frame, BufferedImage prevFrame)
+	{
+		double colorDist = getColorDifference(frame, prevFrame);
 		if (Math.abs(colorDist) < 2) {
 			return Optional.empty();
 		} else if (colorDist < 0) {

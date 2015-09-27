@@ -21,11 +21,21 @@ package com.shootoff.camera;
 import java.awt.image.BufferedImage;
 
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import javafx.geometry.Bounds;
+
 import java.awt.Color;
 
+import org.openimaj.image.ImageUtilities;
+import org.openimaj.image.MBFImage;
+import org.openimaj.image.analysis.colour.CIEDE2000;
+import org.openimaj.image.colour.Transforms;
+import org.openimaj.image.feature.global.AvgBrightness;
+import org.openimaj.image.processor.PixelProcessor;
+import org.openimaj.util.function.Operation;
+import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +51,8 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	public ShotSearchingBrightnessPixelTransformer(Configuration config,
 			CanvasManager canvasManager, boolean[][] sectorStatuses,
 			BufferedImage currentFrame, Optional<Bounds> projectionBounds, boolean cropped) {
-		super(config, canvasManager, sectorStatuses, null, null,
-				projectionBounds, cropped);
+		super(config, canvasManager, sectorStatuses, currentFrame,
+				null, projectionBounds, cropped);
 
 
 		for (int x = 0; x < CameraManager.FEED_WIDTH; x++)
@@ -56,12 +66,27 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 	
 	private final static int BRIGHTNESS_INDEX = 2;
 	
-	private final int[][] lumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
+	private int[][] lumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
 	
-	private final double[][] colorDiffMovingAverage = new double[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
+	private double[][] colorDiffMovingAverage = new double[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
 	
+	
+	private final int[][] newLumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
+	
+	private final double[][] newColorDiffMovingAverage = new double[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
+	
+	public double[][] getColorDiffMovingAverage() {
+		return colorDiffMovingAverage;
+	}
+
+
+
+
 	@Override
 	public void run() {
+		
+		//test(currentFrame);
+		
 		//**These tests don't work without lum information**
 		
 		// Split the image into x columns and y rows, and search
@@ -127,10 +152,10 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 		
 		
         // Update the average brightness
-    	lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
+		newLumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
 		
     	// Update the color distance
-    	colorDiffMovingAverage[x][y] = ((colorDiffMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + colorDiff) / CameraManager.INIT_FRAME_COUNT;
+		newColorDiffMovingAverage[x][y] = ((colorDiffMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + colorDiff) / CameraManager.INIT_FRAME_COUNT;
 		
     	/*if (lumsMovingAverage[x][y] > 245)
     	{
@@ -143,7 +168,110 @@ public class ShotSearchingBrightnessPixelTransformer extends ShotSearcher implem
 
 	}
 	
+	public void applyFilter()
+	{
+		lumsMovingAverage = newLumsMovingAverage;
+		colorDiffMovingAverage = newColorDiffMovingAverage;
+	}
 	
+	/*static public Float[] GREEN = { 87.7370334735442f, -86.1884340941196f, 83.1861435450368f } ;
+	static public Float[] RED = { 53.2328817858425f, 80.1053270902018f, 67.2227819454362f };
+	public ArrayList<Pixel> updateDataAndGetPossibleShots(BufferedImage frame, boolean pixelTransformerInitialized)
+	{
+		ArrayList<Pixel> possibleShots = new ArrayList<Pixel>();
+		
+		final MBFImage mbfImage = Transforms.RGB_TO_CIELab(ImageUtilities.createMBFImage(frame, false));
+		
+		
+		Parallel.forIndex(0, frame.getHeight(), 1, new Operation<Integer>()
+		{
+
+		public void perform (Integer y) {
+			for (int x = 0; x < frame.getWidth(); x++) {
+				java.awt.Color currentC = new java.awt.Color(frame.getRGB(x, y));
+				int currentRGB = currentC.getRGB();
+				
+				int currentLum = PixelTransformer.calcLums(currentRGB);
+				
+		    	float deltaEg = deltaE_green(mbfImage.getPixel(x, y));
+		    	float deltaEr = deltaE_red(mbfImage.getPixel(x, y));
+		    	//logger.trace("{} {} {} {}", mbfImage.getPixel(x, y), GREEN, deltaEg, deltaEr);
+		    	//avgDistance += (deltaEr - deltaEg);
+		    	
+		    	float colorDiff = (deltaEr - deltaEg);
+		    	
+		    	if (lumsMovingAverage[x][y] == -1)
+		    	{
+		    		colorDiffMovingAverage[x][y] = colorDiff;
+		    		lumsMovingAverage[x][y] = currentLum;
+		    	}
+		    	else
+		    	{
+		    		
+		    		if (pixelTransformerInitialized && (currentLum-lumsMovingAverage[x][y])>=((255-lumsMovingAverage[x][y])/2) && lumsMovingAverage[x][y]<=250 && (currentLum-lumsMovingAverage[x][y])>=10)
+		    		{
+		    			synchronized (possibleShots)
+		    			{
+		    				possibleShots.add(new Pixel(x,y, currentC, currentLum, lumsMovingAverage[x][y], colorDiffMovingAverage[x][y], mbfImage.getPixel(x,y)));
+		    			}
+		    		}
+		    		
+		    		
+		    		
+		        	lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + currentLum) / CameraManager.INIT_FRAME_COUNT;
+		    		colorDiffMovingAverage[x][y] = ((colorDiffMovingAverage[x][y] * (CameraManager.INIT_FRAME_COUNT-1)) + colorDiff) / CameraManager.INIT_FRAME_COUNT;
+		    	}
+		    }
+		}
+		});
+		
+		return possibleShots;
+	}
+	
+
+	
+	public static float deltaE_green(Float[] c1)
+	{
+		return CIEDE2000.calculateDeltaE(c1, GREEN);
+	}
+	
+	public static float deltaE_red(Float[] c1)
+	{
+		return CIEDE2000.calculateDeltaE(c1, RED);
+	}
+	
+	public void test(BufferedImage frame)
+	{
+		Float[] GREEN = { 87.7370334735442f, -86.1884340941196f, 83.1861435450368f } ;
+		Float[] RED = { 53.2328817858425f, 80.1053270902018f, 67.2227819454362f };
+		
+		MBFImage mbfImage = ImageUtilities.createMBFImage(frame, false);
+		
+		AvgBrightness avgb = new AvgBrightness();
+		avgb.analyseImage(mbfImage);
+		logger.warn("{}", avgb.getBrightness());
+		
+		
+		mbfImage = Transforms.RGB_TO_CIELab(mbfImage);
+		
+		double avgDistance = 0;
+		int i = 0;
+		
+		
+		for (int y=325; y<338; y++) {
+		    for(int x=403; x<415; x++) {
+		    	float deltaEg = CIEDE2000.calculateDeltaE(mbfImage.getPixel(x, y), GREEN);
+		    	float deltaEr = CIEDE2000.calculateDeltaE(mbfImage.getPixel(x, y), RED);
+		    	logger.warn("{} {} {} {}", mbfImage.getPixel(x, y), GREEN, deltaEg, deltaEr);
+		    	avgDistance += (deltaEr - deltaEg);
+		    	
+		    	i++;
+		    }
+		}
+		avgDistance /= i;
+		
+		logger.warn("{}", avgDistance);
+	}*/
 	
 	public boolean applyFilter(BufferedImage frame, int x, int y, LightingCondition lightCondition) {
 		return false;

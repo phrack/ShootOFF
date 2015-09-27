@@ -41,10 +41,6 @@ public class TestShotSearcher {
 		BufferedImage testFrame = ImageIO.read(
 				TestShotSearcher.class.getResourceAsStream(imagePath));
 
-		/*BufferedImage grayScale = new BufferedImage(testFrame.getWidth(),
-				testFrame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-
-		grayScale.createGraphics().drawImage(testFrame, 0, 0, null);*/
 		
 		Thread searcher = new Thread(
 				new ShotSearchingBrightnessPixelTransformer(config, mockManager, sectorStatuses,

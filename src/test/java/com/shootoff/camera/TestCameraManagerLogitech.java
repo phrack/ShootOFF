@@ -66,15 +66,8 @@ public class TestCameraManagerLogitech {
 		
 		assertEquals(9, shots.size());
 		
-		// Seems to have a bit of trouble with the shot color
-		
-		/*assertEquals(629.5, shots.get(0).getX(), 1);
-		assertEquals(168.5, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
-		
-		assertEquals(428.5, shots.get(1).getX(), 1);
-		assertEquals(129.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());*/
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 	}
 	
 	
@@ -84,17 +77,20 @@ public class TestCameraManagerLogitech {
 		
 		assertEquals(9, shots.size());
 		
-		// Seems to have a bit of trouble with the shot color
-		
-		/*assertEquals(629.5, shots.get(0).getX(), 1);
-		assertEquals(168.5, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
-		
-		assertEquals(428.5, shots.get(1).getX(), 1);
-		assertEquals(129.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());*/
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 	}
 	
+	
+	@Test
+	public void testLogitechOutdoorGreen2() {
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.avi", Optional.empty());
+		
+		assertEquals(9, shots.size());
+		
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
+	}
 	
 	@Test
 	public void testLogitechSafariGreen() {
@@ -102,13 +98,40 @@ public class TestCameraManagerLogitech {
 		
 		assertEquals(9, shots.size());
 		
-		/*assertEquals(629.5, shots.get(0).getX(), 1);
-		assertEquals(168.5, shots.get(0).getY(), 1);
-		assertEquals(Color.RED, shots.get(0).getColor());
-		
-		assertEquals(428.5, shots.get(1).getX(), 1);
-		assertEquals(129.5, shots.get(1).getY(), 1);
-		assertEquals(Color.RED, shots.get(1).getColor());*/
+		for (Shot shot : shots)
+			assertEquals(Color.GREEN, shot.getColor());
 	}
 	
+	
+	@Test
+	public void testLogitechIndoorRed() {
+		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-red.avi", Optional.empty());
+		
+		assertEquals(9, shots.size());
+		
+		for (Shot shot : shots)
+			assertEquals(Color.RED, shot.getColor());
+	}
+	
+	
+	@Test
+	public void testLogitechOutdoorRed() {
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.avi", Optional.empty());
+		
+		assertEquals(9, shots.size());
+		
+		for (Shot shot : shots)
+			assertEquals(Color.RED, shot.getColor());
+	}
+	
+	
+	@Test
+	public void testLogitechSafariRed() {
+		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.avi", Optional.empty());
+		
+		assertEquals(9, shots.size());
+		
+		for (Shot shot : shots)
+			assertEquals(Color.RED, shot.getColor());
+	}
 }
