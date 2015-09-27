@@ -261,15 +261,43 @@ public final class ShotDetectionManager implements Runnable {
 
 	private ArrayList<Pixel> findThresholdPixelsAndUpdateFilter(BufferedImage workingCopy, boolean detectShots)
 	{
+		final int subWidth = workingCopy.getWidth() / SECTOR_COLUMNS;
+		final int subHeight = workingCopy.getHeight() / SECTOR_ROWS;
+		
+		final boolean[][] sectorstatuses = cameraManager.getSectorStatuses();
+		
+		
 		ArrayList<Pixel> thresholdPixels = new ArrayList<Pixel>();
 
 		// In this loop we accomplish both MovingAverage updates AND threshold pixel detection
-		Parallel.forIndex(0, workingCopy.getHeight(), 1, new Operation<Integer>()
+		Parallel.forIndex(0, (SECTOR_ROWS*SECTOR_COLUMNS), 1, new Operation<Integer>()
 		{
 
-			public void perform (Integer y) {
-				for (int x = 0; x < workingCopy.getWidth(); x++) {
-						Optional<Pixel> pixel = updateFilter(workingCopy, x, y, detectShots);
+			public void perform (Integer sector) {
+				Integer sectorX = (sector%SECTOR_ROWS);
+				Integer sectorY = (int)Math.floor((sector/SECTOR_COLUMNS));
+				
+				Integer startX = subWidth*(sector%SECTOR_ROWS);
+				Integer startY = subHeight*(int)Math.floor((sector/SECTOR_COLUMNS));
+				
+				//logger.warn("{} - {} {}", sector, startX, startY);
+				
+				if (!sectorstatuses[sectorY][sectorX])
+					return;
+				
+				for (Integer y = startY; y < startY + subHeight; y++)
+				{
+					
+					for (Integer x = startX; x < startX + subWidth; x++)
+					{
+						//logger.warn("{} - {} {} - {} {}", sector, startX, startY, x, y);
+						
+						Optional<Pixel> pixel = Optional.empty();
+						
+						pixel = updateFilter(workingCopy, x, y, detectShots);
+						
+						//logger.warn("step 2");
+						
 						if(pixel.isPresent())
 						{
 							
@@ -279,6 +307,9 @@ public final class ShotDetectionManager implements Runnable {
 							}
 
 						}
+						
+						//logger.warn("step 3");
+					}
 				}
 
 			}
