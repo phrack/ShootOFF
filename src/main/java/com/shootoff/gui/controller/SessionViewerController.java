@@ -31,11 +31,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
@@ -43,6 +46,7 @@ import marytts.util.io.FileFilter;
 public class SessionViewerController {
 	@FXML private ListView<File> sessionListView;
 	@FXML private TabPane cameraTabPane;
+	@FXML private Button togglePlaybackButton;
 	@FXML private Slider timeSlider;
 	@FXML private Label timeLabel;
 	@FXML private ListView<Event> eventsListView;
@@ -53,6 +57,7 @@ public class SessionViewerController {
 	private final Map<String, SessionCanvasManager> cameraGroups = new HashMap<String, SessionCanvasManager>();
 	private final Map<Tab, Integer> eventSelectionsPerTab = new HashMap<Tab, Integer>();
 	
+	private boolean isPlaying = false;
 	private boolean refreshFromSlider = true;
 	private boolean refreshFromSelection = true;
 	private SessionRecorder currentSession;
@@ -63,6 +68,9 @@ public class SessionViewerController {
 		this.config = config;
 		sessionEntries.addAll(findSessions());
 		sessionListView.setItems(sessionEntries);
+		
+		togglePlaybackButton.setGraphic(new ImageView(new Image(
+				VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
 		
 		sessionListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<File>() {
 				public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
@@ -285,5 +293,18 @@ public class SessionViewerController {
 		} else {
 			eventsListView.getSelectionModel().select(eventEntries.size() - 1);
 		}
+	}
+	
+	@FXML
+	public void togglePlaybackButtonClicked(ActionEvent event) {
+		isPlaying = !isPlaying;
+		
+		if (isPlaying) {
+			togglePlaybackButton.setGraphic(new ImageView(new Image(
+					SessionViewerController.class.getResourceAsStream("/images/gnome_media_playback_pause.png"))));
+		} else {
+			togglePlaybackButton.setGraphic(new ImageView(new Image(
+					SessionViewerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+		}	
 	}
 } 
