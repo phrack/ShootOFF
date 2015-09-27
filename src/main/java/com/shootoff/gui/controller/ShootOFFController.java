@@ -646,7 +646,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        			noneTrainingMenuItem.fire();
 	        		}
 	        		toggleArenaShotsMenuItem.setText("Show Shot Markers");
-	        		if (calibrationTarget != null) {
+	        		if (calibrationConfigPane != null) {
 	        			stopCalibration();
 	        		}
 	        		toggleProjectorMenus(true);
