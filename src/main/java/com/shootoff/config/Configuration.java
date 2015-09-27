@@ -126,6 +126,13 @@ public class Configuration {
 	private Set<VideoPlayerController> videoPlayers = new HashSet<VideoPlayerController>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
+	
+	private boolean debugShotsRecordToFiles = false;
+	
+	public boolean isDebugShotsRecordToFiles()
+	{
+		return debugShotsRecordToFiles;
+	}
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;

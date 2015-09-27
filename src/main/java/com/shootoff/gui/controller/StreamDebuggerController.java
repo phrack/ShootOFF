@@ -47,14 +47,14 @@ public class StreamDebuggerController implements DebuggerListener {
 
 		cameraManager.setThresholdListener(this);
 
-		centerBorderSlider.valueProperty().addListener(new ChangeListener<Number>() {
+		/*centerBorderSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
 	        	if (newValue == null) return;
 
         		cameraManager.setCenterApproxBorderSize(newValue.intValue());
 	      	}
-	    });
+	    });*/
 
 		minDimSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override

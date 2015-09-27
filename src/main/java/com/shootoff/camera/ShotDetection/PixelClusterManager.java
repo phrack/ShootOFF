@@ -1,15 +1,11 @@
-package com.shootoff.camera;
+package com.shootoff.camera.ShotDetection;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 
-import org.openimaj.util.function.Operation;
-import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +19,14 @@ public class PixelClusterManager {
 	
 	HashMap<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 
-	PixelClusterManager(ArrayList<Pixel> p)
+	private ShotDetectionManager shotDetectionManager;
+	
+	private final static double MINIMUM_CONNECTEDNESS = 4.5f;
+
+	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager)
 	{
 			points = p;
+			this.shotDetectionManager = shotDetectionManager;
 	}
 	
 	void clusterPixels()
@@ -126,7 +127,7 @@ public class PixelClusterManager {
 			logger.trace("Cluster {} - {} - connectedness {} - {} {}", i, cluster.size(), avgconnectedness, averageX, averageY);
 			
 			// It's too small or not well connected, bail out early
-			if (cluster.size() < 9 || avgconnectedness < 4.5)
+			if (cluster.size() < shotDetectionManager.getMinimumShotDimension() || avgconnectedness < MINIMUM_CONNECTEDNESS)
 				continue;
 			
 

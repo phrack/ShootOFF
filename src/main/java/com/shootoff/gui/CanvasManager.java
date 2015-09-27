@@ -68,6 +68,8 @@ public class CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
+	private CameraManager cameraManager;
+	
 	private final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
@@ -83,6 +85,7 @@ public class CanvasManager {
 	
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
+
 	
 	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor, 
 			String cameraName, ObservableList<ShotEntry> shotEntries) {
@@ -119,7 +122,11 @@ public class CanvasManager {
 			}
 		});
 	}	
-	
+
+	public void setCameraManager(CameraManager cameraManager) {
+		this.cameraManager = cameraManager;
+	}
+
 	public String getCameraName() {
 		return cameraName;
 	}
@@ -239,7 +246,7 @@ public class CanvasManager {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
-				CameraManager.getFrameCount(), config.getMarkerRadius());
+				System.currentTimeMillis(), cameraManager.getFrameCount(), config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
@@ -304,7 +311,7 @@ public class CanvasManager {
 				
 				Shot arenaShot = new Shot(shot.getColor(), 
 						(shot.getX() - b.getMinX()) * x_scale, (shot.getY() - b.getMinY()) * y_scale,
-						shot.getTimestamp(), config.getMarkerRadius());
+						shot.getTimestamp(), shot.getFrame(), config.getMarkerRadius());
 				
 				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
 			}

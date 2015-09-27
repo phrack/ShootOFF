@@ -49,6 +49,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
 		arenaStage = (Stage)arenaAnchor.getScene().getWindow();
+		
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
 		

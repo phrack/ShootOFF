@@ -23,26 +23,21 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
-
 public class DeduplicationProcessor implements ShotProcessor {
 	private Optional<Shot> lastShot = Optional.empty();
-	//private final double DISTANCE_THRESHOLD_X;
-	//private final double DISTANCE_THRESHOLD_Y;
 	
 	private static double DISTANCE_THRESHOLD = 0.10;
 	private static double DISTANCE_THRESHOLD_X = 640 * DISTANCE_THRESHOLD;
 	private static double DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
 	
-	private static int TIME_THRESHOLD = 10; // This is Miculek constant because it's based on how fast Jerry Miculek
-	// can pull the trigger. It's a safe bet ShootOFF users aren't faster :).	
+	private static int frameThreshold = 10;
 	
 	public static int getThreshold() {
-		return TIME_THRESHOLD;
+		return frameThreshold;
 	}
 
-	public static void setThreshold(int tIME_THRESHOLD) {
-		TIME_THRESHOLD = tIME_THRESHOLD;
+	public static void setThreshold(int ft) {
+		frameThreshold = ft;
 	}
 
 	private final Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
@@ -56,11 +51,10 @@ public class DeduplicationProcessor implements ShotProcessor {
 		return lastShot;
 	}
 	
-	@Override
-	public boolean processShot(Shot shot) {
-		if (lastShot.isPresent()) {
-			logger.trace("processShot {} {}", shot.getTimestamp(), lastShot.get().getTimestamp());
 
+	public boolean processShot(Shot shot, boolean updateLastShot) {
+		if (lastShot.isPresent()) {
+			logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(), frameThreshold);
 			
 			// FIX ME MAYBE? Color detection is disabled
 			//shot.getColor().equals(lastShot.get().getColor()) && 
@@ -69,7 +63,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 			// and are very close to each other, ignore the new shot
 			
 			if (	
-					shot.getTimestamp() - lastShot.get().getTimestamp() <= TIME_THRESHOLD &&
+					shot.getFrame() - lastShot.get().getFrame() <= frameThreshold &&
 					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
 					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
 				return false;
@@ -77,31 +71,19 @@ public class DeduplicationProcessor implements ShotProcessor {
 			
 		}
 
-		
-		lastShot = Optional.of(shot);
+		if (updateLastShot)
+			lastShot = Optional.of(shot);
 		
 		return true;
 	}
 	
+	@Override
+	public boolean processShot(Shot shot) {
+		return processShot(shot, true);
+	}
+	
 	public boolean processShotLookahead(Shot shot) {
-		
-		if (lastShot.isPresent()) {
-			logger.trace("processShotLookAhead {} {}", shot.getTimestamp(), lastShot.get().getTimestamp());
-			
-			// If two shots have the same color, appear to have happened fast than Jerry Miculek can shoot
-			// and are very close to each other, ignore the new shot
-			
-			if (
-					shot.getTimestamp() - lastShot.get().getTimestamp() <= TIME_THRESHOLD &&
-					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
-					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
-				return false;
-			}
-			
-
-		}
-		
-		return true;
+		return processShot(shot, false);
 	}
 
 	@Override

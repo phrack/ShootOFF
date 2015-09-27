@@ -6,14 +6,13 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.ShotDetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
@@ -29,15 +28,14 @@ public class TestCameraManagerLogitech {
 		config.setDetectionRate(0);
 		config.setDebugMode(true);
 		mockManager = new MockCanvasManager(config, true);
-		sectorStatuses = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 		
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}
 		
-		CameraManager.setFrameCount(0);
 	}
 	
 	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
