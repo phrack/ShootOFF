@@ -15,11 +15,13 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	private final Logger logger = LoggerFactory.getLogger(PixelCluster.class);
 	
 	
-	private static final long serialVersionUID = 8652050835557402069L;
+	private static final long serialVersionUID = 1L;
 
 	
 	public double centerPixelX;
 	public double centerPixelY;
+	
+	private final static int MAXIMUM_CONNECTEDNESS = 8;
 	
 	public double getColorDifference(BufferedImage frame, double[][] colorDiffMovingAverage)
 	{
@@ -29,7 +31,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		double lumDiff = 0;
 		for (Pixel pixel : this)
 		{
-			if (pixel.getConnectedness()<8)
+			if (pixel.getConnectedness()<MAXIMUM_CONNECTEDNESS)
 			{
 				for(int h=-1;h<=1;h++)
 					for(int w=-1;w<=1;w++) 

@@ -437,15 +437,12 @@ public class CameraManager {
 		
 		private boolean processFrame(BufferedImage currentFrame)
 		{
-			if (!isDetecting)
-				return false;
-			
 			
 			incFrameCount();
 			
 			logger.trace("processFrame {}", frameCount);
 			
-			boolean result = shotDetectionManager.processFrame(currentFrame, true);
+			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
 			
 			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {

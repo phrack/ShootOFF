@@ -212,16 +212,10 @@ public final class ShotDetectionManager implements Runnable {
 
 	
 	private void detectShots(BufferedImage workingCopy, ArrayList<PixelCluster> clusters) {
-		Parallel.forEach(clusters, new Operation<PixelCluster>()
+		for (PixelCluster cluster : clusters)
 		{
-			public void perform(PixelCluster cluster)
-			{
-
-				addShot(workingCopy, cluster);
-
-				
-			}
-		});
+			addShot(workingCopy, cluster);
+		}
 	}
 
 
@@ -345,7 +339,7 @@ public final class ShotDetectionManager implements Runnable {
 		
 		
 		Shot shot = new Shot(color.get(), x, y, 
-				System.currentTimeMillis(), cameraManager.getFrameCount(), config.getMarkerRadius());
+				0, cameraManager.getFrameCount(), config.getMarkerRadius());
 		
 		
 		if (config.isDebugShotsRecordToFiles() && config.getDeduplicationProcessor().processShotLookahead(shot)) {

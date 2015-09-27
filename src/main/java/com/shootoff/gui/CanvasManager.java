@@ -246,7 +246,7 @@ public class CanvasManager {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis(), cameraManager.getFrameCount(), config.getMarkerRadius());
+				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
@@ -285,6 +285,7 @@ public class CanvasManager {
 		} else {
 			notifyShot(shot);
 		}
+		
 		
 		shotEntries.add(new ShotEntry(shot));
 		shots.add(shot);
