@@ -496,6 +496,7 @@ public class Main extends Application {
 			
 			System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 			
 			resourcesMetadataFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
 			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
@@ -519,6 +520,7 @@ public class Main extends Application {
 		} else {
 			System.setProperty("shootoff.home", System.getProperty("user.dir"));
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 			runShootOFF();
 		}
 	}

@@ -39,8 +39,11 @@ import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.courses.Course;
+import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.CalibrationConfigPane;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
@@ -113,6 +116,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
 	@FXML private Menu addArenaTargetMenu;
 	@FXML private Menu arenaBackgroundMenu;
+	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
 	
 	private String defaultWindowTitle;
@@ -660,6 +664,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
+		coursesMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
 		
 		for (MenuItem m : projectorExerciseMenuItems) m.setDisable(isDisabled);
@@ -735,7 +740,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		backgroundMenuItem.setOnAction((e) -> {
 				InputStream is = this.getClass().getResourceAsStream(resourceName);
-				Image img = new Image(is);
+				LocatedImage img = new LocatedImage(is, resourceName);
 				arenaController.setBackground(img);
 			});
 		
@@ -747,6 +752,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		arenaController.setBackground(null);
 	}
 	
+	@FXML
 	public void openArenaBackgroundMenuItemClicked(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Arena Background");
@@ -758,11 +764,69 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		File backgroundFile = fileChooser.showOpenDialog(shootOFFStage);
 		
 		if (backgroundFile != null) {
-			Image img = new Image(backgroundFile.toURI().toString());
+			LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
 			arenaController.setBackground(img);
 		}
 	}
 	
+	@FXML
+	public void saveCourseMenuItemClicked(ActionEvent event) {
+		File coursesDir = new File(System.getProperty("shootoff.courses"));
+		
+		if (!coursesDir.exists()) {
+			if (!coursesDir.mkdirs()) {
+				logger.error("Courses folder does not exist and cannot be created: {}", coursesDir.getAbsolutePath());
+			}
+		}
+		
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save Course");
+		fileChooser.setInitialDirectory(coursesDir);
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Course File (*.course)", "*.course")
+            );
+        
+		File courseFile = fileChooser.showSaveDialog(shootOFFStage);
+		
+		if (courseFile != null) {
+			String path = courseFile.getPath();
+			if (!path.endsWith(".course")) path += ".course";
+			
+			courseFile = new File(path);
+			
+			CourseIO.saveCourse(arenaController, courseFile);
+		}
+	}
+	
+	@FXML
+	public void loadCourseMenuItemClicked(ActionEvent event) {
+		File coursesDir = new File(System.getProperty("shootoff.courses"));
+		
+		if (!coursesDir.exists()) {
+			if (!coursesDir.mkdirs()) {
+				logger.error("Courses folder does not exist and cannot be created: {}", coursesDir.getAbsolutePath());
+			}
+		}
+		
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Course");
+		fileChooser.setInitialDirectory(coursesDir);
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Course File (*.course)", "*.course")
+            );
+        
+		File courseFile = fileChooser.showOpenDialog(shootOFFStage);
+		
+		if (courseFile != null) {
+			Optional<Course> course = CourseIO.loadCourse(arenaController, courseFile);
+			
+			if (course.isPresent()) {
+				arenaController.setCourse(course.get());
+			}
+		}
+	}
+	
+	@FXML
 	public void toggleArenaShotsClicked(ActionEvent event) {
 		if (toggleArenaShotsMenuItem.getText().equals("Show Shot Markers")) {
 			toggleArenaShotsMenuItem.setText("Hide Shot Markers");

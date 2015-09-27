@@ -59,6 +59,12 @@
                         <MenuItem mnemonicParsing="false" onAction="#removeArenaBackgroundMenuItemClicked" text="None" />
                     </items>
                   </Menu>
+                  <Menu fx:id="coursesMenu" disable="true" mnemonicParsing="false" text="Courses">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#saveCourseMenuItemClicked" text="Save Course..." />
+                        <MenuItem mnemonicParsing="false" onAction="#loadCourseMenuItemClicked" text="Load Course..." />
+                    </items>
+                  </Menu>
                   <MenuItem fx:id="toggleArenaShotsMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaShotsClicked" text="Show Shot Markers" />
               </items>
             </Menu>
