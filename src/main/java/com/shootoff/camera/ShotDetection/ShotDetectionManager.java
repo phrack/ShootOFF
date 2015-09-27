@@ -274,13 +274,13 @@ public final class ShotDetectionManager implements Runnable {
 		{
 
 			public void perform (Integer sector) {
-				Integer sectorX = (sector%SECTOR_ROWS);
-				Integer sectorY = (int)Math.floor((sector/SECTOR_COLUMNS));
+				Integer sectorX = (sector%SECTOR_COLUMNS);
+				Integer sectorY = (int)Math.floor((sector/SECTOR_ROWS));
 				
-				Integer startX = subWidth*(sector%SECTOR_ROWS);
-				Integer startY = subHeight*(int)Math.floor((sector/SECTOR_COLUMNS));
+				Integer startX = subWidth*sectorX;
+				Integer startY = subHeight*sectorY;
 				
-				//logger.warn("{} - {} {}", sector, startX, startY);
+				logger.trace("{} - {} {} - {} {}", sector, sectorX, sectorY, startX, startY);
 				
 				if (!sectorstatuses[sectorY][sectorX])
 					return;
@@ -290,14 +290,12 @@ public final class ShotDetectionManager implements Runnable {
 					
 					for (Integer x = startX; x < startX + subWidth; x++)
 					{
-						//logger.warn("{} - {} {} - {} {}", sector, startX, startY, x, y);
-						
+
 						Optional<Pixel> pixel = Optional.empty();
 						
 						pixel = updateFilter(workingCopy, x, y, detectShots);
 						
-						//logger.warn("step 2");
-						
+
 						if(pixel.isPresent())
 						{
 							
@@ -308,7 +306,6 @@ public final class ShotDetectionManager implements Runnable {
 
 						}
 						
-						//logger.warn("step 3");
 					}
 				}
 
