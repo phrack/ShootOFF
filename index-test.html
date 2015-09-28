@@ -671,7 +671,7 @@ gratitude for this project, please make us feel good by letting us know!</p>
       <div class="modal-body m-body">
         <p class="m-text">Lorem ipsum dolor sit amet, nullam quaeque oportere pro no, per eu argumentum repudiandae, mei numquam facilisi ut. Moderatius efficiendi te nam. </p>
 
-        <form class="m-form" action="process.php" method="post" id="survey_form">
+        <form class="m-form" action="yourfile.x" method="post" id="survey_form">
 
             <div class="question">
               <p>First Question Goes Here?</p>
@@ -712,10 +712,10 @@ gratitude for this project, please make us feel good by letting us know!</p>
           <div class="row">
 
             <div class="col-xs-6 wst">
-              <a id="tirekov" type="submit" value="Submit" class="btn btn-my-red track" data-dismiss="modal">Get ShootOFF</a>
+              <a id="tirekov" type="submit" value="submit" class="btn btn-my-red track" data-dismiss="modal">Get ShootOFF</a>
             </div>
             <div class="col-xs-6 wst2">
-              <a class="btn btn-my-wh lmb2" href="ShootOFF.jnlp" onclick="return launchApplication('ShootOFF.jnlp');">Launch From Browser</a>
+              <a class="btn btn-my-wh lmb2" href="ShootOFF.jnlp" onclick="return launchApplication('ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
             </div>
 
           </div>
@@ -825,7 +825,7 @@ $(document).ready(function(){
 <!-- DOWNLOAD APP ONCLICK -->
   <script>
     $("a#tirekov").click(function(){
-             window.location = "https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip";    
+             window.open("https://github.com/phrack/ShootOFF/releases/download/v3.2-FINAL/shootoff-3.2-final.zip")   
     });
   </script>
 
