@@ -669,39 +669,54 @@ gratitude for this project, please make us feel good by letting us know!</p>
         <h4 class="modal-title m-header-title" id="myModalLabel">Demographic Survey (OPTIONAL)</h4>
       </div>
       <div class="modal-body m-body">
-        <p class="m-text">Lorem ipsum dolor sit amet, nullam quaeque oportere pro no, per eu argumentum repudiandae, mei numquam facilisi ut. Moderatius efficiendi te nam. </p>
+        <p class="m-text">You don't have to, but if you've never told us a bit about yourself we'd appreciate you filling out the survey below before downloading!</p>
 
         <form class="m-form" action="yourfile.x" method="post" id="survey_form">
 
             <div class="question">
-              <p>First Question Goes Here?</p>
-              <input class="m-input" id="Question1" name="Question1" type="text" value="" placeholder="Write your Answer Here">
+              <p>What kind of shooter are you?</p>	
+              <input type="checkbox" name="q1police" value="Police"> Police</input>
+              <input type="checkbox" name="q1military" value="Military"> Military</input>
+              <input type="checkbox" name="q1competitor" value="Competitor"> Competitor</input>
+              <input type="checkbox" name="q1concealcarrier" value="ConcealCarrier"> Conceal Carrier</input>
+              <input type="checkbox" name="q1hunter" value="Hunter"> Hunter</input>
             </div>
 
             <div class="question">
-              <p>Seckond Question Goes Here?</p>
-              <input class="m-input" id="Question2" name="Question2" type="text" value="" placeholder="Write your Answer Here">
+              <p>What prevents you from training more?</p>
+              <input type="checkbox" name="q2time" value="Time"> Time</input>
+              <input type="checkbox" name="q2money" value="Money"> Money</input>
+              <input type="checkbox" name="q2disinterest" value="Disinterest"> Disinterest</input> <br/>
+              <input type="checkbox" name="q2other" value="Other"> Other</input>
+              <input class="m-input" id="q2otherexpl" name="q2otherexpl" type="text" value="" placeholder="Write your answer here">
             </div>
 
             <div class="question">
-              <p>Third Question Goes Here?</p>
-              <input class="m-input" id="Question3" name="Question3" type="text" value="" placeholder="Write your Answer Here">
+              <p>Have you used ShootOFF before?</p>
+              <input type="radio" name="usedshootoff" value="yes"> Yes</input>
+              <input type="radio" name="usedshootoff" value="no" checked> No</input>
+            </div>
+
+            <div class="question">
+              <p>What's your email address (opts you into future emails about software updates)?</p>
+              <input class="m-input" id="Question4" name="Question4" type="text" value="" placeholder="Write your email address">
             </div>
 
             <div class="years">
-              <p>How Old Are you?</p>
+              <p>How old are you?</p>
               <select name="Service" class="m-input">
-                <option value="0-10">0 - 10 Years Old</option>
-                <option value="10-20">10-20 Years Old</option>
-                <option value="20-40">20-40 Years Old</option>
-                <option value="40-50">40-50 Years Old</option>
-                <option value="50+">50+ Years Old</option>
+                <option value="<18">&lt;18 Years Old</option>
+                <option value="18-25">18-25 Years Old</option>
+                <option value="26-35">26-35 Years Old</option>
+                <option value="36-45">36-45 Years Old</option>
+                <option value="46-55">46-55 Years Old</option>
+		<option value="56+">56+ Years Old</option>
               </select>
             </div>
 
         </form>
 
-        <p class="m-text2">You can just skip the survey and download ShootOFF App</p>
+        <p class="m-text2">You can skip the survey and just download ShootOFF.</p>
 
 
 
@@ -715,7 +730,7 @@ gratitude for this project, please make us feel good by letting us know!</p>
               <a id="tirekov" type="submit" value="submit" class="btn btn-my-red track" data-dismiss="modal">Get ShootOFF</a>
             </div>
             <div class="col-xs-6 wst2">
-              <a class="btn btn-my-wh lmb2" href="ShootOFF.jnlp" onclick="return launchApplication('ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
+              <a class="btn btn-my-wh lmb2" href="jws/ShootOFF.jnlp" onclick="return launchApplication('jws/ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
             </div>
 
           </div>
