@@ -127,6 +127,11 @@ public class Configuration {
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
+	
+	
+	private boolean debugShotsRecordToFiles = false;
+		
+
 
  	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
@@ -780,5 +785,10 @@ public class Configuration {
 	
 	public Optional<Color> getShotTimerRowColor() {
 		return shotRowColor;
+	}
+	
+	public boolean isDebugShotsRecordToFiles()
+	{
+		return debugShotsRecordToFiles;
 	}
 }

@@ -21,7 +21,7 @@ public class PixelClusterManager {
 
 	private ShotDetectionManager shotDetectionManager;
 	
-	private final static double MINIMUM_CONNECTEDNESS = 4.5f;
+	private final static double MINIMUM_CONNECTEDNESS = 6.72f;
 
 	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager)
 	{
@@ -56,23 +56,28 @@ public class PixelClusterManager {
 						int ry = thisPoint.y+h; 
 						Pixel nearPoint = new Pixel(rx,ry);
 						if (points.contains(nearPoint))
+						{
 							logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint), !pixelMapping.containsKey(nearPoint));
-						
-						
-						if (points.contains(nearPoint) && pixelMapping.containsKey(nearPoint) && pixelMapping.get(nearPoint).intValue()==numberOfRegions)
-						{
-							connectedness++;
+							
+							if (pixelMapping.containsKey(nearPoint) && pixelMapping.get(nearPoint).intValue()==numberOfRegions)
+							{
+								connectedness++;
+							}
+							
+							else if (!pixelMapping.containsKey(nearPoint))
+							{
+								
+								connectedness++;
+								
+								nearPoint = points.get(points.indexOf(nearPoint));
+								
+								mustExamine.push(nearPoint);
+								pixelMapping.put(nearPoint, numberOfRegions);
+								
+							}
 						}
 						
-						if (points.contains(nearPoint) && !pixelMapping.containsKey(nearPoint))
-						{
-							
-							nearPoint = points.get(points.indexOf(nearPoint));
-							
-							mustExamine.push(nearPoint);
-							pixelMapping.put(nearPoint, numberOfRegions);
-							
-						}
+
 					}
 				
 				thisPoint.setConnectedness(connectedness);
@@ -115,9 +120,6 @@ public class PixelClusterManager {
 				}
 				
 			}
-			
-			
-			logger.trace("Cluster {} - {} - connectedness {} - {} {}", i, cluster.size(), avgconnectedness, averageX, averageY);
 			
 			averageX = (averageX / avgconnectedness);
 			averageY = (averageY / avgconnectedness);

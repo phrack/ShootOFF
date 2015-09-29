@@ -268,63 +268,57 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
+			
+ 	private Optional<ShotProcessor> processShot(Shot shot) {
 
-	private Optional<ShotProcessor> processShot(Shot shot) {
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
+  		for (ShotProcessor processor : config.getShotProcessors()) {
+  			if (!processor.processShot(shot)) {
+ 				if (processor instanceof MalfunctionsProcessor) {
+ 					hadMalfunction = true;
+ 				} else if (processor instanceof VirtualMagazineProcessor) {
+ 					hadReload = true;
+ 				}
+ 				
+  				rejectingProcessor = Optional.of(processor);
+  				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
+  				break;
+  			}
+  		}
+  		
+ 		return rejectingProcessor;
+ 	}
+ 	
+ 	
+	private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
+		// Record video for rejected shots as long as they weren't rejected
+		// for being dupes
+		if (!config.getSessionRecorder().isPresent()) return;
 		
-
-		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
-	
-		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
-		for (ShotProcessor processor : config.getShotProcessors()) {
-			if (!processor.processShot(shot)) {
-				if (processor instanceof MalfunctionsProcessor) {
-					hadMalfunction = true;
-				} else if (processor instanceof VirtualMagazineProcessor) {
-					hadReload = true;
-				}
-				
-				rejectingProcessor = Optional.of(processor);
-				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
-				break;
+		if (rejectingProcessor instanceof DeduplicationProcessor == false) {
+			notifyShot(shot);
+		
+			Optional<String> videoString = createVideoString(shot);
+			
+			if (rejectingProcessor instanceof MalfunctionsProcessor) {
+				config.getSessionRecorder().get().recordShot(cameraName, 
+						shot, true, false, Optional.empty(), 
+						Optional.empty(),
+						videoString);		
+			} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
+				config.getSessionRecorder().get().recordShot(cameraName, 
+						shot, false, true, Optional.empty(), 
+						Optional.empty(),
+						videoString);		
 			}
 		}
-		
-
-		
-		if (rejectingProcessor.isPresent()) {
-			// Record video for rejected shots as long as they weren't rejected
-			// for being dupes
-			if (!config.getSessionRecorder().isPresent()) return;
-			
-
-		if (rejectingProcessor instanceof DeduplicationProcessor == false) {
-				notifyShot(shot);
-			
-				Optional<String> videoString = createVideoString(shot);
-				
-
-			if (rejectingProcessor instanceof MalfunctionsProcessor) {
-					config.getSessionRecorder().get().recordShot(cameraName, 
-							shot, true, false, Optional.empty(), 
-							Optional.empty(),
-							videoString);		
-
-			} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
-					config.getSessionRecorder().get().recordShot(cameraName, 
-							shot, false, true, Optional.empty(), 
-							Optional.empty(),
-							videoString);		
- 				}
-			}
 	}
-			
+	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 		if (rejectingProcessor.isPresent()) {
@@ -600,14 +594,9 @@ public class CanvasManager {
 		targets.add(newTarget);
 		
 				
-		return addTarget(newTarget);
-	}
-			
-	public Target addTarget(Target newTarget) {
-		Platform.runLater(() -> { canvasGroup.getChildren().add(newTarget.getTargetGroup()); });
-		
 		return newTarget;
 	}
+
 	
 	public void removeTarget(Target target) {
 		Platform.runLater(() -> { canvasGroup.getChildren().remove(target.getTargetGroup()); });

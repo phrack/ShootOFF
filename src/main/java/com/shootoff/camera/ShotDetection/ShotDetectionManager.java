@@ -236,7 +236,7 @@ public final class ShotDetectionManager implements Runnable {
 		
 		if (cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT)
 		{
-			logger.info("HIGH MOTION - IGNORING FRAME - avgPossibleShotsDetected {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
+			logger.info("HIGH MOTION - IGNORING FRAME - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
 			return true;
 		}
 		return false;
@@ -322,7 +322,7 @@ public final class ShotDetectionManager implements Runnable {
 	
 	
 	
-	private final int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 500;
+	private final int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 200;
 	
 	private void updateAvgThresholdPixels(int thresholdPixels)
 	{
