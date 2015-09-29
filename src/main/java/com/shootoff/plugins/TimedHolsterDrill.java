@@ -18,6 +18,7 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -27,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javafx.scene.Group;
+import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
@@ -43,6 +45,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
 	private long beepTime = 0;
+	private boolean coloredRows = false;
 	
 	public TimedHolsterDrill() {}
 	
@@ -63,7 +66,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() {
-			TextToSpeech.say("shooter... make ready");
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
 			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 			
 			if (repeatExercise)
@@ -77,6 +80,14 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		@Override
 		public Void call() throws Exception {
 			if (repeatExercise) {
+				if (coloredRows) {
+					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+				} else {
+					thisSuper.setShotTimerRowColor(null);
+				}
+				
+				coloredRows = !coloredRows;
+				
 	            TrainingExerciseBase.playSound("sounds/beep.wav");
 	            thisSuper.pauseShotDetection(false);
 	            beepTime = System.currentTimeMillis();

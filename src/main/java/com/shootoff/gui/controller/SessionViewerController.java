@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,7 @@ import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.io.SessionIO;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -31,11 +36,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
@@ -43,16 +51,22 @@ import marytts.util.io.FileFilter;
 public class SessionViewerController {
 	@FXML private ListView<File> sessionListView;
 	@FXML private TabPane cameraTabPane;
+	@FXML private Button togglePlaybackButton;
 	@FXML private Slider timeSlider;
 	@FXML private Label timeLabel;
 	@FXML private ListView<Event> eventsListView;
 	
+	private static final int STEP_INTERVAL = 100; // ms
+	private static final int CORE_POOL_SIZE = 2;
+	
 	private final Logger logger = LoggerFactory.getLogger(SessionViewerController.class);
+	private ScheduledExecutorService executorService;
 	private final ObservableList<File> sessionEntries = FXCollections.observableArrayList();
 	private final ObservableList<Event> eventEntries = FXCollections.observableArrayList();
 	private final Map<String, SessionCanvasManager> cameraGroups = new HashMap<String, SessionCanvasManager>();
 	private final Map<Tab, Integer> eventSelectionsPerTab = new HashMap<Tab, Integer>();
 	
+	private boolean isPlaying = false;
 	private boolean refreshFromSlider = true;
 	private boolean refreshFromSelection = true;
 	private SessionRecorder currentSession;
@@ -64,8 +78,13 @@ public class SessionViewerController {
 		sessionEntries.addAll(findSessions());
 		sessionListView.setItems(sessionEntries);
 		
+		togglePlaybackButton.setGraphic(new ImageView(new Image(
+				VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+		
 		sessionListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<File>() {
 				public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
+					if (isPlaying) togglePlaybackButton.fire();
+					
 					Optional<SessionRecorder> session = SessionIO.loadSession(
 							new File(System.getProperty("shootoff.home") + File.separator +
 									"sessions" + File.separator + newFile.getName()));
@@ -94,6 +113,8 @@ public class SessionViewerController {
 			public void changed(ObservableValue<? extends Tab> ot, Tab oldTab, Tab newTab) {	
 				if (newTab == null) return;
 				
+				if (isPlaying) togglePlaybackButton.fire();
+				
 				eventSelectionsPerTab.put(oldTab, eventsListView.getSelectionModel().getSelectedIndex());
 				
 				listCameraEvents(newTab.getText());
@@ -117,7 +138,7 @@ public class SessionViewerController {
 				if (newEvent == null) return;
 				
 				refreshFromSlider = false;
-				timeSlider.setValue(newEvent.getTimestamp());
+				if (!isPlaying) timeSlider.setValue(newEvent.getTimestamp());
 				refreshFromSlider = true;
 				
 				if (!refreshFromSelection) return;
@@ -167,6 +188,10 @@ public class SessionViewerController {
 		
 		eventsListView.setItems(eventEntries);
 		
+		timeSlider.setOnMouseClicked((event) -> {
+				if (isPlaying) togglePlaybackButton.fire();
+			});
+		
 		timeSlider.valueProperty().addListener(new ChangeListener<Number>() {
 		      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
 		        if (newValue == null) {
@@ -178,8 +203,11 @@ public class SessionViewerController {
 		        
 		        if (!refreshFromSlider) return;
 		        
-		        for (Event e : eventEntries) {
-		        	if (e.getTimestamp() >= newValue.longValue()) {
+		        List<Event> reversedEntries = new ArrayList<Event>(eventEntries);
+		        Collections.reverse(reversedEntries);
+		        
+		        for (Event e : reversedEntries) {
+		        	if (e.getTimestamp() <= newValue.longValue()) {
 		        		eventsListView.getSelectionModel().select(e);
 		        		break;
 		        	}
@@ -195,10 +223,10 @@ public class SessionViewerController {
 	}
 	
 	private List<File> findSessions () {
-		File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions");
+		File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
 		List<File> sessions = new ArrayList<File>();
 		
-		File[] sessionFiles = targetsFolder.listFiles(new FileFilter("xml"));
+		File[] sessionFiles = sessionsFolder.listFiles(new FileFilter("xml"));
 		
 		if (sessionFiles != null) {
 			for (File file : sessionFiles) {
@@ -259,6 +287,8 @@ public class SessionViewerController {
 	
 	@FXML
 	public void nextButtonClicked(ActionEvent event) {
+		if (isPlaying) togglePlaybackButton.fire();
+		
 		int selectedIndex = eventsListView.getSelectionModel().getSelectedIndex();
 		
 		if (selectedIndex >= 0) {
@@ -274,6 +304,8 @@ public class SessionViewerController {
 	
 	@FXML
 	public void previousButtonClicked(ActionEvent event) {
+		if (isPlaying) togglePlaybackButton.fire();
+		
 		int selectedIndex = eventsListView.getSelectionModel().getSelectedIndex();
 
 		if (selectedIndex >= 0) {
@@ -285,5 +317,42 @@ public class SessionViewerController {
 		} else {
 			eventsListView.getSelectionModel().select(eventEntries.size() - 1);
 		}
+	}
+	
+	private class AdvanceSlider implements Callable<Void> {
+		@Override
+		public Void call() throws Exception {
+			if (isPlaying) {
+				double currentTime = timeSlider.getValue();
+
+				Platform.runLater(() -> {
+						if (currentTime + 100 > timeSlider.getMax()) togglePlaybackButton.fire();
+					
+						timeSlider.setValue(currentTime + STEP_INTERVAL);
+					});
+				
+				executorService.schedule(new AdvanceSlider(), STEP_INTERVAL, TimeUnit.MILLISECONDS);
+			}
+			
+			return null;
+		}
+	}
+	
+	@FXML
+	public void togglePlaybackButtonClicked(ActionEvent event) {
+		isPlaying = !isPlaying;
+		
+		if (isPlaying) {
+			togglePlaybackButton.setGraphic(new ImageView(new Image(
+					SessionViewerController.class.getResourceAsStream("/images/gnome_media_playback_pause.png"))));
+			
+			executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+			executorService.schedule(new AdvanceSlider(), STEP_INTERVAL, TimeUnit.MILLISECONDS);
+		} else {
+			togglePlaybackButton.setGraphic(new ImageView(new Image(
+					SessionViewerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+			
+			executorService.shutdownNow();
+		}	
 	}
 } 

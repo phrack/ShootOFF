@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,13 +33,15 @@ import com.shootoff.targets.io.TargetIO;
 public class TestRandomShoot {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream = new PrintStream(stringOut);
+	private PrintStream stringOutStream;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws UnsupportedEncodingException {
 		new JFXPanel(); // Initialize the JFX toolkit
 		
+		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		TextToSpeech.silence(true);
+		TrainingExerciseBase.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 	}
@@ -46,6 +49,7 @@ public class TestRandomShoot {
 	@After
 	public void tearDown() {
 		TextToSpeech.silence(false);
+		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
 	}
 
@@ -55,12 +59,12 @@ public class TestRandomShoot {
 		
 		RandomShoot rs = new RandomShoot(targets);
 		
-		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString());
+		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		rs.reset(targets);
 		
-		assertEquals("This training exercise requires a target with subtargets\n", stringOut.toString());
+		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8"));
 	}
 
 	@Test
@@ -83,14 +87,15 @@ public class TestRandomShoot {
 		
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 		
-		assertTrue(stringOut.toString().startsWith("shoot subtarget " + firstSubtarget));
+		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").split("\n")[0]);
 		stringOut.reset();
 		
 		// Simulate missing a shot
 		
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
 		
-		assertEquals("shoot " + firstSubtarget + "\n", stringOut.toString());
+		assertEquals(String.format("sounds/voice/shootoff-shoot.wav\nsounds/voice/shootoff-%s.wav\n", firstSubtarget),
+				stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Simulate a hit
@@ -111,7 +116,7 @@ public class TestRandomShoot {
 			assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());
 		} else {
 			String nextSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
-			assertTrue(stringOut.toString().startsWith("shoot subtarget " + nextSubtarget));
+			assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + nextSubtarget));
 			stringOut.reset();
 		}
 	}	

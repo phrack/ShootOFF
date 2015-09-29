@@ -66,11 +66,11 @@ public class TestCameraManagerDark {
 		
 		assertEquals(2, shots.size());
 		
-		assertEquals(629.5, shots.get(0).getX(), 1);
+		assertEquals(626.0, shots.get(0).getX(), 1);
 		assertEquals(168.5, shots.get(0).getY(), 1);
 		assertEquals(Color.RED, shots.get(0).getColor());
 		
-		assertEquals(428.5, shots.get(1).getX(), 1);
+		assertEquals(430.5, shots.get(1).getX(), 1);
 		assertEquals(129.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 	}
@@ -87,10 +87,10 @@ public class TestCameraManagerDark {
 		assertEquals(Color.RED, shots.get(0).getColor());
 
 		assertEquals(279.5, shots.get(1).getX(), 1);
-		assertEquals(125, shots.get(1).getY(), 1);
+		assertEquals(124.5, shots.get(1).getY(), 1);
 		assertEquals(Color.RED, shots.get(1).getColor());
 
-		assertEquals(436.5, shots.get(2).getX(), 1);
+		assertEquals(438.0, shots.get(2).getX(), 1);
 		assertEquals(145.5, shots.get(2).getY(), 1);
 		assertEquals(Color.RED, shots.get(2).getColor());
 
@@ -98,12 +98,12 @@ public class TestCameraManagerDark {
 		assertEquals(230.0, shots.get(3).getY(), 1);
 		assertEquals(Color.RED, shots.get(3).getColor());
 
-		assertEquals(298.0, shots.get(4).getX(), 1);
+		assertEquals(301.5, shots.get(4).getX(), 1);
 		assertEquals(239.0, shots.get(4).getY(), 1);
 		assertEquals(Color.RED, shots.get(4).getColor());
 
-		assertEquals(216.5, shots.get(5).getX(), 1);
-		assertEquals(246, shots.get(5).getY(), 1);
+		assertEquals(217.5, shots.get(5).getX(), 1);
+		assertEquals(245.0, shots.get(5).getY(), 1);
 		assertEquals(Color.RED, shots.get(5).getColor());
 
 		assertEquals(122.0, shots.get(6).getX(), 1);
@@ -114,8 +114,8 @@ public class TestCameraManagerDark {
 		assertEquals(375.0, shots.get(7).getY(), 1);
 		assertEquals(Color.RED, shots.get(7).getColor());
 
-		assertEquals(436.5, shots.get(8).getX(), 1);
-		assertEquals(379.0, shots.get(8).getY(), 1);
+		assertEquals(437.0, shots.get(8).getX(), 1);
+		assertEquals(377.0, shots.get(8).getY(), 1);
 		assertEquals(Color.RED, shots.get(8).getColor());
 	}
 	

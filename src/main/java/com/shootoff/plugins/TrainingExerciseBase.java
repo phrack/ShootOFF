@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -30,6 +31,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 
 import com.shootoff.camera.CamerasSupervisor;
@@ -61,11 +63,14 @@ import javafx.util.Callback;
  * @author phrack
  */
 public class TrainingExerciseBase {
+	private static boolean isSilenced = false;
+	
 	@SuppressWarnings("unused")
 	private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
+	private boolean changedRowColor = false;
 	
 	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
 	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = 
@@ -91,6 +96,20 @@ public class TrainingExerciseBase {
 			canvasManager.getCanvasGroup().getChildren().add(exerciseLabel);
 			exerciseLabels.put(canvasManager, exerciseLabel);
 		}
+	}
+	
+	/**
+	 * Allows sounds to be silenced or on. If silenced, instead of 
+	 * playing a sound the file name will be printed to stdout. This 
+	 * exists so that components can be easily tested even if they 
+	 * are reliant on sounds. 
+	 * 
+	 * @param isSilenced set to <tt>true</tt> if sound file names
+	 * 					 should instead be printed to stdout,
+	 * 					 <tt>false</tt> for normal operation.
+	 */
+	public static void silence(boolean isSilenced) {
+		TrainingExerciseBase.isSilenced = isSilenced;
 	}
 	
 	/**
@@ -164,6 +183,18 @@ public class TrainingExerciseBase {
 	}
 	
 	/**
+	 * Set the background color for rows for shots added to the shot timer after this
+	 * method is called. 
+	 * 
+	 * @param c		the color to use in the style string for the row. Set to null to
+	 * 				return the row color to the default color
+	 */
+	public void setShotTimerRowColor(Color c) {
+		changedRowColor = true;
+		config.setShotTimerRowColor(c);
+	}
+	
+	/**
 	 * Shows a message on every single webcam feed.
 	 * 
 	 * @param message	the message to show on every webcam feed
@@ -193,6 +224,12 @@ public class TrainingExerciseBase {
 	 */
 	public void reset() {
 		camerasSupervisor.reset();
+		
+		if (changedRowColor) {
+			config.setShotTimerRowColor(null);
+			changedRowColor = false;
+		}
+		
 		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());	
 	}
 	
@@ -215,6 +252,15 @@ public class TrainingExerciseBase {
 	}
 	
 	public static void playSound(File soundFile) {
+		playSound(soundFile, Optional.empty());
+	}
+	
+	private static void playSound(File soundFile, Optional<LineListener> listener) {
+		if (isSilenced) {
+			System.out.println(soundFile.getPath());
+			return;
+		}
+		
 		if (!soundFile.isAbsolute()) 
 			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
 		
@@ -236,9 +282,13 @@ public class TrainingExerciseBase {
 				clip.open(audioInputStream);
 				clip.start();
 				
-				clip.addLineListener((e) -> {
-						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
-					});
+				if (listener.isPresent()) {
+					clip.addLineListener(listener.get());
+				} else {
+					clip.addLineListener((e) -> {
+							if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
+						});
+				}
 			} catch (LineUnavailableException | IOException e) {
 				if (clip != null) clip.close();
 				e.printStackTrace();
@@ -246,10 +296,50 @@ public class TrainingExerciseBase {
 		} 
 	}
 	
+	public static void playSounds(List<File> soundFiles) {
+		if (isSilenced) {
+			soundFiles.forEach(System.out::println);
+		} else {
+			SoundQueue sq = new SoundQueue(soundFiles);
+			sq.play();
+		}
+	}
+	
+	private static class SoundQueue implements LineListener {
+		private final List<File> soundFiles;
+		private int queueIndex = 0;
+		
+		public SoundQueue(List<File> soundFiles) {
+			this.soundFiles = soundFiles;
+		}
+		
+		public void play() {
+			playSound(soundFiles.get(queueIndex), Optional.of(this));
+		}
+		
+		@Override
+		public void update(LineEvent event) { 
+			if (event.getType().equals(LineEvent.Type.STOP)) {
+				event.getLine().close();
+				
+				queueIndex++;
+				
+				if (queueIndex < soundFiles.size()) {
+					playSound(soundFiles.get(queueIndex), Optional.of(this));
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Removes all objects the training exercise has added to the GUI.
 	 */
 	public void destroy() {
+		if (changedRowColor) {
+			config.setShotTimerRowColor(null);
+			changedRowColor = false;
+		}
+		
 		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 			shotTimerTable.getColumns().remove(column);
 		}

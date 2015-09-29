@@ -97,7 +97,7 @@ public class SessionIO {
 		} else if (sessionFile.getName().endsWith("json")) {
 			events = new JSONSessionReader(sessionFile).load();
 		} else {
-			System.err.println("Unknown target file type.");
+			System.err.println("Unknown session file type.");
 			return Optional.empty();
 		}
 		

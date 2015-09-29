@@ -61,8 +61,9 @@ public class CameraManager {
 	public static final int FEED_HEIGHT = 480;
 	public static final int MIN_SHOT_DETECTION_FPS = 5;
 	
-	
+
 	public static final int DEFAULT_FPS = 30;
+
 
 	private final ShotDetectionManager shotDetectionManager;
 
@@ -79,7 +80,6 @@ public class CameraManager {
 	private boolean shownBrightnessWarning = false;
 	private boolean cropFeedToProjection = false;
 	private boolean limitDetectProjection = false;
-
 	
 	private Optional<Integer> minimumShotDimension = Optional.empty();
 
@@ -159,9 +159,11 @@ public class CameraManager {
 	}
 
 	private void init(Detector detector) {
+
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 
 		// Turn on all shot sectors by default
+
 		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
 			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
@@ -273,8 +275,11 @@ public class CameraManager {
 				cameraName = userCameraName.get();
 			} else {
 				cameraName = webcam.get().getName();
-			}
+			}	
 		}
+
+		
+		setDetecting(false);
 		
 		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName);
 		recordingShots = true;
@@ -284,8 +289,12 @@ public class CameraManager {
 		recordingShots = false;
 		for (ShotRecorder r : shotRecorders.values()) r.close();
 		shotRecorders.clear();
+		if (rollingRecorder != null) {
 		rollingRecorder.close();
 		rollingRecorder = null;
+	}
+	
+		setDetecting(true);
 	}
 	
 	public Image getCurrentFrame() {
@@ -303,6 +312,7 @@ public class CameraManager {
 	public boolean isVideoProcessed() {
 		return processedVideo;
 	}
+
 
 
 	public void setMinimumShotDimension(int minDim) {
@@ -329,6 +339,7 @@ public class CameraManager {
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 
+
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 		
 		@Override
@@ -353,8 +364,10 @@ public class CameraManager {
 		{
 			BufferedImage currentFrame = event.getImage();
 
+
 			processFrame(currentFrame);
 		}
+
 
 		@Override
 		public void onClose(ICloseEvent event) {
@@ -370,6 +383,7 @@ public class CameraManager {
 
 		private void streamCameraFrames() {			
 
+
 			while (isStreaming) {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 				
@@ -381,14 +395,17 @@ public class CameraManager {
 					return;
 				}
 
+
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
 					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 							(int)b.getWidth(), (int)b.getHeight());
 				}
 				
+
 				if (!processFrame(currentFrame))
 					continue;
+
 				
 				if (recordingShots) {
 					rollingRecorder.recordFrame(currentFrame);
@@ -419,6 +436,7 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
+
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
 
 				if (cropFeedToProjection) {
@@ -427,31 +445,41 @@ public class CameraManager {
 					canvasManager.updateBackground(img, Optional.empty());
 				}
 
+
 			}
+
 			
 			detectionExecutor.shutdown();
 		}
 
-		
+
 		private static final int DEDUPE_THRESHOLD_DIVISION_FACTOR = 4;
 		
+
 		private boolean processFrame(BufferedImage currentFrame)
 		{
 			
+
 			incFrameCount();
 			
+
 			logger.trace("processFrame {}", frameCount);
 			
+
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
-			
+
 			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
 				
+
 				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
 				
+
 				DeduplicationProcessor.setThreshold((int)(webcamFPS/DEDUPE_THRESHOLD_DIVISION_FACTOR));
 				
+
 				if (debuggerListener.isPresent()) {
+
 					debuggerListener.get().updateFeedData(webcamFPS, null);
 				}
 				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
@@ -461,9 +489,11 @@ public class CameraManager {
 					showedFPSWarning = true;
 				}
 			}
+
 			
 			return result;
 		}
+
 		
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
@@ -508,6 +538,7 @@ public class CameraManager {
 			});
 		}
 		
+
 
 	}
 	

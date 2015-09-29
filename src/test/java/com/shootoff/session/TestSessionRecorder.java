@@ -134,10 +134,11 @@ public class TestSessionRecorder {
 		// First two are an add then a move that were artificially inserted
 		assertEquals(3, events.size());
 		
-		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
-		assertEquals(45, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);
+		final int TARGET_RESIZED_INDEX = 2;
+		assertEquals(EventType.TARGET_RESIZED, events.get(TARGET_RESIZED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(12, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 	}
 	
 	@Test
@@ -156,20 +157,22 @@ public class TestSessionRecorder {
 		// First two are an add then a move that were artificially inserted
 		assertEquals(3, events.size());
 		
-		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
-		assertEquals(45, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);
+		final int CAM1_TARGET_RESIZED_INDEX = 2;
+		assertEquals(EventType.TARGET_RESIZED, events.get(CAM1_TARGET_RESIZED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(12, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 		
 		events = sessionRecorder.getCameraEvents(cameraName2);
 		
 		// First two are an add then a move that were artificially inserted
 		assertEquals(3, events.size());
 		
-		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(55, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
-		assertEquals(20, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);
+		final int CAM2_TARGET_RESIZED_INDEX = 2;
+		assertEquals(EventType.TARGET_RESIZED, events.get(CAM2_TARGET_RESIZED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(CAM2_TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(55, ((TargetResizedEvent)events.get(CAM2_TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(20, ((TargetResizedEvent)events.get(CAM2_TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 	}
 	
 	@Test
@@ -294,15 +297,17 @@ public class TestSessionRecorder {
 		// First one is an add that was artificially inserted		
 		assertEquals(3, events.size());
 		
-		assertEquals(EventType.TARGET_RESIZED, events.get(1).getType());
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(1)).getTargetIndex());
-		assertEquals(6, ((TargetResizedEvent)events.get(1)).getNewWidth(), 1);
-		assertEquals(7, ((TargetResizedEvent)events.get(1)).getNewHeight(), 1);
+		final int TARGET_RESIZED_INDEX = 1;
+		assertEquals(EventType.TARGET_RESIZED, events.get(TARGET_RESIZED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(6, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(7, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 		
-		assertEquals(EventType.TARGET_MOVED, events.get(2).getType());
-		assertEquals(targetIndex, ((TargetMovedEvent)events.get(2)).getTargetIndex());
-		assertEquals(12, ((TargetMovedEvent)events.get(2)).getNewX());
-		assertEquals(45, ((TargetMovedEvent)events.get(2)).getNewY());
+		final int TARGET_MOVED_INDEX = 2;
+		assertEquals(EventType.TARGET_MOVED, events.get(TARGET_MOVED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getTargetIndex());
+		assertEquals(12, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getNewX());
+		assertEquals(45, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getNewY());
 	}
 	
 	@Test
@@ -324,14 +329,16 @@ public class TestSessionRecorder {
 		// First one is an add that was artificially inserted
 		assertEquals(3, events.size());
 		
-		assertEquals(EventType.TARGET_MOVED, events.get(1).getType());
-		assertEquals(targetIndex, ((TargetMovedEvent)events.get(1)).getTargetIndex());
-		assertEquals(12, ((TargetMovedEvent)events.get(1)).getNewX());
-		assertEquals(45, ((TargetMovedEvent)events.get(1)).getNewY());
+		final int TARGET_MOVED_INDEX = 1;
+		assertEquals(EventType.TARGET_MOVED, events.get(TARGET_MOVED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getTargetIndex());
+		assertEquals(12, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getNewX());
+		assertEquals(45, ((TargetMovedEvent)events.get(TARGET_MOVED_INDEX)).getNewY());
 		
-		assertEquals(EventType.TARGET_RESIZED, events.get(2).getType());
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(2)).getTargetIndex());
-		assertEquals(12, ((TargetResizedEvent)events.get(2)).getNewWidth(), 1);
-		assertEquals(45, ((TargetResizedEvent)events.get(2)).getNewHeight(), 1);	
+		final int TARGET_RESIZED_INDEX = 2;
+		assertEquals(EventType.TARGET_RESIZED, events.get(TARGET_RESIZED_INDEX).getType());
+		assertEquals(targetIndex, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(12, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewWidth(), 1);
+		assertEquals(45, ((TargetResizedEvent)events.get(TARGET_RESIZED_INDEX)).getNewHeight(), 1);	
 	}
 }

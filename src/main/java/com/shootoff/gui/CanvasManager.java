@@ -56,8 +56,10 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -82,6 +84,8 @@ public class CanvasManager {
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
+	private boolean hadMalfunction = false;
+	private boolean hadReload = false;
 	
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
@@ -121,12 +125,30 @@ public class CanvasManager {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
 			}
 		});
-	}	
+	}
 
 	public void setCameraManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 	}
 
+	private void jdk8094135Warning() {
+			Platform.runLater(() -> {
+				Alert cameraAlert = new Alert(AlertType.ERROR);
+				cameraAlert.setTitle("Internal Error");
+				cameraAlert.setHeaderText("Internal Error -- Likely Too Many false Shots");
+				cameraAlert.setResizable(true);
+				cameraAlert.setContentText("An internal error due to JDK bug 8094135 occured in Java that will cause all "
+						+ "of your shots to be lost. This error is most likely to occur when you are getting a lot of false "
+						+ "shots due to poor lighting conditions and/or a poor camera setup. Please put the camera in front "
+						+ "of the shooter and turn off any bright lights in front of the camera that are the same height as "
+						+ "the shooter. If problems persist you may need to restart ShootOFF.");
+				cameraAlert.show();
+				
+				shots.clear();
+				shotEntries.clear();
+			});
+	}
+	
 	public String getCameraName() {
 		return cameraName;
 	}
@@ -175,7 +197,11 @@ public class CanvasManager {
 			}
 			
 			shots.clear();
+			try {
 			if (shotEntries != null) shotEntries.clear();
+			} catch (NullPointerException npe) {
+				jdk8094135Warning();
+			}
 			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
 		}); 
 	}
@@ -242,52 +268,91 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
-	public void addShot(Color color,  double x, double y) {
-		if (startTime == 0) startTime = System.currentTimeMillis();
+
+	private Optional<ShotProcessor> processShot(Shot shot) {
+		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		
+
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		for (ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) {
+				if (processor instanceof MalfunctionsProcessor) {
+					hadMalfunction = true;
+				} else if (processor instanceof VirtualMagazineProcessor) {
+					hadReload = true;
+				}
+				
 				rejectingProcessor = Optional.of(processor);
 				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
 				break;
 			}
 		}
 		
+
 		
 		if (rejectingProcessor.isPresent()) {
 			// Record video for rejected shots as long as they weren't rejected
 			// for being dupes
 			if (!config.getSessionRecorder().isPresent()) return;
 			
-			if (rejectingProcessor.get() instanceof DeduplicationProcessor == false) {
+
+		if (rejectingProcessor instanceof DeduplicationProcessor == false) {
 				notifyShot(shot);
 			
 				Optional<String> videoString = createVideoString(shot);
 				
-				if (rejectingProcessor.get() instanceof MalfunctionsProcessor) {
+
+			if (rejectingProcessor instanceof MalfunctionsProcessor) {
 					config.getSessionRecorder().get().recordShot(cameraName, 
 							shot, true, false, Optional.empty(), 
 							Optional.empty(),
 							videoString);		
- 				} else if (rejectingProcessor.get() instanceof VirtualMagazineProcessor) {
+
+			} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
 					config.getSessionRecorder().get().recordShot(cameraName, 
 							shot, false, true, Optional.empty(), 
 							Optional.empty(),
 							videoString);		
  				}
 			}
+	}
 			
+	public void addShot(Color color, double x, double y) {
+		if (startTime == 0) startTime = System.currentTimeMillis();
+		
+		Shot shot = new Shot(color, x, y, 
+				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+	
+		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
+		if (rejectingProcessor.isPresent()) {
+			recordRejectedShot(shot, rejectingProcessor.get());
 			return;
 		} else {
 			notifyShot(shot);
 		}
 		
+
+		Optional<Shot> lastShot = Optional.empty();
+		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() -1).getShot());
 		
-		shotEntries.add(new ShotEntry(shot));
+		ShotEntry shotEntry;
+		if (hadMalfunction || hadReload) {
+			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
+			hadMalfunction = false;
+			hadReload = false;
+		} else {
+			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
+		}
+		
+		try {
+			shotEntries.add(shotEntry);
+		} catch (NullPointerException npe) {
+			jdk8094135Warning();
+		}
+		
 		shots.add(shot);
 		drawShot(shot);
 		
@@ -312,6 +377,7 @@ public class CanvasManager {
 				
 				Shot arenaShot = new Shot(shot.getColor(), 
 						(shot.getX() - b.getMinX()) * x_scale, (shot.getY() - b.getMinY()) * y_scale,
+
 						shot.getTimestamp(), shot.getFrame(), config.getMarkerRadius());
 				
 				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
@@ -523,7 +589,14 @@ public class CanvasManager {
 	}
 	
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
+
 		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, targets.size());
+		
+		return addTarget(newTarget);
+	}
+	
+	public Target addTarget(Target newTarget) {
+		Platform.runLater(() -> { canvasGroup.getChildren().add(newTarget.getTargetGroup()); });
 		targets.add(newTarget);
 		
 				

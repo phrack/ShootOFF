@@ -100,7 +100,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			PrintWriter out = new PrintWriter(targetFile);
+			PrintWriter out = new PrintWriter(targetFile, "UTF-8");
 			
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			out.println("<target>");

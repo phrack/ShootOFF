@@ -15,6 +15,7 @@
                <children>
                   <Button mnemonicParsing="false" onAction="#previousButtonClicked" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_skip_backward.png&quot;); -fx-background-position: center;" />
                   <Button mnemonicParsing="false" onAction="#nextButtonClicked" minHeight="-Infinity" minWidth="-Infinity" prefHeight="32.0" prefWidth="32.0" style="-fx-background-position: center; -fx-background-image: url(&quot;images/gnome_media_skip_forward.png&quot;);" />
+                   <Button fx:id="togglePlaybackButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#togglePlaybackButtonClicked" prefHeight="32.0" prefWidth="32.0" />
                   <Slider fx:id="timeSlider" HBox.hgrow="ALWAYS" />
                   <Label fx:id="timeLabel" text="00:00:00" />
                </children>

@@ -179,6 +179,12 @@ public class Main extends Application {
 			e.printStackTrace();
 			tryRunningShootOFF();
 			return Optional.empty();
+        } finally {
+        	try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
 		
 		connection.disconnect();
@@ -453,9 +459,24 @@ public class Main extends Application {
 		}
     }
     
+    public static void closeNoCamera() {
+		Alert cameraAlert = new Alert(AlertType.ERROR);
+		cameraAlert.setTitle("No Webcams");
+		cameraAlert.setHeaderText("No Webcams Found!");
+		cameraAlert.setResizable(true);
+		cameraAlert.setContentText("ShootOFF needs a webcam to function. Now closing...");
+		cameraAlert.showAndWait();
+		System.exit(-1);
+    }
+    
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
+		
+		String os = System.getProperty("os.name"); 
+		if (os != null && os.equals("Mac OS X") && Camera.getWebcams().isEmpty()) {
+			closeNoCamera();
+		}
 		
 		if (System.getProperty("javawebstart.version", null) != null) {
 			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
@@ -474,6 +495,8 @@ public class Main extends Application {
 			}
 			
 			System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
+			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 			
 			resourcesMetadataFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
 			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
@@ -496,6 +519,8 @@ public class Main extends Application {
 			}
 		} else {
 			System.setProperty("shootoff.home", System.getProperty("user.dir"));
+			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 			runShootOFF();
 		}
 	}

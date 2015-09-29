@@ -236,7 +236,7 @@ public class TestConfiguration {
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
 		assertEquals(true, config.useRedLaserSound());
-		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/metal_clang.wav", config.getRedLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/steel_sound_1.wav", config.getRedLaserSound().getPath());
 		assertEquals(false, config.useGreenLaserSound());
 		assertEquals(System.getProperty("user.dir") + File.separator + "sounds/beep.wav", config.getGreenLaserSound().getPath());
 		assertEquals(true, config.useVirtualMagazine());

@@ -19,17 +19,20 @@
 package com.shootoff.gui.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.courses.Course;
 import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.LocatedImage;
+import com.shootoff.gui.Target;
 
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -42,9 +45,15 @@ public class ProjectorArenaController implements CalibrationListener {
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
 	
-	@SuppressWarnings("unused")
 	private Configuration config;
 	private CanvasManager canvasManager;
+	private Optional<LocatedImage> background = Optional.empty();
+	
+	// Used for testing
+	public void init(Configuration config, CanvasManager canvasManager) {
+		this.config = config;
+		this.canvasManager = canvasManager;
+	}
 	
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
@@ -88,8 +97,29 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.close();
 	}
 	
-	public void setBackground(Image img) {
+	public void setBackground(LocatedImage img) {
+		background = Optional.ofNullable(img);
 		canvasManager.updateBackground(img, Optional.empty());
+	}
+	
+	public Optional<LocatedImage> getBackground() {
+		return background;
+	}
+	
+	public Configuration getConfiguration() {
+		return config;
+	}
+	
+	public void setCourse(Course course) {
+		if (course.getBackground().isPresent()) {
+			setBackground(course.getBackground().get());
+		} else {
+			setBackground(null);
+		}
+		
+		for (Target t : new ArrayList<Target>(canvasManager.getTargets())) canvasManager.removeTarget(t);
+		
+		for (Target t : course.getTargets()) canvasManager.addTarget(t);
 	}
 	
 	@FXML

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <target>
-	<image x="74.000000" y="189.500000" file="targets/plate_rack.png">
+	<image x="87.000000" y="190.500000" file="targets/plate-rack.png">
 	</image>
-	<image x="89.500000" y="61.000000" file="targets/plate.gif">
-		<tag name="command" value="animate;play_sound(sounds/metal_clang.wav)" />
+	<image x="89.500000" y="53.000000" file="targets/circle-plate.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_2.wav)" />
 	</image>
-	<image x="442.500000" y="61.000000" file="targets/plate.gif">
-		<tag name="command" value="animate;play_sound(sounds/metal_clang.wav)" />
+	<image x="442.500000" y="53.000000" file="targets/circle-plate.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_2.wav)" />
 	</image>
-	<image x="264.500000" y="61.000000" file="targets/plate.gif">
-		<tag name="command" value="animate;play_sound(sounds/metal_clang.wav)" />
+	<image x="264.500000" y="53.000000" file="targets/circle-plate.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_2.wav)" />
 	</image>
 </target>

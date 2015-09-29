@@ -18,6 +18,7 @@
 
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javafx.scene.Group;
+import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
@@ -54,6 +56,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private int delayMin = 4;
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
+	private boolean coloredRows = false;
 	
 	public ISSFStandardPistol() {}
 	
@@ -95,7 +98,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		@Override
 		public Void call() throws Exception {
 			if (repeatExercise) {
-				TextToSpeech.say("Shooter... make ready");
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
 				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
             	executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 			}
@@ -110,6 +113,14 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 			shotCount = 0;
 			
 			if (repeatExercise) {
+				if (coloredRows) {
+					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+				} else {
+					thisSuper.setShotTimerRowColor(null);
+				}
+				
+				coloredRows = !coloredRows;
+				
 				TrainingExerciseBase.playSound("sounds/beep.wav");
 				thisSuper.pauseShotDetection(false);
 				endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
@@ -124,7 +135,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		public Void call() throws Exception {
 			if (repeatExercise) {
 				thisSuper.pauseShotDetection(true);
-				TextToSpeech.say("Round over");
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
 				
 				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 				

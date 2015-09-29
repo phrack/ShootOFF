@@ -59,6 +59,12 @@
                         <MenuItem mnemonicParsing="false" onAction="#removeArenaBackgroundMenuItemClicked" text="None" />
                     </items>
                   </Menu>
+                  <Menu fx:id="coursesMenu" disable="true" mnemonicParsing="false" text="Courses">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#saveCourseMenuItemClicked" text="Save Course..." />
+                        <MenuItem mnemonicParsing="false" onAction="#loadCourseMenuItemClicked" text="Load Course..." />
+                    </items>
+                  </Menu>
                   <MenuItem fx:id="toggleArenaShotsMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaShotsClicked" text="Show Shot Markers" />
               </items>
             </Menu>
@@ -67,7 +73,7 @@
       <HBox VBox.vgrow="ALWAYS">
          <children>
             <TabPane fx:id="cameraTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER" />
-            <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportWidth="180.0" HBox.hgrow="ALWAYS">
+            <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportWidth="265.0" HBox.hgrow="ALWAYS">
                <content>
                   <TableView fx:id="shotTimerTable" minHeight="0.0" minWidth="0.0" />
                </content>

@@ -108,10 +108,10 @@ public class XMLSessionWriter implements EventVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			File sessionsFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions");
+			File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
 			if (!sessionsFolder.exists()) sessionsFolder.mkdir();
 			
-			PrintWriter out = new PrintWriter(sessionFile);
+			PrintWriter out = new PrintWriter(sessionFile, "UTF-8");
 			
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			out.println("<session>");

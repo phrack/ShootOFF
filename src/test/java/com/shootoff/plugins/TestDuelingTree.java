@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import com.shootoff.targets.io.TargetIO;
 public class TestDuelingTree {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream = new PrintStream(stringOut);
+	private PrintStream stringOutStream;
 	private List<Group> targets;
 	private List<TargetRegion> leftPaddles;
 	private List<TargetRegion> rightPaddles;
@@ -41,7 +42,11 @@ public class TestDuelingTree {
 	public void setUp() throws ConfigurationException, NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, IOException {
 		new JFXPanel(); // Initialize the JFX toolkit
 		
+		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
+		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+		
 		TextToSpeech.silence(true);
+		TrainingExerciseBase.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 		
@@ -83,6 +88,7 @@ public class TestDuelingTree {
 	@After
 	public void tearDown() {
 		TextToSpeech.silence(false);
+		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
 	}
 
@@ -95,34 +101,34 @@ public class TestDuelingTree {
 		DuelingTree dt = new DuelingTree(targets);
 		dt.init(config, new CamerasSupervisor(config), null, null);
 		
-		assertEquals("This training exercise requires a dueling tree target\n", stringOut.toString());
+		assertEquals("sounds/voice/shootoff-duelingtree-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		dt.reset(targets);
 		
 		assertEquals("left score: 0\n"
 				      + "right score: 0\n"
-				      + "This training exercise requires a dueling tree target\n", stringOut.toString());
+				      + "sounds/voice/shootoff-duelingtree-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 	
 	@Test
-	public void testOneRoundsLeftWins() {
+	public void testOneRoundsLeftWins() throws UnsupportedEncodingException {
 		for (TargetRegion leftPaddle : leftPaddles) {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddle));
 		}
 		
 		assertEquals("left score: 1\n"
-			      + "right score: 0\n", stringOut.toString());
+			      + "right score: 0\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 	
 		dt.destroy();
-		assertEquals("", stringOut.toString());
+		assertEquals("", stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 	
 	@Test
-	public void testTwoSeparateRoundsEachSideWinsOnce() {
+	public void testTwoSeparateRoundsEachSideWinsOnce() throws UnsupportedEncodingException {
 		// Let right shoot two paddles then have left come in for the win
 		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddles.get(0)));
 		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddles.get(1)));
@@ -135,13 +141,13 @@ public class TestDuelingTree {
 		}		
 		
 		assertEquals("left score: 1\n"
-			      + "right score: 0\n", stringOut.toString());
+			      + "right score: 0\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		dt.reset(targets);
 
 		assertEquals("left score: 0\n"
-			      + "right score: 0\n", stringOut.toString());
+			      + "right score: 0\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Right pulls out the win with no competition
@@ -150,11 +156,11 @@ public class TestDuelingTree {
 		}		
 		
 		assertEquals("left score: 0\n"
-			      + "right score: 1\n", stringOut.toString());
+			      + "right score: 1\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		dt.destroy();
-		assertEquals("", stringOut.toString());
+		assertEquals("", stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 }
