@@ -543,7 +543,9 @@ public class CameraManager {
 	}
 	
 	public void showBrightnessWarning() {
-
+		// TODO Switch to error overlay or only show this once?
+		
+		
 		if (!webcam.isPresent() || shownBrightnessWarning)
 			return;
 		shownBrightnessWarning = true;

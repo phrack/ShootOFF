@@ -60,18 +60,7 @@ public class TestCameraManagerLogitech {
 	
 	@Test
 	public void testLogitechIndoorGreen() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.avi", Optional.empty());
-		
-		assertEquals(9, shots.size());
-		
-		for (Shot shot : shots)
-			assertEquals(Color.GREEN, shot.getColor());
-	}
-	
-	
-	@Test
-	public void testLogitechOutdoorGreen() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green.avi", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", Optional.empty());
 		
 		assertEquals(9, shots.size());
 		
@@ -82,7 +71,7 @@ public class TestCameraManagerLogitech {
 	
 	@Test
 	public void testLogitechOutdoorGreen2() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.avi", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.mp4", Optional.empty());
 		
 		assertEquals(9, shots.size());
 		
@@ -92,7 +81,7 @@ public class TestCameraManagerLogitech {
 	
 	@Test
 	public void testLogitechSafariGreen() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.avi", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", Optional.empty());
 		
 		assertEquals(9, shots.size());
 		
@@ -100,21 +89,12 @@ public class TestCameraManagerLogitech {
 			assertEquals(Color.GREEN, shot.getColor());
 	}
 	
-	
-	@Test
-	public void testLogitechIndoorRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-red.avi", Optional.empty());
-		
-		assertEquals(9, shots.size());
-		
-		for (Shot shot : shots)
-			assertEquals(Color.RED, shot.getColor());
-	}
+
 	
 	
 	@Test
 	public void testLogitechOutdoorRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.avi", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.mp4", Optional.empty());
 		
 		assertEquals(9, shots.size());
 		
@@ -125,7 +105,7 @@ public class TestCameraManagerLogitech {
 	
 	@Test
 	public void testLogitechSafariRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.avi", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.mp4", Optional.empty());
 		
 		assertEquals(9, shots.size());
 		

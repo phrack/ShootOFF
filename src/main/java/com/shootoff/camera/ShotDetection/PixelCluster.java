@@ -29,6 +29,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		
 		double diff = 0;
 		double lumDiff = 0;
+		
 		for (Pixel pixel : this)
 		{
 			if (pixel.getConnectedness()<MAXIMUM_CONNECTEDNESS)
@@ -36,6 +37,9 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 				for(int h=-1;h<=1;h++)
 					for(int w=-1;w<=1;w++) 
 					{
+						if (h==0 && w==0)
+							continue;
+						
 						int rx = pixel.x+w; 
 						int ry = pixel.y+h; 
 						

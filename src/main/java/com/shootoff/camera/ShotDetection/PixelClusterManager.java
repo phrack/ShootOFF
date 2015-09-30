@@ -9,6 +9,8 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
+
 public class PixelClusterManager {
 	
 	private final Logger logger = LoggerFactory.getLogger(PixelClusterManager.class);
@@ -20,8 +22,9 @@ public class PixelClusterManager {
 	HashMap<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 
 	private ShotDetectionManager shotDetectionManager;
-	
-	private final static double MINIMUM_CONNECTEDNESS = 6.72f;
+
+	private final static double MINIMUM_CONNECTEDNESS = 4.44f;
+	private final static double MINIMUM_CONNECTEDNESS_FACTOR = .018f;
 
 	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager)
 	{
@@ -52,12 +55,20 @@ public class PixelClusterManager {
 				for(int h=-1;h<=1;h++)
 					for(int w=-1;w<=1;w++) 
 					{
+						if (h==0 && w==0)
+							continue;
+						
 						int rx = thisPoint.x+w; 
 						int ry = thisPoint.y+h; 
+						
+						if (rx<0 || ry<0 || rx>=CameraManager.FEED_WIDTH || ry>=CameraManager.FEED_HEIGHT)
+							continue;
+						
 						Pixel nearPoint = new Pixel(rx,ry);
 						if (points.contains(nearPoint))
 						{
 							logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint), !pixelMapping.containsKey(nearPoint));
+							
 							
 							if (pixelMapping.containsKey(nearPoint) && pixelMapping.get(nearPoint).intValue()==numberOfRegions)
 							{
@@ -79,6 +90,8 @@ public class PixelClusterManager {
 						
 
 					}
+				
+				logger.trace("{} {} - {}", thisPoint.x, thisPoint.y, connectedness);
 				
 				thisPoint.setConnectedness(connectedness);
 			}
@@ -121,15 +134,19 @@ public class PixelClusterManager {
 				
 			}
 			
+			
 			averageX = (averageX / avgconnectedness);
 			averageY = (averageY / avgconnectedness);
 
 			avgconnectedness = avgconnectedness / cluster.size();
+
+			// We scale up the minimum in a linear scale as the cluster size increases.  This is an approximate density
+			double scaled_minimum = MINIMUM_CONNECTEDNESS+((cluster.size()-shotDetectionManager.getMinimumShotDimension())*MINIMUM_CONNECTEDNESS_FACTOR);
 			
-			logger.trace("Cluster {} - {} - connectedness {} - {} {}", i, cluster.size(), avgconnectedness, averageX, averageY);
+			logger.trace("Cluster {} - {} - connectedness {} scaled_minimum {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
 			
 			// It's too small or not well connected, bail out early
-			if (cluster.size() < shotDetectionManager.getMinimumShotDimension() || avgconnectedness < MINIMUM_CONNECTEDNESS)
+			if (cluster.size() < shotDetectionManager.getMinimumShotDimension() || avgconnectedness < scaled_minimum)
 				continue;
 			
 
