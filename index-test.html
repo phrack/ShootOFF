@@ -695,15 +695,10 @@ gratitude for this project, please make us feel good by letting us know!</p>
         var q1_concealcarrier = $('#q1_concealcarrier:checked').val();
         var q1_hunter = $('#q1_hunter:checked').val();
 
-	var q1 = new Array();
-	$("input[name='q1[]']:checked").each(function(i) {
-		q1.push($(this).val());
-	});
-
-        var q2_time = $('#q2_time').val();
-        var q2_money = $('#q2_money').val();
-        var q2_disinterest = $('#q2_disinterest').val();
-        var q2_other = $('#q2_other').val();
+        var q2_time = $('#q2_time:checked').val();
+        var q2_money = $('#q2_money:checked').val();
+        var q2_disinterest = $('#q2_disinterest:checked').val();
+        var q2_other = $('#q2_other:checked').val();
         var q2_other_option_response = $('#q2_other_option_response').val();
 
         var q3_yes_no = radio_button_value = $('input:radio[name=q3]:checked').val();
@@ -711,15 +706,14 @@ gratitude for this project, please make us feel good by letting us know!</p>
         var q4_email = $('#q4_email').val();
 
         var q5_age = $('#q5_age').val();
+
             $.ajax({
                 url: "https://docs.google.com/forms/d/1SD6h8ME_FhabCOZbOD3k67Vri6b3RLxzk-Xlq4Xyh7E/formResponse",
                 data: { 
-                  "entry.830909439" : q1,
-                  //"group_830909439_1": q1_police, "group_830909439_2": q1_military, "group_830909439_3": q1_competitor, 
-                  //"group_830909439_4": q1_concealcarrier, "group_830909439_5": q1_hunter,
+                  "entry.830909439": [q1_police, q1_military, q1_competitor, q1_concealcarrier, q1_hunter],
 
-                  "group_2022365593_1": q2_time,  "group_2022365593_2": q2_money, "group_2022365593_3": q2_disinterest, 
-                  "group_2022365593_4": q2_other, "entry_2022365593_other_option_response": q2_other_option_response,
+                  "entry.2022365593": [q2_time, q2_money, q2_disinterest, q2_other],
+                  "entry.2022365593.other_option_response": q2_other_option_response,
 
                   "entry.920067728": q3_yes_no,
 
@@ -727,6 +721,7 @@ gratitude for this project, please make us feel good by letting us know!</p>
 
                   "entry_1498314145": q5_age
                 },
+                traditional: true,
                 type: "POST",
                 dataType: "xml"
             });
@@ -746,20 +741,20 @@ gratitude for this project, please make us feel good by letting us know!</p>
 
             <div class="question">
               <p>What kind of shooter are you?</p>	
-              <input type="checkbox" name="q1[]" id="q1_police" value="Police"> Police</input>
-              <input type="checkbox" name="q1[]" id="q1_military" value="Military"> Military</input>
-              <input type="checkbox" name="q1[]" id="q1_competitor" value="Competitor"> Competitor</input>
-              <input type="checkbox" name="q1[]" id="q1_concealcarrier" value="Conceal Carrier"> Conceal Carrier</input>
-              <input type="checkbox" name="q1[]" id="q1_hunter" value="Hunter"> Hunter</input>
+              <input type="checkbox" name="q1" id="q1_police" value="Police"> Police</input>
+              <input type="checkbox" name="q1" id="q1_military" value="Military"> Military</input>
+              <input type="checkbox" name="q1" id="q1_competitor" value="Competitor"> Competitor</input>
+              <input type="checkbox" name="q1" id="q1_concealcarrier" value="Conceal Carrier"> Conceal Carrier</input>
+              <input type="checkbox" name="q1" id="q1_hunter" value="Hunter"> Hunter</input>
             </div>
 
             <div class="question">
               <p>What prevents you from training more?</p>
-              <input type="checkbox" name="q2_a" id="q2_time" value="Time"> Time</input>
-              <input type="checkbox" name="q2_b" id="q2_money" value="Money"> Money</input>
-              <input type="checkbox" name="q2_c" id="q2_disinterest" value="Disinterest"> Disinterest</input> <br/>
-              <input type="checkbox" name="q2_d" id="q2_other" value="__other_option__"> Other</input>
-              <input class="m-input" name="q2_e" id="q2_other_option_response" type="text" value="" placeholder="Write your answer here">
+              <input type="checkbox" name="q2" id="q2_time" value="Time"> Time</input>
+              <input type="checkbox" name="q2" id="q2_money" value="Money"> Money</input>
+              <input type="checkbox" name="q2" id="q2_disinterest" value="Disinterest"> Disinterest</input> <br/>
+              <input type="checkbox" name="q2" id="q2_other" value="__other_option__"> Other</input>
+              <input class="m-input" name="q2_expl" id="q2_other_option_response" type="text" value="" placeholder="Write your answer here">
             </div>
 
             <div class="question">
