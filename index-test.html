@@ -707,6 +707,18 @@ gratitude for this project, please make us feel good by letting us know!</p>
 
         var q5_age = $('#q5_age').val();
 
+        // Don't submit form data if all fields are empty (default)
+        if (q1_police == undefined && q1_military == undefined && q1_competitor == undefined && q1_concealcarrier == undefined && 
+                q1_hunter == undefined &&
+            q2_time == undefined && q2_money == undefined && q2_disinterest == undefined && q2_other == undefined &&
+            q3_yes_no == undefined &&
+            q4_email == "" &&
+            q5_age == "") {
+
+          alert("EMPTY");
+          return;
+        }
+
             $.ajax({
                 url: "https://docs.google.com/forms/d/1SD6h8ME_FhabCOZbOD3k67Vri6b3RLxzk-Xlq4Xyh7E/formResponse",
                 data: { 
