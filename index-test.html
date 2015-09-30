@@ -657,7 +657,7 @@ gratitude for this project, please make us feel good by letting us know!</p>
         <div class="col-md-4 f-p">
           <h4 class="f-title">Download</h4>
           <p>The current stable version of ShootOFF is version 3.3, see <a class="l-ab" target="_blank" href="https://github.com/phrack/ShootOFF/issues?q=milestone%3A%223.3+Webstart+and+Shot+Video+Recorder%22+is%3Aclosed">what's new</a>. (Ensure you have the latest version of Java installed.) </p>
-          <a id="bt-download" class="btn btn-my-red" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
+          <a id="bt-download" class="btn btn-my-red f-button" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
         </div>
 
         </div>
@@ -687,6 +687,47 @@ gratitude for this project, please make us feel good by letting us know!</p>
 <!-- /footer -->
 
 <!-- Modal -->
+<script>
+    function postDataToGoogle() {
+        var q1_police = $('#police').val();
+        var q1_military = $('#military').val();
+        var q1_competitor = $('#competitor').val();
+        var q1_concealcarrier = $('#concealcarrier').val();
+	var q1_hunter = $('#hunter').val();
+
+        var q2_time = $('#time').val();
+        var q2_money = $('#money').val();
+        var q2_disinterest = $('#disinterest').val();
+        var q2_other = $('#other').val();
+	var q2_other_option_response = $('#other_option_response').val();
+
+	var q3_yes_no = radio_button_value = $('input:radio[name=q3]:checked').val();
+
+	var q4_email = $('#q4_email').val();
+
+	var q5_age = $('#q5_age').val();
+
+            $.ajax({
+                url: "https://docs.google.com/forms/d/1SD6h8ME_FhabCOZbOD3k67Vri6b3RLxzk-Xlq4Xyh7E/formResponse",
+                data: { 
+		"group_830909439_1": q1_police, "group_830909439_2": q1_military, "group_830909439_3": q1_competitor, 
+		"group_830909439_4": q1_concealcarrier, "group_830909439_5": q1_hunter,
+
+		"group_2022365593_1": q2_time,  "group_2022365593_2": q2_money, "group_2022365593_3": q2_disinterest, 
+		"group_2022365593_4": q2_other, "entry_2022365593_other_option_response": q2_other_option_response,
+
+		"entry.920067728": q3_yes_no,
+
+		"entry_171650231": q4_email,
+
+		"entry_1498314145": q5_age
+		},
+                type: "POST",
+                dataType: "xml"
+            });
+    }
+</script>
+
 <div class="modal fade" id="survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -696,41 +737,41 @@ gratitude for this project, please make us feel good by letting us know!</p>
       <div class="modal-body m-body">
         <p class="m-text">You don't have to, but if you've never told us a bit about yourself we'd appreciate you filling out the survey below before downloading!</p>
 
-        <form class="m-form" action="yourfile.x" method="post" id="survey_form">
+        <form class="m-form" id="survey_form">
 
             <div class="question">
               <p>What kind of shooter are you?</p>	
-              <input type="checkbox" name="q1police" value="Police"> Police</input>
-              <input type="checkbox" name="q1military" value="Military"> Military</input>
-              <input type="checkbox" name="q1competitor" value="Competitor"> Competitor</input>
-              <input type="checkbox" name="q1concealcarrier" value="ConcealCarrier"> Conceal Carrier</input>
-              <input type="checkbox" name="q1hunter" value="Hunter"> Hunter</input>
+              <input type="checkbox" name="q1_a" id="police" value="Police"> Police</input>
+              <input type="checkbox" name="q1_b" id="military" value="Military"> Military</input>
+              <input type="checkbox" name="q1_c" id="competitor" value="Competitor"> Competitor</input>
+              <input type="checkbox" name="q1_d" id="concealcarrier" value="Conceal Carrier"> Conceal Carrier</input>
+              <input type="checkbox" name="q1_e" id="hunter" value="Hunter"> Hunter</input>
             </div>
 
             <div class="question">
               <p>What prevents you from training more?</p>
-              <input type="checkbox" name="q2time" value="Time"> Time</input>
-              <input type="checkbox" name="q2money" value="Money"> Money</input>
-              <input type="checkbox" name="q2disinterest" value="Disinterest"> Disinterest</input> <br/>
-              <input type="checkbox" name="q2other" value="Other"> Other</input>
-              <input class="m-input" id="q2otherexpl" name="q2otherexpl" type="text" value="" placeholder="Write your answer here">
+              <input type="checkbox" name="q2_a" id="time" value="Time"> Time</input>
+              <input type="checkbox" name="q2_b" id="money" value="Money"> Money</input>
+              <input type="checkbox" name="q2_c" id="disinterest" value="Disinterest"> Disinterest</input> <br/>
+              <input type="checkbox" name="q2_d" id="other" value="__other_option__"> Other</input>
+              <input class="m-input" name="q2_e" id="other_option_response" type="text" value="" placeholder="Write your answer here">
             </div>
 
             <div class="question">
               <p>Have you used ShootOFF before?</p>
-              <input type="radio" name="usedshootoff" value="yes"> Yes</input>
-              <input type="radio" name="usedshootoff" value="no" checked> No</input>
+              <input type="radio" name="q3" id="q3_yes" value="Yes"> Yes</input>
+              <input type="radio" name="q3" id="q3_no" value="No" checked> No</input>
             </div>
 
             <div class="question">
               <p>What's your email address (opts you into future emails about software updates)?</p>
-              <input class="m-input" id="Question4" name="Question4" type="text" value="" placeholder="Write your email address">
+              <input class="m-input" name="entry.171650231" id="q4_email" type="text" value="" placeholder="Write your email address">
             </div>
 
             <div class="years">
               <p>How old are you?</p>
-              <select name="Service" class="m-input">
-                <option value="<18">&lt;18 Years Old</option>
+              <select name="entry.1498314145" id="q5_age" class="m-input">
+                <option value="&lt;18">&lt;18 Years Old</option>
                 <option value="18-25">18-25 Years Old</option>
                 <option value="26-35">26-35 Years Old</option>
                 <option value="36-45">36-45 Years Old</option>
@@ -752,10 +793,10 @@ gratitude for this project, please make us feel good by letting us know!</p>
           <div class="row">
 
             <div class="col-xs-6 wst">
-              <a id="tirekov" type="submit" value="submit" class="btn btn-my-red track" data-dismiss="modal">Get ShootOFF</a>
+              <a id="tirekov" type="submit" value="submit" class="btn btn-my-red track" data-dismiss="modal" onclick="postDataToGoogle();">Get ShootOFF</a>
             </div>
             <div class="col-xs-6 wst2">
-              <a class="btn btn-my-wh lmb2" href="jws/ShootOFF.jnlp" onclick="return launchApplication('jws/ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
+              <a class="btn btn-my-wh lmb2" href="jws/ShootOFF.jnlp" onclick="postDataToGoogle();return launchApplication('jws/ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
             </div>
 
           </div>
