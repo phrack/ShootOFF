@@ -25,6 +25,11 @@ public class PixelClusterManager {
 
 	private final static double MINIMUM_CONNECTEDNESS = 4.44f;
 	private final static double MINIMUM_CONNECTEDNESS_FACTOR = .018f;
+	
+	private final static double MINIMUM_DENSITY = .79f;
+	
+	private final static double MINIMUM_SHOT_RATIO = .82f;
+	private final static double MAXIMUM_SHOT_RATIO = 1.18f;
 
 	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager)
 	{
@@ -147,12 +152,24 @@ public class PixelClusterManager {
 			if (cluster.size() < shotDetectionManager.getMinimumShotDimension())
 				continue;
 			
-			int shotWidth = (maxX-minX);
-			int shotHeight = (maxY-minY);
+			int shotWidth = (maxX-minX)+1;
+			int shotHeight = (maxY-minY)+1;
 			double shotRatio = (double)shotWidth/(double)shotHeight;
 			
-			if (shotRatio < .82 || shotRatio > 1.18)
+			logger.trace("shotRatio {} {} - {} - {} {} {} {}", shotWidth, shotHeight, shotRatio, minX, minY, maxX, maxY);
+			
+			if (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO)
 				continue;
+			
+			double shotArea = shotWidth * shotHeight;
+			double circleArea = Math.PI * Math.pow((Math.max(shotWidth,shotHeight))/2,2);
+			double density = cluster.size()/circleArea;
+			
+			logger.trace("density {} {} - {} {} - {}", shotWidth, shotHeight, circleArea, cluster.size(), density);
+			
+			if (density < MINIMUM_DENSITY)
+				continue;
+			
 			
 			averageX = (averageX / avgconnectedness);
 			averageY = (averageY / avgconnectedness);
@@ -162,7 +179,7 @@ public class PixelClusterManager {
 			// We scale up the minimum in a linear scale as the cluster size increases.  This is an approximate density
 			double scaled_minimum = MINIMUM_CONNECTEDNESS+((cluster.size()-shotDetectionManager.getMinimumShotDimension())*MINIMUM_CONNECTEDNESS_FACTOR);
 			
-			logger.trace("Cluster {} - {} - connectedness {} scaled_minimum {} - ratio {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, shotRatio, averageX, averageY);
+			logger.trace("Cluster {} - {} - connectedness {} scaled_minimum {} - ratio {} - density {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, shotRatio, density, averageX, averageY);
 			
 			if (avgconnectedness < scaled_minimum)
 				continue;

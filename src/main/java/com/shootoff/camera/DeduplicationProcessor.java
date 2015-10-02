@@ -26,9 +26,11 @@ import org.slf4j.LoggerFactory;
 public class DeduplicationProcessor implements ShotProcessor {
 	private Optional<Shot> lastShot = Optional.empty();
 	
-	private static double DISTANCE_THRESHOLD = 0.10;
+	private static double DISTANCE_THRESHOLD = 0.05;
 	private static double DISTANCE_THRESHOLD_X = 640 * DISTANCE_THRESHOLD;
 	private static double DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
+	
+	public static final int DEDUPE_THRESHOLD_DIVISION_FACTOR = 5;
 	
 	private static int frameThreshold = 10;
 	
@@ -66,6 +68,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 					shot.getFrame() - lastShot.get().getFrame() <= frameThreshold &&
 					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
 					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
+				
 				return false;
 			}
 			

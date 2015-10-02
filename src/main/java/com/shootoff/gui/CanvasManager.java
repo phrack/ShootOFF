@@ -70,9 +70,9 @@ public class CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
-	private CameraManager cameraManager;
+	protected CameraManager cameraManager;
 	
-	private final CamerasSupervisor camerasSupervisor;
+	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
