@@ -33,7 +33,7 @@ public final class ShotDetectionManager implements Runnable {
 	private Configuration config;
 	
 	
-	private final int INIT_FRAME_COUNT = 5;
+	private final int INIT_FRAME_COUNT = 3;
 	private boolean filtersInitialized = false;	
 
 	// This is the long term storage for the MAs
@@ -104,8 +104,8 @@ public final class ShotDetectionManager implements Runnable {
 		
         if (lumsMovingAverage[x][y] == -1)
         {
-        	newLumsMovingAverage[x][y] = currentLum;
-        	newColorDiffMovingAverage[x][y] = colorDiff;
+        	newLumsMovingAverage[x][y] = Math.min(currentLum, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
+        	newColorDiffMovingAverage[x][y] = Math.min(colorDiff, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
             return Optional.empty();
 
         }
@@ -121,6 +121,7 @@ public final class ShotDetectionManager implements Runnable {
 			
 			// Make the feed pixels red so the user can easily see what the problem pixels are
 			
+			// TODO: Fix for detection bounds
 			if (shouldShowBrightnessWarningBool)
 				frame.setRGB(x, y, 0xFF0000);
 		}
@@ -164,10 +165,13 @@ public final class ShotDetectionManager implements Runnable {
 		int threshold = (255-lumsMovingAverage)/2;
 		int increase = (currentLum-lumsMovingAverage);
 		
+		int motion_threshold = threshold+(int)((255-threshold)*(avgThresholdPixels/(double)MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+		
+		
 		if (increase<MINIMUM_BRIGHTNESS_INCREASE)
 			return false;
 		
-		if (increase<threshold)
+		if (increase<motion_threshold)
 			return false;
 		
 		return true;
@@ -210,7 +214,10 @@ public final class ShotDetectionManager implements Runnable {
 
 			
 			if (shouldShowBrightnessWarning())
+			{
 				cameraManager.showBrightnessWarning();
+
+			}
 		
 			// We don't show a warning if the excessive motion happens very early in the feed
 			// But we still need to skip detection on those frames
@@ -219,6 +226,12 @@ public final class ShotDetectionManager implements Runnable {
 			{
 				if (shouldShowMotionWarning(thresholdPixels.size()))
 					cameraManager.showMotionWarning();
+				
+				for (Pixel pixel : thresholdPixels)
+				{
+					// TODO: fix for detection bounds
+					frame.setRGB(pixel.x, pixel.y, 0x0000FF);
+				}
 			}
 			else if (thresholdPixels.size() >= getMinimumShotDimension())
 			{
@@ -273,6 +286,7 @@ public final class ShotDetectionManager implements Runnable {
 		if (cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT)
 		{
 			logger.info("HIGH MOTION - IGNORING FRAME - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
+
 			return true;
 		}
 		return false;
@@ -373,7 +387,7 @@ public final class ShotDetectionManager implements Runnable {
 	private void updateAvgThresholdPixels(int thresholdPixels)
 	{
 		if (avgThresholdPixels == -1)
-			avgThresholdPixels = thresholdPixels;
+			avgThresholdPixels = Math.min(thresholdPixels,MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
 			avgThresholdPixels = (((cameraManager.getFPS()-1)*avgThresholdPixels)+Math.min(thresholdPixels,MAXIMUM_THRESHOLD_PIXELS_FOR_AVG))/cameraManager.getFPS();
 	
@@ -382,7 +396,7 @@ public final class ShotDetectionManager implements Runnable {
 	private void updateAvgBrightPixels(int brightPixels)
 	{
 		if (avgBrightPixels == -1)
-			avgBrightPixels = brightPixels;
+			avgBrightPixels = Math.min(brightPixels,MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
 			avgBrightPixels = (((cameraManager.getFPS()-1)*avgBrightPixels)+Math.min(brightPixels,MAXIMUM_THRESHOLD_PIXELS_FOR_AVG))/cameraManager.getFPS();
 	

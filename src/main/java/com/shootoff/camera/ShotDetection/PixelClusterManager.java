@@ -111,6 +111,8 @@ public class PixelClusterManager {
 			double averageX = 0;
 			double averageY = 0;
 			
+			int minX = CameraManager.FEED_WIDTH, minY = CameraManager.FEED_HEIGHT, maxX = 0, maxY = 0;
+			
 			double avgconnectedness = 0;
 			
 			Iterator<Entry<Pixel, Integer>> it = pixelMapping.entrySet().iterator();
@@ -121,7 +123,15 @@ public class PixelClusterManager {
 				{
 					Pixel nextPixel = next.getKey();
 					
-					
+					if (nextPixel.x<minX)
+						minX = nextPixel.x;
+					if (nextPixel.x>maxX)
+						maxX = nextPixel.x;
+					if (nextPixel.y<minY)
+						minY = nextPixel.y;
+					if (nextPixel.y>maxY)
+						maxY = nextPixel.y;
+						
 					cluster.add(nextPixel);
 					logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, nextPixel.getConnectedness());
 					averageX += nextPixel.x * nextPixel.getConnectedness();
@@ -134,6 +144,15 @@ public class PixelClusterManager {
 				
 			}
 			
+			if (cluster.size() < shotDetectionManager.getMinimumShotDimension())
+				continue;
+			
+			int shotWidth = (maxX-minX);
+			int shotHeight = (maxY-minY);
+			double shotRatio = (double)shotWidth/(double)shotHeight;
+			
+			if (shotRatio < .82 || shotRatio > 1.18)
+				continue;
 			
 			averageX = (averageX / avgconnectedness);
 			averageY = (averageY / avgconnectedness);
@@ -143,10 +162,9 @@ public class PixelClusterManager {
 			// We scale up the minimum in a linear scale as the cluster size increases.  This is an approximate density
 			double scaled_minimum = MINIMUM_CONNECTEDNESS+((cluster.size()-shotDetectionManager.getMinimumShotDimension())*MINIMUM_CONNECTEDNESS_FACTOR);
 			
-			logger.trace("Cluster {} - {} - connectedness {} scaled_minimum {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
+			logger.trace("Cluster {} - {} - connectedness {} scaled_minimum {} - ratio {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, shotRatio, averageX, averageY);
 			
-			// It's too small or not well connected, bail out early
-			if (cluster.size() < shotDetectionManager.getMinimumShotDimension() || avgconnectedness < scaled_minimum)
+			if (avgconnectedness < scaled_minimum)
 				continue;
 			
 
