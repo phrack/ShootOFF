@@ -21,6 +21,7 @@ package com.shootoff.camera;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +31,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
+
+import javax.imageio.ImageIO;
+
+import org.openimaj.math.geometry.point.Point2dImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.AutoCalibration.AutoCalibrationManager;
 import com.shootoff.camera.ShotDetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -55,6 +64,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
+import javafx.util.Callback;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -99,6 +109,11 @@ public class CameraManager {
 	private int frameCount = 0;
 	
 	private static double webcamFPS = DEFAULT_FPS;
+	
+	private AutoCalibrationManager acm = new AutoCalibrationManager();
+	private boolean autoCalibrationEnabled = false;
+	
+	private ShootOFFController controller;
 	
 	
 	public int getFrameCount() {
@@ -341,6 +356,9 @@ public class CameraManager {
 
 
 		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
+
+
+
 		
 		@Override
 		public void run() {
@@ -354,16 +372,27 @@ public class CameraManager {
 			}
 		}
 
-		@Override
+
 		/**
 		 * From the MediaListenerAdapter. This method is used to get a new frame
 		 * from a video that is being played back in a unit test, not to get
 		 * a frame from the webcam.
 		 */
+		private long lastVideoTimestamp = -1;
+		private static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
+		@Override
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			BufferedImage currentFrame = event.getImage();
+			
+			if (lastVideoTimestamp > -1 && (getFrameCount()%DEFAULT_FPS)==0)
+			{
 
+				double estimateFPS = (double)SECOND_IN_MICROSECONDS/(double)(event.getTimeStamp()-lastVideoTimestamp);
+			
+				setFPS(estimateFPS);
+			}
+			lastVideoTimestamp = event.getTimeStamp();
 
 			processFrame(currentFrame);
 		}
@@ -451,9 +480,6 @@ public class CameraManager {
 			
 			detectionExecutor.shutdown();
 		}
-
-
-		private static final int DEDUPE_THRESHOLD_DIVISION_FACTOR = 4;
 		
 
 		private boolean processFrame(BufferedImage currentFrame)
@@ -463,38 +489,93 @@ public class CameraManager {
 			incFrameCount();
 			
 
-			logger.trace("processFrame {}", frameCount);
+			logger.trace("processFrame {}", getFrameCount());
 			
+			if (autoCalibrationEnabled && (getFrameCount()%DEFAULT_FPS==0))
+			{
+				fireAutoCalibration(currentFrame);
+			}
 
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
 
 			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
 				
-
-				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
-				
-
-				DeduplicationProcessor.setThreshold((int)(webcamFPS/DEDUPE_THRESHOLD_DIVISION_FACTOR));
-				
+				setFPS(webcam.get().getFPS());
 
 				if (debuggerListener.isPresent()) {
 
 					debuggerListener.get().updateFeedData(webcamFPS, null);
 				}
-				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
-					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
-							webcam.get().getName(), webcamFPS);
-					showFPSWarning(webcamFPS);
-					showedFPSWarning = true;
-				}
+
+				checkIfMinimumFPS();
 			}
 
 			
 			return result;
 		}
+		
+		private void setFPS(double newFPS)
+		{
+
+			webcamFPS = Math.min(newFPS,DEFAULT_FPS);
+			
+			DeduplicationProcessor.setThreshold((int)(webcamFPS/DeduplicationProcessor.DEDUPE_THRESHOLD_DIVISION_FACTOR));
+			
+		}
+		
+		private void checkIfMinimumFPS()
+		{
+			if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
+				logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
+						webcam.get().getName(), webcamFPS);
+				showFPSWarning(webcamFPS);
+				showedFPSWarning = true;
+			}
+		}
 
 		
+		private void fireAutoCalibration(BufferedImage frame) {
+			acm.setFrame(frame);
+			acm.setCallback(new Callback<List<Point2dImpl>, Void>()
+			{
+
+				@Override
+				public Void call(List<Point2dImpl> corners) {
+					logger.warn("autocalib result {}", corners);
+					
+					autoCalibrateSuccess(corners);
+					return null;
+				}
+						
+			});
+			new Thread(acm).start();
+			
+			
+		}
+
+		protected void autoCalibrateSuccess(List<Point2dImpl> corners) {
+
+			if (autoCalibrationEnabled && controller != null)
+			{
+				autoCalibrationEnabled = false;
+				
+				Optional<Bounds> bounds = acm.calcBounds(corners);
+				
+				if (!bounds.isPresent())
+				{
+					// Whole area not on screen, fail out
+					autoCalibrationEnabled = true;
+					return;
+				}
+				
+
+				Platform.runLater(() -> { controller.calibrate(bounds.get()); });
+				
+			}
+			
+		}
+
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.ERROR);
@@ -578,6 +659,15 @@ public class CameraManager {
 	public void showMotionWarning() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void enableAutoCalibration() {
+		autoCalibrationEnabled  = true;
+		
+	}
+
+	public void setController(ShootOFFController controller) {
+		this.controller = controller;
 	}
 
 

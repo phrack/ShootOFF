@@ -73,6 +73,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -637,6 +638,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        arenaController.init(config, camerasSupervisor);
 	        arenaController.getCanvasManager().setShowShots(false);
 	        
+
+
+	        
 	        toggleArenaCalibrationMenuItem.fire();
 	        
 	        arenaStage.setOnCloseRequest((e) -> {
@@ -682,6 +686,16 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
 
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream("pattern.png");
+			LocatedImage img = new LocatedImage(is, "chessboard");
+	        arenaController.setBackground(img);
+	        
+	        // Disables calibration text
+	        // TODO: Properly disable
+	        arenaController.calibrated();
+			arenaCameraManager.setController(this);
+	        arenaCameraManager.enableAutoCalibration();
+			
 			calibrationConfigPane = new CalibrationConfigPane(tabAnchor, 
 					calibrationTarget.isPresent() && !(arenaCameraManager.isLimitingDetectionToProjection() || arenaCameraManager.isCroppingFeedToProjection()),
 					arenaCameraManager.isLimitingDetectionToProjection(), arenaCameraManager.isCroppingFeedToProjection());
@@ -689,35 +703,53 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			arenaCameraManager.setProjectionBounds(null);
 			
 			if (!calibrationTarget.isPresent()) {
-				RectangleRegion calibrationRectangle =  new RectangleRegion(DEFAULT_DIM, DEFAULT_DIM, 
-						DEFAULT_POS, DEFAULT_POS);
-				calibrationRectangle.setFill(Color.PURPLE);
-				calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
-	
-				Group calibrationGroup = new Group();
-				calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
-				calibrationGroup.getChildren().add(calibrationRectangle);
-				
-				calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
+				createCalibrationTarget(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_POS, DEFAULT_POS);
 			} else {
 				arenaCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
 			}
 			
 		} else {
 
-			arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, calibrationTarget.get().getTargetGroup().getBoundsInParent());
-			arenaCameraManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
-			arenaCameraManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
+			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent());
 			
-			if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
-
-				arenaCameraManager.setProjectionBounds(calibrationTarget.get().getTargetGroup().getBoundsInParent());
-			} else {
-				arenaCameraManager.setProjectionBounds(null);
-			}
-			
-			stopCalibration();
 		}		
+	}
+	
+	public void createCalibrationTarget(double x, double y, double width, double height)
+	{
+		RectangleRegion calibrationRectangle =  new RectangleRegion(x, y, 
+				width, height);
+		calibrationRectangle.setFill(Color.PURPLE);
+		calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
+
+		Group calibrationGroup = new Group();
+		calibrationGroup.setOnMouseClicked((e) -> { calibrationGroup.requestFocus(); });
+		calibrationGroup.getChildren().add(calibrationRectangle);
+		
+		calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
+
+	}
+	
+	public void calibrate(Bounds bounds)
+	{
+		if (calibrationTarget.isPresent()) 
+			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
+		
+		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
+		
+		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, bounds);
+		arenaCameraManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
+		arenaCameraManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
+		
+		
+		if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
+
+			arenaCameraManager.setProjectionBounds(bounds);
+		} else {
+			arenaCameraManager.setProjectionBounds(null);
+		}
+		
+		stopCalibration();
 	}
 	
 	private void stopCalibration() {
@@ -725,6 +757,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		calibrationConfigPane.close();
 		
+		arenaController.setBackground(null);
 
 		if (calibrationTarget.isPresent()) 
 			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
