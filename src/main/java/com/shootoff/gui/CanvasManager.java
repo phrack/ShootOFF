@@ -80,7 +80,7 @@ public class CanvasManager {
 	private final List<Target> targets = new ArrayList<Target>();
 	
 	private ProgressIndicator progress;
-	private Optional<ContextMenu> contextMenu;
+	private Optional<ContextMenu> contextMenu = Optional.empty();
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
