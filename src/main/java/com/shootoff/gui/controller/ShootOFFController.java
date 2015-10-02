@@ -234,9 +234,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		        			if (cm.getCanvasGroup().getChildren().indexOf(marker) < cm.getCanvasGroup().getChildren().size() - 1) {
 		        				cm.getCanvasGroup().getChildren().remove(marker);
 		        				cm.getCanvasGroup().getChildren().add(cm.getCanvasGroup().getChildren().size(), marker);
-		        			}
-		        		}
 		        	}
+	        	}
+	        }
 	        	}
 	        }
 	    });
@@ -677,9 +677,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
-						
+
+
 			arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+
 			calibrationConfigPane = new CalibrationConfigPane(tabAnchor, 
 					calibrationTarget.isPresent() && !(arenaCameraManager.isLimitingDetectionToProjection() || arenaCameraManager.isCroppingFeedToProjection()),
 					arenaCameraManager.isLimitingDetectionToProjection(), arenaCameraManager.isCroppingFeedToProjection());
@@ -702,11 +704,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			}
 			
 		} else {
+
 			arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, calibrationTarget.get().getTargetGroup().getBoundsInParent());
 			arenaCameraManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
 			arenaCameraManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
 			
 			if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
+
 				arenaCameraManager.setProjectionBounds(calibrationTarget.get().getTargetGroup().getBoundsInParent());
 			} else {
 				arenaCameraManager.setProjectionBounds(null);
@@ -721,6 +725,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		calibrationConfigPane.close();
 		
+
 		if (calibrationTarget.isPresent()) 
 			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
 		arenaCameraManager.setDetecting(true);

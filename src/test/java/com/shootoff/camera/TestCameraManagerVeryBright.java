@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.ShotDetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
@@ -27,13 +28,14 @@ public class TestCameraManagerVeryBright {
 		config.setDetectionRate(0);
 		config.setDebugMode(true);
 		mockManager = new MockCanvasManager(config, true);
-		sectorStatuses = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 		
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}
+		
 	}
 	
 	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
@@ -58,7 +60,7 @@ public class TestCameraManagerVeryBright {
 	// VERY BRIGHT
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOff() {
 		// Turn off the top sectors because they are all just noise.
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
 			sectorStatuses[0][x] = false;
 		}
 		
@@ -112,7 +114,7 @@ public class TestCameraManagerVeryBright {
 	// VERY BRIGHT
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOn() {
 		// Turn off the top sectors because they are all just noise.
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
 			sectorStatuses[0][x] = false;
 		}
 		
@@ -162,7 +164,7 @@ public class TestCameraManagerVeryBright {
 	// VERY BRIGHT
 	public void testMSHD3000MinBrightnessMinContrastWhiteBalanceOff() {
 		// Turn off the top sectors because they are all just noise.
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
 			sectorStatuses[0][x] = false;
 		}
 		

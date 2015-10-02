@@ -13,6 +13,7 @@ import javafx.scene.paint.Color;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.ShotDetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
@@ -28,13 +29,15 @@ public class TestCameraManagerDark {
 		config.setDetectionRate(0);
 		config.setDebugMode(true);
 		mockManager = new MockCanvasManager(config, true);
-		sectorStatuses = new boolean[ShotSearcher.SECTOR_ROWS][ShotSearcher.SECTOR_COLUMNS];
+		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 		
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotSearcher.SECTOR_ROWS; y++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}
+		
+		
 	}
 	
 	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
@@ -131,7 +134,12 @@ public class TestCameraManagerDark {
 		
 		// Misses very middle shot and both water shots
 				
-		assertEquals(6, shots.size());
+		//assertEquals(6, shots.size());
+		
+		// No longer misses middle shot
+		// Still misses water shots
+		assertEquals(7, shots.size());
+
 		
 		assertEquals(467.5, shots.get(0).getX(), 1);
 		assertEquals(120.5, shots.get(0).getY(), 1);
@@ -165,7 +173,8 @@ public class TestCameraManagerDark {
 		
 		// Misses middle shots on middle and bottom row
 		
-		assertEquals(10, shots.size());
+		//assertEquals(10, shots.size());
+		assertEquals(9, shots.size());
 		
 		assertEquals(472.5, shots.get(0).getX(), 1);
 		assertEquals(63.0, shots.get(0).getY(), 1);
@@ -176,9 +185,9 @@ public class TestCameraManagerDark {
 		assertEquals(Color.GREEN, shots.get(1).getColor());
 
 		// Dupe of the shot above
-		assertEquals(474.5, shots.get(2).getX(), 1);
-		assertEquals(101.0, shots.get(2).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(2).getColor());
+		//assertEquals(474.5, shots.get(2).getX(), 1);
+		//assertEquals(101.0, shots.get(2).getY(), 1);
+		//assertEquals(Color.GREEN, shots.get(2).getColor());
 
 		assertEquals(337.5, shots.get(3).getX(), 1);
 		assertEquals(97.0, shots.get(3).getY(), 1);
@@ -205,16 +214,16 @@ public class TestCameraManagerDark {
 		assertEquals(Color.GREEN, shots.get(8).getColor());
 
 		// Dupe of the shot above
-		assertEquals(206.5, shots.get(9).getX(), 1);
+		/*assertEquals(206.5, shots.get(9).getX(), 1);
 		assertEquals(281.0, shots.get(9).getY(), 1);
-		assertEquals(Color.GREEN, shots.get(9).getColor());
+		assertEquals(Color.GREEN, shots.get(9).getColor());*/
 	}
 	
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsBrightRoomLimitedBounds() {
 		// Turn off the top sectors because they are all just noise.
-		for (int x = 0; x < ShotSearcher.SECTOR_COLUMNS; x++) {
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
 			sectorStatuses[0][x] = false;
 		}
 		

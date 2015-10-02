@@ -62,14 +62,17 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;import javafx.scene.paint.Color;
+import javafx.scene.input.MouseButton;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
-	private final CamerasSupervisor camerasSupervisor;
+	protected CameraManager cameraManager;
+	
+	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
@@ -86,6 +89,7 @@ public class CanvasManager {
 	
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
+
 	
 	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor, 
 			String cameraName, ObservableList<ShotEntry> shotEntries) {
@@ -122,7 +126,11 @@ public class CanvasManager {
 			}
 		});
 	}
-	
+
+	public void setCameraManager(CameraManager cameraManager) {
+		this.cameraManager = cameraManager;
+	}
+
 	private void jdk8094135Warning() {
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.ERROR);
@@ -190,7 +198,7 @@ public class CanvasManager {
 			
 			shots.clear();
 			try {
-				if (shotEntries != null) shotEntries.clear();
+			if (shotEntries != null) shotEntries.clear();
 			} catch (NullPointerException npe) {
 				jdk8094135Warning();
 			}
@@ -260,26 +268,28 @@ public class CanvasManager {
 		return Optional.empty();
 	}
 	
-	private Optional<ShotProcessor> processShot(Shot shot) {
+			
+ 	private Optional<ShotProcessor> processShot(Shot shot) {
+
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
-		
-		for (ShotProcessor processor : config.getShotProcessors()) {
-			if (!processor.processShot(shot)) {
-				if (processor instanceof MalfunctionsProcessor) {
-					hadMalfunction = true;
-				} else if (processor instanceof VirtualMagazineProcessor) {
-					hadReload = true;
-				}
-				
-				rejectingProcessor = Optional.of(processor);
-				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
-				break;
-			}
-		}
-		
-		return rejectingProcessor;
-	}
-	
+  		for (ShotProcessor processor : config.getShotProcessors()) {
+  			if (!processor.processShot(shot)) {
+ 				if (processor instanceof MalfunctionsProcessor) {
+ 					hadMalfunction = true;
+ 				} else if (processor instanceof VirtualMagazineProcessor) {
+ 					hadReload = true;
+ 				}
+ 				
+  				rejectingProcessor = Optional.of(processor);
+  				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
+  				break;
+  			}
+  		}
+  		
+ 		return rejectingProcessor;
+ 	}
+ 	
+ 	
 	private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
 		// Record video for rejected shots as long as they weren't rejected
 		// for being dupes
@@ -308,7 +318,7 @@ public class CanvasManager {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis() - startTime, config.getMarkerRadius());
+				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
 	
 		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 		if (rejectingProcessor.isPresent()) {
@@ -318,6 +328,7 @@ public class CanvasManager {
 			notifyShot(shot);
 		}
 		
+
 		Optional<Shot> lastShot = Optional.empty();
 		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() -1).getShot());
 		
@@ -360,7 +371,8 @@ public class CanvasManager {
 				
 				Shot arenaShot = new Shot(shot.getColor(), 
 						(shot.getX() - b.getMinX()) * x_scale, (shot.getY() - b.getMinY()) * y_scale,
-						shot.getTimestamp(), config.getMarkerRadius());
+
+						shot.getTimestamp(), shot.getFrame(), config.getMarkerRadius());
 				
 				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
 			}
@@ -571,6 +583,7 @@ public class CanvasManager {
 	}
 	
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
+
 		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, targets.size());
 		
 		return addTarget(newTarget);
@@ -580,8 +593,10 @@ public class CanvasManager {
 		Platform.runLater(() -> { canvasGroup.getChildren().add(newTarget.getTargetGroup()); });
 		targets.add(newTarget);
 		
+				
 		return newTarget;
 	}
+
 	
 	public void removeTarget(Target target) {
 		Platform.runLater(() -> { canvasGroup.getChildren().remove(target.getTargetGroup()); });

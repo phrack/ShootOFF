@@ -20,40 +20,73 @@ package com.shootoff.camera;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class DeduplicationProcessor implements ShotProcessor {
 	private Optional<Shot> lastShot = Optional.empty();
-	private final double DISTANCE_THRESHOLD_X;
-	private final double DISTANCE_THRESHOLD_Y;
 	
+	private static double DISTANCE_THRESHOLD = 0.05;
+	private static double DISTANCE_THRESHOLD_X = 640 * DISTANCE_THRESHOLD;
+	private static double DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
+	
+	public static final int DEDUPE_THRESHOLD_DIVISION_FACTOR = 5;
+	
+	private static int frameThreshold = 10;
+	
+	public static int getThreshold() {
+		return frameThreshold;
+	}
+
+	public static void setThreshold(int ft) {
+		frameThreshold = ft;
+	}
+
+	private final Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
+
+
 	public DeduplicationProcessor() {
-		final double DISTANCE_THRESHOLD = 0.10;
-		DISTANCE_THRESHOLD_X = 640 * DISTANCE_THRESHOLD;
-		DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
+
 	}
 	
 	protected Optional<Shot> getLastShot() {
 		return lastShot;
 	}
 	
-	@Override
-	public boolean processShot(Shot shot) {
+
+	public boolean processShot(Shot shot, boolean updateLastShot) {
 		if (lastShot.isPresent()) {
-			final int TIME_THRESHOLD = 155; // This is Miculek constant because it's based on how fast Jerry Miculek
-											// can pull the trigger. It's a safe bet ShootOFF users aren't faster :).
+			logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(), frameThreshold);
+			
+			// FIX ME MAYBE? Color detection is disabled
+			//shot.getColor().equals(lastShot.get().getColor()) && 
 			
 			// If two shots have the same color, appear to have happened fast than Jerry Miculek can shoot
 			// and are very close to each other, ignore the new shot
-			if (shot.getColor().equals(lastShot.get().getColor()) && 
-					shot.getTimestamp() - lastShot.get().getTimestamp() <= TIME_THRESHOLD &&
+			
+			if (	
+					shot.getFrame() - lastShot.get().getFrame() <= frameThreshold &&
 					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
 					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
+				
 				return false;
 			}
+			
 		}
-		
-		lastShot = Optional.of(shot);
+
+		if (updateLastShot)
+			lastShot = Optional.of(shot);
 		
 		return true;
+	}
+	
+	@Override
+	public boolean processShot(Shot shot) {
+		return processShot(shot, true);
+	}
+	
+	public boolean processShotLookahead(Shot shot) {
+		return processShot(shot, false);
 	}
 
 	@Override
