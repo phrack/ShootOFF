@@ -354,16 +354,27 @@ public class CameraManager {
 			}
 		}
 
-		@Override
+		
 		/**
 		 * From the MediaListenerAdapter. This method is used to get a new frame
 		 * from a video that is being played back in a unit test, not to get
 		 * a frame from the webcam.
 		 */
+		private long lastVideoTimestamp = -1;
+		private static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
+		@Override
 		public void onVideoPicture(IVideoPictureEvent event)
 		{
 			BufferedImage currentFrame = event.getImage();
+			
+			if (lastVideoTimestamp > -1 && (getFrameCount()%DEFAULT_FPS)==0)
+			{
 
+				double estimateFPS = (double)SECOND_IN_MICROSECONDS/(double)(event.getTimeStamp()-lastVideoTimestamp);
+			
+				setFPS(estimateFPS);
+			}
+			lastVideoTimestamp = event.getTimeStamp();
 
 			processFrame(currentFrame);
 		}
@@ -452,10 +463,6 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 
-
-		private static final int DEDUPE_THRESHOLD_DIVISION_FACTOR = 4;
-		
-
 		private boolean processFrame(BufferedImage currentFrame)
 		{
 			
@@ -463,7 +470,7 @@ public class CameraManager {
 			incFrameCount();
 			
 
-			logger.trace("processFrame {}", frameCount);
+			logger.trace("processFrame {}", getFrameCount());
 			
 
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
@@ -471,27 +478,37 @@ public class CameraManager {
 
 			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
 				
-
-				webcamFPS = Math.min(webcam.get().getFPS(),DEFAULT_FPS);
-				
-
-				DeduplicationProcessor.setThreshold((int)(webcamFPS/DEDUPE_THRESHOLD_DIVISION_FACTOR));
-				
+				setFPS(webcam.get().getFPS());
 
 				if (debuggerListener.isPresent()) {
 
 					debuggerListener.get().updateFeedData(webcamFPS, null);
 				}
-				if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
-					logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
-							webcam.get().getName(), webcamFPS);
-					showFPSWarning(webcamFPS);
-					showedFPSWarning = true;
-				}
+
+				checkIfMinimumFPS();
 			}
 
 			
 			return result;
+		}
+		
+		private void setFPS(double newFPS)
+		{
+
+			webcamFPS = Math.min(newFPS,DEFAULT_FPS);
+			
+			DeduplicationProcessor.setThreshold((int)(webcamFPS/DeduplicationProcessor.DEDUPE_THRESHOLD_DIVISION_FACTOR));
+			
+		}
+		
+		private void checkIfMinimumFPS()
+		{
+			if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
+				logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
+						webcam.get().getName(), webcamFPS);
+				showFPSWarning(webcamFPS);
+				showedFPSWarning = true;
+			}
 		}
 
 		

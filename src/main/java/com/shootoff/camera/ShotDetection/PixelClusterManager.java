@@ -161,7 +161,6 @@ public class PixelClusterManager {
 			if (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO)
 				continue;
 			
-			double shotArea = shotWidth * shotHeight;
 			double circleArea = Math.PI * Math.pow((Math.max(shotWidth,shotHeight))/2,2);
 			double density = cluster.size()/circleArea;
 			
