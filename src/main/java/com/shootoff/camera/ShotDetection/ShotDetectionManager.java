@@ -303,7 +303,7 @@ public final class ShotDetectionManager {
 		
 		if (cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT)
 		{
-			logger.debug("HIGH MOTION - IGNORING FRAME - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
+			logger.debug("HIGH MOTION - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
 
 			return true;
 		}

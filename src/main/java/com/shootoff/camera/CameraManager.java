@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,7 +56,9 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -559,9 +563,36 @@ public class CameraManager {
 
 	}
 	
+	
+	private Label brightnessDiagnosticWarning = null;
+	private Timer brightnessDiagnosticTimer = new Timer();
+	private final static int brightnessDiagnosticLengthMS = 1000;
 	public void showBrightnessWarning() {
-		// TODO Switch to error overlay or only show this once?
-		
+		if (brightnessDiagnosticWarning == null)
+		{
+			Platform.runLater(() -> {
+				brightnessDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive brightness", Color.RED);
+			});
+		}
+		else
+		{
+			// Stop the existing timer and start a new one
+			brightnessDiagnosticTimer.cancel();
+		}
+		brightnessDiagnosticTimer = new Timer();
+		brightnessDiagnosticTimer.schedule(new TimerTask() {
+		    public void run() {
+		         Platform.runLater(new Runnable() {
+		            public void run() {
+		            	if (brightnessDiagnosticWarning != null)
+		            	{
+		            		canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
+		            		brightnessDiagnosticWarning = null;
+		            	}
+		            }
+		        });
+		    }
+		}, brightnessDiagnosticLengthMS);
 		
 		if (!webcam.isPresent() || shownBrightnessWarning)
 			return;
@@ -575,8 +606,7 @@ public class CameraManager {
 					+ " For best results, please do any mix of the following:\n\n"
 					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness\n"
 					+ "-Remove any bright light sources in the camera's view\n"
-					+ "-Turn down your projector's brightness and contrast\n"
-					+ "-Dim any lights in the room or turn them off, especially those behind the shooter";
+					+ "-Turn down your projector's brightness and contrast";
 			String message;
 			if (cameraName.isPresent()) {
 				message = String.format(messageFormat, cameraName.get());
@@ -592,9 +622,35 @@ public class CameraManager {
 		});
 	}
 
+	private Label motionDiagnosticWarning = null;
+	private Timer motionDiagnosticTimer = new Timer();
+	private final static int motionDiagnosticLengthMS = 1000;
 	public void showMotionWarning() {
-		// TODO Auto-generated method stub
-		
+		if (motionDiagnosticWarning == null)
+		{
+			Platform.runLater(() -> {
+					motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
+			});
+		}
+		else
+		{
+			// Stop the existing timer and start a new one
+			motionDiagnosticTimer.cancel();
+		}
+		motionDiagnosticTimer = new Timer();
+		motionDiagnosticTimer.schedule(new TimerTask() {
+		    public void run() {
+		         Platform.runLater(new Runnable() {
+		            public void run() {
+		            	if (motionDiagnosticWarning != null)
+		            	{
+		            		canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
+		            		motionDiagnosticWarning = null;
+		            	}
+		            }
+		        });
+		    }
+		}, motionDiagnosticLengthMS);
 	}
 
 
