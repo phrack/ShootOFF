@@ -112,4 +112,23 @@ public class TestCameraManagerLogitech {
 		for (Shot shot : shots)
 			assertEquals(Color.RED, shot.getColor());
 	}
+	
+	
+	@Test
+	public void testLogitechBouncingTargetsNoBG() {
+		List<Shot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", Optional.empty());
+		
+		assertEquals(0, shots.size());
+
+	}
+	
+	@Test
+	public void testLogitechBouncingTargetsOutdoor() {
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty());
+		
+		assertEquals(0, shots.size());
+
+	}
+	
+	
 }
