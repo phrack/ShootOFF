@@ -1,6 +1,7 @@
 package com.shootoff.camera;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,8 +57,25 @@ public class ShotDetectionTestor {
 		// If you are getting this failure you're either detecting noise that wasn't detected before
 		// or you found a shot that was previously missed and not accounted for, thus you should
 		// add it to the required shot list for the respective test.
-		collector.checkThat(String.format("There are %d shots that were detected that aren't account for", mutableActualShots.size()), 
-				mutableActualShots.isEmpty(), equalTo(true));
+		StringBuilder reason = new StringBuilder();
+		
+		if (mutableActualShots.size() == 1) {
+			reason.append(String.format("There was %d shot that was detected that isn't account for: ", mutableActualShots.size()));	
+		} else if (mutableActualShots.size() > 1) {
+			reason.append(String.format("There are %d shots that were detected that aren't account for: ", mutableActualShots.size()));
+		}
+		
+		if (!mutableActualShots.isEmpty()) {
+			Iterator<Shot> it = mutableActualShots.iterator();
+			
+			while (it.hasNext()) {
+				Shot s = it.next();
+				reason.append(String.format("(%.2f, %.2f, %s)", s.getX(), s.getY(), s.getColor().toString()));
+				if (it.hasNext()) reason.append(", ");
+			}
+		}
+		
+		collector.checkThat(reason.toString(), mutableActualShots.isEmpty(), equalTo(true));
 	}
 	
 	public Optional<Shot> findPotentialShotMatch(List<Shot> actualShots, Shot testedShot) {
