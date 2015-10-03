@@ -1,3 +1,5 @@
+chime.wav -- https://freesound.org/people/kwahmah_02/sounds/274751/ kwahmah_02 This work is licensed under the Attribution License.
+
 From http://www.stillnorthmedia.com/firearm-sound-library.html:
 
 benelli_nova.wav
