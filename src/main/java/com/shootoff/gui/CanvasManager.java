@@ -54,15 +54,18 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
@@ -73,6 +76,7 @@ public class CanvasManager {
 	protected CameraManager cameraManager;
 	
 	protected final CamerasSupervisor camerasSupervisor;
+	private final VBox diagnosticsVBox = new VBox();
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
@@ -89,7 +93,6 @@ public class CanvasManager {
 	
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
-
 	
 	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor, 
 			String cameraName, ObservableList<ShotEntry> shotEntries) {
@@ -108,9 +111,13 @@ public class CanvasManager {
 
 		if (Platform.isFxApplicationThread()) {
 			progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
-			progress.setPrefHeight(480);
-			progress.setPrefWidth(640);
+			progress.setPrefHeight(CameraManager.FEED_HEIGHT);
+			progress.setPrefWidth(CameraManager.FEED_WIDTH);
 			canvasGroup.getChildren().add(progress);
+			canvasGroup.getChildren().add(diagnosticsVBox);
+			diagnosticsVBox.setAlignment(Pos.CENTER);
+			diagnosticsVBox.setFillWidth(true);
+			diagnosticsVBox.setPrefWidth(CameraManager.FEED_WIDTH);
 		}
 		
 		canvasGroup.setOnMouseClicked((event) -> {
@@ -130,6 +137,26 @@ public class CanvasManager {
 	public void setCameraManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 	}
+	
+	public Label addDiagnosticMessage(String message, Color backgroundColor) {
+		Label diagnosticLabel = new Label(message);
+		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));
+		diagnosticsVBox.getChildren().add(diagnosticLabel);
+		
+		return diagnosticLabel;
+	}
+	
+	public void removeDiagnosticMessage(Label diagnosticLabel) {
+		diagnosticsVBox.getChildren().remove(diagnosticLabel);
+	}
+	
+    public static String colorToWebCode(Color color)
+    {
+        return String.format("#%02X%02X%02X",
+            (int)(color.getRed() * 255),
+            (int)(color.getGreen() * 255),
+            (int)(color.getBlue() * 255));
+    }
 
 	private void jdk8094135Warning() {
 			Platform.runLater(() -> {
