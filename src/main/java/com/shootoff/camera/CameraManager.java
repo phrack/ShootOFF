@@ -196,6 +196,9 @@ public class CameraManager {
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
+		if (brightnessDiagnosticTimer != null) brightnessDiagnosticTimer.cancel();
+		if (motionDiagnosticTimer != null) motionDiagnosticTimer.cancel();
+		detectionExecutor.shutdownNow();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -339,12 +342,16 @@ public class CameraManager {
 	public void incFrameCount() {
 		frameCount++;
 	}
+	
+	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
+	private Timer brightnessDiagnosticTimer = new Timer();
+	private Timer motionDiagnosticTimer = new Timer();
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 
 
-		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
+		
 		
 		@Override
 		public void run() {
@@ -565,7 +572,6 @@ public class CameraManager {
 	
 	
 	private Label brightnessDiagnosticWarning = null;
-	private Timer brightnessDiagnosticTimer = new Timer();
 	private final static int brightnessDiagnosticLengthMS = 1000;
 	public void showBrightnessWarning() {
 		if (brightnessDiagnosticWarning == null)
@@ -623,7 +629,6 @@ public class CameraManager {
 	}
 
 	private Label motionDiagnosticWarning = null;
-	private Timer motionDiagnosticTimer = new Timer();
 	private final static int motionDiagnosticLengthMS = 1000;
 	public void showMotionWarning() {
 		if (motionDiagnosticWarning == null)
