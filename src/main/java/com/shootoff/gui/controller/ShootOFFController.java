@@ -156,7 +156,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
 			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
-			if (arenaController != null) arenaController.close();
+			if (arenaController != null) {
+				arenaController.getCanvasManager().close();
+				arenaController.close();
+			}
 			
 			for (Stage streamDebuggerStage : streamDebuggerStages) {
 				streamDebuggerStage.close();

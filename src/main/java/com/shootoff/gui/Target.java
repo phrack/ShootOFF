@@ -181,8 +181,13 @@ public class Target {
 	public void animate(TargetRegion region, List<String> args) {
 		ImageRegion imageRegion;
 		
+		boolean resetAfterAnimation = false;
+		
 		if (args.size() == 0) {
 			imageRegion = (ImageRegion)region;
+		} else if (args.get(0).equals("true")){
+			imageRegion = (ImageRegion)region;
+			resetAfterAnimation = true;
 		} else {
 			Optional<TargetRegion> r;
 			
@@ -207,7 +212,15 @@ public class Target {
 		if (!imageRegion.onFirstFrame()) return;
 		
 		if (imageRegion.getAnimation().isPresent()) {
-			imageRegion.getAnimation().get().play();
+			SpriteAnimation animation = imageRegion.getAnimation().get();
+			animation.play();
+			
+			if (resetAfterAnimation) {
+				animation.setOnFinished((e) -> {
+						animation.reset();
+						animation.setOnFinished(null);
+					});
+			}
 		} else {
 			System.err.println("Request to animate region, but region does "
 					+ "not contain an animation.");

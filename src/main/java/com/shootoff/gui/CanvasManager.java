@@ -144,6 +144,10 @@ public class CanvasManager {
 		});
 	}
 
+	public void close() {
+		diagnosticExecutorService.shutdownNow();
+	}
+	
 	public void setCameraManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 	}

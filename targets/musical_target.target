@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="13.000000" y="80.500000" file="targets/musical-rack.png">
+	</image>
+	<image x="390.000000" y="245.000000" file="targets/note_plates/note_a_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/ab1.wav)" />
+	</image>
+	<image x="451.000000" y="245.000000" file="targets/note_plates/note_b_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/bb1.wav)" />
+	</image>
+	<image x="515.000000" y="245.000000" file="targets/note_plates/note_c_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/c1.wav)" />
+	</image>
+	<image x="328.000000" y="245.000000" file="targets/note_plates/note_g_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/g1.wav)" />
+	</image>
+	<image x="263.500000" y="245.000000" file="targets/note_plates/note_f_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/f1.wav)" />
+	</image>
+	<image x="200.000000" y="245.000000" file="targets/note_plates/note_e_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/eb1.wav)" />
+	</image>
+	<image x="138.000000" y="245.000000" file="targets/note_plates/note_d_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/db1.wav)" />
+	</image>
+	<image x="76.000000" y="245.000000" file="targets/note_plates/note_c_large.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/c1.wav)" />
+	</image>
+	<image x="138.500000" y="92.000000" file="targets/note_plates/note_c_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/c2.wav)" />
+	</image>
+	<image x="469.500000" y="92.000000" file="targets/note_plates/note_c_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/c2.wav)" />
+	</image>
+	<image x="186.500000" y="92.000000" file="targets/note_plates/note_d_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/db2.wav)" />
+	</image>
+	<image x="234.500000" y="92.000000" file="targets/note_plates/note_e_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/eb2.wav)" />
+	</image>
+	<image x="281.500000" y="92.000000" file="targets/note_plates/note_f_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/f2.wav)" />
+	</image>
+	<image x="328.500000" y="92.000000" file="targets/note_plates/note_g_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/g2.wav)" />
+	</image>
+	<image x="375.500000" y="92.000000" file="targets/note_plates/note_a_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/ab2.wav)" />
+	</image>
+	<image x="421.500000" y="92.000000" file="targets/note_plates/note_b_medium.gif">
+		<tag name="command" value="animate(true);play_sound(sounds/note_sounds/bb2.wav)" />
+	</image>
+</target>
