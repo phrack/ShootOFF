@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
-
 
 public class PixelCluster extends java.util.ArrayList<Pixel> {
 
