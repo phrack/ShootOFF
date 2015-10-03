@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <target>
-	<image x="145.500000" y="1.500000" file="targets/duel_tree_stand.gif">
+	<image x="139.500000" y="1.500000" file="targets/duel_tree_stand.gif">
 	</image>
-	<image x="89.500000" y="12.500000" file="targets/tree-paddle-left.gif">
+	<image x="88.500000" y="22.500000" file="targets/tree-paddle-left.gif">
 		<tag name="subtarget" value="left_paddle_1" />
 		<tag name="command" value="animate;reverse;play_sound(sounds/steel_sound_1.wav)" />
 	</image>
-	<image x="89.500000" y="174.500000" file="targets/tree-paddle-left.gif">
+	<image x="88.500000" y="184.500000" file="targets/tree-paddle-left.gif">
 		<tag name="subtarget" value="left_paddle_2" />
 		<tag name="command" value="animate;reverse;play_sound(sounds/steel_sound_1.wav)" />
 	</image>
-	<image x="89.500000" y="336.500000" file="targets/tree-paddle-left.gif">
+	<image x="88.500000" y="346.500000" file="targets/tree-paddle-left.gif">
 		<tag name="subtarget" value="left_paddle_3" />
 		<tag name="command" value="animate;reverse;play_sound(sounds/steel_sound_1.wav)" />
 	</image>
-	<image x="83.500000" y="94.500000" file="targets/tree-paddles-right.gif">
+	<image x="89.500000" y="102.500000" file="targets/tree-paddles-right.gif">
 		<tag name="subtarget" value="right_paddle_1" />
 		<tag name="command" value="animate;reverse;play_sound(sounds/steel_sound_1.wav)" />
 	</image>
-	<image x="83.500000" y="255.500000" file="targets/tree-paddles-right.gif">
+	<image x="88.500000" y="264.500000" file="targets/tree-paddles-right.gif">
 		<tag name="subtarget" value="right_paddle_2" />
 		<tag name="command" value="animate;reverse;play_sound(sounds/steel_sound_1.wav)" />
 	</image>
-	<image x="83.500000" y="418.500000" file="targets/tree-paddles-right.gif">
+	<image x="89.500000" y="428.500000" file="targets/tree-paddles-right.gif">
 		<tag name="subtarget" value="right_paddle_3" />
 		<tag name="command" value="animate;reverse;play_sound(sounds/steel_sound_1.wav)" />
 	</image>
