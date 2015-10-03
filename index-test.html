@@ -805,10 +805,10 @@ gratitude for this project, please make us feel good by letting us know!</p>
           <div class="row">
 
             <div class="col-xs-6 wst">
-              <a id="tirekov" type="submit" value="submit" class="btn btn-my-red track" data-dismiss="modal" onclick="postDataToGoogle();">Get ShootOFF</a>
+              <a id="tirekov" type="submit" value="submit" class="btn btn-my-red" data-dismiss="modal" onclick="postDataToGoogle();">Get ShootOFF</a>
             </div>
             <div class="col-xs-6 wst2">
-              <a class="btn btn-my-wh lmb2" href="jws/ShootOFF.jnlp" onclick="postDataToGoogle();return launchApplication('jws/ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
+              <a class="btn btn-my-wh lmb2 track" href="jws/ShootOFF.jnlp" onclick="postDataToGoogle();return launchApplication('jws/ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
             </div>
 
           </div>
@@ -927,7 +927,7 @@ $(document).ready(function(){
 <!-- DOWNLOAD APP ONCLICK -->
   <script>
     $("a#tirekov").click(function(){
-             window.open("https://github.com/phrack/ShootOFF/releases/download/v3.3-FINAL/shootoff-3.3-final.zip")   
+             trackOutboundLink("https://github.com/phrack/ShootOFF/releases/download/v3.3-FINAL/shootoff-3.3-final.zip", false)   
     });
   </script>
 
