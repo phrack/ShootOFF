@@ -56,7 +56,8 @@ public class ShotDetectionTestor {
 		// If you are getting this failure you're either detecting noise that wasn't detected before
 		// or you found a shot that was previously missed and not accounted for, thus you should
 		// add it to the required shot list for the respective test.
-		collector.checkThat("There are shots that were detected that aren't account for", mutableActualShots.isEmpty(), equalTo(true));
+		collector.checkThat(String.format("There are %d shots that were detected that aren't account for", mutableActualShots.size()), 
+				mutableActualShots.isEmpty(), equalTo(true));
 	}
 	
 	public Optional<Shot> findPotentialShotMatch(List<Shot> actualShots, Shot testedShot) {
