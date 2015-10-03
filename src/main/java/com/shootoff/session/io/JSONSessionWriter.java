@@ -19,8 +19,10 @@
 package com.shootoff.session.io;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Optional;
 
 import org.json.simple.JSONArray;
@@ -154,10 +156,10 @@ public class JSONSessionWriter implements EventVisitor {
 		JSONObject session = new JSONObject();
 		session.put("cameras", cameras);
 		
-		FileWriter file = null;
+		Writer file = null;
 		
 		try {
-			file = new FileWriter(sessionFile);
+			file = new OutputStreamWriter(new FileOutputStream(sessionFile), "UTF-8");
 			file.write(session.toJSONString());
 			file.flush();
 		} catch (IOException e) {

@@ -45,7 +45,7 @@ public class TestCourseIO {
 		targetWidth = 10;
 		targetHeight = 1;
 		
-		InputStream is = this.getClass().getResourceAsStream(backgroundURL);
+		InputStream is = TestCourseIO.class.getResourceAsStream(backgroundURL);
 		LocatedImage img = new LocatedImage(is, backgroundURL);
 		arenaController.setBackground(img);
 		
@@ -86,7 +86,7 @@ public class TestCourseIO {
 		Optional<Course> course = CourseIO.loadCourse(arenaController, tempXMLCourse);
 		checkCourse(course);
 		
-		tempXMLCourse.delete();
+		if (!tempXMLCourse.delete()) System.err.println("Failed to delete " + tempXMLCourse.getPath());
 	}
 
 	

@@ -133,7 +133,7 @@ public class Target {
 			targetGroup.setScaleX(targetGroup.getScaleX() * scaleXDelta);
 		}
 		
-		if (currentHeight != newHeight) {
+		if (Math.abs(currentHeight - newHeight) > .0000001) {
 			double scaleYDelta = 1.0 + ((newHeight - currentHeight) / currentHeight);
 			targetGroup.setScaleY(targetGroup.getScaleY() * scaleYDelta);
 		}

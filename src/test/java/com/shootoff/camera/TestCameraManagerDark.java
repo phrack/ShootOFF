@@ -69,7 +69,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 430.2, 130.7, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 438.7, 132.4, 0, 2));
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 626, 168.5, 0, 2));

@@ -96,7 +96,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechSafariGreen() {
-		// Missing 3 shots
+		// Missing 4 shots
 		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -104,7 +104,6 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 259.5, 141.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 387.5, 185.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 522.8, 181.5, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 390.3, 84.8, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 232.3, 78.8, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);

@@ -190,7 +190,7 @@ public class Configuration {
 		shotProcessors.add(deduplicationProcessor);
 	}
 	
-	private void readConfigurationFile() throws IOException, ConfigurationException {
+	private void readConfigurationFile() throws ConfigurationException, IOException {
 		Properties prop = new Properties();
 		
 		InputStream inputStream;
@@ -202,13 +202,17 @@ public class Configuration {
 		}
 			 
 		if (inputStream != null) {
-			prop.load(inputStream);
+			try {
+				prop.load(inputStream);
+			} catch (IOException ioe) {
+				throw ioe;
+			} finally {
+				inputStream.close();
+			}
 		} else {
 			throw new FileNotFoundException("Could not read configuration file " +
 					configName);
 		}
-		
-		inputStream.close();
 		
 		if (prop.containsKey(IPCAMS_PROP)) {
 			for (String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
@@ -363,9 +367,15 @@ public class Configuration {
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
 		
 		OutputStream outputStream = new FileOutputStream(configName);
-		prop.store(outputStream, "ShootOFF Configuration");
-		outputStream.flush();
-		outputStream.close();
+		
+		try {
+			prop.store(outputStream, "ShootOFF Configuration");
+			outputStream.flush();
+		} catch (IOException ioe) {
+			throw ioe;
+		} finally {
+			outputStream.close();
+		}
 	}
 	
 	private void parseCmdLine(String[] args) throws ConfigurationException {

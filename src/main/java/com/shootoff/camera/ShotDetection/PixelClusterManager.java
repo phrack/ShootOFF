@@ -144,7 +144,7 @@ public class PixelClusterManager {
 					
 					avgconnectedness += nextPixel.getConnectedness();
 					
-					pixelMapping.remove(next);
+					it.remove();
 				}
 				
 			}
@@ -161,7 +161,7 @@ public class PixelClusterManager {
 			if (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO)
 				continue;
 			
-			double circleArea = Math.PI * Math.pow((Math.max(shotWidth,shotHeight))/2,2);
+			double circleArea = Math.PI * Math.pow((Math.max(shotWidth,shotHeight))/2.0,2);
 			double density = cluster.size()/circleArea;
 			
 			logger.trace("density {} {} - {} {} - {}", shotWidth, shotHeight, circleArea, cluster.size(), density);

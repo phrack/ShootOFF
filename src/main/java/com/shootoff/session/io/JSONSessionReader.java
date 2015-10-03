@@ -19,8 +19,9 @@
 package com.shootoff.session.io;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,7 +56,7 @@ public class JSONSessionReader {
 		Map<String, List<Event>> events = new HashMap<String, List<Event>>();
 		
 		try {
-			JSONObject session = (JSONObject)new JSONParser().parse(new FileReader(sessionFile));
+			JSONObject session = (JSONObject)new JSONParser().parse(new InputStreamReader(new FileInputStream(sessionFile), "UTF-8"));
 			
 			JSONArray cameras = (JSONArray)session.get("cameras");
 			@SuppressWarnings("unchecked")

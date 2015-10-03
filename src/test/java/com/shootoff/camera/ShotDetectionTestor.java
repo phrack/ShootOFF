@@ -62,7 +62,7 @@ public class ShotDetectionTestor {
 	public Optional<Shot> findPotentialShotMatch(List<Shot> actualShots, Shot testedShot) {
 		for (Shot shot : actualShots) {
 			if (Math.abs(shot.getX() - testedShot.getX()) <= ALLOWED_COORD_VARIANCE &&
-				Math.abs(shot.getX() - testedShot.getX()) <= ALLOWED_COORD_VARIANCE) {
+				Math.abs(shot.getY() - testedShot.getY()) <= ALLOWED_COORD_VARIANCE) {
 				
 				return Optional.of(shot);
 			}
