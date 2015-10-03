@@ -20,6 +20,7 @@ package com.shootoff.gui;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,8 @@ public class ImageCell extends TextFieldListCell<String> {
 	
 	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames, 
 			Optional<DesignateShotRecorderListener> listener, Optional<Set<Camera>> recordingCameras) {
-		this.webcams = webcams;
-		this.userDefinedCameraNames = userDefinedCameraNames;
+		this.webcams = new ArrayList<Camera>(webcams);
+		this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
 		this.recordingCameras = recordingCameras;
 		
 		this.setConverter(new DefaultStringConverter());
