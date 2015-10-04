@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
+import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,11 +174,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				sessionViewerStage.close();
 			}
 			
+			GlobalExecutorPool.getPool().shutdownNow();
+			
 			if (!config.getVideoPlayers().isEmpty()) {
 				for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
 					videoPlayer.getStage().close();
 				}
 			}
+			
+			if (!config.inDebugMode()) System.exit(0);
 		});
 		
 		if (config.getWebcams().isEmpty()) {

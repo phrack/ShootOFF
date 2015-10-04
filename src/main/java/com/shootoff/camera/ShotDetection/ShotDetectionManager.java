@@ -344,9 +344,10 @@ public final class ShotDetectionManager {
 		
 		final boolean[][] sectorstatuses = cameraManager.getSectorStatuses();
 		
-		
 		ArrayList<Pixel> thresholdPixels = new ArrayList<Pixel>();
 
+		if (!cameraManager.isDetecting()) return new ArrayList<Pixel>();
+		
 		// In this loop we accomplish both MovingAverage updates AND threshold pixel detection
 		Parallel.forIndex(0, (SECTOR_ROWS*SECTOR_COLUMNS), 1, new Operation<Integer>()
 		{

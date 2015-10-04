@@ -82,6 +82,7 @@ public class CamerasSupervisor {
 	public void closeAll() {
 		for (CameraManager manager : managers) {
 			manager.getCanvasManager().close();
+			manager.setDetecting(false);
 			manager.setStreaming(false);
 			manager.close();
 		}

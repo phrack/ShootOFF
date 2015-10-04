@@ -208,11 +208,14 @@ public class CameraManager {
 	public void setDetecting(boolean isDetecting) {
 		this.isDetecting = isDetecting;
 	}
+	
+	public boolean isDetecting() {
+		return isDetecting;
+	}
 
 	public void setProjectionBounds(Bounds projectionBounds) {
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
-	
 
 	public void setCropFeedToProjection(boolean cropFeed) {
 		cropFeedToProjection = cropFeed;
