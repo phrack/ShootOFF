@@ -925,9 +925,15 @@ $(document).ready(function(){
   	
   function loadJava()
   {
-  	var callback = function(){java_callback();};
-  	scriptTag("https://java.com/js/dtjava.js", callback);
-  	
+  	if (typeof dtjava !== 'undefined')
+  	{
+  		java_callback();
+  	}
+  	else
+  	{
+  		var callback = function(){java_callback();};
+  		scriptTag("https://java.com/js/dtjava.js", callback);
+  	}	
   }
   	
   $('#survey').on('shown.bs.modal', function () {
