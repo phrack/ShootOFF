@@ -1,9 +1,14 @@
 package com.shootoff.camera.ShotDetection;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+
+import javax.imageio.ImageIO;
+
 import java.util.Stack;
 
 import org.slf4j.Logger;
@@ -23,13 +28,13 @@ public class PixelClusterManager {
 
 	private ShotDetectionManager shotDetectionManager;
 
-	private final static double MINIMUM_CONNECTEDNESS = 4.44f;
+	private final static double MINIMUM_CONNECTEDNESS = 3.66f;
 	private final static double MINIMUM_CONNECTEDNESS_FACTOR = .018f;
 	
-	private final static double MINIMUM_DENSITY = .79f;
+	private final static double MINIMUM_DENSITY = .74f;
 	
-	private final static double MINIMUM_SHOT_RATIO = .82f;
-	private final static double MAXIMUM_SHOT_RATIO = 1.18f;
+	private final static double MINIMUM_SHOT_RATIO = .5f;
+	private final static double MAXIMUM_SHOT_RATIO = 1.5f;
 
 	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager)
 	{
@@ -108,7 +113,7 @@ public class PixelClusterManager {
 	public ArrayList<PixelCluster> dumpClusters()
 	{
 		ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
-		
+				
 		for (int i = 0; i <= numberOfRegions; i++)
 		{
 			PixelCluster cluster = new PixelCluster();
@@ -156,15 +161,17 @@ public class PixelClusterManager {
 			int shotHeight = (maxY-minY)+1;
 			double shotRatio = (double)shotWidth/(double)shotHeight;
 			
-			logger.trace("shotRatio {} {} - {} - {} {} {} {}", shotWidth, shotHeight, shotRatio, minX, minY, maxX, maxY);
+						
+			logger.trace("Cluster {}: shotRatio {} {} - {} - {} {} {} {}", i, shotWidth, shotHeight, shotRatio, minX, minY, maxX, maxY);
 			
 			if (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO)
 				continue;
 			
-			double circleArea = Math.PI * Math.pow((Math.max(shotWidth,shotHeight))/2.0,2);
-			double density = cluster.size()/circleArea;
+			double r = (double)(shotWidth+shotHeight)/4.0f;
+			double circleArea = Math.PI * Math.pow(r,2);
+			double density = (double)cluster.size()/circleArea;
 			
-			logger.trace("density {} {} - {} {} - {}", shotWidth, shotHeight, circleArea, cluster.size(), density);
+			logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(), density);
 			
 			if (density < MINIMUM_DENSITY)
 				continue;
@@ -178,7 +185,7 @@ public class PixelClusterManager {
 			// We scale up the minimum in a linear scale as the cluster size increases.  This is an approximate density
 			double scaled_minimum = MINIMUM_CONNECTEDNESS+((cluster.size()-shotDetectionManager.getMinimumShotDimension())*MINIMUM_CONNECTEDNESS_FACTOR);
 			
-			logger.trace("Cluster {} - {} - connectedness {} scaled_minimum {} - ratio {} - density {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, shotRatio, density, averageX, averageY);
+			logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - ratio {} - density {} - {} {}", i, cluster.size(), avgconnectedness, scaled_minimum, shotRatio, density, averageX, averageY);
 			
 			if (avgconnectedness < scaled_minimum)
 				continue;
@@ -190,6 +197,9 @@ public class PixelClusterManager {
 			
 			clusters.add(cluster);
 		}
+		
+		logger.trace("---- Detected {} shots from {} regions ------", clusters.size(), numberOfRegions+1);
+		
 		return clusters;
 	}
 }

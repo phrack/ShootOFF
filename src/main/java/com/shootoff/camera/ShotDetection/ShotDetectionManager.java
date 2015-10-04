@@ -22,6 +22,8 @@ import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
+import cern.colt.Arrays;
+
 public final class ShotDetectionManager {
 
 	public static final int SECTOR_COLUMNS = 3;
@@ -32,7 +34,6 @@ public final class ShotDetectionManager {
 	private CanvasManager canvasManager;
 	private CameraManager cameraManager;
 	private Configuration config;
-	
 	
 	private final int INIT_FRAME_COUNT = 5;
 	private boolean filtersInitialized = false;	
@@ -50,7 +51,7 @@ public final class ShotDetectionManager {
 	
 	private final int MOTION_WARNING_FRAMECOUNT = 30;
 	private final int MOTION_WARNING_AVG_THRESHOLD = 100;
-	private final int MOTION_WARNING_THRESHOLD_PIXELS = 250;
+	private final int MOTION_WARNING_THRESHOLD_PIXELS = 300;
 	
 	// Individual pixel threshold
 	private final int EXCESSIVE_BRIGHTNESS_THRESHOLD = 245;
@@ -59,17 +60,22 @@ public final class ShotDetectionManager {
 	// Aggregate # of pixel threshold
 	private final int BRIGHTNESS_WARNING_AVG_THRESHOLD = 100;
 	private final int BRIGHTNESS_WARNING_FRAMECOUNT = 90;
+	
+	
 	// This is updated for every bright pixel
 	private int brightPixels = 0;
+
+	private final int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 300;
 	// The average is then calculated here
 	private double avgBrightPixels = -1;
+
 
 	// This is a short circuit for our pixel-color-changer to set the bad pixels red
 	// without having complicated math every pixel
 	private boolean shouldShowBrightnessWarningBool = false;
 	private BufferedImage currentFullFrame;
 	
-	private static final int MINIMUM_SHOT_DIMENSION = 9;
+	private static final int MINIMUM_SHOT_DIMENSION = 6;
 	
 	
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config,
@@ -149,10 +155,35 @@ public final class ShotDetectionManager {
 	}
 	
 	
+	private void deepCopy(int[][] source, int[][] destination)
+	{
+		Parallel.forIndex(0, source.length, 1, new Operation<Integer>(){
+			public void perform(Integer i){
+				int[] aMatrix = source[i];
+				int   aLength = aMatrix.length;
+				System.arraycopy(aMatrix, 0, destination[i], 0, aLength);
+			}
+		});
+	}
+
+	private void deepCopy(double[][] source, double[][] destination)
+	{
+		Parallel.forIndex(0, source.length, 1, new Operation<Integer>(){
+			public void perform(Integer i){
+				double[] aMatrix = source[i];
+				int  aLength = aMatrix.length;
+				System.arraycopy(aMatrix, 0, destination[i], 0, aLength);
+			}
+		});
+	}
+
+	
 	private void applyFilter()
 	{
-		lumsMovingAverage = newLumsMovingAverage;
-		colorDiffMovingAverage = newColorDiffMovingAverage;
+	
+		deepCopy(newLumsMovingAverage, lumsMovingAverage);
+		deepCopy(newColorDiffMovingAverage, colorDiffMovingAverage);
+	
 	}
 
 	
@@ -170,10 +201,14 @@ public final class ShotDetectionManager {
 
 	private boolean pixelAboveThreshold(int currentLum, int lumsMovingAverage)
 	{
-		int threshold = (255-lumsMovingAverage)/2;
+		int threshold = (int)((double)(255-lumsMovingAverage)/4f);
 		int increase = (currentLum-lumsMovingAverage);
 		
-		int dynamic_threshold = threshold+(int)((255-threshold)*(avgThresholdPixels/(double)MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+		//int dynamic_increase = 0;
+		//if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD || avgThresholdPixels > BRIGHTNESS_WARNING_AVG_THRESHOLD)
+		int dynamic_increase = (int)((255-threshold)*(avgThresholdPixels/(double)MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+		
+		int dynamic_threshold = threshold+dynamic_increase;
 		
 		
 		if (increase<MINIMUM_BRIGHTNESS_INCREASE)
@@ -218,7 +253,17 @@ public final class ShotDetectionManager {
 			
 		ArrayList<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingCopy, (detectShots && filtersInitialized));
 		
-		logger.trace("thresholdPixels {}", thresholdPixels.size());
+		
+		if (logger.isDebugEnabled())
+		{
+			if (thresholdPixels.size() >= 4)
+				logger.debug("thresholdPixels {} getMinimumShotDimension {}", thresholdPixels.size(), getMinimumShotDimension());
+			
+			for (Pixel pixel : thresholdPixels)
+			{
+				logger.debug("thresholdPixel {} {} - from array {} from pixel cur {} avg {}", pixel.x, pixel.y, lumsMovingAverage[pixel.x][pixel.y], pixel.getCurrentLum(), pixel.getLumAverage());
+			}
+		}
 		
 		if (checkIfInitialized())
 			filtersInitialized = true;
@@ -250,8 +295,11 @@ public final class ShotDetectionManager {
 					drawOnCurrentFrame(pixel.x, pixel.y, 0x0000FF);
 				}
 			}
+
 			else if (thresholdPixels.size() >= getMinimumShotDimension())
 			{
+				
+				logger.trace("thresholdPixels {}", thresholdPixels.size());
 
 				ArrayList<PixelCluster> clusters = clusterPixels(workingCopy, thresholdPixels);
 
@@ -293,7 +341,7 @@ public final class ShotDetectionManager {
 
 	private boolean isExcessiveMotion(int thresholdPixels) {
 		
-		if ((avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD || (thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS)))
+		if (thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS)
 			return true;
 
 		return false;
@@ -301,7 +349,7 @@ public final class ShotDetectionManager {
 	
 	private boolean shouldShowMotionWarning(int thresholdPixels) {
 		
-		if (cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT)
+		if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD && cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT)
 		{
 			logger.debug("HIGH MOTION - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
 
@@ -400,8 +448,6 @@ public final class ShotDetectionManager {
 	
 	
 	
-	
-	private final int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 200;
 	
 	private void updateAvgThresholdPixels(int thresholdPixels)
 	{
