@@ -23,8 +23,6 @@ public class TestConfiguration {
 	@Test
 	public void testConfirmDefaults() {
 		assertEquals(0, defaultConfig.getWebcams().size());
-		assertEquals(70, defaultConfig.getDetectionRate());
-		assertEquals(230, defaultConfig.getLaserIntensity());
 		assertEquals(4, defaultConfig.getMarkerRadius());
 		assertEquals(false, defaultConfig.ignoreLaserColor());
 		assertEquals("None", defaultConfig.getIgnoreLaserColorName());
@@ -37,52 +35,6 @@ public class TestConfiguration {
 		assertEquals(false, defaultConfig.useMalfunctions());
 		assertTrue(defaultConfig.getMalfunctionsProbability() == 10.0);
 		assertEquals(false, defaultConfig.inDebugMode());
-	}
-
-	@Test(expected=ConfigurationException.class)
-	public void testDetectionRateBelowRange() throws ConfigurationException {
-		defaultConfig.setDetectionRate(0);
-		defaultConfig.validateConfiguration();		
-	}
-
-	@Test
-	public void testDetectionRateInRange() {
-		try {
-			defaultConfig.setDetectionRate(1);
-			defaultConfig.validateConfiguration();
-			defaultConfig.setDetectionRate(50);
-			defaultConfig.validateConfiguration();
-			defaultConfig.setDetectionRate(1000);
-			defaultConfig.validateConfiguration();
-		} catch (ConfigurationException e) {
-			fail("Detection rate values are in range but got ConfigurationException");
-		}
-	}
-	
-	@Test(expected=ConfigurationException.class)
-	public void testLaserIntesityBelowRange() throws ConfigurationException {
-		defaultConfig.setLaserIntensity(0);
-		defaultConfig.validateConfiguration();		
-	}
-
-	@Test(expected=ConfigurationException.class)
-	public void testLaserIntesityAboveRange() throws ConfigurationException {
-		defaultConfig.setLaserIntensity(256);
-		defaultConfig.validateConfiguration();		
-	}
-	
-	@Test
-	public void testLaserIntensityInRange() {
-		try {
-			defaultConfig.setLaserIntensity(1);
-			defaultConfig.validateConfiguration();
-			defaultConfig.setLaserIntensity(100);
-			defaultConfig.validateConfiguration();
-			defaultConfig.setLaserIntensity(255);
-			defaultConfig.validateConfiguration();
-		} catch (ConfigurationException e) {
-			fail("Laser intensity values are in range but got ConfigurationException");
-		}
 	}
 	
 	@Test(expected=ConfigurationException.class)
@@ -230,8 +182,6 @@ public class TestConfiguration {
 				TestConfiguration.class.getResourceAsStream("/test.properties"),
 				"test.properties");
 
-		assertEquals(40, config.getDetectionRate());
-		assertEquals(120, config.getLaserIntensity());
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
@@ -251,11 +201,9 @@ public class TestConfiguration {
 		Configuration config = new Configuration(
 				TestConfiguration.class.getResourceAsStream("/test.properties"),
 				"test.properties",
-				new String[] {"-i", "20"});
-
-		assertEquals(40, config.getDetectionRate());
-		assertEquals(20, config.getLaserIntensity());
-		assertEquals(4, config.getMarkerRadius());
+				new String[] {"-m", "6"});
+		
+		assertEquals(6, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
 		assertEquals(true, config.useVirtualMagazine());
@@ -268,12 +216,10 @@ public class TestConfiguration {
 	@Test
 	public void testReadCmdLineShort() throws IOException, ConfigurationException {
 		Configuration config = new Configuration(new String[]{
-				"-d", "-r", "40", "-i", "120", "-m", "4", "-c", "green",
+				"-d", "-m", "4", "-c", "green",
 				"-u", "25", "-f", "43.15" 
 			});
 		
-		assertEquals(40, config.getDetectionRate());
-		assertEquals(120, config.getLaserIntensity());
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
@@ -287,15 +233,12 @@ public class TestConfiguration {
 	@Test
 	public void testReadCmdLineLong() throws IOException, ConfigurationException {
 		Configuration config = new Configuration(new String[]{
-				"--debug", "--detection-rate", "40", 
-				"--laser-intensity", "120", "--marker-radius", "4", 
+				"--debug", "--marker-radius", "4", 
 				"--ignore-laser-color", "green",
 				"--use-virtual-magazine", "25", 
 				"--use-malfunctions", "43.15" 
 			});				
-		
-		assertEquals(40, config.getDetectionRate());
-		assertEquals(120, config.getLaserIntensity());
+
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());

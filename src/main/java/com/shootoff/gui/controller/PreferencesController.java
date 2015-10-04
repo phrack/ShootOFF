@@ -57,10 +57,6 @@ import javafx.util.Callback;
 
 public class PreferencesController implements DesignateShotRecorderListener {
 	@FXML private ListView<String> webcamListView;
-	@FXML private Slider detectionRateSlider;
-	@FXML private Label detectionRateLabel;
-	@FXML private Slider laserIntensitySlider;
-	@FXML private Label laserIntensityLabel;
 	@FXML private Slider markerRadiusSlider;
 	@FXML private Label markerRadiusLabel;
 	@FXML private ChoiceBox<String> ignoreLaserColorChoiceBox;
@@ -87,7 +83,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	
 	public void setConfig(Configuration config, 
 			CameraConfigListener cameraConfigListener) throws IOException {
-	    preferencesStage = (Stage)detectionRateSlider.getScene().getWindow();
+	    preferencesStage = (Stage)markerRadiusSlider.getScene().getWindow();
 	    
 	    this.cameraConfigListener = cameraConfigListener;
 	    
@@ -126,8 +122,6 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	    
 		this.config = config;
 		
-		linkSliderToLabel(detectionRateSlider, detectionRateLabel);
-		linkSliderToLabel(laserIntensitySlider, laserIntensityLabel);
 		linkSliderToLabel(markerRadiusSlider, markerRadiusLabel);
 		linkSliderToLabel(virtualMagazineSlider, virtualMagazineLabel);
 		linkSliderToLabel(malfunctionsSlider, malfunctionsLabel);
@@ -137,8 +131,6 @@ public class PreferencesController implements DesignateShotRecorderListener {
 			configuredCameras.add(config.getWebcams().get(webcamName));
 		}
 		
-		detectionRateSlider.setValue(config.getDetectionRate());
-		laserIntensitySlider.setValue(config.getLaserIntensity());
 		markerRadiusSlider.setValue(config.getMarkerRadius());
 		ignoreLaserColorChoiceBox.setValue(config.getIgnoreLaserColorName());
 		redLaserSoundCheckBox.setSelected(config.useRedLaserSound());
@@ -255,8 +247,6 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	public void okClicked(ActionEvent event) throws ConfigurationException, IOException {
 		config.setWebcams(configuredNames, configuredCameras);
 		config.setRecordingCameras(recordingCameras);
-		config.setDetectionRate((int)detectionRateSlider.getValue());
-		config.setLaserIntensity((int)laserIntensitySlider.getValue());
 		config.setMarkerRadius((int)markerRadiusSlider.getValue());
 		config.setIgnoreLaserColor(!ignoreLaserColorChoiceBox.getValue().equals("None"));
 		config.setIgnoreLaserColorName(ignoreLaserColorChoiceBox.getValue());

@@ -31,7 +31,6 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
-		config.setDetectionRate(0);
 		config.setDebugMode(true);
 		mockManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
