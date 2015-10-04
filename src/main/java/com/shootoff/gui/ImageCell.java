@@ -46,7 +46,11 @@ public class ImageCell extends TextFieldListCell<String> {
 	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames, 
 			Optional<DesignateShotRecorderListener> listener, Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<Camera>(webcams);
-		this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
+		if (userDefinedCameraNames != null) {
+			this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
+		} else {
+			this.userDefinedCameraNames = null;
+		}
 		this.recordingCameras = recordingCameras;
 		
 		this.setConverter(new DefaultStringConverter());
