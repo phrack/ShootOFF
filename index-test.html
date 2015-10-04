@@ -891,7 +891,15 @@ $(document).ready(function(){
     var link = element.attr('href');
     var new_window = element.attr('target') == '_blank' ? true : false;
     element.click(function(){
-      trackOutboundLink(link, new_window);
+      trackOutboundLink(link);
+      if (new_window)
+      {
+      	window.open(link);
+      }
+      else
+      {
+      	document.url = link;
+      }
       return false;
     });
   });
