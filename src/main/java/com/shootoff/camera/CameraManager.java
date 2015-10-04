@@ -476,38 +476,28 @@ public class CameraManager {
 
 		private boolean processFrame(BufferedImage currentFrame)
 		{
-			
-
 			incFrameCount();
-			
-
+		
 			logger.trace("processFrame {}", getFrameCount());
 			
-
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
-
-			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
-				
+			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {				
 				setFPS(webcam.get().getFPS());
-
+				
 				if (debuggerListener.isPresent()) {
-
 					debuggerListener.get().updateFeedData(webcamFPS, null);
 				}
 
 				checkIfMinimumFPS();
 			}
 
-			
 			return result;
 		}
 		
 		private void setFPS(double newFPS)
 		{
-
-			webcamFPS = Math.min(newFPS,DEFAULT_FPS);
-			
+			webcamFPS = Math.min(newFPS, DEFAULT_FPS);	
 			DeduplicationProcessor.setThreshold((int)(webcamFPS/DeduplicationProcessor.DEDUPE_THRESHOLD_DIVISION_FACTOR));
 			
 		}
@@ -521,7 +511,6 @@ public class CameraManager {
 				showedFPSWarning = true;
 			}
 		}
-
 		
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
