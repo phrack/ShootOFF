@@ -44,24 +44,10 @@
   ga('send', 'pageview');
   
 /**
-* Track clicks to a link. If new_window is true the google analytics request
-* will be made synchronously, because browsers block new windows from opening unless
-* it is done DURING an on click event. If new_window is false, the request will
-* be made asynchronously, and the current window url will be changed.
-*/
-var trackOutboundLink = function(url, new_window) {
-  ga('send', 'event', 'outbound', 'click', url, {'hitCallback':
-    function () {
-      if (!new_window) {
-        document.location = url;
-      }
-    }
-  });
-  if (new_window){
-    //window.open(url);
-    // No good solution for this right now.  Just use the current tab.
-    document.location = url;
-  }
+* Track clicks to a link. Must open the link seperately from this function. */
+var trackOutboundLink = function(url) {
+  ga('send', 'event', 'outbound', 'click', url, null);
+
 }
 
 </script>
@@ -968,6 +954,7 @@ $(document).ready(function(){
   <script>
     $("a#tirekov").click(function(){
              trackOutboundLink("https://github.com/phrack/ShootOFF/releases/download/v3.3-FINAL/shootoff-3.3-final.zip", false);
+             window.open("https://github.com/phrack/ShootOFF/releases/download/v3.3-FINAL/shootoff-3.3-final.zip");
     });
   </script>
 
