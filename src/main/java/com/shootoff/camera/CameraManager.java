@@ -421,6 +421,7 @@ public class CameraManager {
 					return;
 				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 					// Camera appears to be open but got a null frame
+					logger.warn("Null frame from camera: {}", webcam.get().getName());
 					continue;
 				}
 
