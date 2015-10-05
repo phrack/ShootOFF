@@ -22,8 +22,6 @@ import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
-import cern.colt.Arrays;
-
 public final class ShotDetectionManager {
 
 	public static final int SECTOR_COLUMNS = 3;

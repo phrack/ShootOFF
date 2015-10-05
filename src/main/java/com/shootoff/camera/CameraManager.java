@@ -415,9 +415,13 @@ public class CameraManager {
 				BufferedImage currentFrame = webcam.get().getImage();
 
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
+					// Camera appears to have closed
 					showMissingCameraError();
 					detectionExecutor.shutdown();
 					return;
+				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
+					// Camera appears to be open but got a null frame
+					continue;
 				}
 
 
