@@ -2,55 +2,53 @@
 <html lang="en">
   <head>
 
-  <script>
+    <script type="text/javascript">
+      if (window.location == "http://phrack.github.io/ShootOFF/") {
+        window.location = "http://shootoffapp.com";
+      }
+
       function launchApplication(jnlpfile) {
-          dtjava.launch(            {
-                  url : 'jws/ShootOFF.jnlp'
-              },
-              {
-                  javafx : '8.0+'
-              },
-              {}
+        dtjava.launch(            
+            {
+              url : 'jws/ShootOFF.jnlp'
+            },
+            {
+              javafx : '8.0+'
+            },
+            {}
           );
           return false;
+        }
+        
+      function java_callback() {  		
+        platform = new dtjava.Platform();
+        platform.jvm = "1.8.0+";
+        platform.javafx = "8.0";
+		    		
+        // null means it validated
+        if (dtjava.validate(platform) == null) {
+          $("#tirekov").html('Download Standalone');
+          $(".lmb2").css({"display": "block"});
+        } else{
+          $(".wst").css({"width": "100%"});
+        }
       }
+
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-66374084-1', 'auto');
+      ga('require', 'linkid', 'linkid.js');
+      ga('send', 'pageview');
       
-		  function java_callback()
-		  {  		
-		  		platform = new dtjava.Platform();
-		  		platform.jvm = "1.8.0+";
-		  		platform.javafx = "8.0";
-		  		
-		  		// null means it validated
-		      if (dtjava.validate(platform) == null) 
-		      {
-		        $("#tirekov").html('Download Standalone');
-		        $(".lmb2").css({"display": "block"});
-		      }
-		
-		      else{
-		        $(".wst").css({"width": "100%"});
-		      }
-		  }
-  </script>
-  <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-66374084-1', 'auto');
-  ga('require', 'linkid', 'linkid.js');
-  ga('send', 'pageview');
-  
-/**
-* Track clicks to a link. Must open the link seperately from this function. */
-var trackOutboundLink = function(url) {
-  ga('send', 'event', 'outbound', 'click', url, null);
-
-}
-
-</script>
+      /**
+       * Track clicks to a link. Must open the link seperately from this function. */
+      var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, null);
+      }
+    </script>
   	
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
