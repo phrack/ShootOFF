@@ -491,16 +491,23 @@ public final class ShotDetectionManager {
 		if (!color.isPresent())
 			return;
 		
+		
+		Shot shot = new Shot(color.get(), x, y, 
+				0, cameraManager.getFrameCount(), config.getMarkerRadius());
+		
+		// If a shot is ignored, we still pass it to the DeuplicationProcessor for storage
+		// because otherwise we may get another shot at this same location at the next frame
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
 				color.get().equals(config.getIgnoreLaserColor().get()))
+		{
+			config.getDeduplicationProcessor().processShot(shot);
 			return;
+		}
 		
 		logger.info("Suspected shot accepted: Center ({}, {}), {}",
 				x, y, color.get());
 		
-		
-		Shot shot = new Shot(color.get(), x, y, 
-				0, cameraManager.getFrameCount(), config.getMarkerRadius());
+
 		
 		
 		if (config.isDebugShotsRecordToFiles() && config.getDeduplicationProcessor().processShotLookahead(shot)) {
