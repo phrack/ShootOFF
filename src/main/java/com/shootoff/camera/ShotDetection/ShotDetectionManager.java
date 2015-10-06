@@ -155,6 +155,8 @@ public final class ShotDetectionManager {
 	
 	private void deepCopy(int[][] source, int[][] destination)
 	{
+		if (!cameraManager.isDetecting()) return;
+		
 		Parallel.forIndex(0, source.length, 1, new Operation<Integer>(){
 			public void perform(Integer i){
 				int[] aMatrix = source[i];
@@ -166,6 +168,8 @@ public final class ShotDetectionManager {
 
 	private void deepCopy(double[][] source, double[][] destination)
 	{
+		if (!cameraManager.isDetecting()) return;
+		
 		Parallel.forIndex(0, source.length, 1, new Operation<Integer>(){
 			public void perform(Integer i){
 				double[] aMatrix = source[i];

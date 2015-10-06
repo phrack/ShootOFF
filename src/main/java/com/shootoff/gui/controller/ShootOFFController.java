@@ -708,6 +708,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				calibrationGroup.getChildren().add(calibrationRectangle);
 				
 				calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
+				calibrationTarget.get().setKeepInBounds(true);
 			} else {
 				arenaCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
 			}
