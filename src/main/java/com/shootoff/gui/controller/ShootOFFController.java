@@ -366,10 +366,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		// We want the CameraManager to configure the camera, we just try to
 		// open and close it here to see if we can. If we hold off on doing this
 		// until later it's harder to give the user a good error message.
-		if (!webcam.isOpen() && !webcam.open()) {
-			return false;
-		} else {
-			webcam.close();
+		String os = System.getProperty("os.name");
+		if (os != null && !os.equals("Mac OS X")) {
+			if (!webcam.isOpen() && !webcam.open()) {
+				return false;
+			} else {
+				webcam.close();
+			}
 		}
 		
 		Tab cameraTab = new Tab(webcamName);
