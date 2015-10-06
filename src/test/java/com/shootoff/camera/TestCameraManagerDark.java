@@ -67,13 +67,11 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	public void testNoInterferenceTwoShots() {
 		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4", Optional.empty());
 		
-		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 438.7, 132.4, 0, 2));
-		
 		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(Color.RED, 438.7, 132.4, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 626, 168.5, 0, 2));
 		
-		super.checkShots(collector, shots, requiredShots, optionalShots, false);
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
 	}
 	
 	@Test
@@ -108,7 +106,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
-		// Misses water shots
+		// Misses middle water shot
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -116,9 +114,10 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 334.4, 125.1, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 199.7, 108.1, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 164.5, 220.2, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 370.7, 222.1, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 441.6, 250.2, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 503.6, 218.1, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 323.2, 311.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 194.4, 314.9, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
@@ -126,13 +125,14 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOffSafari() {
-		// Misses middle shots on middle and bottom row
+		// Misses middle shot on bottom row
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 472.8, 62.9, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 472.9, 100.2, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 337.8, 97.1, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 376.8, 226.2, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 203.9, 99.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 200.6, 233.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 494.7, 224.2, 0, 2));

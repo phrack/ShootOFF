@@ -64,15 +64,16 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechIndoorGreen() {
-		// Missing 4 shots
+		// Missing 3 shots
 		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.GREEN, 223.3, 258.9, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 509.8, 184.4, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 515.9, 50.4, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 388.8, 86.2, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 216.7, 71.2, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 517.1, 255.3, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 222.9, 259.0, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 509.7, 184.5, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 515.5, 50.6, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 388.3, 85.6, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 216.9, 71.4, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
@@ -80,42 +81,54 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechOutdoorGreen2() {
-		// Missing 4 shots
 		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.GREEN, 415.7, 50.7, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 276.8, 69.7, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 415.6, 50.7, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 276.5, 70.0, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 116.8, 72.8, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 113.4, 214.6, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 269.2, 207.2, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 268.0, 309.0, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 97.0, 301.0, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 409.8, 214.7, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 418.9, 316.4, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 269.0, 309.3, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 96.8, 300.8, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
 	
 	@Test
 	public void testLogitechSafariGreen() {
-		// Missing 4 shots
+		// Missing 1 shot
 		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.GREEN, 241.7, 253.7, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 259.5, 141.4, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 387.5, 185.1, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 522.8, 181.5, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 232.3, 78.8, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 488.8, 237.0, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 366.8, 253.3, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 239.7, 255.7, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 259.3, 141.1, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 386.8, 185.5, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 522.6, 181.1, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 512.4, 66.0, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 232.0, 79.1, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
 	
 	@Test
 	public void testLogitechOutdoorRed() {
-		// Missing 7 shots
 		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 446.2, 172.6, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 119.3, 287.3, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 432.6, 74.4, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 293.4, 79.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 131.5, 72.5, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 131.7, 174.8, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 295.6, 153.4, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 446.3, 172.5, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 418.8, 279.6, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 289.7, 296.1, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 119.1, 287.5, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), false);
 	}
@@ -123,20 +136,27 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechSafariRed() {
-		// Missing 6 shots
 		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.mp4", Optional.empty());
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 290.2, 191.8, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 437.8, 299.3, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 288.6, 299.4, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 440.5, 90.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 290.7, 91.6, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 140.4, 94.4, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 129.3, 193.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 290.2, 191.7, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 448.7, 200.7, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 437.5, 299.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 288.4, 299.2, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 137.4, 293.9, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
 	
-	
 	@Test
 	public void testLogitechBouncingTargetsNoBG() {
+		config.setIgnoreLaserColor(true);
+		config.setIgnoreLaserColorName("green");
+		
 		List<Shot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", Optional.empty());
 		
 		assertEquals(0, shots.size());
@@ -144,13 +164,11 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechBouncingTargetsOutdoor() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty());
+		config.setIgnoreLaserColor(true);
+		config.setIgnoreLaserColorName("green");
 		
-		// These are noise but we can't get rid of them without really messing up other tests.
-		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.GREEN, 233.2, 192.2, 0, 2));
-		optionalShots.add(new Shot(Color.GREEN, 233.3, 278.4, 0, 2));
-
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty());
+	
+		assertEquals(0, shots.size());
 	}
 }
