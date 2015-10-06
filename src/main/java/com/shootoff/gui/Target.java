@@ -339,8 +339,18 @@ public class Target {
 		        
 		        if (right) originXDelta *= -1.0;
 		        
+		        double oldLayoutX = targetGroup.getLayoutX();
+		        double oldScaleX = targetGroup.getScaleX();
+		        
 		        targetGroup.setLayoutX(targetGroup.getLayoutX() + originXDelta);
 	        	targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
+	        	
+		        if (keepInBounds && (targetGroup.getBoundsInParent().getMinX() <= 0 || 
+				        targetGroup.getBoundsInParent().getMaxX() >= CameraManager.FEED_WIDTH)) {
+		        	
+		        	targetGroup.setLayoutX(oldLayoutX); 
+		        	targetGroup.setScaleX(oldScaleX);
+		        }
     		} else if (top || bottom) {
 		        double gap;
 		        
@@ -368,8 +378,18 @@ public class Target {
 		        
 		        if (bottom) originYDelta *= -1.0;
 		        
+		        double oldLayoutY = targetGroup.getLayoutY();
+		        double oldScaleY = targetGroup.getScaleY();
+		        
 	        	targetGroup.setLayoutY(targetGroup.getLayoutY() + originYDelta); 
 	        	targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
+	        	
+		        if (keepInBounds && (targetGroup.getBoundsInParent().getMinY() <= 0 || 
+				        targetGroup.getBoundsInParent().getMaxY() >= CameraManager.FEED_HEIGHT)) {
+		        	
+		        	targetGroup.setLayoutY(oldLayoutY); 
+		        	targetGroup.setScaleY(oldScaleY);
+		        }
 	        }
 	        
 			if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
