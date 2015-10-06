@@ -178,7 +178,15 @@ public class Camera {
 	}
 	
 	public boolean open() {
-		return webcam.open();
+		boolean open = false;
+		
+		try {
+			open = webcam.open();
+		} catch (WebcamException we) {
+			open = false;
+		}
+	
+		return open;
 	}
 	
 	public boolean close() {

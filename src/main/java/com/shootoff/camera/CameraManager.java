@@ -68,7 +68,6 @@ public class CameraManager {
 
 	public static final int DEFAULT_FPS = 30;
 
-
 	private final ShotDetectionManager shotDetectionManager;
 
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
