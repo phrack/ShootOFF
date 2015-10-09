@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,8 +65,9 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.util.Callback;
+import javafx.scene.paint.Color;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -73,7 +76,6 @@ public class CameraManager {
 	
 
 	public static final int DEFAULT_FPS = 30;
-
 
 	private final ShotDetectionManager shotDetectionManager;
 
@@ -207,6 +209,9 @@ public class CameraManager {
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
+		if (brightnessDiagnosticTimer != null) brightnessDiagnosticTimer.cancel();
+		if (motionDiagnosticTimer != null) motionDiagnosticTimer.cancel();
+		detectionExecutor.shutdownNow();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -216,11 +221,14 @@ public class CameraManager {
 	public void setDetecting(boolean isDetecting) {
 		this.isDetecting = isDetecting;
 	}
+	
+	public boolean isDetecting() {
+		return isDetecting;
+	}
 
 	public void setProjectionBounds(Bounds projectionBounds) {
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
-	
 
 	public void setCropFeedToProjection(boolean cropFeed) {
 		cropFeedToProjection = cropFeed;
@@ -350,15 +358,19 @@ public class CameraManager {
 	public void incFrameCount() {
 		frameCount++;
 	}
+	
+	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
+	private Timer brightnessDiagnosticTimer = new Timer();
+	private Timer motionDiagnosticTimer = new Timer();
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 
 
-		private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 
 
 
+		
 		
 		@Override
 		public void run() {
@@ -372,7 +384,7 @@ public class CameraManager {
 			}
 		}
 
-
+		
 		/**
 		 * From the MediaListenerAdapter. This method is used to get a new frame
 		 * from a video that is being played back in a unit test, not to get
@@ -419,9 +431,14 @@ public class CameraManager {
 				BufferedImage currentFrame = webcam.get().getImage();
 
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
+					// Camera appears to have closed
 					showMissingCameraError();
 					detectionExecutor.shutdown();
 					return;
+				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
+					// Camera appears to be open but got a null frame
+					logger.warn("Null frame from camera: {}", webcam.get().getName());
+					continue;
 				}
 
 
@@ -480,16 +497,11 @@ public class CameraManager {
 			
 			detectionExecutor.shutdown();
 		}
-		
 
 		private boolean processFrame(BufferedImage currentFrame)
 		{
-			
-
 			incFrameCount();
 			
-
-			logger.trace("processFrame {}", getFrameCount());
 			
 			if (autoCalibrationEnabled && (getFrameCount()%DEFAULT_FPS==0))
 			{
@@ -499,27 +511,19 @@ public class CameraManager {
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
 
-			if (webcam.isPresent() && (getFrameCount()%DEFAULT_FPS)==0) {
-				
+			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {				
 				setFPS(webcam.get().getFPS());
-
-				if (debuggerListener.isPresent()) {
-
-					debuggerListener.get().updateFeedData(webcamFPS, null);
-				}
+				
 
 				checkIfMinimumFPS();
 			}
 
-			
 			return result;
 		}
 		
 		private void setFPS(double newFPS)
 		{
-
-			webcamFPS = Math.min(newFPS,DEFAULT_FPS);
-			
+			webcamFPS = Math.min(newFPS, DEFAULT_FPS);	
 			DeduplicationProcessor.setThreshold((int)(webcamFPS/DeduplicationProcessor.DEDUPE_THRESHOLD_DIVISION_FACTOR));
 			
 		}
@@ -533,7 +537,6 @@ public class CameraManager {
 				showedFPSWarning = true;
 			}
 		}
-
 		
 		private void fireAutoCalibration(BufferedImage frame) {
 			acm.setFrame(frame);
@@ -623,9 +626,35 @@ public class CameraManager {
 
 	}
 	
+	
+	private Label brightnessDiagnosticWarning = null;
+	private final static int brightnessDiagnosticLengthMS = 1000;
 	public void showBrightnessWarning() {
-		// TODO Switch to error overlay or only show this once?
-		
+		if (brightnessDiagnosticWarning == null)
+		{
+			Platform.runLater(() -> {
+				brightnessDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive brightness", Color.RED);
+			});
+		}
+		else
+		{
+			// Stop the existing timer and start a new one
+			brightnessDiagnosticTimer.cancel();
+		}
+		brightnessDiagnosticTimer = new Timer();
+		brightnessDiagnosticTimer.schedule(new TimerTask() {
+		    public void run() {
+		         Platform.runLater(new Runnable() {
+		            public void run() {
+		            	if (brightnessDiagnosticWarning != null)
+		            	{
+		            		canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
+		            		brightnessDiagnosticWarning = null;
+		            	}
+		            }
+		        });
+		    }
+		}, brightnessDiagnosticLengthMS);
 		
 		if (!webcam.isPresent() || shownBrightnessWarning)
 			return;
@@ -639,8 +668,7 @@ public class CameraManager {
 					+ " For best results, please do any mix of the following:\n\n"
 					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness\n"
 					+ "-Remove any bright light sources in the camera's view\n"
-					+ "-Turn down your projector's brightness and contrast\n"
-					+ "-Dim any lights in the room or turn them off, especially those behind the shooter";
+					+ "-Turn down your projector's brightness and contrast";
 			String message;
 			if (cameraName.isPresent()) {
 				message = String.format(messageFormat, cameraName.get());
@@ -656,9 +684,34 @@ public class CameraManager {
 		});
 	}
 
+	private Label motionDiagnosticWarning = null;
+	private final static int motionDiagnosticLengthMS = 1000;
 	public void showMotionWarning() {
-		// TODO Auto-generated method stub
-		
+		if (motionDiagnosticWarning == null)
+		{
+			Platform.runLater(() -> {
+					motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
+			});
+	}
+		else
+		{
+			// Stop the existing timer and start a new one
+			motionDiagnosticTimer.cancel();
+		}
+		motionDiagnosticTimer = new Timer();
+		motionDiagnosticTimer.schedule(new TimerTask() {
+		    public void run() {
+		         Platform.runLater(new Runnable() {
+		            public void run() {
+		            	if (motionDiagnosticWarning != null)
+		            	{
+		            		canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
+		            		motionDiagnosticWarning = null;
+		            	}
+		            }
+		        });
+		    }
+		}, motionDiagnosticLengthMS);
 	}
 
 	public void enableAutoCalibration() {

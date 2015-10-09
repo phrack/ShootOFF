@@ -66,8 +66,6 @@ public class Configuration {
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
 	private static final String RECORDING_WEBCAMS_PROP = "shootoff.webcams.recording";
-	private static final String DETECTION_RATE_PROP = "shootoff.detectionrate";
-	private static final String LASER_INTENSITY_PROP = "shootoff.laserintensity";
 	private static final String MARKER_RADIUS_PROP = "shootoff.markerradius";
 	private static final String IGNORE_LASER_COLOR_PROP = "shootoff.ignorelasercolor";
 	private static final String USE_RED_LASER_SOUND_PROP = "shootoff.redlasersound.use";
@@ -78,13 +76,7 @@ public class Configuration {
 	private static final String VIRTUAL_MAGAZINE_CAPACITY_PROP = "shootoff.virtualmagazine.capacity";
 	private static final String USE_MALFUNCTIONS_PROP = "shootoff.malfunctions.use";
 	private static final String MALFUNCTIONS_PROBABILITY_PROP = "shootoff.malfunctions.probability";
-	
-	protected static final String DETECTION_RATE_MESSAGE = 
-			"DETECTION_RATE has an invalid value: %d. Acceptable values are "
-			+ "greater than 0.";
-	protected static final String LASER_INTENSITY_MESSAGE = 
-			"LASER_INTENSITY has an invalid value: %d. Acceptable values are "
-			+ "between 1 and 255.";
+
 	protected static final String MARKER_RADIUS_MESSAGE = 
 			"MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
@@ -107,8 +99,6 @@ public class Configuration {
 	
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
 	private Map<String, Camera> webcams = new HashMap<String, Camera>();
-	private int detectionRate = 70;
-	private int laserIntensity = 230;
 	private int markerRadius = 4;
 	private boolean ignoreLaserColor = false;
 	private String ignoreLaserColorName = "None";
@@ -128,10 +118,7 @@ public class Configuration {
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	
-	
 	private boolean debugShotsRecordToFiles = false;
-		
-
 
  	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
@@ -190,7 +177,7 @@ public class Configuration {
 		shotProcessors.add(deduplicationProcessor);
 	}
 	
-	private void readConfigurationFile() throws IOException, ConfigurationException {
+	private void readConfigurationFile() throws ConfigurationException, IOException {
 		Properties prop = new Properties();
 		
 		InputStream inputStream;
@@ -202,13 +189,17 @@ public class Configuration {
 		}
 			 
 		if (inputStream != null) {
-			prop.load(inputStream);
+			try {
+				prop.load(inputStream);
+			} catch (IOException ioe) {
+				throw ioe;
+			} finally {
+				inputStream.close();
+			}
 		} else {
 			throw new FileNotFoundException("Could not read configuration file " +
 					configName);
 		}
-		
-		inputStream.close();
 		
 		if (prop.containsKey(IPCAMS_PROP)) {
 			for (String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
@@ -251,16 +242,6 @@ public class Configuration {
 			}
 		}
 		setRecordingCameras(recordingCameras);
-		
-		if (prop.containsKey(DETECTION_RATE_PROP)) {
-			setDetectionRate(
-					Integer.parseInt(prop.getProperty(DETECTION_RATE_PROP)));
-		}
-		
-		if (prop.containsKey(LASER_INTENSITY_PROP)) {
-			setLaserIntensity(
-					Integer.parseInt(prop.getProperty(LASER_INTENSITY_PROP)));
-		}
 		
 		if (prop.containsKey(MARKER_RADIUS_PROP)) {
 			setMarkerRadius(
@@ -349,8 +330,6 @@ public class Configuration {
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(RECORDING_WEBCAMS_PROP, recordingWebcamList.toString());
-		prop.setProperty(DETECTION_RATE_PROP, String.valueOf(detectionRate));
-		prop.setProperty(LASER_INTENSITY_PROP, String.valueOf(laserIntensity));
 		prop.setProperty(MARKER_RADIUS_PROP, String.valueOf(markerRadius));
 		prop.setProperty(IGNORE_LASER_COLOR_PROP, ignoreLaserColorName);
 		prop.setProperty(USE_RED_LASER_SOUND_PROP, String.valueOf(useRedLaserSound));
@@ -363,23 +342,21 @@ public class Configuration {
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
 		
 		OutputStream outputStream = new FileOutputStream(configName);
-		prop.store(outputStream, "ShootOFF Configuration");
-		outputStream.flush();
-		outputStream.close();
+		
+		try {
+			prop.store(outputStream, "ShootOFF Configuration");
+			outputStream.flush();
+		} catch (IOException ioe) {
+			throw ioe;
+		} finally {
+			outputStream.close();
+		}
 	}
 	
 	private void parseCmdLine(String[] args) throws ConfigurationException {
 		Options options = new Options();
 
 		options.addOption("d", "debug", false, "turn on debug log messages");
-		options.addOption("r", "detection-rate", true, 
-				"sets the rate at which shots are detected in milliseconds. " +
-                "this should be set to about the length of time your laser trainer " +
-                "stays on for each shot, typically about 100 ms");
-		options.addOption("i", "laser-intensity", true,
-				"sets the intensity threshold for detecting the laser [1,255]. " +
-	            "this should be as high as you can set it while still detecting " +
-	            "shots");
 		options.addOption("m", "marker-radius", true, 
 				"sets the radius of shot markers in pixels [1,20]");
 		options.addOption("c", "ignore-laser-color", true, 
@@ -395,12 +372,6 @@ public class Configuration {
 			CommandLine cmd = parser.parse(options, args);
 			
 			if (cmd.hasOption("d")) setDebugMode(true);
-			
-			if (cmd.hasOption("r"))
-				setDetectionRate(Integer.parseInt(cmd.getOptionValue("r")));
-			
-			if (cmd.hasOption("i")) 
-				setLaserIntensity(Integer.parseInt(cmd.getOptionValue("i")));
 			
 			if (cmd.hasOption("m"))
 				setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
@@ -430,19 +401,9 @@ public class Configuration {
 	}
 	
 	protected void validateConfiguration() throws ConfigurationException {
-		if (detectionRate < 1) {
-			throw new ConfigurationException(
-					String.format(DETECTION_RATE_MESSAGE, detectionRate));
-		}
-		
-		if (laserIntensity < 1 || laserIntensity > 255) {
-			throw new ConfigurationException(
-					String.format(LASER_INTENSITY_MESSAGE, laserIntensity));
-		}
-		
 		if (markerRadius < 1 || markerRadius > 20) {
 			throw new ConfigurationException(
-					String.format(MARKER_RADIUS_MESSAGE, laserIntensity));
+					String.format(MARKER_RADIUS_MESSAGE, markerRadius));
 		}
 		
 		if (!redLaserSound.isAbsolute()) 
@@ -536,14 +497,6 @@ public class Configuration {
 		for (int i = 0; i < webcamNames.size(); i++) {
 			this.webcams.put(webcamNames.get(i), webcams.get(i));
 		}
-	}
-
-	public void setDetectionRate(int detectionRate) {
-		this.detectionRate = detectionRate;
-	}
-	
-	public void setLaserIntensity(int laserIntensity) {
-		this.laserIntensity = laserIntensity;
 	}
 
 	public void setMarkerRadius(int markRadius) {
@@ -686,14 +639,6 @@ public class Configuration {
 		}
 		
 		return Optional.empty();
-	}
-	
-	public int getDetectionRate() {
-		return detectionRate;
-	}
-	
-	public int getLaserIntensity() {
-		return laserIntensity;
 	}
 
 	public int getMarkerRadius() {

@@ -23,9 +23,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.camera.Shot;
 
 public class XMLSessionWriter implements EventVisitor {
+	private final Logger logger = LoggerFactory.getLogger(XMLSessionWriter.class);
 	private final File sessionFile;
 	private StringBuilder xmlBody = new StringBuilder();
 	
@@ -109,7 +113,11 @@ public class XMLSessionWriter implements EventVisitor {
 	public void visitEnd() {
 		try {
 			File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
-			if (!sessionsFolder.exists()) sessionsFolder.mkdir();
+			if (!sessionsFolder.exists()) {
+				if (!sessionsFolder.mkdir()) {
+					logger.error("Failed to make directory to store sessions: {}", sessionsFolder.getPath());
+				}
+			}
 			
 			PrintWriter out = new PrintWriter(sessionFile, "UTF-8");
 			

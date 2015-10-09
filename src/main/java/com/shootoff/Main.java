@@ -135,7 +135,7 @@ public class Main extends Application {
 		}
 		
 		try {
-			String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()));
+			String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()), "UTF-8");
 			return deserializeMetadataXML(metadataXML);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -174,7 +174,7 @@ public class Main extends Application {
 	            metadataXML.append(line);
 	        }
         } catch (IOException e) {
-			if (connection != null) connection.disconnect();
+			connection.disconnect();
 
 			System.err.println("Failed to read resources metadata");
 			e.printStackTrace();

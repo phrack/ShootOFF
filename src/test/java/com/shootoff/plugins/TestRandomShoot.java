@@ -94,7 +94,7 @@ public class TestRandomShoot {
 		
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
 		
-		assertEquals(String.format("sounds/voice/shootoff-shoot.wav\nsounds/voice/shootoff-%s.wav\n", firstSubtarget),
+		assertEquals(String.format("sounds/voice/shootoff-shoot.wav%nsounds/voice/shootoff-%s.wav%n", firstSubtarget),
 				stringOut.toString("UTF-8"));
 		stringOut.reset();
 		

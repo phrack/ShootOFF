@@ -118,6 +118,6 @@ public class TestTargetIO {
 			}
 		}
 		
-		tempXMLTarget.delete();
+		if (!tempXMLTarget.delete()) System.err.println("Failed to delete " + tempXMLTarget.getPath());
 	}
 }

@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
-
 
 public class PixelCluster extends java.util.ArrayList<Pixel> {
 
@@ -21,8 +19,12 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	public double centerPixelX;
 	public double centerPixelY;
 	
+	// We ignore fully connected pixels because they are not on the edges
 	private final static int MAXIMUM_CONNECTEDNESS = 8;
 	
+	// We collect all the pixels AROUND the detected shot, not any in the shot itself
+	// Usually the pixels in the shot are max brightness which are biased green
+	// So we look around the shot instead
 	public double getColorDifference(BufferedImage frame, double[][] colorDiffMovingAverage)
 	{
 		ArrayList<Pixel> visited = new ArrayList<Pixel>();
@@ -43,7 +45,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 						int rx = pixel.x+w; 
 						int ry = pixel.y+h; 
 						
-						if (rx<0 || ry<0 || rx>=CameraManager.FEED_WIDTH || ry>=CameraManager.FEED_HEIGHT)
+						if (rx<0 || ry<0 || rx>=frame.getWidth() || ry>=frame.getHeight())
 							continue;
 						
 						Pixel nearPoint = new Pixel(rx,ry);

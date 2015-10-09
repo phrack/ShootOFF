@@ -50,7 +50,8 @@ public class MockCanvasManager extends CanvasManager {
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis(), config.getMarkerRadius());
+				System.currentTimeMillis(), this.cameraManager.getFrameCount(), config.getMarkerRadius());
+		
 		
 		if (useShotProcessors) {
 			for (ShotProcessor p : config.getShotProcessors()) {

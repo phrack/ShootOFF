@@ -23,11 +23,16 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -54,15 +59,18 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
@@ -70,9 +78,15 @@ public class CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
-	private CameraManager cameraManager;
+	protected CameraManager cameraManager;
 	
-	private final CamerasSupervisor camerasSupervisor;
+	private final VBox diagnosticsVBox = new VBox();
+	private static final int DIAGNOSTIC_POOL_SIZE = 10;
+	private static final int DIAGNOSTIC_CHIME_DELAY = 5000; // ms
+	private final ScheduledExecutorService diagnosticExecutorService = Executors.newScheduledThreadPool(DIAGNOSTIC_POOL_SIZE);
+	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<Label, ScheduledFuture<Void>>();
+	
+	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
@@ -80,7 +94,7 @@ public class CanvasManager {
 	private final List<Target> targets = new ArrayList<Target>();
 	
 	private ProgressIndicator progress;
-	private Optional<ContextMenu> contextMenu;
+	private Optional<ContextMenu> contextMenu = Optional.empty();
 	private Optional<Group> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
@@ -89,7 +103,6 @@ public class CanvasManager {
 	
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
-
 	
 	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor, 
 			String cameraName, ObservableList<ShotEntry> shotEntries) {
@@ -108,9 +121,13 @@ public class CanvasManager {
 
 		if (Platform.isFxApplicationThread()) {
 			progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
-			progress.setPrefHeight(480);
-			progress.setPrefWidth(640);
+			progress.setPrefHeight(CameraManager.FEED_HEIGHT);
+			progress.setPrefWidth(CameraManager.FEED_WIDTH);
 			canvasGroup.getChildren().add(progress);
+			canvasGroup.getChildren().add(diagnosticsVBox);
+			diagnosticsVBox.setAlignment(Pos.CENTER);
+			diagnosticsVBox.setFillWidth(true);
+			diagnosticsVBox.setPrefWidth(CameraManager.FEED_WIDTH);
 		}
 		
 		canvasGroup.setOnMouseClicked((event) -> {
@@ -127,9 +144,40 @@ public class CanvasManager {
 		});
 	}
 
+	public void close() {
+		diagnosticExecutorService.shutdownNow();
+	}
+	
 	public void setCameraManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 	}
+	
+	public Label addDiagnosticMessage(String message, Color backgroundColor) {
+		Label diagnosticLabel = new Label(message);
+		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));
+		diagnosticsVBox.getChildren().add(diagnosticLabel);
+		
+		@SuppressWarnings("unchecked")
+		ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>)diagnosticExecutorService.schedule(
+				() -> TrainingExerciseBase.playSound("sounds/chime.wav"), DIAGNOSTIC_CHIME_DELAY, TimeUnit.MILLISECONDS);
+		diagnosticFutures.put(diagnosticLabel, chimeFuture);
+		
+		return diagnosticLabel;
+	}
+	
+	public void removeDiagnosticMessage(Label diagnosticLabel) {
+		diagnosticFutures.get(diagnosticLabel).cancel(false);
+		diagnosticFutures.remove(diagnosticLabel);
+		diagnosticsVBox.getChildren().remove(diagnosticLabel);
+	}
+	
+    public static String colorToWebCode(Color color)
+    {
+        return String.format("#%02X%02X%02X",
+            (int)(color.getRed() * 255),
+            (int)(color.getGreen() * 255),
+            (int)(color.getBlue() * 255));
+    }
 
 	private void jdk8094135Warning() {
 			Platform.runLater(() -> {

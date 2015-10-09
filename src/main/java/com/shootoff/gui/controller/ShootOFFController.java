@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
+import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,7 +158,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
 			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
-			if (arenaController != null) arenaController.close();
+			if (arenaController != null) {
+				arenaController.getCanvasManager().close();
+				arenaController.close();
+			}
 			
 			for (Stage streamDebuggerStage : streamDebuggerStages) {
 				streamDebuggerStage.close();
@@ -171,11 +175,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				sessionViewerStage.close();
 			}
 			
+			GlobalExecutorPool.getPool().shutdownNow();
+			
 			if (!config.getVideoPlayers().isEmpty()) {
 				for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
 					videoPlayer.getStage().close();
 				}
 			}
+			
+			if (!config.inDebugMode()) System.exit(0);
 		});
 		
 		if (config.getWebcams().isEmpty()) {
@@ -253,7 +261,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	                }
 	            	
 	            	if (item.getRowColor().isPresent()) {
-	            		setStyle("-fx-background-color: " + toWebCode(item.getRowColor().get()));
+	            		setStyle("-fx-background-color: " + CanvasManager.colorToWebCode(item.getRowColor().get()));
 	            	} else {
 	            		setStyle("");
 	            	}
@@ -279,7 +287,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		                } else if (item.hadReload()) {
 		                	setStyle("-fx-background-color: lightskyblue");
 		                } else if (item.getRowColor().isPresent()) {
-		                	setStyle("-fx-background-color: " + toWebCode(item.getRowColor().get()));
+		                	setStyle("-fx-background-color: " + CanvasManager.colorToWebCode(item.getRowColor().get()));
 		            	} else {
 		                    setStyle("");
 		                }
@@ -293,14 +301,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
-	
-    private String toWebCode( Color color )
-    {
-        return String.format( "#%02X%02X%02X",
-            (int)( color.getRed() * 255 ),
-            (int)( color.getGreen() * 255 ),
-            (int)( color.getBlue() * 255 ) );
-    }
 	
 	@Override
 	public void cameraConfigUpdated() {
@@ -362,6 +362,18 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private boolean addCameraTab(String webcamName, Camera webcam) {
 		if (webcam.isLocked() && !webcam.isOpen()) {
 			return false;
+		}
+		
+		// We want the CameraManager to configure the camera, we just try to
+		// open and close it here to see if we can. If we hold off on doing this
+		// until later it's harder to give the user a good error message.
+		String os = System.getProperty("os.name");
+		if (os != null && !os.equals("Mac OS X")) {
+			if (!webcam.isOpen() && !webcam.open()) {
+				return false;
+			} else {
+				webcam.close();
+			}
 		}
 		
 		Tab cameraTab = new Tab(webcamName);
@@ -727,7 +739,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		calibrationGroup.getChildren().add(calibrationRectangle);
 		
 		calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
-
+				calibrationTarget.get().setKeepInBounds(true);
 	}
 	
 	public void calibrate(Bounds bounds)

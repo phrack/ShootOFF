@@ -157,7 +157,7 @@ public class TestSessionIO {
 		Optional<SessionRecorder> sessionRecorder = SessionIO.loadSession(tempXMLSession);
 		checkSession(sessionRecorder);
 		
-		tempXMLSession.delete();
+		if (!tempXMLSession.delete()) System.err.println("Failed to delete " + tempXMLSession.getPath());
 	}
 	
 	@Test
@@ -168,6 +168,6 @@ public class TestSessionIO {
 		Optional<SessionRecorder> sessionRecorder = SessionIO.loadSession(tempJSONSession);
 		checkSession(sessionRecorder);
 		
-		tempJSONSession.delete();
+		if (!tempJSONSession.delete()) System.err.println("Failed to delete " + tempJSONSession.getPath());
 	}
 }
