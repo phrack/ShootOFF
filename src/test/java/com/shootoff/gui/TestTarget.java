@@ -10,19 +10,37 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.EllipseRegion;
+import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
+import javafx.collections.FXCollections;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+
 public class TestTarget {
+	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	
 	private TargetRegion tr0, trPlateRackPlate, trPepperPopper;
 	private Target pepperPopper;
 	private List<Target> targets;
+	private CanvasManager canvasManager;
 	
 	@Before
-	public void setUp() {
+	public void setUp() throws ConfigurationException {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
 		tr0 = new EllipseRegion(0, 0, 10, 10);
@@ -36,11 +54,18 @@ public class TestTarget {
 		Map<String, String> tags2 = new HashMap<String, String>();
 		tags2.put("command", "animate(pepper_popper);play_sound(sounds/steel_sound_1.wav,pepper_popper)");
 		trPepperPopper.setTags(tags2);
+	
+		Configuration config = new Configuration(new String[0]);
+		canvasManager = new CanvasManager(new Group(), config, new CamerasSupervisor(config), "test", FXCollections.observableArrayList());
+		
+		ProjectorArenaController arenaController = new ProjectorArenaController();
+		arenaController.init(config, canvasManager);
 		
 		targets = new ArrayList<Target>();
-		pepperPopper = new Target(TargetIO.loadTarget(new File("targets/pepper_popper.target")).get(), targets);
+		pepperPopper = canvasManager.addTarget(new File("targets/pepper_popper.target")).get();
 		targets.add(pepperPopper);
 		targets.add(new Target(TargetIO.loadTarget(new File("targets/reset.target")).get(), targets));
+		
 	}
 
 	@Test
@@ -113,5 +138,39 @@ public class TestTarget {
 				"not present");
 
 		assertFalse(r.isPresent());
+	}
+	
+	@Test
+	public void testAnimateAndResetPepperPopper() {
+		TargetRegion r = (TargetRegion)pepperPopper.getTargetGroup().getChildren().get(0);
+		
+		assertEquals(RegionType.IMAGE, r.getType());
+		
+		ImageRegion animated = (ImageRegion)r;
+		assertTrue(animated.getAnimation().isPresent());
+		assertTrue(animated.onFirstFrame());
+		
+		pepperPopper.animate(animated, new ArrayList<String>());
+
+		animated.reset();
+		
+		assertTrue(animated.onFirstFrame());
+	}
+	
+	@Test
+	public void testAnimateAndResetFlagPepperPopper() {
+		TargetRegion r = (TargetRegion)pepperPopper.getTargetGroup().getChildren().get(0);
+		
+		assertEquals(RegionType.IMAGE, r.getType());
+		
+		ImageRegion animated = (ImageRegion)r;
+		assertTrue(animated.getAnimation().isPresent());
+		assertTrue(animated.onFirstFrame());
+		
+		List<String> args = new ArrayList<String>();
+		args.add("true");
+		pepperPopper.animate(animated, args);
+		
+		assertTrue(animated.onFirstFrame());
 	}
 }

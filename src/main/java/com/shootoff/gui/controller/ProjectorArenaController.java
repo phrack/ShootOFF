@@ -56,7 +56,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		this.canvasManager = canvasManager;
 		
 		arenaStage = new Stage();
-		arenaAnchor = new AnchorPane();
+		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
 		Scene scene = new Scene(arenaAnchor, 500, 500);
 		arenaStage.setScene(scene);
 	}
