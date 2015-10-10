@@ -1,55 +1,60 @@
 package com.shootoff.camera.AutoCalibration;
 
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
+import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-
-import javafx.geometry.BoundingBox;
-import javafx.geometry.Bounds;
-import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
 
-import org.openimaj.image.FImage;
-import org.openimaj.image.ImageUtilities;
-import org.openimaj.image.MBFImage;
-import org.openimaj.image.camera.CameraIntrinsics;
-import org.openimaj.image.camera.calibration.CameraCalibration;
-import org.openimaj.image.camera.calibration.CameraCalibrationZhang;
-import org.openimaj.image.camera.calibration.ChessboardCornerFinder;
-import org.openimaj.image.camera.calibration.FastChessboardDetector;
-import org.openimaj.math.geometry.point.Point2d;
-import org.openimaj.math.geometry.point.Point2dImpl;
-import org.openimaj.util.pair.IndependentPair;
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point3;
+import org.opencv.core.Size;
+import org.opencv.core.TermCriteria;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
-
 
 public class AutoCalibrationManager implements Runnable {
+	
 	private final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);
 	
 	public final static int PATTERN_WIDTH = 9;
 	public final static int PATTERN_HEIGHT = 6;
 	
-	private FastChessboardDetector fastFinder = new FastChessboardDetector(PATTERN_WIDTH, PATTERN_HEIGHT);
-	private ChessboardCornerFinder cbFinder = new ChessboardCornerFinder(PATTERN_WIDTH, PATTERN_HEIGHT, ChessboardCornerFinder.Options.ADAPTIVE_THRESHOLD);
-
+	private Mat savedImage = new Mat();
 	
 	private BufferedImage frame;
 	
-	private Callback<List<Point2dImpl>, Void> callback;
+	private int successes = 0;
+	private final static int MIN_BOARDS = 5;
 	
-	public void setCallback(Callback<List<Point2dImpl>, Void> callback) {
+	MatOfPoint2f imageCorners = new MatOfPoint2f();
+	private List<Mat> imagePoints = new ArrayList<>();
+	private List<Mat> objectPoints = new ArrayList<>();
+	private MatOfPoint3f obj = new MatOfPoint3f();
+	
+	private Mat intrinsic = new Mat(3, 3, CvType.CV_32FC1);
+	private Mat distCoeffs = new Mat();
+
+	private boolean isCalibrated = false;
+	
+	//private Callback<List<Point2dImpl>, Void> callback;
+	
+	/*public void setCallback(Callback<List<Point2dImpl>, Void> callback) {
 		this.callback = callback;
-	}
+	}*/
 
 	public void setFrame(BufferedImage frame) {
 		this.frame = frame;
@@ -57,7 +62,18 @@ public class AutoCalibrationManager implements Runnable {
 
 	public AutoCalibrationManager()
 	{
-
+		int numSquares = PATTERN_WIDTH * PATTERN_HEIGHT;
+		for (int j = 0; j < numSquares; j++)
+			obj.push_back(new MatOfPoint3f(new Point3(j / PATTERN_WIDTH, j % PATTERN_HEIGHT, 0.0f)));
+	}
+	
+	public Mat BufferedImageToMat(BufferedImage frame)
+	{
+		byte[] pixels = ((DataBufferByte)frame.getRaster().getDataBuffer()).getData();
+		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
+		mat.put(0, 0, pixels);
+		
+		return mat;
 	}
 	
 	public void test()
@@ -71,107 +87,158 @@ public class AutoCalibrationManager implements Runnable {
 			e.printStackTrace();
 			return;
 		}
+		
+		Mat mat = BufferedImageToMat(frame);
+		
+		Mat grayImage = new Mat();
 
-	    ColorSpace grayCS = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-	    ColorConvertOp grayConvertOp = new ColorConvertOp(grayCS, null);
-	    BufferedImage grayScale = grayConvertOp.filter(testFrame, null);
+	    Imgproc.cvtColor(mat, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+	    Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
+	    
+		boolean found = Calib3d.findChessboardCorners(grayImage, boardSize, imageCorners, 0);
+
+		String filename = "test.png";
+		File file = new File(filename);
+		filename = file.toString();
+		Imgcodecs.imwrite(filename, grayImage);
 		
 		
-		FImage oiFrame = null;
-		oiFrame = ImageUtilities.createFImage(grayScale);
+		logger.warn("found {}", found);
+	}
+
+	@Override
+	public void run() {
+		test();
 		
-		findChessboard(oiFrame);
-		
-		
-		File outputfile = new File("test.png");
-		try {
-			ImageIO.write(grayScale, "png", outputfile);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
-	public AutoCalibrationManager(BufferedImage frame)
+	public void processFrame(BufferedImage frame)
 	{
-		this.frame = frame;
-	}
-	
-	public List<Point2dImpl> findChessboardBufferedImage()
-	{
-		FImage oiFrame = null;
-		oiFrame = ImageUtilities.createFImage(frame);
-		
-		return findChessboard(oiFrame);
-	}
-	
-	public List<Point2dImpl> findChessboardBufferedImage(BufferedImage frame)
-	{
-		/*BufferedImage grayScale = new BufferedImage(frame.getWidth(),
-				frame.getHeight(), BufferedImage.TYPE_BYTE_GRAY);*/
-		
-	    ColorSpace grayCS = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-	    ColorConvertOp grayConvertOp = new ColorConvertOp(grayCS, null);
-	    BufferedImage grayScale = grayConvertOp.filter(frame, null);
-		
-		
-		
-		FImage oiFrame = null;
-		oiFrame = ImageUtilities.createFImage(grayScale);
-		
-		List<Point2dImpl> corners =  findChessboard(oiFrame);
-		
-		if (corners == null)
-			return null;
-		
-		/*MBFImage mbfFrame = ImageUtilities.createMBFImage(frame, false);
-		
-		ChessboardCornerFinder.drawChessboardCorners(mbfFrame, 9, 6, corners, true);
-		
-		frame = ImageUtilities.createBufferedImage(mbfFrame);
-
-		File outputfile = new File("test.png");
-		try {
-			ImageIO.write(frame, "png", outputfile);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		return corners;
-	}
-	
-	
-	private List<Point2dImpl> findChessboard(FImage oiFrame)
-	{
-		
-		/*fastFinder.analyseImage(oiFrame);
-		
-		if (!fastFinder.chessboardDetected())
-			return null;
-		*/
-
-		cbFinder.analyseImage(oiFrame);
-		
-		if (cbFinder.isFound())
-		{
-			List<Point2dImpl> corners = cbFinder.getCorners();
-			
-			logger.warn("found {} {}", corners.get(0).x, corners.get(0).y);
-
-			calibrate(oiFrame, corners);
-			
-			return corners;
-		}
+		if (!isCalibrated)
+			collectBoards(frame);
 		else
 		{
-			logger.trace("not found");
+			Mat mat = BufferedImageToMat(frame);
 			
-			return null;
+			Mat undistorted = new Mat();
+			Imgproc.undistort(mat, undistorted, intrinsic, distCoeffs);
+
+			try {
+				frame = matToBufferedImage(undistorted);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
-	public void calibrate(FImage oiFrame, List<Point2dImpl> corners)
+	
+	private BufferedImage matToBufferedImage(Mat mat) throws IOException {
+		MatOfByte matOfByte = new MatOfByte();
+		Imgcodecs.imencode(".jpg", mat, matOfByte);
+		byte[] byteArray = matOfByte.toArray();
+		InputStream in = new ByteArrayInputStream(byteArray);
+		return ImageIO.read(in);
+	}
+
+	public void collectBoards(BufferedImage frame)
+	{
+		boolean found = findChessboardBufferedImage(frame);
+		
+		if (!found)
+			return;
+		
+		successes++;
+		
+		// reach the correct number of images needed for the calibration
+		if (successes == MIN_BOARDS)
+		{
+			
+			logger.warn("got enough, calibrating");
+			calibrateCamera();
+		}
+	}
+	
+	private void calibrateCamera() {
+		// init needed variables according to OpenCV docs
+		List<Mat> rvecs = new ArrayList<>();
+		List<Mat> tvecs = new ArrayList<>();
+		intrinsic.put(0, 0, 1);
+		intrinsic.put(1, 1, 1);
+		// calibrate!
+		Calib3d.calibrateCamera(objectPoints, imagePoints, savedImage.size(), intrinsic, distCoeffs, rvecs, tvecs);
+		this.isCalibrated  = true;
+		
+		
+		logger.warn("calibrated");
+	}
+
+	public boolean findChessboardBufferedImage()
+	{
+		byte[] pixels = ((DataBufferByte)frame.getRaster().getDataBuffer()).getData();
+		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
+		mat.put(0, 0, pixels);
+		
+		return findChessboard(mat);
+	}
+	
+	public boolean findChessboardBufferedImage(BufferedImage frame)
+	{
+		byte[] pixels = ((DataBufferByte)frame.getRaster().getDataBuffer()).getData();
+		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
+		mat.put(0, 0, pixels);
+		
+		return findChessboard(mat);
+	}
+	
+	
+	private boolean findChessboard(Mat mat)
+	{
+		
+		Mat grayImage = new Mat();
+
+	    Imgproc.cvtColor(mat, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+	    Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
+
+	    MatOfPoint2f imageCorners = new MatOfPoint2f();
+	    
+		boolean found = Calib3d.findChessboardCorners(grayImage, boardSize, imageCorners, Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_NORMALIZE_IMAGE + Calib3d.CALIB_CB_FAST_CHECK);
+		if (found) 
+		{
+
+			
+			// optimization
+			TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
+			Imgproc.cornerSubPix(grayImage, imageCorners, new Size(11, 11), new Size(-1, -1), term);
+			// save the current frame for further elaborations
+			grayImage.copyTo(this.savedImage);
+			// show the chessboard inner corners on screen
+			Calib3d.drawChessboardCorners(mat, boardSize, imageCorners, found);
+			
+			try {
+				frame = matToBufferedImage(mat);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			this.imagePoints.add(imageCorners);
+			this.objectPoints.add(obj);			
+			
+			String filename = "test.png";
+			File file = new File(filename);
+			filename = file.toString();
+			Imgcodecs.imwrite(filename, mat);
+			
+			
+			logger.warn("found {}", found);
+		}
+		return found;
+	}
+	
+	/*public void calibrate(FImage oiFrame, List<Point2dImpl> corners)
 	{
 		
 		List<List<? extends IndependentPair<? extends Point2d, ? extends Point2d>>> listCorners = new ArrayList<List<? extends IndependentPair<? extends Point2d, ? extends Point2d>>>();
@@ -198,13 +265,13 @@ public class AutoCalibrationManager implements Runnable {
                         listCorners.add(firstFrameSquares);
                         
                 }
-        }*/
+        }
 		
 		logger.warn("found {} {}", corners.get(0).x, corners.get(0).y);
 		
-		/*CameraCalibration calibrator = new CameraCalibration(listCorners, oiFrame.width, oiFrame.height);
+		//CameraCalibration calibrator = new CameraCalibration(listCorners, oiFrame.width, oiFrame.height);
 		
-		CameraIntrinsics cameraIntrinsics  = calibrator.getIntrisics();*/
+		//CameraIntrinsics cameraIntrinsics  = calibrator.getIntrisics();
 		
 	}
 	
@@ -281,5 +348,5 @@ public class AutoCalibrationManager implements Runnable {
 			callback.call(result);
 		}
 	}
-
+*/
 }

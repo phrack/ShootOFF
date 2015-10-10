@@ -21,7 +21,6 @@ package com.shootoff.camera;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,12 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 
-import javax.imageio.ImageIO;
-
-import org.openimaj.math.geometry.point.Point2dImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +57,6 @@ import com.xuggle.xuggler.video.IConverter;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
@@ -539,7 +533,9 @@ public class CameraManager {
 		}
 		
 		private void fireAutoCalibration(BufferedImage frame) {
-			acm.setFrame(frame);
+			
+			acm.processFrame(frame);
+			/*acm.setFrame(frame);
 			acm.setCallback(new Callback<List<Point2dImpl>, Void>()
 			{
 
@@ -554,10 +550,10 @@ public class CameraManager {
 			});
 			new Thread(acm).start();
 			
-			
+			*/
 		}
 
-		protected void autoCalibrateSuccess(List<Point2dImpl> corners) {
+		/*protected void autoCalibrateSuccess(List<Point2dImpl> corners) {
 
 			if (autoCalibrationEnabled && controller != null)
 			{
@@ -577,7 +573,7 @@ public class CameraManager {
 				
 			}
 			
-		}
+		}*/
 
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
