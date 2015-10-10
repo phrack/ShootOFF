@@ -668,7 +668,7 @@ public class CanvasManager {
 		return targetGroups;
 	}
 	
-	private void toggleTargetSelection(Optional<Group> newSelection) {
+	protected void toggleTargetSelection(Optional<Group> newSelection) {
 		if (selectedTarget.isPresent())
 			setTargetSelection(selectedTarget.get(), false);
 		

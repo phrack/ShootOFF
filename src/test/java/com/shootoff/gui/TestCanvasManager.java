@@ -13,11 +13,13 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.targets.TargetRegion;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 
 public class TestCanvasManager {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -31,6 +33,7 @@ public class TestCanvasManager {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
 		Configuration config = new Configuration(new String[0]);
+		config.setDebugMode(true);
 		cm = new CanvasManager(new Group(), config, new CamerasSupervisor(config), "test", shotEntries);
 	
 		ipscTarget = cm.addTarget(new File("targets/IPSC.target")).get();
@@ -68,5 +71,43 @@ public class TestCanvasManager {
 		h = cm.checkHit(new Shot(Color.GREEN, 0, 0, 0, 2));
 		
 		assertFalse(h.isPresent());
+	}
+	
+	@Test
+	public void testWebCodeRed() {
+		assertEquals("#FF0000", CanvasManager.colorToWebCode(Color.RED));
+	}
+	
+	@Test
+	public void testWebCodeGreen() {
+		assertEquals("#008000", CanvasManager.colorToWebCode(Color.GREEN));
+	}
+	
+	@Test
+	public void testRemoveTarget() {
+		cm.removeTarget(ipscTarget);
+		
+		assertEquals(0, cm.getTargets().size());
+	}
+	
+	@Test
+	public void testGetTargetGroups() {
+		assertEquals(1, cm.getTargetGroups().size());
+		assertTrue(cm.getTargetGroups().contains(ipscTarget.getTargetGroup()));
+	}
+	
+	@Test
+	public void testTargetSelection() {
+		Shape firstShape = (Shape)ipscTarget.getTargetGroup().getChildren().get(0);
+		
+		assertEquals(null, firstShape.getStroke());
+		
+		cm.toggleTargetSelection(Optional.of(ipscTarget.getTargetGroup()));
+		
+		assertEquals(TargetRegion.SELECTED_STROKE_COLOR, firstShape.getStroke());
+		
+		cm.toggleTargetSelection(Optional.empty());
+		
+		assertEquals(TargetRegion.UNSELECTED_STROKE_COLOR, firstShape.getStroke());
 	}
 }
