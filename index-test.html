@@ -1,0 +1,979 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <script type="text/javascript">
+      if (window.location == "http://phrack.github.io/ShootOFF/") {
+        window.location = "http://shootoffapp.com";
+      }
+
+      function launchApplication(jnlpfile) {
+        dtjava.launch(            
+            {
+              url : 'jws/ShootOFF.jnlp'
+            },
+            {
+              javafx : '8.0+'
+            },
+            {}
+          );
+          return false;
+        }
+        
+      function java_callback() {  		
+        platform = new dtjava.Platform();
+        platform.jvm = "1.8.0+";
+        platform.javafx = "8.0";
+		    		
+        // null means it validated
+        if (dtjava.validate(platform) == null) {
+          $("#tirekov").html('Download Standalone');
+          $(".lmb2").css({"display": "block"});
+        } else{
+          $(".wst").css({"width": "100%"});
+        }
+      }
+
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-66374084-1', 'auto');
+      ga('require', 'linkid', 'linkid.js');
+      ga('send', 'pageview');
+      
+      /**
+       * Track clicks to a link. Must open the link seperately from this function. */
+      var trackOutboundLink = function(url) {
+        ga('send', 'event', 'outbound', 'click', url, null);
+      }
+    </script>
+  	
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="ShootOFF - A virtual shooting range to enhance laser dry fire training">
+    <meta name="author" content="">
+    <link rel="icon" href="img/favicon.ico">
+
+    <title>ShootOFF App</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,300italic,300,400italic,700,700italic' rel='stylesheet' type='text/css'>
+
+    <!-- Custom styles for this template -->
+    <link href="css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    
+  </head>
+
+
+
+  <body data-spy="scroll" data-target=".navbar" data-offset="100">
+
+
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#welcome">Welcome</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#documentation">Documentation</a></li>
+            <li><a href="#contributing">Contributing</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+<!-- Welcome -->
+
+<section id="welcome">
+  <div class="w-bg">
+    <div class="w-bg-over">
+
+      <div class="container">
+        <div class="row w-row">
+          <img src="img/logo.svg" alt="logo" />
+          <h1 class="headline">Welcome to <span class="redd">ShootOFF</span></h1>
+          <h3 class="sub-headline">A virtual shooting range to enhance laser dry fire training</h3>
+
+          <div class="col-xs-6">
+             <a id="bt-download" class="btn btn-my-red" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
+          </div>
+          <div class="col-xs-6">
+             <a class="btn btn-my-wh" href="#about">Learn More</a>
+          </div>
+
+          	<img class="img-responsive w-img" src="img/demo.png" alt="demo preview">
+
+         </div>
+      </div>
+
+
+    </div>
+  </div>
+  
+  <div class="link-bg">      
+    <div class="container">
+      <div class="row">
+        <div class="col-md-2 col-md-offset-1 l-yt">
+          <a target="_blank" href="https://www.youtube.com/channel/UC8vMpX8x-crjduJ99TR3sAA">Watch on Youtube</a>
+        </div>
+        <div class="col-md-2 l-gh">
+          <a class="track" target="_blank" href="https://github.com/phrack/ShootOFF">Develop on GitHub</a>
+        </div>
+        <div class="col-md-2 l-tw">
+          <a class="track" target="_blank" href="https://twitter.com/ShootOFF">Follow on Twitter</a>
+        </div>
+        <div class="col-md-2 l-re">
+          <a class="track" target="_blank" href="https://www.reddit.com/r/ShootOFF/">Discuss on reddit</a>
+        </div>
+        <div class="col-md-2 l-wi">
+          <a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki">Learn on Wiki</a>
+        </div>
+      </div>
+    </div>  
+  </div>
+</section>
+
+<!-- /Welcome -->
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ABOUT -->
+
+<section id="about" class="s-about">
+
+  <div class="container">
+    <div class="row">
+      <h2 class="a-title">About <span class="redd">ShootOFF</span></h2>
+      <h6 class="a-sub-title">With ShootOFF and a laser trainer you can turn your dry fire practice into a realistic, effective, and fun training experience.</h6>
+      <div class="a-separator"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4"><img class="a-img" src="img/img-1.png" alt="about Image 1"></div>
+      <div class="col-md-8 a-t">
+        <p>ShootOFF is free, open source software that enhances laser dry fire training by detecting 
+        your shots using a computer and a webcam. Process your shots as they happen with a <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Officially-Supported-Training-Exercises">training exercise</a> to keep score, call out random targets, practice shoot-don't-shoot drills, and much more.
+        </p>
+
+        <p>
+        Not interactive enough? Connect a <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Using-the-Projector-Arena">projector</a>, set a background to one of the included wilderness and shooting range scenes, and add some animated targets. Turn on a fan and you might just think you're actually at the range!
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="container">
+    <div class="row">
+        <div class="col-md-8 a-t">
+          <p>ShootOFF is intended to be used with laser cartridges sold by companies like <a class="l-ab track" target="_blank" href="https://www.laser-ammo.com/">Laser 
+          Ammo</a> and <a class="l-ab track" target="_blank" href="http://www.laserlyte.com/">LaserLyte</a> and laser trainers such as SIRT sold by <a class="l-ab track" target="_blank" href="http://www.nextleveltraining.com/">NextLevel Training</a>. 
+          A more complete list of hardware for laser dry fire training is available on our wiki 
+          <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Laser-Dry-Fire-Hardware">here</a>.
+          </p>
+
+          <p>
+          This project was started in response to the large number of expensive, unreliable, 
+          and primitive hardware products sold online to act as targets for laser dry fire
+          training. Why buy new hardware when you can use hardware you already own with 
+          free software?
+          </p>
+
+        </div>
+        <div class="col-md-4"><img class="a-img" src="img/img-2.png" alt="about Image 2"></div>
+    </div>
+  </div>
+
+
+
+
+<!-- Youtube -->
+<div class="yt-bg">
+  <div class="yt-over">
+
+    <a class="a-modal" data-toggle="modal" data-target="#videoModal" data-theVideo="https://www.youtube.com/embed/mGZ1D4LCHVY" href="#">
+      <img src="img/play.svg">
+    </a>
+
+
+    <div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <div>
+                    <iframe width="100%" height="350" src=""></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+
+    <div class="a-modal-b">Introducing <span class="greenn">ShootOFF</span>: OpenFire Framework</div>
+
+  </div>
+</div>
+<!-- /Youtube -->
+
+</section>
+
+<!-- /ABOUT -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Features -->
+
+<section id="features" class="s-about">
+  <div class="container">
+    <div class="row">
+      <h2 class="a-title">ShootOFF <span class="redd">Features</span></h2>
+      <h6 class="a-sub-title">ShootOFF turns your home into a safe, clean shooting range you can use any time you want.</h6>
+      <div class="a-separator"></div>
+    </div>
+  </div>
+
+  <div class="container fea-cont">
+    <div class="row">
+
+      <div class="col-md-6">
+        <ul class="fea-left">
+          <li>
+            <h4 class="f-t cam">Multiple Cameras</h4>
+            <p>
+              Set up a full virtual 
+              shoot house at home using multiple cameras or simply use one camera for yourself 
+              and another for a friend during competitions. IP cameras are supported!
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t editor">Target Editor</h4>
+            <p>
+              ShootOFF comes with a number of targets.  Not enough or missing something? With the <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Creating-A-Virtual-Target">target editor</a> you can edit our targets or create any
+              target you want!
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t projector">Supports Projectors</h4>
+            <p>
+              Using a <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Using-the-Projector-Arena">projector</a> or a second monitor enables the use of animated and moving targets, more realistic training exercises, and even video for more realistic training.
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t protocols">Traning Exercises</h4>
+            <p>
+              <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Officially-Supported-Training-Exercises">Training exercises</a> make dry fire training fun and more effective by helping you keep score, time drills, pratice shoot-don't-shoot drills, and much more.
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t record">Session Recorder</h4>
+            <p>
+            Record your shooting sessions to 
+            <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Recording-and-Viewing-Sessions">view</a> 
+            them later or share them with a friend. Optionally record yourself shooting to check your form!
+            </p>
+          </li>
+
+        </ul>
+      </div>
+
+
+
+
+      <div class="col-md-6" style="overflow:hidden;">
+        <ul class="fea-right">
+
+          <li>
+            <h4 class="f-t targets">Virtual Targets</h4>
+            <p>
+            <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Adding-A-Virtual-Target">Virtual targets</a> are used by training 
+            exercises to detect exactly where your shot landed on a physical or projected target. Print a target out, tape it to the wall, point your camera at it, add the corresponding virtual target, and line the virtual target up with the physical target. Using a projector? Just add the virtual target and you're done!
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t configuration">Rich Configuration</h4>
+            <p>
+            Rich <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Configuration">configuration</a> options allow you to set shot sounds, ignore certain lasers, tweak shot detection, and much more.
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t magazine">Virtual Magazine</h4>
+            <p>
+            The configurable virtual magazine helps you practice reloads while you
+            dry fire.
+            </p>
+          </li>
+
+          <li>
+            <h4 class="f-t drills">Malfunction Drills</h4>
+            <p>
+            Practice malfunction drills by turning on malfunctions and configuring 
+            the rate at which they occur.
+            </p>
+          </li>
+
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+
+<!-- New Feature -->
+
+  <div class="container">
+    <div class="row">
+      <div class="new">
+        <h5><b>NEW IN v3.4</b></h5>
+        <h4 class="f-t record">Session Recorder</h4>
+        <p>Play recorded sessions back in real time.</p>
+        <h4 class="f-t projector">Projectors</h4>
+        <p>Save your arena layout and restore it quickly for later training sessions</p>
+      </div>
+    </div>
+  </div>
+
+<!-- /New Feature -->
+
+
+<!-- GPL(FREE SOFTWARE) -->
+
+<div class="gpl">
+  <div class="container">
+    <div class="row gpl-row">
+      <img src="img/gpl.png" style="padding-bottom:15px;" alt="GPL FREE SOFTWARE" />
+      <h4 class="gpl-text">Our software is <a class="l-ab track" target="_blank" href="https://raw.githubusercontent.com/phrack/ShootOFF/master/LICENSE">FREE</a> as in no cost and free as in freedom: all of ShootOFF's code is provided free of charge to do anything you want with it as long as you comply with the <a class="l-ab track" target="_blank" href="http://www.gnu.org/licenses/quick-guide-gplv3.html">GPL</a>.</h4>
+    </div>
+  </div>
+</div>
+
+<!-- /GPL(FREE SOFTWARE) -->
+
+
+
+
+
+<!-- Download -->
+<div class="download">
+  <div class="download-over">
+    <div class="container">
+    <div class="row">
+
+      <h2 class="a-title a-dow">Download <span class="redd">ShootOFF</span></h2>
+      <h6 class="a-sub-title a-dow">The current stable version of ShootOFF is version 3.4, see <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/issues?q=milestone%3A%223.4+Content+Refresh%22">what's new</a>.</h6>
+      <div class="a-separator a-dow-sep"></div>
+
+
+      <div class="col-md-8 col-md-offset-2 dow">
+      <h5 class="dow-text">Regardless of the operating system you are using, ensure you have the latest version of Java installed. 
+          Download the ZIP by clicking the download button below, extract its contents, and double click ShootOFF.jar. 
+          Linux users may need to use the command line instead: java -jar ShootOFF.jar.
+      </h5>
+      <a style="float:none;" id="bt-download" class="btn btn-my-red" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+<!-- /Download -->
+
+</section>
+
+<!-- /Features -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Documentation -->
+
+<section id="documentation" class="s-about">
+
+<div class="container">
+  <div class="row">
+    <h2 class="a-title">Documentation & Troubleshooting</h2>
+    <div class="a-separator"></div>
+
+      <div class="dow">
+        <h5 class="d-text">We work hard to ensure that our <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki">wiki</a> is constantly up to date with the latest information for using, configuring, and troubleshooting 
+        the current version of ShootOFF. Please turn to the <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/FAQ">FAQ</a> if you have any questions. If you have a suggestion or a problem that isn't 
+        addressed on the wiki please either join us on <a class="l-ab track" target="_blank" href="https://www.reddit.com/r/ShootOFF/">Reddit</a>, email <a class="l-ab"  href="mailto:project.shootoff@gmail.com">project.shootoff@gmail.com</a>, or open a new issue on our GitHub <a class="l-ab" target="_blank" href="https://github.com/phrack/ShootOFF/issues">issue tracker</a>.
+        </h5>
+      </div>
+
+
+
+
+
+
+    <div class="col-md-6 col-md-offset-3">
+      <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title">
+            <a class="link-wiki" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Using ShootOFF: The Basics
+            </a>
+          </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            <ul class="wiki-ul">
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Getting-Started">Installation & Getting Started</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Camera-Setup-Tips">Camera Setup Tips</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Configuration">Configuration</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Adding-A-Virtual-Target">Adding a Virtual Target</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Shot-Timer">Shot Timer</a></li>
+		<li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Recording-and-Viewing-Sessions">Recording and Viewing Sessions</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Using-the-Projector-Arena">Using the Projector Arena</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Officially-Supported-Training-Exercises">Officially Supported Training Exercises</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingTwo">
+          <h4 class="panel-title">
+            <a class="link-wiki" class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              Using ShootOFF: Advanced
+            </a>
+          </h4>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            <ul class="wiki-ul">
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Creating-A-Virtual-Target">Creating a Virtual Target</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Tag-Semantics">Tag Semantics</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Testing-Virtual-Targets%2C-Tags%2C-and-Training-Exercises">Testing Virtual Targets, Tags, and Training Exercises</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingThree">
+          <h4 class="panel-title">
+            <a class="link-wiki" class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              Building and contributing
+            </a>
+          </h4>
+        </div>
+        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+          <div class="panel-body">
+            <ul class="wiki-ul">
+              <li><a  class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Build-setup-on-Ubuntu">Building ShootOFF on Ubuntu</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingFour">
+          <h4 class="panel-title">
+            <a class="link-wiki" class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+              Troubleshooting
+            </a>
+          </h4>
+        </div>
+        <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+          <div class="panel-body">
+            <ul class="wiki-ul">
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/FAQ">FAQ</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/How-Shot-Detection-Works">How Shot Detection Works</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Debugging-Shot-Detection">Debugging Shot Detection</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingFive">
+          <h4 class="panel-title">
+            <a class="link-wiki" class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="false" aria-controls="collapseThree">
+              Additional Information
+            </a>
+          </h4>
+        </div>
+        <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+          <div class="panel-body">
+            <ul class="wiki-ul">
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Laser-Dry-Fire-Hardware">Laser Dry Fire Hardware</a></li>
+              <li><a class="track" target="_blank" href="https://github.com/phrack/ShootOFF/wiki/Alternative-Software">Alternative Software</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  </div>
+</div>
+
+</section>
+
+<!-- /Documentation -->
+
+
+
+
+
+
+
+
+
+
+<!-- Contributing -->
+<section id="contributing">
+
+<div class="gpl">
+  <div class="container">
+    <div class="row gpl-row">
+      <h2 class="a-title">Contributing</h2>
+      <div class="a-separator"></div>
+
+      <p>We are always willing to accept code contributions on our GitHub <a class="l-ab track" target="_blank" href="https://github.com/phrack/ShootOFF">repository</a>. Please feel free to email <a class="l-ab" href="mailto:project.shootoff@gmail.com">project.shootoff@gmail.com</a> or open an issue to discuss a feature 
+you'd like to or are implementing.</p>
+
+      <p>If you do not know how to write software, we are always looking for help in the art department (icons, graphics for the program and website, etc.). We can also always use 
+help in advertising ShootOFF: tell a friend about the project, help a relative set-up ShootOFF, or post about your experience with the project on your favorite forum!</p>
+
+      <p>We do not accept monetary donations at this time. We suggest donating to <a class="l-ab track" target="_blank" href="http://www.appleseedinfo.org/">Project Appleseed</a> or your local civil rights organization instead. If you make a donation out of 
+gratitude for this project, please make us feel good by letting us know!</p>
+
+    </div>
+  </div>
+</div>
+
+</section>
+<!-- /Contributing -->
+
+
+
+
+
+<!-- Footer -->
+
+<section id="footer">
+
+  <div class="w-bg">
+    <div class="w-bg-over">
+      <div class="container f-cont">
+        <img src="img/logo.svg" alt="logo" />
+	<a href="http://www.cmu.edu/olympus/" class="track" target="_blank"><img src="img/olympus-logo-white.png" alt="project olympus logo" style="margin-left: 15px;" /></a>
+        <div class="row f-row"> 
+
+        <div class="col-md-4 f-p">
+          <h4 class="f-title">Contact</h4>
+          <p>Email us or open an issue on GitHub to ask for help, suggest a feature, or just tell us how we're doing!
+          </p>
+
+          <ul class="list-inline">
+            <li><img width="20px" height="20px" src="img/email.svg"></li>
+            <li><a style="color:#f9f9f9;" class="track" href="mailto:project.shootoff@gmail.com">project.shootoff@gmail.com</a>
+          </ul>
+        </div>
+
+        <div class="col-md-4 f-p">
+          <h4 class="f-title">About</h4>
+          <p>ShootOFF is free, open source software that enhances 
+          laser dry fire training by detecting your shots using a 
+          computer and a webcam.
+          </p>
+          <a class="btn btn-my-wh f-button" href="#about">Learn More</a>
+        </div>
+
+        <div class="col-md-4 f-p">
+          <h4 class="f-title">Download</h4>
+          <p>The current stable version of ShootOFF is version 3.4, see <a class="l-ab" target="_blank" href="https://github.com/phrack/ShootOFF/issues?q=milestone%3A%223.4+Content+Refresh%22">what's new</a>. (Ensure you have the latest version of Java installed.) </p>
+          <a id="bt-download" class="btn btn-my-red f-button" data-toggle="modal" data-target="#survey">Get ShootOFF</a>
+        </div>
+
+        </div>
+      </div>
+
+
+
+      <div class="container">
+        <div class="row f-bottom">
+          <div class="col-xs-6 f-ssoc"><p class="f-copy">©Copyright 2015 | ShootOFF</p></div>
+          <div class="col-xs-6 f-soc">
+            <ul class="list-inline">
+              <li><a class="f-links track" target="_blank" href="http://www.youtube.com/channel/UC8vMpX8x-crjduJ99TR3sAA"><img src="img/youtube-2.svg" alt="Youtube Icon"></a></li>
+              <li><a class="f-links track" target="_blank" href="https://github.com/phrack/ShootOFF"><img src="img/git-1.svg" alt="GitHub Icon"></a></li>
+              <li><a class="f-links track" target="_blank" href="https://twitter.com/ShootOFF"><img src="img/twitter-1.svg" alt="Twitter Icon"></a></li>
+              <li><a class="f-links track" target="_blank" href="http://www.reddit.com/r/ShootOFF/"><img src="img/reddit-1.svg" alt="Reddit Icon"></a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- /footer -->
+
+<!-- Modal -->
+<script>
+    function postDataToGoogle() {
+        var q1_police = $('#q1_police:checked').val();
+        var q1_military = $('#q1_military:checked').val();
+        var q1_competitor = $('#q1_competitor:checked').val();
+        var q1_concealcarrier = $('#q1_concealcarrier:checked').val();
+        var q1_hunter = $('#q1_hunter:checked').val();
+
+        var q2_time = $('#q2_time:checked').val();
+        var q2_money = $('#q2_money:checked').val();
+        var q2_disinterest = $('#q2_disinterest:checked').val();
+        var q2_other = $('#q2_other:checked').val();
+        var q2_other_option_response = $('#q2_other_option_response').val();
+
+        var q3_yes_no = radio_button_value = $('input:radio[name=q3]:checked').val();
+
+        var q4_email = $('#q4_email').val();
+
+        var q5_age = $('#q5_age').val();
+
+        // Don't submit form data if all fields are empty (default)
+        if (q1_police == undefined && q1_military == undefined && q1_competitor == undefined && q1_concealcarrier == undefined && 
+                q1_hunter == undefined &&
+            q2_time == undefined && q2_money == undefined && q2_disinterest == undefined && q2_other == undefined &&
+            q3_yes_no == undefined &&
+            q4_email == "" &&
+            q5_age == "") {
+
+          return;
+        }
+
+            $.ajax({
+                url: "https://docs.google.com/forms/d/1SD6h8ME_FhabCOZbOD3k67Vri6b3RLxzk-Xlq4Xyh7E/formResponse",
+                data: { 
+                  "entry.830909439": [q1_police, q1_military, q1_competitor, q1_concealcarrier, q1_hunter],
+
+                  "entry.2022365593": [q2_time, q2_money, q2_disinterest, q2_other],
+                  "entry.2022365593.other_option_response": q2_other_option_response,
+
+                  "entry.920067728": q3_yes_no,
+
+                  "entry_171650231": q4_email,
+
+                  "entry_1498314145": q5_age
+                },
+                traditional: true,
+                type: "POST",
+                dataType: "xml"
+            });
+            
+            document.cookie = "tookSurvey=true; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/";
+    }
+</script>
+
+<div class="modal fade" id="survey" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header m-header">
+        <h4 class="modal-title m-header-title" id="myModalLabel">Demographic Survey (OPTIONAL)</h4>
+      </div>
+      <div class="modal-body m-body">
+        <p class="m-text">You don't have to, but if you've never told us a bit about yourself we'd appreciate you filling out the survey below before downloading!</p>
+
+        <form class="m-form" id="survey_form">
+
+            <div class="question">
+              <p>What kind of shooter are you?</p>	
+              <input type="checkbox" name="q1" id="q1_police" value="Police"> Police</input>
+              <input type="checkbox" name="q1" id="q1_military" value="Military"> Military</input>
+              <input type="checkbox" name="q1" id="q1_competitor" value="Competitor"> Competitor</input>
+              <input type="checkbox" name="q1" id="q1_concealcarrier" value="Conceal Carrier"> Conceal Carrier</input>
+              <input type="checkbox" name="q1" id="q1_hunter" value="Hunter"> Hunter</input>
+            </div>
+
+            <div class="question">
+              <p>What prevents you from training more?</p>
+              <input type="checkbox" name="q2" id="q2_time" value="Time"> Time</input>
+              <input type="checkbox" name="q2" id="q2_money" value="Money"> Money</input>
+              <input type="checkbox" name="q2" id="q2_disinterest" value="Disinterest"> Disinterest</input> <br/>
+              <input type="checkbox" name="q2" id="q2_other" value="__other_option__"> Other</input>
+              <input class="m-input" name="q2_expl" id="q2_other_option_response" type="text" value=""  oninput="document.getElementById('q2_other').checked = 'checked';" placeholder="Write your answer here">
+            </div>
+
+            <div class="question">
+              <p>Have you used ShootOFF before?</p>
+              <input type="radio" name="q3" id="q3_yes" value="Yes"> Yes</input>
+              <input type="radio" name="q3" id="q3_no" value="No"> No</input>
+            </div>
+
+            <div class="question">
+              <p>What's your email address (opts you into future emails about software updates)?</p>
+              <input class="m-input" name="entry.171650231" id="q4_email" type="text" value="" placeholder="Write your email address">
+            </div>
+
+            <div class="years">
+              <p>How old are you?</p>
+              <select name="entry.1498314145" id="q5_age" class="m-input">
+                <option value=""></option>
+                <option value="&lt;18">&lt;18 Years Old</option>
+                <option value="18-25">18-25 Years Old</option>
+                <option value="26-35">26-35 Years Old</option>
+                <option value="36-45">36-45 Years Old</option>
+                <option value="46-55">46-55 Years Old</option>
+                <option value="56+">56+ Years Old</option>
+              </select>
+            </div>
+
+        </form>
+
+        <p class="m-text2">You can skip the survey and just download ShootOFF.</p>
+
+
+
+      </div>
+      <div class="modal-footer m-footer">
+
+        <div class="container" style="width:100%;">
+          <div class="row">
+
+            <div class="col-xs-6 wst">
+              <a id="tirekov" type="submit" value="submit" class="btn btn-my-red" data-dismiss="modal" onclick="postDataToGoogle();">Get ShootOFF</a>
+            </div>
+            <div class="col-xs-6 wst2">
+              <a class="btn btn-my-wh lmb2" onclick="trackOutboundLink('jws/ShootOFF.jnlp');postDataToGoogle();return launchApplication('jws/ShootOFF.jnlp');" data-dismiss="modal">Launch From Browser</a>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!--/Modal -->
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+
+
+    <script>
+      autoPlayYouTubeModal();
+
+      function autoPlayYouTubeModal() {
+          var trigger = $("body").find('[data-toggle="modal"]');
+          trigger.click(function () {
+              var theModal = $(this).data("target"),
+                  videoSRC = $(this).attr("data-theVideo"),
+                  videoSRCauto = videoSRC + "?autoplay=1";
+              $(theModal + ' iframe').attr('src', videoSRCauto);
+              $(theModal + ' button.close').click(function () {
+                  $(theModal + ' iframe').attr('src', videoSRC);
+              });
+              $('.modal').click(function () {
+                  $(theModal + ' iframe').attr('src', videoSRC);
+              });
+          });
+      }
+    </script>
+
+    <script>
+$(document).ready(function () {
+    $(document).on("scroll", onScroll);
+    
+    //smoothscroll
+    $('a[href^="#"]').on('click', function (e) {
+        e.preventDefault();
+        $(document).off("scroll");
+        
+        $('a').each(function () {
+            $(this).removeClass('active');
+        })
+        $(this).addClass('active');
+      
+        var target = this.hash,
+            menu = target;
+        $target = $(target);
+        $('html, body').stop().animate({
+            'scrollTop': $target.offset().top
+        }, 500, 'swing', function () {
+            window.location.hash = target;
+            $(document).on("scroll", onScroll);
+        });
+    });
+});
+
+function onScroll(event){
+    var scrollPos = $(document).scrollTop();
+    $('#menu-center a').each(function () {
+        var currLink = $(this);
+        var refElement = $(currLink.attr("href"));
+        if (refElement.position().top <= scrollPos && refElement.position().top + refElement.height() > scrollPos) {
+            currLink.addClass("active");
+        }
+        else{
+            currLink.removeClass("active");
+        }
+    });
+}
+
+/** 
+* Add an onclick event to all links with class name "track", which will trigger
+* the above defined trackOutboundLink function
+*/
+$(document).ready(function(){
+  // set google analytics onclick link event on each link with class track
+  $('a.track').each(function(index, element){
+    element = $(element);
+    var link = element.attr('href');
+    var new_window = element.attr('target') == '_blank' ? true : false;
+    element.click(function(){
+      trackOutboundLink(link);
+      if (new_window)
+      {
+      	window.open(link);
+      }
+      else
+      {
+      	document.url = link;
+      }
+      return false;
+    });
+  });
+});
+
+    </script>
+
+<!-- MODAL POPUP FUNCTION INI -->
+  <script>
+  	
+  function scriptTag(src, callback) {
+
+    var s = document.createElement('script');
+    s.type = 'text/' + (src.type || 'javascript');
+    s.src = src.src || src;
+    s.async = false;
+
+    s.onreadystatechange = s.onload = function () {
+
+        var state = s.readyState;
+
+        if (!callback.done && (!state || /loaded|complete/.test(state))) {
+            callback.done = true;
+            callback();
+        }
+    };
+
+    // use body if available. more safe in IE
+    (document.body || head).appendChild(s);
+	}
+  	
+  function loadJava()
+  {
+  	if (typeof dtjava !== 'undefined')
+  	{
+  		java_callback();
+  	}
+  	else
+  	{
+  		var callback = function(){java_callback();};
+  		scriptTag("https://java.com/js/dtjava.js", callback);
+  	}	
+  }
+  	
+  $('#survey').on('shown.bs.modal', function () {
+  	
+			loadJava();
+			
+			if (document.cookie.replace(/(?:(?:^|.*;\s*)tookSurvey\s*\=\s*([^;]*).*$)|^.*$/, "$1") === "true") {
+  	  	$('survey_form').hide();
+  	  }
+  	
+      $('#myInput').focus()
+
+    })
+  </script>
+
+<!-- HIDE MODAL ON CLICK LINK -->
+  <script type="text/javascript">
+    $(function () {
+        $("#tirekov").on('click', function() {
+            $('#survey').modal('hide');
+        });
+    });
+  </script>
+
+<!-- DOWNLOAD APP ONCLICK -->
+  <script>
+    $("a#tirekov").click(function(){
+             trackOutboundLink("https://github.com/phrack/ShootOFF/releases/download/v3.4-FINAL/shootoff-3.4-final.zip", false);
+             window.open("https://github.com/phrack/ShootOFF/releases/download/v3.4-FINAL/shootoff-3.4-final.zip");
+    });
+  </script>
+
+  </body>
+</html>
