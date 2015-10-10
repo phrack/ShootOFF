@@ -736,10 +736,10 @@ gratitude for this project, please make us feel good by letting us know!</p>
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header m-header">
-        <h4 class="modal-title m-header-title" id="myModalLabel">Demographic Survey (OPTIONAL)</h4>
+        <h4 class="modal-title m-header-title" id="survey_title">Demographic Survey (OPTIONAL)</h4>
       </div>
       <div class="modal-body m-body">
-        <p class="m-text">You don't have to, but if you've never told us a bit about yourself we'd appreciate you filling out the survey below before downloading!</p>
+        <p class="m-text" id="survey_intro_text">You don't have to, but if you've never told us a bit about yourself we'd appreciate you filling out the survey below before downloading!</p>
 
         <form class="m-form" id="survey_form">
 
@@ -787,7 +787,7 @@ gratitude for this project, please make us feel good by letting us know!</p>
 
         </form>
 
-        <p class="m-text2">You can skip the survey and just download ShootOFF.</p>
+        <p class="m-text2" id="survey_download">You can skip the survey and just download ShootOFF.</p>
 
 
 
@@ -950,7 +950,10 @@ $(document).ready(function(){
 			loadJava();
 			
 			if (document.cookie.replace(/(?:(?:^|.*;\s*)tookSurvey\s*\=\s*([^;]*).*$)|^.*$/, "$1") === "true") {
-  	  	$('survey_form').hide();
+  	  	$('#survey_form').hide();
+  	  	$('#survey_title').html("Download ShootOFF");
+  	  	$('#survey_intro_text').hide();
+  	  	$('#survey_download').html("Thank you for taking the survey.  You can download ShootOFF below.");
   	  }
   	
       $('#myInput').focus()
