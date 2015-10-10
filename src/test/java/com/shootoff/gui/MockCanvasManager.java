@@ -69,4 +69,12 @@ public class MockCanvasManager extends CanvasManager {
 	public List<Shot> getShots() {
 		return shots;
 	}
+	
+	@Override
+	public Target addTarget(Target newTarget) {
+		super.getCanvasGroup().getChildren().add(newTarget.getTargetGroup());
+		super.getTargets().add(newTarget);
+		
+		return newTarget;
+	}
 }

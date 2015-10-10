@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ProjectorArenaController;
@@ -23,18 +22,15 @@ import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
-import javafx.collections.FXCollections;
-import javafx.scene.Group;
-import javafx.scene.Scene;
+import javafx.event.Event;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 public class TestTarget {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 	
 	private TargetRegion tr0, trPlateRackPlate, trPepperPopper;
+	private Configuration config;
 	private Target pepperPopper;
 	private List<Target> targets;
 	private CanvasManager canvasManager;
@@ -55,17 +51,18 @@ public class TestTarget {
 		tags2.put("command", "animate(pepper_popper);play_sound(sounds/steel_sound_1.wav,pepper_popper)");
 		trPepperPopper.setTags(tags2);
 	
-		Configuration config = new Configuration(new String[0]);
-		canvasManager = new CanvasManager(new Group(), config, new CamerasSupervisor(config), "test", FXCollections.observableArrayList());
+		config = new Configuration(new String[0]);
+		canvasManager = new MockCanvasManager(config);
+		canvasManager.getCanvasGroup().getChildren().clear();
 		
 		ProjectorArenaController arenaController = new ProjectorArenaController();
 		arenaController.init(config, canvasManager);
 		
 		targets = new ArrayList<Target>();
-		pepperPopper = canvasManager.addTarget(new File("targets/pepper_popper.target")).get();
+		pepperPopper = canvasManager.addTarget(
+				new Target(TargetIO.loadTarget(new File("targets/pepper_popper.target")).get(), targets));
 		targets.add(pepperPopper);
 		targets.add(new Target(TargetIO.loadTarget(new File("targets/reset.target")).get(), targets));
-		
 	}
 
 	@Test
@@ -172,5 +169,57 @@ public class TestTarget {
 		pepperPopper.animate(animated, args);
 		
 		assertTrue(animated.onFirstFrame());
+	}
+	
+	@Test
+	public void testLeftArrowKeyResizeTarget() {
+		double oldWidth = pepperPopper.getDimension().getWidth();
+		double oldHeight = pepperPopper.getDimension().getHeight();
+		
+		KeyEvent leftArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "left", "left",
+                KeyCode.LEFT, true, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), leftArrowEvent);
+		
+		assertEquals(oldWidth - Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight, pepperPopper.getDimension().getHeight(), .001);
+	}
+	
+	@Test
+	public void testRightArrowKeyResizeTarget() {
+		double oldWidth = pepperPopper.getDimension().getWidth();
+		double oldHeight = pepperPopper.getDimension().getHeight();
+		
+		KeyEvent rightArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "right", "right",
+                KeyCode.RIGHT, true, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), rightArrowEvent);
+		
+		assertEquals(oldWidth + Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight, pepperPopper.getDimension().getHeight(), .001);
+	}
+	
+	@Test
+	public void testUpArrowKeyResizeTarget() {
+		double oldWidth = pepperPopper.getDimension().getWidth();
+		double oldHeight = pepperPopper.getDimension().getHeight();
+		
+		KeyEvent upArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "up", "up",
+                KeyCode.UP, true, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
+		
+		assertEquals(oldWidth, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight - Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+	}
+	
+	@Test
+	public void testDownArrowKeyResizeTarget() {
+		double oldWidth = pepperPopper.getDimension().getWidth();
+		double oldHeight = pepperPopper.getDimension().getHeight();
+		
+		KeyEvent downArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "down", "down",
+                KeyCode.DOWN, true, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
+		
+		assertEquals(oldWidth, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight + Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 }
