@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
@@ -34,6 +35,7 @@ public class TestRandomShoot {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
+	private Random rng;
 	
 	@Before
 	public void setUp() throws UnsupportedEncodingException {
@@ -44,6 +46,7 @@ public class TestRandomShoot {
 		TrainingExerciseBase.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);
+		rng = new Random(15);
 	}
 	
 	@After
@@ -57,8 +60,8 @@ public class TestRandomShoot {
 	public void testNoTarget() throws IOException {
 		List<Group> targets = new ArrayList<Group>();
 		
-		RandomShoot rs = new RandomShoot(targets);
-		
+		RandomShoot rs = new RandomShoot(targets, rng);
+
 		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
@@ -73,7 +76,7 @@ public class TestRandomShoot {
 		targets.add(TargetIO.loadTarget(new File("targets" + File.separator + 
 				"SimpleBullseye_five_small.target")).get());
 		
-		RandomShoot rs = new RandomShoot(targets);
+		RandomShoot rs = new RandomShoot(targets, rng);
 		
 		// Make sure initial state makes sense
 		

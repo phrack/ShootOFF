@@ -36,11 +36,23 @@ import com.shootoff.targets.TargetRegion;
 public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
 	private final List<String> subtargets = new ArrayList<String>();
 	private final Stack<Integer> currentSubtargets = new Stack<Integer>();
+	private Random rng = new Random();
 	
 	public RandomShoot() {}
 	
 	public RandomShoot(List<Group> targets) {
 		super(targets);
+		if (fetchSubtargets(targets)) startRound();
+	}
+	
+	/**
+	 * This is use to make this plugin deterministic for testing.
+	 * 
+	 * @param rng	an rng with a known seed
+	 */
+	protected RandomShoot(List<Group> targets, Random rng) {
+		super(targets);
+		this.rng = rng;
 		if (fetchSubtargets(targets)) startRound();
 	}
 	
@@ -108,8 +120,8 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	private void pickSubtargets() {
 		currentSubtargets.clear();
 		
-        int count = new Random().nextInt((subtargets.size() - 1) + 1) + 1;
-        for (int i : new Random().ints(count, 0, subtargets.size()).toArray()) {
+        int count = rng.nextInt((subtargets.size() - 1) + 1) + 1;
+        for (int i : rng.ints(count, 0, subtargets.size()).toArray()) {
         	currentSubtargets.push(Integer.valueOf(i));
         }
 	}
