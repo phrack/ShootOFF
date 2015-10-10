@@ -946,8 +946,6 @@ $(document).ready(function(){
   }
   	
   $('#survey').on('shown.bs.modal', function () {
-  	
-			loadJava();
 			
 			if (document.cookie.replace(/(?:(?:^|.*;\s*)tookSurvey\s*\=\s*([^;]*).*$)|^.*$/, "$1") === "true") {
   	  	$('#survey_form').hide();
@@ -955,8 +953,12 @@ $(document).ready(function(){
   	  	$('#survey_intro_text').hide();
   	  	$('#survey_download').html("Thank you for taking the survey.  You can download ShootOFF below.");
   	  }
-  	
-      $('#myInput').focus()
+  		else
+  		{
+      	$('#myInput').focus()
+    	}
+
+			loadJava();
 
     })
   </script>
