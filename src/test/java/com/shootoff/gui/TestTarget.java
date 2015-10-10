@@ -106,6 +106,8 @@ public class TestTarget {
 				(TargetRegion)pepperPopper.getTargetGroup().getChildren().get(0), "pepper_popper");
 	
 		assertTrue(r.isPresent());
+		assertTrue(r.get().tagExists("name"));
+		assertEquals("pepper_popper", r.get().getTag("name"));
 		
 		r = Target.getTargetRegionByName(targets, (TargetRegion)pepperPopper.getTargetGroup().getChildren().get(0), 
 				"not present");

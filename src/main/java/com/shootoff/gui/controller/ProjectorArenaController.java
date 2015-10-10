@@ -32,6 +32,7 @@ import com.shootoff.gui.Target;
 
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -53,6 +54,11 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void init(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
 		this.canvasManager = canvasManager;
+		
+		arenaStage = new Stage();
+		arenaAnchor = new AnchorPane();
+		Scene scene = new Scene(arenaAnchor, 500, 500);
+		arenaStage.setScene(scene);
 	}
 	
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor) {

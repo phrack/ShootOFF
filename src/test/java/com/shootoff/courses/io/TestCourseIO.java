@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
+import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
@@ -20,6 +22,8 @@ import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.io.TargetIO;
 
 public class TestCourseIO {
+	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	
 	private ProjectorArenaController arenaController;
 	private String backgroundURL;
 	private boolean backgroundIsResource;

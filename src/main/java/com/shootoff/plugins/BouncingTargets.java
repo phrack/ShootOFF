@@ -41,6 +41,8 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	private Timeline targetAnimation;
 	private int score = 0;
 	
+	boolean testing = false;
+	
 	public BouncingTargets() {}
 	
 	public BouncingTargets(List<Group> targets) {
@@ -48,10 +50,28 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		thisSuper = super.getInstance();
 	}
 	
+	// For testing
+	protected void init(int shootCount, int dontShootCount, int maxVelocity) {
+		testing = true;
+		
+		this.shootCount = shootCount;
+		this.dontShootCount = dontShootCount;
+		BouncingTargets.maxVelocity = maxVelocity;
+		
+		shootTargets.clear();
+		dontShootTargets.clear();
+		
+		startExercise();
+	}
+	
 	@Override
 	public void init() {
 		collectSettings();
 		
+		startExercise();
+	}
+	
+	private void startExercise() {
 		super.showTextOnFeed("Score: 0");
 		
         addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
@@ -120,12 +140,20 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		super.pauseShotDetection(false);
 	}
 	
+	protected List<BouncingTarget> getShootTargets() {
+		return shootTargets;
+	}
+
+	protected List<BouncingTarget> getDontShootTargets() {
+		return dontShootTargets;
+	}
+	
 	private void updateTargets() {
 		for (BouncingTarget b : shootTargets) b.moveTarget();
 		for (BouncingTarget b : dontShootTargets) b.moveTarget();
 	}
 	
-	private static class BouncingTarget {
+	protected static class BouncingTarget {
 		private final Target target;
 		private double dx;
 		private double dy;
@@ -189,6 +217,8 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		}
 		
 	    public void moveTarget() {
+	    	if (maxVelocity == 0) return;
+	    	
 	        Bounds b = target.getTargetGroup().getBoundsInParent();
 	        Point2D p = target.getPosition();
 	        Dimension2D d = target.getDimension();
@@ -271,7 +301,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		for (BouncingTarget b : dontShootTargets) super.removeTarget(b.getTarget());
 		dontShootTargets.clear();
 		
-		collectSettings();
+		if (!testing) collectSettings();
 		
         addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
         addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
