@@ -161,6 +161,8 @@ public class Target {
     }
     
     protected static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
+    	if (!region.tagExists("command")) return;
+    	
 		String commandsSource = region.getTag("command");
 		List<String> commands = Arrays.asList(commandsSource.split(";"));		
 		
