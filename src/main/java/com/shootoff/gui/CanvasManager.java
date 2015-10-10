@@ -462,7 +462,7 @@ public class CanvasManager {
 			});
 	}
 	
-	private static class Hit {
+	protected static class Hit {
 		private final Target target;
 		private final TargetRegion hitRegion;
 		
@@ -480,7 +480,7 @@ public class CanvasManager {
 		}
 	}
 	
-	private Optional<Hit> checkHit(Shot shot) {
+	protected Optional<Hit> checkHit(Shot shot) {
 		Optional<String> videoString = createVideoString(shot);
 		
 		// Targets are in order of when they were added, thus we must search in reverse
