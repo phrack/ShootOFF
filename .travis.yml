@@ -11,6 +11,8 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
   - sudo apt-get install -qq --only-upgrade -y gradle
+  # Required by the version of OpenIMAJ used by webcam-capture
+  - sudo apt-get install -qq -y libv4l-dev
   - sudo apt-get install -qq -y xvfb x11-xkb-utils libxrender-dev libxtst-dev libgtk2.0-0
   - nohup Xvfb :99 -ac &
   - export DISPLAY=:99.0
