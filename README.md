@@ -1,4 +1,4 @@
-ShootOFF
+ShootOFF [![Build Status](https://travis-ci.org/phrack/ShootOFF.svg?branch=master)](https://travis-ci.org/phrack/ShootOFF)
 ========
 
 An open source, cross-platform framework to enhance laser dry fire training. The Shoot: Open Fire Framework (ShootOFF for short) runs on Linux, Mac, and Windows out of the box.
