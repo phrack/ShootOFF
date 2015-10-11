@@ -172,6 +172,58 @@ public class TestTarget {
 	}
 	
 	@Test
+	public void testLeftArrowKeyMoveTarget() {
+		double oldX = pepperPopper.getPosition().getX();
+		double oldY = pepperPopper.getPosition().getY();
+		
+		KeyEvent leftArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "left", "left",
+                KeyCode.LEFT, false, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), leftArrowEvent);
+		
+		assertEquals(oldX - Target.MOVEMENT_DELTA, pepperPopper.getPosition().getX(), .001);
+		assertEquals(oldY, pepperPopper.getPosition().getY(), .001);
+	}
+	
+	@Test
+	public void testRightArrowKeyMoveTarget() {
+		double oldX = pepperPopper.getPosition().getX();
+		double oldY = pepperPopper.getPosition().getY();
+		
+		KeyEvent rightArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "right", "right",
+                KeyCode.RIGHT, false, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), rightArrowEvent);
+		
+		assertEquals(oldX + Target.MOVEMENT_DELTA, pepperPopper.getPosition().getX(), .001);
+		assertEquals(oldY, pepperPopper.getPosition().getY(), .001);
+	}
+	
+	@Test
+	public void testUpArrowKeyMoveTarget() {
+		double oldX = pepperPopper.getPosition().getX();
+		double oldY = pepperPopper.getPosition().getY();
+		
+		KeyEvent upArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "up", "up",
+                KeyCode.UP, false, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
+		
+		assertEquals(oldX, pepperPopper.getPosition().getX(), .001);
+		assertEquals(oldY - Target.MOVEMENT_DELTA, pepperPopper.getPosition().getY(), .001);
+	}
+	
+	@Test
+	public void testDownArrowKeyMoveTarget() {
+		double oldX = pepperPopper.getPosition().getX();
+		double oldY = pepperPopper.getPosition().getY();
+		
+		KeyEvent downArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "down", "down",
+                KeyCode.DOWN, false, false, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
+		
+		assertEquals(oldX, pepperPopper.getPosition().getX(), .001);
+		assertEquals(oldY + Target.MOVEMENT_DELTA, pepperPopper.getPosition().getY(), .001);
+	}
+	
+	@Test
 	public void testLeftArrowKeyResizeTarget() {
 		double oldWidth = pepperPopper.getDimension().getWidth();
 		double oldHeight = pepperPopper.getDimension().getHeight();

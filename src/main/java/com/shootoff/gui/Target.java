@@ -47,7 +47,7 @@ import javafx.scene.input.MouseEvent;
  * @author phrack
  */
 public class Target {
-	private static final int MOVEMENT_DELTA = 1;
+	protected static final int MOVEMENT_DELTA = 1;
 	protected static final int SCALE_DELTA = 1;
     private static final int RESIZE_MARGIN = 5;
     
