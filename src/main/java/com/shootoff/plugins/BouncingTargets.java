@@ -41,7 +41,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	private Timeline targetAnimation;
 	private int score = 0;
 	
-	boolean testing = false;
+	private boolean testing = false;
 	
 	public BouncingTargets() {}
 	
