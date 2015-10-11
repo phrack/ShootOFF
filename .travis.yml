@@ -7,7 +7,8 @@ branches:
 before_script:
   - gradle --version
 before_install:
-  - xvfb-run -a
+  - nohup xvfb :99 -ac &
+  - export DISPLAY=:99.0
 install:
   # Update Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class)
   - travis_wait sudo apt-get update -qq
