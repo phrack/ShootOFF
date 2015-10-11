@@ -8,9 +8,9 @@ before_script:
   - gradle --version
 before_install:
   # Update Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class)
-  - travis_wait sudo apt-get update -qq
-  - travis_wait sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
-  - travis_wait sudo apt-get install -qq --only-upgrade -y gradle
-  - travis_wait sudo apt-get install xvfb x11-xkb-utils libxrender-dev libxtst-dev libgtk2.0-0
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
+  - sudo apt-get install -qq --only-upgrade -y gradle
+  - sudo apt-get install -qq -y xvfb x11-xkb-utils libxrender-dev libxtst-dev libgtk2.0-0
   - nohup xvfb :99 -ac &
   - export DISPLAY=:99.0
