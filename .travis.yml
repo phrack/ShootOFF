@@ -12,5 +12,5 @@ before_install:
   - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
   - sudo apt-get install -qq --only-upgrade -y gradle
   - sudo apt-get install -qq -y xvfb x11-xkb-utils libxrender-dev libxtst-dev libgtk2.0-0
-  - nohup xvfb :99 -ac &
+  - nohup Xvfb :99 -ac &
   - export DISPLAY=:99.0
