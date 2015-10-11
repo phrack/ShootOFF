@@ -4,3 +4,7 @@ sudo: required
 branches:
   only:
     - master
+install:
+  # Uupdate Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class)
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
