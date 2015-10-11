@@ -9,7 +9,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -34,7 +36,11 @@ public class TestCanvasManager {
 		
 		Configuration config = new Configuration(new String[0]);
 		config.setDebugMode(true);
-		cm = new CanvasManager(new Group(), config, new CamerasSupervisor(config), "test", shotEntries);
+		CamerasSupervisor cs = new CamerasSupervisor(config);
+		cm = new CanvasManager(new Group(), config, cs, "test", shotEntries);
+		CameraManager cameraManager = cs.addCameraManager(new MockCamera(), cm);
+		cs.setDetectingAll(false);
+		cm.setCameraManager(cameraManager);
 	
 		ipscTarget = cm.addTarget(new File("targets/IPSC.target")).get();
 		ipscTarget.setPosition(0, 0);
@@ -109,5 +115,14 @@ public class TestCanvasManager {
 		cm.toggleTargetSelection(Optional.empty());
 		
 		assertEquals(TargetRegion.UNSELECTED_STROKE_COLOR, firstShape.getStroke());
+	}
+	
+	@Test
+	public void testAddShot() {
+		assertEquals(0, cm.getShots().size());
+		
+		cm.addShot(Color.RED, 0, 0);
+		
+		assertEquals(1, cm.getShots().size());
 	}
 }

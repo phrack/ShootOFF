@@ -362,6 +362,11 @@ public class CanvasManager {
 		}
 	}
 	
+	// For testing
+	protected List<Shot> getShots() {
+		return shots;
+	}
+	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
