@@ -15,12 +15,13 @@ apply plugin: 'eclipse'
 
 def javaHome = System.properties['java.home']
 
-def archivePath = 'build/dist/ShootOFF.jar'
-def libTempDir = 'build/dist/libs'
+def dist = 'build/dist/'
+def archivePath = dist + 'ShootOFF.jar'
+def libTempDir = dist + 'libs'
 def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'
-def version = '3.2'
+def version = '3.4'
 def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
@@ -168,6 +169,20 @@ task fxJar(dependsOn: build){
             }
         }
     }
+}
+
+task zipRelease(type: Zip){
+    dependsOn('fxJar')
+
+    from(file(dist)) {
+        include 'targets/**'
+        include 'sounds/**'
+        include 'libs/**/*.jar'
+        include 'shootoff.properties'
+        include 'ShootOFF.jar'
+    }
+    archiveName = 'shootoff-' + version + '-final.zip'
+    destinationDir = file(dist)
 }
 
 task fxSignedJar(dependsOn: fxJar){
