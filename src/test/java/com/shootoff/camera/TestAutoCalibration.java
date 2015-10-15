@@ -27,21 +27,14 @@ public class TestAutoCalibration {
 	}
 	
 	@Test
-	public void testDark() throws IOException {
+	public void testCalibrate() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
-					TestAutoCalibration.class.getResourceAsStream("/autocalibration/dark.png"));
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-4-rotated.png"));
 
-		//List<Point2dImpl> corners = acm.findChessboardBufferedImage(testFrame);
-		
-		//assertTrue(corners != null);
-		
-		
-		//Optional<Bounds> bounds = acm.calcBounds(corners);
-			
-		acm.setFrame(testFrame);
-		
-		acm.test();
-		
+		for (int i = 0; i < 6; i++)
+			acm.processFrame(testFrame);
+
+		// calibrate-4 should equal calibrate-undist-5
 	}
 
 }

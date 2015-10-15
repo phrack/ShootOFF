@@ -121,6 +121,12 @@ public class Camera {
 	private final Webcam webcam;
 	private final boolean isIpCam;
 	
+	// For testing
+	protected Camera() {
+		this.webcam = null;
+		this.isIpCam = false;
+	}
+	
 	private Camera(Webcam webcam) {
 		this.webcam = webcam;
 		this.isIpCam = false;

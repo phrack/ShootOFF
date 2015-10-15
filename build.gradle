@@ -86,6 +86,15 @@ dependencies {
     testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.+'
 }
 
+test {
+    onOutput { descriptor, event ->
+       logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+    }
+
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
 
 task copyConfig(type:Copy) {
     from 'shootoff.properties' into 'build/dist'

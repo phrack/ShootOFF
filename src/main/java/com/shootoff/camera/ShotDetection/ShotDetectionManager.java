@@ -263,7 +263,7 @@ public final class ShotDetectionManager {
 			
 			for (Pixel pixel : thresholdPixels)
 			{
-				logger.debug("thresholdPixel {} {} - from array {} from pixel cur {} avg {}", pixel.x, pixel.y, lumsMovingAverage[pixel.x][pixel.y], pixel.getCurrentLum(), pixel.getLumAverage());
+				logger.trace("thresholdPixel {} {} - from array {} from pixel cur {} avg {}", pixel.x, pixel.y, lumsMovingAverage[pixel.x][pixel.y], pixel.getCurrentLum(), pixel.getLumAverage());
 			}
 		}
 		

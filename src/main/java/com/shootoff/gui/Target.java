@@ -47,8 +47,8 @@ import javafx.scene.input.MouseEvent;
  * @author phrack
  */
 public class Target {
-	private static final int MOVEMENT_DELTA = 1;
-	private static final int SCALE_DELTA = 1;
+	protected static final int MOVEMENT_DELTA = 1;
+	protected static final int SCALE_DELTA = 1;
     private static final int RESIZE_MARGIN = 5;
     
     private final File targetFile;
@@ -161,6 +161,8 @@ public class Target {
     }
     
     protected static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
+    	if (!region.tagExists("command")) return;
+    	
 		String commandsSource = region.getTag("command");
 		List<String> commands = Arrays.asList(commandsSource.split(";"));		
 		

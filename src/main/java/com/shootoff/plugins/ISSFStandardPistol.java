@@ -57,6 +57,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
 	private boolean coloredRows = false;
+	private boolean testing = false;
 	
 	public ISSFStandardPistol() {}
 	
@@ -80,12 +81,30 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	@Override
 	public void init() {
 		super.pauseShotDetection(true);
-		super.addShotTimerColumn(SCORE_COL_NAME, SCORE_COL_WIDTH);
-		super.addShotTimerColumn(ROUND_COL_NAME, ROUND_COL_WIDTH);
 		super.getDelayedStartInterval(this);
 		
-		thisSuper.pauseShotDetection(true);
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);	
+		startExercise();
+	}
+	
+	// For testing
+	protected void init(int delayMin, int delayMax) {
+		this.delayMin = delayMin;
+		this.delayMax = delayMax;
+		
+		testing = true;
+		
+		startExercise();
+	}
+	
+	private void startExercise() {
+		super.addShotTimerColumn(SCORE_COL_NAME, SCORE_COL_WIDTH);
+		super.addShotTimerColumn(ROUND_COL_NAME, ROUND_COL_WIDTH);
+		
+		if (!testing) {
+			executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);	
+		} else {
+			new SetupWait().call();
+		}
 	}
 	
 	@Override
@@ -96,11 +115,15 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 
 	private class SetupWait implements Callable<Void> {
 		@Override
-		public Void call() throws Exception {
+		public Void call() {
 			if (repeatExercise) {
 				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
 				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-            	executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+				if (!testing) {
+					executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+				} else {
+					new StartRound().call();
+				}
 			}
 			
 			return null;
@@ -109,7 +132,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	
 	private class StartRound implements Callable<Void> {
 		@Override
-		public Void call() throws Exception {
+		public Void call() {
 			shotCount = 0;
 			
 			if (repeatExercise) {
@@ -132,7 +155,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	
 	private class EndRound implements Callable<Void> {
 		@Override
-		public Void call() throws Exception {
+		public Void call() {
 			if (repeatExercise) {
 				thisSuper.pauseShotDetection(true);
 				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
@@ -142,12 +165,20 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 				if (round < 4) {
 					// Go to next round
 					round++;
-	            	executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+					if (!testing) {
+						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+					} else {
+						new StartRound().call();
+					}
 				} else if (roundTimeIndex < ROUND_TIMES.length - 1) {
 					// Go to round 1 for next time
 					round = 1;
 					roundTimeIndex++;
-	            	executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);			
+					if (!testing) {
+						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+					} else {
+						new StartRound().call();
+					}		
 				} else {
 					TextToSpeech.say("Event over... Your score is " + runningScore);
 					thisSuper.pauseShotDetection(false);

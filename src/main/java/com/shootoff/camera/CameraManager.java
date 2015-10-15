@@ -62,6 +62,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.util.Callback;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -106,8 +107,9 @@ public class CameraManager {
 	
 	private static double webcamFPS = DEFAULT_FPS;
 	
-	private AutoCalibrationManager acm = new AutoCalibrationManager();
+	private AutoCalibrationManager acm = null;
 	private boolean autoCalibrationEnabled = false;
+	public boolean cameraAutoCalibrated = false;
 	
 	private ShootOFFController controller;
 	
@@ -357,6 +359,7 @@ public class CameraManager {
 	private Timer brightnessDiagnosticTimer = new Timer();
 	private Timer motionDiagnosticTimer = new Timer();
 
+
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 
@@ -501,6 +504,11 @@ public class CameraManager {
 			{
 				fireAutoCalibration(currentFrame);
 			}
+			
+			if (cameraAutoCalibrated)
+			{
+				acm.undistortFrame(currentFrame);
+			}
 
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
@@ -533,47 +541,35 @@ public class CameraManager {
 		}
 		
 		private void fireAutoCalibration(BufferedImage frame) {
-			
-			acm.processFrame(frame);
-			/*acm.setFrame(frame);
-			acm.setCallback(new Callback<List<Point2dImpl>, Void>()
+
+			acm.setFrame(frame);
+			acm.setCallback(new Callback<Optional<Bounds>, Void>()
 			{
 
 				@Override
-				public Void call(List<Point2dImpl> corners) {
-					logger.warn("autocalib result {}", corners);
-					
-					autoCalibrateSuccess(corners);
+				public Void call(Optional<Bounds> bounds) {
+					if (bounds.isPresent())
+						autoCalibrateSuccess(bounds.get());
 					return null;
 				}
 						
 			});
 			new Thread(acm).start();
-			
-			*/
 		}
 
-		/*protected void autoCalibrateSuccess(List<Point2dImpl> corners) {
+		protected void autoCalibrateSuccess(Bounds bounds) {
 
 			if (autoCalibrationEnabled && controller != null)
 			{
 				autoCalibrationEnabled = false;
 				
-				Optional<Bounds> bounds = acm.calcBounds(corners);
-				
-				if (!bounds.isPresent())
-				{
-					// Whole area not on screen, fail out
-					autoCalibrationEnabled = true;
-					return;
-				}
-				
+				cameraAutoCalibrated = true;
 
-				Platform.runLater(() -> { controller.calibrate(bounds.get()); });
+				Platform.runLater(() -> { controller.calibrate(bounds); });
 				
 			}
 			
-		}*/
+		}
 
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
@@ -711,8 +707,9 @@ public class CameraManager {
 	}
 
 	public void enableAutoCalibration() {
+		acm = new AutoCalibrationManager();
 		autoCalibrationEnabled  = true;
-		
+		cameraAutoCalibrated = false;
 	}
 
 	public void setController(ShootOFFController controller) {

@@ -362,6 +362,11 @@ public class CanvasManager {
 		}
 	}
 	
+	// For testing
+	protected List<Shot> getShots() {
+		return shots;
+	}
+	
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
@@ -462,7 +467,7 @@ public class CanvasManager {
 			});
 	}
 	
-	private static class Hit {
+	protected static class Hit {
 		private final Target target;
 		private final TargetRegion hitRegion;
 		
@@ -480,7 +485,7 @@ public class CanvasManager {
 		}
 	}
 	
-	private Optional<Hit> checkHit(Shot shot) {
+	protected Optional<Hit> checkHit(Shot shot) {
 		Optional<String> videoString = createVideoString(shot);
 		
 		// Targets are in order of when they were added, thus we must search in reverse
@@ -668,7 +673,7 @@ public class CanvasManager {
 		return targetGroups;
 	}
 	
-	private void toggleTargetSelection(Optional<Group> newSelection) {
+	protected void toggleTargetSelection(Optional<Group> newSelection) {
 		if (selectedTarget.isPresent())
 			setTargetSelection(selectedTarget.get(), false);
 		

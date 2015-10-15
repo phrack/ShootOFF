@@ -66,7 +66,7 @@ public class Main extends Application {
 	private Stage primaryStage;
 	
 
-	private static class ResourcesInfo {
+	protected static class ResourcesInfo {
 		private String version;
 		private long fileSize;
 		private String xml;
@@ -118,7 +118,7 @@ public class Main extends Application {
 		return Optional.of(metadataXML.substring(dataStart, dataEnd));
 	}
 	
-	private Optional<ResourcesInfo> deserializeMetadataXML(String metadataXML) {
+	protected Optional<ResourcesInfo> deserializeMetadataXML(String metadataXML) {
 		Optional<String> version = parseField(metadataXML, "version");
 		Optional<String> fileSize = parseField(metadataXML, "fileSize");
 		
