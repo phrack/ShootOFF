@@ -121,7 +121,7 @@ public class AutoCalibrationManager implements Runnable {
 			undistorted = undistort(mat, intrinsic, distCoeffs, imageCorners);
 			
 			
-			Optional<Bounds> bounds = calcBounds(imageCorners);
+			Optional<Bounds> bounds = calcBoundsFromDimensions(rotatedCorners);
 			
 
 						
@@ -160,6 +160,8 @@ public class AutoCalibrationManager implements Runnable {
 			int minY = (int) bounds.get().getMinY();
 			int width = (int) bounds.get().getWidth();
 			int height = (int) bounds.get().getHeight();
+			
+			logger.warn("{} {} {} {}", minX, minY, width, height);
 			
 			frame = frame.getSubimage(minX, minY, width, height);
 			
@@ -304,6 +306,9 @@ public class AutoCalibrationManager implements Runnable {
 	private Mat map1 = new Mat();
 	private Mat map2 = new Mat();
 	private boolean mapInitialized = false;
+	private MatOfPoint2f translatedCorners = new MatOfPoint2f();
+	private MatOfPoint2f rotatedCorners = new MatOfPoint2f();
+	private Mat perspMat = new Mat();
 	public Mat undistort(final Mat image,final Mat cameraMatrix,final Mat distCoeffs,final MatOfPoint2f imageCorners){
 		
 
@@ -314,35 +319,62 @@ public class AutoCalibrationManager implements Runnable {
 		
 		if (!mapInitialized)
 		{
-			Imgproc.initUndistortRectifyMap(newCameraMtx, distCoeffs, new Mat(), newCameraMtx, image.size(), CvType.CV_32FC1, map1, map2);
 			mapInitialized = true;
+			
+			Imgproc.initUndistortRectifyMap(newCameraMtx, distCoeffs, new Mat(), newCameraMtx, image.size(), CvType.CV_32FC1, map1, map2);
+
+			
+			translatedCorners.alloc(imageCorners.rows());
+			
+			logger.warn("remap {} {} - {} {}", imageCorners.rows(), imageCorners.cols());
+			for (int i = 0; i < imageCorners.rows(); i++)
+			{
+				logger.warn("{} - {}", i, imageCorners.get(i, 0));
+			
+				
+				logger.warn("{} {}", map2.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1]), map1.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1]));
+				
+				double newx = map2.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1])[0];
+				double newy = map1.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1])[0];
+				
+				translatedCorners.put(i, 0, newx, newy);
+				
+				logger.warn("newx {} newy {}", newx, newy);
+				
+			}
+			
+			
+			
+			Point realCenter = new Point(image.rows()/2, image.cols()/2);
+			
+			double scale = 1.0;
+
+			// Get the rotation matrix with the specifications above
+			
+			rotatedCorners.alloc(translatedCorners.rows());
+			
+			Mat rot_mat = Imgproc.getRotationMatrix2D( realCenter, calcAngle(translatedCorners), scale );
+			for (int i = 0; i < translatedCorners.rows(); i++)
+			{
+				Point newpt = rotPoint(rot_mat, new Point(translatedCorners.get(i, 0)[0], translatedCorners.get(i, 0)[1]));
+				logger.warn("old pt x {} y {} - new pt x {} y {}", translatedCorners.get(i,0)[0], translatedCorners.get(i,0)[1], newpt.x, newpt.y);
+				rotatedCorners.put(i, 0, newpt.x, newpt.y);
+			}
+
+			
+			Mat cropsrc = calcMatBoundsFromDimensions(rotatedCorners);
+			Mat cropdst = new Mat(4,1,CvType.CV_32FC2);
+			cropdst.put(0, 0, 0, 0, image.cols(), 0, image.cols(), image.rows(), 0, image.rows());
+			
+			perspMat = Imgproc.getPerspectiveTransform(cropsrc, cropdst);
 		}
 	
 		
 		Imgproc.remap(image, mat, map1, map2, Imgproc.INTER_LINEAR);
 		
-		MatOfPoint2f dst = new MatOfPoint2f();
-		dst.alloc(imageCorners.rows());
-		//Imgproc.remap(imageCorners, dst, map1, map2, Imgproc.INTER_LINEAR);
-		
-		logger.warn("remap {} {} - {} {}", imageCorners.rows(), imageCorners.cols());
-		for (int i = 0; i < imageCorners.rows(); i++)
-		{
-			logger.warn("{} - {}", i, imageCorners.get(i, 0));
-		
-			
-			logger.warn("{} {}", map2.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1]), map1.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1]));
-			
-			double newx = map2.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1])[0];
-			double newy = map1.get((int)imageCorners.get(i, 0)[0], (int)imageCorners.get(i, 0)[1])[0];
-			
-			dst.put(i, 0, newx, newy);
-			
-			logger.warn("newx {} newy {}", newx, newy);
-			
-		}
+
 	
-		logger.warn("dst {} {}", dst.rows(), dst.cols());
+		logger.warn("translatedCorners {} {}", translatedCorners.rows(), translatedCorners.cols());
 		
 		Imgproc.undistort(image,mat,cameraMatrix,distCoeffs,cameraMatrix);
 
@@ -360,37 +392,24 @@ public class AutoCalibrationManager implements Runnable {
 		  
 		//mat = warpPerspective(mat, dst);
 		
-		rotateImage(mat, calcAngle(dst), calcCenter(dst));
+		logger.warn("calcAngle {} calcCenter {}", calcAngle(translatedCorners), calcCenter(translatedCorners));
 		
+		rotateImage(mat, calcAngle(translatedCorners), calcCenter(translatedCorners));
 		
-		Point realCenter = new Point(mat.rows()/2, mat.cols()/2);
-		
-		double scale = 1.0;
 
-		// Get the rotation matrix with the specifications above
-		Mat rot_mat = Imgproc.getRotationMatrix2D( realCenter, calcAngle(dst), scale );
-		for (int i = 0; i < dst.rows(); i++)
-		{
-			Point newpt = rotPoint(rot_mat, new Point(dst.get(i, 0)[0], dst.get(i, 0)[1]));
-			dst.put(i, 0, newpt.x, newpt.y);
-		}
 		
-		Calib3d.drawChessboardCorners(mat, new Size(PATTERN_WIDTH, PATTERN_HEIGHT), dst, true);
+		Calib3d.drawChessboardCorners(mat, new Size(PATTERN_WIDTH, PATTERN_HEIGHT), rotatedCorners, true);
 		
 		
-		Mat cropsrc = calcBoundsFromDimensions(dst);
-		Mat cropdst = new Mat(4,1,CvType.CV_32FC2);
-		cropdst.put(0, 0, 0, 0, mat.cols(), 0, mat.cols(), mat.rows(), 0, mat.rows());
-		
-		Mat perspMat = Imgproc.getPerspectiveTransform(cropsrc, cropdst);
-		
-		Imgproc.warpPerspective(mat,mat,perspMat,mat.size());
+
+		// TODO: Re-enable to crop
+		//Imgproc.warpPerspective(mat,mat,perspMat,mat.size());
 		
 		
 		return mat;
 	}
 	
-	public Mat warpPerspective(final Mat image, MatOfPoint2f corners)
+	/*public Mat warpPerspective(final Mat image, MatOfPoint2f corners)
 	{
 		Mat src = new Mat(4,1,CvType.CV_32FC2);
 		Mat dst = new Mat(4,1,CvType.CV_32FC2);
@@ -427,7 +446,7 @@ public class AutoCalibrationManager implements Runnable {
 		rotateImage(changed, calcAngle(corners), calcCenter(corners));
 		
 		return changed;
-	}
+	}*/
 	
 /*Point2f rotPoint(const Mat &R, const Point2f &p)
 {
@@ -483,7 +502,14 @@ public class AutoCalibrationManager implements Runnable {
 		return new Point(topLeft.x+(width/2), topLeft.y+(height/2));
 	}
 	
-	private Mat calcBoundsFromDimensions(MatOfPoint2f corners)
+	private Optional<Bounds> calcBoundsFromDimensions(MatOfPoint2f corners)
+	{
+		Mat mat = calcMatBoundsFromDimensions(corners);
+		
+		return Optional.of(new BoundingBox(mat.get(0, 0)[0], mat.get(0, 0)[1], mat.get(1, 0)[0]-mat.get(0, 0)[0], mat.get(2, 0)[1]-mat.get(1, 0)[1]));
+	}
+	
+	private Mat calcMatBoundsFromDimensions(MatOfPoint2f corners)
 	{
 		Mat result = new Mat(4,1,CvType.CV_32FC2);
 		
@@ -501,8 +527,8 @@ public class AutoCalibrationManager implements Runnable {
 		double angle = Math.atan((topRight.y-topLeft.y)/(topRight.x-topLeft.x))*180/Math.PI;
 		
 		logger.warn("square size {} {} - angle {}", width/PATTERN_WIDTH, height/PATTERN_HEIGHT, angle);
-		double squareWidth = width/PATTERN_WIDTH;
-		double squareHeight = height/PATTERN_HEIGHT;
+		double squareWidth = (1+borderFactor)*(width/PATTERN_WIDTH);
+		double squareHeight = (1+borderFactor)*(height/PATTERN_HEIGHT);
 		
 		double[] newTopLeft = { topLeft.x - squareWidth, topLeft.y - squareHeight };
 		double[] newBottomLeft = { bottomLeft.x - squareWidth, bottomLeft.y + squareHeight };

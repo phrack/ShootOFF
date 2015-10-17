@@ -500,7 +500,7 @@ public class CameraManager {
 			incFrameCount();
 			
 			
-			if (autoCalibrationEnabled && (getFrameCount()%DEFAULT_FPS==0))
+			if (autoCalibrationEnabled && (getFrameCount()%5==0))
 			{
 				fireAutoCalibration(currentFrame);
 			}
