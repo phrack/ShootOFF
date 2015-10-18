@@ -2,34 +2,19 @@ package com.shootoff.camera.AutoCalibration;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.util.Callback;
 
-import javax.imageio.ImageIO;
-
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfDouble;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.MatOfPoint3f;
 import org.opencv.core.Point;
-import org.opencv.core.Point3;
-import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
@@ -37,7 +22,6 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 
@@ -51,22 +35,23 @@ public class AutoCalibrationManager implements Runnable {
     private Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
 	
-	private Mat savedImage = new Mat();
+	//private Mat savedImage = new Mat();
 	
 	private BufferedImage frame;
 	
-	private int successes = 0;
-	private final static int MIN_BOARDS = 5;
+	//private int successes = 0;
+	private final static int MIN_BOARDS = 3;
 	
 	MatOfPoint2f imageCorners = new MatOfPoint2f();
-	private List<Mat> imagePoints = new ArrayList<>();
-	private List<Mat> objectPoints = new ArrayList<>();
-	private MatOfPoint3f obj = new MatOfPoint3f();
+	//private List<Mat> imagePoints = new ArrayList<>();
+	//private List<Mat> objectPoints = new ArrayList<>();
+	//private MatOfPoint3f obj = new MatOfPoint3f();
 	
-	private Mat intrinsic = new Mat(3, 3, CvType.CV_32FC1);
-	private Mat distCoeffs = new Mat();
+	//private Mat intrinsic = new Mat(3, 3, CvType.CV_32FC1);
+	//private Mat distCoeffs = new Mat();
 
 	private boolean isCalibrated = false;
+	private int seenChessboards = 0;
 	
 	private Callback<Optional<Bounds>, Void> callback;
 	
@@ -80,9 +65,9 @@ public class AutoCalibrationManager implements Runnable {
 
 	public AutoCalibrationManager()
 	{
-		int numSquares = PATTERN_WIDTH * PATTERN_HEIGHT;
+		/*int numSquares = PATTERN_WIDTH * PATTERN_HEIGHT;
 		for (int j = 0; j < numSquares; j++)
-			obj.push_back(new MatOfPoint3f(new Point3(j / PATTERN_HEIGHT, j % PATTERN_WIDTH, 0.0f)));
+			obj.push_back(new MatOfPoint3f(new Point3(j / PATTERN_HEIGHT, j % PATTERN_WIDTH, 0.0f)));*/
 	}
 	
 	public Mat bufferedImageToMat(BufferedImage frame)
@@ -95,9 +80,21 @@ public class AutoCalibrationManager implements Runnable {
 		return mat;
 	}
 
+	private void reset()
+	{
+		isCalibrated = false;
+		seenChessboards = 0;
+		warpInitialized = false;
+	}
 
 	@Override
 	public void run() {
+		if (isCalibrated)
+		{
+			reset();
+		}
+		
+		
 		Optional<Bounds> bounds = processFrame(frame);
 		
 		if (callback != null && bounds.isPresent())
@@ -108,24 +105,26 @@ public class AutoCalibrationManager implements Runnable {
 	
 	public Optional<Bounds> processFrame(BufferedImage frame)
 	{
-		if (!isCalibrated)
-			collectBoards(frame);
-		if (isCalibrated)
+		boolean found = findChessboardBufferedImage(frame);
+		
+		if (found && seenChessboards < MIN_BOARDS)
+		{
+			seenChessboards++;
+		}
+		else if (found)
 		{ 	
 			Mat mat = bufferedImageToMat(frame);
 			
 			Mat undistorted = new Mat();
 			
 			
-
-						 
-			//imageCorners = (MatOfPoint2f) imagePoints.get(imagePoints.size()-1);
-			
-			
-			String filename = String.format("calibrate-dist-%s.png",successes);
-			File file = new File(filename);
-			filename = file.toString();
-			Imgcodecs.imwrite(filename, mat);
+			if (logger.isTraceEnabled())
+			{
+				String filename = String.format("calibrate-dist-%s.png",seenChessboards);
+				File file = new File(filename);
+				filename = file.toString();
+				Imgcodecs.imwrite(filename, mat);
+			}
 			
 			undistorted = warpPerspective(mat, imageCorners);
 			
@@ -133,36 +132,14 @@ public class AutoCalibrationManager implements Runnable {
 			// UPSIDE DOWN PATTERN CURRENTLY BREAKS EVERYTHING
 			
 			Optional<Bounds> bounds = Optional.of(boundingBox);
-			//Optional<Bounds> bounds = calcBoundsFromDimensions(rotatedCorners);
 			
-
-						
-			
-			
-
-			
-
-
-			//mat.copyTo(undistorted);
-			
-			/*MatOfPoint2f approxCurve = new MatOfPoint2f();
-	        double approxDistance = Imgproc.arcLength(dst, true)*0.02;
-	        Imgproc.approxPolyDP(dst, approxCurve, approxDistance, true);
-
-	        //Convert back to MatOfPoint
-	        MatOfPoint points = new MatOfPoint( approxCurve.toArray() );
-
-	        Rect rect = Imgproc.boundingRect(points);*/
-			
-			//logger.warn("{} {} {} {} - {} {}", rect.x, rect.y, rect.width, rect.height);
-			
-	        
-	        //undistorted = undistorted.submat(rect);
-			
-			filename = String.format("calibrate-undist-%s.png",successes);
-			file = new File(filename);
-			filename = file.toString();
-			Imgcodecs.imwrite(filename, undistorted);
+			if (logger.isTraceEnabled())
+			{
+				String filename = String.format("calibrate-undist-%s.png",seenChessboards);
+				File file = new File(filename);
+				filename = file.toString();
+				Imgcodecs.imwrite(filename, undistorted);
+			}
 			
 			if (!bounds.isPresent())
 				return Optional.empty();
@@ -173,14 +150,21 @@ public class AutoCalibrationManager implements Runnable {
 			int width = (int) bounds.get().getWidth();
 			int height = (int) bounds.get().getHeight();
 			
-			logger.warn("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
+			logger.debug("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
 			
-			undistorted = undistorted.submat(minY, minY+height, minX, minX+width);
+
 			
-			filename = String.format("calibrate-undist-cropped-%s.png",successes);
-			file = new File(filename);
-			filename = file.toString();
-			Imgcodecs.imwrite(filename, undistorted);
+			if (logger.isTraceEnabled())
+			{
+				undistorted = undistorted.submat(minY, minY+height, minX, minX+width);
+				
+				String filename = String.format("calibrate-undist-cropped-%s.png",seenChessboards);
+				File file = new File(filename);
+				filename = file.toString();
+				Imgcodecs.imwrite(filename, undistorted);
+			}
+			
+			isCalibrated = true;
 			
 			return bounds;
 			
@@ -202,7 +186,7 @@ public class AutoCalibrationManager implements Runnable {
 	      return image;  
 	}  
 
-	public void collectBoards(BufferedImage frame)
+	/*public void collectBoards(BufferedImage frame)
 	{
 		boolean found = findChessboardBufferedImage(frame);
 		
@@ -228,9 +212,9 @@ public class AutoCalibrationManager implements Runnable {
 				e.printStackTrace();
 			}
 		}
-	}
+	}*/
 	
-	private void calibrateCamera() {
+	/*private void calibrateCamera() {
 		// init needed variables according to OpenCV docs
 		List<Mat> rvecs = new ArrayList<>();
 		List<Mat> tvecs = new ArrayList<>();
@@ -266,9 +250,9 @@ public class AutoCalibrationManager implements Runnable {
 		this.isCalibrated  = true;
 		
 		logger.warn("calibrated");
-	}
+	}*/
 	
-	public static double computeReprojectionErrors(Mat cameraMatrix, Mat distCoeffs, List<Mat> objectPoints,List<Mat> cornersBuffer, List<Mat> rvecs, List<Mat> tvecs, Mat perViewErrors) {
+	/*public static double computeReprojectionErrors(Mat cameraMatrix, Mat distCoeffs, List<Mat> objectPoints,List<Mat> cornersBuffer, List<Mat> rvecs, List<Mat> tvecs, Mat perViewErrors) {
 		MatOfPoint2f cornersProjected = new MatOfPoint2f();
 		double totalError = 0;
 		double error;
@@ -290,7 +274,7 @@ public class AutoCalibrationManager implements Runnable {
 		perViewErrors.put(0, 0, viewErrors);
 
 		return Math.sqrt(totalError / totalPoints);
-	}
+	}*/
 	
 	public boolean findChessboardBufferedImage(BufferedImage frame)
 	{
@@ -316,9 +300,9 @@ public class AutoCalibrationManager implements Runnable {
 			// optimization
 			Imgproc.cornerSubPix(grayImage, imageCorners, new Size(5, 5), new Size(-1, -1), term);
 			// save the current frame for further elaborations
-			grayImage.copyTo(this.savedImage);
+			//grayImage.copyTo(this.savedImage);
 			// show the chessboard inner corners on mat
-			Calib3d.drawChessboardCorners(mat, boardSize, imageCorners, found);
+			//Calib3d.drawChessboardCorners(mat, boardSize, imageCorners, found);
 			
 			/*try {
 				frame = matToBufferedImage(mat);
@@ -327,25 +311,28 @@ public class AutoCalibrationManager implements Runnable {
 				e.printStackTrace();
 			}*/
 			
-			this.imagePoints.add(imageCorners.clone());
+			//this.imagePoints.add(imageCorners.clone());
 			
 			//imageCorners.release();
 		
 			
 			//this.objectPoints.add(obj);			
 			
-			String filename = String.format("calibrate-marked-%s.png",successes);
-			File file = new File(filename);
-			filename = file.toString();
-			Imgcodecs.imwrite(filename, mat);
+			if (logger.isTraceEnabled())
+			{
+				String filename = String.format("calibrate-marked-%s.png",seenChessboards);
+				File file = new File(filename);
+				filename = file.toString();
+				Imgcodecs.imwrite(filename, mat);
+			}
 			
 			
-			logger.warn("found {}", found);
+			logger.debug("found {}", found);
 		}
 		return found;
 	}
 	
-	public static final double SQUARE_SIZE = 40;
+	/*public static final double SQUARE_SIZE = 40;
 	public static void calcBoardCornerPositions(Mat corners, Size boardSize) {
 		final int cn = 3;
 		int size = (int) boardSize.width * (int) boardSize.height;
@@ -360,24 +347,29 @@ public class AutoCalibrationManager implements Runnable {
 		}
 		corners.create(size, 1, CvType.CV_32FC3);
 		corners.put(0, 0, positions);
-	}
+	}*/
 	
-	private Mat map1 = new Mat();
+	/*private Mat map1 = new Mat();
 	private Mat map2 = new Mat();
 	private boolean mapInitialized = false;
 	private MatOfPoint2f translatedCorners = new MatOfPoint2f();
-	private MatOfPoint2f rotatedCorners = new MatOfPoint2f();
-	private Mat perspMat = new Mat();
-	MatOfPoint2f cropsrc = null;
-	MatOfPoint2f cropdst = null;
 	private RotatedRect box = null;
 	private Mat newCameraMtx = new Mat();
+	private Size boundSize = null;*/
+	
+	private MatOfPoint2f rotatedCorners = new MatOfPoint2f();
+	private Mat perspMat = new Mat();
+	//MatOfPoint2f cropsrc = null;
+	//MatOfPoint2f cropdst = null;
+
 
 	private Bounds boundingBox = null;
-	
 	private boolean warpInitialized = false;
 	private double rotationAngle = 0.0;
-	private Size boundSize = null;
+	Point realCenter = null;
+	
+	
+
 	public Mat warpPerspective(final Mat image, MatOfPoint2f corners)
 	{
 		Mat mat=new Mat(image.rows(),image.cols(),CvType.CV_32FC1);
@@ -394,7 +386,7 @@ public class AutoCalibrationManager implements Runnable {
 			
 			rotatedCorners.alloc(imageCorners.rows());
 			
-			logger.warn("calcAngle {} calcCenter {}", calcAngle(imageCorners), calcCenter(imageCorners));
+			logger.debug("calcAngle {} calcCenter {}", calcAngle(imageCorners), calcCenter(imageCorners));
 			
 			rotationAngle = calcAngle(imageCorners);
 			
@@ -402,7 +394,7 @@ public class AutoCalibrationManager implements Runnable {
 			for (int i = 0; i < imageCorners.rows(); i++)
 			{
 				Point newpt = rotPoint(rot_mat, new Point(imageCorners.get(i, 0)[0], imageCorners.get(i, 0)[1]));
-				logger.warn("old pt x {} y {} - new pt x {} y {}", imageCorners.get(i,0)[0], imageCorners.get(i,0)[1], newpt.x, newpt.y);
+				logger.debug("old pt x {} y {} - new pt x {} y {}", imageCorners.get(i,0)[0], imageCorners.get(i,0)[1], newpt.x, newpt.y);
 				rotatedCorners.put(i, 0, newpt.x, newpt.y);
 			}
 
@@ -419,7 +411,7 @@ public class AutoCalibrationManager implements Runnable {
 			// |         |
 			//3rd-------4th
 			Mat bounds = calcMatBoundsFromDimensions(rotatedCorners);
-			cropsrc = new MatOfPoint2f();
+			MatOfPoint2f cropsrc = new MatOfPoint2f();
 			cropsrc.alloc(4);
 			cropsrc.put(0, 0, bounds.get(0, 0));
 			cropsrc.put(1, 0, bounds.get(1, 0));
@@ -429,7 +421,7 @@ public class AutoCalibrationManager implements Runnable {
 
 			
 			RotatedRect box = Imgproc.minAreaRect(cropsrc);
-			cropdst = new MatOfPoint2f();
+			MatOfPoint2f cropdst = new MatOfPoint2f();
 			cropdst.alloc(4);
 			cropdst.put(0, 0, box.boundingRect().x, box.boundingRect().y,
 					box.boundingRect().x+box.boundingRect().width, box.boundingRect().y,
@@ -438,36 +430,36 @@ public class AutoCalibrationManager implements Runnable {
 			
 			boundingBox = new BoundingBox(box.boundingRect().x, box.boundingRect().y, box.boundingRect().width, box.boundingRect().height);
 			
-			boundSize = new Size(image.cols(), image.rows());
+			//boundSize = new Size(image.cols(), image.rows());
 			
-			logger.warn("bounds {} - {} - {}", bounds.get(0, 0), cropsrc.get(0, 0), cropdst.get(0, 0));
-			logger.warn("bounds {} - {} - {}", bounds.get(1, 0), cropsrc.get(1, 0), cropdst.get(1, 0));
-			logger.warn("bounds {} - {} - {}", bounds.get(2, 0), cropsrc.get(2, 0), cropdst.get(2, 0));
-			logger.warn("bounds {} - {} - {}", bounds.get(3, 0), cropsrc.get(3, 0), cropdst.get(3, 0));
+			realCenter = new Point(image.rows()/2, image.cols()/2);
 			
-			logger.warn("sizes {} {} - {} {} {}", cropsrc.size(), cropdst.size(), box.angle, box.center, box.size);
-
+			if (logger.isDebugEnabled())
+			{
+				logger.debug("bounds {} - {} - {}", bounds.get(0, 0), cropsrc.get(0, 0), cropdst.get(0, 0));
+				logger.debug("bounds {} - {} - {}", bounds.get(1, 0), cropsrc.get(1, 0), cropdst.get(1, 0));
+				logger.debug("bounds {} - {} - {}", bounds.get(2, 0), cropsrc.get(2, 0), cropdst.get(2, 0));
+				logger.debug("bounds {} - {} - {}", bounds.get(3, 0), cropsrc.get(3, 0), cropdst.get(3, 0));
+			
+				logger.debug("sizes {} {} - {} {} {}", cropsrc.size(), cropdst.size(), box.angle, box.center, box.size);
+			}
 			
 			perspMat = Imgproc.getPerspectiveTransform(cropsrc, cropdst);
 		}
 		
 		mat = image.clone();
-
-		Point realCenter = new Point(image.rows()/2, image.cols()/2);
 		
 		mat = rotateImage(mat, rotationAngle, realCenter);
 		
-		logger.warn("rotatedCorners {}", rotatedCorners.get(PATTERN_WIDTH-1, 0));
+		logger.trace("rotatedCorners {}", rotatedCorners.get(PATTERN_WIDTH-1, 0));
 		
 
 		//Calib3d.drawChessboardCorners(mat, new Size(PATTERN_WIDTH, PATTERN_HEIGHT), rotatedCorners, true);
 		
-		Mat newmat = new Mat();
-		
-		Imgproc.warpPerspective(mat,newmat,perspMat,mat.size(), Imgproc.INTER_LINEAR);
+		Imgproc.warpPerspective(mat,mat,perspMat,mat.size(), Imgproc.INTER_LINEAR);
 		
 		
-		return newmat;
+		return mat;
 	}
 	
 /*Point2f rotPoint(const Mat &R, const Point2f &p)
@@ -497,7 +489,7 @@ public class AutoCalibrationManager implements Runnable {
 	
 		double scale = 1.0;
 		
-		logger.warn("rotateImage {} {} {}", realCenter, angle, scale);
+		logger.trace("rotateImage {} {} {}", realCenter, angle, scale);
 
 		/// Get the rotation matrix with the specifications above
 		Mat rot_mat = Imgproc.getRotationMatrix2D( realCenter, angle, scale );
@@ -521,29 +513,33 @@ public class AutoCalibrationManager implements Runnable {
 	{
 		Point topLeft = new Point(corners.get(0,0)[0], corners.get(0,0)[1]);
 		Point topRight = new Point(corners.get(PATTERN_WIDTH-1,0)[0], corners.get(PATTERN_WIDTH-1,0)[1]);
-		Point bottomRight = new Point(corners.get(PATTERN_WIDTH*PATTERN_HEIGHT-1,0)[0], corners.get(PATTERN_WIDTH*PATTERN_HEIGHT-1,0)[1]);
+		//Point bottomRight = new Point(corners.get(PATTERN_WIDTH*PATTERN_HEIGHT-1,0)[0], corners.get(PATTERN_WIDTH*PATTERN_HEIGHT-1,0)[1]);
 		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH*(PATTERN_HEIGHT-1),0)[0], corners.get(PATTERN_WIDTH*(PATTERN_HEIGHT-1),0)[1]);
 		
 		double width = Math.sqrt(Math.pow(topRight.x - topLeft.x,2) + Math.pow(topRight.y - topLeft.y,2));
 		double height = Math.sqrt(Math.pow(bottomLeft.x - topLeft.x,2) + Math.pow(bottomLeft.y - topLeft.y,2));
 		
-		logger.warn("center {} {}", topLeft.x+(width/2), topLeft.y+(height/2));
+		logger.debug("center {} {}", topLeft.x+(width/2), topLeft.y+(height/2));
 		
 		return new Point(topLeft.x+(width/2), topLeft.y+(height/2));
 	}
 	
-	private Optional<Bounds> calcBoundsFromDimensions(MatOfPoint2f corners)
+	/*private Optional<Bounds> calcBoundsFromDimensions(MatOfPoint2f corners)
 	{
 		Mat mat = calcMatBoundsFromDimensions(corners);
 		
+
+		
 		return Optional.of(new BoundingBox(mat.get(0, 0)[0], mat.get(0, 0)[1], mat.get(1, 0)[0]-mat.get(0, 0)[0], mat.get(2, 0)[1]-mat.get(1, 0)[1]));
-	}
+	}*/
 	
 	private Mat calcMatBoundsFromDimensions(MatOfPoint2f corners)
 	{
+		// TODO: HANDLE UPSIDE DOWN PATTERN
+		
 		Mat result = new Mat(4,1,CvType.CV_32FC2);
 		
-		double borderFactor = .25;
+		double borderFactor = .36;
 		
 		Point topLeft = new Point(corners.get(0,0)[0], corners.get(0,0)[1]);
 		Point topRight = new Point(corners.get(PATTERN_WIDTH-1,0)[0], corners.get(PATTERN_WIDTH-1,0)[1]);
@@ -556,7 +552,7 @@ public class AutoCalibrationManager implements Runnable {
 		//angle = int(math.atan((y1-y2)/(x2-x1))*180/math.pi)
 		double angle = Math.atan((topRight.y-topLeft.y)/(topRight.x-topLeft.x))*180/Math.PI;
 		
-		logger.warn("square size {} {} - angle {}", width/PATTERN_WIDTH, height/PATTERN_HEIGHT, angle);
+		logger.debug("square size {} {} - angle {}", width/PATTERN_WIDTH, height/PATTERN_HEIGHT, angle);
 		double squareWidth = (1+borderFactor)*(width/PATTERN_WIDTH);
 		double squareHeight = (1+borderFactor)*(height/PATTERN_HEIGHT);
 		
@@ -573,7 +569,7 @@ public class AutoCalibrationManager implements Runnable {
 	}
 	
 	
-	public Optional<Bounds> calcBounds(MatOfPoint2f corners)
+	/*public Optional<Bounds> calcBounds(MatOfPoint2f corners)
 	{
 		double borderFactor = .05;
 		
@@ -643,7 +639,7 @@ public class AutoCalibrationManager implements Runnable {
 		
 		
 		return Optional.of(new BoundingBox(minX, minY, width, height));
-	}
+	}*/
 
 	public BufferedImage undistortFrame(BufferedImage frame, int frameCount) {
 		if (!isCalibrated)

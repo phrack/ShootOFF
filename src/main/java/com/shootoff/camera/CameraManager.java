@@ -21,7 +21,6 @@ package com.shootoff.camera;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.imageio.ImageIO;
 
 import javafx.geometry.Bounds;
 
@@ -66,6 +63,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.Pair;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -448,9 +446,12 @@ public class CameraManager {
 							(int)b.getWidth(), (int)b.getHeight());
 				}
 				
+				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
 
-				if (!processFrame(currentFrame))
+				if (!pFramePair.getKey())
 					continue;
+				
+				currentFrame = pFramePair.getValue();
 
 				
 				if (recordingShots) {
@@ -498,12 +499,12 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 
-		private boolean processFrame(BufferedImage currentFrame)
+		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame)
 		{
 			incFrameCount();
 			
 			
-			if (autoCalibrationEnabled && (getFrameCount()%5==0))
+			if (autoCalibrationEnabled && (getFrameCount()%30==0))
 			{
 				fireAutoCalibration(currentFrame);
 			}
@@ -513,18 +514,10 @@ public class CameraManager {
 				currentFrame = acm.undistortFrame(currentFrame, getFrameCount());
 			}
 
-			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
+			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
 
 			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {		
-				/*File outputfile = new File(String.format("processFrame-%s.png",getFrameCount()));
-				try {
-					ImageIO.write(currentFrame, "png", outputfile);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
-				
 				
 				setFPS(webcam.get().getFPS());
 				
@@ -532,7 +525,7 @@ public class CameraManager {
 				checkIfMinimumFPS();
 			}
 
-			return result;
+			return new Pair<Boolean, BufferedImage>(result, currentFrame);
 		}
 		
 		private void setFPS(double newFPS)

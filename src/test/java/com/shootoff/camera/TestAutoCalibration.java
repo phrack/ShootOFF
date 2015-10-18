@@ -16,10 +16,10 @@ import org.junit.Test;
 import org.opencv.core.Core;
 
 import com.shootoff.camera.AutoCalibration.AutoCalibrationManager;
-import com.shootoff.config.Configuration;
+//import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 public class TestAutoCalibration {
-	private Configuration config;
+	//private Configuration config;
 	private AutoCalibrationManager acm;
 	
 	@Before
@@ -27,7 +27,7 @@ public class TestAutoCalibration {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
 		
-		config = new Configuration(new String[0]);
+		//config = new Configuration(new String[0]);
 		
 		acm = new AutoCalibrationManager();
 	}
@@ -55,16 +55,9 @@ public class TestAutoCalibration {
 			{
 				calibrated = true;
 				
-				BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				// Make sure this matches a saved image
+				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
 				
-				
-				File outputfile = new File(String.format("undistortFrame-%s.png",i));
-				try {
-					ImageIO.write(newFrame, "png", outputfile);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		}
 		
@@ -72,13 +65,13 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 40);
+		assertTrue((int)calibrationBounds.get().getMinX() == 38);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 189);
+		assertTrue((int)calibrationBounds.get().getMinY() == 187);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 298);
+		assertTrue((int)calibrationBounds.get().getWidth() == 303);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 207);
+		assertTrue((int)calibrationBounds.get().getHeight() == 210);
 
 	}
 
@@ -106,16 +99,9 @@ public class TestAutoCalibration {
 			{
 				calibrated = true;
 				
-				BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				// Make sure this matches a saved image
+				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
 				
-				
-				File outputfile = new File(String.format("undistortFrame-%s.png",i));
-				try {
-					ImageIO.write(newFrame, "png", outputfile);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		}
 		
@@ -123,13 +109,13 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 46);
+		assertTrue((int)calibrationBounds.get().getMinX() == 118);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 194);
+		assertTrue((int)calibrationBounds.get().getMinY() == 45);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 288);
+		assertTrue((int)calibrationBounds.get().getWidth() == 405);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 197);
+		assertTrue((int)calibrationBounds.get().getHeight() == 300);
 
 	}
 	
