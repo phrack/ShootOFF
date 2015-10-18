@@ -21,6 +21,7 @@ package com.shootoff.camera;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,8 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.imageio.ImageIO;
 
 import javafx.geometry.Bounds;
 
@@ -507,13 +510,22 @@ public class CameraManager {
 			
 			if (cameraAutoCalibrated)
 			{
-				acm.undistortFrame(currentFrame);
+				currentFrame = acm.undistortFrame(currentFrame, getFrameCount());
 			}
 
 			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
 
-			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {				
+			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {		
+				/*File outputfile = new File(String.format("processFrame-%s.png",getFrameCount()));
+				try {
+					ImageIO.write(currentFrame, "png", outputfile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
+				
+				
 				setFPS(webcam.get().getFPS());
 				
 

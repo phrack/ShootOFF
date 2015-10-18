@@ -1,7 +1,13 @@
 package com.shootoff.camera;
 
+import static org.junit.Assert.*;
+
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
+
+import javafx.geometry.Bounds;
 
 import javax.imageio.ImageIO;
 
@@ -27,14 +33,104 @@ public class TestAutoCalibration {
 	}
 	
 	@Test
-	public void testCalibrate() throws IOException {
+	public void testCalibratePaper() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-4-rotated.png"));
 
-		for (int i = 0; i < 6; i++)
-			acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		boolean calibrated = false;
+		
+		for (int i = 0; i <= 7; i++)
+		{
+			
+			if (!calibrated)
+			{
+				calibrationBounds = acm.processFrame(testFrame);
+				if (calibrationBounds.isPresent())
+					calibrated = true;
+			}
+			
+			else if (calibrated)
+			{
+				calibrated = true;
+				
+				BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				
+				
+				File outputfile = new File(String.format("undistortFrame-%s.png",i));
+				try {
+					ImageIO.write(newFrame, "png", outputfile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		assertEquals(true, calibrated);
+		
+		assertTrue(calibrationBounds.isPresent());
+		
+		assertTrue((int)calibrationBounds.get().getMinX() == 40);
 
-		// calibrate-4 should equal calibrate-undist-5
+		assertTrue((int)calibrationBounds.get().getMinY() == 189);
+
+		assertTrue((int)calibrationBounds.get().getWidth() == 298);
+
+		assertTrue((int)calibrationBounds.get().getHeight() == 207);
+
 	}
 
+	
+	@Test
+	public void testCalibrateProjection() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		boolean calibrated = false;
+		
+		for (int i = 0; i <= 7; i++)
+		{
+			
+			if (!calibrated)
+			{
+				calibrationBounds = acm.processFrame(testFrame);
+				if (calibrationBounds.isPresent())
+					calibrated = true;
+			}
+			
+			else if (calibrated)
+			{
+				calibrated = true;
+				
+				BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				
+				
+				File outputfile = new File(String.format("undistortFrame-%s.png",i));
+				try {
+					ImageIO.write(newFrame, "png", outputfile);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		assertEquals(true, calibrated);
+		
+		assertTrue(calibrationBounds.isPresent());
+		
+		assertTrue((int)calibrationBounds.get().getMinX() == 46);
+
+		assertTrue((int)calibrationBounds.get().getMinY() == 194);
+
+		assertTrue((int)calibrationBounds.get().getWidth() == 288);
+
+		assertTrue((int)calibrationBounds.get().getHeight() == 197);
+
+	}
+	
 }
