@@ -3,7 +3,6 @@ package com.shootoff.camera;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ public class TestAutoCalibration {
 		
 		boolean calibrated = false;
 		
-		for (int i = 0; i <= 7; i++)
+		for (int i = 0; i <= 5; i++)
 		{
 			
 			if (!calibrated)
@@ -65,13 +64,13 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 38);
+		assertTrue((int)calibrationBounds.get().getMinX() == 36);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 187);
+		assertTrue((int)calibrationBounds.get().getMinY() == 184);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 303);
+		assertTrue((int)calibrationBounds.get().getWidth() == 307);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 210);
+		assertTrue((int)calibrationBounds.get().getHeight() == 216);
 
 	}
 
@@ -85,7 +84,7 @@ public class TestAutoCalibration {
 		
 		boolean calibrated = false;
 		
-		for (int i = 0; i <= 7; i++)
+		for (int i = 0; i <= 5; i++)
 		{
 			
 			if (!calibrated)
@@ -109,13 +108,13 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 118);
+		assertTrue((int)calibrationBounds.get().getMinX() == 114);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 45);
+		assertTrue((int)calibrationBounds.get().getMinY() == 41);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 405);
+		assertTrue((int)calibrationBounds.get().getWidth() == 413);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 300);
+		assertTrue((int)calibrationBounds.get().getHeight() == 307);
 
 	}
 	
