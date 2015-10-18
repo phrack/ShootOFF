@@ -116,7 +116,6 @@ public class AutoCalibrationManager implements Runnable {
 			undistorted = warpPerspective(mat, imageCorners);
 			
 			// TODO: HANDLE UPSIDE DOWN PATTERN BY WARNING USER AND NOT CALIBRATING
-			// UPSIDE DOWN PATTERN CURRENTLY BREAKS EVERYTHING
 			
 			Optional<Bounds> bounds = Optional.of(boundingBox);
 			
