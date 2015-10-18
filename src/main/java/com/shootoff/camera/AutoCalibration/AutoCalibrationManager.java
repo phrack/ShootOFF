@@ -136,7 +136,7 @@ public class AutoCalibrationManager implements Runnable {
 			int width = (int) bounds.get().getWidth();
 			int height = (int) bounds.get().getHeight();
 			
-			logger.warn("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
+			logger.debug("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
 			
 			if (logger.isTraceEnabled())
 			{
