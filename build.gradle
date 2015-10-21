@@ -45,14 +45,22 @@ repositories {
 
 configurations {
     jfxant
+
+    // Some dependencies (webcam-capture and marytts?) pull in slf4j implementations that conflict
+    // with logback
+    compile.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
 }
 
 dependencies {
     jfxant files("$javaHome" + "/../lib/ant-javafx.jar")
 
-    // webcam-capture depends on slf4j, but uses and older and incomplete version that
-    // throws errors about missing a logger
-    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.12'
+    // Raven, exception reporting client (requires logback)
+    compile group: 'net.kencochrane.raven', name: 'raven-logback', version: '6.+'
+
+    // Logback to enable exception reporting
+    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.+'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
+
     // bridj is here because webcam-capture depends on it but fetches 0.6.2, which
     // does not play nicely with stackguard in newer versions of the JVM.
     compile group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'    

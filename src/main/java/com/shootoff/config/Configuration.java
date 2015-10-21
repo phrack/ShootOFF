@@ -50,8 +50,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.LoggerFactory;
 
-import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.DeduplicationProcessor;
@@ -61,6 +61,13 @@ import com.shootoff.camera.VirtualMagazineProcessor;
 import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.session.SessionRecorder;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
 
 public class Configuration {
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
@@ -574,21 +581,36 @@ public class Configuration {
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
 		
-		if (debugMode) {
-			String logLevel = System.getProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY);
-			if (logLevel == null) {
-				System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
-			} else if (!logLevel.toLowerCase().equals("trace")) {
-				System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
-			}
-			// Ensure WebcamDefaultDriver's logger stays at info because it is quite noisy
-			// and doesn't output information we care about.
-			System.setProperty(org.slf4j.impl.SimpleLogger.LOG_KEY_PREFIX + 
-					WebcamDefaultDriver.class.getName(), "INFO");
-		} else {
-			System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-		}
+		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		
+		if (debugMode) {
+			if (rootLogger.getLevel().equals(Level.TRACE)) {
+				return;
+			}
+			
+            LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+			PatternLayoutEncoder ple = new PatternLayoutEncoder();
+			
+			ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
+			ple.setContext(loggerContext);
+			ple.start();
+			ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+			consoleAppender.setEncoder(ple);
+			consoleAppender.setContext(loggerContext);
+			consoleAppender.start();
+			 
+			rootLogger.detachAndStopAllAppenders();
+			rootLogger.setAdditive(false);
+			rootLogger.addAppender(consoleAppender);
+			rootLogger.setLevel(Level.DEBUG);
+			
+			// Ensure webcam-capture logger stays at info because it is quite noisy
+			// and doesn't output information we care about.
+            Logger webcamCaptureLogger = (Logger)loggerContext.getLogger("com.github.sarxos");
+            webcamCaptureLogger.setLevel(Level.INFO);
+		} else {
+			rootLogger.setLevel(Level.WARN);
+		}
 	}
 	
 	public void setRecordingCameras(Set<Camera> recordingCameras) {

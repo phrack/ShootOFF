@@ -382,6 +382,8 @@ public class CanvasManager {
 		}
 		
 
+		logger.warn("SHOT");
+		
 		Optional<Shot> lastShot = Optional.empty();
 		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() -1).getShot());
 		
