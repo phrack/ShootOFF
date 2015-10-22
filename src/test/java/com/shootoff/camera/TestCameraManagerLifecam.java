@@ -31,7 +31,6 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
 		config = new Configuration(new String[0]);
-		config.setDebugMode(true);
 		mockManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 		
