@@ -84,7 +84,7 @@ public class TargetEditorController {
 	@FXML private ToggleButton tagsButton;
 	@FXML private ChoiceBox<String> regionColorChoiceBox;
 	
-	private static final Logger logger = LoggerFactory.getLogger(VideoPlayerController.class);
+	private static final Logger logger = LoggerFactory.getLogger(TargetEditorController.class);
 	
 	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
 	
