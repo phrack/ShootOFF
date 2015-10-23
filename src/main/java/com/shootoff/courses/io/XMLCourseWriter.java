@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class XMLCourseWriter implements CourseVisitor {
+	private static final Logger logger = LoggerFactory.getLogger(XMLCourseWriter.class);
+	
 	private final File courseFile;
 	private StringBuilder xmlBody = new StringBuilder();
 	
@@ -37,7 +42,7 @@ public class XMLCourseWriter implements CourseVisitor {
 			out.close();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error writing XML course", e);
 		}
 	}
 }

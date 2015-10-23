@@ -30,6 +30,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
@@ -38,6 +41,8 @@ import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
 
 public class ISSFStandardPistol extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
+	private static final Logger logger = LoggerFactory.getLogger(ISSFStandardPistol.class);
+	
 	private final static String SCORE_COL_NAME = "Score";
 	private final static int SCORE_COL_WIDTH = 60;
 	private final static String ROUND_COL_NAME = "Round";
@@ -234,7 +239,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 				endRound.cancel(true);
 				new EndRound().call();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Error ending current ISSF round (five shots detected)", e);
 			}
 		}
 		

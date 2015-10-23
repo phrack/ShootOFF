@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.gui.TagEditorPanel;
 import com.shootoff.gui.TargetListener;
 import com.shootoff.targets.EllipseRegion;
@@ -80,6 +83,8 @@ public class TargetEditorController {
 	@FXML private Button bringForwardButton;
 	@FXML private ToggleButton tagsButton;
 	@FXML private ChoiceBox<String> regionColorChoiceBox;
+	
+	private static final Logger logger = LoggerFactory.getLogger(VideoPlayerController.class);
 	
 	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
 	
@@ -483,7 +488,7 @@ public class TargetEditorController {
 					break;
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Error drawing target image region", e);
 			}
 		}
 		

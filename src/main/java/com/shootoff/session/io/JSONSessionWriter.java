@@ -27,10 +27,14 @@ import java.util.Optional;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Shot;
 
 public class JSONSessionWriter implements EventVisitor {
+	private final Logger logger = LoggerFactory.getLogger(JSONSessionWriter.class);
+	
 	private final File sessionFile;
 	private final JSONArray cameras = new JSONArray();
 	private JSONObject currentCamera;
@@ -163,12 +167,12 @@ public class JSONSessionWriter implements EventVisitor {
 			file.write(session.toJSONString());
 			file.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error writing JSON session", e);
 		} finally {
 			try {
 				if (file != null) file.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Error closing JSON session", e);
 			}
 					
 		}

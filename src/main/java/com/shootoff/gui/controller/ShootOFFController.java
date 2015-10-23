@@ -438,7 +438,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					try {
 						loader.load();
 					} catch (Exception e) {
-						e.printStackTrace();
+						logger.error("Error loading StreamDebugger FXML file", e);
 					}
 					
 					Stage streamDebuggerStage = new Stage();
@@ -937,7 +937,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			try {
 				ImageIO.write(renderedImage, extension, imageFile);
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("Error saving feed image", e);
 			}
 		}
 	}

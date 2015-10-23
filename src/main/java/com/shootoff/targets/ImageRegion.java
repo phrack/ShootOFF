@@ -25,12 +25,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.targets.animation.SpriteAnimation;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class ImageRegion extends ImageView implements TargetRegion {
+	private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
+	
 	private final Map<String, String> tags = new HashMap<String, String>();
 	private final File imageFile;
 	
@@ -46,7 +51,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 		try {
 			this.setImage(new Image(new FileInputStream(imageFile)));
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error reading image file to set image target region's picture", e);
 		}
 	}
 	

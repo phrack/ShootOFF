@@ -519,8 +519,7 @@ public final class ShotDetectionManager {
 			try {
 				ImageIO.write(workingCopy, "png", outputfile);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Error writing original shot detection image", e);
 			}
 			for (Pixel p : pc)
 			{
@@ -533,8 +532,7 @@ public final class ShotDetectionManager {
 			try {
 				ImageIO.write(workingCopy, "png", outputfile);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Error writing processed shot detection image", e);
 			}
 		}
 		

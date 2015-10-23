@@ -22,6 +22,9 @@ import java.util.Set;
 
 import javax.sound.sampled.AudioInputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import marytts.LocalMaryInterface;
 import marytts.MaryInterface;
 import marytts.exceptions.MaryConfigurationException;
@@ -29,6 +32,8 @@ import marytts.exceptions.SynthesisException;
 import marytts.util.data.audio.AudioPlayer;
 
 public final class TextToSpeech {
+	private static final Logger logger = LoggerFactory.getLogger(TextToSpeech.class);
+	
 	private static boolean inited = false;
 	private static boolean isSilenced = false;
 	private static MaryInterface marytts = null;
@@ -60,7 +65,7 @@ public final class TextToSpeech {
 			player.start();
 		} catch (MaryConfigurationException | 
 				SynthesisException e) {
-			e.printStackTrace();
+			logger.error("Error sythesizing text to voice", e);
 		}
 	}
 	
