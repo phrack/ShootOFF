@@ -248,6 +248,7 @@ public class CanvasManager {
 			try {
 			if (shotEntries != null) shotEntries.clear();
 			} catch (NullPointerException npe) {
+				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
 			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
@@ -396,6 +397,7 @@ public class CanvasManager {
 		try {
 			shotEntries.add(shotEntry);
 		} catch (NullPointerException npe) {
+			logger.error("JDK 8094135 exception", npe);
 			jdk8094135Warning();
 		}
 		

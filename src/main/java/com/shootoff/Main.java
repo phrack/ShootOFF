@@ -342,8 +342,11 @@ public class Main extends Application {
 					    
 					    File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 					    if (entry.isDirectory()) {
-					        if (!f.exists() && !f.mkdir()) 
-					        	throw new IOException("Failed to make directory while extracting JAR: " + entry.getName());
+					        if (!f.exists() && !f.mkdir()) {
+					        	IOException e = new IOException("Failed to make directory while extracting JAR: " + entry.getName());
+					        	logger.error("Error making directory to extract writable JAR contents", e);
+					        	throw e;
+					        }
 					    } else {			    	
 						    InputStream is = jar.getInputStream(entry);
 						    FileOutputStream fos = new FileOutputStream(f);
@@ -435,7 +438,7 @@ public class Main extends Application {
 			config = new Configuration(System.getProperty("shootoff.home") + File.separator + 
 					"shootoff.properties", args);
 		} catch (IOException | ConfigurationException e) {
-			logger.error("Error fetching ShootOFF configuration", e);
+			logger.error("Error fetching ShootOFF configuration to run ShootOFF", e);
 			return;
 		}
 		
