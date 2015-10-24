@@ -9,6 +9,8 @@ branches:
   - master
 before_script:
   - gradle --version
+  # Have ssh trust our deployment server
+  - echo -e "Host dev.shootoffapp.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 before_install:
   - sudo apt-get update -qq
   # Update Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class) 
