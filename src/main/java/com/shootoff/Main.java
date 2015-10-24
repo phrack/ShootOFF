@@ -458,6 +458,13 @@ public class Main extends Application {
 			}
 		}
 		
+		// This simply ensures that error reporting is turned off because
+		// once it's off it stays off
+		if (!config.useErrorReporting() && !config.inDebugMode()) {
+			config.disableErrorReporting();
+			logger.info("Error reporting has been disabled.");
+		}
+		
 		try {
 			FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
 		    loader.load();   

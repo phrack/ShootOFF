@@ -476,6 +476,12 @@ public class Configuration {
 	public void setUseErrorReporting(boolean useErrorReporting) {
 		this.useErrorReporting = useErrorReporting;
 	}
+	
+	public void disableErrorReporting() {
+		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+	    LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+	    setLogConsoleAppender(rootLogger, loggerContext);
+	}
  	
 	public void registerVideoPlayer(VideoPlayerController videoPlayer) {
 		videoPlayers.add(videoPlayer);
@@ -625,20 +631,8 @@ public class Configuration {
 				return;
 			}
 			
-            LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
-			PatternLayoutEncoder ple = new PatternLayoutEncoder();
-			
-			ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
-			ple.setContext(loggerContext);
-			ple.start();
-			ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
-			consoleAppender.setEncoder(ple);
-			consoleAppender.setContext(loggerContext);
-			consoleAppender.start();
-			 
-			rootLogger.detachAndStopAllAppenders();
-			rootLogger.setAdditive(false);
-			rootLogger.addAppender(consoleAppender);
+	        LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+	        setLogConsoleAppender(rootLogger, loggerContext);
 			rootLogger.setLevel(Level.DEBUG);
 			
 			// Ensure webcam-capture logger stays at info because it is quite noisy
@@ -648,6 +642,22 @@ public class Configuration {
 		} else {
 			rootLogger.setLevel(Level.WARN);
 		}
+	}
+	
+	private void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
+		PatternLayoutEncoder ple = new PatternLayoutEncoder();
+		
+		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
+		ple.setContext(loggerContext);
+		ple.start();
+		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+		consoleAppender.setEncoder(ple);
+		consoleAppender.setContext(loggerContext);
+		consoleAppender.start();
+		 
+		rootLogger.detachAndStopAllAppenders();
+		rootLogger.setAdditive(false);
+		rootLogger.addAppender(consoleAppender);
 	}
 	
 	public void setRecordingCameras(Set<Camera> recordingCameras) {
