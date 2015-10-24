@@ -51,10 +51,12 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -446,7 +448,7 @@ public class Main extends Application {
 		TextToSpeech.say("");
 		
 		if (config.isFirstRun()) {
-			showFirstRunMessage();
+			config.setUseErrorReporting(showFirstRunMessage());
 			
 			config.setFirstRun(false);
 			try {
@@ -472,18 +474,32 @@ public class Main extends Application {
 		}
     }
     
-    private void showFirstRunMessage() {
+    private boolean showFirstRunMessage() {
 		Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
 		shootoffWelcome.setTitle("Welcome to ShootOFF");
 		shootoffWelcome.setHeaderText("Please Ensure Your Firearm is Unloaded!");
 		shootoffWelcome.setResizable(true);
-		shootoffWelcome.setContentText("Thank you for choosing ShootOFF for your training needs. Please be careful to ensure "
-				+ "your firearm is not loaded every time you use ShootOFF. We are not liable for any negligent discharges "
-				+ "that may result for your use of this software.\n\n"
-				+ "We upload most errors that cause crashes to our servers to help us detect and fix common problems. We "
-				+ "do not include any personal information in these reports, but you may uncheck the checkbox below if you "
-				+ "do not want support this effort.");
+		
+		
+	    FlowPane fp = new FlowPane();
+	    Label lbl = new Label("Thank you for choosing ShootOFF for your training needs.\n"
+	    		+ "Please be careful to ensure your firearm is not loaded\n"
+	    		+ "every time you use ShootOFF. We are not liable for any\n"
+	    		+ "negligent discharges that may result from your use of this\n"
+	    		+ "software.\n\n"
+	    		+ "We upload most errors that cause crashes to our servers to\n"
+	    		+ "help us detect and fix common problems. We do not include any\n"
+	    		+ "personal information in these reports, but you may uncheck\n"
+	    		+ "the box below if you do not want support this effort.\n\n");
+		CheckBox useErrorReporting = new CheckBox("Allow ShootOFF to Send Error Reports");
+		useErrorReporting.setSelected(true);
+	    
+	    fp.getChildren().addAll(lbl, useErrorReporting);
+
+		shootoffWelcome.getDialogPane().contentProperty().set(fp);		
 		shootoffWelcome.showAndWait();	
+		
+		return useErrorReporting.isSelected();
     }
     
     public static void closeNoCamera() {

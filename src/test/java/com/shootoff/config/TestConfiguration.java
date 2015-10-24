@@ -23,6 +23,7 @@ public class TestConfiguration {
 	@Test
 	public void testConfirmDefaults() {
 		assertFalse(defaultConfig.isFirstRun());
+		assertTrue(defaultConfig.useErrorReporting());
 		assertEquals(0, defaultConfig.getWebcams().size());
 		assertEquals(4, defaultConfig.getMarkerRadius());
 		assertEquals(false, defaultConfig.ignoreLaserColor());
@@ -184,6 +185,7 @@ public class TestConfiguration {
 				"test.properties");
 
 		assertTrue(config.isFirstRun());
+		assertFalse(config.useErrorReporting());
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());

@@ -71,6 +71,7 @@ import ch.qos.logback.core.ConsoleAppender;
 
 public class Configuration {
 	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
+	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
 	private static final String RECORDING_WEBCAMS_PROP = "shootoff.webcams.recording";
@@ -106,6 +107,7 @@ public class Configuration {
 	private String configName;
 	
 	private boolean isFirstRun = false;
+	private boolean useErrorReporting = true;
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
 	private Map<String, Camera> webcams = new HashMap<String, Camera>();
 	private int markerRadius = 4;
@@ -211,9 +213,13 @@ public class Configuration {
 		}
 		
 		if (prop.containsKey(FIRST_RUN_PROP)) {
-			isFirstRun = Boolean.parseBoolean(prop.getProperty(FIRST_RUN_PROP));
+			setFirstRun(Boolean.parseBoolean(prop.getProperty(FIRST_RUN_PROP)));
 		} else {
 			setFirstRun(false);
+		}
+		
+		if (prop.containsKey(ERROR_REPORTING_PROP)) {
+			setUseErrorReporting(Boolean.parseBoolean(prop.getProperty(ERROR_REPORTING_PROP)));
 		}
 		
 		if (prop.containsKey(IPCAMS_PROP)) {
@@ -343,6 +349,7 @@ public class Configuration {
 		}		
 		
 		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
+		prop.setProperty(ERROR_REPORTING_PROP, String.valueOf(useErrorReporting));
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(RECORDING_WEBCAMS_PROP, recordingWebcamList.toString());
@@ -460,6 +467,14 @@ public class Configuration {
 	
 	public void setFirstRun(boolean isFirstRun) {
 		this.isFirstRun = isFirstRun;
+	}
+	
+	public boolean useErrorReporting() {
+		return useErrorReporting;
+	}
+	
+	public void setUseErrorReporting(boolean useErrorReporting) {
+		this.useErrorReporting = useErrorReporting;
 	}
  	
 	public void registerVideoPlayer(VideoPlayerController videoPlayer) {
