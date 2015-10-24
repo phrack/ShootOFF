@@ -122,7 +122,6 @@ task copyLibs(type:Copy) {
     exclude "*junit*.jar"
     exclude "*slf4j-log4j12*.jar"
     exclude "*freetts-de*.jar"
-    exclude "*logback*.jar"
 }
 
 task updateJars() {
