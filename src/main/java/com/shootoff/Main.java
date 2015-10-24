@@ -497,7 +497,7 @@ public class Main extends Application {
 	    		+ "We upload most errors that cause crashes to our servers to\n"
 	    		+ "help us detect and fix common problems. We do not include any\n"
 	    		+ "personal information in these reports, but you may uncheck\n"
-	    		+ "the box below if you do not want support this effort.\n\n");
+	    		+ "the box below if you do not want to support this effort.\n\n");
 		CheckBox useErrorReporting = new CheckBox("Allow ShootOFF to Send Error Reports");
 		useErrorReporting.setSelected(true);
 	    
