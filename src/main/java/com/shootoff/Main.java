@@ -445,6 +445,17 @@ public class Main extends Application {
 		// This initializes the TTS engine
 		TextToSpeech.say("");
 		
+		if (config.isFirstRun()) {
+			showFirstRunMessage();
+			
+			config.setFirstRun(false);
+			try {
+				config.writeConfigurationFile();
+			} catch (ConfigurationException | IOException e) {
+				logger.error("Error persisting firstrun = false in config", e);
+			}
+		}
+		
 		try {
 			FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
 		    loader.load();   
@@ -459,6 +470,20 @@ public class Main extends Application {
 			logger.error("Error loading ShootOFF FXML file", e);
 			return;
 		}
+    }
+    
+    private void showFirstRunMessage() {
+		Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
+		shootoffWelcome.setTitle("Welcome to ShootOFF");
+		shootoffWelcome.setHeaderText("Please Ensure Your Firearm is Unloaded!");
+		shootoffWelcome.setResizable(true);
+		shootoffWelcome.setContentText("Thank you for choosing ShootOFF for your training needs. Please be careful to ensure "
+				+ "your firearm is not loaded every time you use ShootOFF. We are not liable for any negligent discharges "
+				+ "that may result for your use of this software.\n\n"
+				+ "We upload most errors that cause crashes to our servers to help us detect and fix common problems. We "
+				+ "do not include any personal information in these reports, but you may uncheck the checkbox below if you "
+				+ "do not want support this effort.");
+		shootoffWelcome.showAndWait();	
     }
     
     public static void closeNoCamera() {

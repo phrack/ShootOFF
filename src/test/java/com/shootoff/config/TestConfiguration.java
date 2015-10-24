@@ -22,6 +22,7 @@ public class TestConfiguration {
 		
 	@Test
 	public void testConfirmDefaults() {
+		assertFalse(defaultConfig.isFirstRun());
 		assertEquals(0, defaultConfig.getWebcams().size());
 		assertEquals(4, defaultConfig.getMarkerRadius());
 		assertEquals(false, defaultConfig.ignoreLaserColor());
@@ -182,6 +183,7 @@ public class TestConfiguration {
 				TestConfiguration.class.getResourceAsStream("/test.properties"),
 				"test.properties");
 
+		assertTrue(config.isFirstRun());
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
@@ -220,6 +222,7 @@ public class TestConfiguration {
 				"-u", "25", "-f", "43.15" 
 			});
 		
+		assertFalse(config.isFirstRun());
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
@@ -239,6 +242,7 @@ public class TestConfiguration {
 				"--use-malfunctions", "43.15" 
 			});				
 
+		assertFalse(config.isFirstRun());
 		assertEquals(4, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());

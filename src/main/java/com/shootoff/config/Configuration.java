@@ -70,6 +70,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 
 public class Configuration {
+	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
 	private static final String RECORDING_WEBCAMS_PROP = "shootoff.webcams.recording";
@@ -104,6 +105,7 @@ public class Configuration {
 	private InputStream configInput;
 	private String configName;
 	
+	private boolean isFirstRun = false;
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
 	private Map<String, Camera> webcams = new HashMap<String, Camera>();
 	private int markerRadius = 4;
@@ -206,6 +208,12 @@ public class Configuration {
 		} else {
 			throw new FileNotFoundException("Could not read configuration file " +
 					configName);
+		}
+		
+		if (prop.containsKey(FIRST_RUN_PROP)) {
+			isFirstRun = Boolean.parseBoolean(prop.getProperty(FIRST_RUN_PROP));
+		} else {
+			setFirstRun(false);
 		}
 		
 		if (prop.containsKey(IPCAMS_PROP)) {
@@ -334,6 +342,7 @@ public class Configuration {
 			recordingWebcamList.append(c.getName());
 		}		
 		
+		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(RECORDING_WEBCAMS_PROP, recordingWebcamList.toString());
@@ -445,6 +454,14 @@ public class Configuration {
 		}
 	}
 	
+	public boolean isFirstRun() {
+		return isFirstRun;
+	}
+	
+	public void setFirstRun(boolean isFirstRun) {
+		this.isFirstRun = isFirstRun;
+	}
+ 	
 	public void registerVideoPlayer(VideoPlayerController videoPlayer) {
 		videoPlayers.add(videoPlayer);
 	}
@@ -580,6 +597,11 @@ public class Configuration {
 
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
+		
+		if (debugMode) {
+			// Ignore first run operations if we are running in debug mode
+			setFirstRun(false);
+		}
 		
 		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		
