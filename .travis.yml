@@ -23,5 +23,5 @@ before_install:
   - export DISPLAY=:99.0
 after_success:
   - gradle zipRelease -x test
-  - mv shootoff-*-final.zip shootoff-nightly-$(date +'%m%d%Y').zip
-  - sshpass -p $SSHPASS scp shootoff-nightly-$(date +'%m%d%Y').zip nightlies@dev.shootoffapp.com:~/continuous-deployment-page/nightlies
+  - mv build/dist/shootoff-*-final.zip shootoff-nightly-$(date +'%m%d%Y').zip
+  - sshpass -e scp shootoff-nightly-$(date +'%m%d%Y').zip nightlies@dev.shootoffapp.com:~/continuous-deployment-page/nightlies
