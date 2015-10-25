@@ -52,6 +52,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.DeduplicationProcessor;
@@ -417,7 +418,7 @@ public class Configuration {
 			System.err.println(e.getMessage());
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("com.shootoff.Main", options);
-			System.exit(-1);
+			Main.forceClose(-1);
 		}
 		
 		validateConfiguration();

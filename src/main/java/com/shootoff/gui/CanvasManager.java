@@ -513,9 +513,9 @@ public class CanvasManager {
 							
 							int adjustedX = (int)(shot.getX() - nodeBounds.getMinX());
 							int adjustedY = (int)(shot.getY() - nodeBounds.getMinY());
-							
-							if (currentImage.getWidth() != nodeBounds.getWidth() ||
-									currentImage.getHeight() != nodeBounds.getHeight()) {
+							 
+							if (Math.abs(currentImage.getWidth() - nodeBounds.getWidth()) > .0000001 ||
+									Math.abs(currentImage.getHeight() - nodeBounds.getHeight()) > .0000001) {
 							
 								BufferedImage bufferedOriginal = SwingFXUtils.fromFXImage(currentImage, null);
 								

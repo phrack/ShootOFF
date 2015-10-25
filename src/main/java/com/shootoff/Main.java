@@ -283,7 +283,7 @@ public class Main extends Application {
         		con.disconnect();
         		if (task.getValue()) {
         			try {
-        				PrintWriter out = new PrintWriter(resourcesMetadataFile);
+        				PrintWriter out = new PrintWriter(resourcesMetadataFile, "UTF-8");
         				out.print(ri.getXML());
         				out.close();
         			} catch (IOException e) {
@@ -351,11 +351,11 @@ public class Main extends Application {
 					        }
 					    } else {			    	
 						    InputStream is = jar.getInputStream(entry);
-						    FileOutputStream fos = new FileOutputStream(f);
-						    while (is.available() > 0) {
-						        fos.write(is.read());
+						    try (FileOutputStream fos = new FileOutputStream(f)) {
+							    while (is.available() > 0) {
+							        fos.write(is.read());
+							    }
 						    }
-						    fos.close();
 						    is.close();
 						    
 						    currentCount++;
@@ -433,6 +433,10 @@ public class Main extends Application {
         }
     }
 	
+    public static void forceClose(int status) {
+    	System.exit(status);
+    }
+    
     public void runShootOFF() {
 		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
 		Configuration config;
@@ -516,7 +520,7 @@ public class Main extends Application {
 		cameraAlert.setResizable(true);
 		cameraAlert.setContentText("ShootOFF needs a webcam to function. Now closing...");
 		cameraAlert.showAndWait();
-		System.exit(-1);
+		Main.forceClose(-1);
     }
     
 	@Override

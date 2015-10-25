@@ -182,7 +182,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				}
 			}
 			
-			if (!config.inDebugMode()) System.exit(0);
+			if (!config.inDebugMode()) Main.forceClose(0);
 		});
 		
 		if (config.getWebcams().isEmpty()) {
@@ -352,7 +352,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		if (allCamerasFailed) {
 			cameraAlert.showAndWait();
-			System.exit(-1);
+			Main.forceClose(-1);
 		} else {
 			cameraAlert.show();
 		}
