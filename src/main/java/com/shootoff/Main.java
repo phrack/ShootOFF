@@ -528,12 +528,19 @@ public class Main extends Application {
 	}
 	
 	public static void main(String[] args) {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
-		
 		// Check the comment at the top of the Camera class
 		// for more information about this hack
 		String os = System.getProperty("os.name"); 
+		
+		System.err.println(os);
+		
+		if (os != null && !os.split(" ")[0].equals("Windows"))
+			nu.pattern.OpenCV.loadLibrary();
+		
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		
+
 		if (os != null && os.equals("Mac OS X")) {
 			Camera.getDefault();
 		}

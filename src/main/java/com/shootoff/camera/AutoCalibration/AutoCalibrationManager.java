@@ -18,7 +18,7 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,7 +110,7 @@ public class AutoCalibrationManager implements Runnable {
 				String filename = String.format("calibrate-dist-%s.png",seenChessboards);
 				File file = new File(filename);
 				filename = file.toString();
-				Imgcodecs.imwrite(filename, mat);
+				Highgui.imwrite(filename, mat);
 			}
 			
 			undistorted = warpPerspective(mat, imageCorners);
@@ -124,7 +124,7 @@ public class AutoCalibrationManager implements Runnable {
 				String filename = String.format("calibrate-undist-%s.png",seenChessboards);
 				File file = new File(filename);
 				filename = file.toString();
-				Imgcodecs.imwrite(filename, undistorted);
+				Highgui.imwrite(filename, undistorted);
 			}
 			
 			if (!bounds.isPresent())
@@ -145,7 +145,7 @@ public class AutoCalibrationManager implements Runnable {
 				String filename = String.format("calibrate-undist-cropped-%s.png",seenChessboards);
 				File file = new File(filename);
 				filename = file.toString();
-				Imgcodecs.imwrite(filename, undistorted);
+				Highgui.imwrite(filename, undistorted);
 			}
 			
 			isCalibrated = true;
@@ -198,7 +198,7 @@ public class AutoCalibrationManager implements Runnable {
 				String filename = String.format("calibrate-marked-%s.png",seenChessboards);
 				File file = new File(filename);
 				filename = file.toString();
-				Imgcodecs.imwrite(filename, mat);
+				Highgui.imwrite(filename, mat);
 			}
 			
 			logger.debug("found {}", found);
