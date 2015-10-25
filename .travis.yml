@@ -1,18 +1,29 @@
 language: java
 jdk: oraclejdk8
 sudo: required
+env:
+  global:
+    secure: Y5Os/RZCM+3WQ0G01dsexQGEb9RcsDD0Zlww6ZgD+h0gmbLQOFsEHNqnUpmAe5MbLCiFA1S2T2q+tWpg03wOCvnyR5LsnaZ1s/4z0t/hVrKI915zudv1bmy3ZV/3IyqOH+DbIQoftmsddIAf7G4eTCJ6NV7E7JiF+ks+Q2d46O+LZndCe/oR7el/sIVqmZSz5k3h+o/gyTpubh+1Y7NGfqcWqrDqS5yrWrWd8/Cpdh01lOB2OgX6Od2o0swZM1kT0Y/vmH+3pbBNf42U1ZR0u0JXy1VT7zAFxVeJUPtSPCV/uJC3HbbWRwBD6o7U7Tm1VTSarvw/62e4/9LAIGfESKQlJ/PZSmNwOF6SO7tK7AuWDuXGRFYyjhsML030easRe1IeweBMowxzx9sIawwrnT3t6KZ8tDc2uzANyEQ6lfQt137ADpUrVX27LBC4ozXh53oN5CsCi5FWSKKArnQlPvDlwAkRS/kmNmnhVoccjtHvMJoLau0BYpseKFiqMY9NrQhh/TMYBJf19sBWHy6NO4W67LpNmni6feMgV0yGp27Int+Pu16f+KyxUCLUCoraLqdMcbuA9NlUTzm2+vx5/dZN0uaEzGRmbnCMCN/LbHStDJxr3XJS8bhSF18Igv0yEz0TKc0+M+uUbqCk3WNhzutr403Ymgy51TwsXWeuXTY=
 branches:
   only:
-    - master
+  - master
 before_script:
   - gradle --version
+  # Have ssh trust our deployment server
+  - echo -e "Host dev.shootoffapp.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 before_install:
-  # Update Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class)
   - sudo apt-get update -qq
+  # Update Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class) 
   - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
   - sudo apt-get install -qq --only-upgrade -y gradle
   # Required by the version of OpenIMAJ used by webcam-capture
   - sudo apt-get install -qq -y libv4l-dev
   - sudo apt-get install -qq -y xvfb x11-xkb-utils libxrender-dev libxtst-dev libgtk2.0-0
+  # Required to use scp on command line
+  - sudo apt-get install -qq -y sshpass
   - nohup Xvfb :99 -ac &
   - export DISPLAY=:99.0
+after_success:
+  - gradle zipRelease -x test
+  - mv build/dist/shootoff-*-final.zip shootoff-nightly-$(date +'%m%d%Y').zip
+  - sshpass -e scp shootoff-nightly-$(date +'%m%d%Y').zip nightlies@dev.shootoffapp.com:~/continuous-deployment-page/nightlies

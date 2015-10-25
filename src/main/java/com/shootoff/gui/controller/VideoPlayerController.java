@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.gui.PlaybackListener;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -38,6 +41,8 @@ public class VideoPlayerController implements PlaybackListener {
 	@FXML private Slider timeSlider;
 	@FXML private Label timeLabel;
 	@FXML private Button togglePlaybackButton;
+	
+	private static final Logger logger = LoggerFactory.getLogger(VideoPlayerController.class);
 	
 	private final Map<String, PlaybackContext> contexts = new HashMap<String, PlaybackContext>();
 	private PlaybackContext currentContext;
@@ -126,7 +131,7 @@ public class VideoPlayerController implements PlaybackListener {
 					long delay = currentTimestamp - lastTimestamp;
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					logger.error("Error while reading video frames", e);
 				}
 			}
 			

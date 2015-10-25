@@ -33,6 +33,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.session.Event;
@@ -46,6 +48,8 @@ import com.shootoff.session.TargetResizedEvent;
 import javafx.scene.paint.Color;
 
 public class JSONSessionReader {
+	private final Logger logger = LoggerFactory.getLogger(JSONSessionReader.class);
+	
 	private final File sessionFile;
 	
 	public JSONSessionReader(File sessionFile) {
@@ -156,7 +160,7 @@ public class JSONSessionReader {
 			}
 			
 		} catch (IOException | ParseException e) {
-			e.printStackTrace();
+			logger.error("Error reading JSON session", e);
 		}
 		
 		return events;

@@ -248,6 +248,7 @@ public class CanvasManager {
 			try {
 			if (shotEntries != null) shotEntries.clear();
 			} catch (NullPointerException npe) {
+				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
 			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
@@ -381,7 +382,6 @@ public class CanvasManager {
 			notifyShot(shot);
 		}
 		
-
 		Optional<Shot> lastShot = Optional.empty();
 		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() -1).getShot());
 		
@@ -397,6 +397,7 @@ public class CanvasManager {
 		try {
 			shotEntries.add(shotEntry);
 		} catch (NullPointerException npe) {
+			logger.error("JDK 8094135 exception", npe);
 			jdk8094135Warning();
 		}
 		
@@ -512,9 +513,9 @@ public class CanvasManager {
 							
 							int adjustedX = (int)(shot.getX() - nodeBounds.getMinX());
 							int adjustedY = (int)(shot.getY() - nodeBounds.getMinY());
-							
-							if (currentImage.getWidth() != nodeBounds.getWidth() ||
-									currentImage.getHeight() != nodeBounds.getHeight()) {
+							 
+							if (Math.abs(currentImage.getWidth() - nodeBounds.getWidth()) > .0000001 ||
+									Math.abs(currentImage.getHeight() - nodeBounds.getHeight()) > .0000001) {
 							
 								BufferedImage bufferedOriginal = SwingFXUtils.fromFXImage(currentImage, null);
 								

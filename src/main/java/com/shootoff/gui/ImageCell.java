@@ -27,6 +27,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.camera.Camera;
 
 import javafx.beans.value.ChangeListener;
@@ -38,6 +41,8 @@ import javafx.scene.image.ImageView;
 import javafx.util.converter.DefaultStringConverter;
 
 public class ImageCell extends TextFieldListCell<String> {
+	private final Logger logger = LoggerFactory.getLogger(ImageCell.class);
+	
 	private static final Map<Camera, ImageView> imageCache = new HashMap<Camera, ImageView>();
 	private final List<Camera> webcams;
 	private final List<String> userDefinedCameraNames;
@@ -150,12 +155,17 @@ public class ImageCell extends TextFieldListCell<String> {
         		}
         	}
         } else {
-            int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
-            if (cameraIndex >= 0) {
-            	webcamIV = Optional.of(imageCache.get(webcams.get(cameraIndex)));	
-            }
+        	try {
+	            int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
+	            if (cameraIndex >= 0) {
+	            	webcamIV = Optional.of(imageCache.get(webcams.get(cameraIndex)));	
+	            }
+        	} catch (NullPointerException e) {
+        		logger.error("Error fetching cached image for configured camera: " + webcamName, e);
+        		throw e;
+        	}
         }
-        
+ 
         return webcamIV;
     }
     

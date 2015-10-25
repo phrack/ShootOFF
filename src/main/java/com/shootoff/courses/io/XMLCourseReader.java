@@ -12,6 +12,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -28,6 +30,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
 public class XMLCourseReader {
+	private static final Logger logger = LoggerFactory.getLogger(XMLCourseReader.class);
+	
 	private final ProjectorArenaController arenaController;
 	private final File courseFile;
 	
@@ -54,13 +58,13 @@ public class XMLCourseReader {
 			
 			return Optional.of(c);
 		} catch (IOException | ParserConfigurationException | SAXException e) {
-			e.printStackTrace();
+			logger.error("Error reading XML course", e);
 		} finally {
 			if (xmlInput != null) {
 				try {
 					xmlInput.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Error closing XML course opened for reading", e);
 				}
 			}
 		}

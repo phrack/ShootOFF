@@ -31,6 +31,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -49,6 +51,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class XMLTargetReader {
+	private static final Logger logger = LoggerFactory.getLogger(XMLTargetReader.class);
+	
 	private final File targetFile;
 	
 	public XMLTargetReader(File targetFile) {
@@ -65,13 +69,13 @@ public class XMLTargetReader {
 			
 			return handler.getRegions();
 		} catch (IOException | ParserConfigurationException | SAXException e) {
-			e.printStackTrace();
+			logger.error("Error reading XML target", e);
 		} finally {
 			if (xmlInput != null) {
 				try {
 					xmlInput.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Error closing XMl target opened for reading", e);
 				}
 			}
 		}
@@ -125,7 +129,7 @@ public class XMLTargetReader {
 						animation.play();
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Error reading animation from XML target", e);
 				}
 				
 				currentRegion = imageRegion;

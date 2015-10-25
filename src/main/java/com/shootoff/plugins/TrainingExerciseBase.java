@@ -34,6 +34,9 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
@@ -63,6 +66,8 @@ import javafx.util.Callback;
  * @author phrack
  */
 public class TrainingExerciseBase {
+	private static final Logger logger = LoggerFactory.getLogger(TrainingExerciseBase.class);
+	
 	private static boolean isSilenced = false;
 	
 	@SuppressWarnings("unused")
@@ -132,7 +137,7 @@ public class TrainingExerciseBase {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error reading DelayedStartInterval FXML file", e);
 		}
 		
 		Stage delayedStartIntervalStage = new Stage();
@@ -269,8 +274,9 @@ public class TrainingExerciseBase {
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error reading sound file to play", e);
 		}
+		
 		if (audioInputStream != null) {
 			AudioFormat format = audioInputStream.getFormat();
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
@@ -291,7 +297,7 @@ public class TrainingExerciseBase {
 				}
 			} catch (LineUnavailableException | IOException e) {
 				if (clip != null) clip.close();
-				e.printStackTrace();
+				logger.error("Error playing sound clip", e);
 			}
 		} 
 	}

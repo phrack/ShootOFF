@@ -50,8 +50,9 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.LoggerFactory;
 
-import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
+import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.DeduplicationProcessor;
@@ -62,7 +63,16 @@ import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.session.SessionRecorder;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+
 public class Configuration {
+	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
+	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
 	private static final String RECORDING_WEBCAMS_PROP = "shootoff.webcams.recording";
@@ -97,6 +107,8 @@ public class Configuration {
 	private InputStream configInput;
 	private String configName;
 	
+	private boolean isFirstRun = false;
+	private boolean useErrorReporting = true;
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
 	private Map<String, Camera> webcams = new HashMap<String, Camera>();
 	private int markerRadius = 4;
@@ -199,6 +211,16 @@ public class Configuration {
 		} else {
 			throw new FileNotFoundException("Could not read configuration file " +
 					configName);
+		}
+		
+		if (prop.containsKey(FIRST_RUN_PROP)) {
+			setFirstRun(Boolean.parseBoolean(prop.getProperty(FIRST_RUN_PROP)));
+		} else {
+			setFirstRun(false);
+		}
+		
+		if (prop.containsKey(ERROR_REPORTING_PROP)) {
+			setUseErrorReporting(Boolean.parseBoolean(prop.getProperty(ERROR_REPORTING_PROP)));
 		}
 		
 		if (prop.containsKey(IPCAMS_PROP)) {
@@ -327,6 +349,8 @@ public class Configuration {
 			recordingWebcamList.append(c.getName());
 		}		
 		
+		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
+		prop.setProperty(ERROR_REPORTING_PROP, String.valueOf(useErrorReporting));
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(RECORDING_WEBCAMS_PROP, recordingWebcamList.toString());
@@ -394,7 +418,7 @@ public class Configuration {
 			System.err.println(e.getMessage());
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("com.shootoff.Main", options);
-			System.exit(-1);
+			Main.forceClose(-1);
 		}
 		
 		validateConfiguration();
@@ -438,6 +462,28 @@ public class Configuration {
 		}
 	}
 	
+	public boolean isFirstRun() {
+		return isFirstRun;
+	}
+	
+	public void setFirstRun(boolean isFirstRun) {
+		this.isFirstRun = isFirstRun;
+	}
+	
+	public boolean useErrorReporting() {
+		return useErrorReporting;
+	}
+	
+	public void setUseErrorReporting(boolean useErrorReporting) {
+		this.useErrorReporting = useErrorReporting;
+	}
+	
+	public void disableErrorReporting() {
+		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+	    LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+	    setLogConsoleAppender(rootLogger, loggerContext);
+	}
+ 	
 	public void registerVideoPlayer(VideoPlayerController videoPlayer) {
 		videoPlayers.add(videoPlayer);
 	}
@@ -575,20 +621,44 @@ public class Configuration {
 		this.debugMode = debugMode;
 		
 		if (debugMode) {
-			String logLevel = System.getProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY);
-			if (logLevel == null) {
-				System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
-			} else if (!logLevel.toLowerCase().equals("trace")) {
-				System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
-			}
-			// Ensure WebcamDefaultDriver's logger stays at info because it is quite noisy
-			// and doesn't output information we care about.
-			System.setProperty(org.slf4j.impl.SimpleLogger.LOG_KEY_PREFIX + 
-					WebcamDefaultDriver.class.getName(), "INFO");
-		} else {
-			System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
+			// Ignore first run operations if we are running in debug mode
+			setFirstRun(false);
 		}
 		
+		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		
+		if (debugMode) {
+			if (rootLogger.getLevel().equals(Level.TRACE)) {
+				return;
+			}
+			
+	        LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+	        setLogConsoleAppender(rootLogger, loggerContext);
+			rootLogger.setLevel(Level.DEBUG);
+			
+			// Ensure webcam-capture logger stays at info because it is quite noisy
+			// and doesn't output information we care about.
+            Logger webcamCaptureLogger = (Logger)loggerContext.getLogger("com.github.sarxos");
+            webcamCaptureLogger.setLevel(Level.INFO);
+		} else {
+			rootLogger.setLevel(Level.WARN);
+		}
+	}
+	
+	private void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
+		PatternLayoutEncoder ple = new PatternLayoutEncoder();
+		
+		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
+		ple.setContext(loggerContext);
+		ple.start();
+		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+		consoleAppender.setEncoder(ple);
+		consoleAppender.setContext(loggerContext);
+		consoleAppender.start();
+		 
+		rootLogger.detachAndStopAllAppenders();
+		rootLogger.setAdditive(false);
+		rootLogger.addAppender(consoleAppender);
 	}
 	
 	public void setRecordingCameras(Set<Camera> recordingCameras) {

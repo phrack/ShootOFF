@@ -24,7 +24,12 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class XMLTargetWriter implements RegionVisitor {
+	private final Logger logger = LoggerFactory.getLogger(XMLTargetWriter.class);
+	
 	private final File targetFile;
 	private StringBuilder xmlBody = new StringBuilder();
 	
@@ -110,7 +115,7 @@ public class XMLTargetWriter implements RegionVisitor {
 			out.close();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error writing XML target", e);
 		}
 	}
 }
