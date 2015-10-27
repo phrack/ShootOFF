@@ -10,11 +10,13 @@ import javafx.geometry.Bounds;
 import javafx.util.Callback;
 
 import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
@@ -22,6 +24,7 @@ import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 
@@ -118,7 +121,7 @@ public class AutoCalibrationManager implements Runnable {
 			// TODO: HANDLE UPSIDE DOWN PATTERN BY WARNING USER AND NOT CALIBRATING
 			
 			Optional<Bounds> bounds = Optional.of(boundingBox);
-			
+
 			if (logger.isTraceEnabled())
 			{
 				String filename = String.format("calibrate-undist-%s.png",seenChessboards);
@@ -131,21 +134,75 @@ public class AutoCalibrationManager implements Runnable {
 				return Optional.empty();
 			
 			
-			int minX = (int) bounds.get().getMinX();
+			/*int minX = (int) bounds.get().getMinX();
 			int minY = (int) bounds.get().getMinY();
 			int width = (int) bounds.get().getWidth();
-			int height = (int) bounds.get().getHeight();
+			int height = (int) bounds.get().getHeight();*/
+			int maxX = 0, maxY = 0, minX = CameraManager.FEED_WIDTH, minY = CameraManager.FEED_HEIGHT;
 			
-			logger.debug("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
+			
+			Mat lines = new Mat();
+		    Mat grey = new Mat();
+		    Imgproc.cvtColor(undistorted, grey, Imgproc.COLOR_BGR2GRAY);
+		    
+		    Mat dst = new Mat();
+			Imgproc.Canny(grey, grey, 300, 600); 
+
+			Imgproc.HoughLinesP(grey, lines, 1, Math.PI/180, 500, bounds.get().getHeight(), 10);
+			
+			logger.warn("houghlines {} {}", lines.rows(), lines.cols());
+			
+			for (int i = 0; i < lines.cols(); i++)
+			{
+				
+				double houghWidth = Math.abs(lines.get(0, i)[2] - lines.get(0, i)[0]);
+				double houghHeight = Math.abs(lines.get(0, i)[3] - lines.get(0, i)[1]);
+				if (houghWidth > bounds.get().getWidth() || houghHeight > bounds.get().getHeight())
+				{
+					logger.warn("houghlines {} - {} {}", lines.get(0, i), houghWidth, houghHeight);
+					Core.line(mat, new Point(lines.get(0, i)[0], lines.get(0, i)[1]), new Point(lines.get(0, i)[2], lines.get(0, i)[3]), new Scalar(255, 0, 0));
+					
+					if (lines.get(0, i)[0] < minX)
+						minX = (int) lines.get(0, i)[0];
+					if (lines.get(0, i)[2] < minX)
+						minX = (int) lines.get(0, i)[2];
+					if (lines.get(0, i)[1] < minY)
+						minY = (int) lines.get(0, i)[1];
+					if (lines.get(0, i)[3] < minY)
+						minY = (int) lines.get(0, i)[3];
+					
+					if (lines.get(0, i)[0] > maxX)
+						maxX = (int) lines.get(0, i)[0];
+					if (lines.get(0, i)[2] > maxX)
+						maxX = (int) lines.get(0, i)[2];
+					if (lines.get(0, i)[1] > maxY)
+						maxY = (int) lines.get(0, i)[1];
+					if (lines.get(0, i)[3] > maxY)
+						maxY = (int) lines.get(0, i)[3];
+				}
+				
+				
+			}
+			
+			logger.warn("boundslines {} {} {} {}", minX, minY, maxX, maxY);
+			
+			
+			String filename = String.format("calibrate-undist-lines-%s.png",seenChessboards);
+			File file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, mat);
+			
+			
+			logger.warn("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
 			
 			if (logger.isTraceEnabled())
 			{
-				undistorted = undistorted.submat(minY, minY+height, minX, minX+width);
+				/*undistorted = undistorted.submat(minY, minY+height, minX, minX+width);
 				
 				String filename = String.format("calibrate-undist-cropped-%s.png",seenChessboards);
 				File file = new File(filename);
 				filename = file.toString();
-				Highgui.imwrite(filename, undistorted);
+				Highgui.imwrite(filename, undistorted);*/
 			}
 			
 			isCalibrated = true;
@@ -266,8 +323,6 @@ public class AutoCalibrationManager implements Runnable {
 			
 			boundingBox = new BoundingBox(box.boundingRect().x, box.boundingRect().y, box.boundingRect().width, box.boundingRect().height);
 			
-			realCenter = new Point(image.rows()/2, image.cols()/2);
-			
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("bounds {} - {} - {}", bounds.get(0, 0), cropsrc.get(0, 0), cropdst.get(0, 0));
@@ -315,12 +370,14 @@ public class AutoCalibrationManager implements Runnable {
 		
 		Mat result = new Mat(4,1,CvType.CV_32FC2);
 		
-		double borderFactor = .36;
+		double borderFactor = 0;
 		
 		Point topLeft = new Point(corners.get(0,0)[0], corners.get(0,0)[1]);
 		Point topRight = new Point(corners.get(PATTERN_WIDTH-1,0)[0], corners.get(PATTERN_WIDTH-1,0)[1]);
 		Point bottomRight = new Point(corners.get(PATTERN_WIDTH*PATTERN_HEIGHT-1,0)[0], corners.get(PATTERN_WIDTH*PATTERN_HEIGHT-1,0)[1]);
 		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH*(PATTERN_HEIGHT-1),0)[0], corners.get(PATTERN_WIDTH*(PATTERN_HEIGHT-1),0)[1]);
+		
+		logger.warn("points {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
 		
 		double width = Math.sqrt(Math.pow(topRight.x - topLeft.x,2) + Math.pow(topRight.y - topLeft.y,2));
 		double height = Math.sqrt(Math.pow(bottomLeft.x - topLeft.x,2) + Math.pow(bottomLeft.y - topLeft.y,2));
@@ -328,11 +385,11 @@ public class AutoCalibrationManager implements Runnable {
 		//angle = int(math.atan((y1-y2)/(x2-x1))*180/math.pi)
 		double angle = Math.atan((topRight.y-topLeft.y)/(topRight.x-topLeft.x))*180/Math.PI;
 		
-		if (logger.isTraceEnabled())
-			logger.trace("square size {} {} - angle {}", width/PATTERN_WIDTH, height/PATTERN_HEIGHT, angle);
+		//if (logger.isTraceEnabled())
+		logger.warn("square size {} {} - angle {}", width/(PATTERN_WIDTH-1), height/(PATTERN_HEIGHT-1), angle);
 		
-		double squareWidth = (1+borderFactor)*(width/PATTERN_WIDTH);
-		double squareHeight = (1+borderFactor)*(height/PATTERN_HEIGHT);
+		double squareWidth = (1+borderFactor)*(width/(PATTERN_WIDTH-1));
+		double squareHeight = (1+borderFactor)*(height/(PATTERN_HEIGHT-1));
 		
 		double[] newTopLeft = { topLeft.x - squareWidth, topLeft.y - squareHeight };
 		double[] newBottomLeft = { bottomLeft.x - squareWidth, bottomLeft.y + squareHeight };

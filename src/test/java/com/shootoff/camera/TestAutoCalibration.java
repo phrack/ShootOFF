@@ -118,4 +118,41 @@ public class TestAutoCalibration {
 
 	}
 	
+	
+	
+	@Test
+	public void testCalibratePattern() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/pattern_with_line.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		boolean calibrated = false;
+		
+		for (int i = 0; i <= 5; i++)
+		{
+			
+			if (!calibrated)
+			{
+				calibrationBounds = acm.processFrame(testFrame);
+				if (calibrationBounds.isPresent())
+					calibrated = true;
+			}
+			
+			else if (calibrated)
+			{
+				calibrated = true;
+				
+				// Make sure this matches a saved image
+				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				
+			}
+		}
+		
+		assertEquals(true, calibrated);
+		
+		assertTrue(calibrationBounds.isPresent());
+
+	}
 }
+

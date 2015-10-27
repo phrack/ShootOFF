@@ -586,8 +586,7 @@ public class Main extends Application {
 		// for more information about this hack
 		String os = System.getProperty("os.name"); 
 		
-		System.err.println(os);
-		
+		// Windows doesn't use the library provided by Pattern
 		if (os != null && !os.split(" ")[0].equals("Windows"))
 			nu.pattern.OpenCV.loadLibrary();
 		
