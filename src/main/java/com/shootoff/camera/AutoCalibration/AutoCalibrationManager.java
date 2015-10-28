@@ -3,6 +3,8 @@ package com.shootoff.camera.AutoCalibration;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javafx.geometry.BoundingBox;
@@ -13,8 +15,10 @@ import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -143,24 +147,51 @@ public class AutoCalibrationManager implements Runnable {
 			
 			Mat lines = new Mat();
 		    Mat grey = new Mat();
+		    Mat temp;
 		    Imgproc.cvtColor(undistorted, grey, Imgproc.COLOR_BGR2GRAY);
-		    
-		    Mat dst = new Mat();
-			Imgproc.Canny(grey, grey, 300, 600); 
 
-			Imgproc.HoughLinesP(grey, lines, 1, Math.PI/180, 500, bounds.get().getHeight(), 10);
+		    
+		    //Imgproc.GaussianBlur(grey, grey, new Size(3,3),4);
+			Imgproc.Canny(grey, grey, 50, 150); 
+
+			Imgproc.HoughLinesP(grey, lines, 1, Math.PI/180, 1, bounds.get().getHeight(), 10);
+			
+		    temp = grey.clone();
+			
+			final Mat hierarchy = new Mat();
+            final List<MatOfPoint> contoursList = new ArrayList<MatOfPoint>();
+            Imgproc.findContours(temp, contoursList, hierarchy,
+                    Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+            for (MatOfPoint contour : contoursList) {
+
+            	Rect rect = Imgproc.boundingRect( contour );
+            	if (rect.width > bounds.get().getWidth() && rect.height > bounds.get().getHeight())
+            	{
+            		logger.warn("contour {} {} - {} {} {} {}", contour.rows(), contour.cols(), rect.x, rect.y, rect.x+rect.width, rect.y+rect.height);
+            		Core.rectangle(undistorted, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(255,0,0));
+            		
+            		minX = rect.x;
+            		minY = rect.y;
+            		maxX = rect.x+rect.width;
+            		maxY = rect.y+rect.height;
+            	}
+            }
+            //Imgproc.drawContours(undistorted, contoursList, -1, new Scalar(255, 0, 0));
 			
 			logger.warn("houghlines {} {}", lines.rows(), lines.cols());
 			
 			for (int i = 0; i < lines.cols(); i++)
 			{
 				
+
 				double houghWidth = Math.abs(lines.get(0, i)[2] - lines.get(0, i)[0]);
 				double houghHeight = Math.abs(lines.get(0, i)[3] - lines.get(0, i)[1]);
-				if (houghWidth > bounds.get().getWidth() || houghHeight > bounds.get().getHeight())
+
+				
+				if (houghWidth >= bounds.get().getWidth()-50 || houghHeight >= bounds.get().getHeight()-50)
 				{
 					logger.warn("houghlines {} - {} {}", lines.get(0, i), houghWidth, houghHeight);
-					Core.line(mat, new Point(lines.get(0, i)[0], lines.get(0, i)[1]), new Point(lines.get(0, i)[2], lines.get(0, i)[3]), new Scalar(255, 0, 0));
+					//Core.line(undistorted, new Point(lines.get(0, i)[0], lines.get(0, i)[1]), new Point(lines.get(0, i)[2], lines.get(0, i)[3]), new Scalar(255, 0, 0));
 					
 					if (lines.get(0, i)[0] < minX)
 						minX = (int) lines.get(0, i)[0];
@@ -190,9 +221,13 @@ public class AutoCalibrationManager implements Runnable {
 			String filename = String.format("calibrate-undist-lines-%s.png",seenChessboards);
 			File file = new File(filename);
 			filename = file.toString();
-			Highgui.imwrite(filename, mat);
+			Highgui.imwrite(filename, undistorted);
 			
 			
+			filename = String.format("calibrate-undist-grey-lines-%s.png",seenChessboards);
+			file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, grey);			
 			logger.warn("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
 			
 			if (logger.isTraceEnabled())

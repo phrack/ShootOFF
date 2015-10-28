@@ -154,5 +154,75 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 	}
+	
+	@Test
+	public void testCalibrateSquare1() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/square1.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		boolean calibrated = false;
+		
+		for (int i = 0; i <= 5; i++)
+		{
+			
+			if (!calibrated)
+			{
+				calibrationBounds = acm.processFrame(testFrame);
+				if (calibrationBounds.isPresent())
+					calibrated = true;
+			}
+			
+			else if (calibrated)
+			{
+				calibrated = true;
+				
+				// Make sure this matches a saved image
+				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				
+			}
+		}
+		
+		assertEquals(true, calibrated);
+		
+		assertTrue(calibrationBounds.isPresent());
+
+	}
+	
+	@Test
+	public void testCalibrateSquare2() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/square2.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		boolean calibrated = false;
+		
+		for (int i = 0; i <= 5; i++)
+		{
+			
+			if (!calibrated)
+			{
+				calibrationBounds = acm.processFrame(testFrame);
+				if (calibrationBounds.isPresent())
+					calibrated = true;
+			}
+			
+			else if (calibrated)
+			{
+				calibrated = true;
+				
+				// Make sure this matches a saved image
+				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
+				
+			}
+		}
+		
+		assertEquals(true, calibrated);
+		
+		assertTrue(calibrationBounds.isPresent());
+
+	}
 }
 
