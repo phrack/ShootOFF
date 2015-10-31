@@ -19,7 +19,7 @@
 package com.shootoff.gui;
 
 import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.ShotDetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;

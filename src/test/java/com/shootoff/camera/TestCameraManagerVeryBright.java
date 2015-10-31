@@ -15,7 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
-import com.shootoff.camera.ShotDetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;

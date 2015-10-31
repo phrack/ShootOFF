@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.ShotDetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
