@@ -37,6 +37,7 @@ public class TestConfiguration {
 		assertEquals(false, defaultConfig.useMalfunctions());
 		assertTrue(defaultConfig.getMalfunctionsProbability() == 10.0);
 		assertEquals(false, defaultConfig.inDebugMode());
+		assertFalse(defaultConfig.getArenaPosition().isPresent());
 	}
 	
 	@Test(expected=ConfigurationException.class)
@@ -198,6 +199,9 @@ public class TestConfiguration {
 		assertEquals(true, config.useMalfunctions());
 		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(false, config.inDebugMode());
+		assertTrue(config.getArenaPosition().isPresent());
+		assertEquals(10, config.getArenaPosition().get().getX(), 0.1);
+		assertEquals(200, config.getArenaPosition().get().getY(), 0.1);
 	}
 	
 	@Test
