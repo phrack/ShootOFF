@@ -94,7 +94,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	private Screen getArenaHomeScreen() {
 		ObservableList<Screen> arenaHomeScreens = Screen.getScreensForRectangle(arenaStage.getX(), arenaStage.getY(), 1, 1);
 		
-		if (arenaHomeScreens.size() > 0) {
+		if (arenaHomeScreens.size() > 1) {
 			logger.warn("Found multiple screens as the possible arena home screen, this is unexpected: {}", 
 					arenaHomeScreens.size());
 		}
