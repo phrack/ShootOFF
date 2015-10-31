@@ -153,7 +153,7 @@ public class CameraManager {
 	    reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 	    reader.addListener(detector);
 
-	    logger.warn("opening {}", videoFile.getAbsolutePath());
+	    logger.debug("opening {}", videoFile.getAbsolutePath());
 	    
 	    setSectorStatuses(sectorStatuses);
 	    
