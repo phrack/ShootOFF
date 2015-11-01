@@ -64,8 +64,6 @@ public class CameraManager {
 	public static final int FEED_WIDTH = 640;
 	public static final int FEED_HEIGHT = 480;
 	public static final int MIN_SHOT_DETECTION_FPS = 5;
-	
-
 	public static final int DEFAULT_FPS = 30;
 
 	private final ShotDetectionManager shotDetectionManager;
@@ -102,20 +100,6 @@ public class CameraManager {
 	private int frameCount = 0;
 	
 	private static double webcamFPS = DEFAULT_FPS;
-	
-	
-	public int getFrameCount() {
-		return frameCount;
-	}
-
-	public void setFrameCount(int i) {
-		frameCount = i;
-	}
-
-
-	public double getFPS() {
-		return webcamFPS;
-	}
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -235,7 +219,6 @@ public class CameraManager {
 	public Optional<Bounds> getProjectionBounds() {
 		return projectionBounds;
 	}
-
 	
 	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
@@ -286,7 +269,6 @@ public class CameraManager {
 				cameraName = webcam.get().getName();
 			}	
 		}
-
 		
 		setDetecting(false);
 		
@@ -322,8 +304,6 @@ public class CameraManager {
 		return processedVideo;
 	}
 
-
-
 	public void setMinimumShotDimension(int minDim) {
 		minimumShotDimension = Optional.of(minDim);
 		logger.debug("Set the minimum dimension for shots to: {}", minDim);
@@ -340,9 +320,17 @@ public class CameraManager {
 	{
 		return debuggerListener;
 	}
+	
+	public int getFrameCount() {
+		return frameCount;
+	}
 
-	public void incFrameCount() {
-		frameCount++;
+	public void setFrameCount(int i) {
+		frameCount = i;
+	}
+
+	public double getFPS() {
+		return webcamFPS;
 	}
 	
 	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
@@ -352,9 +340,6 @@ public class CameraManager {
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 
-
-		
-		
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
@@ -366,7 +351,6 @@ public class CameraManager {
 				streamCameraFrames();
 			}
 		}
-
 		
 		/**
 		 * From the MediaListenerAdapter. This method is used to get a new frame
@@ -392,7 +376,6 @@ public class CameraManager {
 			processFrame(currentFrame);
 		}
 
-
 		@Override
 		public void onClose(ICloseEvent event) {
 			synchronized (processingLock) {
@@ -403,11 +386,7 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 
-
-
 		private void streamCameraFrames() {			
-
-
 			while (isStreaming) {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 				
@@ -424,18 +403,15 @@ public class CameraManager {
 					continue;
 				}
 
-
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
 					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 							(int)b.getWidth(), (int)b.getHeight());
-				}
-				
+				}				
 
 				if (!processFrame(currentFrame))
 					continue;
 
-				
 				if (recordingShots) {
 					rollingRecorder.recordFrame(currentFrame);
 					
@@ -465,7 +441,6 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
-
 				Image img = SwingFXUtils.toFXImage(currentFrame, null);
 
 				if (cropFeedToProjection) {
@@ -473,17 +448,14 @@ public class CameraManager {
 				} else {
 					canvasManager.updateBackground(img, Optional.empty());
 				}
-
-
 			}
 
-			
 			detectionExecutor.shutdown();
 		}
 
 		private boolean processFrame(BufferedImage currentFrame)
 		{
-			incFrameCount();
+			frameCount++;
 		
 			logger.trace("processFrame {}", getFrameCount());
 			
@@ -493,7 +465,7 @@ public class CameraManager {
 				setFPS(webcam.get().getFPS());
 				
 				if (debuggerListener.isPresent()) {
-					debuggerListener.get().updateFeedData(webcamFPS, null);
+					debuggerListener.get().updateFeedData(webcamFPS, Optional.empty());
 				}
 
 				checkIfMinimumFPS();
@@ -504,9 +476,12 @@ public class CameraManager {
 		
 		private void setFPS(double newFPS)
 		{
+			if (newFPS < 1.0) {
+				logger.debug("New FPS read from webcam is very low: {}", newFPS);
+			}
+			
 			webcamFPS = Math.min(newFPS, DEFAULT_FPS);	
 			DeduplicationProcessor.setThreshold((int)(webcamFPS/DeduplicationProcessor.DEDUPE_THRESHOLD_DIVISION_FACTOR));
-			
 		}
 		
 		private void checkIfMinimumFPS()
@@ -561,9 +536,6 @@ public class CameraManager {
 				cameraAlert.show();
 			});
 		}
-		
-
-
 	}
 	
 	
@@ -653,6 +625,4 @@ public class CameraManager {
 		    }
 		}, motionDiagnosticLengthMS);
 	}
-
-
 }

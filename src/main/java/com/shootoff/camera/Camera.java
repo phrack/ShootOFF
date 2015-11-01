@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamCompositeDriver;
 import com.github.sarxos.webcam.WebcamException;
@@ -49,6 +52,8 @@ public class Camera {
 	private static final boolean isMac;
 	private static final Webcam defaultWebcam;
 	private static final List<Camera> knownWebcams;
+	
+	private static final Logger logger = LoggerFactory.getLogger(Camera.class);
 	
 	public static class CompositeDriver extends WebcamCompositeDriver {
 		public CompositeDriver() {
@@ -96,7 +101,7 @@ public class Camera {
 			try {
 				t.join(ipcamTimeout);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.error("Error connecting to webcam", e);
 			}
 			
 			if (t.isAlive()) {
@@ -110,6 +115,7 @@ public class Camera {
 				throw (UnknownHostException)we.getCause();
 			}
 			
+			logger.error("Error cocnnecting to webcam", we);
 			throw we;
 		}
 	}
@@ -130,6 +136,8 @@ public class Camera {
 	private Camera(Webcam webcam) {
 		this.webcam = webcam;
 		this.isIpCam = false;
+		
+		logger.debug("WebcamDevice type: {}", webcam.getDevice().getClass().getName());
 	}
 	
 	private Camera(IpCamDevice ipcam) {
