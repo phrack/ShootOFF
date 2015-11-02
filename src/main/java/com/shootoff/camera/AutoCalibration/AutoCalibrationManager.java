@@ -99,7 +99,9 @@ public class AutoCalibrationManager implements Runnable {
 	
 	public Optional<Bounds> processFrame(BufferedImage frame)
 	{
-		boolean found = findChessboardBufferedImage(frame);
+		Mat mat = bufferedImageToMat(frame);
+		
+		boolean found = findChessboard(mat);
 		
 		if (found && seenChessboards < MIN_BOARDS)
 		{
@@ -107,7 +109,6 @@ public class AutoCalibrationManager implements Runnable {
 		}
 		else if (found)
 		{ 	
-			Mat mat = bufferedImageToMat(frame);
 			
 			Mat undistorted = new Mat();
 			
@@ -120,7 +121,7 @@ public class AutoCalibrationManager implements Runnable {
 				Highgui.imwrite(filename, mat);
 			}
 			
-			undistorted = warpPerspective(mat, imageCorners);
+			undistorted = warpPerspective(mat);
 			
 			// TODO: HANDLE UPSIDE DOWN PATTERN BY WARNING USER AND NOT CALIBRATING
 			
@@ -138,84 +139,7 @@ public class AutoCalibrationManager implements Runnable {
 				return Optional.empty();
 			
 			
-			/*int minX = (int) bounds.get().getMinX();
-			int minY = (int) bounds.get().getMinY();
-			int width = (int) bounds.get().getWidth();
-			int height = (int) bounds.get().getHeight();*/
-			int maxX = 0, maxY = 0, minX = CameraManager.FEED_WIDTH, minY = CameraManager.FEED_HEIGHT;
-			
-			
-			Mat lines = new Mat();
-		    Mat grey = new Mat();
-		    Mat temp;
-		    Imgproc.cvtColor(undistorted, grey, Imgproc.COLOR_BGR2GRAY);
 
-		    
-		    //Imgproc.GaussianBlur(grey, grey, new Size(3,3),4);
-			Imgproc.Canny(grey, grey, 50, 150); 
-
-			Imgproc.HoughLinesP(grey, lines, 1, Math.PI/180, 1, bounds.get().getHeight(), 10);
-			
-		    temp = grey.clone();
-			
-			final Mat hierarchy = new Mat();
-            final List<MatOfPoint> contoursList = new ArrayList<MatOfPoint>();
-            Imgproc.findContours(temp, contoursList, hierarchy,
-                    Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-            for (MatOfPoint contour : contoursList) {
-
-            	Rect rect = Imgproc.boundingRect( contour );
-            	if (rect.width > bounds.get().getWidth() && rect.height > bounds.get().getHeight())
-            	{
-            		logger.warn("contour {} {} - {} {} {} {}", contour.rows(), contour.cols(), rect.x, rect.y, rect.x+rect.width, rect.y+rect.height);
-            		Core.rectangle(undistorted, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(255,0,0));
-            		
-            		minX = rect.x;
-            		minY = rect.y;
-            		maxX = rect.x+rect.width;
-            		maxY = rect.y+rect.height;
-            	}
-            }
-            //Imgproc.drawContours(undistorted, contoursList, -1, new Scalar(255, 0, 0));
-			
-			logger.warn("houghlines {} {}", lines.rows(), lines.cols());
-			
-			for (int i = 0; i < lines.cols(); i++)
-			{
-				
-
-				double houghWidth = Math.abs(lines.get(0, i)[2] - lines.get(0, i)[0]);
-				double houghHeight = Math.abs(lines.get(0, i)[3] - lines.get(0, i)[1]);
-
-				
-				if (houghWidth >= bounds.get().getWidth()-50 || houghHeight >= bounds.get().getHeight()-50)
-				{
-					logger.warn("houghlines {} - {} {}", lines.get(0, i), houghWidth, houghHeight);
-					//Core.line(undistorted, new Point(lines.get(0, i)[0], lines.get(0, i)[1]), new Point(lines.get(0, i)[2], lines.get(0, i)[3]), new Scalar(255, 0, 0));
-					
-					if (lines.get(0, i)[0] < minX)
-						minX = (int) lines.get(0, i)[0];
-					if (lines.get(0, i)[2] < minX)
-						minX = (int) lines.get(0, i)[2];
-					if (lines.get(0, i)[1] < minY)
-						minY = (int) lines.get(0, i)[1];
-					if (lines.get(0, i)[3] < minY)
-						minY = (int) lines.get(0, i)[3];
-					
-					if (lines.get(0, i)[0] > maxX)
-						maxX = (int) lines.get(0, i)[0];
-					if (lines.get(0, i)[2] > maxX)
-						maxX = (int) lines.get(0, i)[2];
-					if (lines.get(0, i)[1] > maxY)
-						maxY = (int) lines.get(0, i)[1];
-					if (lines.get(0, i)[3] > maxY)
-						maxY = (int) lines.get(0, i)[3];
-				}
-				
-				
-			}
-			
-			logger.warn("boundslines {} {} {} {}", minX, minY, maxX, maxY);
 			
 			
 			String filename = String.format("calibrate-undist-lines-%s.png",seenChessboards);
@@ -224,12 +148,7 @@ public class AutoCalibrationManager implements Runnable {
 			Highgui.imwrite(filename, undistorted);
 			
 			
-			filename = String.format("calibrate-undist-grey-lines-%s.png",seenChessboards);
-			file = new File(filename);
-			filename = file.toString();
-			Highgui.imwrite(filename, grey);			
-			logger.warn("bounds {} {} {} {}", bounds.get().getMinX(), bounds.get().getMinY(), bounds.get().getWidth(), bounds.get().getHeight());
-			
+
 			if (logger.isTraceEnabled())
 			{
 				/*undistorted = undistorted.submat(minY, minY+height, minX, minX+width);
@@ -249,6 +168,55 @@ public class AutoCalibrationManager implements Runnable {
 		return Optional.empty();
 	}
 	
+	private boolean findProjectionArea(Mat frame)
+	{
+		boolean result = false;
+		
+		int maxX = 0, maxY = 0, minX = CameraManager.FEED_WIDTH, minY = CameraManager.FEED_HEIGHT;
+		
+	    Mat grey = new Mat();
+	    Mat temp;
+	    Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
+
+		Imgproc.Canny(grey, grey, 50, 150); 
+
+	    temp = grey.clone();
+	    
+	    // use actual contour bounds and estimate of pattern dimensions to transform
+		
+		final Mat hierarchy = new Mat();
+        final List<MatOfPoint> contoursList = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(temp, contoursList, hierarchy,
+                Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        for (MatOfPoint contour : contoursList) {
+        	result = false;
+
+        	Rect rect = Imgproc.boundingRect( contour );
+        	if (rect.width > boundingBox.getWidth() && rect.height > boundingBox.getHeight())
+        	{
+        		logger.warn("contour {} {} - {} {} {} {}", contour.rows(), contour.cols(), rect.x, rect.y, rect.x+rect.width, rect.y+rect.height);
+        		Core.rectangle(frame, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(255,0,0));
+        		
+        		minX = rect.x;
+        		minY = rect.y;
+        		maxX = rect.x+rect.width;
+        		maxY = rect.y+rect.height;
+        		
+                boundingBox = new BoundingBox(minX, minY, rect.width, rect.height);
+                result = true;
+        	}
+        }
+        //Imgproc.drawContours(undistorted, contoursList, -1, new Scalar(255, 0, 0));
+		
+		String filename = String.format("calibrate-undist-grey-lines-%s.png",seenChessboards);
+		File file = new File(filename);
+		filename = file.toString();
+		Highgui.imwrite(filename, grey);			
+		
+		logger.warn("boundslines {} {} {} {}", minX, minY, maxX, maxY);
+		
+		return result;
+	}
 	
 	public BufferedImage matToBufferedImage(Mat matBGR){  
 	      int width = matBGR.width(), height = matBGR.height(), channels = matBGR.channels() ;  
@@ -308,9 +276,9 @@ public class AutoCalibrationManager implements Runnable {
 	
 	
 
-	public Mat warpPerspective(final Mat image, MatOfPoint2f corners)
+	public Mat warpPerspective(final Mat image)
 	{
-		Mat mat=new Mat(image.rows(),image.cols(),CvType.CV_32FC1);
+		Mat mat = image.clone();
 		
 		if (!warpInitialized)
 		{
@@ -332,7 +300,9 @@ public class AutoCalibrationManager implements Runnable {
 				rotatedCorners.put(i, 0, newpt.x, newpt.y);
 			}
 			
+			Imgproc.warpAffine( mat, mat, rotMatrix, mat.size() );
 			
+
 			//1st-------2nd
 			// |         |
 			// |         |
@@ -349,34 +319,47 @@ public class AutoCalibrationManager implements Runnable {
 
 			
 			RotatedRect box = Imgproc.minAreaRect(cropsrc);
-			MatOfPoint2f cropdst = new MatOfPoint2f();
-			cropdst.alloc(4);
-			cropdst.put(0, 0, box.boundingRect().x, box.boundingRect().y,
-					box.boundingRect().x+box.boundingRect().width, box.boundingRect().y,
-					box.boundingRect().x, box.boundingRect().y+box.boundingRect().height,
-					box.boundingRect().x+box.boundingRect().width, box.boundingRect().y+box.boundingRect().height);
+
 			
 			boundingBox = new BoundingBox(box.boundingRect().x, box.boundingRect().y, box.boundingRect().width, box.boundingRect().height);
 			
-			if (logger.isDebugEnabled())
-			{
-				logger.debug("bounds {} - {} - {}", bounds.get(0, 0), cropsrc.get(0, 0), cropdst.get(0, 0));
-				logger.debug("bounds {} - {} - {}", bounds.get(1, 0), cropsrc.get(1, 0), cropdst.get(1, 0));
-				logger.debug("bounds {} - {} - {}", bounds.get(2, 0), cropsrc.get(2, 0), cropdst.get(2, 0));
-				logger.debug("bounds {} - {} - {}", bounds.get(3, 0), cropsrc.get(3, 0), cropdst.get(3, 0));
+			logger.warn("orig bounds - {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(), boundingBox.getHeight());
 			
-				logger.debug("sizes {} {} - {} {} {}", cropsrc.size(), cropdst.size(), box.angle, box.center, box.size);
+			findProjectionArea(mat);
+			
+			logger.warn("ratios - {} - expected {}", boundingBox.getWidth()/boundingBox.getHeight(), (9.0/7.0));
+
+			MatOfPoint2f cropdst = new MatOfPoint2f();
+			cropdst.alloc(4);
+			cropdst.put(0, 0, boundingBox.getMinX(), boundingBox.getMinY(),
+					boundingBox.getMinX()+boundingBox.getWidth(), boundingBox.getMinY(),
+					boundingBox.getMinX(), boundingBox.getMinY()+boundingBox.getHeight(),
+					boundingBox.getMinX()+boundingBox.getWidth(), boundingBox.getMinY()+boundingBox.getHeight());
+			
+			if (logger.isWarnEnabled())
+			{
+				logger.warn("bounds {} - {} - {}", bounds.get(0, 0), cropsrc.get(0, 0), cropdst.get(0, 0));
+				logger.warn("bounds {} - {} - {}", bounds.get(1, 0), cropsrc.get(1, 0), cropdst.get(1, 0));
+				logger.warn("bounds {} - {} - {}", bounds.get(2, 0), cropsrc.get(2, 0), cropdst.get(2, 0));
+				logger.warn("bounds {} - {} - {}", bounds.get(3, 0), cropsrc.get(3, 0), cropdst.get(3, 0));
+			
+				logger.warn("sizes {} {} - {} {} {}", cropsrc.size(), cropdst.size(), box.angle, box.center, box.size);
 			}
 			
 			perspMat = Imgproc.getPerspectiveTransform(cropsrc, cropdst);
+			
+			Imgproc.warpPerspective(mat,mat,perspMat,mat.size(), Imgproc.INTER_LINEAR);
+			
+			
 		}
+		else
+		{
 		
-		mat = image.clone();
+			Imgproc.warpAffine( mat, mat, rotMatrix, mat.size() );
 		
-		Imgproc.warpAffine( mat, mat, rotMatrix, mat.size() );
-		
-		Imgproc.warpPerspective(mat,mat,perspMat,mat.size(), Imgproc.INTER_LINEAR);
-		
+			Imgproc.warpPerspective(mat,mat,perspMat,mat.size(), Imgproc.INTER_LINEAR);
+		}
+			
 		return mat;
 	}
 	
@@ -446,7 +429,7 @@ public class AutoCalibrationManager implements Runnable {
 		
 		Mat mat = bufferedImageToMat(frame);
 		
-		frame = matToBufferedImage(warpPerspective(mat, imageCorners));
+		frame = matToBufferedImage(warpPerspective(mat));
 		
 		return frame;
 	}
