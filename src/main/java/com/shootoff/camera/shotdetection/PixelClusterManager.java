@@ -1,4 +1,4 @@
-package com.shootoff.camera.ShotDetection;
+package com.shootoff.camera.shotdetection;
 
 import java.util.ArrayList;
 import java.util.HashMap;

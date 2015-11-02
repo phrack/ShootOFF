@@ -1,4 +1,4 @@
-package com.shootoff.camera.ShotDetection;
+package com.shootoff.camera.shotdetection;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -75,15 +75,12 @@ public final class ShotDetectionManager {
 	
 	private static final int MINIMUM_SHOT_DIMENSION = 6;
 	
-	
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config,
 			CanvasManager canvasManager) {
 		this.canvasManager = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;
 		
-		
-
 		for (int y = 0; y < CameraManager.FEED_HEIGHT; y++)
 			for (int x = 0; x < CameraManager.FEED_WIDTH; x++)
 			{
@@ -337,10 +334,6 @@ public final class ShotDetectionManager {
 		}
 	}
 
-
-
-
-
 	private boolean isExcessiveMotion(int thresholdPixels) {
 		
 		if (thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS)
@@ -466,7 +459,6 @@ public final class ShotDetectionManager {
 			avgBrightPixels = Math.min(brightPixels,MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
 			avgBrightPixels = (((cameraManager.getFPS()-1)*avgBrightPixels)+Math.min(brightPixels,MAXIMUM_THRESHOLD_PIXELS_FOR_AVG))/cameraManager.getFPS();
-	
 	}
 	
 	
@@ -478,12 +470,6 @@ public final class ShotDetectionManager {
 		}
 		return MINIMUM_SHOT_DIMENSION;
 	}
-	
-	
-	
-	
-	
-	
 	
 	private void addShot(BufferedImage workingCopy, PixelCluster pc)
 	{

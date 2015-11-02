@@ -674,6 +674,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 		
 		arenaController.toggleArena();
+        arenaController.autoPlaceArena();
     }
 	
 	private void toggleProjectorMenus(boolean isDisabled) {

@@ -19,6 +19,7 @@
 package com.shootoff.gui.controller;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.LightingCondition;
@@ -47,15 +48,6 @@ public class StreamDebuggerController implements DebuggerListener {
 
 		cameraManager.setThresholdListener(this);
 
-		/*centerBorderSlider.valueProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-	        	if (newValue == null) return;
-
-        		cameraManager.setCenterApproxBorderSize(newValue.intValue());
-	      	}
-	    });*/
-
 		minDimSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
@@ -76,10 +68,15 @@ public class StreamDebuggerController implements DebuggerListener {
 	}
 
 	@Override
-	public void updateFeedData(double fps, LightingCondition lightingCondition) {
+	public void updateFeedData(double fps, Optional<LightingCondition> lightingCondition) {
 		Platform.runLater(() -> {
-				streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS -- %s", 
-						fps, lightingCondition));
+				if (lightingCondition.isPresent()) {
+					streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS -- %s", 
+							fps, lightingCondition.get()));
+				} else {
+					streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", 
+							fps));					
+				}
 			});
 	}
 }

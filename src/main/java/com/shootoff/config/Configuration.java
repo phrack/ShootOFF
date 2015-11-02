@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
@@ -86,6 +87,8 @@ public class Configuration {
 	private static final String VIRTUAL_MAGAZINE_CAPACITY_PROP = "shootoff.virtualmagazine.capacity";
 	private static final String USE_MALFUNCTIONS_PROP = "shootoff.malfunctions.use";
 	private static final String MALFUNCTIONS_PROBABILITY_PROP = "shootoff.malfunctions.probability";
+	private static final String ARENA_POSITION_X_PROP = "shootoff.arena.x";
+	private static final String ARENA_POSITION_Y_PROP = "shootoff.arena.y";
 
 	protected static final String MARKER_RADIUS_MESSAGE = 
 			"MARKER_RADIUS has an invalid value: %d. Acceptable values are "
@@ -129,6 +132,7 @@ public class Configuration {
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
+	private Optional<Point2D> arenaPosition = Optional.empty();
 	
 	private boolean debugShotsRecordToFiles = false;
 
@@ -319,6 +323,11 @@ public class Configuration {
 					Float.parseFloat(prop.getProperty(MALFUNCTIONS_PROBABILITY_PROP)));
 		}
 		
+		if (prop.containsKey(ARENA_POSITION_X_PROP) && prop.containsKey(ARENA_POSITION_Y_PROP)) {
+			setArenaPosition(Double.parseDouble(prop.getProperty(ARENA_POSITION_X_PROP)),
+					Double.parseDouble(prop.getProperty(ARENA_POSITION_Y_PROP)));
+		}
+		
 		validateConfiguration();
 	}
 	
@@ -364,6 +373,13 @@ public class Configuration {
 		prop.setProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP, String.valueOf(virtualMagazineCapacity));
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
+		
+		if (getArenaPosition().isPresent()) {
+			Point2D arenaPosition = getArenaPosition().get();
+			
+			prop.setProperty(ARENA_POSITION_X_PROP, String.valueOf(arenaPosition.getX()));
+			prop.setProperty(ARENA_POSITION_Y_PROP, String.valueOf(arenaPosition.getY()));
+		}
 		
 		OutputStream outputStream = new FileOutputStream(configName);
 		
@@ -694,6 +710,10 @@ public class Configuration {
 		
 		currentExercise = exercise;
 	}
+	
+	public void setArenaPosition(double x, double y) {
+		arenaPosition = Optional.of(new Point2D(x, y));
+	}
 
 	public Map<String, URL> getRegistedIpCams() {
 		return ipcams;
@@ -805,5 +825,9 @@ public class Configuration {
 	public boolean isDebugShotsRecordToFiles()
 	{
 		return debugShotsRecordToFiles;
+	}
+	
+	public Optional<Point2D> getArenaPosition() {
+		return arenaPosition;
 	}
 }

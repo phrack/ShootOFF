@@ -22,15 +22,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
 import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -38,9 +44,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ProjectorArenaController implements CalibrationListener {
+	private final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
+	
 	private Stage arenaStage;
 	@FXML private AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
@@ -49,6 +58,9 @@ public class ProjectorArenaController implements CalibrationListener {
 	private Configuration config;
 	private CanvasManager canvasManager;
 	private Optional<LocatedImage> background = Optional.empty();
+	
+	private Screen originalHomeScreen;
+	private Optional<Screen> detectedProjectorScreen = Optional.empty();
 	
 	// Used for testing
 	public void init(Configuration config, CanvasManager canvasManager) {
@@ -77,6 +89,92 @@ public class ProjectorArenaController implements CalibrationListener {
 		});
 		
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
+	}
+	
+	private Screen getArenaHomeScreen() {
+		ObservableList<Screen> arenaHomeScreens = Screen.getScreensForRectangle(arenaStage.getX(), arenaStage.getY(), 1, 1);
+		
+		if (arenaHomeScreens.size() > 1) {
+			logger.warn("Found multiple screens as the possible arena home screen, this is unexpected: {}", 
+					arenaHomeScreens.size());
+		}
+		
+		return arenaHomeScreens.get(0);
+	}
+	
+	public void autoPlaceArena() {
+		originalHomeScreen = getArenaHomeScreen();
+		
+		// Place the arena on what we hope is the projector with the following precidence:
+		// 1. If the user has place the arena on a screen before, place it on that screen again
+		// 2. If the user has never placed the arena before and there are only two screens, 
+		//    put it on the non-primary screen
+		// 3. If the arena has never been placed and there are more than two screens, place
+		//    the arena on the smallest screen
+		
+		Optional<Screen> projector = Optional.empty();
+		
+		if (config.getArenaPosition().isPresent()) {
+			logger.debug("Projector has been manually placed previously");
+			
+			Point2D arenaPosition = config.getArenaPosition().get();
+			
+			arenaStage.setX(arenaPosition.getX());
+			arenaStage.setY(arenaPosition.getY());
+			
+			toggleFullScreen();
+			
+			return;
+		} else if (Screen.getScreens().size() == 2) {
+			logger.debug("Two screens present");
+			
+			Screen primary = Screen.getPrimary();
+			
+			for (Screen screen : Screen.getScreens()) {
+				if (!screen.equals(primary)) {
+					projector = Optional.of(screen);
+					break;
+				}
+			}
+		} else if (Screen.getScreens().size() > 2) {
+			logger.debug("More than two screens present");
+			
+			Screen smallest = null;
+			
+			// Find screen with the smallest area
+			for (Screen screen : Screen.getScreens()) {
+				if (smallest == null) {
+					smallest = screen;
+				} else {
+					if (screen.getBounds().getHeight() * screen.getBounds().getWidth() < 
+							smallest.getBounds().getHeight() * smallest.getBounds().getWidth()) {
+						smallest = screen;
+					}
+				}
+			}
+			
+			projector = Optional.ofNullable(smallest);
+		}
+		
+		if (projector.isPresent()) {
+			Screen arenaHome = projector.get();
+			
+			double newX = arenaHome.getVisualBounds().getMinX();
+			double newY = arenaHome.getVisualBounds().getMinY();
+			
+			logger.debug("Found likely projector screen: resolution = {}x{}, newX = {}, newY = {}", 
+					arenaHome.getBounds().getWidth(), arenaHome.getBounds().getHeight(),
+					newX, newY);
+			
+			arenaStage.setX(newX + 10);
+			arenaStage.setY(newY + 10);
+			
+			detectedProjectorScreen = projector;
+			
+			toggleFullScreen();
+		} else {
+			logger.debug("Did not find screen that is a likely projector");
+		}
 	}
 	
 	public void toggleArena() throws IOException {
@@ -129,13 +227,32 @@ public class ProjectorArenaController implements CalibrationListener {
 	}
 	
 	@FXML
-	public void canvasKeyPressed(KeyEvent event) {
+	public void canvasKeyPressed(KeyEvent event) throws Exception {
 		boolean macFullscreen = event.getCode() == KeyCode.F &&
 			event.isControlDown() && event.isShortcutDown();
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
-			arenaStage.setAlwaysOnTop(!arenaStage.isAlwaysOnTop());
-			arenaStage.setFullScreen(!arenaStage.isFullScreen());
+			// Manually going full screen with an arena that was manually
+			// moved to another screen
+			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen() && !originalHomeScreen.equals(getArenaHomeScreen());
+			boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen() && !detectedProjectorScreen.equals(getArenaHomeScreen());
+			
+			if (fullyManual || movedAfterAuto) {
+				config.setArenaPosition(arenaStage.getX(), arenaStage.getY());
+				try {
+					config.writeConfigurationFile();
+				} catch (ConfigurationException | IOException e) {
+					logger.error("Error writing configuration with arena location", e);
+					throw e;
+				}
+			}
+			
+			toggleFullScreen();
 		}
+	}
+	
+	private void toggleFullScreen() {
+		arenaStage.setAlwaysOnTop(!arenaStage.isAlwaysOnTop());
+		arenaStage.setFullScreen(!arenaStage.isFullScreen());
 	}
 	
 	@FXML 
