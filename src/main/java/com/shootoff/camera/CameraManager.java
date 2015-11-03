@@ -38,7 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import com.shootoff.camera.shotdetection.ShotDetectionManager;import com.shootoff.camera.AutoCalibration.AutoCalibrationManager;import com.shootoff.config.Configuration;
+
+
+import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -110,11 +113,6 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 	
 	private ShootOFFController controller;
-	
-	
-	public int getFrameCount() {
-		return frameCount;
-	}
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);

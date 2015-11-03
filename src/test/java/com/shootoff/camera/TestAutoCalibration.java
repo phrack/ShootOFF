@@ -12,9 +12,8 @@ import javax.imageio.ImageIO;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opencv.core.Core;
 
-import com.shootoff.camera.AutoCalibration.AutoCalibrationManager;
+import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 //import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 public class TestAutoCalibration {
@@ -23,8 +22,7 @@ public class TestAutoCalibration {
 	
 	@Before
 	public void setUp() throws ConfigurationException {
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
+		nu.pattern.OpenCV.loadShared();
 		
 		//config = new Configuration(new String[0]);
 		

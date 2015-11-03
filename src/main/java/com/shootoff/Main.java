@@ -38,8 +38,6 @@ import java.util.jar.JarFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opencv.core.Core;
-
 import com.shootoff.camera.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -586,13 +584,7 @@ public class Main extends Application {
 		// for more information about this hack
 		String os = System.getProperty("os.name"); 
 		
-		// Windows doesn't use the library provided by Pattern
-		if (os != null && !os.split(" ")[0].equals("Windows"))
-			nu.pattern.OpenCV.loadLibrary();
-		
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
-		
+		nu.pattern.OpenCV.loadShared();
 
 		if (os != null && os.equals("Mac OS X")) {
 			Camera.getDefault();
