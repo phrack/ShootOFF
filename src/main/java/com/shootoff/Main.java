@@ -465,7 +465,7 @@ public class Main extends Application {
 		// This simply ensures that error reporting is turned off,
 		// once it's off it stays off
 		if (!config.useErrorReporting() || config.inDebugMode()) {
-			config.disableErrorReporting();
+			Configuration.disableErrorReporting();
 			logger.info("Error reporting has been disabled.");
 		}
 		

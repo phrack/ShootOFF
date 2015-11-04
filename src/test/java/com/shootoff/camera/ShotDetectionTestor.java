@@ -5,11 +5,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.rules.ErrorCollector;
+
+import com.shootoff.config.Configuration;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 
+@Ignore
 public class ShotDetectionTestor {
 	private static int ALLOWED_COORD_VARIANCE = 3;
+	
+    @BeforeClass
+    public static void setUpBaseClass() {
+        Configuration.disableErrorReporting();
+    }
 	
 	public void checkShots(ErrorCollector collector, final List<Shot> actualShots, 
 			List<Shot> requiredShots, List<Shot> optionalShots, boolean isColorWarning) {

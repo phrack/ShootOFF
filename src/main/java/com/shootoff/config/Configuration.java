@@ -494,7 +494,7 @@ public class Configuration {
 		this.useErrorReporting = useErrorReporting;
 	}
 	
-	public void disableErrorReporting() {
+	public static void disableErrorReporting() {
 		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 	    LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
 	    setLogConsoleAppender(rootLogger, loggerContext);
@@ -661,7 +661,7 @@ public class Configuration {
 		}
 	}
 	
-	private void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
+	private static void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
 		
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
