@@ -111,7 +111,7 @@ public class Configuration {
 	private String configName;
 	
 	private boolean isFirstRun = false;
-	private boolean useErrorReporting = true;
+	private boolean useErrorReporting = false;
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
 	private Map<String, Camera> webcams = new HashMap<String, Camera>();
 	private int markerRadius = 4;
