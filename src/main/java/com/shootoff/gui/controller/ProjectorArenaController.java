@@ -20,6 +20,7 @@ package com.shootoff.gui.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	private final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 	
 	private Stage arenaStage;
+	private Stage shootOFFStage;
 	@FXML private AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
@@ -59,7 +61,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	private CanvasManager canvasManager;
 	private Optional<LocatedImage> background = Optional.empty();
 	
-	private Screen originalHomeScreen;
+	private Screen originalArenaHomeScreen;
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
 	
 	// Used for testing
@@ -73,8 +75,9 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setScene(scene);
 	}
 	
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor) {
+	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
+		shootOFFStage = shootOFFController.getStage();
 		arenaStage = (Stage)arenaAnchor.getScene().getWindow();
 		
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
@@ -91,24 +94,50 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
 	}
 	
-	private Screen getArenaHomeScreen() {
-		ObservableList<Screen> arenaHomeScreens = Screen.getScreensForRectangle(arenaStage.getX(), arenaStage.getY(), 1, 1);
+	private Optional<Screen> getStageHomeScreen(Stage stage) {
+		ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
 		
-		if (arenaHomeScreens.size() > 1) {
+		if (stageHomeScreens.isEmpty()) {
+			StringBuilder message = new StringBuilder(String.format("Didn't find screen for stage with title %s at (%f, %f)."
+					+ " Existing screens: %n%n", stage.getTitle(), stage.getX(), stage.getY()));
+			
+			Iterator<Screen> it = Screen.getScreens().iterator();
+			
+			while (it.hasNext()) {
+				Screen s = it.next();
+
+				message.append(String.format("(w = %f, h = %f, dpi = %f)", s.getBounds().getWidth(), 
+						s.getBounds().getHeight(), s.getDpi()));
+				
+				if (it.hasNext()) {
+					message.append("\n");
+				}
+			}
+			
+			logger.error(message.toString());
+			
+			return Optional.empty();
+		} else if (stageHomeScreens.size() > 1) {
 			logger.warn("Found multiple screens as the possible arena home screen, this is unexpected: {}", 
-					arenaHomeScreens.size());
+					stageHomeScreens.size());
 		}
 		
-		return arenaHomeScreens.get(0);
+		return Optional.of(stageHomeScreens.get(0));
 	}
 	
 	public void autoPlaceArena() {
-		originalHomeScreen = getArenaHomeScreen();
+		Optional<Screen> homeScreen = getStageHomeScreen(arenaStage);
+		
+		if (homeScreen.isPresent()) {
+			originalArenaHomeScreen = homeScreen.get();
+		} else {
+			return;
+		}
 		
 		// Place the arena on what we hope is the projector with the following precidence:
 		// 1. If the user has place the arena on a screen before, place it on that screen again
 		// 2. If the user has never placed the arena before and there are only two screens, 
-		//    put it on the non-primary screen
+		//    put it on the screen the ShootOFF window isn't on
 		// 3. If the arena has never been placed and there are more than two screens, place
 		//    the arena on the smallest screen
 		
@@ -128,10 +157,14 @@ public class ProjectorArenaController implements CalibrationListener {
 		} else if (Screen.getScreens().size() == 2) {
 			logger.debug("Two screens present");
 			
-			Screen primary = Screen.getPrimary();
+			homeScreen = getStageHomeScreen(shootOFFStage);
+		
+			if (!homeScreen.isPresent()) return;
+			
+			Screen shootOFFScreen = homeScreen.get();
 			
 			for (Screen screen : Screen.getScreens()) {
-				if (!screen.equals(primary)) {
+				if (!screen.equals(shootOFFScreen)) {
 					projector = Optional.of(screen);
 					break;
 				}
@@ -233,8 +266,12 @@ public class ProjectorArenaController implements CalibrationListener {
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
 			// Manually going full screen with an arena that was manually
 			// moved to another screen
-			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen() && !originalHomeScreen.equals(getArenaHomeScreen());
-			boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen() && !detectedProjectorScreen.equals(getArenaHomeScreen());
+			Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage); 
+			
+			if (!currentArenaScreen.isPresent()) return;
+			
+			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen() && !originalArenaHomeScreen.equals(currentArenaScreen.get());
+			boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen() && !detectedProjectorScreen.equals(currentArenaScreen.get());
 			
 			if (fullyManual || movedAfterAuto) {
 				config.setArenaPosition(arenaStage.getX(), arenaStage.getY());
