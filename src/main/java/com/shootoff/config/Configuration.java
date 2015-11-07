@@ -644,12 +644,13 @@ public class Configuration {
 		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		
 		if (debugMode) {
+			LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+			setLogConsoleAppender(rootLogger, loggerContext);
+			
 			if (rootLogger.getLevel().equals(Level.TRACE)) {
 				return;
 			}
 			
-	        LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
-	        setLogConsoleAppender(rootLogger, loggerContext);
 			rootLogger.setLevel(Level.DEBUG);
 			
 			// Ensure webcam-capture logger stays at info because it is quite noisy
