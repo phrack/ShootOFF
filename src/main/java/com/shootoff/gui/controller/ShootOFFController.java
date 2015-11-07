@@ -301,6 +301,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 	
+	public Stage getStage() {
+		return shootOFFStage;
+	}
+	
 	@Override
 	public void cameraConfigUpdated() {
 		config.unregisterAllRecordingCameraManagers();
@@ -646,7 +650,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        arenaStage.setScene(new Scene(loader.getRoot()));
 	        
 	        arenaController = (ProjectorArenaController)loader.getController();
-	        arenaController.init(config, camerasSupervisor);
+	        arenaController.init(this, config, camerasSupervisor);
 	        arenaController.getCanvasManager().setShowShots(false);
 	        
 	        toggleArenaCalibrationMenuItem.fire();
