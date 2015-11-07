@@ -28,51 +28,6 @@ public class TestAutoCalibration {
 		acm = new AutoCalibrationManager();
 	}
 	
-
-	
-	@Test
-	public void testCalibrateProjection() throws IOException {
-		BufferedImage testFrame = ImageIO.read(
-					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
-
-		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-		boolean calibrated = false;
-		
-		for (int i = 0; i <= 5; i++)
-		{
-			
-			if (!calibrated)
-			{
-				calibrationBounds = acm.processFrame(testFrame);
-				if (calibrationBounds.isPresent())
-					calibrated = true;
-			}
-			
-			else if (calibrated)
-			{
-				calibrated = true;
-				
-				// Make sure this matches a saved image
-				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
-				
-			}
-		}
-		
-		assertEquals(true, calibrated);
-		
-		assertTrue(calibrationBounds.isPresent());
-		
-		assertTrue((int)calibrationBounds.get().getMinX() == 114);
-
-		assertTrue((int)calibrationBounds.get().getMinY() == 41);
-
-		assertTrue((int)calibrationBounds.get().getWidth() == 413);
-
-		assertTrue((int)calibrationBounds.get().getHeight() == 307);
-
-	}
-	
 	@Test
 	public void testCalibrateProjection2() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
@@ -106,13 +61,13 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 114);
+		assertTrue((int)calibrationBounds.get().getMinX() == 113);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 41);
+		assertTrue((int)calibrationBounds.get().getMinY() == 36);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 413);
+		assertTrue((int)calibrationBounds.get().getWidth() == 419);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 307);
+		assertTrue((int)calibrationBounds.get().getHeight() == 313);
 
 	}
 	
@@ -149,13 +104,13 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 114);
+		assertTrue((int)calibrationBounds.get().getMinX() == 112);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 41);
+		assertTrue((int)calibrationBounds.get().getMinY() == 36);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 413);
+		assertTrue((int)calibrationBounds.get().getWidth() == 420);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 307);
+		assertTrue((int)calibrationBounds.get().getHeight() == 313);
 
 	}
 	
