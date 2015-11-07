@@ -35,6 +35,7 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
 
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -204,7 +205,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			
 			detectedProjectorScreen = projector;
 			
-			toggleFullScreen();
+			Platform.runLater(() ->toggleFullScreen());
 		} else {
 			logger.debug("Did not find screen that is a likely projector");
 		}
