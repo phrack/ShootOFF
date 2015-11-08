@@ -743,7 +743,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream("pattern.png");
 			LocatedImage img = new LocatedImage(is, "chessboard");
-	        arenaController.setTargetsVisible(false);
+			arenaController.startCalibration();
 	        arenaController.setCalibrationMessageVisible(false);
 	        arenaController.saveCurrentBackground();
 	        arenaController.setBackground(img);
@@ -801,7 +801,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
 		arenaCameraManager.setDetecting(true);
 
-		arenaController.calibrated();
+		arenaController.calibrated(arenaCameraManager.getCanvasManager());
 	}
 	
 	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {

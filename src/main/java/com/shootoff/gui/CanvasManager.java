@@ -152,17 +152,25 @@ public class CanvasManager {
 		this.cameraManager = cameraManager;
 	}
 	
-	public Label addDiagnosticMessage(String message, Color backgroundColor) {
+	public CameraManager getCameraManager() {
+		return cameraManager;
+	}
+	
+	public Label addDiagnosticMessage(String message, long chimeDelay, Color backgroundColor) {
 		Label diagnosticLabel = new Label(message);
 		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));
 		diagnosticsVBox.getChildren().add(diagnosticLabel);
 		
 		@SuppressWarnings("unchecked")
 		ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>)diagnosticExecutorService.schedule(
-				() -> TrainingExerciseBase.playSound("sounds/chime.wav"), DIAGNOSTIC_CHIME_DELAY, TimeUnit.MILLISECONDS);
+				() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
 		diagnosticFutures.put(diagnosticLabel, chimeFuture);
 		
 		return diagnosticLabel;
+	}
+	
+	public Label addDiagnosticMessage(String message, Color backgroundColor) {
+		return addDiagnosticMessage(message, DIAGNOSTIC_CHIME_DELAY, backgroundColor);
 	}
 	
 	public void removeDiagnosticMessage(Label diagnosticLabel) {

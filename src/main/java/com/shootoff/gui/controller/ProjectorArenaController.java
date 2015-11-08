@@ -46,6 +46,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -60,6 +61,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	private Configuration config;
 	private CanvasManager canvasManager;
+	private Optional<Label> mouseOnArenaLabel = Optional.empty();
 	private Optional<LocatedImage> background = Optional.empty();
 	private Optional<LocatedImage> savedBackground = Optional.empty();
 	
@@ -314,7 +316,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setFullScreen(!arenaStage.isFullScreen());
 	}
 	
-	public void setTargetsVisible(boolean visible) {
+	private void setTargetsVisible(boolean visible) {
 		for (Target t : canvasManager.getTargets()) t.getTargetGroup().setVisible(visible);
 	}
 	
@@ -328,9 +330,31 @@ public class ProjectorArenaController implements CalibrationListener {
     }
 
 	@Override
-	public void calibrated() {
+	public void startCalibration() {
+        setTargetsVisible(false);
+		arenaStage.getScene().setOnMouseEntered(null);
+		arenaStage.getScene().setOnMouseExited(null);
+	}
+	
+	@Override
+	public void calibrated(CanvasManager feedCanvasManager) {
 		setCalibrationMessageVisible(false);
 		setTargetsVisible(true);
 		restoreCurrentBackground();
+		
+		arenaStage.getScene().setOnMouseEntered((event) -> {
+			mouseOnArenaLabel = Optional.of(feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
+					15000 /* ms */, Color.YELLOW));
+		
+			feedCanvasManager.getCameraManager().setDetecting(false);
+		});
+	
+		arenaStage.getScene().setOnMouseExited((event) -> {
+			if (mouseOnArenaLabel.isPresent()) {
+				feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel.get());
+			}
+		
+			feedCanvasManager.getCameraManager().setDetecting(true);
+		});
 	}
 }
