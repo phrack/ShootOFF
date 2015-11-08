@@ -119,7 +119,7 @@ public class TestDuelingTree {
 		}
 		
 		assertEquals("left score: 1\n"
-			      + "right score: 0\n", stringOut.toString("UTF-8"));
+			      + "right score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 	
 		dt.destroy();
@@ -141,13 +141,13 @@ public class TestDuelingTree {
 		}		
 		
 		assertEquals("left score: 1\n"
-			      + "right score: 0\n", stringOut.toString("UTF-8"));
+			      + "right score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 		
 		dt.reset(targets);
 
 		assertEquals("left score: 0\n"
-			      + "right score: 0\n", stringOut.toString("UTF-8"));
+			      + "right score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 		
 		// Right pulls out the win with no competition
@@ -156,7 +156,7 @@ public class TestDuelingTree {
 		}		
 		
 		assertEquals("left score: 0\n"
-			      + "right score: 1\n", stringOut.toString("UTF-8"));
+			      + "right score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 		
 		dt.destroy();
