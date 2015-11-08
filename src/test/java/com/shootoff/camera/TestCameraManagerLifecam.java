@@ -28,8 +28,6 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 	
 	@Before
 	public void setUp() throws ConfigurationException {
-		System.setProperty("shootoff.home", System.getProperty("user.dir"));
-		
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
 		mockManager = new MockCanvasManager(config, true);

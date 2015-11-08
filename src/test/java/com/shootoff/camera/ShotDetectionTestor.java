@@ -19,6 +19,7 @@ public class ShotDetectionTestor {
 	
     @BeforeClass
     public static void setUpBaseClass() {
+    	System.setProperty("shootoff.home", System.getProperty("user.dir"));
         Configuration.disableErrorReporting();
     }
 	
