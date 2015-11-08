@@ -170,7 +170,7 @@ public class AutoCalibrationManager implements Runnable {
 
 	}
 
-	public BufferedImage undistortFrame(BufferedImage frame, int frameCount) {
+	public BufferedImage undistortFrame(BufferedImage frame) {
 		if (!isCalibrated)
 		{
 			logger.warn("undistortFrame called when isCalibrated is false");

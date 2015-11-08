@@ -475,14 +475,14 @@ public class CameraManager {
 			frameCount++;
 			
 			
-			if (autoCalibrationEnabled && (getFrameCount()%30==0))
+			if (autoCalibrationEnabled && (getFrameCount()%DEFAULT_FPS==0))
 			{
 				fireAutoCalibration(currentFrame);
 			}
 			
 			if (cameraAutoCalibrated)
 			{
-				currentFrame = acm.undistortFrame(currentFrame, getFrameCount());
+				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
 			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);

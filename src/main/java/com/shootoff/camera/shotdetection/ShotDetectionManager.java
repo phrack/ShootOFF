@@ -253,7 +253,7 @@ public final class ShotDetectionManager {
 		ArrayList<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingCopy, (detectShots && filtersInitialized));
 		
 		
-		if (logger.isDebugEnabled())
+		if (logger.isTraceEnabled())
 		{
 			if (thresholdPixels.size() >= 4)
 				logger.debug("thresholdPixels {} getMinimumShotDimension {}", thresholdPixels.size(), getMinimumShotDimension());
