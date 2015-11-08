@@ -653,10 +653,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        arenaController = (ProjectorArenaController)loader.getController();
 	        arenaController.init(this, config, camerasSupervisor);
 	        arenaController.getCanvasManager().setShowShots(false);
-	        
-
-
-	        
+	            
 	        toggleArenaCalibrationMenuItem.fire();
 	        
 	        arenaStage.setOnCloseRequest((e) -> {
@@ -705,11 +702,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream("pattern.png");
 			LocatedImage img = new LocatedImage(is, "chessboard");
+	        arenaController.setTargetsVisible(false);
+	        arenaController.setCalibrationMessageVisible(false);
 	        arenaController.setBackground(img);
 	        
-	        // Disables calibration text
-	        // TODO: Properly disable
-	        arenaController.calibrated();
 			arenaCameraManager.setController(this);
 	        arenaCameraManager.enableAutoCalibration();
 			
@@ -726,9 +722,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			}
 			
 		} else {
-
 			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent());
-			
 		}		
 	}
 	
@@ -758,9 +752,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		arenaCameraManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
 		arenaCameraManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
 		
-		
 		if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
-
 			arenaCameraManager.setProjectionBounds(bounds);
 		} else {
 			arenaCameraManager.setProjectionBounds(null);

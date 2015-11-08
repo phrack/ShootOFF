@@ -293,6 +293,14 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setFullScreen(!arenaStage.isFullScreen());
 	}
 	
+	public void setTargetsVisible(boolean visible) {
+		for (Target t : canvasManager.getTargets()) t.getTargetGroup().setVisible(visible);
+	}
+	
+	public void setCalibrationMessageVisible(boolean visible) {
+		calibrationLabel.setVisible(visible);
+	}
+	
 	@FXML 
 	public void canvasMouseEntered(MouseEvent event) throws IOException {
 		arenaAnchor.requestFocus();
@@ -300,6 +308,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	@Override
 	public void calibrated() {
-		calibrationLabel.setVisible(false);
+		setCalibrationMessageVisible(false);
+		setTargetsVisible(true);
 	}
 }
