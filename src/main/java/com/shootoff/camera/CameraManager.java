@@ -600,7 +600,7 @@ public class CameraManager {
 	
 	private Label brightnessDiagnosticWarning = null;
 	private final static int brightnessDiagnosticLengthMS = 1000;
-	private boolean showingBrightnessWarning = false;
+	private volatile boolean showingBrightnessWarning = false;
 	public void showBrightnessWarning() {
 		if (!showingBrightnessWarning)
 		{
@@ -660,7 +660,7 @@ public class CameraManager {
 
 	private Label motionDiagnosticWarning = null;
 	private final static int motionDiagnosticLengthMS = 1000;
-	private boolean showingMotionDiagnosticWarning = false;
+	private volatile boolean showingMotionDiagnosticWarning = false;
 	public void showMotionWarning() {
 		if (!showingMotionDiagnosticWarning)
 		{

@@ -348,7 +348,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.getScene().setOnMouseExited(null);
 	}
 	
-	private boolean showingCursorWarning = false;
+	private volatile boolean showingCursorWarning = false;
 	@Override
 	public void calibrated(CanvasManager feedCanvasManager) {
 		setCalibrationMessageVisible(false);

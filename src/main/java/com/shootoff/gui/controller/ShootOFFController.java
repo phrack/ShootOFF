@@ -791,7 +791,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	
 	private Label manualCalibrationRequestMessage = null; 
-	private boolean showingManualCalibrationRequestMessage = false;
+	private volatile boolean showingManualCalibrationRequestMessage = false;
 	private void showManualCalibrationRequestMessage()
 	{
 		if (showingManualCalibrationRequestMessage)
@@ -819,7 +819,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private Label fullScreenRequestMessage = null; 
-	private boolean showingFullScreenRequestMessage = false;
+	private volatile boolean showingFullScreenRequestMessage = false;
 	private void showFullScreenRequest()
 	{
 		if (showingFullScreenRequestMessage)
@@ -892,7 +892,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 	
 	private Label autoCalibrationMessage = null; 
-	private boolean showingAutoCalibrationMessage = false;
+	private volatile boolean showingAutoCalibrationMessage = false;
 	private void showAutoCalibrationMessage()
 	{
 		logger.trace("showAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}", showingAutoCalibrationMessage, autoCalibrationMessage);
