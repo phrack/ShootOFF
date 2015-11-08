@@ -62,12 +62,12 @@ public class TestRandomShoot {
 		
 		RandomShoot rs = new RandomShoot(targets, rng);
 
-		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace('/', File.separatorChar));
+		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 		
 		rs.reset(targets);
 		
-		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace('/', File.separatorChar));
+		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 	}
 
 	@Test

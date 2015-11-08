@@ -101,7 +101,7 @@ public class TestISSFStandardPistol {
 	
 	@Test
 	public void testFullRound() throws UnsupportedEncodingException {
-		assertEquals("sounds/voice/shootoff-makeready.wav\nsounds/beep.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace('/', File.separatorChar));
+		assertEquals("sounds/voice/shootoff-makeready.wav\nsounds/beep.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
 		// 150s round 1-4
@@ -180,7 +180,7 @@ public class TestISSFStandardPistol {
 	
 	@Test
 	public void testFull150sThenReset() throws UnsupportedEncodingException {
-		assertEquals("sounds/voice/shootoff-makeready.wav\nsounds/beep.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace('/', File.separatorChar));
+		assertEquals("sounds/voice/shootoff-makeready.wav\nsounds/beep.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
 		// 150s round 1-4

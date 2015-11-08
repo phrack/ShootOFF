@@ -3,6 +3,7 @@ package com.shootoff.plugins;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -98,7 +99,7 @@ public class TestBouncingTargets {
 		stringOut.reset();
 	
 		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(dontShootRegion));
-		assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace('/', File.separatorChar));
 		stringOut.reset();
 	}
 	

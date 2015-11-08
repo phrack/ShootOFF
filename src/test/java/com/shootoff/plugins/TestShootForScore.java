@@ -73,7 +73,7 @@ public class TestShootForScore {
 	@Test 
 	public void testReset() throws UnsupportedEncodingException {
 		sfs.reset(targets);
-		assertEquals("score: 0\n", stringOut.toString("UTF-8"));
+		assertEquals("score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 	}
 	
