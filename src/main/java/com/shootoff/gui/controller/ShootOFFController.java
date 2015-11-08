@@ -705,9 +705,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        			noneTrainingMenuItem.fire();
 	        		}
 	        		toggleArenaShotsMenuItem.setText("Show Shot Markers");
-	        		//if (calibrationConfigPane != null) {
-	        		//	stopCalibration();
-	        		//}
+	        		if (!toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
+	        			stopCalibration();
+	        		}
 	        		toggleProjectorMenus(true);
 	        		startArenaMenuItem.setDisable(false);
 	        		arenaCameraManager.setProjectionBounds(null);
@@ -738,7 +738,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate")) {
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
-
 
 			arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 
