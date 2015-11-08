@@ -27,7 +27,7 @@ import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
+//import ch.qos.logback.classic.Level;
 
 import com.shootoff.camera.CameraManager;
 import com.xuggle.xuggler.video.ConverterFactory;
@@ -106,8 +106,6 @@ public class AutoCalibrationManager implements Runnable {
 		
 		// For debugging
 		Mat traceMat = null;
-		String filename;
-		File file;
 		if (logger.isTraceEnabled())
 		{
 			traceMat = mat.clone();
@@ -132,8 +130,8 @@ public class AutoCalibrationManager implements Runnable {
 		
 		if (logger.isTraceEnabled())
 		{
-			filename = String.format("calibrate-dist.png");
-			file = new File(filename);
+			String filename = String.format("calibrate-dist.png");
+			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, traceMat);
 		}
@@ -152,8 +150,8 @@ public class AutoCalibrationManager implements Runnable {
 			Mat undistorted = warpPerspective(mat);
 			
 
-			filename = String.format("calibrate-undist.png");
-			file = new File(filename);
+			String filename = String.format("calibrate-undist.png");
+			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, undistorted);
 			
@@ -344,8 +342,6 @@ public class AutoCalibrationManager implements Runnable {
 	// Use probabilistic Hough Lines algorithm to calculate the ideal corners of the pattern
 	private Optional<MatOfPoint2f> findIdealCorners(Mat frame, MatOfPoint2f estimatedPatternRect)
 	{
-		String filename;
-		File file;
 		
 		Mat traceMat = null;
 		if (logger.isTraceEnabled())
@@ -373,8 +369,8 @@ public class AutoCalibrationManager implements Runnable {
 		
 		if (logger.isTraceEnabled())
 		{
-			filename = String.format("calibrate-undist-grey-lines.png");
-			file = new File(filename);
+			String filename = String.format("calibrate-undist-grey-lines.png");
+			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, grey);	
 		}
@@ -384,7 +380,7 @@ public class AutoCalibrationManager implements Runnable {
 	    
 	    
 	    // Easier to work off of Points
-	    Point[] estimatedPoints = MatOfPoint2fToPoints(estimatedPatternRect);
+	    Point[] estimatedPoints = matOfPoint2fToPoints(estimatedPatternRect);
 	    
 		if (logger.isTraceEnabled())
 		{
@@ -475,8 +471,8 @@ public class AutoCalibrationManager implements Runnable {
 	    
 		if (logger.isTraceEnabled())
 		{
-			filename = String.format("calibrate-lines.png");
-			file = new File(filename);
+			String filename = String.format("calibrate-lines.png");
+			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, traceMat);	
 		}
@@ -499,8 +495,8 @@ public class AutoCalibrationManager implements Runnable {
 	    
 		if (logger.isTraceEnabled())
 		{
-			filename = String.format("calibrate-lines-with-corners.png");
-			file = new File(filename);
+			String filename = String.format("calibrate-lines-with-corners.png");
+			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, traceMat);	
 		}
@@ -701,7 +697,7 @@ public class AutoCalibrationManager implements Runnable {
 		return mat;
 	}
 	
-	private Point[] MatOfPoint2fToPoints(MatOfPoint2f mat)
+	private Point[] matOfPoint2fToPoints(MatOfPoint2f mat)
 	{
 	    Point[] points = new Point[4];
 	    points[0] = new Point(mat.get(0,0)[0], mat.get(0,0)[1]);

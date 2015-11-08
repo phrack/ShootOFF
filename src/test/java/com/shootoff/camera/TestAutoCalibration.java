@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
-import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 public class TestAutoCalibration {
 	private AutoCalibrationManager acm;
@@ -22,8 +21,6 @@ public class TestAutoCalibration {
 	@Before
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
-	
-		//Configuration.disableErrorReporting();
 		
 		acm = new AutoCalibrationManager();
 	}
@@ -39,13 +36,10 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 113);
-
-		assertTrue((int)calibrationBounds.get().getMinY() == 36);
-
-		assertTrue((int)calibrationBounds.get().getWidth() == 419);
-
-		assertTrue((int)calibrationBounds.get().getHeight() == 313);
+		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(419, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(313, calibrationBounds.get().getHeight(), 1.0);
 
 	}
 	
@@ -60,14 +54,11 @@ public class TestAutoCalibration {
 		calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
-		
-		assertTrue((int)calibrationBounds.get().getMinX() == 113);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 37);
-
-		assertTrue((int)calibrationBounds.get().getWidth() == 418);
-
-		assertTrue((int)calibrationBounds.get().getHeight() == 312);
+		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(37, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(418, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(312, calibrationBounds.get().getHeight(), 1.0);
 
 	}
 	
@@ -123,13 +114,10 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 45);
-
-		assertTrue((int)calibrationBounds.get().getMinY() == 25);
-
-		assertTrue((int)calibrationBounds.get().getWidth() == 569);
-
-		assertTrue((int)calibrationBounds.get().getHeight() == 431);
+		assertEquals(45, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(25, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(569, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(431, calibrationBounds.get().getHeight(), 1.0);
 	}
 
 
@@ -145,14 +133,10 @@ public class TestAutoCalibration {
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 116);
-
-		assertTrue((int)calibrationBounds.get().getMinY() == 88);
-
-		assertTrue((int)calibrationBounds.get().getWidth() == 422);
-
-		assertTrue((int)calibrationBounds.get().getHeight() == 296);
-
+		assertEquals(116, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(88, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(296, calibrationBounds.get().getHeight(), 1.0);
 	}
 }
 
