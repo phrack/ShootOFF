@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
@@ -322,7 +323,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
         if (selectedToggle != null && selectedToggle instanceof RadioMenuItem) {
         	RadioMenuItem selectedOption = (RadioMenuItem)calibrationToggleGroup.getSelectedToggle();
         	
-        	switch (selectedOption.getText().toLowerCase()) {
+        	switch (selectedOption.getText().toLowerCase(Locale.getDefault())) {
         	case "detect everywhere":
         		return CalibrationOption.EVERYWHERE;
         		
