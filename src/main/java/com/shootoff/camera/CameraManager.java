@@ -690,6 +690,11 @@ public class CameraManager {
 		autoCalibrationEnabled  = true;
 		cameraAutoCalibrated = false;
 	}
+	
+	public void disableAutoCalibration() {
+		autoCalibrationEnabled  = false;
+		cameraAutoCalibrated = false;
+	}
 
 	public void setController(ShootOFFController controller) {
 		this.controller = controller;

@@ -67,6 +67,8 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	private Screen originalArenaHomeScreen;
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
+
+	private ShootOFFController shootOFFController;
 	
 	// Used for testing
 	public void init(Configuration config, CanvasManager canvasManager) {
@@ -81,6 +83,9 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
+		
+		this.shootOFFController = shootOFFController;
+		
 		shootOFFStage = shootOFFController.getStage();
 		arenaStage = (Stage)arenaAnchor.getScene().getWindow();
 		
@@ -155,7 +160,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			arenaStage.setX(arenaPosition.getX());
 			arenaStage.setY(arenaPosition.getY());
 			
-			toggleFullScreen();
+			Platform.runLater(() ->toggleFullScreen());
 			
 			return;
 		} else if (Screen.getScreens().size() == 2) {
@@ -314,9 +319,16 @@ public class ProjectorArenaController implements CalibrationListener {
 	private void toggleFullScreen() {
 		arenaStage.setAlwaysOnTop(!arenaStage.isAlwaysOnTop());
 		arenaStage.setFullScreen(!arenaStage.isFullScreen());
+		
+		shootOFFController.setFullScreenStatus(arenaStage.isFullScreen());
 	}
 	
-	private void setTargetsVisible(boolean visible) {
+	public boolean isFullScreen()
+	{
+		return arenaStage.isFullScreen();
+	}
+	
+	public void setTargetsVisible(boolean visible) {
 		for (Target t : canvasManager.getTargets()) t.getTargetGroup().setVisible(visible);
 	}
 	
