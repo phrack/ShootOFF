@@ -28,7 +28,6 @@ def keyStore = 'shootoff_cs.jks'
 def keyAlias = 'cscert'
 def tsaURL = 'http://timestamp.comodoca.com/rfc3161'
 
-
 repositories {
     mavenCentral()
     // Next 2 are used for tts
@@ -89,7 +88,7 @@ dependencies {
     }
     
     //OpenCV
-	compile 'org.openpnp:opencv:2.4.11-1'
+    compile 'org.openpnp:opencv:2.4.11-1'
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
     testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.+'

@@ -83,8 +83,8 @@ public class CameraManager {
 	private final Configuration config;
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
-	private boolean isStreaming = true;
-	private boolean isDetecting = true;
+	private volatile boolean isStreaming = true;
+	private volatile boolean isDetecting = true;
 	private boolean shownBrightnessWarning = false;
 	private boolean cropFeedToProjection = false;
 	private boolean limitDetectProjection = false;
