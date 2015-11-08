@@ -32,13 +32,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javafx.geometry.Bounds;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.shotdetection.ShotDetectionManager;
-import com.shootoff.config.Configuration;
+
+
+
+import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -53,12 +59,13 @@ import com.xuggle.xuggler.video.IConverter;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.geometry.Bounds;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.util.Callback;
+import javafx.util.Pair;
 
 public class CameraManager {
 	public static final int FEED_WIDTH = 640;
@@ -100,6 +107,12 @@ public class CameraManager {
 	private int frameCount = 0;
 	
 	private static double webcamFPS = DEFAULT_FPS;
+	
+	private AutoCalibrationManager acm = null;
+	private boolean autoCalibrationEnabled = false;
+	public boolean cameraAutoCalibrated = false;
+	
+	private ShootOFFController controller;
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -337,6 +350,7 @@ public class CameraManager {
 	private Timer brightnessDiagnosticTimer = new Timer();
 	private Timer motionDiagnosticTimer = new Timer();
 
+
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
 
@@ -408,9 +422,12 @@ public class CameraManager {
 					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 							(int)b.getWidth(), (int)b.getHeight());
 				}				
+				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
 
-				if (!processFrame(currentFrame))
+				if (!pFramePair.getKey())
 					continue;
+				
+				currentFrame = pFramePair.getValue();
 
 				if (recordingShots) {
 					rollingRecorder.recordFrame(currentFrame);
@@ -453,25 +470,35 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 
-		private boolean processFrame(BufferedImage currentFrame)
+		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame)
 		{
 			frameCount++;
-		
-			logger.trace("processFrame {}", getFrameCount());
 			
-			boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
+			
+			if (autoCalibrationEnabled && (getFrameCount()%30==0))
+			{
+				fireAutoCalibration(currentFrame);
+			}
+			
+			if (cameraAutoCalibrated)
+			{
+				currentFrame = acm.undistortFrame(currentFrame, getFrameCount());
+			}
 
-			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {				
+			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
+
+
+			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS)==0) {		
+				
 				setFPS(webcam.get().getFPS());
 				
 				if (debuggerListener.isPresent()) {
 					debuggerListener.get().updateFeedData(webcamFPS, Optional.empty());
 				}
-
 				checkIfMinimumFPS();
 			}
 
-			return result;
+			return new Pair<Boolean, BufferedImage>(result, currentFrame);
 		}
 		
 		private void setFPS(double newFPS)
@@ -494,6 +521,37 @@ public class CameraManager {
 			}
 		}
 		
+		private void fireAutoCalibration(BufferedImage frame) {
+
+			acm.setFrame(frame);
+			acm.setCallback(new Callback<Optional<Bounds>, Void>()
+			{
+
+				@Override
+				public Void call(Optional<Bounds> bounds) {
+					if (bounds.isPresent())
+						autoCalibrateSuccess(bounds.get());
+					return null;
+				}
+						
+			});
+			new Thread(acm).start();
+		}
+
+		protected void autoCalibrateSuccess(Bounds bounds) {
+
+			if (autoCalibrationEnabled && controller != null)
+			{
+				autoCalibrationEnabled = false;
+				
+				cameraAutoCalibrated = true;
+
+				Platform.runLater(() -> { controller.calibrate(bounds); });
+				
+			}
+			
+		}
+
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.ERROR);
@@ -604,7 +662,7 @@ public class CameraManager {
 			Platform.runLater(() -> {
 					motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 			});
-		}
+	}
 		else
 		{
 			// Stop the existing timer and start a new one
@@ -625,4 +683,16 @@ public class CameraManager {
 		    }
 		}, motionDiagnosticLengthMS);
 	}
+
+	public void enableAutoCalibration() {
+		acm = new AutoCalibrationManager();
+		autoCalibrationEnabled  = true;
+		cameraAutoCalibrated = false;
+	}
+
+	public void setController(ShootOFFController controller) {
+		this.controller = controller;
+	}
+
+
 }

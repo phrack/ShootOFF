@@ -352,9 +352,9 @@ public class Main extends Application {
 					    } else {			    	
 						    InputStream is = jar.getInputStream(entry);
 						    try (FileOutputStream fos = new FileOutputStream(f)) {
-							    while (is.available() > 0) {
-							        fos.write(is.read());
-							    }
+						    while (is.available() > 0) {
+						        fos.write(is.read());
+						    }
 						    }
 						    is.close();
 						    
@@ -455,7 +455,7 @@ public class Main extends Application {
 			config.setUseErrorReporting(showFirstRunMessage());
 			
 			config.setFirstRun(false);
-			try {
+		try {
 				config.writeConfigurationFile();
 			} catch (ConfigurationException | IOException e) {
 				logger.error("Error persisting firstrun = false in config", e);
@@ -583,6 +583,9 @@ public class Main extends Application {
 		// Check the comment at the top of the Camera class
 		// for more information about this hack
 		String os = System.getProperty("os.name"); 
+		
+		nu.pattern.OpenCV.loadShared();
+
 		if (os != null && os.equals("Mac OS X")) {
 			Camera.getDefault();
 		}
