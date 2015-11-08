@@ -45,7 +45,6 @@ import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.CalibrationConfigPane;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
@@ -67,6 +66,8 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -91,6 +92,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -116,6 +118,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private MenuItem startArenaMenuItem;
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
+	@FXML private Menu calibrationOptionsMenu;
+	@FXML private ToggleGroup calibrationToggleGroup;
 	@FXML private Menu addArenaTargetMenu;
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
@@ -129,12 +133,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 	
 	private ProjectorArenaController arenaController;
-	private CalibrationConfigPane calibrationConfigPane;
 	private Optional<Target> calibrationTarget = Optional.empty();
 	private CameraManager arenaCameraManager;
 	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 	
 	private Stage sessionViewerStage;
+	
+	private enum CalibrationOption {
+		EVERYWHERE, ONLY_IN_BOUNDS, CROP
+	}
 	
 	public void init(Configuration config) {
 		this.config = config;
@@ -225,6 +232,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        }
 	    });
 		
+		calibrationToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>(){
+		    public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
+	    			if (newToggle == null) return;
+	    	
+	    			configureArenaCamera(getSelectedCalibrationOption());
+	            }
+		    });
+		
 		shotTimerTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<ShotEntry>() {
 	        @Override
 	        public void onChanged(Change<? extends ShotEntry> change)
@@ -270,7 +285,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		splitCol.setCellFactory(column -> {
 		        return new TableCell<ShotEntry, ShotEntry.SplitData>() {
-		            @Override
+		        	@Override
 		            public void updateItem(ShotEntry.SplitData item, boolean empty) {
 		                super.updateItem(item, empty);
 		                
@@ -300,6 +315,33 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shotTimerTable.getColumns().add(laserCol);
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+	}
+	
+	private CalibrationOption getSelectedCalibrationOption() {
+		Toggle selectedToggle = calibrationToggleGroup.getSelectedToggle();
+        if (selectedToggle != null && selectedToggle instanceof RadioMenuItem) {
+        	RadioMenuItem selectedOption = (RadioMenuItem)calibrationToggleGroup.getSelectedToggle();
+        	
+        	switch (selectedOption.getText().toLowerCase()) {
+        	case "detect everywhere":
+        		return CalibrationOption.EVERYWHERE;
+        		
+        	case "only detect in projector bounds":
+        		return CalibrationOption.ONLY_IN_BOUNDS;
+        		
+        	case "crop feed to projector bounds":
+        		return CalibrationOption.CROP;
+        	
+    		default:
+    			logger.error("Unknown calibration option, defaulting to only in projection bounds: {}", 
+    					selectedOption.getText());
+    			
+    			return CalibrationOption.ONLY_IN_BOUNDS;
+        	}
+        } else {
+        	logger.error("No calibration toggle selected or it's not a RadioMenuItem. This should not be possible.");
+        	return CalibrationOption.ONLY_IN_BOUNDS;
+        }
 	}
 	
 	public Stage getStage() {
@@ -663,9 +705,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        			noneTrainingMenuItem.fire();
 	        		}
 	        		toggleArenaShotsMenuItem.setText("Show Shot Markers");
-	        		if (calibrationConfigPane != null) {
-	        			stopCalibration();
-	        		}
+	        		//if (calibrationConfigPane != null) {
+	        		//	stopCalibration();
+	        		//}
 	        		toggleProjectorMenus(true);
 	        		startArenaMenuItem.setDisable(false);
 	        		arenaCameraManager.setProjectionBounds(null);
@@ -680,6 +722,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	private void toggleProjectorMenus(boolean isDisabled) {
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
+		calibrationOptionsMenu.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
 		coursesMenu.setDisable(isDisabled);
@@ -698,7 +741,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 
 			arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-			final AnchorPane tabAnchor = (AnchorPane)cameraTabPane.getSelectionModel().getSelectedItem().getContent();
 
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream("pattern.png");
 			LocatedImage img = new LocatedImage(is, "chessboard");
@@ -710,10 +752,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			arenaCameraManager.setController(this);
 	        arenaCameraManager.enableAutoCalibration();
 			
-			calibrationConfigPane = new CalibrationConfigPane(tabAnchor, 
-					calibrationTarget.isPresent() && !(arenaCameraManager.isLimitingDetectionToProjection() || arenaCameraManager.isCroppingFeedToProjection()),
-					arenaCameraManager.isLimitingDetectionToProjection(), arenaCameraManager.isCroppingFeedToProjection());
-			arenaCameraManager.setDetecting(false);
+	        arenaCameraManager.setDetecting(false);
 			arenaCameraManager.setProjectionBounds(null);
 			
 			if (!calibrationTarget.isPresent()) {
@@ -749,15 +788,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
 		
-		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, bounds);
-		arenaCameraManager.setCropFeedToProjection(calibrationConfigPane.cropFeed());
-		arenaCameraManager.setLimitDetectProjection(calibrationConfigPane.limitDetectProjection());
-		
-		if (calibrationConfigPane.cropFeed() || calibrationConfigPane.limitDetectProjection()) {
-			arenaCameraManager.setProjectionBounds(bounds);
-		} else {
-			arenaCameraManager.setProjectionBounds(null);
-		}
+		configureArenaCamera(getSelectedCalibrationOption(), bounds);
 		
 		stopCalibration();
 	}
@@ -765,16 +796,24 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void stopCalibration() {
 		toggleArenaCalibrationMenuItem.setText("Calibrate");
 		
-		calibrationConfigPane.close();
-		
 		arenaController.setBackground(null);
 
 		if (calibrationTarget.isPresent()) 
 			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
 		arenaCameraManager.setDetecting(true);
-		
-		calibrationConfigPane = null;
+
 		arenaController.calibrated();
+	}
+	
+	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
+		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, bounds);
+		configureArenaCamera(option);
+		arenaCameraManager.setProjectionBounds(bounds);
+	}
+	
+	private void configureArenaCamera(CalibrationOption option) {
+		arenaCameraManager.setCropFeedToProjection(CalibrationOption.CROP.equals(option));
+		arenaCameraManager.setLimitDetectProjection(CalibrationOption.ONLY_IN_BOUNDS.equals(option));
 	}
 	
 	private void initDefaultBackgrounds() {
