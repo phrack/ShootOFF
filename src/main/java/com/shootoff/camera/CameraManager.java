@@ -600,9 +600,11 @@ public class CameraManager {
 	
 	private Label brightnessDiagnosticWarning = null;
 	private final static int brightnessDiagnosticLengthMS = 1000;
+	private boolean showingBrightnessWarning = false;
 	public void showBrightnessWarning() {
-		if (brightnessDiagnosticWarning == null)
+		if (!showingBrightnessWarning)
 		{
+			showingBrightnessWarning = true;
 			Platform.runLater(() -> {
 				brightnessDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive brightness", Color.RED);
 			});
@@ -622,6 +624,7 @@ public class CameraManager {
 		            		canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
 		            		brightnessDiagnosticWarning = null;
 		            	}
+		    			showingBrightnessWarning = false;
 		            }
 		        });
 		    }
@@ -657,13 +660,15 @@ public class CameraManager {
 
 	private Label motionDiagnosticWarning = null;
 	private final static int motionDiagnosticLengthMS = 1000;
+	private boolean showingMotionDiagnosticWarning = false;
 	public void showMotionWarning() {
-		if (motionDiagnosticWarning == null)
+		if (!showingMotionDiagnosticWarning)
 		{
+			showingMotionDiagnosticWarning = true;
 			Platform.runLater(() -> {
 					motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 			});
-	}
+		}
 		else
 		{
 			// Stop the existing timer and start a new one
@@ -679,6 +684,7 @@ public class CameraManager {
 		            		canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
 		            		motionDiagnosticWarning = null;
 		            	}
+		            	showingMotionDiagnosticWarning = false;
 		            }
 		        });
 		    }

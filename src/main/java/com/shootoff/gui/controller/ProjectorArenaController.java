@@ -61,7 +61,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	private Configuration config;
 	private CanvasManager canvasManager;
-	private Optional<Label> mouseOnArenaLabel = Optional.empty();
+	private Label mouseOnArenaLabel = null;
 	private Optional<LocatedImage> background = Optional.empty();
 	private Optional<LocatedImage> savedBackground = Optional.empty();
 	
@@ -348,6 +348,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.getScene().setOnMouseExited(null);
 	}
 	
+	private boolean showingCursorWarning = false;
 	@Override
 	public void calibrated(CanvasManager feedCanvasManager) {
 		setCalibrationMessageVisible(false);
@@ -355,15 +356,21 @@ public class ProjectorArenaController implements CalibrationListener {
 		restoreCurrentBackground();
 		
 		arenaStage.getScene().setOnMouseEntered((event) -> {
-			mouseOnArenaLabel = Optional.of(feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
-					15000 /* ms */, Color.YELLOW));
-		
-			feedCanvasManager.getCameraManager().setDetecting(false);
+			if (!shootOFFController.isCalibrating())
+			{
+				showingCursorWarning = true;
+				mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
+						15000 /* ms */, Color.YELLOW);
+			
+				feedCanvasManager.getCameraManager().setDetecting(false);
+			}
 		});
 	
 		arenaStage.getScene().setOnMouseExited((event) -> {
-			if (mouseOnArenaLabel.isPresent()) {
-				feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel.get());
+			if (showingCursorWarning) {
+				feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
+				showingCursorWarning = false;
+				mouseOnArenaLabel = null;
 			}
 		
 			feedCanvasManager.getCameraManager().setDetecting(true);

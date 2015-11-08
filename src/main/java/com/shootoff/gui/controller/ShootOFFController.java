@@ -143,6 +143,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	private Stage sessionViewerStage;
 	
+	private boolean isCalibrating = false;
+	
+	
 	private enum CalibrationOption {
 		EVERYWHERE, ONLY_IN_BOUNDS, CROP
 	}
@@ -714,7 +717,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        		startArenaMenuItem.setDisable(false);
 	        		arenaCameraManager.setProjectionBounds(null);
 	        		arenaController = null;
-	        		arenaCameraManager = null;
+	        		
+	        		// We can't remove this until stopCalibration's runlaters finish
+	        		Platform.runLater(() -> {arenaCameraManager = null;});
 	        	});
 		}
 		
@@ -734,9 +739,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		for (MenuItem m : projectorExerciseMenuItems) m.setDisable(isDisabled);
 	}
-	
-	private boolean isCalibrating = false;
-	
 	
 	private void toggleArenaCalibrationMenuItemText()
 	{
@@ -781,6 +783,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 		
 	}
+	
+	public boolean isCalibrating()
+	{
+		return isCalibrating;
+	}
+	
 	
 	private Label manualCalibrationRequestMessage = null; 
 	private boolean showingManualCalibrationRequestMessage = false;
@@ -907,7 +915,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			showingAutoCalibrationMessage = false;
 			
 			Platform.runLater(() -> {
-				logger.trace("removeAutoCalibrationMessage runLater {}", autoCalibrationMessage);
+				logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
 				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(autoCalibrationMessage);
 				autoCalibrationMessage = null;
 			});
