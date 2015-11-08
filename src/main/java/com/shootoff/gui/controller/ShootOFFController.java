@@ -704,6 +704,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			LocatedImage img = new LocatedImage(is, "chessboard");
 	        arenaController.setTargetsVisible(false);
 	        arenaController.setCalibrationMessageVisible(false);
+	        arenaController.saveCurrentBackground();
 	        arenaController.setBackground(img);
 	        
 			arenaCameraManager.setController(this);

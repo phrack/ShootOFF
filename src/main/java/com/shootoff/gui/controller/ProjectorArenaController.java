@@ -61,6 +61,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	private Configuration config;
 	private CanvasManager canvasManager;
 	private Optional<LocatedImage> background = Optional.empty();
+	private Optional<LocatedImage> savedBackground = Optional.empty();
 	
 	private Screen originalArenaHomeScreen;
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
@@ -240,6 +241,26 @@ public class ProjectorArenaController implements CalibrationListener {
 		canvasManager.updateBackground(img, Optional.empty());
 	}
 	
+	/**
+	 *  Used to temporarily save the background before autocalibration
+	 */
+	public void saveCurrentBackground() {
+		if (background.isPresent()) {
+			savedBackground = background;
+		}
+	}
+	
+	/**
+	 * Used to restore the background that was saved before autocalibration
+	 * with saveCurrentBackground.
+	 */
+	public void restoreCurrentBackground() {
+		if (savedBackground.isPresent()) {
+			setBackground(savedBackground.get());
+			savedBackground = Optional.empty();
+		}
+	}
+	
 	public Optional<LocatedImage> getBackground() {
 		return background;
 	}
@@ -310,5 +331,6 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void calibrated() {
 		setCalibrationMessageVisible(false);
 		setTargetsVisible(true);
+		restoreCurrentBackground();
 	}
 }
