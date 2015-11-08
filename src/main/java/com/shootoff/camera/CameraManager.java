@@ -507,8 +507,9 @@ public class CameraManager {
 				logger.debug("New FPS read from webcam is very low: {}", newFPS);
 			}
 			
-			webcamFPS = Math.min(newFPS, DEFAULT_FPS);	
-			DeduplicationProcessor.setThreshold((int)(webcamFPS/DeduplicationProcessor.DEDUPE_THRESHOLD_DIVISION_FACTOR));
+			webcamFPS = newFPS;
+			DeduplicationProcessor.setThresholdUsingFPS(webcamFPS);
+			
 		}
 		
 		private void checkIfMinimumFPS()

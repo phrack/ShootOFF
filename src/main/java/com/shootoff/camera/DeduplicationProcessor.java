@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 public class DeduplicationProcessor implements ShotProcessor {
 	private Optional<Shot> lastShot = Optional.empty();
 	
-	private static double DISTANCE_THRESHOLD = 0.05;
-	private static double DISTANCE_THRESHOLD_X = 640 * DISTANCE_THRESHOLD;
-	private static double DISTANCE_THRESHOLD_Y = 480 * DISTANCE_THRESHOLD;
+	// About 12.5 pixels at 640x480
+	private static double DISTANCE_THRESHOLD = (CameraManager.FEED_HEIGHT * CameraManager.FEED_WIDTH) / 24576.0;
 	
-	public static final int DEDUPE_THRESHOLD_DIVISION_FACTOR = 5;
+	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 8.0;
+	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
 	
-	private static int frameThreshold = 10;
+	private static int frameThreshold = DEDUPE_THRESHOLD_MINIMUM;
 	
 	public static int getThreshold() {
 		return frameThreshold;
@@ -42,11 +42,10 @@ public class DeduplicationProcessor implements ShotProcessor {
 		frameThreshold = ft;
 	}
 
-	private final Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
+	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
 
 
 	public DeduplicationProcessor() {
-
 	}
 	
 	protected Optional<Shot> getLastShot() {
@@ -56,18 +55,23 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 	public boolean processShot(Shot shot, boolean updateLastShot) {
 		if (lastShot.isPresent()) {
-			logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(), frameThreshold);
 			
-			// FIX ME MAYBE? Color detection is disabled
-			//shot.getColor().equals(lastShot.get().getColor()) && 
+			if (logger.isTraceEnabled())
+			{
+				logger.trace("processShot {} {}", shot.getX(), shot.getY());
+			
+				logger.trace("processShot {} - {}", shot.getFrame() - lastShot.get().getFrame(), frameThreshold);
+			
+				logger.trace("processShot distance {}", euclideanDistance(lastShot.get(), shot));
+			}
 			
 			// If two shots have the same color, appear to have happened fast than Jerry Miculek can shoot
 			// and are very close to each other, ignore the new shot
 			
-			if (	
-					shot.getFrame() - lastShot.get().getFrame() <= frameThreshold &&
-					Math.abs(lastShot.get().getX() - shot.getX()) <= DISTANCE_THRESHOLD_X &&
-					Math.abs(lastShot.get().getY() - shot.getY()) <= DISTANCE_THRESHOLD_Y) {
+			if (	shot.getFrame() - lastShot.get().getFrame() <= frameThreshold &&
+					euclideanDistance(lastShot.get(), shot) <= DISTANCE_THRESHOLD) {
+				
+				logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
 				
 				return false;
 			}
@@ -78,6 +82,11 @@ public class DeduplicationProcessor implements ShotProcessor {
 			lastShot = Optional.of(shot);
 		
 		return true;
+	}
+	
+	public double euclideanDistance(Shot shot1, Shot shot2)
+	{
+		return Math.sqrt(Math.pow(shot1.getX()-shot2.getX(),2) + Math.pow(shot1.getY()-shot2.getY(),2));		
 	}
 	
 	@Override
@@ -92,5 +101,15 @@ public class DeduplicationProcessor implements ShotProcessor {
 	@Override
 	public void reset() {
 		lastShot = Optional.empty();
+	}
+
+	public static void setThresholdUsingFPS(double webcamFPS) {
+		int newThreshold = (int) (webcamFPS/DEDUPE_THRESHOLD_DIVISION_FACTOR);
+		
+		logger.trace("setThresholdUsingFPS {} {}", webcamFPS, newThreshold);
+		
+		newThreshold = Math.max(newThreshold, DEDUPE_THRESHOLD_MINIMUM);
+		
+		setThreshold(newThreshold);
 	}
 }
