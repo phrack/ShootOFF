@@ -168,10 +168,10 @@ public class Main extends Application {
 			return Optional.empty();
 		}
 		
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
         StringBuilder metadataXML = new StringBuilder();
         
-        try {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
+        	
 	        String line;
 	        while ((line = br.readLine()) != null) {
 	        	if (metadataXML.length() > 0) metadataXML.append("\n");
@@ -183,12 +183,6 @@ public class Main extends Application {
 			logger.error("Failed to read resources metadata", e);
 			tryRunningShootOFF();
 			return Optional.empty();
-        } finally {
-        	try {
-				br.close();
-			} catch (IOException e) {
-				logger.error("Error closing reader opened to process resource metadata", e);
-			}
         }
 		
 		connection.disconnect();
@@ -240,10 +234,8 @@ public class Main extends Application {
             @Override
             public Boolean call() throws InterruptedException {
     			BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
-    			FileOutputStream fileOutputStream = null;
-    			
-    			try {
-    				fileOutputStream = new FileOutputStream(resourcesJARFile);
+
+    			try (FileOutputStream fileOutputStream = new FileOutputStream(resourcesJARFile)) {
 	    	
     				long totalDownloaded = 0;
 	    			int count;
@@ -258,15 +250,7 @@ public class Main extends Application {
 	    			fileOutputStream.close();
 	    			
 	                updateProgress(100, 100);
-    			} catch (IOException e) {
-    				if (fileOutputStream != null) {
-    					try {
-    						fileOutputStream.close();
-    					} catch (IOException e1) {
-    						e1.printStackTrace();
-    					}
-    				}
-    				
+    			} catch (IOException e) {    				
     				logger.error("Failed to download writable resources file", e);
     				return false;
     			}

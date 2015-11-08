@@ -30,9 +30,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
-		Optional<Bounds> calibrationBounds = Optional.empty();
-
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
 		
@@ -47,11 +45,8 @@ public class TestAutoCalibration {
 	public void testCalibrateProjection2() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
-
-		Optional<Bounds> calibrationBounds = Optional.empty();
 		
-
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
 
@@ -67,10 +62,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
 
-		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertFalse(calibrationBounds.isPresent());
 	}
@@ -81,9 +73,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
 
-		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -95,9 +85,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 
-		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -108,9 +96,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 
-		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
 		
@@ -126,10 +112,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 
-
-		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-		calibrationBounds = acm.processFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
 		

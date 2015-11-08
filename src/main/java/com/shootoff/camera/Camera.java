@@ -111,8 +111,10 @@ public class Camera {
 			
 			return new Camera(ipcam);
 		} catch (WebcamException we) {
-			if (we.getCause() instanceof UnknownHostException) {
-				throw (UnknownHostException)we.getCause();
+			Throwable cause = we.getCause();
+			
+			if (cause instanceof UnknownHostException) {
+				throw (UnknownHostException)cause;
 			}
 			
 			logger.error("Error cocnnecting to webcam", we);

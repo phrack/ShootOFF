@@ -34,15 +34,11 @@ public class CourseIO {
 	}
 	
 	public static Optional<Course> loadCourse(ProjectorArenaController arenaController, File courseFile) {
-		Optional<Course> course = Optional.empty();
-		
-		if (courseFile.getName().endsWith("course")) {
-			course = new XMLCourseReader(arenaController, courseFile).load();
-		} else {
+		if (!courseFile.getName().endsWith("course")) {
 			System.err.println("Unknown course file type.");
 			return Optional.empty();
 		}
 		
-		return course;
+		return new XMLCourseReader(arenaController, courseFile).load();
 	}
 }

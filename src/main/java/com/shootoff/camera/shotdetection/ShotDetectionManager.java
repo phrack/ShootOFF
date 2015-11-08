@@ -300,7 +300,7 @@ public final class ShotDetectionManager {
 				
 				logger.trace("thresholdPixels {}", thresholdPixels.size());
 
-				ArrayList<PixelCluster> clusters = clusterPixels(workingCopy, thresholdPixels);
+				ArrayList<PixelCluster> clusters = clusterPixels(thresholdPixels);
 
 				detectShots(workingCopy, clusters);
 			}
@@ -317,11 +317,10 @@ public final class ShotDetectionManager {
 	}
 	
 	
-	private ArrayList<PixelCluster> clusterPixels(BufferedImage workingCopy, ArrayList<Pixel> thresholdPixels) {
-		ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
+	private ArrayList<PixelCluster> clusterPixels(ArrayList<Pixel> thresholdPixels) {
 		PixelClusterManager pixelClusterManager = new PixelClusterManager(thresholdPixels, this);
 		pixelClusterManager.clusterPixels();
-		clusters = pixelClusterManager.dumpClusters();
+		ArrayList<PixelCluster> clusters = pixelClusterManager.dumpClusters();
 	
 		return clusters;
 	}
@@ -374,8 +373,8 @@ public final class ShotDetectionManager {
 
 
 	private boolean checkIfInitialized() {
-		if (cameraManager.getFrameCount()>INIT_FRAME_COUNT)
-			return true;
+		if (cameraManager.getFrameCount() > INIT_FRAME_COUNT) return true;
+		
 		return false;
 	}
 
@@ -411,21 +410,15 @@ public final class ShotDetectionManager {
 				{
 					
 					for (Integer x = startX; x < startX + subWidth; x++)
-					{
-
-						Optional<Pixel> pixel = Optional.empty();
+					{	
+						Optional<Pixel> pixel = updateFilter(workingCopy, x, y, detectShots);
 						
-						pixel = updateFilter(workingCopy, x, y, detectShots);
-						
-
 						if(pixel.isPresent())
 						{
-							
 							synchronized (thresholdPixels)
 							{
 								thresholdPixels.add(pixel.get());
 							}
-
 						}
 						
 					}
@@ -438,12 +431,7 @@ public final class ShotDetectionManager {
 		return thresholdPixels;
 	}
 	
-	
-	
-	
-	
-	
-	
+
 	private void updateAvgThresholdPixels(int thresholdPixels)
 	{
 		if (avgThresholdPixels == -1)
