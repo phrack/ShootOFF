@@ -23,41 +23,19 @@ public class TestAutoCalibration {
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
 	
-		Configuration.disableErrorReporting();
+		//Configuration.disableErrorReporting();
 		
 		acm = new AutoCalibrationManager();
 	}
 	
 	@Test
-	public void testCalibrateProjection2() throws IOException {
+	public void testCalibrateProjection() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
-					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
 		Optional<Bounds> calibrationBounds = Optional.empty();
-		
-		boolean calibrated = false;
-		
-		for (int i = 0; i <= 5; i++)
-		{
-			
-			if (!calibrated)
-			{
-				calibrationBounds = acm.processFrame(testFrame);
-				if (calibrationBounds.isPresent())
-					calibrated = true;
-			}
-			
-			else if (calibrated)
-			{
-				calibrated = true;
-				
-				// Make sure this matches a saved image
-				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
-				
-			}
-		}
-		
-		assertEquals(true, calibrated);
+
+		calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
 		
@@ -72,48 +50,67 @@ public class TestAutoCalibration {
 	}
 	
 	@Test
-	public void testCalibrateProjection3() throws IOException {
+	public void testCalibrateProjection2() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
-					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-3.png"));
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 
 		Optional<Bounds> calibrationBounds = Optional.empty();
 		
-		boolean calibrated = false;
-		
-		for (int i = 0; i <= 5; i++)
-		{
-			
-			if (!calibrated)
-			{
-				calibrationBounds = acm.processFrame(testFrame);
-				if (calibrationBounds.isPresent())
-					calibrated = true;
-			}
-			
-			else if (calibrated)
-			{
-				calibrated = true;
-				
-				// Make sure this matches a saved image
-				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
-				
-			}
-		}
-		
-		assertEquals(true, calibrated);
+
+		calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
 		
-		assertTrue((int)calibrationBounds.get().getMinX() == 112);
+		assertTrue((int)calibrationBounds.get().getMinX() == 113);
 
-		assertTrue((int)calibrationBounds.get().getMinY() == 36);
+		assertTrue((int)calibrationBounds.get().getMinY() == 37);
 
-		assertTrue((int)calibrationBounds.get().getWidth() == 420);
+		assertTrue((int)calibrationBounds.get().getWidth() == 418);
 
-		assertTrue((int)calibrationBounds.get().getHeight() == 313);
+		assertTrue((int)calibrationBounds.get().getHeight() == 312);
 
 	}
 	
+	@Test
+	public void testCalibrateProjectionCutoff() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+
+		calibrationBounds = acm.processFrame(testFrame);
+		
+		assertFalse(calibrationBounds.isPresent());
+	}
+	
+	
+	@Test
+	public void testCalibrateTightPatternUpsidedown() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		calibrationBounds = acm.processFrame(testFrame);
+		
+		assertEquals(false, calibrationBounds.isPresent());
+
+	}
+
+	
+	@Test
+	public void testCalibrateTightPatternCutOff() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
+
+		Optional<Bounds> calibrationBounds = Optional.empty();
+		
+		calibrationBounds = acm.processFrame(testFrame);
+		
+		assertEquals(false, calibrationBounds.isPresent());
+
+	}
 	
 	@Test
 	public void testCalibrateTightPattern() throws IOException {
@@ -122,32 +119,17 @@ public class TestAutoCalibration {
 
 		Optional<Bounds> calibrationBounds = Optional.empty();
 		
-		boolean calibrated = false;
-		
-		for (int i = 0; i <= 5; i++)
-		{
-			
-			if (!calibrated)
-			{
-				calibrationBounds = acm.processFrame(testFrame);
-				if (calibrationBounds.isPresent())
-					calibrated = true;
-			}
-			
-			else if (calibrated)
-			{
-				calibrated = true;
-				
-				// Make sure this matches a saved image
-				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
-				
-			}
-		}
-		
-		assertEquals(true, calibrated);
+		calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
+		
+		assertTrue((int)calibrationBounds.get().getMinX() == 45);
 
+		assertTrue((int)calibrationBounds.get().getMinY() == 25);
+
+		assertTrue((int)calibrationBounds.get().getWidth() == 569);
+
+		assertTrue((int)calibrationBounds.get().getHeight() == 431);
 	}
 
 
@@ -156,33 +138,20 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 					TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 
+
 		Optional<Bounds> calibrationBounds = Optional.empty();
 		
-		boolean calibrated = false;
-		
-		for (int i = 0; i <= 5; i++)
-		{
-			
-			if (!calibrated)
-			{
-				calibrationBounds = acm.processFrame(testFrame);
-				if (calibrationBounds.isPresent())
-					calibrated = true;
-			}
-			
-			else if (calibrated)
-			{
-				calibrated = true;
-				
-				// Make sure this matches a saved image
-				//BufferedImage newFrame = acm.undistortFrame(testFrame, i);
-				
-			}
-		}
-		
-		assertEquals(true, calibrated);
+		calibrationBounds = acm.processFrame(testFrame);
 		
 		assertTrue(calibrationBounds.isPresent());
+		
+		assertTrue((int)calibrationBounds.get().getMinX() == 116);
+
+		assertTrue((int)calibrationBounds.get().getMinY() == 88);
+
+		assertTrue((int)calibrationBounds.get().getWidth() == 422);
+
+		assertTrue((int)calibrationBounds.get().getHeight() == 296);
 
 	}
 }
