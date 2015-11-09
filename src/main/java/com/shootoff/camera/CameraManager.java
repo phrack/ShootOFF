@@ -417,17 +417,22 @@ public class CameraManager {
 					continue;
 				}
 
-				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					Bounds b = projectionBounds.get();
-					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
-							(int)b.getWidth(), (int)b.getHeight());
-				}				
+		
 				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
 
+				
 				if (!pFramePair.getKey())
 					continue;
 				
 				currentFrame = pFramePair.getValue();
+				
+
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					Bounds b = projectionBounds.get();
+					
+					currentFrame = currentFrame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
+							(int)b.getWidth(), (int)b.getHeight());
+				}		
 
 				if (recordingShots) {
 					rollingRecorder.recordFrame(currentFrame);
@@ -546,6 +551,9 @@ public class CameraManager {
 				autoCalibrationEnabled = false;
 				
 				cameraAutoCalibrated = true;
+				
+				logger.debug("autoCalibrateSuccess {} {} {} {}", (int)bounds.getMinX(), (int)bounds.getMinY(),
+						(int)bounds.getWidth(), (int)bounds.getHeight());
 
 				Platform.runLater(() -> { controller.calibrate(bounds); });
 				
@@ -699,7 +707,6 @@ public class CameraManager {
 	
 	public void disableAutoCalibration() {
 		autoCalibrationEnabled  = false;
-		cameraAutoCalibrated = false;
 	}
 
 	public void setController(ShootOFFController controller) {

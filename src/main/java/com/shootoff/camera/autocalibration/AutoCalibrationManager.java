@@ -581,6 +581,10 @@ public class AutoCalibrationManager implements Runnable {
 		destCorners.put(2, 0, new double[]{ boundsRect.boundingRect().x, boundsRect.boundingRect().y+boundsRect.boundingRect().height } );
 		destCorners.put(3, 0, new double[]{ boundsRect.boundingRect().x+boundsRect.boundingRect().width, boundsRect.boundingRect().y+boundsRect.boundingRect().height } );
 		
+		logger.debug("initializeWarpPerspective {} {} {} {}", sourceCorners.get(0, 0), sourceCorners.get(1, 0), sourceCorners.get(2, 0), sourceCorners.get(3, 0));
+		logger.debug("initializeWarpPerspective {} {} {} {}", destCorners.get(0, 0), destCorners.get(1, 0), destCorners.get(2, 0), destCorners.get(3, 0));
+		
+		
 		perspMat = Imgproc.getPerspectiveTransform(sourceCorners, destCorners);
 		
 		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y, boundsRect.boundingRect().width, boundsRect.boundingRect().height);

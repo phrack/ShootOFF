@@ -142,7 +142,7 @@ public final class ShotDetectionManager {
 	{
 		int drawX = x;
 		int drawY = y;
-		if (cameraManager.isLimitingDetectionToProjection() && cameraManager.getProjectionBounds().isPresent()) {
+		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection()) && cameraManager.getProjectionBounds().isPresent()) {
 			drawX = (int) (cameraManager.getProjectionBounds().get().getMinX()+x);
 			drawY = (int) (cameraManager.getProjectionBounds().get().getMinY()+y);
 		}
@@ -235,7 +235,7 @@ public final class ShotDetectionManager {
 		BufferedImage workingCopy = null;
 		
 		
-		if (cameraManager.isLimitingDetectionToProjection() && cameraManager.getProjectionBounds().isPresent()) {
+		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection()) && cameraManager.getProjectionBounds().isPresent()) {
 			Bounds b = cameraManager.getProjectionBounds().get();
 			BufferedImage subFrame = frame.getSubimage((int)b.getMinX(), (int)b.getMinY(),
 					(int)b.getWidth(), (int)b.getHeight());
@@ -510,13 +510,13 @@ public final class ShotDetectionManager {
 			}
 		}
 		
-		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
-				&& cameraManager.getProjectionBounds().isPresent()) {
+		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection()) && cameraManager.getProjectionBounds().isPresent()) {
 
 			Bounds b = cameraManager.getProjectionBounds().get();
 			
 			canvasManager.addShot(color.get(), x + b.getMinX(),
 					y + b.getMinY());
+
 		} else {
 			canvasManager.addShot(color.get(), x,
 					y);
