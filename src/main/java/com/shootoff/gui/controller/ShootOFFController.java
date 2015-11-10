@@ -1016,14 +1016,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		removeFullScreenRequest();
 		removeAutoCalibrationMessage();
 		removeManualCalibrationRequestMessage();
-		
-		arenaController.setBackground(null);
-
 		removeCalibrationTargetIfPresent();
-		
-		arenaCameraManager.setDetecting(true);
 
 		arenaController.calibrated(arenaCameraManager.getCanvasManager());
+		
+		// We disable shot detection briefly because the pattern going away can cause false shots
+		// This statement applies to all the cam feeds rather than just the arena.  I don't think that should
+		// be a problem?
+		disableShotDetectionForPeriod(200);
+		//	arenaCameraManager.setDetecting(true);
 	}
 	
 	private void removeCalibrationTargetIfPresent()
@@ -1202,6 +1203,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	@FXML
 	public void resetClicked(ActionEvent event) {
+		resetShotsAndTargets();
+	}
+	
+	
+	public void resetShotsAndTargets()
+	{
+		disableShotDetectionForPeriod(200);
+		
 		camerasSupervisor.reset();
 		
 		if (config.getExercise().isPresent()) {
@@ -1215,6 +1224,44 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			config.getExercise().get().reset(knownTargets);
 		}
 	}
+	
+	private Timer disableShotDetectionTimer = null;
+	private volatile boolean disableShotDetectionTimerEnabled = false;
+	
+	// Technically the period could be shorter than the previous call
+	// and we don't handle that right now.  I'm not too worried about that
+	// because I don't think the periods are going to be vastly different
+	// This is only intended for very short disablement periods
+	public void disableShotDetectionForPeriod(int msPeriod)
+	{
+		if (disableShotDetectionTimerEnabled)
+		{
+			disableShotDetectionTimer.cancel();
+		}
+		disableShotDetectionTimerEnabled = true;
+		
+		camerasSupervisor.setDetectingAll(false);
+		
+		disableShotDetectionTimer = new Timer();
+		disableShotDetectionTimer.schedule(new TimerTask() {
+		    public void run() {
+		         Platform.runLater(new Runnable() {
+		            public void run() {
+		            	if (!isCalibrating)
+		            	{
+		            		camerasSupervisor.setDetectingAll(true);
+		            	}
+		            	else
+		            	{
+		            		logger.info("disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
+		            	}
+		            	disableShotDetectionTimerEnabled = false;
+		            }
+		        });
+		    }
+		}, msPeriod);
+	}
+	
 	
 	@FXML
 	public void saveFeedClicked(ActionEvent event) {
