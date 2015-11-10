@@ -99,7 +99,7 @@ public class TestBouncingTargets {
 		stringOut.reset();
 	
 		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(dontShootRegion));
-		assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace('/', File.separatorChar));
+		assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n").replace(File.separatorChar, '/'));
 		stringOut.reset();
 	}
 	

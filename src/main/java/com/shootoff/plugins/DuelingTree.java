@@ -170,7 +170,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 		if (!isResetting) {
 			leftScore = 0;
 			rightScore = 0;
-			super.showTextOnFeed("left score: 0\nright score: 0");
+			super.showTextOnFeed(String.format("left score: 0%nright score: 0"));
 		}
 		
 		paddlesOnLeft.clear();

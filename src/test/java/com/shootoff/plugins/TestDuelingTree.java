@@ -101,14 +101,14 @@ public class TestDuelingTree {
 		DuelingTree dt = new DuelingTree(targets);
 		dt.init(config, new CamerasSupervisor(config), null, null);
 		
-		assertEquals("sounds/voice/shootoff-duelingtree-warning.wav\n", stringOut.toString("UTF-8"));
+		assertEquals(String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 		
 		dt.reset(targets);
 		
-		assertEquals("left score: 0\n"
-				      + "right score: 0\n"
-				      + "sounds/voice/shootoff-duelingtree-warning.wav\n", stringOut.toString("UTF-8"));
+		assertEquals(String.format("left score: 0%n")
+				      + String.format("right score: 0%n")
+				      + String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 	}
 	
@@ -118,8 +118,8 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddle));
 		}
 		
-		assertEquals("left score: 1\n"
-			      + "right score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("left score: 1%n")
+			      + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 	
 		dt.destroy();
@@ -140,14 +140,14 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddle));
 		}		
 		
-		assertEquals("left score: 1\n"
-			      + "right score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("left score: 1%n")
+			      + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		dt.reset(targets);
 
-		assertEquals("left score: 0\n"
-			      + "right score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("left score: 0%n")
+			      + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		// Right pulls out the win with no competition
@@ -155,8 +155,8 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddle));
 		}		
 		
-		assertEquals("left score: 0\n"
-			      + "right score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("left score: 0%n")
+			      + String.format("right score: 1%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 		
 		dt.destroy();

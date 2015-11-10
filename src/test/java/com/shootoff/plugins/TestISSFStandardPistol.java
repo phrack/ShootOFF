@@ -89,11 +89,11 @@ public class TestISSFStandardPistol {
 				roundOne, roundTwo, roundThree, roundOne + roundTwo + roundThree);
 		
 		if (gameOver) {
-			return scoreString + "sounds/voice/shootoff-roundover.wav\nEvent over... Your score is 60\n".replace("\r\n", "\n").replace('/', File.separatorChar);
+			return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nEvent over... Your score is 60%n").replace('/', File.separatorChar);
 		}
 		
 		if (roundOver) {
-			return scoreString + "sounds/voice/shootoff-roundover.wav\nsounds/beep.wav\n".replace("\r\n", "\n").replace('/', File.separatorChar);
+			return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nsounds/beep.wav%n").replace('/', File.separatorChar);
 		}
 		
 		return scoreString;
@@ -101,7 +101,7 @@ public class TestISSFStandardPistol {
 	
 	@Test
 	public void testFullRound() throws UnsupportedEncodingException {
-		assertEquals("sounds/voice/shootoff-makeready.wav\nsounds/beep.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 
 		// 150s round 1-4
@@ -180,7 +180,7 @@ public class TestISSFStandardPistol {
 	
 	@Test
 	public void testFull150sThenReset() throws UnsupportedEncodingException {
-		assertEquals("sounds/voice/shootoff-makeready.wav\nsounds/beep.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 
 		// 150s round 1-4
@@ -211,7 +211,7 @@ public class TestISSFStandardPistol {
 		
 		issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 		// (regionScore * 5 * i) = last round's score
-		assertEquals("\n" + getScoreString(regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
+		assertEquals(String.format("%n") + getScoreString(regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 }

@@ -62,12 +62,12 @@ public class TestRandomShoot {
 		
 		RandomShoot rs = new RandomShoot(targets, rng);
 
-		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 		
 		rs.reset(targets);
 		
-		assertEquals("sounds/voice/shootoff-subtargets-warning.wav\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class TestRandomShoot {
 		
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 		
-		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").split("\n")[0]);
+		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n", ""))[0]);
 		stringOut.reset();
 		
 		// Simulate missing a shot
@@ -98,7 +98,7 @@ public class TestRandomShoot {
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
 		
 		assertEquals(String.format("sounds/voice/shootoff-shoot.wav%nsounds/voice/shootoff-%s.wav%n", firstSubtarget),
-				stringOut.toString("UTF-8").replace('/', File.separatorChar));
+				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 		
 		// Simulate a hit
