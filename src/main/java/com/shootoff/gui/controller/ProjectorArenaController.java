@@ -151,21 +151,28 @@ public class ProjectorArenaController implements CalibrationListener {
 		//    put it on the screen the ShootOFF window isn't on
 		// 3. If the arena has never been placed and there are more than two screens, place
 		//    the arena on the smallest screen
-		
-		Optional<Screen> projector = Optional.empty();
-		
 		if (config.getArenaPosition().isPresent()) {
 			logger.debug("Projector has been manually placed previously");
 			
 			Point2D arenaPosition = config.getArenaPosition().get();
 			
-			arenaStage.setX(arenaPosition.getX());
-			arenaStage.setY(arenaPosition.getY());
+			ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(), arenaPosition.getY(), 1, 1);
 			
-			Platform.runLater(() ->toggleFullScreen());
+			if (!screens.isEmpty()) {
+				arenaStage.setX(arenaPosition.getX());
+				arenaStage.setY(arenaPosition.getY());
 			
-			return;
-		} else if (Screen.getScreens().size() == 2) {
+				Platform.runLater(() -> toggleFullScreen());
+			
+				return;
+			} else {
+				logger.debug("Saved screen coordinates ({}, {}) no longer exists, attempting fallback approaches...", arenaPosition.getX(), arenaPosition.getY());
+			}
+		} 
+		
+		Optional<Screen> projector = Optional.empty();
+		
+		if (Screen.getScreens().size() == 2) {
 			logger.debug("Two screens present");
 			
 			homeScreen = getStageHomeScreen(shootOFFStage);
