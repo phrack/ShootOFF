@@ -719,7 +719,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        		arenaController = null;
 	        		
 	        		// We can't remove this until stopCalibration's runlaters finish
-	        		Platform.runLater(() -> {arenaCameraManager = null;});
+	        		Platform.runLater(() -> {
+	        					arenaCameraManager = null;
+	        					arenaController.setFeedCanvasManager(null);
+	        				}
+	        		);
 	        	});
 		}
 		
@@ -768,9 +772,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		toggleArenaCalibrationMenuItemText();
 
 		arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+		
+		arenaController.setFeedCanvasManager(arenaCameraManager.getCanvasManager());
+		
+		// Sets calibrating and not detecting
+		arenaCameraManager.setCalibrating(true);
         
         arenaController.setTargetsVisible(false);
-        arenaCameraManager.setDetecting(false);
 		arenaCameraManager.setProjectionBounds(null);
 		
 		if (arenaController.isFullScreen())
@@ -1018,13 +1026,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		removeManualCalibrationRequestMessage();
 		removeCalibrationTargetIfPresent();
 
-		arenaController.calibrated(arenaCameraManager.getCanvasManager());
+		arenaController.calibrated();
+		
+		arenaCameraManager.setCalibrating(false);
 		
 		// We disable shot detection briefly because the pattern going away can cause false shots
 		// This statement applies to all the cam feeds rather than just the arena.  I don't think that should
 		// be a problem?
-		disableShotDetectionForPeriod(200);
-		//	arenaCameraManager.setDetecting(true);
+		disableShotDetectionForPeriod(400);
 	}
 	
 	private void removeCalibrationTargetIfPresent()
@@ -1209,7 +1218,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	public void resetShotsAndTargets()
 	{
-		disableShotDetectionForPeriod(200);
+
 		
 		camerasSupervisor.reset();
 		
@@ -1223,6 +1232,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			
 			config.getExercise().get().reset(knownTargets);
 		}
+		
+		disableShotDetectionForPeriod(500);
 	}
 	
 	private Timer disableShotDetectionTimer = null;

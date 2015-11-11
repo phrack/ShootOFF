@@ -3,7 +3,6 @@ package com.shootoff.camera;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -13,7 +12,6 @@ import javax.imageio.ImageIO;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opencv.highgui.Highgui;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.config.ConfigurationException;

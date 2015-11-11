@@ -2,5 +2,5 @@ package com.shootoff.gui;
 
 public interface CalibrationListener {
 	public void startCalibration();
-	public void calibrated(CanvasManager feedCanvasManager);
+	public void calibrated();
 }

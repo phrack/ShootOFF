@@ -85,6 +85,7 @@ public class CameraManager {
 
 	private volatile boolean isStreaming = true;
 	private volatile boolean isDetecting = true;
+	private volatile boolean isCalibrating = false;
 	private boolean shownBrightnessWarning = false;
 	private boolean cropFeedToProjection = false;
 	private boolean limitDetectProjection = false;
@@ -202,7 +203,23 @@ public class CameraManager {
 	}
 
 	public void setDetecting(boolean isDetecting) {
+		// Lock this to false during calibration
+		if (this.isCalibrating && isDetecting)
+		{
+			logger.info("Not changing detection to true during calibration");
+			return;
+		}
+		
+		logger.debug("setDetecting was {} now {}", this.isDetecting, isDetecting);
+		
 		this.isDetecting = isDetecting;
+	}
+	
+	public void setCalibrating(boolean isCalibrating)
+	{
+		this.isCalibrating = isCalibrating;
+		if (isCalibrating)
+			setDetecting(false);
 	}
 	
 	public boolean isDetecting() {

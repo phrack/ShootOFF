@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -348,36 +350,85 @@ public class ProjectorArenaController implements CalibrationListener {
 	@Override
 	public void startCalibration() {
         setTargetsVisible(false);
-		arenaStage.getScene().setOnMouseEntered(null);
-		arenaStage.getScene().setOnMouseExited(null);
+		//arenaStage.getScene().setOnMouseEntered(null);
+		//arenaStage.getScene().setOnMouseExited(null);
 	}
 	
+	
+	private volatile boolean mouseInWindow = false;
 	private volatile boolean showingCursorWarning = false;
+
+	private CanvasManager feedCanvasManager;
+	private void cursorWarningToggle(boolean mouseEntered)
+	{
+		if (feedCanvasManager == null)
+			return;
+		
+		// If everything is still the same, return
+		if (mouseEntered && showingCursorWarning && !shootOFFController.isCalibrating())
+			return;
+
+		// If the mouse entered OR the mouse is in the window but we haven't been showing the warning, show the warning
+		if (mouseEntered || (mouseInWindow && !showingCursorWarning))
+		{
+	        Platform.runLater(new Runnable() {
+	            public void run() {
+	            	mouseInWindow = true;
+	    			if (!shootOFFController.isCalibrating())
+	    			{
+	    				showingCursorWarning = true;
+	    				mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
+	    						15000 /* ms */, Color.YELLOW);
+	    			
+	    				feedCanvasManager.getCameraManager().setDetecting(false);
+	    			}
+	    		}
+	        });
+		}
+		else if (!mouseEntered && showingCursorWarning)
+		{
+			mouseInWindow = false;
+			Timer mouseExitedTimer = new Timer();
+			mouseExitedTimer.schedule(new TimerTask() {
+			    public void run() {
+			         Platform.runLater(new Runnable() {
+				            public void run() {
+								if (showingCursorWarning) {
+									feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
+									showingCursorWarning = false;
+									mouseOnArenaLabel = null;
+								}
+								if (!shootOFFController.isCalibrating())
+									feedCanvasManager.getCameraManager().setDetecting(true);
+				            }
+			         });
+			    }
+			}, 100 /* ms */);
+		}
+
+	}
+
 	@Override
-	public void calibrated(CanvasManager feedCanvasManager) {
+	public void calibrated() {
 		setCalibrationMessageVisible(false);
 		setTargetsVisible(true);
 		restoreCurrentBackground();
 		
+		cursorWarningToggle(false);
+		
+
+	}
+
+	public void setFeedCanvasManager(CanvasManager canvasManager) {
+		this.feedCanvasManager = canvasManager;
+		
 		arenaStage.getScene().setOnMouseEntered((event) -> {
-			if (!shootOFFController.isCalibrating())
-			{
-				showingCursorWarning = true;
-				mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
-						15000 /* ms */, Color.YELLOW);
-			
-				feedCanvasManager.getCameraManager().setDetecting(false);
-			}
+			cursorWarningToggle(true);
 		});
 	
 		arenaStage.getScene().setOnMouseExited((event) -> {
-			if (showingCursorWarning) {
-				feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
-				showingCursorWarning = false;
-				mouseOnArenaLabel = null;
-			}
-		
-			feedCanvasManager.getCameraManager().setDetecting(true);
+			cursorWarningToggle(false);
 		});
+		
 	}
 }
