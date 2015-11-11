@@ -191,7 +191,6 @@ public class TestAutoCalibration {
 		{
 			for (int j = 0; j < acm.getPerspMat().cols(); j++)
 			{
-				System.out.println(String.format("%.2f\n", acm.getPerspMat().get(i,j)[0]));
 				assertEquals(expectedMatrix[i][j], acm.getPerspMat().get(i,j)[0], .1);
 			}
 		}
