@@ -63,6 +63,8 @@ public class AutoCalibrationManager implements Runnable {
 	// Stores the transformation matrix
 	private Mat perspMat = null;
 	
+
+
 	// Stores the bounding box we'll pass back to CameraManager
 	private Bounds boundingBox = null;
 	
@@ -98,6 +100,10 @@ public class AutoCalibrationManager implements Runnable {
 		{
 			callback.call(bounds);
 		}
+	}
+	
+	public Mat getPerspMat() {
+		return perspMat;
 	}
 	
 	public Optional<Bounds> processFrame(BufferedImage frame)
