@@ -357,10 +357,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	@Override
 	public void startCalibration() {
         setTargetsVisible(false);
-		//arenaStage.getScene().setOnMouseEntered(null);
-		//arenaStage.getScene().setOnMouseExited(null);
 	}
-	
 	
 	private volatile boolean mouseInWindow = false;
 	private volatile boolean showingCursorWarning = false;
@@ -374,14 +371,14 @@ public class ProjectorArenaController implements CalibrationListener {
 		// If everything is still the same, return
 		if (mouseEntered && showingCursorWarning && !shootOFFController.isCalibrating())
 			return;
-
+		
 		// If the mouse entered OR the mouse is in the window but we haven't been showing the warning, show the warning
 		if (mouseEntered || (mouseInWindow && !showingCursorWarning))
-		{
+		{	
 	        Platform.runLater(new Runnable() {
 	            public void run() {
 	            	mouseInWindow = true;
-	    			if (!shootOFFController.isCalibrating())
+	    			if (!shootOFFController.isCalibrating() && arenaStage.isFullScreen())
 	    			{
 	    				showingCursorWarning = true;
 	    				mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
@@ -412,7 +409,6 @@ public class ProjectorArenaController implements CalibrationListener {
 			    }
 			}, 100 /* ms */);
 		}
-
 	}
 
 	@Override
@@ -422,8 +418,6 @@ public class ProjectorArenaController implements CalibrationListener {
 		restoreCurrentBackground();
 		
 		cursorWarningToggle(false);
-		
-
 	}
 
 	public void setFeedCanvasManager(CanvasManager canvasManager) {
@@ -436,6 +430,5 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.getScene().setOnMouseExited((event) -> {
 			cursorWarningToggle(false);
 		});
-		
 	}
 }
