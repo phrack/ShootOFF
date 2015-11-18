@@ -233,7 +233,8 @@ public class SessionViewerController {
 				sessions.add(new File(file.getName()));
 			}
 		} else {
-			logger.error("Failed to find session files because a list of files could not be retrieved");
+			logger.error("Failed to find session files because a list of files could not be retrieved: "
+					+ "sessionFolder = {}", sessionsFolder.getPath());
 		}
 		
 		return sessions;
