@@ -101,7 +101,14 @@ public class XMLTargetReader {
 			case "image":
 				currentTags = new HashMap<String, String>();
 				
-				File imageFile = new File(System.getProperty("shootoff.home") + File.separator + attributes.getValue("file"));
+				File savedFile = new File(attributes.getValue("file"));
+				
+				File imageFile;
+				if (savedFile.isAbsolute()) {
+					imageFile = savedFile;
+				} else {
+					imageFile = new File(System.getProperty("shootoff.home") + File.separator + attributes.getValue("file"));
+				}
 				
 				ImageRegion imageRegion = new ImageRegion(
 						Double.parseDouble(attributes.getValue("x")),
