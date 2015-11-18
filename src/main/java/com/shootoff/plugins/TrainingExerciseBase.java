@@ -33,6 +33,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -273,8 +274,8 @@ public class TrainingExerciseBase {
 
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
-		} catch (Exception e) {
-			logger.error("Error reading sound file to play", e);
+		} catch (UnsupportedAudioFileException | IOException e) {
+			logger.error(String.format("Error reading sound file to play: soundFile = %s", soundFile), e);
 		}
 		
 		if (audioInputStream != null) {
