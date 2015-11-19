@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Camera;
+import com.shootoff.camera.CameraManager;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -173,7 +174,7 @@ public class ImageCell extends TextFieldListCell<String> {
     	boolean cameraOpened = false;
     	
 		if (!webcam.isOpen()) {
-			webcam.setViewSize(new Dimension(640, 480));
+			webcam.setViewSize(new Dimension(CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT));
 			webcam.open();			
 			cameraOpened = true;
 		}

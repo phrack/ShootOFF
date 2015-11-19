@@ -235,7 +235,11 @@ public class Camera {
 	}
 	
 	public void setViewSize(Dimension size) {
-		webcam.setViewSize(size);
+		try {
+			webcam.setViewSize(size);
+		} catch (IllegalArgumentException e) {
+			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
+		}
 	}
 	
 	@Override
