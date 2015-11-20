@@ -21,6 +21,7 @@ package com.shootoff.session.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -66,7 +67,7 @@ public class XMLSessionWriter implements EventVisitor {
 		}
 		
 		if (videoString.isPresent()) {
-			xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
+			xmlBody.append(String.format(Locale.US, "\t\t<shot timestamp=\"%d\" color=\"%s\""
 					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" isMalfunction=\"%b\""
 					+ " isReload=\"%b\" targetIndex=\"%d\" hitRegionIndex=\"%d\" videos=\"%s\" />%n",
 					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
@@ -74,7 +75,7 @@ public class XMLSessionWriter implements EventVisitor {
 					videoString.get()));
 			
 		} else {
-			xmlBody.append(String.format("\t\t<shot timestamp=\"%d\" color=\"%s\""
+			xmlBody.append(String.format(Locale.US, "\t\t<shot timestamp=\"%d\" color=\"%s\""
 					+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" isMalfunction=\"%b\""
 					+ " isReload=\"%b\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n", 
 					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(), 
@@ -94,7 +95,7 @@ public class XMLSessionWriter implements EventVisitor {
 
 	@Override
 	public void visitTargetResize(long timestamp, int targetIndex, double newWidth, double newHeight) {
-		xmlBody.append(String.format("\t\t<targetResized timestamp=\"%d\" index=\"%d\" "
+		xmlBody.append(String.format(Locale.US, "\t\t<targetResized timestamp=\"%d\" index=\"%d\" "
 				+ "newWidth=\"%f\" newHeight=\"%f\" />%n", timestamp, targetIndex, newWidth, newHeight));
 	}
 

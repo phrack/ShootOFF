@@ -3,6 +3,7 @@ package com.shootoff.courses.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ public class XMLCourseWriter implements CourseVisitor {
 
 	@Override
 	public void visitTarget(File targetFile, double x, double y, double width, double height) {
-		xmlBody.append(String.format("\t<target file=\"%s\" x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" />%n",
+		xmlBody.append(String.format(Locale.US, "\t<target file=\"%s\" x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" />%n",
 				targetFile.getPath(), x, y, width, height));
 	}
 

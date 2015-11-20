@@ -21,6 +21,7 @@ package com.shootoff.targets.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,7 +40,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	
 	private void addTags(Map<String, String> tags) {
 		for (Entry<String, String> entry : tags.entrySet()) {
-			xmlBody.append(String.format("\t\t<tag name=\"%s\" value=\"%s\" />%n",
+			xmlBody.append(String.format(Locale.US, "\t\t<tag name=\"%s\" value=\"%s\" />%n",
 					entry.getKey(), entry.getValue()));
 		}
 	}
@@ -48,7 +49,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	public void visitImageRegion(double x, double y, File imageFile,
 			Map<String, String> tags) {
 		
-		xmlBody.append(String.format(
+		xmlBody.append(String.format(Locale.US,
 				"\t<image x=\"%f\" y=\"%f\" file=\"%s\">%n", 
 				x, y, imageFile.getPath()));
 		
@@ -61,7 +62,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	public void visitRectangleRegion(double x, double y, double width,
 			double height, String fill, Map<String, String> tags) {
 	
-		xmlBody.append(String.format(
+		xmlBody.append(String.format(Locale.US, 
 				"\t<rectangle x=\"%f\" y=\"%f\" width=\"%f\" "
 				+ "height=\"%f\" fill=\"%s\">%n", 
 				x, y, width, height, fill));
@@ -75,7 +76,7 @@ public class XMLTargetWriter implements RegionVisitor {
 	public void visitEllipse(double centerX, double centerY, double radiusX,
 			double radiusY, String fill, Map<String, String> tags) {
 	
-		xmlBody.append(String.format(
+		xmlBody.append(String.format(Locale.US, 
 				"\t<ellipse centerX=\"%f\" centerY=\"%f\" radiusX=\"%f\" "
 				+ "radiusY=\"%f\" fill=\"%s\">%n", 
 				centerX, centerY, radiusX, radiusY, fill));
@@ -93,7 +94,7 @@ public class XMLTargetWriter implements RegionVisitor {
 				"\t<polygon fill=\"%s\">%n", fill));
 		
 		for (int i = 0; i < points.length - 1; i += 2) {
-			xmlBody.append(String.format("\t\t<point x=\"%f\" y=\"%f\" />%n",
+			xmlBody.append(String.format(Locale.US, "\t\t<point x=\"%f\" y=\"%f\" />%n",
 					points[i], points[i+1]));
 		}
 		
