@@ -171,7 +171,19 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
+			
+			if (autoCalibrationTimer != null) {
+				autoCalibrationTimer.cancel();
+				autoCalibrationTimer = null;
+			}
+			
+			if (disableShotDetectionTimer != null) {
+				disableShotDetectionTimer.cancel();
+				disableShotDetectionTimer = null;
+			}
+			
 			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
+			
 			if (arenaController != null) {
 				arenaController.getCanvasManager().close();
 				arenaController.close();
@@ -874,7 +886,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			
         cancelAutoCalibrationTimer();
 
-       	autoCalibrationTimer = new Timer();
+       	autoCalibrationTimer = new Timer("Auto Calibration");
         
 		autoCalibrationTimer.schedule(new TimerTask() {
 		    public void run() {
@@ -1218,8 +1230,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	
 	public void resetShotsAndTargets()
 	{
-
-		
 		camerasSupervisor.reset();
 		
 		if (config.getExercise().isPresent()) {
@@ -1253,7 +1263,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 		camerasSupervisor.setDetectingAll(false);
 		
-		disableShotDetectionTimer = new Timer();
+		disableShotDetectionTimer = new Timer("Disable Shot Detect");
 		disableShotDetectionTimer.schedule(new TimerTask() {
 		    public void run() {
 		         Platform.runLater(new Runnable() {

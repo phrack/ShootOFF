@@ -193,8 +193,14 @@ public class CameraManager {
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
-		if (brightnessDiagnosticTimer != null) brightnessDiagnosticTimer.cancel();
-		if (motionDiagnosticTimer != null) motionDiagnosticTimer.cancel();
+		if (brightnessDiagnosticTimer != null) {
+			brightnessDiagnosticTimer.cancel();
+			brightnessDiagnosticTimer = null;
+		}
+		if (motionDiagnosticTimer != null) {
+			motionDiagnosticTimer.cancel();
+			motionDiagnosticTimer = null;
+		}
 		detectionExecutor.shutdownNow();
 	}
 
@@ -364,9 +370,8 @@ public class CameraManager {
 	}
 	
 	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
-	private Timer brightnessDiagnosticTimer = new Timer();
-	private Timer motionDiagnosticTimer = new Timer();
-
+	private Timer brightnessDiagnosticTimer = null;
+	private Timer motionDiagnosticTimer = null;
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
@@ -639,7 +644,7 @@ public class CameraManager {
 			// Stop the existing timer and start a new one
 			brightnessDiagnosticTimer.cancel();
 		}
-		brightnessDiagnosticTimer = new Timer();
+		brightnessDiagnosticTimer = new Timer("Brightness Diagnostic");
 		brightnessDiagnosticTimer.schedule(new TimerTask() {
 		    public void run() {
 		         Platform.runLater(new Runnable() {
@@ -699,7 +704,7 @@ public class CameraManager {
 			// Stop the existing timer and start a new one
 			motionDiagnosticTimer.cancel();
 		}
-		motionDiagnosticTimer = new Timer();
+		motionDiagnosticTimer = new Timer("Motion Diagnostic");
 		motionDiagnosticTimer.schedule(new TimerTask() {
 		    public void run() {
 		         Platform.runLater(new Runnable() {

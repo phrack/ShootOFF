@@ -392,7 +392,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		else if (!mouseEntered && showingCursorWarning)
 		{
 			mouseInWindow = false;
-			Timer mouseExitedTimer = new Timer();
+			Timer mouseExitedTimer = new Timer("Mouse Exited");
 			mouseExitedTimer.schedule(new TimerTask() {
 			    public void run() {
 			         Platform.runLater(new Runnable() {
