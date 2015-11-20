@@ -140,20 +140,54 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 			
 			if (!it.hasNext() && currentSubtargets.size() > 1) soundFiles.add(new File("sounds/voice/shootoff-and.wav"));
 			
-			soundFiles.add(new File(String.format("sounds/voice/shootoff-%s.wav", 
-					subtargets.get(index))));
+			File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subtargets.get(index)));
+			
+			if (targetNameSound.exists()) {
+				soundFiles.add(targetNameSound);
+			} else {
+				// We don't have a voice actor sounds file for a target subregion, fall back 
+				// to TTS
+				saySubtargetsTTS();
+				return;
+			}
 		}
 		
 		super.playSounds(soundFiles);
     }
 	
+	private void saySubtargetsTTS() {
+        StringBuilder sentence = new StringBuilder("shoot subtarget ");
+ 
+        sentence.append(subtargets.get(currentSubtargets.get(currentSubtargets.size() - 1)));
+        
+        for (int i = currentSubtargets.size() - 2; i >= 0; i--) {
+        	sentence.append(" then ");
+        	sentence.append(subtargets.get(currentSubtargets.get(i)));
+        }
+        
+        TextToSpeech.say(sentence.toString());
+    }
+	
 	private void sayCurrentSubtarget() {
 		List<File> soundFiles = new ArrayList<File>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
-		soundFiles.add(new File(String.format("sounds/voice/shootoff-%s.wav", 
-				subtargets.get(currentSubtargets.peek()))));
+		
+		File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", 
+				subtargets.get(currentSubtargets.peek())));
+		
+		if (targetNameSound.exists()) {
+			soundFiles.add(targetNameSound);
+		} else {
+			sayCurrentSubtargetTTS();
+			return;
+		}
 		
 		super.playSounds(soundFiles);
+	}
+	
+	private void sayCurrentSubtargetTTS() {
+		String sentence = "shoot " + subtargets.get(currentSubtargets.peek());
+		TextToSpeech.say(sentence);
 	}
 
 	@Override
