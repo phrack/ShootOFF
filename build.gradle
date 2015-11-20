@@ -13,6 +13,13 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+eclipse {
+    jdt {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+}
+
 def javaHome = System.properties['java.home']
 
 def dist = 'build/dist/'
