@@ -728,12 +728,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	        		toggleProjectorMenus(true);
 	        		startArenaMenuItem.setDisable(false);
 	        		arenaCameraManager.setProjectionBounds(null);
-	        		arenaController = null;
-	        		
+
 	        		// We can't remove this until stopCalibration's runlaters finish
 	        		Platform.runLater(() -> {
 	        					arenaCameraManager = null;
 	        					arenaController.setFeedCanvasManager(null);
+	        					arenaController = null;
 	        				}
 	        		);
 	        	});
