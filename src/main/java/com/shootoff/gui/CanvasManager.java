@@ -59,6 +59,7 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -548,6 +549,12 @@ public class CanvasManager {
 									continue;
 								}
 							}
+						} else {
+							// The shot is in the bounding box but make sure it is in the shape's
+							// fill otherwise we can get a shot detected where there isn't actually
+							// a region showing
+							Point2D localCoords = target.getTargetGroup().parentToLocal(shot.getX(), shot.getY());
+							if (!node.contains(localCoords)) continue;
 						}
 						
 						if (config.inDebugMode()) {
