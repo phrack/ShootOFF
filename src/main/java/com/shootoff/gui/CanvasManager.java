@@ -632,13 +632,7 @@ public class CanvasManager {
 	public Optional<Target> addTarget(File targetFile) {
 		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
 		
-		if (targetGroup.isPresent()) {	
-			targetGroup.get().setOnMouseClicked((event) -> {
-					toggleTargetSelection(targetGroup);
-					selectedTarget = targetGroup;
-					targetGroup.get().requestFocus();
-				});
-			
+		if (targetGroup.isPresent()) {				
 			Optional<Target> target = Optional.of(addTarget(targetFile, targetGroup.get(), true));
 			
 			if (config.getSessionRecorder().isPresent() && target.isPresent()) {

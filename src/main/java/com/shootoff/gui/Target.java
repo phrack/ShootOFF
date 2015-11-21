@@ -81,6 +81,11 @@ public class Target {
         this.cameraName = parent.getCameraName();
         this.targetIndex = targetIndex;
         
+		targetGroup.setOnMouseClicked((event) -> {
+			parent.toggleTargetSelection(Optional.of(targetGroup));
+			targetGroup.requestFocus();
+		});
+        
         mousePressed();
         mouseDragged();
         mouseMoved();
