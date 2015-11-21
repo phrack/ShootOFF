@@ -297,13 +297,13 @@ public class Target {
 		        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + deltaX >= 0 && 
 		        	targetGroup.getBoundsInParent().getMaxX() + deltaX <= CameraManager.FEED_WIDTH)) {
 		        	
-		        	targetGroup.setLayoutX(targetGroup.getLayoutX() + deltaX);
+		        	targetGroup.setLayoutX(targetGroup.getLayoutX() + (deltaX * targetGroup.getScaleX()));
 		        }
 
 		        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + deltaY >= 0 && 
 			        targetGroup.getBoundsInParent().getMaxY() + deltaY <= CameraManager.FEED_HEIGHT)) {
 			        			        
-		        	targetGroup.setLayoutY(targetGroup.getLayoutY() + deltaY);
+		        	targetGroup.setLayoutY(targetGroup.getLayoutY() + (deltaY * targetGroup.getScaleY()));
 		        }
 		        	
 				if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
@@ -318,9 +318,9 @@ public class Target {
 		        double gap; // The gap between the mouse and nearest target edge
 		        
 		        if (right) {
-		        	gap = event.getX() - targetGroup.getLayoutBounds().getMaxX();
+		        	gap = (event.getX() - targetGroup.getLayoutBounds().getMaxX()) * targetGroup.getScaleX();
 		        } else {
-		        	gap = event.getX() - targetGroup.getLayoutBounds().getMinX();
+		        	gap = (event.getX() - targetGroup.getLayoutBounds().getMinX()) * targetGroup.getScaleX();
 		        }
 		        
 		        double currentWidth = targetGroup.getBoundsInParent().getWidth(); 
@@ -343,9 +343,13 @@ public class Target {
 		        
 		        double oldLayoutX = targetGroup.getLayoutX();
 		        double oldScaleX = targetGroup.getScaleX();
+		        double newScaleX = oldScaleX * (1.0 - scaleDelta);
+		        
+		        // If we scale too small the target can do weird things
+		        if (newScaleX < 0.001 || Double.isNaN(newScaleX) || Double.isInfinite(newScaleX)) return;	
 		        
 		        targetGroup.setLayoutX(targetGroup.getLayoutX() + originXDelta);
-	        	targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
+	        	targetGroup.setScaleX(newScaleX);
 	        	
 		        if (keepInBounds && (targetGroup.getBoundsInParent().getMinX() <= 0 || 
 				        targetGroup.getBoundsInParent().getMaxX() >= CameraManager.FEED_WIDTH)) {
@@ -357,10 +361,10 @@ public class Target {
 		        double gap;
 		        
 		        if (bottom) {
-		        	gap = event.getY() - targetGroup.getLayoutBounds().getMaxY();
+		        	gap = (event.getY() - targetGroup.getLayoutBounds().getMaxY()) * targetGroup.getScaleY();
 		        } else {
-		        	gap = event.getY() - targetGroup.getLayoutBounds().getMinY();
-		        }    
+		        	gap = (event.getY() - targetGroup.getLayoutBounds().getMinY()) * targetGroup.getScaleY();
+		        }   
 		        
 		        double currentHeight = targetGroup.getBoundsInParent().getHeight(); 
 		        double newHeight = currentHeight + gap;
@@ -382,9 +386,13 @@ public class Target {
 		        
 		        double oldLayoutY = targetGroup.getLayoutY();
 		        double oldScaleY = targetGroup.getScaleY();
+		        double newScaleY = oldScaleY * (1.0 - scaleDelta);
+		        
+		        // If we scale too small the target can do weird things
+		        if (newScaleY < 0.001 || Double.isNaN(newScaleY) || Double.isInfinite(newScaleY)) return;	
 		        
 	        	targetGroup.setLayoutY(targetGroup.getLayoutY() + originYDelta); 
-	        	targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
+	        	targetGroup.setScaleY(newScaleY);
 	        	
 		        if (keepInBounds && (targetGroup.getBoundsInParent().getMinY() <= 0 || 
 				        targetGroup.getBoundsInParent().getMaxY() >= CameraManager.FEED_HEIGHT)) {
