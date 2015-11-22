@@ -600,7 +600,7 @@ public class CameraManager {
 				cameraAlert.setHeaderText("Cannot Communicate with Camera!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
-				cameraAlert.initOwner(controller.getStage());
+				if (controller != null) cameraAlert.initOwner(controller.getStage());
 				cameraAlert.show();
 			});
 		}
@@ -623,7 +623,7 @@ public class CameraManager {
 				cameraAlert.setHeaderText("Webcam FPS is too low!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
-				cameraAlert.initOwner(controller.getStage());
+				if (controller != null) cameraAlert.initOwner(controller.getStage());
 				cameraAlert.show();
 			});
 		}
@@ -686,7 +686,7 @@ public class CameraManager {
 			brightnessAlert.setHeaderText("Webcam detected very bright conditions!");
 			brightnessAlert.setResizable(true);
 			brightnessAlert.setContentText(message);
-			brightnessAlert.initOwner(controller.getStage());
+			if (controller != null) brightnessAlert.initOwner(controller.getStage());
 			brightnessAlert.show();
 		});
 	}
@@ -737,6 +737,4 @@ public class CameraManager {
 	public void setController(ShootOFFController controller) {
 		this.controller = controller;
 	}
-
-
 }
