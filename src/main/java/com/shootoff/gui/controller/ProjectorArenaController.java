@@ -250,6 +250,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	public void close() {
 		arenaStage.close();
+		closeMouseExitedTimer();
 	}
 	
 	public void setBackground(LocatedImage img) {
@@ -361,7 +362,8 @@ public class ProjectorArenaController implements CalibrationListener {
 	
 	private volatile boolean mouseInWindow = false;
 	private volatile boolean showingCursorWarning = false;
-
+    private Timer mouseExitedTimer = null;
+	
 	private CanvasManager feedCanvasManager;
 	private void cursorWarningToggle(boolean mouseEntered)
 	{
@@ -392,7 +394,10 @@ public class ProjectorArenaController implements CalibrationListener {
 		else if (!mouseEntered && showingCursorWarning)
 		{
 			mouseInWindow = false;
-			Timer mouseExitedTimer = new Timer("Mouse Exited");
+			
+			closeMouseExitedTimer();
+			
+			mouseExitedTimer = new Timer("Mouse Exited");
 			mouseExitedTimer.schedule(new TimerTask() {
 			    public void run() {
 			         Platform.runLater(new Runnable() {
@@ -408,6 +413,13 @@ public class ProjectorArenaController implements CalibrationListener {
 			         });
 			    }
 			}, 100 /* ms */);
+		}
+	}
+	
+	private void closeMouseExitedTimer() {
+		if (mouseExitedTimer != null) {
+			mouseExitedTimer.cancel();
+			mouseExitedTimer = null;
 		}
 	}
 
