@@ -367,7 +367,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	private CanvasManager feedCanvasManager;
 	private void cursorWarningToggle(boolean mouseEntered)
 	{
-		if (feedCanvasManager == null)
+		if (feedCanvasManager == null || shootOFFController.isCalibrating())
 			return;
 		
 		// If everything is still the same, return
