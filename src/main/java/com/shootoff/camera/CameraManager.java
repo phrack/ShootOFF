@@ -600,6 +600,7 @@ public class CameraManager {
 				cameraAlert.setHeaderText("Cannot Communicate with Camera!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
+				cameraAlert.initOwner(controller.getStage());
 				cameraAlert.show();
 			});
 		}
@@ -622,6 +623,7 @@ public class CameraManager {
 				cameraAlert.setHeaderText("Webcam FPS is too low!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
+				cameraAlert.initOwner(controller.getStage());
 				cameraAlert.show();
 			});
 		}
@@ -664,7 +666,7 @@ public class CameraManager {
 			return;
 		shownBrightnessWarning = true;
 		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.WARNING);
+			Alert brightnessAlert = new Alert(AlertType.WARNING);
 
 			Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
 			String messageFormat = "The camera %s is streaming frames that are very bright. "
@@ -680,11 +682,12 @@ public class CameraManager {
 				message = String.format(messageFormat, webcam.get().getName());
 			}
 
-			cameraAlert.setTitle("Conditions Very Bright");
-			cameraAlert.setHeaderText("Webcam detected very bright conditions!");
-			cameraAlert.setResizable(true);
-			cameraAlert.setContentText(message);
-			cameraAlert.show();
+			brightnessAlert.setTitle("Conditions Very Bright");
+			brightnessAlert.setHeaderText("Webcam detected very bright conditions!");
+			brightnessAlert.setResizable(true);
+			brightnessAlert.setContentText(message);
+			brightnessAlert.initOwner(controller.getStage());
+			brightnessAlert.show();
 		});
 	}
 
