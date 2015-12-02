@@ -1,0 +1,3 @@
+RewriteCond %{HTTP_HOST}   !^shootoffapp\.com [NC]
+RewriteCond %{HTTP_HOST}   !^$
+RewriteRule ^/(.*)         http://shootoffapp.com/$1 [L,R]

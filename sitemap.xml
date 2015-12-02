@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<url>
+  <loc>http://shootoffapp.com/</loc>
+  <changefreq>weekly</changefreq>
+  <priority>0.8</priority>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#survey</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#download</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#welcome</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#about</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#features</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#documentation</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#contributing</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#documentation-basics</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#documentation-advanced</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#documentation-contributing</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#documentation-troubleshooting</loc>
+</url>
+<url>
+  <loc>http://shootoffapp.com/#documentation-additionalinfo</loc>
+</url>
+</urlset>
