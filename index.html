@@ -3,6 +3,10 @@
   <head>
 
     <script type="text/javascript">
+    	
+    	if (window.location == "http://phrack.github.io/ShootOFF/") {
+        window.location = "http://shootoffapp.com";
+      }
 
       function launchApplication(jnlpfile) {
         dtjava.launch(            
@@ -46,7 +50,8 @@
         ga('send', 'event', 'outbound', 'click', url, null);
       }
     </script>
-  	
+
+		<link rel="canonical" href="http://shootoffapp.com">  	
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
