@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
@@ -139,22 +138,22 @@ public class Configuration {
  	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
-	private DeduplicationProcessor deduplicationProcessor = null;
+	//private DeduplicationProcessor deduplicationProcessor = null;
 	
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		readConfigurationFile();
 		
-		deduplicationProcessor = new DeduplicationProcessor();
-		shotProcessors.add(deduplicationProcessor);
+		//deduplicationProcessor = new DeduplicationProcessor();
+		//shotProcessors.add(deduplicationProcessor);
 	}
 	
 	public Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
-		deduplicationProcessor = new DeduplicationProcessor();
-		shotProcessors.add(deduplicationProcessor);
+		//deduplicationProcessor = new DeduplicationProcessor();
+		//shotProcessors.add(deduplicationProcessor);
 	}
 	
 	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException, ConfigurationException {
@@ -163,8 +162,8 @@ public class Configuration {
 		parseCmdLine(args);
 		readConfigurationFile();
 		parseCmdLine(args); // Parse twice so that we guarantee debug is set and override config file
-		deduplicationProcessor = new DeduplicationProcessor();
-		shotProcessors.add(deduplicationProcessor);
+		//deduplicationProcessor = new DeduplicationProcessor();
+		//shotProcessors.add(deduplicationProcessor);
 	}
 	
 	/**
@@ -182,15 +181,15 @@ public class Configuration {
 		parseCmdLine(args);
 		readConfigurationFile();
 		parseCmdLine(args);
-		deduplicationProcessor = new DeduplicationProcessor();
-		shotProcessors.add(deduplicationProcessor);
+		//deduplicationProcessor = new DeduplicationProcessor();
+		//shotProcessors.add(deduplicationProcessor);
 	}
 
 	public Configuration(String[] args) throws ConfigurationException {
 		configName = DEFAULT_CONFIG_FILE;
 		parseCmdLine(args);
-		deduplicationProcessor = new DeduplicationProcessor();
-		shotProcessors.add(deduplicationProcessor);
+		//deduplicationProcessor = new DeduplicationProcessor();
+		//shotProcessors.add(deduplicationProcessor);
 	}
 	
 	private void readConfigurationFile() throws ConfigurationException, IOException {
@@ -805,9 +804,9 @@ public class Configuration {
 		return recordingManagers;
 	}
 	
-	public DeduplicationProcessor getDeduplicationProcessor() {
+	/*public DeduplicationProcessor getDeduplicationProcessor() {
 		return deduplicationProcessor;
-	}
+	}*/
 	
 	public Set<ShotProcessor> getShotProcessors() {
 		return shotProcessors;

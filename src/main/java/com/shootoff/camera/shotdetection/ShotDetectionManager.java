@@ -478,7 +478,7 @@ public final class ShotDetectionManager {
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
 				color.get().equals(config.getIgnoreLaserColor().get()))
 		{
-			config.getDeduplicationProcessor().processShot(shot);
+			cameraManager.getDeduplicationProcessor().processShot(shot);
 			return;
 		}
 		
@@ -488,7 +488,7 @@ public final class ShotDetectionManager {
 
 		
 		
-		if (config.isDebugShotsRecordToFiles() && config.getDeduplicationProcessor().processShotLookahead(shot)) {
+		if (config.isDebugShotsRecordToFiles() && cameraManager.getDeduplicationProcessor().processShotLookahead(shot)) {
 			File outputfile = new File(String.format("shot-%d-%d_orig.png",(int)pc.centerPixelX, (int)pc.centerPixelY));
 			try {
 				ImageIO.write(workingCopy, "png", outputfile);

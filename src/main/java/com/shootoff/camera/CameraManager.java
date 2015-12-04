@@ -114,6 +114,8 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 	
 	private ShootOFFController controller;
+	
+	private DeduplicationProcessor deduplicationProcessor;
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -125,7 +127,9 @@ public class CameraManager {
 		
 		this.canvasManager.setCameraManager(this);
 		
-		init(new Detector());
+		deduplicationProcessor = new DeduplicationProcessor();
+		
+		initDetector(new Detector());
 	}
 
 	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas,
@@ -136,14 +140,10 @@ public class CameraManager {
 		this.config = config;
 		
 		this.canvasManager.setCameraManager(this);
-		
-		if (projectionBounds.isPresent()) {
-			setLimitDetectProjection(true);
-			setProjectionBounds(projectionBounds.get());
-		}
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
+		deduplicationProcessor = new DeduplicationProcessor();
 
 		Detector detector = new Detector();
 		
@@ -159,7 +159,7 @@ public class CameraManager {
 	      do {} while(false);
 	}
 
-	private void init(Detector detector) {
+	private void initDetector(Detector detector) {
 
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 
@@ -535,7 +535,7 @@ public class CameraManager {
 			}
 			
 			webcamFPS = newFPS;
-			DeduplicationProcessor.setThresholdUsingFPS(webcamFPS);
+			deduplicationProcessor.setThresholdUsingFPS(webcamFPS);
 			
 		}
 		
@@ -736,5 +736,9 @@ public class CameraManager {
 
 	public void setController(ShootOFFController controller) {
 		this.controller = controller;
+	}
+
+	public DeduplicationProcessor getDeduplicationProcessor() {
+		return deduplicationProcessor;
 	}
 }
