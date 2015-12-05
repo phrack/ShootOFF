@@ -138,6 +138,11 @@ public class CameraManager {
 		this.config = config;
 		
 		this.canvasManager.setCameraManager(this);
+		
+		if (projectionBounds.isPresent()) {
+			setLimitDetectProjection(true);
+			setProjectionBounds(projectionBounds.get());
+		}
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
