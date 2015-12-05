@@ -20,12 +20,8 @@ public class TestDeduplicationProcessor {
 	
 	@Test 
 	public void testReset() {
-		DeduplicationProcessor deduplicationProcessor = null;
-		
-		for (ShotProcessor s : config.getShotProcessors()) {
-			if (s instanceof DeduplicationProcessor) deduplicationProcessor = (DeduplicationProcessor)s;
-		}
-		
+		DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor();
+				
 		assertFalse(deduplicationProcessor.getLastShot().isPresent());
 		
 		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);

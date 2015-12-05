@@ -32,13 +32,13 @@ public class DeduplicationProcessor implements ShotProcessor {
 	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 8.0;
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
 	
-	private static int frameThreshold = DEDUPE_THRESHOLD_MINIMUM;
+	private int frameThreshold = DEDUPE_THRESHOLD_MINIMUM;
 	
-	public static int getThreshold() {
+	public int getThreshold() {
 		return frameThreshold;
 	}
 
-	public static void setThreshold(int ft) {
+	public void setThreshold(int ft) {
 		frameThreshold = ft;
 	}
 
@@ -103,7 +103,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 		lastShot = Optional.empty();
 	}
 
-	public static void setThresholdUsingFPS(double webcamFPS) {
+	public void setThresholdUsingFPS(double webcamFPS) {
 		int newThreshold = (int) (webcamFPS/DEDUPE_THRESHOLD_DIVISION_FACTOR);
 		
 		logger.trace("setThresholdUsingFPS {} {}", webcamFPS, newThreshold);

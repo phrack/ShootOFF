@@ -114,6 +114,8 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 	
 	private ShootOFFController controller;
+	
+	private static final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor();
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -124,8 +126,8 @@ public class CameraManager {
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
 		this.canvasManager.setCameraManager(this);
-		
-		init(new Detector());
+			
+		initDetector(new Detector());
 	}
 
 	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas,
@@ -144,7 +146,6 @@ public class CameraManager {
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
-
 		Detector detector = new Detector();
 		
 	    IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
@@ -159,7 +160,7 @@ public class CameraManager {
 	      do {} while(false);
 	}
 
-	private void init(Detector detector) {
+	private void initDetector(Detector detector) {
 
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 
@@ -535,7 +536,7 @@ public class CameraManager {
 			}
 			
 			webcamFPS = newFPS;
-			DeduplicationProcessor.setThresholdUsingFPS(webcamFPS);
+			deduplicationProcessor.setThresholdUsingFPS(webcamFPS);
 			
 		}
 		
@@ -736,5 +737,9 @@ public class CameraManager {
 
 	public void setController(ShootOFFController controller) {
 		this.controller = controller;
+	}
+
+	public DeduplicationProcessor getDeduplicationProcessor() {
+		return deduplicationProcessor;
 	}
 }

@@ -330,6 +330,14 @@ public class CanvasManager {
  	private Optional<ShotProcessor> processShot(Shot shot) {
 
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
+		
+		if (!getCameraManager().getDeduplicationProcessor().processShot(shot))
+		{
+			logger.debug("Processing Shot: Shot Rejected By {}", getCameraManager().getDeduplicationProcessor().getClass().getName());
+			return Optional.of(getCameraManager().getDeduplicationProcessor());
+		}
+		
+		
   		for (ShotProcessor processor : config.getShotProcessors()) {
   			if (!processor.processShot(shot)) {
  				if (processor instanceof MalfunctionsProcessor) {
