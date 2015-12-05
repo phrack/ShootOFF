@@ -226,7 +226,10 @@ public class SessionViewerController {
 		File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
 		List<File> sessions = new ArrayList<File>();
 		
-		if (!sessionsFolder.exists()) return sessions;
+		if (!sessionsFolder.exists()) {
+			logger.debug("No sessions folder available");
+			return sessions;
+		}
 		
 		File[] sessionFiles = sessionsFolder.listFiles(new FileFilter("xml"));
 		
