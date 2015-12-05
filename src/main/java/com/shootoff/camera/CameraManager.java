@@ -115,7 +115,7 @@ public class CameraManager {
 	
 	private ShootOFFController controller;
 	
-	private DeduplicationProcessor deduplicationProcessor;
+	private static final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor();
 
 	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -126,9 +126,7 @@ public class CameraManager {
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
 		this.canvasManager.setCameraManager(this);
-		
-		deduplicationProcessor = new DeduplicationProcessor();
-		
+			
 		initDetector(new Detector());
 	}
 
@@ -143,8 +141,6 @@ public class CameraManager {
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
-		deduplicationProcessor = new DeduplicationProcessor();
-
 		Detector detector = new Detector();
 		
 	    IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
