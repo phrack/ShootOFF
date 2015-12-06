@@ -105,6 +105,9 @@ public class Configuration {
 			+ "between 0.1 and 99.9.";
 	
 	private static final String DEFAULT_CONFIG_FILE = "shootoff.properties";
+	
+	private static final int DEFAULT_DISPLAY_WIDTH = 640;
+	private static final int DEFAULT_DISPLAY_HEIGHT = 480;
 
 	private InputStream configInput;
 	private String configName;
@@ -132,6 +135,10 @@ public class Configuration {
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
+	
+	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
+
+	private int displayHeight = DEFAULT_DISPLAY_HEIGHT;
 	
 	private boolean debugShotsRecordToFiles = false;
 
@@ -467,6 +474,20 @@ public class Configuration {
 			throw new ConfigurationException(
 					String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
 		}
+	}
+	
+	public int getDisplayWidth() {
+		return displayWidth;
+	}
+
+	public int getDisplayHeight() {
+		return displayHeight;
+	}
+	
+	public void setDisplayResolution(int displayWidth, int displayHeight)
+	{
+		this.displayWidth = displayWidth;
+		this.displayHeight = displayHeight;
 	}
 	
 	public boolean isFirstRun() {

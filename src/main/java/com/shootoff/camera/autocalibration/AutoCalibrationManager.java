@@ -39,13 +39,15 @@ public class AutoCalibrationManager implements Runnable {
 	
 	private final static int PATTERN_WIDTH = 9;
 	private final static int PATTERN_HEIGHT = 6;
-    private Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
+    private final static Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 	
 	private BufferedImage frame;
 
 
 	
 	private Callback<Optional<Bounds>, Void> callback;
+
+	private CameraManager cameraManager;
 	
 	public void setCallback(Callback<Optional<Bounds>, Void> callback) {
 		this.callback = callback;
@@ -55,8 +57,9 @@ public class AutoCalibrationManager implements Runnable {
 		this.frame = frame;
 	}
 
-	public AutoCalibrationManager()
+	public AutoCalibrationManager(CameraManager cameraManager)
 	{
+		this.cameraManager = cameraManager;
 		//((ch.qos.logback.classic.Logger) logger).setLevel(Level.TRACE);
 	}
 	
@@ -145,7 +148,7 @@ public class AutoCalibrationManager implements Runnable {
 		// Step 4: Initialize the warp matrix and bounding box
 		initializeWarpPerspective(mat, idealCorners.get());
 		
-		if (boundingBox.getMinX() < 0 ||  boundingBox.getMinY() < 0 || boundingBox.getWidth() > CameraManager.FEED_WIDTH || boundingBox.getHeight() > CameraManager.FEED_HEIGHT)
+		if (boundingBox.getMinX() < 0 ||  boundingBox.getMinY() < 0 || boundingBox.getWidth() > cameraManager.getFeedWidth() || boundingBox.getHeight() > cameraManager.getFeedHeight())
 			return Optional.empty();
 		
 		logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(), boundingBox.getHeight());

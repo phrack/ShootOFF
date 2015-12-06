@@ -10,7 +10,6 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
 
 public class PixelClusterManager {
 	
@@ -67,7 +66,7 @@ public class PixelClusterManager {
 						int rx = thisPoint.x+w; 
 						int ry = thisPoint.y+h; 
 						
-						if (rx<0 || ry<0 || rx>=CameraManager.FEED_WIDTH || ry>=CameraManager.FEED_HEIGHT)
+						if (rx<0 || ry<0 || rx>=shotDetectionManager.getCameraManager().getFeedWidth() || ry>=shotDetectionManager.getCameraManager().getFeedHeight())
 							continue;
 						
 						Pixel nearPoint = new Pixel(rx,ry);
@@ -117,7 +116,7 @@ public class PixelClusterManager {
 			double averageX = 0;
 			double averageY = 0;
 			
-			int minX = CameraManager.FEED_WIDTH, minY = CameraManager.FEED_HEIGHT, maxX = 0, maxY = 0;
+			int minX = shotDetectionManager.getCameraManager().getFeedWidth(), minY = shotDetectionManager.getCameraManager().getFeedHeight(), maxX = 0, maxY = 0;
 			
 			double avgconnectedness = 0;
 			

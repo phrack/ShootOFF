@@ -2,13 +2,14 @@ package com.shootoff.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.DeduplicationProcessor;
+import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
@@ -24,7 +25,7 @@ public class MockCanvasManager extends CanvasManager {
 	private final Configuration config;
 	private final String cameraName;
 	private final boolean useShotProcessors;
-	private DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor();
+	private DeduplicationProcessor deduplicationProcessor;
 	
 	
 	private long startTime = 0;
@@ -36,6 +37,8 @@ public class MockCanvasManager extends CanvasManager {
 		this.config = config;
 		this.cameraName = "Default";
 		this.useShotProcessors = false;
+		deduplicationProcessor = new DeduplicationProcessor(new CameraManager(new MockCamera(), this, config));
+		
 	}
 	
 	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
@@ -45,6 +48,8 @@ public class MockCanvasManager extends CanvasManager {
 		this.config = config;
 		this.cameraName = "Default";
 		this.useShotProcessors = useShotProcessors;
+		
+		deduplicationProcessor = new DeduplicationProcessor(new CameraManager(new MockCamera(), this, config));
 	}
 
 	public String getCameraName() {

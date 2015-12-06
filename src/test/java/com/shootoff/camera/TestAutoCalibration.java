@@ -22,7 +22,7 @@ public class TestAutoCalibration {
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
 		
-		acm = new AutoCalibrationManager();
+		acm = new AutoCalibrationManager(new MockCameraManager());
 	}
 	
 	@Test

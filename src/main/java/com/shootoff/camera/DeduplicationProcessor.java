@@ -27,12 +27,15 @@ public class DeduplicationProcessor implements ShotProcessor {
 	private Optional<Shot> lastShot = Optional.empty();
 	
 	// About 12.5 pixels at 640x480
-	private static double DISTANCE_THRESHOLD = (CameraManager.FEED_HEIGHT * CameraManager.FEED_WIDTH) / 24576.0;
+	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 24576.0;
+	private static double distanceThreshold;
 	
 	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 8.0;
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
 	
 	private int frameThreshold = DEDUPE_THRESHOLD_MINIMUM;
+
+	private CameraManager cameraManager;
 	
 	public int getThreshold() {
 		return frameThreshold;
@@ -45,9 +48,16 @@ public class DeduplicationProcessor implements ShotProcessor {
 	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
 
 
-	public DeduplicationProcessor() {
+	public DeduplicationProcessor(CameraManager cameraManager) {
+		this.cameraManager = cameraManager;
+		
+		setDistanceThreshold();
 	}
 	
+	private void setDistanceThreshold() {
+		distanceThreshold = (cameraManager.getFeedWidth() * cameraManager.getFeedHeight()) / DISTANCE_THRESHOLD_DIVISION_FACTOR;
+	}
+
 	protected Optional<Shot> getLastShot() {
 		return lastShot;
 	}
@@ -69,7 +79,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 			// and are very close to each other, ignore the new shot
 			
 			if (	shot.getFrame() - lastShot.get().getFrame() <= frameThreshold &&
-					euclideanDistance(lastShot.get(), shot) <= DISTANCE_THRESHOLD) {
+					euclideanDistance(lastShot.get(), shot) <= distanceThreshold) {
 				
 				logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
 				

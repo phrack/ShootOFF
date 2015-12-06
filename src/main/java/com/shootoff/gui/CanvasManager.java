@@ -122,13 +122,13 @@ public class CanvasManager {
 
 		if (Platform.isFxApplicationThread()) {
 			progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
-			progress.setPrefHeight(CameraManager.FEED_HEIGHT);
-			progress.setPrefWidth(CameraManager.FEED_WIDTH);
+			progress.setPrefHeight(config.getDisplayHeight());
+			progress.setPrefWidth(config.getDisplayWidth());
 			canvasGroup.getChildren().add(progress);
 			canvasGroup.getChildren().add(diagnosticsVBox);
 			diagnosticsVBox.setAlignment(Pos.CENTER);
 			diagnosticsVBox.setFillWidth(true);
-			diagnosticsVBox.setPrefWidth(CameraManager.FEED_WIDTH);
+			diagnosticsVBox.setPrefWidth(config.getDisplayWidth());
 		}
 		
 		canvasGroup.setOnMouseClicked((event) -> {

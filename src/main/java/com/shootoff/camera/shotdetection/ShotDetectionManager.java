@@ -31,39 +31,46 @@ public final class ShotDetectionManager {
 		
 	private CanvasManager canvasManager;
 	private CameraManager cameraManager;
+
+
 	private Configuration config;
 	
-	private final int INIT_FRAME_COUNT = 5;
+
 	private boolean filtersInitialized = false;	
 
 	// This is the long term storage for the MAs
-	private int[][] lumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];	
-	private double[][] colorDiffMovingAverage = new double[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
+	// "final" does apply here, the data in the arrays can be changed but the arrays themselves cannot be overwritten
+	private final int[][] lumsMovingAverage;
+	private final double[][] colorDiffMovingAverage;
 	
 	// New data is stored here until the shot detection has finished for a frame
-	// "final" does apply here, the data in the arrays can not be changed but the arrays themselves cannot be overwritten
-	private final int[][] newLumsMovingAverage = new int[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
-	private final double[][] newColorDiffMovingAverage = new double[CameraManager.FEED_WIDTH][CameraManager.FEED_HEIGHT];
+	// "final" does apply here, the data in the arrays can be changed but the arrays themselves cannot be overwritten
+	private final int[][] newLumsMovingAverage;
+	private final double[][] newColorDiffMovingAverage;
 	
 	private double avgThresholdPixels = -1;
 	
-	private final int MOTION_WARNING_FRAMECOUNT = 30;
-	private final int MOTION_WARNING_AVG_THRESHOLD = 100;
-	private final int MOTION_WARNING_THRESHOLD_PIXELS = 300;
+	private final static int INIT_FRAME_COUNT = 5;
+	
+	private final static int MOTION_WARNING_FRAMECOUNT = 30;
+	private final static int MOTION_WARNING_AVG_THRESHOLD = 100;
+	private final static int MOTION_WARNING_THRESHOLD_PIXELS = 300;
 	
 	// Individual pixel threshold
-	private final int EXCESSIVE_BRIGHTNESS_THRESHOLD = 245;
-	private final int MINIMUM_BRIGHTNESS_INCREASE = 255-EXCESSIVE_BRIGHTNESS_THRESHOLD;
+	private final static int EXCESSIVE_BRIGHTNESS_THRESHOLD = 245;
+	private final static int MINIMUM_BRIGHTNESS_INCREASE = 255-EXCESSIVE_BRIGHTNESS_THRESHOLD;
 	
 	// Aggregate # of pixel threshold
-	private final int BRIGHTNESS_WARNING_AVG_THRESHOLD = 100;
-	private final int BRIGHTNESS_WARNING_FRAMECOUNT = 90;
+	private final static int BRIGHTNESS_WARNING_AVG_THRESHOLD = 100;
+	private final static int BRIGHTNESS_WARNING_FRAMECOUNT = 90;
+
+	private final static int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 300;
 	
+	private static final int MINIMUM_SHOT_DIMENSION = 6;
 	
 	// This is updated for every bright pixel
 	private int brightPixels = 0;
 
-	private final int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 300;
 	// The average is then calculated here
 	private double avgBrightPixels = -1;
 
@@ -73,20 +80,28 @@ public final class ShotDetectionManager {
 	private boolean shouldShowBrightnessWarningBool = false;
 	private BufferedImage currentFullFrame;
 	
-	private static final int MINIMUM_SHOT_DIMENSION = 6;
-	
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config,
 			CanvasManager canvasManager) {
 		this.canvasManager = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;
 		
-		for (int y = 0; y < CameraManager.FEED_HEIGHT; y++)
-			for (int x = 0; x < CameraManager.FEED_WIDTH; x++)
+		lumsMovingAverage = new int[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
+		newLumsMovingAverage = new int[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
+		
+		colorDiffMovingAverage = new double[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
+		newColorDiffMovingAverage = new double[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
+		
+		for (int y = 0; y < cameraManager.getFeedHeight(); y++)
+			for (int x = 0; x < cameraManager.getFeedWidth(); x++)
 			{
 				lumsMovingAverage[x][y] = -1;
 				colorDiffMovingAverage[x][y] = -1;
 			}
+	}
+	
+	public CameraManager getCameraManager() {
+		return cameraManager;
 	}
 
 

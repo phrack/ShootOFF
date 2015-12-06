@@ -68,8 +68,13 @@ import javafx.util.Callback;
 import javafx.util.Pair;
 
 public class CameraManager {
-	public static final int FEED_WIDTH = 640;
-	public static final int FEED_HEIGHT = 480;
+	public static final int DEFAULT_FEED_WIDTH = 640;
+	public static final int DEFAULT_FEED_HEIGHT = 480;
+	
+	private int feedWidth = DEFAULT_FEED_WIDTH;
+	private int feedHeight = DEFAULT_FEED_HEIGHT;
+	
+	
 	public static final int MIN_SHOT_DETECTION_FPS = 5;
 	public static final int DEFAULT_FPS = 30;
 
@@ -115,9 +120,9 @@ public class CameraManager {
 	
 	private ShootOFFController controller;
 	
-	private static final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor();
+	private final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
 
-	protected CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
+	public CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
 		processingLock = null;
 		this.canvasManager = canvas;
@@ -181,6 +186,23 @@ public class CameraManager {
 
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
 		this.sectorStatuses = sectorStatuses;
+	}
+	
+	public int getFeedWidth() {
+		return feedWidth;
+	}
+
+	public int getFeedHeight() {
+		return feedHeight;
+	}
+	
+	// This exists for future improvements.  It doesn't handle
+	//  potential side effects of modifying the feed resolution
+	//  on the fly.
+	public void setFeedResolution(int width, int height)
+	{
+		feedWidth = width;
+		feedHeight = height;
 	}
 
 	public void clearShots() {
@@ -260,7 +282,7 @@ public class CameraManager {
 	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
 		videoWriterStream = ToolFactory.makeWriter(videoFile.getName());
-		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, FEED_WIDTH, FEED_HEIGHT);
+		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, getFeedWidth(), getFeedHeight());
 		recordingStartTime = System.currentTimeMillis();
 		isFirstStreamFrame = true;
 
@@ -309,7 +331,7 @@ public class CameraManager {
 		
 		setDetecting(false);
 		
-		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName);
+		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName, this);
 		recordingShots = true;
 	}
 	
@@ -381,7 +403,7 @@ public class CameraManager {
 		public void run() {
 			if (webcam.isPresent()) {
 				if (!webcam.get().isOpen()) {
-					webcam.get().setViewSize(new Dimension(FEED_WIDTH, FEED_HEIGHT));
+					webcam.get().setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 					webcam.get().open();
 				}
 
@@ -726,7 +748,7 @@ public class CameraManager {
 	}
 
 	public void enableAutoCalibration() {
-		acm = new AutoCalibrationManager();
+		acm = new AutoCalibrationManager(this);
 		autoCalibrationEnabled  = true;
 		cameraAutoCalibrated = false;
 	}

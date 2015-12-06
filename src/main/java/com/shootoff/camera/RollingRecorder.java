@@ -40,19 +40,25 @@ public class RollingRecorder {
 	private boolean recording = true;
 	
 	private final List<IVideoPicture> bufferedFrames = new ArrayList<IVideoPicture>();
-		
-	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName) {
+
+	private static int recordWidth;
+	private static int recordHeight;
+
+	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName, CameraManager cameraManager) {
 		this.codec = codec;
 		this.extension = extension;
 		this.sessionName = sessionName;
 		this.cameraName = cameraName;
+		
+		recordWidth = cameraManager.getFeedWidth();
+		recordHeight = cameraManager.getFeedHeight();
 		
 		startTime = System.currentTimeMillis();
 		relativeVideoFile =  new File(sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
 		videoFile = new File(System.getProperty("shootoff.sessions") + File.separator + relativeVideoFile.getPath());
 		
 		videoWriter = ToolFactory.makeWriter(videoFile.getPath());
-		videoWriter.addVideoStream(0, 0, codec, CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT);
+		videoWriter.addVideoStream(0, 0, codec, recordWidth, recordHeight);
 		
 		logger.debug("Started recording new rolling video: {}", videoFile.getName());
 	}
@@ -104,7 +110,7 @@ public class RollingRecorder {
 		IMediaReader reader = ToolFactory.makeReader(this.videoFile.getPath());
 		reader.open();
 		long startCutTimestamp = (reader.getContainer().getDuration() / 1000) - ShotRecorder.RECORD_LENGTH;	
-		Cutter cutter = new Cutter(videoFile, codec, startCutTimestamp);
+		Cutter cutter = new Cutter(videoFile, codec, startCutTimestamp, recordWidth, recordHeight);
 		reader.addListener(cutter);
 		
 		logger.debug("Forking video file {} to {}, keepOld = {}, start cutting at = {} ms", this.relativeVideoFile.getPath(), 
@@ -124,7 +130,7 @@ public class RollingRecorder {
 			
 			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
 			r.open();
-			Cutter copy = new Cutter(rollingVideoFile, codec, 0);
+			Cutter copy = new Cutter(rollingVideoFile, codec, 0, recordWidth, recordHeight);
 			r.addListener(copy);
 			while (r.readPacket() == null);
 			
@@ -221,10 +227,10 @@ public class RollingRecorder {
 		private long startTimestamp = -1;
 		private long lastTimestamp;
 		
-		public Cutter(File newVideoFile, ICodec.ID codec, long startingTimestamp /* ms */) {			
+		public Cutter(File newVideoFile, ICodec.ID codec, long startingTimestamp /* ms */, int recordWidth, int recordHeight) {			
 			this.startingTimestamp = startingTimestamp * 1000;
 			writer = ToolFactory.makeWriter(newVideoFile.getPath());
-			writer.addVideoStream(0, 0, codec, CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT);
+			writer.addVideoStream(0, 0, codec, recordWidth, recordHeight);
 		}
 		
 		public void onVideoPicture(IVideoPictureEvent event)

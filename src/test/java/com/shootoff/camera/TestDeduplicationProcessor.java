@@ -2,25 +2,19 @@ package com.shootoff.camera;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import com.shootoff.config.Configuration;
+
+
 import com.shootoff.config.ConfigurationException;
 
 import javafx.scene.paint.Color;
 
 public class TestDeduplicationProcessor {
-	private Configuration config;
-	
-	@Before
-	public void setUp() throws ConfigurationException {
-		config = new Configuration(new String[0]);
-	}
-	
+
 	@Test 
-	public void testReset() {
-		DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor();
+	public void testReset() throws ConfigurationException {
+		DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(new MockCameraManager());
 				
 		assertFalse(deduplicationProcessor.getLastShot().isPresent());
 		

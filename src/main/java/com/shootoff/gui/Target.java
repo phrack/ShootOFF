@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import com.shootoff.camera.CameraManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
@@ -300,13 +299,13 @@ public class Target {
         		double deltaY = event.getY() - y;
         		
 		        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + deltaX >= 0 && 
-		        	targetGroup.getBoundsInParent().getMaxX() + deltaX <= CameraManager.FEED_WIDTH)) {
+		        	targetGroup.getBoundsInParent().getMaxX() + deltaX <= config.get().getDisplayWidth())) {
 		        	
 		        	targetGroup.setLayoutX(targetGroup.getLayoutX() + (deltaX * targetGroup.getScaleX()));
 		        }
 
 		        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + deltaY >= 0 && 
-			        targetGroup.getBoundsInParent().getMaxY() + deltaY <= CameraManager.FEED_HEIGHT)) {
+			        targetGroup.getBoundsInParent().getMaxY() + deltaY <= config.get().getDisplayHeight())) {
 			        			        
 		        	targetGroup.setLayoutY(targetGroup.getLayoutY() + (deltaY * targetGroup.getScaleY()));
 		        }
@@ -357,7 +356,7 @@ public class Target {
 	        	targetGroup.setScaleX(newScaleX);
 	        	
 		        if (keepInBounds && (targetGroup.getBoundsInParent().getMinX() <= 0 || 
-				        targetGroup.getBoundsInParent().getMaxX() >= CameraManager.FEED_WIDTH)) {
+				        targetGroup.getBoundsInParent().getMaxX() >= config.get().getDisplayWidth())) {
 		        	
 		        	targetGroup.setLayoutX(oldLayoutX); 
 		        	targetGroup.setScaleX(oldScaleX);
@@ -400,7 +399,7 @@ public class Target {
 	        	targetGroup.setScaleY(newScaleY);
 	        	
 		        if (keepInBounds && (targetGroup.getBoundsInParent().getMinY() <= 0 || 
-				        targetGroup.getBoundsInParent().getMaxY() >= CameraManager.FEED_HEIGHT)) {
+				        targetGroup.getBoundsInParent().getMaxY() >= config.get().getDisplayHeight())) {
 		        	
 		        	targetGroup.setLayoutY(oldLayoutY); 
 		        	targetGroup.setScaleY(oldScaleY);
@@ -473,7 +472,7 @@ public class Target {
 						}
 					} else {
 				        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() - MOVEMENT_DELTA >= 0 && 
-					        	targetGroup.getBoundsInParent().getMaxX() - MOVEMENT_DELTA <= CameraManager.FEED_WIDTH)) {
+					        	targetGroup.getBoundsInParent().getMaxX() - MOVEMENT_DELTA <= config.get().getDisplayWidth())) {
 					        	
 				        	targetGroup.setLayoutX(targetGroup.getLayoutX() - MOVEMENT_DELTA);
 					    }
@@ -494,7 +493,7 @@ public class Target {
 
 					if (event.isShiftDown()) {
 				        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + (SCALE_DELTA/2) >= 0 && 
-					        	targetGroup.getBoundsInParent().getMaxX() + (SCALE_DELTA/2) <= CameraManager.FEED_WIDTH)) {
+					        	targetGroup.getBoundsInParent().getMaxX() + (SCALE_DELTA/2) <= config.get().getDisplayWidth())) {
 				        	targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
 				        }
 						
@@ -505,7 +504,7 @@ public class Target {
 						}
 					} else {
 				        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + MOVEMENT_DELTA >= 0 && 
-					        	targetGroup.getBoundsInParent().getMaxX() + MOVEMENT_DELTA <= CameraManager.FEED_WIDTH)) {
+					        	targetGroup.getBoundsInParent().getMaxX() + MOVEMENT_DELTA <= config.get().getDisplayWidth())) {
 						
 				        	targetGroup.setLayoutX(targetGroup.getLayoutX() + MOVEMENT_DELTA);
 				        }
@@ -534,7 +533,7 @@ public class Target {
 						}
 					} else {
 				        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() - MOVEMENT_DELTA >= 0 && 
-						        targetGroup.getBoundsInParent().getMaxY() - MOVEMENT_DELTA <= CameraManager.FEED_HEIGHT)) {
+						        targetGroup.getBoundsInParent().getMaxY() - MOVEMENT_DELTA <= config.get().getDisplayHeight())) {
 
 							targetGroup.setLayoutY(targetGroup.getLayoutY() - MOVEMENT_DELTA);	
 				        }
@@ -555,7 +554,7 @@ public class Target {
 					
 					if (event.isShiftDown()) {
 				        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + (SCALE_DELTA/2) >= 0 && 
-						        targetGroup.getBoundsInParent().getMaxY() + (SCALE_DELTA/2) <= CameraManager.FEED_HEIGHT)) {
+						        targetGroup.getBoundsInParent().getMaxY() + (SCALE_DELTA/2) <= config.get().getDisplayHeight())) {
 				        	targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 				        }
 						
@@ -566,7 +565,7 @@ public class Target {
 						}
 					} else {
 				        if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + MOVEMENT_DELTA >= 0 && 
-						        targetGroup.getBoundsInParent().getMaxY() + MOVEMENT_DELTA <= CameraManager.FEED_HEIGHT)) {
+						        targetGroup.getBoundsInParent().getMaxY() + MOVEMENT_DELTA <= config.get().getDisplayHeight())) {
 
 				        	targetGroup.setLayoutY(targetGroup.getLayoutY() + MOVEMENT_DELTA);
 				        }
