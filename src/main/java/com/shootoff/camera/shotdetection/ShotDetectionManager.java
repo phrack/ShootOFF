@@ -82,6 +82,8 @@ public final class ShotDetectionManager {
 	
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config,
 			CanvasManager canvasManager) {
+		//((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.TRACE);
+		
 		this.canvasManager = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;

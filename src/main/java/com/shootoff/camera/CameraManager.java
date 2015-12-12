@@ -19,6 +19,9 @@
 package com.shootoff.camera;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -36,6 +39,9 @@ import javafx.geometry.Bounds;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
+
 
 
 
@@ -508,17 +514,28 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
-				Image img = SwingFXUtils.toFXImage(currentFrame, null);
+				// Not quite working right
+				Image img = SwingFXUtils.toFXImage(resize(currentFrame, config.getDisplayWidth(), config.getDisplayHeight()), null);
 
 				if (cropFeedToProjection) {
 					canvasManager.updateBackground(img, projectionBounds);
 				} else {
+					
 					canvasManager.updateBackground(img, Optional.empty());
 				}
 			}
 
 			detectionExecutor.shutdown();
 		}
+		
+		public BufferedImage resize(BufferedImage source, int width, int height) {
+			BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
+			Graphics2D g2 = tmp.createGraphics();
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR); 
+			g2.drawImage(source, 0, 0, width, height, null);
+			g2.dispose(); 
+			return tmp;
+		} 
 
 		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame)
 		{

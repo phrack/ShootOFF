@@ -25,8 +25,6 @@ public class MockCanvasManager extends CanvasManager {
 	private final Configuration config;
 	private final String cameraName;
 	private final boolean useShotProcessors;
-	private DeduplicationProcessor deduplicationProcessor;
-	
 	
 	private long startTime = 0;
 	
@@ -37,8 +35,6 @@ public class MockCanvasManager extends CanvasManager {
 		this.config = config;
 		this.cameraName = "Default";
 		this.useShotProcessors = false;
-		deduplicationProcessor = new DeduplicationProcessor(new CameraManager(new MockCamera(), this, config));
-		
 	}
 	
 	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
@@ -48,8 +44,6 @@ public class MockCanvasManager extends CanvasManager {
 		this.config = config;
 		this.cameraName = "Default";
 		this.useShotProcessors = useShotProcessors;
-		
-		deduplicationProcessor = new DeduplicationProcessor(new CameraManager(new MockCamera(), this, config));
 	}
 
 	public String getCameraName() {
@@ -64,9 +58,9 @@ public class MockCanvasManager extends CanvasManager {
 		
 		
 		if (useShotProcessors) {
-			if (!deduplicationProcessor.processShot(shot))
+			if (!cameraManager.getDeduplicationProcessor().processShot(shot))
 			{
-				logger.debug("Processing Shot: Shot Rejected By {}", deduplicationProcessor.getClass().getName());
+				logger.debug("Processing Shot: Shot Rejected By {}", cameraManager.getDeduplicationProcessor().getClass().getName());
 				return;
 			}
 			

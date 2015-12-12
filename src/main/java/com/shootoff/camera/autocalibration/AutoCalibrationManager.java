@@ -60,7 +60,7 @@ public class AutoCalibrationManager implements Runnable {
 	public AutoCalibrationManager(CameraManager cameraManager)
 	{
 		this.cameraManager = cameraManager;
-		//((ch.qos.logback.classic.Logger) logger).setLevel(Level.TRACE);
+		//((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.TRACE);
 	}
 	
 	// Stores the transformation matrix

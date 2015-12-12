@@ -106,8 +106,8 @@ public class Configuration {
 	
 	private static final String DEFAULT_CONFIG_FILE = "shootoff.properties";
 	
-	private static final int DEFAULT_DISPLAY_WIDTH = 640;
-	private static final int DEFAULT_DISPLAY_HEIGHT = 480;
+	private static final int DEFAULT_DISPLAY_WIDTH = 800;
+	private static final int DEFAULT_DISPLAY_HEIGHT = 600;
 
 	private InputStream configInput;
 	private String configName;
@@ -140,7 +140,7 @@ public class Configuration {
 
 	private int displayHeight = DEFAULT_DISPLAY_HEIGHT;
 	
-	private boolean debugShotsRecordToFiles = false;
+	private boolean debugShotsRecordToFiles = true;
 
  	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
