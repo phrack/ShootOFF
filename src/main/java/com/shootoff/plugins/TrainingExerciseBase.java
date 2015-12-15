@@ -34,6 +34,7 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,10 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DelayedStartListener;
+import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.DelayedStartIntervalController;
+import com.shootoff.gui.controller.ParIntervalController;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -60,42 +63,39 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-/** 
- * This class implements common training exercise operations. All
- * training exercises should extend it.
+/**
+ * This class implements common training exercise operations. All training
+ * exercises should extend it.
  * 
  * @author phrack
  */
 public class TrainingExerciseBase {
 	private static final Logger logger = LoggerFactory.getLogger(TrainingExerciseBase.class);
-	
+
 	private static boolean isSilenced = false;
-	
-	@SuppressWarnings("unused")
-	private List<Group> targets;
+
+	@SuppressWarnings("unused") private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
-	
+
 	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
-	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = 
-			new HashMap<String, TableColumn<ShotEntry, String>>();
+	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
 	public TrainingExerciseBase() {}
-	
+
 	public TrainingExerciseBase(List<Group> targets) {
 		this.targets = targets;
 	}
-	
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, 
-			TableView<ShotEntry> shotTimerTable) {
+
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TableView<ShotEntry> shotTimerTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.shotTimerTable = shotTimerTable;
-		
+
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
 			Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
@@ -103,173 +103,240 @@ public class TrainingExerciseBase {
 			exerciseLabels.put(canvasManager, exerciseLabel);
 		}
 	}
-	
+
 	/**
-	 * Allows sounds to be silenced or on. If silenced, instead of 
-	 * playing a sound the file name will be printed to stdout. This 
-	 * exists so that components can be easily tested even if they 
-	 * are reliant on sounds. 
+	 * Allows sounds to be silenced or on. If silenced, instead of playing a
+	 * sound the file name will be printed to stdout. This exists so that
+	 * components can be easily tested even if they are reliant on sounds.
 	 * 
-	 * @param isSilenced set to <tt>true</tt> if sound file names
-	 * 					 should instead be printed to stdout,
-	 * 					 <tt>false</tt> for normal operation.
+	 * @param isSilenced
+	 *            set to <tt>true</tt> if sound file names should instead be
+	 *            printed to stdout, <tt>false</tt> for normal operation.
 	 */
 	public static void silence(boolean isSilenced) {
 		TrainingExerciseBase.isSilenced = isSilenced;
 	}
-	
+
 	/**
-	 * Returns the current instance of this class. This method exists so that we can
-	 * call methods in this class when in an internal class (e.g. to implement Callable)
-	 * that doesn't have access to super.
+	 * Returns the current instance of this class. This method exists so that we
+	 * can call methods in this class when in an internal class (e.g. to
+	 * implement Callable) that doesn't have access to super.
 	 * 
 	 * @return the current instance of this class
 	 */
 	public TrainingExerciseBase getInstance() {
 		return this;
 	}
-	
+
 	public Stage getShootOFFStage() {
-		return (Stage)shotTimerTable.getScene().getWindow();
+		return (Stage) shotTimerTable.getScene().getWindow();
 	}
-	
+
 	public void getDelayedStartInterval(DelayedStartListener listener) {
-		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
 			logger.error("Error reading DelayedStartInterval FXML file", e);
 		}
-		
+
 		Stage delayedStartIntervalStage = new Stage();
-		
-		DelayedStartIntervalController controller = (DelayedStartIntervalController)loader.getController();
+
+		DelayedStartIntervalController controller = (DelayedStartIntervalController) loader.getController();
 		controller.init(listener);
-		
+
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
 		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
 		delayedStartIntervalStage.setTitle("Delayed Start Interval");
 		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
 		delayedStartIntervalStage.showAndWait();
 	}
-	
+
 	/**
-	 * Adds a column to the shot timer table. The <tt>name</tt> is used to reference this column
-	 * for the purposes of setting text and cleaning up.
+	 * A copy of getDelayedStartInterval() plus setting the PAR time.
 	 * 
-	 * @param name	both the text that will appear for name of the column and the name used to
-	 * 				reference this column whenever it needs to be looked up
-	 * @param width	the width of the new column
+	 * @param listener
+	 */
+	public void getParInterval(ParListener listener) {
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
+		try {
+			loader.load();
+		} catch (IOException e) {
+			logger.error("Error reading ParInterval FXML file", e);
+		}
+
+		Stage delayedStartIntervalStage = new Stage();
+
+		ParIntervalController controller = (ParIntervalController) loader.getController();
+		controller.init(listener);
+
+		delayedStartIntervalStage.initOwner(getShootOFFStage());
+		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
+		delayedStartIntervalStage.setTitle("Par Intervals");
+		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
+		delayedStartIntervalStage.showAndWait();
+	}
+
+	/**
+	 * Adds a column to the shot timer table. The <tt>name</tt> is used to
+	 * reference this column for the purposes of setting text and cleaning up.
+	 * 
+	 * @param name
+	 *            both the text that will appear for name of the column and the
+	 *            name used to reference this column whenever it needs to be
+	 *            looked up
+	 * @param width
+	 *            the width of the new column
 	 */
 	public void addShotTimerColumn(String name, int width) {
 		TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
-		     public ObservableValue<String> call(CellDataFeatures<ShotEntry, String> p) {
-		         return new SimpleStringProperty(p.getValue().getExerciseValue(name));
-		     }
-		  });
-		
+			public ObservableValue<String> call(CellDataFeatures<ShotEntry, String> p) {
+				return new SimpleStringProperty(p.getValue().getExerciseValue(name));
+			}
+		});
+
 		exerciseColumns.put(name, newCol);
 		shotTimerTable.getColumns().add(newCol);
 	}
-	
-	/** 
-	 * Inserts text into the named column for the last entry in the shot timer table.
+
+	/**
+	 * Inserts text into the named column for the last entry in the shot timer
+	 * table.
 	 * 
-	 * @param name	the name of the column to insert the text into
-	 * @param value	the text that should be inserted
+	 * @param name
+	 *            the name of the column to insert the text into
+	 * @param value
+	 *            the text that should be inserted
 	 */
 	public void setShotTimerColumnText(String name, String value) {
 		if (shotTimerTable != null) {
-			Platform.runLater(() -> {
-					shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
+			// Platform.runLater(() -> {
+			// shotTimerTable.getItems().get(shotTimerTable.getItems().size() -
+			// 1).setExerciseValue(name, value);
+			// });
+
+			/*
+			 * Platform.runLater() frequently does not execute until a new item
+			 * is added to the queue. SwingUtilities.invokeLater() does not have
+			 * that problem.
+			 */
+			try {
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name,
+								value);
+					}
 				});
+			} catch (Exception e) {}
 		}
 	}
-	
+
 	/**
-	 * Set the background color for rows for shots added to the shot timer after this
-	 * method is called. 
+	 * Set the background color for rows for shots added to the shot timer after
+	 * this method is called.
 	 * 
-	 * @param c		the color to use in the style string for the row. Set to null to
-	 * 				return the row color to the default color
+	 * @param c
+	 *            the color to use in the style string for the row. Set to null
+	 *            to return the row color to the default color
 	 */
 	public void setShotTimerRowColor(Color c) {
 		changedRowColor = true;
 		config.setShotTimerRowColor(c);
 	}
-	
+
 	/**
 	 * Shows a message on every single webcam feed.
 	 * 
-	 * @param message	the message to show on every webcam feed
+	 * @param message
+	 *            the message to show on every webcam feed
 	 */
 	public void showTextOnFeed(String message) {
-		if (config.inDebugMode()) System.out.println(message);
-		
+		if (config.inDebugMode())
+			System.out.println(message);
+
 		if (config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordExerciseFeedMessage(message);
 		}
-		
+
 		Platform.runLater(() -> {
-				for (Label exerciseLabel : exerciseLabels.values())
-					exerciseLabel.setText(message);
-			});
+			for (Label exerciseLabel : exerciseLabels.values())
+				exerciseLabel.setText(message);
+		});
 	}
-	
+
 	/**
 	 * Clear all present shots.
 	 */
-	public void clearShots()  {
+	public void clearShots() {
 		camerasSupervisor.clearShots();
 	}
-	
-	/** 
+
+	/**
 	 * Perform the equivalent of the user hitting the reset button.
 	 */
 	public void reset() {
 		camerasSupervisor.reset();
-		
+
 		if (changedRowColor) {
 			config.setShotTimerRowColor(null);
 			changedRowColor = false;
 		}
-		
-		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());	
+
+		if (config.getExercise().isPresent())
+			config.getExercise().get().reset(camerasSupervisor.getTargets());
 	}
-	
+
+	/**
+	 * No-op placeholder for method invoked by the "Pause" button click.
+	 */
+	public void pauseExercise() {
+
+	}
+
+	/**
+	 * No-op placeholder for method invoked by the "Resume" button click.
+	 */
+	public void resumeExercise() {
+
+	}
+
 	/**
 	 * Sets whether or not shot detection is paused.
 	 * 
-	 * @param isPaused <tt>true</tt> to temporarily stop detecting shots
+	 * @param isPaused
+	 *            <tt>true</tt> to temporarily stop detecting shots
 	 */
 	public void pauseShotDetection(boolean isPaused) {
 		camerasSupervisor.setDetectingAll(!isPaused);
 	}
-	
+
 	/**
 	 * Plays an audio file asyncronously.
 	 * 
-	 * @param soundFilePath	the audio file to play (e.g. "sounds/metal_clang.wav")
+	 * @param soundFilePath
+	 *            the audio file to play (e.g. "sounds/metal_clang.wav")
 	 */
 	public static void playSound(String soundFilePath) {
 		playSound(new File(soundFilePath));
 	}
-	
+
 	public static void playSound(File soundFile) {
 		playSound(soundFile, Optional.empty());
 	}
-	
+
 	private static void playSound(File soundFile, Optional<LineListener> listener) {
 		if (isSilenced) {
 			System.out.println(soundFile.getPath());
 			return;
 		}
-		
-		if (!soundFile.isAbsolute()) 
+
+		if (!soundFile.isAbsolute())
 			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
-		
+
 		AudioInputStream audioInputStream = null;
 
 		try {
@@ -277,32 +344,34 @@ public class TrainingExerciseBase {
 		} catch (UnsupportedAudioFileException | IOException e) {
 			logger.error(String.format("Error reading sound file to play: soundFile = %s", soundFile), e);
 		}
-		
+
 		if (audioInputStream != null) {
 			AudioFormat format = audioInputStream.getFormat();
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
-			
+
 			Clip clip = null;
-			
+
 			try {
 				clip = (Clip) AudioSystem.getLine(info);
 				clip.open(audioInputStream);
 				clip.start();
-				
+
 				if (listener.isPresent()) {
 					clip.addLineListener(listener.get());
 				} else {
 					clip.addLineListener((e) -> {
-							if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
-						});
+						if (e.getType().equals(LineEvent.Type.STOP))
+							e.getLine().close();
+					});
 				}
 			} catch (LineUnavailableException | IOException e) {
-				if (clip != null) clip.close();
+				if (clip != null)
+					clip.close();
 				logger.error("Error playing sound clip", e);
 			}
-		} 
+		}
 	}
-	
+
 	public static void playSounds(List<File> soundFiles) {
 		if (isSilenced) {
 			soundFiles.forEach(System.out::println);
@@ -311,33 +380,33 @@ public class TrainingExerciseBase {
 			sq.play();
 		}
 	}
-	
+
 	private static class SoundQueue implements LineListener {
 		private final List<File> soundFiles;
 		private int queueIndex = 0;
-		
+
 		public SoundQueue(List<File> soundFiles) {
 			this.soundFiles = soundFiles;
 		}
-		
+
 		public void play() {
 			playSound(soundFiles.get(queueIndex), Optional.of(this));
 		}
-		
+
 		@Override
-		public void update(LineEvent event) { 
+		public void update(LineEvent event) {
 			if (event.getType().equals(LineEvent.Type.STOP)) {
 				event.getLine().close();
-				
+
 				queueIndex++;
-				
+
 				if (queueIndex < soundFiles.size()) {
 					playSound(soundFiles.get(queueIndex), Optional.of(this));
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Removes all objects the training exercise has added to the GUI.
 	 */
@@ -346,17 +415,17 @@ public class TrainingExerciseBase {
 			config.setShotTimerRowColor(null);
 			changedRowColor = false;
 		}
-		
+
 		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 			shotTimerTable.getColumns().remove(column);
 		}
-		
+
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
 			canvasManager.getCanvasGroup().getChildren().remove(exerciseLabels.get(canvasManager));
 		}
-		
+
 		exerciseLabels.clear();
-		
+
 		pauseShotDetection(false);
 	}
 }
