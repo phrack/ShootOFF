@@ -83,11 +83,11 @@ public class TargetEditorController {
 	@FXML private Button bringForwardButton;
 	@FXML private ToggleButton tagsButton;
 	@FXML private ChoiceBox<String> regionColorChoiceBox;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(TargetEditorController.class);
-	
+
 	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
-	
+
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
 
@@ -100,71 +100,80 @@ public class TargetEditorController {
 	private Optional<Line> freeformEdge = Optional.empty();
 	private double lastMouseX = 0;
 	private double lastMouseY = 0;
-	
+
 	public void init(Image backgroundImg, TargetListener targetListener) {
 		if (backgroundImg != null) {
 			ImageView backgroundImgView = new ImageView();
 			backgroundImgView.setImage(backgroundImg);
 			canvasPane.getChildren().add(backgroundImgView);
 		}
-		
+
 		this.targetListener = targetListener;
-		
-		regionColorChoiceBox.setItems(FXCollections.observableArrayList(
-	    		"black", "blue", "green", "orange", "red", "white"));
-		
-		regionColorChoiceBox.getSelectionModel().selectedItemProperty().addListener(
-			new ChangeListener<String>() {
-				@Override
-				public void changed(ObservableValue<? extends String> observable,
-						String oldValue, String newValue) {
-					
-					if (cursorRegion.isPresent()) {
-						TargetRegion selected = (TargetRegion)cursorRegion.get();
-						
-						if (selected.getType() != RegionType.IMAGE)
-							((Shape)selected).setFill(createColor(newValue));
-					}
+
+		regionColorChoiceBox
+				.setItems(FXCollections.observableArrayList("black", "blue", "green", "orange", "red", "white"));
+
+		regionColorChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+
+				if (cursorRegion.isPresent()) {
+					TargetRegion selected = (TargetRegion) cursorRegion.get();
+
+					if (selected.getType() != RegionType.IMAGE)
+						((Shape) selected).setFill(createColor(newValue));
 				}
-		    });
+			}
+		});
 	}
-	
+
 	public void init(Image backgroundImg, TargetListener targetListener, File targetFile) {
 		init(backgroundImg, targetListener);
-		
+
 		Optional<Group> target = TargetIO.loadTarget(targetFile);
-		
+
 		if (target.isPresent()) {
 			targetRegions.addAll(target.get().getChildren());
-			
+
 			for (Node region : target.get().getChildren()) {
-				region.setOnMouseClicked((e) -> { regionClicked(e); });
-				region.setOnKeyPressed((e) -> { regionKeyPressed(e); }); 
+				region.setOnMouseClicked((e) -> {
+					regionClicked(e);
+				});
+				region.setOnKeyPressed((e) -> {
+					regionKeyPressed(e);
+				});
 			}
-			
+
 			canvasPane.getChildren().addAll(target.get().getChildren());
 		}
 	}
-	
+
 	private void toggleShapeControls(boolean enabled) {
 		sendBackwardButton.setDisable(!enabled);
 		bringForwardButton.setDisable(!enabled);
 		tagsButton.setDisable(!enabled);
 		regionColorChoiceBox.setDisable(!enabled);
 	}
-	
+
 	public static Color createColor(String name) {
 		switch (name) {
-		case "black": return Color.BLACK;
-		case "blue": return Color.BLUE;
-		case "green": return Color.GREEN;
-		case "orange": return Color.ORANGE;
-		case "red": return Color.RED;
-		case "white": return Color.WHITE;
-		default: return Color.CORNSILK;
+		case "black":
+			return Color.BLACK;
+		case "blue":
+			return Color.BLUE;
+		case "green":
+			return Color.GREEN;
+		case "orange":
+			return Color.ORANGE;
+		case "red":
+			return Color.RED;
+		case "white":
+			return Color.WHITE;
+		default:
+			return Color.CORNSILK;
 		}
 	}
-	
+
 	public static String getColorName(Color color) {
 		if (color == Color.BLACK) {
 			return "black";
@@ -188,175 +197,184 @@ public class TargetEditorController {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Target");
 		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "targets"));
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target")
-            );
+		fileChooser.getExtensionFilters()
+				.addAll(new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target"));
 		File targetFile = fileChooser.showSaveDialog(canvasPane.getParent().getScene().getWindow());
-		
+
 		if (targetFile != null) {
 			String path = targetFile.getPath();
-			if (!path.endsWith(".target")) path += ".target";
-			
+			if (!path.endsWith(".target"))
+				path += ".target";
+
 			targetFile = new File(path);
 			boolean isNewTarget = !targetFile.exists();
-			
+
 			TargetIO.saveTarget(targetRegions, targetFile);
-			
-			if (isNewTarget) targetListener.newTarget(targetFile);
+
+			if (isNewTarget)
+				targetListener.newTarget(targetFile);
 		}
 	}
-	
+
 	@FXML
 	public void mouseMoved(MouseEvent event) {
 		if (freeformButton.isSelected()) {
 			drawTempPolygonEdge(event);
 		}
-		
-		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
-		
+
+		if (!cursorRegion.isPresent() || cursorButton.isSelected())
+			return;
+
 		Node selected = cursorRegion.get();
 
 		lastMouseX = event.getX() - (selected.getLayoutBounds().getWidth() / 2);
 		lastMouseY = event.getY() - (selected.getLayoutBounds().getHeight() / 2);
-		
-		if (lastMouseX < 0) lastMouseX = 0;
-		if (lastMouseY < 0) lastMouseY = 0;
-		
+
+		if (lastMouseX < 0)
+			lastMouseX = 0;
+		if (lastMouseY < 0)
+			lastMouseY = 0;
+
 		if (event.getX() + (selected.getLayoutBounds().getWidth() / 2) <= canvasPane.getWidth())
 			selected.setLayoutX(lastMouseX - selected.getLayoutBounds().getMinX());
-		
+
 		if (event.getY() + (selected.getLayoutBounds().getHeight() / 2) <= canvasPane.getHeight())
 			selected.setLayoutY(lastMouseY - selected.getLayoutBounds().getMinY());
-		
+
 		event.consume();
 	}
-	
+
 	@FXML
 	public void regionDropped(MouseEvent event) {
-		if (freeformButton.isSelected() && event.getButton().equals(MouseButton.PRIMARY)) {			
+		if (freeformButton.isSelected() && event.getButton().equals(MouseButton.PRIMARY)) {
 			drawPolygon(event);
 		} else if (freeformButton.isSelected() && event.getButton().equals(MouseButton.SECONDARY)) {
 			drawShape();
 			clearFreeformState(true);
 		}
-		
-		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
-		
+
+		if (!cursorRegion.isPresent() || cursorButton.isSelected())
+			return;
+
 		Node selected = cursorRegion.get();
 		targetRegions.add(selected);
-		selected.setOnMouseClicked((e) -> { regionClicked(e); });
-		selected.setOnKeyPressed((e) -> { regionKeyPressed(e); });
-		
-		if (((TargetRegion)selected).getType() == RegionType.IMAGE) {
-			ImageRegion droppedImage = (ImageRegion)selected;
-			
+		selected.setOnMouseClicked((e) -> {
+			regionClicked(e);
+		});
+		selected.setOnKeyPressed((e) -> {
+			regionKeyPressed(e);
+		});
+
+		if (((TargetRegion) selected).getType() == RegionType.IMAGE) {
+			ImageRegion droppedImage = (ImageRegion) selected;
+
 			// If the new image region has an animation, play it once
 			if (droppedImage.getAnimation().isPresent()) {
 				SpriteAnimation animation = droppedImage.getAnimation().get();
 				animation.setCycleCount(1);
-				
-				animation.setOnFinished((e) ->
-					{
-						animation.reset();
-						animation.setOnFinished(null);
-					});
-				
+
+				animation.setOnFinished((e) -> {
+					animation.reset();
+					animation.setOnFinished(null);
+				});
+
 				animation.play();
 			}
-			
+
 			drawImage(droppedImage.getImageFile());
 		} else {
 			drawShape();
 		}
 	}
-	
+
 	@FXML
 	public void canvasKeyPressed(KeyEvent event) {
-		if (freeformButton.isSelected() && 
-				event.isControlDown() && event.getCode() == KeyCode.Z) {
-			
+		if (freeformButton.isSelected() && event.isControlDown() && event.getCode() == KeyCode.Z) {
+
 			undoPolygonStep();
 		}
 	}
-	
+
 	private void undoPolygonStep() {
-		if (freeformPoints.size() <= 0) return;
-		
+		if (freeformPoints.size() <= 0)
+			return;
+
 		// Remove last point, line, and vertex
 		freeformPoints.remove(freeformPoints.size() - 1);
 		freeformPoints.remove(freeformPoints.size() - 1);
-		
+
 		if (freeformPoints.size() == 0 && freeformEdge.isPresent()) {
 			canvasPane.getChildren().remove(freeformEdge.get());
 			freeformEdge = Optional.empty();
 		}
-		
+
 		// Edge if it exists, otherwise vertex
-		if (freeformShapes.size() > 0) 
+		if (freeformShapes.size() > 0)
 			canvasPane.getChildren().remove(freeformShapes.pop());
-		
+
 		// Vertex if there was an edge
 		if (freeformShapes.size() > 0)
 			canvasPane.getChildren().remove(freeformShapes.pop());
 	}
-	
+
 	private void drawTempPolygonEdge(MouseEvent event) {
 		// Need at least one point
-		if (freeformPoints.size() < 2) return;
-		
-		if (freeformEdge.isPresent()) 
+		if (freeformPoints.size() < 2)
+			return;
+
+		if (freeformEdge.isPresent())
 			canvasPane.getChildren().remove(freeformEdge.get());
-		
+
 		double lastX = freeformPoints.get(freeformPoints.size() - 2);
 		double lastY = freeformPoints.get(freeformPoints.size() - 1);
-		
+
 		Line tempEdge = new Line(lastX, lastY, event.getX(), event.getY());
 		final double DASH_OFFSET = 5;
-		
+
 		tempEdge.getStrokeDashArray().addAll(DASH_OFFSET, DASH_OFFSET);
 		freeformEdge = Optional.of(tempEdge);
 		canvasPane.getChildren().add(tempEdge);
 	}
-	
-	private void drawPolygon(MouseEvent event) {		
+
+	private void drawPolygon(MouseEvent event) {
 		final int VERTEX_RADIUS = 3;
-		
+
 		Circle vertexDot = new Circle(event.getX(), event.getY(), VERTEX_RADIUS);
 		freeformShapes.add(vertexDot);
 		canvasPane.getChildren().add(vertexDot);
-		
+
 		if (freeformPoints.size() > 0) {
 			double lastX = freeformPoints.get(freeformPoints.size() - 2);
 			double lastY = freeformPoints.get(freeformPoints.size() - 1);
 			Line edge = new Line(lastX, lastY, event.getX(), event.getY());
-			
+
 			freeformShapes.push(edge);
 			canvasPane.getChildren().add(edge);
 		}
-		
+
 		freeformPoints.add(event.getX());
 		freeformPoints.add(event.getY());
 	}
-	
+
 	public void regionClicked(MouseEvent event) {
 		if (!cursorButton.isSelected()) {
 			// We want to drop a new region
 			regionDropped(event);
 			return;
 		}
-		
+
 		// Want to select the current region
-		Node selected = (Node)event.getTarget();
+		Node selected = (Node) event.getTarget();
 		boolean tagEditorOpen = false;
-		
+
 		if (cursorRegion.isPresent()) {
 			Node previous = cursorRegion.get();
-			
+
 			// Unhighlight the old selection
 			if (!previous.equals(selected)) {
-				if (((TargetRegion)previous).getType() != RegionType.IMAGE)
-					((Shape)previous).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
-				
+				if (((TargetRegion) previous).getType() != RegionType.IMAGE)
+					((Shape) previous).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+
 				if (tagEditor.isPresent()) {
 					// Close tag editor
 					tagsButton.setSelected(false);
@@ -366,27 +384,26 @@ public class TargetEditorController {
 			}
 		}
 
-		if (((TargetRegion)selected).getType() != RegionType.IMAGE)
-			((Shape)selected).setStroke(TargetRegion.SELECTED_STROKE_COLOR);
+		if (((TargetRegion) selected).getType() != RegionType.IMAGE)
+			((Shape) selected).setStroke(TargetRegion.SELECTED_STROKE_COLOR);
 		selected.requestFocus();
 		toggleShapeControls(true);
 		cursorRegion = Optional.of(selected);
-		if (((TargetRegion)selected).getType() != RegionType.IMAGE)
-			regionColorChoiceBox.getSelectionModel().select(
-					getColorName((Color)((Shape)selected).getFill()));
-		
+		if (((TargetRegion) selected).getType() != RegionType.IMAGE)
+			regionColorChoiceBox.getSelectionModel().select(getColorName((Color) ((Shape) selected).getFill()));
+
 		// Re-open editor
 		if (tagEditorOpen) {
 			tagsButton.setSelected(true);
 			toggleTagEditor();
 		}
 	}
-	
+
 	@SuppressWarnings("incomplete-switch")
 	public void regionKeyPressed(KeyEvent event) {
-		Node selected = (Node)event.getTarget();
-		TargetRegion region = (TargetRegion)selected;
-		
+		Node selected = (Node) event.getTarget();
+		TargetRegion region = (TargetRegion) selected;
+
 		switch (event.getCode()) {
 		case DELETE:
 		case BACK_SPACE:
@@ -398,7 +415,7 @@ public class TargetEditorController {
 				toggleTagEditor();
 			}
 			break;
-			
+
 		case LEFT:
 			if (event.isShiftDown()) {
 				region.changeWidth(SCALE_DELTA * -1);
@@ -406,7 +423,7 @@ public class TargetEditorController {
 				selected.setLayoutX(selected.getLayoutX() - MOVEMENT_DELTA);
 			}
 			break;
-			
+
 		case RIGHT:
 			if (event.isShiftDown()) {
 				region.changeWidth(SCALE_DELTA);
@@ -414,7 +431,7 @@ public class TargetEditorController {
 				selected.setLayoutX(selected.getLayoutX() + MOVEMENT_DELTA);
 			}
 			break;
-			
+
 		case UP:
 			if (event.isShiftDown()) {
 				region.changeHeight(SCALE_DELTA * -1);
@@ -431,286 +448,264 @@ public class TargetEditorController {
 			}
 			break;
 		}
-		
+
 		event.consume();
 	}
-	
+
 	@FXML
 	public void cursorSelected(ActionEvent event) {
 		clearFreeformState(false);
-		
-		if (!cursorRegion.isPresent()) return;
-		
+
+		if (!cursorRegion.isPresent())
+			return;
+
 		// Remove shape that was never actually placed
 		Node selected = cursorRegion.get();
-		if (!targetRegions.contains(selected)) 
+		if (!targetRegions.contains(selected))
 			canvasPane.getChildren().remove(selected);
-		
+
 		cursorRegion = Optional.empty();
 	}
-	
+
 	@FXML
 	public void openImage(ActionEvent event) {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Image");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
-                new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png")
-            );
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
+				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
 		File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
-		
+
 		lastMouseX = 0;
 		lastMouseY = 0;
-		
+
 		drawImage(imageFile);
 	}
-	
+
 	private void drawImage(File imageFile) {
 		Optional<ImageRegion> imageRegion = Optional.empty();
-		
+
 		if (imageFile != null) {
 			try {
 				int firstDot = imageFile.getName().indexOf('.') + 1;
 				String extension = imageFile.getName().substring(firstDot);
-				
+
 				switch (extension) {
 				case "gif":
 					ImageRegion newGIFRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
 					GifAnimation gif = new GifAnimation(newGIFRegion, imageFile);
 					newGIFRegion.setImage(gif.getFirstFrame());
-					if (gif.getFrameCount() > 0) newGIFRegion.setAnimation(gif);
+					if (gif.getFrameCount() > 0)
+						newGIFRegion.setAnimation(gif);
 					imageRegion = Optional.of(newGIFRegion);
 					break;
 				case "png":
 					ImageRegion newPNGRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
 					newPNGRegion.setImage(new Image(new FileInputStream(imageFile)));
-					imageRegion = Optional.of(newPNGRegion);		
+					imageRegion = Optional.of(newPNGRegion);
 					break;
 				}
 			} catch (IOException e) {
 				logger.error("Error drawing target image region", e);
 			}
 		}
-		
+
 		if (imageRegion.isPresent()) {
 			canvasPane.getChildren().add(imageRegion.get());
 			cursorRegion = Optional.of(imageRegion.get());
 		}
 	}
-	
+
 	@FXML
-	public void drawShape(ActionEvent event) {	
+	public void drawShape(ActionEvent event) {
 		if (tagsButton.isSelected()) {
 			tagsButton.setSelected(false);
 			toggleTagEditor();
 		}
-		
+
 		lastMouseX = 0;
 		lastMouseY = 0;
-		
-		if (cursorRegion.isPresent() && 
-				!targetRegions.contains(cursorRegion.get())) {
+
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get())) {
 			canvasPane.getChildren().remove(cursorRegion.get());
-		} else if (cursorRegion.isPresent() && 
-				targetRegions.contains(cursorRegion.get())) {
-			
-			TargetRegion selected = (TargetRegion)cursorRegion.get();
-			
+		} else if (cursorRegion.isPresent() && targetRegions.contains(cursorRegion.get())) {
+
+			TargetRegion selected = (TargetRegion) cursorRegion.get();
+
 			if (selected.getType() != RegionType.IMAGE)
-				((Shape)selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
-			
+				((Shape) selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+
 			toggleShapeControls(false);
 			cursorRegion = Optional.empty();
 		}
-		
+
 		clearFreeformState(false);
 		drawShape();
 	}
-	
+
 	private void drawShape() {
 		Shape newShape = null;
 
 		final int DEFAULT_DIM = 40;
 		final double AQT_SCALE = 2.5;
-		
+
 		if (rectangleButton.isSelected()) {
-			newShape = new RectangleRegion(lastMouseX, lastMouseY, 
-				DEFAULT_DIM, DEFAULT_DIM);
+			newShape = new RectangleRegion(lastMouseX, lastMouseY, DEFAULT_DIM, DEFAULT_DIM);
 		} else if (ovalButton.isSelected()) {
 			final int RADIUS = DEFAULT_DIM / 2;
-			newShape = new EllipseRegion(lastMouseX + RADIUS, 
-					lastMouseY + RADIUS, RADIUS, RADIUS);
+			newShape = new EllipseRegion(lastMouseX + RADIUS, lastMouseY + RADIUS, RADIUS, RADIUS);
 		} else if (triangleButton.isSelected()) {
-			newShape = new PolygonRegion(lastMouseX, lastMouseY + (DEFAULT_DIM / 2),
-					lastMouseX + DEFAULT_DIM, lastMouseY + (DEFAULT_DIM / 2),
-					lastMouseX + (DEFAULT_DIM / 2), lastMouseY);
+			newShape = new PolygonRegion(lastMouseX, lastMouseY + (DEFAULT_DIM / 2), lastMouseX + DEFAULT_DIM,
+					lastMouseY + (DEFAULT_DIM / 2), lastMouseX + (DEFAULT_DIM / 2), lastMouseY);
 		} else if (appleseedThreeButton.isSelected()) {
-			newShape = new PolygonRegion(lastMouseX+15.083*AQT_SCALE, lastMouseY+13.12*AQT_SCALE, 
-		            lastMouseX+15.083*AQT_SCALE, lastMouseY+-0.147*AQT_SCALE, 
-		            lastMouseX+14.277*AQT_SCALE, lastMouseY+-2.508*AQT_SCALE, 
-		            lastMouseX+13.149*AQT_SCALE, lastMouseY+-4.115*AQT_SCALE, 
-		            lastMouseX+11.841*AQT_SCALE, lastMouseY+-5.257*AQT_SCALE, 
-		            lastMouseX+10.557*AQT_SCALE, lastMouseY+-6.064*AQT_SCALE, 
-		            lastMouseX+8.689*AQT_SCALE, lastMouseY+-6.811*AQT_SCALE, 
-		            lastMouseX+7.539*AQT_SCALE, lastMouseY+-8.439*AQT_SCALE, 
-		            lastMouseX+7.076*AQT_SCALE, lastMouseY+-9.978*AQT_SCALE, 
-		            lastMouseX+6.104*AQT_SCALE, lastMouseY+-11.577*AQT_SCALE, 
-		            lastMouseX+4.82*AQT_SCALE, lastMouseY+-12.829*AQT_SCALE, 
-		            lastMouseX+3.43*AQT_SCALE, lastMouseY+-13.788*AQT_SCALE, 
-		            lastMouseX+1.757*AQT_SCALE, lastMouseY+-14.386*AQT_SCALE, 
-		            lastMouseX+0.083*AQT_SCALE, lastMouseY+-14.55*AQT_SCALE, 
-		            lastMouseX+-1.59*AQT_SCALE, lastMouseY+-14.386*AQT_SCALE, 
-		            lastMouseX+-3.263*AQT_SCALE, lastMouseY+-13.788*AQT_SCALE, 
-		            lastMouseX+-4.653*AQT_SCALE, lastMouseY+-12.829*AQT_SCALE, 
-		            lastMouseX+-5.938*AQT_SCALE, lastMouseY+-11.577*AQT_SCALE, 
-		            lastMouseX+-6.909*AQT_SCALE, lastMouseY+-9.978*AQT_SCALE, 
-		            lastMouseX+-7.372*AQT_SCALE, lastMouseY+-8.439*AQT_SCALE, 
-		            lastMouseX+-8.522*AQT_SCALE, lastMouseY+-6.811*AQT_SCALE, 
-		            lastMouseX+-10.39*AQT_SCALE, lastMouseY+-6.064*AQT_SCALE, 
-		            lastMouseX+-11.674*AQT_SCALE, lastMouseY+-5.257*AQT_SCALE, 
-		            lastMouseX+-12.982*AQT_SCALE, lastMouseY+-4.115*AQT_SCALE, 
-		            lastMouseX+-14.11*AQT_SCALE, lastMouseY+-2.508*AQT_SCALE, 
-		            lastMouseX+-14.917*AQT_SCALE, lastMouseY+-0.147*AQT_SCALE, 
-		            lastMouseX+-14.917*AQT_SCALE, lastMouseY+13.12*AQT_SCALE);
+			newShape = new PolygonRegion(lastMouseX + 15.083 * AQT_SCALE, lastMouseY + 13.12 * AQT_SCALE,
+					lastMouseX + 15.083 * AQT_SCALE, lastMouseY + -0.147 * AQT_SCALE, lastMouseX + 14.277 * AQT_SCALE,
+					lastMouseY + -2.508 * AQT_SCALE, lastMouseX + 13.149 * AQT_SCALE, lastMouseY + -4.115 * AQT_SCALE,
+					lastMouseX + 11.841 * AQT_SCALE, lastMouseY + -5.257 * AQT_SCALE, lastMouseX + 10.557 * AQT_SCALE,
+					lastMouseY + -6.064 * AQT_SCALE, lastMouseX + 8.689 * AQT_SCALE, lastMouseY + -6.811 * AQT_SCALE,
+					lastMouseX + 7.539 * AQT_SCALE, lastMouseY + -8.439 * AQT_SCALE, lastMouseX + 7.076 * AQT_SCALE,
+					lastMouseY + -9.978 * AQT_SCALE, lastMouseX + 6.104 * AQT_SCALE, lastMouseY + -11.577 * AQT_SCALE,
+					lastMouseX + 4.82 * AQT_SCALE, lastMouseY + -12.829 * AQT_SCALE, lastMouseX + 3.43 * AQT_SCALE,
+					lastMouseY + -13.788 * AQT_SCALE, lastMouseX + 1.757 * AQT_SCALE, lastMouseY + -14.386 * AQT_SCALE,
+					lastMouseX + 0.083 * AQT_SCALE, lastMouseY + -14.55 * AQT_SCALE, lastMouseX + -1.59 * AQT_SCALE,
+					lastMouseY + -14.386 * AQT_SCALE, lastMouseX + -3.263 * AQT_SCALE, lastMouseY + -13.788 * AQT_SCALE,
+					lastMouseX + -4.653 * AQT_SCALE, lastMouseY + -12.829 * AQT_SCALE, lastMouseX + -5.938 * AQT_SCALE,
+					lastMouseY + -11.577 * AQT_SCALE, lastMouseX + -6.909 * AQT_SCALE, lastMouseY + -9.978 * AQT_SCALE,
+					lastMouseX + -7.372 * AQT_SCALE, lastMouseY + -8.439 * AQT_SCALE, lastMouseX + -8.522 * AQT_SCALE,
+					lastMouseY + -6.811 * AQT_SCALE, lastMouseX + -10.39 * AQT_SCALE, lastMouseY + -6.064 * AQT_SCALE,
+					lastMouseX + -11.674 * AQT_SCALE, lastMouseY + -5.257 * AQT_SCALE, lastMouseX + -12.982 * AQT_SCALE,
+					lastMouseY + -4.115 * AQT_SCALE, lastMouseX + -14.11 * AQT_SCALE, lastMouseY + -2.508 * AQT_SCALE,
+					lastMouseX + -14.917 * AQT_SCALE, lastMouseY + -0.147 * AQT_SCALE, lastMouseX + -14.917 * AQT_SCALE,
+					lastMouseY + 13.12 * AQT_SCALE);
 		} else if (appleseedFourButton.isSelected()) {
-			newShape = new PolygonRegion(lastMouseX+11.66*AQT_SCALE, lastMouseY+5.51*AQT_SCALE, 
-	                lastMouseX+11.595*AQT_SCALE, lastMouseY+0.689*AQT_SCALE, 
-	                lastMouseX+11.1*AQT_SCALE, lastMouseY+-1.084*AQT_SCALE, 
-	                lastMouseX+9.832*AQT_SCALE, lastMouseY+-2.441*AQT_SCALE, 
-	                lastMouseX+7.677*AQT_SCALE, lastMouseY+-3.322*AQT_SCALE, 
-	                lastMouseX+5.821*AQT_SCALE, lastMouseY+-4.709*AQT_SCALE, 
-	                lastMouseX+4.715*AQT_SCALE, lastMouseY+-6.497*AQT_SCALE, 
-	                lastMouseX+4.267*AQT_SCALE, lastMouseY+-8.135*AQT_SCALE, 
-	                lastMouseX+3.669*AQT_SCALE, lastMouseY+-9.41*AQT_SCALE, 
-	                lastMouseX+2.534*AQT_SCALE, lastMouseY+-10.553*AQT_SCALE, 
-	                lastMouseX+1.436*AQT_SCALE, lastMouseY+-11.091*AQT_SCALE, 
-	                lastMouseX+0.083*AQT_SCALE, lastMouseY+-11.323*AQT_SCALE, 
-	                lastMouseX+-1.269*AQT_SCALE, lastMouseY+-11.091*AQT_SCALE, 
-	                lastMouseX+-2.367*AQT_SCALE, lastMouseY+-10.553*AQT_SCALE, 
-	                lastMouseX+-3.502*AQT_SCALE, lastMouseY+-9.41*AQT_SCALE, 
-	                lastMouseX+-4.1*AQT_SCALE, lastMouseY+-8.135*AQT_SCALE, 
-	                lastMouseX+-4.548*AQT_SCALE, lastMouseY+-6.497*AQT_SCALE, 
-	                lastMouseX+-5.654*AQT_SCALE, lastMouseY+-4.709*AQT_SCALE, 
-	                lastMouseX+-7.51*AQT_SCALE, lastMouseY+-3.322*AQT_SCALE, 
-	                lastMouseX+-9.665*AQT_SCALE, lastMouseY+-2.441*AQT_SCALE, 
-	                lastMouseX+-10.933*AQT_SCALE, lastMouseY+-1.084*AQT_SCALE, 
-	                lastMouseX+-11.428*AQT_SCALE, lastMouseY+0.689*AQT_SCALE, 
-	                lastMouseX+-11.493*AQT_SCALE, lastMouseY+5.51*AQT_SCALE);
+			newShape = new PolygonRegion(lastMouseX + 11.66 * AQT_SCALE, lastMouseY + 5.51 * AQT_SCALE,
+					lastMouseX + 11.595 * AQT_SCALE, lastMouseY + 0.689 * AQT_SCALE, lastMouseX + 11.1 * AQT_SCALE,
+					lastMouseY + -1.084 * AQT_SCALE, lastMouseX + 9.832 * AQT_SCALE, lastMouseY + -2.441 * AQT_SCALE,
+					lastMouseX + 7.677 * AQT_SCALE, lastMouseY + -3.322 * AQT_SCALE, lastMouseX + 5.821 * AQT_SCALE,
+					lastMouseY + -4.709 * AQT_SCALE, lastMouseX + 4.715 * AQT_SCALE, lastMouseY + -6.497 * AQT_SCALE,
+					lastMouseX + 4.267 * AQT_SCALE, lastMouseY + -8.135 * AQT_SCALE, lastMouseX + 3.669 * AQT_SCALE,
+					lastMouseY + -9.41 * AQT_SCALE, lastMouseX + 2.534 * AQT_SCALE, lastMouseY + -10.553 * AQT_SCALE,
+					lastMouseX + 1.436 * AQT_SCALE, lastMouseY + -11.091 * AQT_SCALE, lastMouseX + 0.083 * AQT_SCALE,
+					lastMouseY + -11.323 * AQT_SCALE, lastMouseX + -1.269 * AQT_SCALE, lastMouseY + -11.091 * AQT_SCALE,
+					lastMouseX + -2.367 * AQT_SCALE, lastMouseY + -10.553 * AQT_SCALE, lastMouseX + -3.502 * AQT_SCALE,
+					lastMouseY + -9.41 * AQT_SCALE, lastMouseX + -4.1 * AQT_SCALE, lastMouseY + -8.135 * AQT_SCALE,
+					lastMouseX + -4.548 * AQT_SCALE, lastMouseY + -6.497 * AQT_SCALE, lastMouseX + -5.654 * AQT_SCALE,
+					lastMouseY + -4.709 * AQT_SCALE, lastMouseX + -7.51 * AQT_SCALE, lastMouseY + -3.322 * AQT_SCALE,
+					lastMouseX + -9.665 * AQT_SCALE, lastMouseY + -2.441 * AQT_SCALE, lastMouseX + -10.933 * AQT_SCALE,
+					lastMouseY + -1.084 * AQT_SCALE, lastMouseX + -11.428 * AQT_SCALE, lastMouseY + 0.689 * AQT_SCALE,
+					lastMouseX + -11.493 * AQT_SCALE, lastMouseY + 5.51 * AQT_SCALE);
 		} else if (appleseedFiveButton.isSelected()) {
-			newShape = new PolygonRegion(lastMouseX+7.893*AQT_SCALE, lastMouseY+3.418*AQT_SCALE, 
-	                lastMouseX+7.893*AQT_SCALE, lastMouseY+1.147*AQT_SCALE, 
-	                lastMouseX+7.255*AQT_SCALE, lastMouseY+0.331*AQT_SCALE, 
-	                lastMouseX+5.622*AQT_SCALE, lastMouseY+-0.247*AQT_SCALE, 
-	                lastMouseX+4.187*AQT_SCALE, lastMouseY+-1.124*AQT_SCALE, 
-	                lastMouseX+2.833*AQT_SCALE, lastMouseY+-2.339*AQT_SCALE, 
-	                lastMouseX+1.917*AQT_SCALE, lastMouseY+-3.594*AQT_SCALE, 
-	                lastMouseX+1.219*AQT_SCALE, lastMouseY+-5.048*AQT_SCALE, 
-	                lastMouseX+0.9*AQT_SCALE, lastMouseY+-6.223*AQT_SCALE, 
-	                lastMouseX+0.801*AQT_SCALE, lastMouseY+-7.1*AQT_SCALE, 
-	                lastMouseX+0.521*AQT_SCALE, lastMouseY+-7.558*AQT_SCALE, 
-	                lastMouseX+0.083*AQT_SCALE, lastMouseY+-7.617*AQT_SCALE, 
-	                lastMouseX+-0.354*AQT_SCALE, lastMouseY+-7.558*AQT_SCALE, 
-	                lastMouseX+-0.634*AQT_SCALE, lastMouseY+-7.1*AQT_SCALE, 
-	                lastMouseX+-0.733*AQT_SCALE, lastMouseY+-6.223*AQT_SCALE, 
-	                lastMouseX+-1.052*AQT_SCALE, lastMouseY+-5.048*AQT_SCALE, 
-	                lastMouseX+-1.75*AQT_SCALE, lastMouseY+-3.594*AQT_SCALE, 
-	                lastMouseX+-2.666*AQT_SCALE, lastMouseY+-2.339*AQT_SCALE, 
-	                lastMouseX+-4.02*AQT_SCALE, lastMouseY+-1.124*AQT_SCALE, 
-	                lastMouseX+-5.455*AQT_SCALE, lastMouseY+-0.247*AQT_SCALE, 
-	                lastMouseX+-7.088*AQT_SCALE, lastMouseY+0.331*AQT_SCALE, 
-	                lastMouseX+-7.726*AQT_SCALE, lastMouseY+1.147*AQT_SCALE, 
-	                lastMouseX+-7.726*AQT_SCALE, lastMouseY+3.418*AQT_SCALE);
+			newShape = new PolygonRegion(lastMouseX + 7.893 * AQT_SCALE, lastMouseY + 3.418 * AQT_SCALE,
+					lastMouseX + 7.893 * AQT_SCALE, lastMouseY + 1.147 * AQT_SCALE, lastMouseX + 7.255 * AQT_SCALE,
+					lastMouseY + 0.331 * AQT_SCALE, lastMouseX + 5.622 * AQT_SCALE, lastMouseY + -0.247 * AQT_SCALE,
+					lastMouseX + 4.187 * AQT_SCALE, lastMouseY + -1.124 * AQT_SCALE, lastMouseX + 2.833 * AQT_SCALE,
+					lastMouseY + -2.339 * AQT_SCALE, lastMouseX + 1.917 * AQT_SCALE, lastMouseY + -3.594 * AQT_SCALE,
+					lastMouseX + 1.219 * AQT_SCALE, lastMouseY + -5.048 * AQT_SCALE, lastMouseX + 0.9 * AQT_SCALE,
+					lastMouseY + -6.223 * AQT_SCALE, lastMouseX + 0.801 * AQT_SCALE, lastMouseY + -7.1 * AQT_SCALE,
+					lastMouseX + 0.521 * AQT_SCALE, lastMouseY + -7.558 * AQT_SCALE, lastMouseX + 0.083 * AQT_SCALE,
+					lastMouseY + -7.617 * AQT_SCALE, lastMouseX + -0.354 * AQT_SCALE, lastMouseY + -7.558 * AQT_SCALE,
+					lastMouseX + -0.634 * AQT_SCALE, lastMouseY + -7.1 * AQT_SCALE, lastMouseX + -0.733 * AQT_SCALE,
+					lastMouseY + -6.223 * AQT_SCALE, lastMouseX + -1.052 * AQT_SCALE, lastMouseY + -5.048 * AQT_SCALE,
+					lastMouseX + -1.75 * AQT_SCALE, lastMouseY + -3.594 * AQT_SCALE, lastMouseX + -2.666 * AQT_SCALE,
+					lastMouseY + -2.339 * AQT_SCALE, lastMouseX + -4.02 * AQT_SCALE, lastMouseY + -1.124 * AQT_SCALE,
+					lastMouseX + -5.455 * AQT_SCALE, lastMouseY + -0.247 * AQT_SCALE, lastMouseX + -7.088 * AQT_SCALE,
+					lastMouseY + 0.331 * AQT_SCALE, lastMouseX + -7.726 * AQT_SCALE, lastMouseY + 1.147 * AQT_SCALE,
+					lastMouseX + -7.726 * AQT_SCALE, lastMouseY + 3.418 * AQT_SCALE);
 		} else if (freeformButton.isSelected()) {
 			double[] points = new double[freeformPoints.size()];
-			
+
 			for (int i = 0; i < freeformPoints.size(); i++) {
 				points[i] = freeformPoints.get(i);
 			}
-			
+
 			newShape = new PolygonRegion(points);
-			
+
 			targetRegions.add(newShape);
-			newShape.setOnMouseClicked((e) -> { regionClicked(e); });
-			newShape.setOnKeyPressed((e) -> { regionKeyPressed(e); });
+			newShape.setOnMouseClicked((e) -> {
+				regionClicked(e);
+			});
+			newShape.setOnKeyPressed((e) -> {
+				regionKeyPressed(e);
+			});
 		} else {
 			cursorRegion = Optional.empty();
 			System.err.println("Unimplemented region type selected.");
 			return;
 		}
-		
+
 		newShape.setFill(DEFAULT_FILL_COLOR);
 		newShape.setOpacity(TargetIO.DEFAULT_OPACITY);
 		canvasPane.getChildren().add(newShape);
-		
+
 		// New freeform polygon should not be on the cursor or
 		// adjusted (it can't be off the canvas)
 		if (!freeformButton.isSelected()) {
 			double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
 			if (leftX < 0)
 				newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
-			
+
 			double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
 			if (topY < 0)
 				newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
-			
+
 			cursorRegion = Optional.of(newShape);
 		}
 	}
-	
+
 	@FXML
 	public void startPolygon(ActionEvent event) {
-		if (cursorRegion.isPresent() && 
-				targetRegions.contains(cursorRegion.get())) {
-			
-			TargetRegion selected = (TargetRegion)cursorRegion.get();
-			
+		if (cursorRegion.isPresent() && targetRegions.contains(cursorRegion.get())) {
+
+			TargetRegion selected = (TargetRegion) cursorRegion.get();
+
 			if (selected.getType() != RegionType.IMAGE)
-				((Shape)selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
-			
+				((Shape) selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+
 			if (tagsButton.isSelected()) {
 				tagsButton.setSelected(false);
 				toggleTagEditor();
 			}
 			toggleShapeControls(false);
 		}
-		
+
 		clearFreeformState(false);
 	}
-	
+
 	private void clearFreeformState(boolean finishedDrawing) {
 		if (cursorRegion.isPresent() && !finishedDrawing) {
 			Node selected = cursorRegion.get();
-			if (!targetRegions.contains(selected)) 
+			if (!targetRegions.contains(selected))
 				canvasPane.getChildren().remove(selected);
-			
+
 			cursorRegion = Optional.empty();
 		}
-		
+
 		freeformPoints.clear();
 		canvasPane.getChildren().removeAll(freeformShapes);
 		freeformShapes.clear();
-		
+
 		if (freeformEdge.isPresent()) {
 			canvasPane.getChildren().remove(freeformEdge.get());
 			freeformEdge = Optional.empty();
 		}
 	}
-	
+
 	@FXML
 	public void bringForward(ActionEvent event) {
-		if (cursorRegion.isPresent() && 
-				!targetRegions.contains(cursorRegion.get())) return;
-				
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get()))
+			return;
+
 		int selectedIndex = targetRegions.indexOf(cursorRegion.get());
 
 		if (selectedIndex < targetRegions.size() - 1) {
 			Collections.swap(targetRegions, selectedIndex, selectedIndex + 1);
-			
-			// Get the index separately for the shapes list because the target region
+
+			// Get the index separately for the shapes list because the target
+			// region
 			// list has fewer items (e.g. no background)
 			ObservableList<Node> shapesList = canvasPane.getChildren();
 			selectedIndex = shapesList.indexOf(cursorRegion.get());
-			
+
 			// We have to do this dance instead of just calling
 			// Collections.swap otherwise we get an IllegalArgumentException
 			// from the Scene for duplicating a child node
@@ -722,17 +717,17 @@ public class TargetEditorController {
 			shapesList.add(selectedIndex + 1, bottomShape);
 		}
 	}
-	
+
 	@FXML
 	public void sendBackward(ActionEvent event) {
-		if (cursorRegion.isPresent() && 
-				!targetRegions.contains(cursorRegion.get())) return;
-		
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get()))
+			return;
+
 		int selectedIndex = targetRegions.indexOf(cursorRegion.get());
-		
+
 		if (selectedIndex > 0) {
 			Collections.swap(targetRegions, selectedIndex - 1, selectedIndex);
-			
+
 			ObservableList<Node> shapesList = canvasPane.getChildren();
 			selectedIndex = shapesList.indexOf(cursorRegion.get());
 
@@ -744,27 +739,28 @@ public class TargetEditorController {
 			shapesList.add(selectedIndex, bottomShape);
 		}
 	}
-	
+
 	@FXML
 	public void toggleTagEditor(ActionEvent event) {
-		if (cursorRegion.isPresent() && 
-				!targetRegions.contains(cursorRegion.get())) return;
-		
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get()))
+			return;
+
 		toggleTagEditor();
 	}
-	
+
 	private void toggleTagEditor() {
 		if (tagsButton.isSelected() && cursorRegion.isPresent()) {
-			TagEditorPanel editor = new TagEditorPanel(((TargetRegion)cursorRegion.get()).getAllTags());
+			TagEditorPanel editor = new TagEditorPanel(((TargetRegion) cursorRegion.get()).getAllTags());
 			tagEditor = Optional.of(editor);
 			targetEditorPane.getChildren().add(editor);
 			editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
-			editor.setLayoutY(tagsButton.getLayoutY() + tagsButton.getHeight() + 
-					tagsButton.getPadding().getBottom() + 2);
+			editor.setLayoutY(
+					tagsButton.getLayoutY() + tagsButton.getHeight() + tagsButton.getPadding().getBottom() + 2);
 		} else if (!tagsButton.isSelected() && tagEditor.isPresent()) {
 			TagEditorPanel editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
-			if (cursorRegion.isPresent()) ((TargetRegion)cursorRegion.get()).setTags(editor.getTags());
+			if (cursorRegion.isPresent())
+				((TargetRegion) cursorRegion.get()).setTags(editor.getTags());
 			tagEditor = Optional.empty();
 		}
 	}

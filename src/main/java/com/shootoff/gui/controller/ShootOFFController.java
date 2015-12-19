@@ -370,11 +370,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public Stage getStage() {
 		return shootOFFStage;
 	}
-	
+
 	public GridPane getButtonsPane() {
 		return buttonsGridPane;
 	}
-	
+
 	public TableView<ShotEntry> getShotEntryTable() {
 		return shotTimerTable;
 	}
@@ -632,8 +632,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
 						.newInstance(arenaController.getCanvasManager().getTargetGroups());
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this,
-						arenaController);
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
 				newExercise.init();
 				config.setExercise(newExercise);
 			} catch (Exception ex) {

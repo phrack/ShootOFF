@@ -89,26 +89,21 @@ public class Configuration {
 	private static final String ARENA_POSITION_X_PROP = "shootoff.arena.x";
 	private static final String ARENA_POSITION_Y_PROP = "shootoff.arena.y";
 
-	protected static final String MARKER_RADIUS_MESSAGE = 
-			"MARKER_RADIUS has an invalid value: %d. Acceptable values are "
+	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
-	protected static final String LASER_COLOR_MESSAGE = 
-			"LASER_COLOR has an invalid value: %s. Acceptable values are "
+	protected static final String LASER_COLOR_MESSAGE = "LASER_COLOR has an invalid value: %s. Acceptable values are "
 			+ "\"red\" and \"green\".";
-	protected static final String LASER_SOUND_MESSAGE = 
-			"LASER_SOUND has an invalid value: %s. Sound file must exist.";
-	protected static final String VIRTUAL_MAGAZINE_MESSAGE = 
-			"VIRTUAL_MAGAZINE has an invalid value: %d. Acceptable values are "
+	protected static final String LASER_SOUND_MESSAGE = "LASER_SOUND has an invalid value: %s. Sound file must exist.";
+	protected static final String VIRTUAL_MAGAZINE_MESSAGE = "VIRTUAL_MAGAZINE has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 45.";
-	protected static final String INJECT_MALFUNCTIONS_MESSAGE = 
-			"INJECT_MALFUNCTIONS has an invalid value: %f. Acceptable values are "
+	protected static final String INJECT_MALFUNCTIONS_MESSAGE = "INJECT_MALFUNCTIONS has an invalid value: %f. Acceptable values are "
 			+ "between 0.1 and 99.9.";
-	
+
 	private static final String DEFAULT_CONFIG_FILE = "shootoff.properties";
 
 	private InputStream configInput;
 	private String configName;
-	
+
 	private boolean isFirstRun = false;
 	private boolean useErrorReporting = true;
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
@@ -123,7 +118,7 @@ public class Configuration {
 	private boolean useVirtualMagazine = false;
 	private int virtualMagazineCapacity = 7;
 	private boolean useMalfunctions = false;
-	private float malfunctionsProbability = (float)10.0;
+	private float malfunctionsProbability = (float) 10.0;
 	private boolean debugMode = false;
 	private Set<Camera> recordingCameras = new HashSet<Camera>();
 	private Set<CameraManager> recordingManagers = new HashSet<CameraManager>();
@@ -132,10 +127,10 @@ public class Configuration {
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
-	
+
 	private boolean debugShotsRecordToFiles = false;
 
- 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
+	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 
@@ -145,31 +140,36 @@ public class Configuration {
 		readConfigurationFile();
 
 	}
-	
+
 	public Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
 
 	}
-	
-	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException, ConfigurationException {
+
+	protected Configuration(InputStream configInputStream, String name, String[] args)
+			throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		parseCmdLine(args);
 		readConfigurationFile();
-		parseCmdLine(args); // Parse twice so that we guarantee debug is set and override config file
+		parseCmdLine(args); // Parse twice so that we guarantee debug is set and
+							// override config file
 
 	}
-	
+
 	/**
-	 * Loads the configuration from a file named <tt>name</tt> and then
-	 * updates the configuration using the programs arguments stored in
-	 * <tt>args</tt>.
+	 * Loads the configuration from a file named <tt>name</tt> and then updates
+	 * the configuration using the programs arguments stored in <tt>args</tt>.
 	 * 
-	 * @param name	the configuration file to load properties from
-	 * @param args	the command line arguments for this program
-	 * @throws IOException	<tt>name</tt> doesn't exist on the file system
-	 * @throws ConfigurationException	a specific property value is out of spec
+	 * @param name
+	 *            the configuration file to load properties from
+	 * @param args
+	 *            the command line arguments for this program
+	 * @throws IOException
+	 *             <tt>name</tt> doesn't exist on the file system
+	 * @throws ConfigurationException
+	 *             a specific property value is out of spec
 	 */
 	public Configuration(String name, String[] args) throws IOException, ConfigurationException {
 		configName = name;
@@ -183,18 +183,18 @@ public class Configuration {
 		configName = DEFAULT_CONFIG_FILE;
 		parseCmdLine(args);
 	}
-	
+
 	private void readConfigurationFile() throws ConfigurationException, IOException {
 		Properties prop = new Properties();
-		
+
 		InputStream inputStream;
-		
+
 		if (configInput != null) {
 			inputStream = configInput;
 		} else {
 			inputStream = new FileInputStream(configName);
 		}
-			 
+
 		if (inputStream != null) {
 			try {
 				prop.load(inputStream);
@@ -204,33 +204,33 @@ public class Configuration {
 				inputStream.close();
 			}
 		} else {
-			throw new FileNotFoundException("Could not read configuration file " +
-					configName);
+			throw new FileNotFoundException("Could not read configuration file " + configName);
 		}
-		
+
 		if (prop.containsKey(FIRST_RUN_PROP)) {
 			setFirstRun(Boolean.parseBoolean(prop.getProperty(FIRST_RUN_PROP)));
 		} else {
 			setFirstRun(false);
 		}
-		
+
 		if (prop.containsKey(ERROR_REPORTING_PROP)) {
 			setUseErrorReporting(Boolean.parseBoolean(prop.getProperty(ERROR_REPORTING_PROP)));
 		}
-		
+
 		if (prop.containsKey(IPCAMS_PROP)) {
 			for (String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
 				String[] names = nameString.split("\\|");
 				if (names.length > 1) {
-					registerIpCam(names[0], names[1]);;
+					registerIpCam(names[0], names[1]);
+					;
 				}
 			}
 		}
-		
+
 		if (prop.containsKey(WEBCAMS_PROP)) {
 			List<String> webcamNames = new ArrayList<String>();
 			List<String> webcamInternalNames = new ArrayList<String>();
-			
+
 			for (String nameString : prop.getProperty(WEBCAMS_PROP).split(",")) {
 				String[] names = nameString.split(":");
 				if (names.length > 1) {
@@ -238,7 +238,7 @@ public class Configuration {
 					webcamInternalNames.add(names[1]);
 				}
 			}
-			
+
 			for (Camera webcam : Camera.getWebcams()) {
 				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
 				if (cameraIndex >= 0) {
@@ -246,7 +246,7 @@ public class Configuration {
 				}
 			}
 		}
-		
+
 		Set<Camera> recordingCameras = new HashSet<Camera>();
 		if (prop.containsKey(RECORDING_WEBCAMS_PROP)) {
 			for (String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP).split(",")) {
@@ -259,96 +259,90 @@ public class Configuration {
 			}
 		}
 		setRecordingCameras(recordingCameras);
-		
+
 		if (prop.containsKey(MARKER_RADIUS_PROP)) {
-			setMarkerRadius(
-					Integer.parseInt(prop.getProperty(MARKER_RADIUS_PROP)));
+			setMarkerRadius(Integer.parseInt(prop.getProperty(MARKER_RADIUS_PROP)));
 		}
-		
+
 		if (prop.containsKey(IGNORE_LASER_COLOR_PROP)) {
 			String colorName = prop.getProperty(IGNORE_LASER_COLOR_PROP);
-			
+
 			if (!colorName.equals("None")) {
 				setIgnoreLaserColor(true);
 				setIgnoreLaserColorName(colorName);
-			} 
+			}
 		}
-		
+
 		if (prop.containsKey(USE_RED_LASER_SOUND_PROP)) {
-			setUseRedLaserSound(
-					Boolean.parseBoolean(prop.getProperty(USE_RED_LASER_SOUND_PROP)));
+			setUseRedLaserSound(Boolean.parseBoolean(prop.getProperty(USE_RED_LASER_SOUND_PROP)));
 		}
-		
+
 		if (prop.containsKey(RED_LASER_SOUND_PROP)) {
-			setRedLaserSound(
-					new File(prop.getProperty(RED_LASER_SOUND_PROP)));
+			setRedLaserSound(new File(prop.getProperty(RED_LASER_SOUND_PROP)));
 		}
-		
+
 		if (prop.containsKey(USE_GREEN_LASER_SOUND_PROP)) {
-			setUseGreenLaserSound(
-					Boolean.parseBoolean(prop.getProperty(USE_GREEN_LASER_SOUND_PROP)));
+			setUseGreenLaserSound(Boolean.parseBoolean(prop.getProperty(USE_GREEN_LASER_SOUND_PROP)));
 		}
-		
+
 		if (prop.containsKey(GREEN_LASER_SOUND_PROP)) {
-			setGreenLaserSound(
-					new File(prop.getProperty(GREEN_LASER_SOUND_PROP)));
+			setGreenLaserSound(new File(prop.getProperty(GREEN_LASER_SOUND_PROP)));
 		}
-		
+
 		if (prop.containsKey(USE_VIRTUAL_MAGAZINE_PROP)) {
-			setUseVirtualMagazine(
-					Boolean.parseBoolean(prop.getProperty(USE_VIRTUAL_MAGAZINE_PROP)));
+			setUseVirtualMagazine(Boolean.parseBoolean(prop.getProperty(USE_VIRTUAL_MAGAZINE_PROP)));
 		}
-		
+
 		if (prop.containsKey(VIRTUAL_MAGAZINE_CAPACITY_PROP)) {
-			setVirtualMagazineCapacity(
-					Integer.parseInt(prop.getProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP)));
+			setVirtualMagazineCapacity(Integer.parseInt(prop.getProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP)));
 		}
-		
+
 		if (prop.containsKey(USE_MALFUNCTIONS_PROP)) {
-			setMalfunctions(
-					Boolean.parseBoolean(prop.getProperty(USE_MALFUNCTIONS_PROP)));
+			setMalfunctions(Boolean.parseBoolean(prop.getProperty(USE_MALFUNCTIONS_PROP)));
 		}
-		
+
 		if (prop.containsKey(MALFUNCTIONS_PROBABILITY_PROP)) {
-			setMalfunctionsProbability(
-					Float.parseFloat(prop.getProperty(MALFUNCTIONS_PROBABILITY_PROP)));
+			setMalfunctionsProbability(Float.parseFloat(prop.getProperty(MALFUNCTIONS_PROBABILITY_PROP)));
 		}
-		
+
 		if (prop.containsKey(ARENA_POSITION_X_PROP) && prop.containsKey(ARENA_POSITION_Y_PROP)) {
 			setArenaPosition(Double.parseDouble(prop.getProperty(ARENA_POSITION_X_PROP)),
 					Double.parseDouble(prop.getProperty(ARENA_POSITION_Y_PROP)));
 		}
-		
+
 		validateConfiguration();
 	}
-	
+
 	public void writeConfigurationFile() throws ConfigurationException, IOException {
 		validateConfiguration();
-		
+
 		Properties prop = new Properties();
-		
+
 		StringBuilder ipcamList = new StringBuilder();
 		for (Entry<String, URL> entry : ipcams.entrySet()) {
-			if (ipcamList.length() > 0) ipcamList.append(",");
+			if (ipcamList.length() > 0)
+				ipcamList.append(",");
 			ipcamList.append(entry.getKey());
 			ipcamList.append("|");
 			ipcamList.append(entry.getValue().toString());
 		}
-		
+
 		StringBuilder webcamList = new StringBuilder();
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
-			if (webcamList.length() > 0) webcamList.append(",");
+			if (webcamList.length() > 0)
+				webcamList.append(",");
 			webcamList.append(entry.getKey());
 			webcamList.append(":");
 			webcamList.append(entry.getValue().getName());
 		}
-		
+
 		StringBuilder recordingWebcamList = new StringBuilder();
 		for (Camera c : recordingCameras) {
-			if (recordingWebcamList.length() > 0) recordingWebcamList.append(",");
+			if (recordingWebcamList.length() > 0)
+				recordingWebcamList.append(",");
 			recordingWebcamList.append(c.getName());
-		}		
-		
+		}
+
 		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
 		prop.setProperty(ERROR_REPORTING_PROP, String.valueOf(useErrorReporting));
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
@@ -359,21 +353,21 @@ public class Configuration {
 		prop.setProperty(USE_RED_LASER_SOUND_PROP, String.valueOf(useRedLaserSound));
 		prop.setProperty(RED_LASER_SOUND_PROP, redLaserSound.getPath());
 		prop.setProperty(USE_GREEN_LASER_SOUND_PROP, String.valueOf(useGreenLaserSound));
-		prop.setProperty(GREEN_LASER_SOUND_PROP, greenLaserSound.getPath());		
+		prop.setProperty(GREEN_LASER_SOUND_PROP, greenLaserSound.getPath());
 		prop.setProperty(USE_VIRTUAL_MAGAZINE_PROP, String.valueOf(useVirtualMagazine));
 		prop.setProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP, String.valueOf(virtualMagazineCapacity));
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
-		
+
 		if (getArenaPosition().isPresent()) {
 			Point2D arenaPosition = getArenaPosition().get();
-			
+
 			prop.setProperty(ARENA_POSITION_X_PROP, String.valueOf(arenaPosition.getX()));
 			prop.setProperty(ARENA_POSITION_Y_PROP, String.valueOf(arenaPosition.getY()));
 		}
-		
+
 		OutputStream outputStream = new FileOutputStream(configName);
-		
+
 		try {
 			prop.store(outputStream, "ShootOFF Configuration");
 			outputStream.flush();
@@ -383,40 +377,40 @@ public class Configuration {
 			outputStream.close();
 		}
 	}
-	
+
 	private void parseCmdLine(String[] args) throws ConfigurationException {
 		Options options = new Options();
 
 		options.addOption("d", "debug", false, "turn on debug log messages");
-		options.addOption("m", "marker-radius", true, 
-				"sets the radius of shot markers in pixels [1,20]");
-		options.addOption("c", "ignore-laser-color", true, 
-				"sets the color of laser that should be ignored by ShootOFF (green " +
-                "or red). No color is ignored by default");
-		options.addOption("u", "use-virtual-magazine", true, 
+		options.addOption("m", "marker-radius", true, "sets the radius of shot markers in pixels [1,20]");
+		options.addOption("c", "ignore-laser-color", true,
+				"sets the color of laser that should be ignored by ShootOFF (green "
+						+ "or red). No color is ignored by default");
+		options.addOption("u", "use-virtual-magazine", true,
 				"turns on the virtual magazine and sets the number rounds it holds [1,45]");
-		options.addOption("f", "use-malfunctions", true, 
+		options.addOption("f", "use-malfunctions", true,
 				"turns on malfunctions and sets the probability of them happening");
-		
+
 		try {
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
-			
-			if (cmd.hasOption("d")) setDebugMode(true);
-			
+
+			if (cmd.hasOption("d"))
+				setDebugMode(true);
+
 			if (cmd.hasOption("m"))
 				setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
-			
+
 			if (cmd.hasOption("c")) {
 				setIgnoreLaserColor(true);
 				setIgnoreLaserColorName(cmd.getOptionValue("c"));
 			}
-			
+
 			if (cmd.hasOption("u")) {
 				setUseVirtualMagazine(true);
 				setVirtualMagazineCapacity(Integer.parseInt(cmd.getOptionValue("u")));
 			}
-			
+
 			if (cmd.hasOption("f")) {
 				setMalfunctions(true);
 				setMalfunctionsProbability(Float.parseFloat(cmd.getOptionValue("f")));
@@ -427,82 +421,77 @@ public class Configuration {
 			formatter.printHelp("com.shootoff.Main", options);
 			Main.forceClose(-1);
 		}
-		
+
 		validateConfiguration();
 	}
-	
+
 	protected void validateConfiguration() throws ConfigurationException {
 		if (markerRadius < 1 || markerRadius > 20) {
-			throw new ConfigurationException(
-					String.format(MARKER_RADIUS_MESSAGE, markerRadius));
+			throw new ConfigurationException(String.format(MARKER_RADIUS_MESSAGE, markerRadius));
 		}
-		
-		if (!redLaserSound.isAbsolute()) 
+
+		if (!redLaserSound.isAbsolute())
 			redLaserSound = new File(System.getProperty("shootoff.home") + File.separator + redLaserSound.getPath());
-		
+
 		if (useRedLaserSound && !redLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
-		
-		if (!greenLaserSound.isAbsolute()) 
-			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
-		
+
+		if (!greenLaserSound.isAbsolute())
+			greenLaserSound = new File(
+					System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
 		}
-		
-		if (ignoreLaserColor && !ignoreLaserColorName.equals("red") && 
-				!ignoreLaserColorName.equals("green")) {
-			throw new ConfigurationException(
-					String.format(LASER_COLOR_MESSAGE, ignoreLaserColorName));
+
+		if (ignoreLaserColor && !ignoreLaserColorName.equals("red") && !ignoreLaserColorName.equals("green")) {
+			throw new ConfigurationException(String.format(LASER_COLOR_MESSAGE, ignoreLaserColorName));
 		}
-		
+
 		if (virtualMagazineCapacity < 1 || virtualMagazineCapacity > 45) {
-			throw new ConfigurationException(
-					String.format(VIRTUAL_MAGAZINE_MESSAGE, virtualMagazineCapacity));
+			throw new ConfigurationException(String.format(VIRTUAL_MAGAZINE_MESSAGE, virtualMagazineCapacity));
 		}
-		
-		if (malfunctionsProbability < (float)0.1 || 
-				malfunctionsProbability > (float)99.9) {
-			throw new ConfigurationException(
-					String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
+
+		if (malfunctionsProbability < (float) 0.1 || malfunctionsProbability > (float) 99.9) {
+			throw new ConfigurationException(String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
 		}
 	}
-	
+
 	public boolean isFirstRun() {
 		return isFirstRun;
 	}
-	
+
 	public void setFirstRun(boolean isFirstRun) {
 		this.isFirstRun = isFirstRun;
 	}
-	
+
 	public boolean useErrorReporting() {
 		return useErrorReporting;
 	}
-	
+
 	public void setUseErrorReporting(boolean useErrorReporting) {
 		this.useErrorReporting = useErrorReporting;
 	}
-	
+
 	public static void disableErrorReporting() {
-		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-	    LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
-	    setLogConsoleAppender(rootLogger, loggerContext);
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		setLogConsoleAppender(rootLogger, loggerContext);
 	}
- 	
+
 	public void registerVideoPlayer(VideoPlayerController videoPlayer) {
 		videoPlayers.add(videoPlayer);
 	}
-	
+
 	public void unregisterVideoPlayer(VideoPlayerController videoPlayer) {
 		videoPlayers.remove(videoPlayer);
 	}
-	
+
 	public Set<VideoPlayerController> getVideoPlayers() {
 		return videoPlayers;
 	}
-	
+
 	public Optional<Camera> registerIpCam(String cameraName, String cameraURL) {
 		try {
 			URL url = new URL(cameraURL);
@@ -521,32 +510,33 @@ public class Configuration {
 			ipcamHostAlert.setTitle("Unknown Host");
 			ipcamHostAlert.setHeaderText("IPCam URL Unknown!");
 			ipcamHostAlert.setResizable(true);
-			ipcamHostAlert.setContentText("The IPCam at " + cameraURL +  " cannot be resolved. Ensure the URL is correct "
-					+ "and that you are either connected to the internet or on the same network as the camera." );
+			ipcamHostAlert.setContentText("The IPCam at " + cameraURL
+					+ " cannot be resolved. Ensure the URL is correct "
+					+ "and that you are either connected to the internet or on the same network as the camera.");
 			ipcamHostAlert.showAndWait();
 		} catch (TimeoutException te) {
 			Alert ipcamTimeoutAlert = new Alert(AlertType.ERROR);
 			ipcamTimeoutAlert.setTitle("IPCam Timeout");
 			ipcamTimeoutAlert.setHeaderText("Connection to IPCam Reached Timeout!");
 			ipcamTimeoutAlert.setResizable(true);
-			ipcamTimeoutAlert.setContentText("Could not communicate with the IP at " + cameraURL + 
-					". Please check the following:\n\n"
-					+ "-The IPCam URL is correct\n"
+			ipcamTimeoutAlert.setContentText("Could not communicate with the IP at " + cameraURL
+					+ ". Please check the following:\n\n" + "-The IPCam URL is correct\n"
 					+ "-You are connected to the Internet (for external cameras)\n"
-					+ "-You are connected to the same network as the camera (for local cameras)" );
-			ipcamTimeoutAlert.showAndWait();					
+					+ "-You are connected to the same network as the camera (for local cameras)");
+			ipcamTimeoutAlert.showAndWait();
 		}
-		
+
 		return Optional.empty();
 	}
-	
+
 	public void unregisterIpCam(String cameraName) {
-		if (Camera.unregisterIpCamera(cameraName)) ipcams.remove(cameraName);
+		if (Camera.unregisterIpCamera(cameraName))
+			ipcams.remove(cameraName);
 	}
-	
+
 	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
 		this.webcams.clear();
-		
+
 		for (int i = 0; i < webcamNames.size(); i++) {
 			this.webcams.put(webcamNames.get(i), webcams.get(i));
 		}
@@ -567,22 +557,22 @@ public class Configuration {
 	public void setUseRedLaserSound(Boolean useRedLaserSound) {
 		this.useRedLaserSound = useRedLaserSound;
 	}
-	
+
 	public void setRedLaserSound(File redLaserSound) {
 		this.redLaserSound = redLaserSound;
 	}
-	
+
 	public void setUseGreenLaserSound(Boolean useGreenLaserSound) {
 		this.useGreenLaserSound = useGreenLaserSound;
 	}
-	
+
 	public void setGreenLaserSound(File greenLaserSound) {
 		this.greenLaserSound = greenLaserSound;
 	}
-	
+
 	public void setUseVirtualMagazine(boolean useVirtualMagazine) {
 		this.useVirtualMagazine = useVirtualMagazine;
-		
+
 		if (!useVirtualMagazine && magazineProcessor != null) {
 			shotProcessors.remove(magazineProcessor);
 			magazineProcessor = null;
@@ -591,12 +581,12 @@ public class Configuration {
 
 	public void setVirtualMagazineCapacity(int virtualMagazineCapacity) {
 		this.virtualMagazineCapacity = virtualMagazineCapacity;
-		
+
 		if (useVirtualMagazine) {
 			if (magazineProcessor != null) {
 				shotProcessors.remove(magazineProcessor);
 			}
-			
+
 			magazineProcessor = new VirtualMagazineProcessor(this);
 			shotProcessors.add(magazineProcessor);
 		}
@@ -604,7 +594,7 @@ public class Configuration {
 
 	public void setMalfunctions(boolean injectMalfunctions) {
 		this.useMalfunctions = injectMalfunctions;
-		
+
 		if (!useMalfunctions && malfunctionsProcessor != null) {
 			shotProcessors.remove(malfunctionsProcessor);
 			malfunctionsProcessor = null;
@@ -613,12 +603,12 @@ public class Configuration {
 
 	public void setMalfunctionsProbability(float injectMalfunctionsProbability) {
 		this.malfunctionsProbability = injectMalfunctionsProbability;
-		
+
 		if (useMalfunctions) {
 			if (malfunctionsProcessor != null) {
 				shotProcessors.remove(malfunctionsProcessor);
 			}
-			
+
 			malfunctionsProcessor = new MalfunctionsProcessor(this);
 			shotProcessors.add(malfunctionsProcessor);
 		}
@@ -626,36 +616,37 @@ public class Configuration {
 
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
-		
+
 		if (debugMode) {
 			// Ignore first run operations if we are running in debug mode
 			setFirstRun(false);
 		}
-		
-		Logger rootLogger = (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		
+
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+
 		if (debugMode) {
-			LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
+			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 			setLogConsoleAppender(rootLogger, loggerContext);
-			
+
 			if (rootLogger.getLevel().equals(Level.TRACE)) {
 				return;
 			}
-			
+
 			rootLogger.setLevel(Level.DEBUG);
-			
-			// Ensure webcam-capture logger stays at info because it is quite noisy
+
+			// Ensure webcam-capture logger stays at info because it is quite
+			// noisy
 			// and doesn't output information we care about.
-            Logger webcamCaptureLogger = (Logger)loggerContext.getLogger("com.github.sarxos");
-            webcamCaptureLogger.setLevel(Level.INFO);
+			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
+			webcamCaptureLogger.setLevel(Level.INFO);
 		} else {
 			rootLogger.setLevel(Level.WARN);
 		}
 	}
-	
+
 	private static void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
-		
+
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
 		ple.setContext(loggerContext);
 		ple.start();
@@ -663,24 +654,24 @@ public class Configuration {
 		consoleAppender.setEncoder(ple);
 		consoleAppender.setContext(loggerContext);
 		consoleAppender.start();
-		 
+
 		rootLogger.detachAndStopAllAppenders();
 		rootLogger.setAdditive(false);
 		rootLogger.addAppender(consoleAppender);
 	}
-	
+
 	public void setRecordingCameras(Set<Camera> recordingCameras) {
 		this.recordingCameras = recordingCameras;
 	}
-	
+
 	public void setShotTimerRowColor(Color c) {
 		shotRowColor = Optional.ofNullable(c);
 	}
-	
+
 	public Set<Camera> getRecordingCameras() {
 		return recordingCameras;
 	}
-	
+
 	public void registerRecordingCameraManager(CameraManager cm) {
 		recordingManagers.add(cm);
 	}
@@ -688,21 +679,22 @@ public class Configuration {
 	public void unregisterRecordingCameraManager(CameraManager cm) {
 		recordingManagers.remove(cm);
 	}
-	
+
 	public void unregisterAllRecordingCameraManagers() {
 		recordingManagers.clear();
 	}
-	
+
 	public void setSessionRecorder(SessionRecorder sessionRecorder) {
 		this.sessionRecorder = Optional.ofNullable(sessionRecorder);
 	}
-	
+
 	public void setExercise(TrainingExercise exercise) {
-		if (currentExercise != null) currentExercise.destroy();
-		
+		if (currentExercise != null)
+			currentExercise.destroy();
+
 		currentExercise = exercise;
 	}
-	
+
 	public void setArenaPosition(double x, double y) {
 		arenaPosition = Optional.of(new Point2D(x, y));
 	}
@@ -710,16 +702,17 @@ public class Configuration {
 	public Map<String, URL> getRegistedIpCams() {
 		return ipcams;
 	}
-	
+
 	public Map<String, Camera> getWebcams() {
 		return webcams;
 	}
-	
+
 	public Optional<String> getWebcamsUserName(Camera webcam) {
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
-			if (entry.getValue().equals(webcam)) return Optional.of(entry.getKey());
+			if (entry.getValue().equals(webcam))
+				return Optional.of(entry.getKey());
 		}
-		
+
 		return Optional.empty();
 	}
 
@@ -737,33 +730,33 @@ public class Configuration {
 		} else if (ignoreLaserColorName.equals("green")) {
 			return Optional.of(Color.GREEN);
 		}
-			
+
 		return Optional.empty();
 	}
-	
+
 	public String getIgnoreLaserColorName() {
 		return ignoreLaserColorName;
 	}
-	
+
 	public boolean useRedLaserSound() {
 		return useRedLaserSound;
 	}
-	
+
 	public File getRedLaserSound() {
-		if (!redLaserSound.isAbsolute()) 
+		if (!redLaserSound.isAbsolute())
 			redLaserSound = new File(System.getProperty("shootoff.home") + File.separator + redLaserSound.getPath());
 
-		
 		return redLaserSound;
 	}
-	
+
 	public boolean useGreenLaserSound() {
 		return useGreenLaserSound;
 	}
-	
+
 	public File getGreenLaserSound() {
-		if (!greenLaserSound.isAbsolute()) 
-			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute())
+			greenLaserSound = new File(
+					System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		return greenLaserSound;
 	}
@@ -787,34 +780,34 @@ public class Configuration {
 	public boolean inDebugMode() {
 		return debugMode;
 	}
-	
+
 	public Optional<SessionRecorder> getSessionRecorder() {
 		return sessionRecorder;
 	}
-	
+
 	public Set<CameraManager> getRecordingManagers() {
 		return recordingManagers;
 	}
-	
+
 	public Set<ShotProcessor> getShotProcessors() {
 		return shotProcessors;
 	}
-	
+
 	public Optional<TrainingExercise> getExercise() {
-		if (currentExercise == null) return Optional.empty();
-		
+		if (currentExercise == null)
+			return Optional.empty();
+
 		return Optional.of(currentExercise);
 	}
-	
+
 	public Optional<Color> getShotTimerRowColor() {
 		return shotRowColor;
 	}
-	
-	public boolean isDebugShotsRecordToFiles()
-	{
+
+	public boolean isDebugShotsRecordToFiles() {
 		return debugShotsRecordToFiles;
 	}
-	
+
 	public Optional<Point2D> getArenaPosition() {
 		return arenaPosition;
 	}

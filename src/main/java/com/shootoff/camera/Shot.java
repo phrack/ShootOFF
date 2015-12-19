@@ -26,11 +26,11 @@ public class Shot {
 	private final double x;
 	private final double y;
 	private final long timestamp;
-	
+
 	private final int frame;
-	
+
 	private final Ellipse marker;
-	
+
 	public Shot(Color color, double x, double y, long timestamp, int frame, int markerRadius) {
 		this.color = color;
 		this.x = x;
@@ -40,7 +40,7 @@ public class Shot {
 		this.marker = new Ellipse(x, y, markerRadius, markerRadius);
 		this.marker.setFill(color);
 	}
-	
+
 	public Shot(Color color, double x, double y, long timestamp, int markerRadius) {
 		this.color = color;
 		this.x = x;
@@ -50,27 +50,27 @@ public class Shot {
 		this.marker.setFill(color);
 		this.frame = 0;
 	}
-	
+
 	public Color getColor() {
 		return color;
 	}
-	
+
 	public double getX() {
 		return x;
 	}
-	
+
 	public double getY() {
 		return y;
 	}
-	
+
 	public long getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public int getFrame() {
 		return frame;
 	}
-	
+
 	public Ellipse getMarker() {
 		return marker;
 	}

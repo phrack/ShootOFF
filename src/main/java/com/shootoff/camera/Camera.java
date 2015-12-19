@@ -52,48 +52,53 @@ public class Camera {
 	private static final boolean isMac;
 	private static final Webcam defaultWebcam;
 	private static final List<Camera> knownWebcams;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(Camera.class);
-	
+
 	public static class CompositeDriver extends WebcamCompositeDriver {
 		public CompositeDriver() {
 			add(new WebcamDefaultDriver());
 			add(new IpCamDriver());
 		}
 	}
-	
+
 	static {
-		Webcam.setDriver( new CompositeDriver());
+		Webcam.setDriver(new CompositeDriver());
 		String os = System.getProperty("os.name");
-		
+
 		if (os != null && os.equals("Mac OS X")) {
 			isMac = true;
 			defaultWebcam = Webcam.getDefault();
-			
+
 			knownWebcams = new ArrayList<Camera>();
-				
+
 			for (Webcam w : Webcam.getWebcams()) {
 				knownWebcams.add(new Camera(w));
 			}
-			
+
 		} else {
 			isMac = false;
 			defaultWebcam = null;
 			knownWebcams = null;
 		}
 	}
-	
-	public static Camera registerIpCamera(String cameraName, URL cameraURL) throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
-		// These are here because webcam-capture wraps this exception in a WebcamException if the 
-		// URL has a syntax issue. We don't want to use webcam-capture classes outside of this
-		// class, thus to handle this error we need to artificially cause it earlier if it is
+
+	public static Camera registerIpCamera(String cameraName, URL cameraURL)
+			throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
+		// These are here because webcam-capture wraps this exception in a
+		// WebcamException if the
+		// URL has a syntax issue. We don't want to use webcam-capture classes
+		// outside of this
+		// class, thus to handle this error we need to artificially cause it
+		// earlier if it is
 		// going to be a problem.
 		cameraURL.toURI();
-		
+
 		try {
 			IpCamDevice ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
-			
-			// If a camera can't  be reached, webcam capture seems to freeze indefinitely. This is done
+
+			// If a camera can't be reached, webcam capture seems to freeze
+			// indefinitely. This is done
 			// to add an artificial timeout.
 			Thread t = new Thread(() -> ipcam.getResolution());
 			t.start();
@@ -103,68 +108,68 @@ public class Camera {
 			} catch (InterruptedException e) {
 				logger.error("Error connecting to webcam", e);
 			}
-			
+
 			if (t.isAlive()) {
 				IpCamDeviceRegistry.unregister(cameraName);
 				throw new TimeoutException();
 			}
-			
+
 			return new Camera(ipcam);
 		} catch (WebcamException we) {
 			Throwable cause = we.getCause();
-			
+
 			if (cause instanceof UnknownHostException) {
-				throw (UnknownHostException)cause;
+				throw (UnknownHostException) cause;
 			}
-			
+
 			logger.error("Error cocnnecting to webcam", we);
 			throw we;
 		}
 	}
-	
+
 	public static boolean unregisterIpCamera(String cameraName) {
 		return IpCamDeviceRegistry.unregister(cameraName);
 	}
-	
+
 	private final Webcam webcam;
 	private final boolean isIpCam;
-	
+
 	// For testing
 	protected Camera() {
 		this.webcam = null;
 		this.isIpCam = false;
 	}
-	
+
 	private Camera(Webcam webcam) {
 		this.webcam = webcam;
 		this.isIpCam = false;
-		
+
 		logger.debug("WebcamDevice type: {}", webcam.getDevice().getClass().getName());
 	}
-	
+
 	private Camera(IpCamDevice ipcam) {
 		this.isIpCam = true;
-		
+
 		for (Camera webcam : getWebcams()) {
 			if (webcam.getName().equals(ipcam.getName())) {
 				this.webcam = webcam.getWebcam();
 				return;
 			}
 		}
-		
+
 		this.webcam = null;
 	}
-	
+
 	protected Webcam getWebcam() {
 		return webcam;
 	}
-	
+
 	public static Camera getDefault() {
 		if (isMac) {
 			return new Camera(defaultWebcam);
 		} else {
 			Webcam webcam = Webcam.getDefault();
-			
+
 			if (webcam != null) {
 				return new Camera(webcam);
 			} else {
@@ -172,68 +177,71 @@ public class Camera {
 			}
 		}
 	}
-	
+
 	public static List<Camera> getWebcams() {
-		if (isMac) return knownWebcams;
-		
+		if (isMac)
+			return knownWebcams;
+
 		List<Camera> webcams = new ArrayList<Camera>();
-		
+
 		for (Webcam w : Webcam.getWebcams()) {
 			webcams.add(new Camera(w));
 		}
-		
+
 		return webcams;
 	}
-	
+
 	public BufferedImage getImage() {
 		return webcam.getImage();
 	}
-	
+
 	public boolean isIpCam() {
 		return isIpCam;
 	}
-	
+
 	public boolean open() {
 		boolean open = false;
-		
+
 		try {
 			open = webcam.open();
 		} catch (WebcamException we) {
 			open = false;
 		}
-	
+
 		return open;
 	}
-	
+
 	public boolean close() {
 		if (isMac) {
-			new Thread(() -> { webcam.close(); }).start();
+			new Thread(() -> {
+				webcam.close();
+			}).start();
 			return true;
 		} else {
 			return webcam.close();
 		}
 	}
-	
+
 	public String getName() {
 		return webcam.getName();
 	}
-	
+
 	public boolean isOpen() {
 		return webcam.isOpen();
 	}
-	
+
 	public boolean isLocked() {
 		return webcam.getLock().isLocked();
 	}
-	
+
 	public boolean isImageNew() {
 		return webcam.isImageNew();
 	}
-	
+
 	public double getFPS() {
 		return webcam.getFPS();
 	}
-	
+
 	public void setViewSize(Dimension size) {
 		try {
 			webcam.setViewSize(size);
@@ -241,7 +249,7 @@ public class Camera {
 			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

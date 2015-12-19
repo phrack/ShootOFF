@@ -91,7 +91,7 @@ public class TrainingExerciseBase {
 	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
 	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
 	private final List<Button> exerciseButtons = new ArrayList<Button>();
-	
+
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
 	public TrainingExerciseBase() {}
@@ -104,8 +104,9 @@ public class TrainingExerciseBase {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
 	}
 
-	// This is only required for unit tests where we don't want to create a full ShootOFFController
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, GridPane buttonsPane, 
+	// This is only required for unit tests where we don't want to create a full
+	// ShootOFFController
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, GridPane buttonsPane,
 			TableView<ShotEntry> shotEntryTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
@@ -119,7 +120,7 @@ public class TrainingExerciseBase {
 			exerciseLabels.put(canvasManager, exerciseLabel);
 		}
 	}
-	
+
 	/**
 	 * Allows sounds to be silenced or on. If silenced, instead of playing a
 	 * sound the file name will be printed to stdout. This exists so that
@@ -302,8 +303,8 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * Adds a button to the right of the reset button with caption <tt>text</tt> and
-	 * action handler <tt>eventHandler</tt>.
+	 * Adds a button to the right of the reset button with caption <tt>text</tt>
+	 * and action handler <tt>eventHandler</tt>.
 	 */
 	public Button addShootOFFButton(String text, EventHandler<ActionEvent> eventHandler) {
 		Button exerciseButton = new Button(text);
@@ -311,15 +312,16 @@ public class TrainingExerciseBase {
 		GridPane.setMargin(exerciseButton, GridPane.getMargin(buttonsPane.getChildren().get(0)));
 		GridPane.setHalignment(exerciseButton, HPos.CENTER);
 		exerciseButtons.add(exerciseButton);
-		
+
 		buttonsPane.add(exerciseButton, buttonsPane.getChildren().size(), 0);
-		
+
 		return exerciseButton;
 	}
-	
+
 	public void removeShootOFFButton(Button exerciseButton) {
-		if (!exerciseButtons.contains(exerciseButton)) return;
-		
+		if (!exerciseButtons.contains(exerciseButton))
+			return;
+
 		buttonsPane.getChildren().remove(exerciseButton);
 		exerciseButtons.remove(exerciseButton);
 	}
@@ -435,13 +437,13 @@ public class TrainingExerciseBase {
 		}
 
 		Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
-		
+
 		while (itExerciseButtons.hasNext()) {
 			Button exerciseButton = itExerciseButtons.next();
 			buttonsPane.getChildren().remove(exerciseButton);
 			itExerciseButtons.remove();
 		}
-		
+
 		exerciseLabels.clear();
 
 		pauseShotDetection(false);

@@ -1,3 +1,21 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2015 phrack
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.shootoff.camera;
 
 import java.awt.image.BufferedImage;
@@ -15,9 +33,9 @@ import com.xuggle.xuggler.video.IConverter;
 public class ShotRecorder {
 	// The number of milliseconds before and after a shot to record
 	public static final long RECORD_LENGTH = 5000; // ms
-	
+
 	private final Logger logger = LoggerFactory.getLogger(ShotRecorder.class);
-	
+
 	private final long startTime;
 	private final long timeOffset;
 	private final File relativeVideoFile;
@@ -25,53 +43,53 @@ public class ShotRecorder {
 	private final String cameraName;
 	private final IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
-	
-	public ShotRecorder(File relativeVideoFile, File videoFile, long cutDuration, IMediaWriter videoWriter, String cameraName) {
+
+	public ShotRecorder(File relativeVideoFile, File videoFile, long cutDuration, IMediaWriter videoWriter,
+			String cameraName) {
 		this.relativeVideoFile = relativeVideoFile;
 		this.videoFile = videoFile;
 		this.videoWriter = videoWriter;
 		this.cameraName = cameraName;
-		
+
 		startTime = System.currentTimeMillis();
 		timeOffset = cutDuration;
-		
+
 		logger.debug("Started recording shot video: {}, cut duration = {} ms", videoFile.getName(), cutDuration);
 	}
-	
+
 	public void recordFrame(BufferedImage frame) {
 		BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
 		IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 		long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
-		
-		IVideoPicture f = converter.toPicture(image,
-				timestamp * 1000);
+
+		IVideoPicture f = converter.toPicture(image, timestamp * 1000);
 		f.setKeyFrame(isFirstShotFrame);
 		f.setQuality(0);
 		isFirstShotFrame = false;
 
 		videoWriter.encodeVideo(0, f);
 	}
-	
+
 	public File getRelativeVideoFile() {
 		return relativeVideoFile;
 	}
-	
+
 	public File getVideoFile() {
 		return videoFile;
 	}
-	
+
 	public String getCameraName() {
 		return cameraName;
 	}
-	
+
 	public boolean isComplete() {
 		return System.currentTimeMillis() - startTime > RECORD_LENGTH;
 	}
-	
+
 	public void close() {
 		videoWriter.close();
-		
+
 		logger.debug("Stopped recording shot video: {}, timeOffset = {}", relativeVideoFile.getPath(), timeOffset);
 	}
 }

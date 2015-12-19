@@ -33,18 +33,19 @@ public class MalfunctionsProcessor implements ShotProcessor {
 		this.rand = new Random();
 		this.prob = config.getMalfunctionsProbability() / 100;
 	}
-	
+
 	public void setUseTTS(boolean useTTS) {
-		this.useTTS = useTTS; 
+		this.useTTS = useTTS;
 	}
 
 	@Override
 	public boolean processShot(Shot shot) {
 		if (rand.nextFloat() < prob) {
-			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
+			if (useTTS)
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
 			return false;
 		}
-		
+
 		return true;
 	}
 
