@@ -20,7 +20,9 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +36,6 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +48,23 @@ import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.DelayedStartIntervalController;
 import com.shootoff.gui.controller.ParIntervalController;
+import com.shootoff.gui.controller.ShootOFFController;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -77,12 +84,14 @@ public class TrainingExerciseBase {
 	@SuppressWarnings("unused") private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
+	private GridPane buttonsPane;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 
 	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
 	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
-
+	private final List<Button> exerciseButtons = new ArrayList<Button>();
+	
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
 	public TrainingExerciseBase() {}
@@ -91,10 +100,17 @@ public class TrainingExerciseBase {
 		this.targets = targets;
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TableView<ShotEntry> shotTimerTable) {
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
+		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
+	}
+
+	// This is only required for unit tests where we don't want to create a full ShootOFFController
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, GridPane buttonsPane, 
+			TableView<ShotEntry> shotEntryTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
-		this.shotTimerTable = shotTimerTable;
+		this.buttonsPane = buttonsPane;
+		this.shotTimerTable = shotEntryTable;
 
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
 			Label exerciseLabel = new Label();
@@ -103,7 +119,7 @@ public class TrainingExerciseBase {
 			exerciseLabels.put(canvasManager, exerciseLabel);
 		}
 	}
-
+	
 	/**
 	 * Allows sounds to be silenced or on. If silenced, instead of playing a
 	 * sound the file name will be printed to stdout. This exists so that
@@ -214,24 +230,9 @@ public class TrainingExerciseBase {
 	 */
 	public void setShotTimerColumnText(String name, String value) {
 		if (shotTimerTable != null) {
-			// Platform.runLater(() -> {
-			// shotTimerTable.getItems().get(shotTimerTable.getItems().size() -
-			// 1).setExerciseValue(name, value);
-			// });
-
-			/*
-			 * Platform.runLater() frequently does not execute until a new item
-			 * is added to the queue. SwingUtilities.invokeLater() does not have
-			 * that problem.
-			 */
-			try {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name,
-								value);
-					}
-				});
-			} catch (Exception e) {}
+			Platform.runLater(() -> {
+				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
+			});
 		}
 	}
 
@@ -291,20 +292,6 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * No-op placeholder for method invoked by the "Pause" button click.
-	 */
-	public void pauseExercise() {
-
-	}
-
-	/**
-	 * No-op placeholder for method invoked by the "Resume" button click.
-	 */
-	public void resumeExercise() {
-
-	}
-
-	/**
 	 * Sets whether or not shot detection is paused.
 	 * 
 	 * @param isPaused
@@ -315,7 +302,30 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * Plays an audio file asyncronously.
+	 * Adds a button to the right of the reset button with caption <tt>text</tt> and
+	 * action handler <tt>eventHandler</tt>.
+	 */
+	public Button addShootOFFButton(String text, EventHandler<ActionEvent> eventHandler) {
+		Button exerciseButton = new Button(text);
+		exerciseButton.setOnAction(eventHandler);
+		GridPane.setMargin(exerciseButton, GridPane.getMargin(buttonsPane.getChildren().get(0)));
+		GridPane.setHalignment(exerciseButton, HPos.CENTER);
+		exerciseButtons.add(exerciseButton);
+		
+		buttonsPane.add(exerciseButton, buttonsPane.getChildren().size(), 0);
+		
+		return exerciseButton;
+	}
+	
+	public void removeShootOFFButton(Button exerciseButton) {
+		if (!exerciseButtons.contains(exerciseButton)) return;
+		
+		buttonsPane.getChildren().remove(exerciseButton);
+		exerciseButtons.remove(exerciseButton);
+	}
+
+	/**
+	 * Plays an audio file asynchronously.
 	 * 
 	 * @param soundFilePath
 	 *            the audio file to play (e.g. "sounds/metal_clang.wav")
@@ -424,6 +434,14 @@ public class TrainingExerciseBase {
 			canvasManager.getCanvasGroup().getChildren().remove(exerciseLabels.get(canvasManager));
 		}
 
+		Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
+		
+		while (itExerciseButtons.hasNext()) {
+			Button exerciseButton = itExerciseButtons.next();
+			buttonsPane.getChildren().remove(exerciseButton);
+			itExerciseButtons.remove();
+		}
+		
 		exerciseLabels.clear();
 
 		pauseShotDetection(false);

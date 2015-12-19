@@ -13,6 +13,7 @@ import com.shootoff.gui.ParListener;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 
 /**
@@ -42,6 +43,17 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 
 	@Override
 	public void init() {
+		super.addShootOFFButton("Pause", (event) -> {
+			Button pauseResumeButton = (Button)event.getSource();
+			if ("Pause".equals(pauseResumeButton.getText())) {
+				pauseResumeButton.setText("Resume");
+				repeatExercise = false;
+			} else {
+				pauseResumeButton.setText("Pause");
+				repeatExercise = true;
+				executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);	
+			}
+		});
 		addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
 		addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
 		pauseShotDetection(true);
@@ -167,17 +179,7 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
-
-	/*
-	 * Copied from parent, TimedHolsterDrill, in order to invoke the SetupWait
-	 * class in this child.
-	 */
-	@Override
-	public void resumeExercise() {
-		repeatExercise = true;
-		executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);
-	}
-
+	
 	@Override
 	public void updatedParInterval(double parTime) {
 		this.parTime = parTime;

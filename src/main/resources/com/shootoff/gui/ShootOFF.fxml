@@ -94,23 +94,15 @@
             <Insets />
          </VBox.margin>
       </HBox>
-      <GridPane maxHeight="-Infinity" minHeight="-Infinity" hgap="10" VBox.vgrow="NEVER">
+      <GridPane fx:id="buttonsGridPane" alignment="TOP_CENTER" hgap="10.0" VBox.vgrow="NEVER">
          <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" onAction="#clickedResumeExercise" text="Resume" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.hgrow="SOMETIMES" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
-               <GridPane.margin>
-                  <Insets bottom="2.0" />
-               </GridPane.margin></Button>
-            <Button mnemonicParsing="false" onAction="#clickedPauseExercise" text="Pause" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
-               <GridPane.margin>
-                  <Insets bottom="2.0" />
-               </GridPane.margin></Button>
-            <Button mnemonicParsing="false" onAction="#resetClicked" text="Reset" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.hgrow="SOMETIMES" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+            <Button mnemonicParsing="false" onAction="#resetClicked" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
                <GridPane.margin>
                   <Insets bottom="2.0" />
                </GridPane.margin></Button>

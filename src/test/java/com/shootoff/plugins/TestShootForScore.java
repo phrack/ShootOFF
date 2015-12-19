@@ -61,8 +61,8 @@ public class TestShootForScore {
 		Configuration config = new Configuration(new String[0]);
 		config.setDebugMode(true);
 		
-		sfs = new ShootForScore(targets);
-		sfs.init(config, new CamerasSupervisor(config), null);
+		sfs = new ShootForScore();
+		sfs.init(config, new CamerasSupervisor(config), null, null);
 	}
 	
 	@After

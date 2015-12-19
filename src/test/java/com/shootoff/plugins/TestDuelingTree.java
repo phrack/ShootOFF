@@ -72,7 +72,7 @@ public class TestDuelingTree {
 		config.setDebugMode(true);
 
 		dt = new DuelingTree(targets);
-		dt.init(config, new CamerasSupervisor(config), null, null);
+		dt.init(config, new CamerasSupervisor(config), null, null, null);
 		
 		config.setExercise(dt);
 		
@@ -99,7 +99,7 @@ public class TestDuelingTree {
 		config.setDebugMode(true);
 		
 		DuelingTree dt = new DuelingTree(targets);
-		dt.init(config, new CamerasSupervisor(config), null, null);
+		dt.init(config, new CamerasSupervisor(config), null, null, null);
 		
 		assertEquals(String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();

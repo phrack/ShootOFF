@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
@@ -57,6 +58,17 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 
 	@Override
 	public void init() {
+		super.addShootOFFButton("Pause", (event) -> {
+				Button pauseResumeButton = (Button)event.getSource();
+				if ("Pause".equals(pauseResumeButton.getText())) {
+					pauseResumeButton.setText("Resume");
+					repeatExercise = false;
+				} else {
+					pauseResumeButton.setText("Pause");
+					repeatExercise = true;
+					executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);	
+				}
+			});
 		super.addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
 		super.pauseShotDetection(true);
 		super.getDelayedStartInterval(this);
@@ -124,24 +136,6 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
 		float drawShotLength = (float) (System.currentTimeMillis() - beepTime) / (float) 1000; // s
 		super.setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
-	}
-
-	/*
-	 * Pauses exercise after current round. Resets nothing.
-	 */
-	@Override
-	public void pauseExercise() {
-		repeatExercise = false;
-	}
-
-	/*
-	 * Resumes the current exercise, with a different "Shooter ready" delay.
-	 * Resets nothing.
-	 */
-	@Override
-	public void resumeExercise() {
-		repeatExercise = true;
-		executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);
 	}
 
 	@Override

@@ -101,6 +101,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
@@ -128,6 +129,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
+	@FXML private GridPane buttonsGridPane;
 
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
@@ -368,6 +370,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public Stage getStage() {
 		return shootOFFStage;
 	}
+	
+	public GridPane getButtonsPane() {
+		return buttonsGridPane;
+	}
+	
+	public TableView<ShotEntry> getShotEntryTable() {
+		return shotTimerTable;
+	}
 
 	@Override
 	public void cameraConfigUpdated() {
@@ -594,7 +604,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				}
 
 				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
-				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, shotTimerTable);
+				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
 				newExercise.init();
 				config.setExercise(newExercise);
 			} catch (Exception ex) {
@@ -622,7 +632,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
 						.newInstance(arenaController.getCanvasManager().getTargetGroups());
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, shotTimerTable,
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this,
 						arenaController);
 				newExercise.init();
 				config.setExercise(newExercise);
@@ -1202,20 +1212,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		preferencesStage.show();
 
 		return loader;
-	}
-
-	@FXML
-	public void clickedPauseExercise(ActionEvent event) {
-		if (config.getExercise().isPresent()) {
-			((TrainingExerciseBase) config.getExercise().get()).getInstance().pauseExercise();
-		}
-	}
-
-	@FXML
-	public void clickedResumeExercise(ActionEvent event) {
-		if (config.getExercise().isPresent()) {
-			((TrainingExerciseBase) config.getExercise().get()).getInstance().resumeExercise();
-		}
 	}
 
 	@FXML
