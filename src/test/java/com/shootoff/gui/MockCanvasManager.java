@@ -6,10 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
-import com.shootoff.camera.DeduplicationProcessor;
-import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
@@ -58,12 +55,7 @@ public class MockCanvasManager extends CanvasManager {
 		
 		
 		if (useShotProcessors) {
-			if (!cameraManager.getDeduplicationProcessor().processShot(shot))
-			{
-				logger.debug("Processing Shot: Shot Rejected By {}", cameraManager.getDeduplicationProcessor().getClass().getName());
-				return;
-			}
-			
+	
 			
 			for (ShotProcessor p : config.getShotProcessors()) {
 				if (!p.processShot(shot)) {

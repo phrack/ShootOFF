@@ -18,18 +18,22 @@
 
 package com.shootoff.camera;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
 public class Shot {
+	private final Logger logger = LoggerFactory.getLogger(Shot.class);
 	private final Color color;
-	private final double x;
-	private final double y;
+	private double x;
+	private double y;
 	private final long timestamp;
 	
 	private final int frame;
 	
-	private final Ellipse marker;
+	private Ellipse marker;
 	
 	public Shot(Color color, double x, double y, long timestamp, int frame, int markerRadius) {
 		this.color = color;
@@ -73,5 +77,22 @@ public class Shot {
 	
 	public Ellipse getMarker() {
 		return marker;
+	}
+
+	public void setTranslation(int displayWidth, int displayHeight,
+			int feedWidth, int feedHeight) {
+		double scaleX = (double)displayWidth / (double)feedWidth;
+		double scaleY = (double)displayHeight / (double)feedHeight;
+		
+		double scaledX = (x * scaleX);
+		double scaledY = (y * scaleY);
+		
+		logger.debug("setTranslation {} {} {} {}", scaleX, scaleY, scaledX, scaledY);
+	
+		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
+		marker.setFill(color);
+		
+		x = scaledX;
+		y = scaledY;
 	}
 }

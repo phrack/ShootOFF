@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
-import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
@@ -135,9 +134,9 @@ public class CanvasManager {
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
-					addShot(Color.RED, event.getX(), event.getY());
+					addShot(Color.RED, event.getX(), event.getY(), true);
 				} else if (event.isControlDown()) {
-					addShot(Color.GREEN, event.getX(), event.getY());
+					addShot(Color.GREEN, event.getX(), event.getY(), true);
 				}
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
@@ -331,13 +330,6 @@ public class CanvasManager {
 
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 		
-		if (!getCameraManager().getDeduplicationProcessor().processShot(shot))
-		{
-			logger.debug("Processing Shot: Shot Rejected By {}", getCameraManager().getDeduplicationProcessor().getClass().getName());
-			return Optional.of(getCameraManager().getDeduplicationProcessor());
-		}
-		
-		
   		for (ShotProcessor processor : config.getShotProcessors()) {
   			if (!processor.processShot(shot)) {
  				if (processor instanceof MalfunctionsProcessor) {
@@ -357,26 +349,23 @@ public class CanvasManager {
  	
  	
 	private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
-		// Record video for rejected shots as long as they weren't rejected
-		// for being dupes
+
 		if (!config.getSessionRecorder().isPresent()) return;
 		
-		if (rejectingProcessor instanceof DeduplicationProcessor == false) {
-			notifyShot(shot);
+		notifyShot(shot);
+	
+		Optional<String> videoString = createVideoString(shot);
 		
-			Optional<String> videoString = createVideoString(shot);
-			
-			if (rejectingProcessor instanceof MalfunctionsProcessor) {
-				config.getSessionRecorder().get().recordShot(cameraName, 
-						shot, true, false, Optional.empty(), 
-						Optional.empty(),
-						videoString);		
-			} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
-				config.getSessionRecorder().get().recordShot(cameraName, 
-						shot, false, true, Optional.empty(), 
-						Optional.empty(),
-						videoString);		
-			}
+		if (rejectingProcessor instanceof MalfunctionsProcessor) {
+			config.getSessionRecorder().get().recordShot(cameraName, 
+					shot, true, false, Optional.empty(), 
+					Optional.empty(),
+					videoString);		
+		} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
+			config.getSessionRecorder().get().recordShot(cameraName, 
+					shot, false, true, Optional.empty(), 
+					Optional.empty(),
+					videoString);		
 		}
 	}
 	
@@ -386,11 +375,21 @@ public class CanvasManager {
 	}
 	
 	public void addShot(Color color, double x, double y) {
+		addShot(color, x, y, false);
+	}
+	
+	public void addShot(Color color, double x, double y, boolean cameFromCanvas) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 		
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
 	
+		// Display and feed sizes differ if true
+		if (config.getDisplayWidth() != cameraManager.getFeedWidth() || config.getDisplayHeight() != cameraManager.getFeedHeight())
+		{
+			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
+		}
+			
 		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 		if (rejectingProcessor.isPresent()) {
 			recordRejectedShot(shot, rejectingProcessor.get());

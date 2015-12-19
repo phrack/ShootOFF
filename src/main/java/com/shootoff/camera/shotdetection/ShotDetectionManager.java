@@ -490,22 +490,24 @@ public final class ShotDetectionManager {
 		Shot shot = new Shot(color.get(), x, y, 
 				0, cameraManager.getFrameCount(), config.getMarkerRadius());
 		
-		// If a shot is ignored, we still pass it to the DeuplicationProcessor for storage
-		// because otherwise we may get another shot at this same location at the next frame
+		
+		if (!cameraManager.getDeduplicationProcessor().processShot(shot))
+		{
+			logger.debug("Processing Shot: Shot Rejected By {}", cameraManager.getDeduplicationProcessor().getClass().getName());
+			return;
+		}
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent() &&
 				color.get().equals(config.getIgnoreLaserColor().get()))
 		{
-			cameraManager.getDeduplicationProcessor().processShot(shot);
+			logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}", config.getIgnoreLaserColor().get());
 			return;
 		}
 		
 		logger.info("Suspected shot accepted: Center ({}, {}), {}",
 				x, y, color.get());
 		
-
 		
-		
-		if (config.isDebugShotsRecordToFiles() && cameraManager.getDeduplicationProcessor().processShotLookahead(shot)) {
+		if (config.isDebugShotsRecordToFiles()) {
 			File outputfile = new File(String.format("shot-%d-%d_orig.png",(int)pc.centerPixelX, (int)pc.centerPixelY));
 			try {
 				ImageIO.write(workingCopy, "png", outputfile);
