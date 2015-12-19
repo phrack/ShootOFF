@@ -25,12 +25,14 @@ import java.util.Optional;
 
 import javafx.scene.Group;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.GridPane;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.controller.ShootOFFController;
 
 public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
@@ -47,8 +49,17 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 	
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, 
-			TableView<ShotEntry> shotTimerTable, ProjectorArenaController arenaController) {
-		super.init(config, camerasSupervisor, shotTimerTable);
+			ShootOFFController controller, ProjectorArenaController arenaController) {
+		super.init(config, camerasSupervisor, controller);
+		this.config = config;
+		this.camerasSupervisor = camerasSupervisor;
+		this.arenaController = arenaController;
+	}
+	
+	// For unit tests
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, 
+			GridPane buttonsPane, TableView<ShotEntry> shotEntryTable, ProjectorArenaController arenaController) {
+		super.init(config, camerasSupervisor, buttonsPane, shotEntryTable);
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaController = arenaController;

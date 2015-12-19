@@ -73,7 +73,7 @@ public class TestISSFStandardPistol {
 		ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 		shotEntries.add(new ShotEntry(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
 		shotTimerTable.setItems(shotEntries);
-		issfExercise.init(config, cs, shotTimerTable);
+		issfExercise.init(config, cs, null, shotTimerTable);
 		issfExercise.init(0, 0);
 	}
 	
