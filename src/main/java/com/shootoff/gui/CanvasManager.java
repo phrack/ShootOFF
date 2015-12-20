@@ -57,6 +57,7 @@ import com.shootoff.targets.io.TargetIO;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -232,14 +233,31 @@ public class CanvasManager {
 		}
 		
 		if (projectionBounds.isPresent()) {
-			background.setX(projectionBounds.get().getMinX());
-			background.setY(projectionBounds.get().getMinY());
+			Bounds translatedBounds = translateBounds(projectionBounds.get());			
+			background.setX(translatedBounds.getMinX());
+			background.setY(translatedBounds.getMinY());
 		} else {
 			background.setX(0);
 			background.setY(0);
 		}
 		
 		background.setImage(img);
+	}
+	
+	private Bounds translateBounds(Bounds bounds)
+	{
+		if (config.getDisplayWidth() == cameraManager.getFeedWidth() && config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return bounds;
+		
+		double scaleX = (double)config.getDisplayWidth() / (double)cameraManager.getFeedWidth();
+		double scaleY = (double)config.getDisplayHeight() / (double)cameraManager.getFeedHeight();
+
+		double minX = (bounds.getMinX() * scaleX);
+		double minY = (bounds.getMinY() * scaleY);
+		double width = (bounds.getWidth() * scaleX);
+		double height = (bounds.getHeight() * scaleY);
+		
+		return new BoundingBox(minX, minY, width, height);
 	}
 	
 	public Group getCanvasGroup() {
@@ -284,6 +302,10 @@ public class CanvasManager {
 	
 	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {		
 		this.arenaController = Optional.ofNullable(arenaController);
+		
+		if (projectionBounds != null)
+			projectionBounds = translateBounds(projectionBounds);
+
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
 	
@@ -384,8 +406,8 @@ public class CanvasManager {
 		Shot shot = new Shot(color, x, y, 
 				System.currentTimeMillis() - startTime, cameraManager.getFrameCount(), config.getMarkerRadius());
 	
-		// Display and feed sizes differ if true
-		if (config.getDisplayWidth() != cameraManager.getFeedWidth() || config.getDisplayHeight() != cameraManager.getFeedHeight())
+		// If the shot didn't come from click to shoot (cameFromCanvas) and the resolution of the display and feed differ, translate shot coordinates
+		if (!cameFromCanvas && (config.getDisplayWidth() != cameraManager.getFeedWidth() || config.getDisplayHeight() != cameraManager.getFeedHeight()))
 		{
 			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
 		}

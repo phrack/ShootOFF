@@ -359,9 +359,9 @@ public class AutoCalibrationManager implements Runnable {
 		}
 		
 		// pixel distance, dynamic because we want to allow any resolution or distance from pattern
-		final int TOLERANCE_THRESHOLD = (int)(minimumDimension / PATTERN_HEIGHT-1 / 5);
+		final int TOLERANCE_THRESHOLD = (int)(minimumDimension / (double)(PATTERN_HEIGHT-1) / 2.0);
 		
-		logger.debug("tolerance threshold {}", TOLERANCE_THRESHOLD);
+		logger.trace("tolerance threshold {} minimumDimension {}", TOLERANCE_THRESHOLD, minimumDimension);
 		
 		// Grey scale conversion.
 	    Mat grey = new Mat();

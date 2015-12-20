@@ -237,10 +237,15 @@ public final class ShotDetectionManager {
 		
 	}
 	
-	public static BufferedImage deepCopy(BufferedImage source){
+	public BufferedImage deepCopy(BufferedImage source){
 	    BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
 	    Graphics g = b.getGraphics();
-	    g.drawImage(source, 0, 0, null);
+	    boolean drawImageComplete = g.drawImage(source, 0, 0, null);
+	    
+	    if (!drawImageComplete)
+	    {
+	    	logger.error("deepCopy drawImageComplete false");
+	    }
 	    g.dispose();
 	    return b;
 	}
@@ -532,6 +537,8 @@ public final class ShotDetectionManager {
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection()) && cameraManager.getProjectionBounds().isPresent()) {
 
 			Bounds b = cameraManager.getProjectionBounds().get();
+			
+			logger.debug("sDetection addShot adding bounds {} {} -> {} {}", x, y, x + b.getMinX(), y + b.getMinY());
 			
 			canvasManager.addShot(color.get(), x + b.getMinX(),
 					y + b.getMinY());

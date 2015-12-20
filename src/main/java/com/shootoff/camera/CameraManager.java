@@ -411,7 +411,7 @@ public class CameraManager {
 					webcam.get().setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 					webcam.get().open();
 				}
-
+				
 				streamCameraFrames();
 			}
 		}
@@ -513,15 +513,11 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
-				// Not quite working right
+				//logger.warn("currentFrame res {} {}", currentFrame.getWidth(), currentFrame.getHeight());
+				
 				Image img = SwingFXUtils.toFXImage(resize(currentFrame, config.getDisplayWidth(), config.getDisplayHeight()), null);
-
-				if (cropFeedToProjection) {
-					canvasManager.updateBackground(img, projectionBounds);
-				} else {
-					
-					canvasManager.updateBackground(img, Optional.empty());
-				}
+				
+				canvasManager.updateBackground(img, Optional.empty());
 			}
 
 			detectionExecutor.shutdown();
