@@ -1246,6 +1246,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		if (disableShotDetectionTimerEnabled) {
 			disableShotDetectionTimer.cancel();
 		}
+
+		// Don't disable the cameras if they are already disabled (e.g. because
+		// a training protocol paused shot detection)
+		if (!camerasSupervisor.areDetecting()) return;
 		disableShotDetectionTimerEnabled = true;
 
 		camerasSupervisor.setDetectingAll(false);

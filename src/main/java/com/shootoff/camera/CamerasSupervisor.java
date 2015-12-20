@@ -29,6 +29,8 @@ import com.shootoff.gui.CanvasManager;
 public class CamerasSupervisor {
 	private final Configuration config;
 	private final List<CameraManager> managers = new ArrayList<CameraManager>();
+	
+	private volatile boolean allDetecting = true;
 
 	public CamerasSupervisor(Configuration config) {
 		this.config = config;
@@ -37,12 +39,14 @@ public class CamerasSupervisor {
 	public CameraManager addCameraManager(Camera webcam, CanvasManager canvasManager) {
 		CameraManager manager = new CameraManager(webcam, canvasManager, config);
 		managers.add(manager);
+		allDetecting = true;
 		return manager;
 	}
 
 	public void clearManagers() {
 		setStreamingAll(false);
 		setDetectingAll(false);
+		allDetecting = false;
 
 		for (CameraManager manager : managers) {
 			manager.close();
@@ -74,9 +78,15 @@ public class CamerasSupervisor {
 	}
 
 	public void setDetectingAll(boolean isDetecting) {
+		allDetecting = isDetecting;
+		
 		for (CameraManager manager : managers) {
 			manager.setDetecting(isDetecting);
 		}
+	}
+	
+	public boolean areDetecting() {
+		return allDetecting;
 	}
 
 	public void closeAll() {
@@ -84,6 +94,7 @@ public class CamerasSupervisor {
 			manager.getCanvasManager().close();
 			manager.setDetecting(false);
 			manager.setStreaming(false);
+			allDetecting = false;
 			manager.close();
 		}
 	}
