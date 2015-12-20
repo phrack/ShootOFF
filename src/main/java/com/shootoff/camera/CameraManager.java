@@ -323,6 +323,10 @@ public class CameraManager {
 
 		setDetecting(true);
 	}
+	
+	public boolean isRecordingShots() {
+		return recordingShots;
+	}
 
 	public Image getCurrentFrame() {
 		if (webcam.isPresent()) {
