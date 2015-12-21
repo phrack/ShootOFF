@@ -18,20 +18,14 @@
 
 package com.shootoff.plugins;
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.ParListener;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Group;
-import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 
 /**
@@ -50,34 +44,12 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 	private int redScore = 0;
 	private int greenScore = 0;
 
-	private boolean countScore = false;
+	protected boolean countScore = false;
 
 	public ParForScore() {}
 
 	public ParForScore(List<Group> targets) {
 		super(targets);
-		this.thisSuper = super.getInstance();
-	}
-
-	@Override
-	public void init() {
-		super.addShootOFFButton("Pause", (event) -> {
-			Button pauseResumeButton = (Button)event.getSource();
-			if ("Pause".equals(pauseResumeButton.getText())) {
-				pauseResumeButton.setText("Resume");
-				repeatExercise = false;
-			} else {
-				pauseResumeButton.setText("Pause");
-				repeatExercise = true;
-				executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);	
-			}
-		});
-		addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
-		addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
-		pauseShotDetection(true);
-		getParInterval(this);
-
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -96,56 +68,27 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 						+ "repeated as long as this exercise is on.");
 	}
 
-	/*
-	 * This class is copied from the parent class, TimedHolsterDrill. Otherwise
-	 * the parent Round is called, rather than the one included in this class. A
-	 * factory pattern for Round creation would alleviate this issue.
-	 */
-	protected class SetupWait implements Callable<Void> {
-		@Override
-		public Void call() {
-			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
-			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-
-			if (repeatExercise) {
-				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
-			}
-			return null;
-		}
+	@Override
+	protected void initUI() {
+		super.initUI();
+		addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
 	}
 
-	/*
-	 * Java does not support subclassing inner classes. Thus, much of this code
-	 * is copied from the parent class, TimedHolsterDrill.
-	 */
-	protected class Round implements Callable<Void> {
-		@Override
-		public Void call() throws Exception {
-			if (repeatExercise) {
-				if (coloredRows) {
-					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
-				} else {
-					thisSuper.setShotTimerRowColor(null);
-				}
+	@Override
+	protected int setupRound() {
+		countScore = true;
+		int delay = super.setupRound();
 
-				coloredRows = !coloredRows;
+		return delay;
+	}
 
-				TrainingExerciseBase.playSound("sounds/beep.wav");
-				thisSuper.pauseShotDetection(false);
-				countScore = true;
-				beepTime = System.currentTimeMillis();
-
-				Thread.sleep((long) (parTime * 1000.));
-				TrainingExerciseBase.playSound("sounds/chime.wav");
-				thisSuper.pauseShotDetection(true);
-				countScore = false;
-
-				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
-			}
-
-			return null;
-		}
+	@Override
+	protected void doRound() throws Exception {
+		super.doRound();
+		Thread.sleep((long) (parTime * 1000.));
+		TrainingExerciseBase.playSound("sounds/chime.wav");
+		pauseShotDetection(true);
+		countScore = false;
 	}
 
 	/*
@@ -159,13 +102,17 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 			return;
 
 		if (hitRegion.get().tagExists("points")) {
-			setShotTimerColumnText(POINTS_COL_NAME, hitRegion.get().getTag("points"));
+			setPoints(shot.getColor(), hitRegion.get().getTag("points"));
+		}
+	}
 
-			if (shot.getColor().equals(Color.RED)) {
-				redScore += Integer.parseInt(hitRegion.get().getTag("points"));
-			} else if (shot.getColor().equals(Color.GREEN)) {
-				greenScore += Integer.parseInt(hitRegion.get().getTag("points"));
-			}
+	protected void setPoints(Color shotColor, String points) {
+		setShotTimerColumnText(POINTS_COL_NAME, points);
+
+		if (shotColor.equals(Color.RED)) {
+			redScore += Integer.parseInt(points);
+		} else if (shotColor.equals(Color.GREEN)) {
+			greenScore += Integer.parseInt(points);
 		}
 
 		String message = "score: 0";
@@ -186,18 +133,13 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
-		repeatExercise = false;
-		executorService.shutdownNow();
+	protected void resetValues() {
 		redScore = 0;
 		greenScore = 0;
 		showTextOnFeed("score: 0");
 		getParInterval(this);
-		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
-	
+
 	@Override
 	public void updatedParInterval(double parTime) {
 		this.parTime = parTime;
