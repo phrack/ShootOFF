@@ -205,6 +205,11 @@ public class Camera {
 		return open;
 	}
 	
+	public Dimension getViewSize()
+	{
+		return webcam.getViewSize();
+	}
+	
 	public boolean close() {
 		if (isMac) {
 			new Thread(() -> { webcam.close(); }).start();
@@ -242,6 +247,7 @@ public class Camera {
 		} catch (IllegalArgumentException e) {
 			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
 		}
+		
 	}
 	
 	@Override

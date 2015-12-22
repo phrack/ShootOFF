@@ -19,6 +19,7 @@
 package com.shootoff.gui;
 
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -219,7 +220,43 @@ public class CanvasManager {
 		background.setFitHeight(height);
 	}
 	
-	public void updateBackground(Image img, Optional<Bounds> projectionBounds) {
+	public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds) {
+		updateCanvasGroup();
+		
+		if (frame == null)
+		{
+			background.setX(0);
+			background.setY(0);
+			background.setImage(null);
+			return;
+		}
+		
+		Image img;
+		if (projectionBounds.isPresent()) {
+			Bounds translatedBounds = translateCameraToCanvas(projectionBounds.get());			
+			background.setX(translatedBounds.getMinX());
+			background.setY(translatedBounds.getMinY());
+			
+			img = SwingFXUtils.toFXImage(resize(frame, (int)translatedBounds.getWidth(), (int)translatedBounds.getHeight()), null);
+		} else {
+			background.setX(0);
+			background.setY(0);
+			
+			img = SwingFXUtils.toFXImage(resize(frame, (int)config.getDisplayWidth(), (int)config.getDisplayHeight()), null);
+		}
+		
+		background.setImage(img);
+	}
+	
+	public void updateBackground(Image img) {
+		updateCanvasGroup();
+		background.setX(0);
+		background.setY(0);
+		background.setImage(img);
+	}
+	
+	private void updateCanvasGroup()
+	{
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {
 					if (canvasGroup.getChildren().isEmpty()) {
@@ -231,20 +268,21 @@ public class CanvasManager {
 					}
 				});
 		}
-		
-		if (projectionBounds.isPresent()) {
-			Bounds translatedBounds = translateBounds(projectionBounds.get());			
-			background.setX(translatedBounds.getMinX());
-			background.setY(translatedBounds.getMinY());
-		} else {
-			background.setX(0);
-			background.setY(0);
-		}
-		
-		background.setImage(img);
 	}
 	
-	private Bounds translateBounds(Bounds bounds)
+	private BufferedImage resize(BufferedImage source, int width, int height) {
+		if (source.getWidth() == width && source.getHeight() == height)
+			return source;
+		
+		BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
+		Graphics2D g2 = tmp.createGraphics();
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR); 
+		g2.drawImage(source, 0, 0, width, height, null);
+		g2.dispose(); 
+		return tmp;
+	} 
+	
+	public Bounds translateCameraToCanvas(Bounds bounds)
 	{
 		if (config.getDisplayWidth() == cameraManager.getFeedWidth() && config.getDisplayHeight() == cameraManager.getFeedHeight())
 			return bounds;
@@ -256,6 +294,28 @@ public class CanvasManager {
 		double minY = (bounds.getMinY() * scaleY);
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
+		
+		logger.info("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight(),
+				minX, minY, width, height);
+		
+		return new BoundingBox(minX, minY, width, height);
+	}
+	
+	public Bounds translateCanvasToCamera(Bounds bounds)
+	{
+		if (config.getDisplayWidth() == cameraManager.getFeedWidth() && config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return bounds;
+		
+		double scaleX = (double)cameraManager.getFeedWidth() / (double)config.getDisplayWidth();
+		double scaleY = (double)cameraManager.getFeedHeight() / (double)config.getDisplayHeight();
+
+		double minX = (bounds.getMinX() * scaleX);
+		double minY = (bounds.getMinY() * scaleY);
+		double width = (bounds.getWidth() * scaleX);
+		double height = (bounds.getHeight() * scaleY);
+		
+		logger.info("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight(),
+				minX, minY, width, height);
 		
 		return new BoundingBox(minX, minY, width, height);
 	}
@@ -302,9 +362,6 @@ public class CanvasManager {
 	
 	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {		
 		this.arenaController = Optional.ofNullable(arenaController);
-		
-		if (projectionBounds != null)
-			projectionBounds = translateBounds(projectionBounds);
 
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}

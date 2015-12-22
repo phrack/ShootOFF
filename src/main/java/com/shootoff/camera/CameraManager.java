@@ -19,8 +19,6 @@
 package com.shootoff.camera;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -46,7 +44,8 @@ import org.slf4j.LoggerFactory;
 
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
-import com.shootoff.camera.shotdetection.ShotDetectionManager;import com.shootoff.config.Configuration;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;
+import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -133,11 +132,13 @@ public class CameraManager {
 		this.canvasManager = canvas;
 		this.config = config;
 
-		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
 		this.canvasManager.setCameraManager(this);
 			
 		initDetector(new Detector());
+
+		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
+	
 	}
 
 	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas,
@@ -153,10 +154,11 @@ public class CameraManager {
 			setLimitDetectProjection(true);
 			setProjectionBounds(projectionBounds.get());
 		}
-
-		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 		
 		Detector detector = new Detector();
+
+		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
+
 		
 	    IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 	    reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
@@ -410,6 +412,10 @@ public class CameraManager {
 				if (!webcam.get().isOpen()) {
 					webcam.get().setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 					webcam.get().open();
+					
+					
+					Dimension openDimension = webcam.get().getViewSize();
+					setFeedResolution((int)openDimension.getWidth(), (int)openDimension.getHeight());
 				}
 				
 				streamCameraFrames();
@@ -513,24 +519,15 @@ public class CameraManager {
 					videoWriterStream.encodeVideo(0, frame);
 				}
 
-				//logger.warn("currentFrame res {} {}", currentFrame.getWidth(), currentFrame.getHeight());
-				
-				Image img = SwingFXUtils.toFXImage(resize(currentFrame, config.getDisplayWidth(), config.getDisplayHeight()), null);
-				
-				canvasManager.updateBackground(img, Optional.empty());
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					canvasManager.updateBackground(currentFrame, projectionBounds);
+				} else {
+					canvasManager.updateBackground(currentFrame, Optional.empty());
+				}
 			}
 
 			detectionExecutor.shutdown();
 		}
-		
-		public BufferedImage resize(BufferedImage source, int width, int height) {
-			BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB); 
-			Graphics2D g2 = tmp.createGraphics();
-			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR); 
-			g2.drawImage(source, 0, 0, width, height, null);
-			g2.dispose(); 
-			return tmp;
-		} 
 
 		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame)
 		{
@@ -612,7 +609,7 @@ public class CameraManager {
 				logger.debug("autoCalibrateSuccess {} {} {} {}", (int)bounds.getMinX(), (int)bounds.getMinY(),
 						(int)bounds.getWidth(), (int)bounds.getHeight());
 
-				Platform.runLater(() -> { controller.calibrate(bounds); });
+				Platform.runLater(() -> { controller.calibrate(bounds, false); });
 				
 			}
 			

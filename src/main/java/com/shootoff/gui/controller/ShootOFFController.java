@@ -772,7 +772,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		} else
 		{
 			if (calibrationTarget.isPresent())
-				calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent());
+				calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
 			else
 				stopCalibration();
 		}		
@@ -1011,13 +1011,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				calibrationTarget.get().setKeepInBounds(true);
 	}
 	
-	public void calibrate(Bounds bounds)
+	public void calibrate(Bounds bounds, boolean calibratedFromCanvas)
 	{
 		removeCalibrationTargetIfPresent();
 		
 		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
 		
-		configureArenaCamera(getSelectedCalibrationOption(), bounds);
+		configureArenaCamera(getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
 		
 		stopCalibration();
 	}
@@ -1054,10 +1054,23 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
 	}
 	
-	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
-		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, bounds);
+	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
+		
+		Bounds translatedToCanvasBounds;
+		if (bounds != null && !calibratedFromCanvas)
+			translatedToCanvasBounds = arenaCameraManager.getCanvasManager().translateCameraToCanvas(bounds);
+		else
+			translatedToCanvasBounds = bounds;
+		
+		Bounds translatedToCameraBounds;
+		if (bounds != null && calibratedFromCanvas)
+			translatedToCameraBounds = arenaCameraManager.getCanvasManager().translateCanvasToCamera(bounds);
+		else
+			translatedToCameraBounds = bounds;
+		
+		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, translatedToCanvasBounds);
 		configureArenaCamera(option);
-		arenaCameraManager.setProjectionBounds(bounds);
+		arenaCameraManager.setProjectionBounds(translatedToCameraBounds);
 	}
 	
 	private void configureArenaCamera(CalibrationOption option) {

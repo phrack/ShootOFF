@@ -534,12 +534,11 @@ public final class ShotDetectionManager {
 			}
 		}
 		
+		
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection()) && cameraManager.getProjectionBounds().isPresent()) {
 
 			Bounds b = cameraManager.getProjectionBounds().get();
-			
-			logger.debug("sDetection addShot adding bounds {} {} -> {} {}", x, y, x + b.getMinX(), y + b.getMinY());
-			
+
 			canvasManager.addShot(color.get(), x + b.getMinX(),
 					y + b.getMinY());
 
@@ -547,8 +546,6 @@ public final class ShotDetectionManager {
 			canvasManager.addShot(color.get(), x,
 					y);
 		}
-		
-
 		
 	}
 }
