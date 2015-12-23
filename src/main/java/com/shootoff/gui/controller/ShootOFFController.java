@@ -54,6 +54,7 @@ import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.ParForScore;
+import com.shootoff.plugins.ParRandomShot;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootDontShoot;
@@ -586,6 +587,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addTrainingExercise(new ShootForScore());
 		addTrainingExercise(new TimedHolsterDrill());
 		addTrainingExercise(new ParForScore());
+		addTrainingExercise(new ParRandomShot());
 	}
 
 	private void addTrainingExercise(TrainingExercise exercise) {

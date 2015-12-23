@@ -448,4 +448,8 @@ public class TrainingExerciseBase {
 
 		pauseShotDetection(false);
 	}
+
+	protected CamerasSupervisor getCamerasSupervisor() {
+		return camerasSupervisor;
+	}
 }
