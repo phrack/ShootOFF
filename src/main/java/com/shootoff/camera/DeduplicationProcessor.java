@@ -75,8 +75,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 		}
 
-		if (updateLastShot)
-			lastShot = Optional.of(shot);
+		if (updateLastShot) lastShot = Optional.of(shot);
 
 		return true;
 	}

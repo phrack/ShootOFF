@@ -165,8 +165,7 @@ public class Target {
 	}
 
 	protected static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
-		if (!region.tagExists("command"))
-			return;
+		if (!region.tagExists("command")) return;
 
 		String commandsSource = region.getTag("command");
 		List<String> commands = Arrays.asList(commandsSource.split(";"));
@@ -194,8 +193,7 @@ public class Target {
 			if (target.getTargetGroup().getChildren().contains(region)) {
 				for (Node node : target.getTargetGroup().getChildren()) {
 					TargetRegion r = (TargetRegion) node;
-					if (r.tagExists("name") && r.getTag("name").equals(name))
-						return Optional.of(r);
+					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
 				}
 			}
 		}
@@ -233,8 +231,7 @@ public class Target {
 		}
 
 		// Don't repeat animations for fallen targets
-		if (!imageRegion.onFirstFrame())
-			return;
+		if (!imageRegion.onFirstFrame()) return;
 
 		if (imageRegion.getAnimation().isPresent()) {
 			SpriteAnimation animation = imageRegion.getAnimation().get();
@@ -292,8 +289,7 @@ public class Target {
 
 	private void mouseDragged() {
 		targetGroup.setOnMouseDragged((event) -> {
-			if (!resize && !move)
-				return;
+			if (!resize && !move) return;
 
 			if (move) {
 				if (config.isPresent() && config.get().inDebugMode() && (event.isControlDown() || event.isShiftDown()))
@@ -347,16 +343,14 @@ public class Target {
 
 				double originXDelta = newOriginX - currentOriginX;
 
-				if (right)
-					originXDelta *= -1.0;
+				if (right) originXDelta *= -1.0;
 
 				double oldLayoutX = targetGroup.getLayoutX();
 				double oldScaleX = targetGroup.getScaleX();
 				double newScaleX = oldScaleX * (1.0 - scaleDelta);
 
 				// If we scale too small the target can do weird things
-				if (newScaleX < 0.001 || Double.isNaN(newScaleX) || Double.isInfinite(newScaleX))
-					return;
+				if (newScaleX < 0.001 || Double.isNaN(newScaleX) || Double.isInfinite(newScaleX)) return;
 
 				targetGroup.setLayoutX(targetGroup.getLayoutX() + originXDelta);
 				targetGroup.setScaleX(newScaleX);
@@ -392,16 +386,14 @@ public class Target {
 
 				double originYDelta = newOriginY - currentOriginY;
 
-				if (bottom)
-					originYDelta *= -1.0;
+				if (bottom) originYDelta *= -1.0;
 
 				double oldLayoutY = targetGroup.getLayoutY();
 				double oldScaleY = targetGroup.getScaleY();
 				double newScaleY = oldScaleY * (1.0 - scaleDelta);
 
 				// If we scale too small the target can do weird things
-				if (newScaleY < 0.001 || Double.isNaN(newScaleY) || Double.isInfinite(newScaleY))
-					return;
+				if (newScaleY < 0.001 || Double.isNaN(newScaleY) || Double.isInfinite(newScaleY)) return;
 
 				targetGroup.setLayoutY(targetGroup.getLayoutY() + originYDelta);
 				targetGroup.setScaleY(newScaleY);
@@ -461,8 +453,7 @@ public class Target {
 			switch (event.getCode()) {
 			case DELETE:
 			case BACK_SPACE:
-				if (userDeletable && parent.isPresent())
-					parent.get().removeTarget(this);
+				if (userDeletable && parent.isPresent()) parent.get().removeTarget(this);
 				break;
 
 			case LEFT: {

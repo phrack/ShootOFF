@@ -33,48 +33,49 @@ public class ShotEntry {
 	private final Optional<Color> rowColor;
 	private final SplitData split;
 	private final Map<String, String> exerciseData = new HashMap<String, String>();
-	
-	public ShotEntry(Shot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction, boolean hadReload) {
+
+	public ShotEntry(Shot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
+			boolean hadReload) {
 		this.shot = shot;
-		
+
 		if (shot.getColor().equals(Color.RED)) {
 			color = "red";
 		} else {
 			color = "green";
 		}
-		
+
 		this.rowColor = rowColor;
-		
-		float timestampS = ((float)shot.getTimestamp()) / (float)1000;
+
+		float timestampS = ((float) shot.getTimestamp()) / (float) 1000;
 		timestamp = String.format("%.2f", timestampS);
-		
+
 		String split;
 		if (lastShot.isPresent()) {
-			split = String.format("%.2f", timestampS - ((float)lastShot.get().getTimestamp() / (float)1000));
+			split = String.format("%.2f", timestampS - ((float) lastShot.get().getTimestamp() / (float) 1000));
 		} else {
 			split = "-";
 		}
-		
+
 		this.split = new SplitData(split, rowColor, hadMalfunction, hadReload);
 	}
-	
+
 	public static class SplitData {
 		private final String split;
 		private final Optional<Color> rowColor;
 		private final boolean hadMalfunction;
 		private final boolean hadReload;
-		
+
 		public SplitData(String split, Optional<Color> rowColor, boolean hadMalfunction, boolean hadReload) {
 			this.split = split;
 			this.rowColor = rowColor;
 			this.hadMalfunction = hadMalfunction;
 			this.hadReload = hadReload;
 		}
-		
+
 		public String getSplit() {
 			return split;
 		}
-		
+
 		public Optional<Color> getRowColor() {
 			return rowColor;
 		}
@@ -91,32 +92,34 @@ public class ShotEntry {
 	public String getColor() {
 		return color;
 	}
-	
+
 	public Optional<Color> getRowColor() {
 		return rowColor;
 	}
-	
+
 	public String getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public SplitData getSplit() {
 		return split;
 	}
-	
+
 	public Shot getShot() {
 		return shot;
 	}
-	
+
 	public void setExerciseValue(String name, String value) {
 		exerciseData.put(name, value);
 	}
-	
+
 	public String getExerciseValue(String name) {
-		if (exerciseData.containsKey(name)) return exerciseData.get(name);
-		else return "";
+		if (exerciseData.containsKey(name))
+			return exerciseData.get(name);
+		else
+			return "";
 	}
-	
+
 	public void clearExerciseData() {
 		exerciseData.clear();
 	}

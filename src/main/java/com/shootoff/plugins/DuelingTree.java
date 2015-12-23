@@ -41,42 +41,43 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	private static final int CORE_POOL_SIZE = 2;
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	private TrainingExerciseBase thisSuper;
-	
-    private boolean continueExercise = true;
-    private boolean isResetting = false;
-    private int leftScore = 0;
-    private int rightScore = 0;
-    private List<TargetRegion> paddlesOnLeft = new ArrayList<TargetRegion>();
-    private List<TargetRegion> paddlesOnRight = new ArrayList<TargetRegion>();
-	
+
+	private boolean continueExercise = true;
+	private boolean isResetting = false;
+	private int leftScore = 0;
+	private int rightScore = 0;
+	private List<TargetRegion> paddlesOnLeft = new ArrayList<TargetRegion>();
+	private List<TargetRegion> paddlesOnRight = new ArrayList<TargetRegion>();
+
 	public DuelingTree() {}
-	
+
 	public DuelingTree(List<Group> targets) {
 		super(targets);
 		this.thisSuper = super.getInstance();
 		findTargets(targets);
 	}
-    
+
 	@Override
 	public void init() {
-        // We need to make sure we start with a clean slate because the position
-        // of the plates matter
+		// We need to make sure we start with a clean slate because the position
+		// of the plates matter
 		super.reset();
-		
+
 		super.addShotTimerColumn(HIT_COL_NAME, HIT_COL_WIDTH);
 		super.showTextOnFeed("left score: 0\nright score: 0");
 	}
 
 	private boolean findTargets(List<Group> targets) {
 		boolean foundTarget = false;
-		
-		// Find the first target with directional subtargets and gets its regions
+
+		// Find the first target with directional subtargets and gets its
+		// regions
 		for (Group target : targets) {
 			if (foundTarget) break;
-			
+
 			for (Node node : target.getChildren()) {
-				TargetRegion region = (TargetRegion)node;
-				
+				TargetRegion region = (TargetRegion) node;
+
 				if (region.tagExists("subtarget")) {
 					if (region.getTag("subtarget").startsWith("left_paddle")) {
 						paddlesOnLeft.add(region);
@@ -88,54 +89,53 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 				}
 			}
 		}
-		
+
 		if (!foundTarget) {
-			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-duelingtree-warning.wav"));	
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-duelingtree-warning.wav"));
 			continueExercise = false;
 		}
-		
+
 		return foundTarget;
 	}
-	
+
 	@Override
 	public ExerciseMetadata getInfo() {
 		return new ExerciseMetadata("Dueling Tree", "1.0", "phrack",
-	    	    	"This exercise works with the dueling tree target. Challenge "
-	    	    	+ "a friend, assign a side (left or right) to each participant, "
-	    	    	+ "and try to shoot the plates from your side to your friend's "
-	    	    	+ "side. A round ends when all plates are on one person's side.");
+				"This exercise works with the dueling tree target. Challenge "
+						+ "a friend, assign a side (left or right) to each participant, "
+						+ "and try to shoot the plates from your side to your friend's "
+						+ "side. A round ends when all plates are on one person's side.");
 	}
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
 		if (!continueExercise) return;
-		
+
 		if (hitRegion.isPresent()) {
 			TargetRegion r = hitRegion.get();
-			
-			if (r.tagExists("subtarget") && 
-					(r.getTag("subtarget").startsWith("left_paddle") || 
-							r.getTag("subtarget").startsWith("right_paddle"))) {
-				
+
+			if (r.tagExists("subtarget") && (r.getTag("subtarget").startsWith("left_paddle")
+					|| r.getTag("subtarget").startsWith("right_paddle"))) {
+
 				String hitBy = "";
-				
+
 				if (paddlesOnLeft.contains(r)) {
 					paddlesOnLeft.remove(r);
-                    paddlesOnRight.add(r);
-                    hitBy = "left";
+					paddlesOnRight.add(r);
+					hitBy = "left";
 				} else if (paddlesOnRight.contains(r)) {
-					paddlesOnLeft.add(r);                                 
+					paddlesOnLeft.add(r);
 					paddlesOnRight.remove(r);
-                    hitBy = "right";
+					hitBy = "right";
 				}
-				
+
 				super.setShotTimerColumnText(HIT_COL_NAME, hitBy);
-				
+
 				if (paddlesOnLeft.size() == 6) {
 					rightScore++;
 					roundOver();
 				}
-				
+
 				if (paddlesOnRight.size() == 6) {
 					leftScore++;
 					roundOver();
@@ -143,7 +143,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 			}
 		}
 	}
-	
+
 	private void roundOver() {
 		if (continueExercise) {
 			thisSuper.showTextOnFeed(String.format("left score: %d%nright score: %d", leftScore, rightScore));
@@ -151,8 +151,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 			executorService.schedule(new NewRound(), NEW_ROUND_DELAY, TimeUnit.SECONDS);
 		}
 	}
-	
-	
+
 	private class NewRound implements Callable<Void> {
 		@Override
 		public Void call() {
@@ -160,11 +159,11 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 			thisSuper.reset();
 			isResetting = false;
 			thisSuper.pauseShotDetection(false);
-			
+
 			return null;
 		}
 	}
-		
+
 	@Override
 	public void reset(List<Group> targets) {
 		if (!isResetting) {
@@ -172,10 +171,10 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 			rightScore = 0;
 			super.showTextOnFeed(String.format("left score: 0%nright score: 0"));
 		}
-		
+
 		paddlesOnLeft.clear();
 		paddlesOnRight.clear();
-		
+
 		findTargets(targets);
 	}
 

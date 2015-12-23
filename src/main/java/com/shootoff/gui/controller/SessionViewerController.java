@@ -101,8 +101,7 @@ public class SessionViewerController {
 
 		sessionListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<File>() {
 			public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
-				if (isPlaying)
-					togglePlaybackButton.fire();
+				if (isPlaying) togglePlaybackButton.fire();
 
 				Optional<SessionRecorder> session = SessionIO.loadSession(new File(System.getProperty("shootoff.home")
 						+ File.separator + "sessions" + File.separator + newFile.getName()));
@@ -129,11 +128,9 @@ public class SessionViewerController {
 
 		cameraTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
 			public void changed(ObservableValue<? extends Tab> ot, Tab oldTab, Tab newTab) {
-				if (newTab == null)
-					return;
+				if (newTab == null) return;
 
-				if (isPlaying)
-					togglePlaybackButton.fire();
+				if (isPlaying) togglePlaybackButton.fire();
 
 				eventSelectionsPerTab.put(oldTab, eventsListView.getSelectionModel().getSelectedIndex());
 
@@ -155,16 +152,13 @@ public class SessionViewerController {
 
 		eventsListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Event>() {
 			public void changed(ObservableValue<? extends Event> oe, Event oldEvent, Event newEvent) {
-				if (newEvent == null)
-					return;
+				if (newEvent == null) return;
 
 				refreshFromSlider = false;
-				if (!isPlaying)
-					timeSlider.setValue(newEvent.getTimestamp());
+				if (!isPlaying) timeSlider.setValue(newEvent.getTimestamp());
 				refreshFromSlider = true;
 
-				if (!refreshFromSelection)
-					return;
+				if (!refreshFromSelection) return;
 
 				int oldIndex = eventEntries.indexOf(oldEvent);
 				int newIndex = eventEntries.indexOf(newEvent);
@@ -178,15 +172,13 @@ public class SessionViewerController {
 		});
 
 		eventsListView.setOnMouseClicked((event) -> {
-			if (event.getClickCount() < 2)
-				return;
+			if (event.getClickCount() < 2) return;
 
 			Event selectedEvent = eventEntries.get(eventsListView.getSelectionModel().getSelectedIndex());
 			if (selectedEvent instanceof ShotEvent) {
 				ShotEvent se = (ShotEvent) selectedEvent;
 
-				if (!se.getVideoString().isPresent())
-					return;
+				if (!se.getVideoString().isPresent()) return;
 
 				FXMLLoader loader = new FXMLLoader(
 						getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
@@ -215,8 +207,7 @@ public class SessionViewerController {
 		eventsListView.setItems(eventEntries);
 
 		timeSlider.setOnMouseClicked((event) -> {
-			if (isPlaying)
-				togglePlaybackButton.fire();
+			if (isPlaying) togglePlaybackButton.fire();
 		});
 
 		timeSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -229,8 +220,7 @@ public class SessionViewerController {
 
 				setTime(newValue.longValue());
 
-				if (!refreshFromSlider)
-					return;
+				if (!refreshFromSlider) return;
 
 				List<Event> reversedEntries = new ArrayList<Event>(eventEntries);
 				Collections.reverse(reversedEntries);
@@ -322,8 +312,7 @@ public class SessionViewerController {
 
 	@FXML
 	public void nextButtonClicked(ActionEvent event) {
-		if (isPlaying)
-			togglePlaybackButton.fire();
+		if (isPlaying) togglePlaybackButton.fire();
 
 		int selectedIndex = eventsListView.getSelectionModel().getSelectedIndex();
 
@@ -340,8 +329,7 @@ public class SessionViewerController {
 
 	@FXML
 	public void previousButtonClicked(ActionEvent event) {
-		if (isPlaying)
-			togglePlaybackButton.fire();
+		if (isPlaying) togglePlaybackButton.fire();
 
 		int selectedIndex = eventsListView.getSelectionModel().getSelectedIndex();
 
@@ -363,8 +351,7 @@ public class SessionViewerController {
 				double currentTime = timeSlider.getValue();
 
 				Platform.runLater(() -> {
-					if (currentTime + 100 > timeSlider.getMax())
-						togglePlaybackButton.fire();
+					if (currentTime + 100 > timeSlider.getMax()) togglePlaybackButton.fire();
 
 					timeSlider.setValue(currentTime + STEP_INTERVAL);
 				});

@@ -50,8 +50,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private boolean coloredRows = false;
 	private Button pauseResumeButton;
 
-	public TimedHolsterDrill() {
-	}
+	public TimedHolsterDrill() {}
 
 	public TimedHolsterDrill(List<Group> targets) {
 		super(targets);
@@ -114,8 +113,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 			playSound(new File("sounds/voice/shootoff-makeready.wav"));
 			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
-			if (repeatExercise)
-				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
+			if (repeatExercise) executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 
 			return null;
 		}

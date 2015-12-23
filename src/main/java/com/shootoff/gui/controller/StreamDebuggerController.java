@@ -43,7 +43,7 @@ public class StreamDebuggerController implements DebuggerListener {
 	private String defaultWindowTitle = "";
 
 	public void init(CameraManager cameraManager) {
-		streamDebuggerStage = (Stage)thresholdImageView.getScene().getWindow();
+		streamDebuggerStage = (Stage) thresholdImageView.getScene().getWindow();
 		defaultWindowTitle = streamDebuggerStage.getTitle();
 
 		cameraManager.setThresholdListener(this);
@@ -51,11 +51,11 @@ public class StreamDebuggerController implements DebuggerListener {
 		minDimSlider.valueProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-	        	if (newValue == null) return;
+				if (newValue == null) return;
 
-        		cameraManager.setMinimumShotDimension(newValue.intValue());
-	      	}
-	    });
+				cameraManager.setMinimumShotDimension(newValue.intValue());
+			}
+		});
 	}
 
 	public ImageView getThresholdImageView() {
@@ -70,13 +70,12 @@ public class StreamDebuggerController implements DebuggerListener {
 	@Override
 	public void updateFeedData(double fps, Optional<LightingCondition> lightingCondition) {
 		Platform.runLater(() -> {
-				if (lightingCondition.isPresent()) {
-					streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS -- %s", 
-							fps, lightingCondition.get()));
-				} else {
-					streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", 
-							fps));					
-				}
-			});
+			if (lightingCondition.isPresent()) {
+				streamDebuggerStage
+						.setTitle(String.format(defaultWindowTitle + " %.2f FPS -- %s", fps, lightingCondition.get()));
+			} else {
+				streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", fps));
+			}
+		});
 	}
 }

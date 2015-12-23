@@ -257,8 +257,7 @@ public class TrainingExerciseBase {
 	 *            the message to show on every webcam feed
 	 */
 	public void showTextOnFeed(String message) {
-		if (config.inDebugMode())
-			System.out.println(message);
+		if (config.inDebugMode()) System.out.println(message);
 
 		if (config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordExerciseFeedMessage(message);
@@ -288,8 +287,7 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		if (config.getExercise().isPresent())
-			config.getExercise().get().reset(camerasSupervisor.getTargets());
+		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());
 	}
 
 	/**
@@ -319,8 +317,7 @@ public class TrainingExerciseBase {
 	}
 
 	public void removeShootOFFButton(Button exerciseButton) {
-		if (!exerciseButtons.contains(exerciseButton))
-			return;
+		if (!exerciseButtons.contains(exerciseButton)) return;
 
 		buttonsPane.getChildren().remove(exerciseButton);
 		exerciseButtons.remove(exerciseButton);
@@ -372,13 +369,11 @@ public class TrainingExerciseBase {
 					clip.addLineListener(listener.get());
 				} else {
 					clip.addLineListener((e) -> {
-						if (e.getType().equals(LineEvent.Type.STOP))
-							e.getLine().close();
+						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
 					});
 				}
 			} catch (LineUnavailableException | IOException e) {
-				if (clip != null)
-					clip.close();
+				if (clip != null) clip.close();
 				logger.error("Error playing sound clip", e);
 			}
 		}

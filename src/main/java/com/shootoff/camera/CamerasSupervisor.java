@@ -29,7 +29,7 @@ import com.shootoff.gui.CanvasManager;
 public class CamerasSupervisor {
 	private final Configuration config;
 	private final List<CameraManager> managers = new ArrayList<CameraManager>();
-	
+
 	private volatile boolean allDetecting = true;
 
 	public CamerasSupervisor(Configuration config) {
@@ -79,15 +79,14 @@ public class CamerasSupervisor {
 
 	public void setDetectingAll(boolean isDetecting) {
 		allDetecting = isDetecting;
-		
+
 		for (CameraManager manager : managers) {
 			// Designated cameras aren't supposed to detect shots
 			// because they are pointed at and recording the shooter
-			if (!manager.isRecordingShots())
-				manager.setDetecting(isDetecting);
+			if (!manager.isRecordingShots()) manager.setDetecting(isDetecting);
 		}
 	}
-	
+
 	public boolean areDetecting() {
 		return allDetecting;
 	}

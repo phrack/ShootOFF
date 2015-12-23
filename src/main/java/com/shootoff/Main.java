@@ -161,8 +161,7 @@ public class Main extends Application {
 			tryRunningShootOFF();
 			return Optional.empty();
 		} catch (IOException e) {
-			if (connection != null)
-				connection.disconnect();
+			if (connection != null) connection.disconnect();
 
 			logger.error("Error download writable resources file", e);
 			tryRunningShootOFF();
@@ -175,8 +174,7 @@ public class Main extends Application {
 
 			String line;
 			while ((line = br.readLine()) != null) {
-				if (metadataXML.length() > 0)
-					metadataXML.append("\n");
+				if (metadataXML.length() > 0) metadataXML.append("\n");
 				metadataXML.append(line);
 			}
 		} catch (IOException e) {
@@ -217,8 +215,7 @@ public class Main extends Application {
 			tryRunningShootOFF();
 			return;
 		} catch (IOException e) {
-			if (connection != null)
-				connection.disconnect();
+			if (connection != null) connection.disconnect();
 
 			logger.error("Failed to get stream to download writable resources file", e);
 			tryRunningShootOFF();
@@ -321,8 +318,7 @@ public class Main extends Application {
 					int fileCount = 0;
 					while (enumEntries.hasMoreElements()) {
 						JarEntry entry = (JarEntry) enumEntries.nextElement();
-						if (!entry.getName().startsWith("META-INF") && !entry.isDirectory())
-							fileCount++;
+						if (!entry.getName().startsWith("META-INF") && !entry.isDirectory()) fileCount++;
 					}
 
 					enumEntries = jar.entries();
@@ -330,8 +326,7 @@ public class Main extends Application {
 					while (enumEntries.hasMoreElements()) {
 						JarEntry entry = (JarEntry) enumEntries.nextElement();
 
-						if (entry.getName().startsWith("META-INF"))
-							continue;
+						if (entry.getName().startsWith("META-INF")) continue;
 
 						File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 						if (entry.isDirectory()) {
@@ -361,8 +356,7 @@ public class Main extends Application {
 					return false;
 				} finally {
 					try {
-						if (jar != null)
-							jar.close();
+						if (jar != null) jar.close();
 					} catch (IOException e) {
 						logger.error("Error closing writable resources file for JNLP", e);
 					}

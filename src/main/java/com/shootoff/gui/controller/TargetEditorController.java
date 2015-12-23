@@ -120,8 +120,7 @@ public class TargetEditorController {
 				if (cursorRegion.isPresent()) {
 					TargetRegion selected = (TargetRegion) cursorRegion.get();
 
-					if (selected.getType() != RegionType.IMAGE)
-						((Shape) selected).setFill(createColor(newValue));
+					if (selected.getType() != RegionType.IMAGE) ((Shape) selected).setFill(createColor(newValue));
 				}
 			}
 		});
@@ -203,16 +202,14 @@ public class TargetEditorController {
 
 		if (targetFile != null) {
 			String path = targetFile.getPath();
-			if (!path.endsWith(".target"))
-				path += ".target";
+			if (!path.endsWith(".target")) path += ".target";
 
 			targetFile = new File(path);
 			boolean isNewTarget = !targetFile.exists();
 
 			TargetIO.saveTarget(targetRegions, targetFile);
 
-			if (isNewTarget)
-				targetListener.newTarget(targetFile);
+			if (isNewTarget) targetListener.newTarget(targetFile);
 		}
 	}
 
@@ -222,18 +219,15 @@ public class TargetEditorController {
 			drawTempPolygonEdge(event);
 		}
 
-		if (!cursorRegion.isPresent() || cursorButton.isSelected())
-			return;
+		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
 
 		Node selected = cursorRegion.get();
 
 		lastMouseX = event.getX() - (selected.getLayoutBounds().getWidth() / 2);
 		lastMouseY = event.getY() - (selected.getLayoutBounds().getHeight() / 2);
 
-		if (lastMouseX < 0)
-			lastMouseX = 0;
-		if (lastMouseY < 0)
-			lastMouseY = 0;
+		if (lastMouseX < 0) lastMouseX = 0;
+		if (lastMouseY < 0) lastMouseY = 0;
 
 		if (event.getX() + (selected.getLayoutBounds().getWidth() / 2) <= canvasPane.getWidth())
 			selected.setLayoutX(lastMouseX - selected.getLayoutBounds().getMinX());
@@ -253,8 +247,7 @@ public class TargetEditorController {
 			clearFreeformState(true);
 		}
 
-		if (!cursorRegion.isPresent() || cursorButton.isSelected())
-			return;
+		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
 
 		Node selected = cursorRegion.get();
 		targetRegions.add(selected);
@@ -296,8 +289,7 @@ public class TargetEditorController {
 	}
 
 	private void undoPolygonStep() {
-		if (freeformPoints.size() <= 0)
-			return;
+		if (freeformPoints.size() <= 0) return;
 
 		// Remove last point, line, and vertex
 		freeformPoints.remove(freeformPoints.size() - 1);
@@ -309,21 +301,17 @@ public class TargetEditorController {
 		}
 
 		// Edge if it exists, otherwise vertex
-		if (freeformShapes.size() > 0)
-			canvasPane.getChildren().remove(freeformShapes.pop());
+		if (freeformShapes.size() > 0) canvasPane.getChildren().remove(freeformShapes.pop());
 
 		// Vertex if there was an edge
-		if (freeformShapes.size() > 0)
-			canvasPane.getChildren().remove(freeformShapes.pop());
+		if (freeformShapes.size() > 0) canvasPane.getChildren().remove(freeformShapes.pop());
 	}
 
 	private void drawTempPolygonEdge(MouseEvent event) {
 		// Need at least one point
-		if (freeformPoints.size() < 2)
-			return;
+		if (freeformPoints.size() < 2) return;
 
-		if (freeformEdge.isPresent())
-			canvasPane.getChildren().remove(freeformEdge.get());
+		if (freeformEdge.isPresent()) canvasPane.getChildren().remove(freeformEdge.get());
 
 		double lastX = freeformPoints.get(freeformPoints.size() - 2);
 		double lastY = freeformPoints.get(freeformPoints.size() - 1);
@@ -456,13 +444,11 @@ public class TargetEditorController {
 	public void cursorSelected(ActionEvent event) {
 		clearFreeformState(false);
 
-		if (!cursorRegion.isPresent())
-			return;
+		if (!cursorRegion.isPresent()) return;
 
 		// Remove shape that was never actually placed
 		Node selected = cursorRegion.get();
-		if (!targetRegions.contains(selected))
-			canvasPane.getChildren().remove(selected);
+		if (!targetRegions.contains(selected)) canvasPane.getChildren().remove(selected);
 
 		cursorRegion = Optional.empty();
 	}
@@ -495,8 +481,7 @@ public class TargetEditorController {
 					ImageRegion newGIFRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
 					GifAnimation gif = new GifAnimation(newGIFRegion, imageFile);
 					newGIFRegion.setImage(gif.getFirstFrame());
-					if (gif.getFrameCount() > 0)
-						newGIFRegion.setAnimation(gif);
+					if (gif.getFrameCount() > 0) newGIFRegion.setAnimation(gif);
 					imageRegion = Optional.of(newGIFRegion);
 					break;
 				case "png":
@@ -641,12 +626,10 @@ public class TargetEditorController {
 		// adjusted (it can't be off the canvas)
 		if (!freeformButton.isSelected()) {
 			double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
-			if (leftX < 0)
-				newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
+			if (leftX < 0) newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
 
 			double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
-			if (topY < 0)
-				newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
+			if (topY < 0) newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
 
 			cursorRegion = Optional.of(newShape);
 		}
@@ -674,8 +657,7 @@ public class TargetEditorController {
 	private void clearFreeformState(boolean finishedDrawing) {
 		if (cursorRegion.isPresent() && !finishedDrawing) {
 			Node selected = cursorRegion.get();
-			if (!targetRegions.contains(selected))
-				canvasPane.getChildren().remove(selected);
+			if (!targetRegions.contains(selected)) canvasPane.getChildren().remove(selected);
 
 			cursorRegion = Optional.empty();
 		}
@@ -692,8 +674,7 @@ public class TargetEditorController {
 
 	@FXML
 	public void bringForward(ActionEvent event) {
-		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get()))
-			return;
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get())) return;
 
 		int selectedIndex = targetRegions.indexOf(cursorRegion.get());
 
@@ -720,8 +701,7 @@ public class TargetEditorController {
 
 	@FXML
 	public void sendBackward(ActionEvent event) {
-		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get()))
-			return;
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get())) return;
 
 		int selectedIndex = targetRegions.indexOf(cursorRegion.get());
 
@@ -742,8 +722,7 @@ public class TargetEditorController {
 
 	@FXML
 	public void toggleTagEditor(ActionEvent event) {
-		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get()))
-			return;
+		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get())) return;
 
 		toggleTagEditor();
 	}
@@ -759,8 +738,7 @@ public class TargetEditorController {
 		} else if (!tagsButton.isSelected() && tagEditor.isPresent()) {
 			TagEditorPanel editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
-			if (cursorRegion.isPresent())
-				((TargetRegion) cursorRegion.get()).setTags(editor.getTags());
+			if (cursorRegion.isPresent()) ((TargetRegion) cursorRegion.get()).setTags(editor.getTags());
 			tagEditor = Optional.empty();
 		}
 	}

@@ -24,14 +24,13 @@ public class ExerciseMetadata {
 	private final String creator;
 	private final String description;
 
-	public ExerciseMetadata(String name, String version, String creator,
-			String description) {
+	public ExerciseMetadata(String name, String version, String creator, String description) {
 		this.name = name;
 		this.version = version;
 		this.creator = creator;
 		this.description = description;
 	}
-	
+
 	public String getName() {
 		return name;
 	}

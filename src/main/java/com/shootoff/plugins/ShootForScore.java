@@ -75,8 +75,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (!hitRegion.isPresent())
-			return;
+		if (!hitRegion.isPresent()) return;
 
 		if (hitRegion.get().tagExists("points")) {
 			super.setShotTimerColumnText(POINTS_COL_NAME, hitRegion.get().getTag("points"));

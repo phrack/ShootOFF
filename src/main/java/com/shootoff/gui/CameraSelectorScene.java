@@ -57,125 +57,129 @@ public class CameraSelectorScene extends Stage {
 	private final List<Camera> selectedWebcams = new ArrayList<Camera>();
 	private final ListView<String> webcamListView = new ListView<String>();
 	private final ObservableList<String> webcams = FXCollections.observableArrayList();
-	
+
 	public CameraSelectorScene(Configuration config, Window parent, List<Camera> configuredCameras) {
 		super();
 		this.initOwner(parent);
 		this.initModality(Modality.WINDOW_MODAL);
-		
+
 		this.config = config;
 		this.configuredCameras = configuredCameras;
-		
+
 		for (Camera webcam : Camera.getWebcams()) {
 			if (!configuredCameras.contains(webcam)) {
 				unconfiguredWebcams.add(webcam);
-				Platform.runLater(() -> { webcams.add(webcam.getName()); });
+				Platform.runLater(() -> {
+					webcams.add(webcam.getName());
+				});
 			}
 		}
-		
+
 		BorderPane pane = new BorderPane();
-		
+
 		final Button registerIpCamButton = new Button("Register IPCam");
 		registerIpCamButton.setOnAction((event) -> {
-				collectIpCamInfo();
-			});
-	
-	    webcamListView.setCellFactory(new Callback<ListView<String>, 
-	            ListCell<String>>() {
-	                @Override 
-	                public ListCell<String> call(ListView<String> list) {
-	                    return new ImageCell(unconfiguredWebcams, null, Optional.empty(), Optional.empty());
-	                }
-	            }
-	        );
+			collectIpCamInfo();
+		});
 
-	    webcamListView.setOnMouseClicked((event) -> {
-	    		if (event.getClickCount() == 2) {
-	    			addSelection();
-	    		}
-	    	});
-	    
-	    webcamListView.setOnKeyPressed((event) -> {
-	    		if (event.getCode() == KeyCode.ENTER) {
-	    			addSelection();
-	    		}else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
-	    			removeSelectedIpCams();
-	    		}
-	    	});
-	    
-	    webcamListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		webcamListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+			@Override
+			public ListCell<String> call(ListView<String> list) {
+				return new ImageCell(unconfiguredWebcams, null, Optional.empty(), Optional.empty());
+			}
+		});
+
+		webcamListView.setOnMouseClicked((event) -> {
+			if (event.getClickCount() == 2) {
+				addSelection();
+			}
+		});
+
+		webcamListView.setOnKeyPressed((event) -> {
+			if (event.getCode() == KeyCode.ENTER) {
+				addSelection();
+			} else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
+				removeSelectedIpCams();
+			}
+		});
+
+		webcamListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		webcamListView.setItems(webcams);
-		
+
 		VBox v = new VBox(registerIpCamButton, webcamListView);
 		v.setAlignment(Pos.CENTER);
 		pane.setTop(v);
-		
+
 		final Button okButton = new Button("OK");
 		okButton.setDefaultButton(true);
 		okButton.setOnAction((event) -> {
-				addSelection();
-			});
-		
+			addSelection();
+		});
+
 		final Button cancelButton = new Button("Cancel");
 		cancelButton.setOnAction((event) -> {
-				this.close();
-			});
-		
+			this.close();
+		});
+
 		HBox h = new HBox(okButton, cancelButton);
 		h.setSpacing(10);
 		pane.setRight(h);
-		
+
 		Scene scene = new Scene(pane);
 		this.setScene(scene);
 		this.show();
 	}
-	
+
 	private void collectIpCamInfo() {
 		final Stage ipcamStage = new Stage();
 		final GridPane ipcamPane = new GridPane();
-		
+
 		final ColumnConstraints cc = new ColumnConstraints(400);
 		cc.setHalignment(HPos.CENTER);
 		ipcamPane.getColumnConstraints().addAll(new ColumnConstraints(), cc);
-		 
+
 		final TextField nameTextField = new TextField();
 		ipcamPane.add(new Label("IPCam Name:"), 0, 0);
 		ipcamPane.add(nameTextField, 1, 0);
-		 
+
 		final TextField urlTextField = new TextField("http://");
 		ipcamPane.add(new Label("IPCam URL:"), 0, 1);
 		ipcamPane.add(urlTextField, 1, 1);
-		 
+
 		final Button okButton = new Button("OK");
 		okButton.setDefaultButton(true);
 		ipcamPane.add(okButton, 1, 2);
- 
+
 		okButton.setOnAction((e) -> {
-				if (nameTextField.getText().isEmpty() || urlTextField.getText().isEmpty()) {
-					Alert ipcamInfoAlert = new Alert(AlertType.ERROR);
-					ipcamInfoAlert.setTitle("Missing Information");
-					ipcamInfoAlert.setHeaderText("Missing Required IPCam Information!");
-					ipcamInfoAlert.setResizable(true);
-					ipcamInfoAlert.setContentText("Please fill in both the IPCam name and the URL.");
-					ipcamInfoAlert.showAndWait();
-					return;
+			if (nameTextField.getText().isEmpty() || urlTextField.getText().isEmpty()) {
+				Alert ipcamInfoAlert = new Alert(AlertType.ERROR);
+				ipcamInfoAlert.setTitle("Missing Information");
+				ipcamInfoAlert.setHeaderText("Missing Required IPCam Information!");
+				ipcamInfoAlert.setResizable(true);
+				ipcamInfoAlert.setContentText("Please fill in both the IPCam name and the URL.");
+				ipcamInfoAlert.showAndWait();
+				return;
+			}
+
+			Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText());
+
+			if (cam.isPresent()) {
+				ImageCell.cacheCamera(cam.get());
+
+				if (!configuredCameras.contains(cam.get())) {
+					unconfiguredWebcams.add(cam.get());
+
+					Platform.runLater(() -> {
+						webcamListView.setItems(null);
+						webcams.add(cam.get().getName());
+						webcamListView.setItems(webcams);
+					});
 				}
-			
-				Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText());
-				
-				if (cam.isPresent()) {
-					ImageCell.cacheCamera(cam.get());
-					
-					if (!configuredCameras.contains(cam.get())) {
-						unconfiguredWebcams.add(cam.get());
-						
-						Platform.runLater(() -> { webcamListView.setItems(null); webcams.add(cam.get().getName()); webcamListView.setItems(webcams); });
-					}
-				}
-				
-			 	ipcamStage.close();
-			 });
- 
+			}
+
+			ipcamStage.close();
+		});
+
 		final Scene scene = new Scene(ipcamPane);
 		ipcamStage.initOwner(this);
 		ipcamStage.initModality(Modality.WINDOW_MODAL);
@@ -183,40 +187,38 @@ public class CameraSelectorScene extends Stage {
 		ipcamStage.setScene(scene);
 		ipcamStage.showAndWait();
 	}
-	
+
 	private void addSelection() {
-		final ObservableList<String> selectedNames = 
-				webcamListView.getSelectionModel().getSelectedItems();
-		
+		final ObservableList<String> selectedNames = webcamListView.getSelectionModel().getSelectedItems();
+
 		if (selectedNames.isEmpty()) return;
-		
-        for (Camera webcam : unconfiguredWebcams) {
-        	if (selectedNames.contains(webcam.getName())) {
-        		selectedWebcams.add(webcam);
-        	}
-        }
-        
-        this.close();
+
+		for (Camera webcam : unconfiguredWebcams) {
+			if (selectedNames.contains(webcam.getName())) {
+				selectedWebcams.add(webcam);
+			}
+		}
+
+		this.close();
 	}
-	
+
 	private void removeSelectedIpCams() {
-		final ObservableList<String> selectedNames = 
-				webcamListView.getSelectionModel().getSelectedItems();
-		
+		final ObservableList<String> selectedNames = webcamListView.getSelectionModel().getSelectedItems();
+
 		if (selectedNames.isEmpty()) return;
-		
+
 		final List<String> removedCameraNames = new ArrayList<String>();
-		
+
 		for (String webcamName : selectedNames) {
 			if (config.getRegistedIpCams().containsKey(webcamName)) {
 				config.unregisterIpCam(webcamName);
 				removedCameraNames.add(webcamName);
 			}
 		}
-		
+
 		webcams.removeAll(removedCameraNames);
 	}
-	
+
 	public List<Camera> getSelectedWebcams() {
 		return selectedWebcams;
 	}

@@ -158,8 +158,7 @@ public class VideoPlayerController implements PlaybackListener {
 
 			lastTimestamp = currentTimestamp;
 			imageView.setImage(SwingFXUtils.toFXImage(event.getImage(), null));
-			if (isPlaying || !doDelay)
-				Platform.runLater(() -> listener.frameUpdated(currentTimestamp));
+			if (isPlaying || !doDelay) Platform.runLater(() -> listener.frameUpdated(currentTimestamp));
 		}
 
 		private void playVideo() {

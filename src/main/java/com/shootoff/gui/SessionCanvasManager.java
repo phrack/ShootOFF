@@ -81,8 +81,7 @@ public class SessionCanvasManager {
 
 			if (se.getVideoString().isPresent()) {
 				se.getShot().getMarker().setOnMouseClicked((event) -> {
-					if (event.getClickCount() < 2)
-						return;
+					if (event.getClickCount() < 2) return;
 
 					FXMLLoader loader = new FXMLLoader(
 							getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
@@ -191,8 +190,7 @@ public class SessionCanvasManager {
 		Target target = targets.get(se.getTargetIndex().get());
 		TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren().get(se.getHitRegionIndex().get());
 
-		if (!region.tagExists("command"))
-			return;
+		if (!region.tagExists("command")) return;
 
 		Target.parseCommandTag(region, (commands, commandName, args) -> {
 			if (!undo) {
@@ -228,8 +226,7 @@ public class SessionCanvasManager {
 							((ImageRegion) region).reset();
 						} else {
 							Optional<TargetRegion> t = Target.getTargetRegionByName(targets, region, args.get(0));
-							if (t.isPresent())
-								((ImageRegion) t.get()).reset();
+							if (t.isPresent()) ((ImageRegion) t.get()).reset();
 						}
 					}
 				}

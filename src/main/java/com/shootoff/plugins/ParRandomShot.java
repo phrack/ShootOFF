@@ -91,8 +91,7 @@ public class ParRandomShot extends ParForScore {
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
 		setLength();
 
-		if (!foundTarget || !hitRegion.isPresent() || !countScore)
-			return;
+		if (!foundTarget || !hitRegion.isPresent() || !countScore) return;
 
 		String subtarget = subtargets.get(currentSubtarget);
 		String hitTarget = getSubtarget(hitRegion);
@@ -153,8 +152,7 @@ public class ParRandomShot extends ParForScore {
 				}
 			}
 
-			if (foundTarget)
-				break;
+			if (foundTarget) break;
 		}
 
 		if (!foundTarget) {

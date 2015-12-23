@@ -45,8 +45,7 @@ public class VirtualMagazineProcessor implements ShotProcessor {
 	public boolean processShot(Shot shot) {
 		if (roundCount == 0) {
 			roundCount = config.getVirtualMagazineCapacity();
-			if (useTTS)
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
+			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
 			return false;
 		}
 

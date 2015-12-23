@@ -25,5 +25,6 @@ import com.shootoff.camera.LightingCondition;
 
 public interface DebuggerListener {
 	public void updateDebugView(BufferedImage thresholdImg);
+
 	public void updateFeedData(double fps, Optional<LightingCondition> lightingCondition);
 }

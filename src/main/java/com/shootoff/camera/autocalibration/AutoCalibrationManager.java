@@ -125,8 +125,7 @@ public class AutoCalibrationManager implements Runnable {
 		// Step 1: Find the chessboard corners
 		Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
 
-		if (!boardCorners.isPresent())
-			return Optional.empty();
+		if (!boardCorners.isPresent()) return Optional.empty();
 
 		// Step 2: Estimate the pattern corners
 		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardCorners.get());
@@ -134,8 +133,7 @@ public class AutoCalibrationManager implements Runnable {
 		// Step 3: Use Hough Lines to find the actual corners
 		Optional<MatOfPoint2f> idealCorners = findIdealCorners(mat, estimatedPatternRect);
 
-		if (!idealCorners.isPresent())
-			return Optional.empty();
+		if (!idealCorners.isPresent()) return Optional.empty();
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-dist.png");
@@ -458,15 +456,13 @@ public class AutoCalibrationManager implements Runnable {
 
 		for (double[] line1 : verifiedLines) {
 			for (double[] line2 : verifiedLines) {
-				if (line1 == line2)
-					continue;
+				if (line1 == line2) continue;
 
 				logger.trace("compare {} {}", line1, line2);
 
 				Optional<Point> intersection = computeIntersect(line1, line2);
 
-				if (intersection.isPresent())
-					possibleCorners.add(intersection.get());
+				if (intersection.isPresent()) possibleCorners.add(intersection.get());
 
 			}
 		}
@@ -497,8 +493,7 @@ public class AutoCalibrationManager implements Runnable {
 
 		// Verify that we have the corners we need
 		for (Point pt : idealCorners) {
-			if (pt == null)
-				return Optional.empty();
+			if (pt == null) return Optional.empty();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("idealCorners {}", pt);
@@ -729,9 +724,8 @@ public class AutoCalibrationManager implements Runnable {
 	}
 
 	private double euclideanDistance(Point pt1, Point pt2) {
-		if (logger.isTraceEnabled())
-			logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
-					Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
+		if (logger.isTraceEnabled()) logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
+				Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
 
 		return Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
 	}

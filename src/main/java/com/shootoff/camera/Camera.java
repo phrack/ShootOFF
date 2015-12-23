@@ -179,8 +179,7 @@ public class Camera {
 	}
 
 	public static List<Camera> getWebcams() {
-		if (isMac)
-			return knownWebcams;
+		if (isMac) return knownWebcams;
 
 		List<Camera> webcams = new ArrayList<Camera>();
 
@@ -260,15 +259,11 @@ public class Camera {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		Camera other = (Camera) obj;
-		if (!this.getName().equals(other.getName()))
-			return false;
+		if (!this.getName().equals(other.getName())) return false;
 		return true;
 	}
 }
