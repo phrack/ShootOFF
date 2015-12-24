@@ -9,7 +9,7 @@ import com.shootoff.gui.Target;
 public class Course {
 	private final Optional<LocatedImage> background;
 	private final List<Target> targets;
-	
+
 	public Course(List<Target> targets) {
 		background = Optional.empty();
 		this.targets = targets;
@@ -19,11 +19,11 @@ public class Course {
 		this.background = Optional.of(background);
 		this.targets = targets;
 	}
-	
+
 	public Optional<LocatedImage> getBackground() {
 		return background;
 	}
-	
+
 	public List<Target> getTargets() {
 		return targets;
 	}

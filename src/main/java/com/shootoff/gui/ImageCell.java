@@ -43,155 +43,166 @@ import javafx.util.converter.DefaultStringConverter;
 
 public class ImageCell extends TextFieldListCell<String> {
 	private final Logger logger = LoggerFactory.getLogger(ImageCell.class);
-	
+
 	private static final Map<Camera, ImageView> imageCache = new HashMap<Camera, ImageView>();
 	private final List<Camera> webcams;
 	private final List<String> userDefinedCameraNames;
 	private final Optional<Set<Camera>> recordingCameras;
-	
-	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames, 
-			Optional<DesignateShotRecorderListener> listener, Optional<Set<Camera>> recordingCameras) {
+
+	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames,
+			Optional<DesignateShotRecorderListener> listener,
+			Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<Camera>(webcams);
 		if (userDefinedCameraNames != null) {
-			this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
+			this.userDefinedCameraNames = new ArrayList<String>(
+					userDefinedCameraNames);
 		} else {
 			this.userDefinedCameraNames = null;
 		}
 		this.recordingCameras = recordingCameras;
-		
+
 		this.setConverter(new DefaultStringConverter());
-		
+
 		for (Camera c : webcams) {
-			if (imageCache.containsKey(c)) continue;
-			
+			if (imageCache.containsKey(c))
+				continue;
+
 			cacheCamera(c);
-			
+
 			new Thread(() -> {
-					Optional<Image> img = fetchWebcamImage(c);
-					
-					if (img.isPresent()) {
-						imageCache.get(c).setImage(img.get());
-					}
-				}).start();
+				Optional<Image> img = fetchWebcamImage(c);
+
+				if (img.isPresent()) {
+					imageCache.get(c).setImage(img.get());
+				}
+			}).start();
 		}
-		
+
 		this.editingProperty().addListener(new ChangeListener<Boolean>() {
-				@Override
-				public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {					
-					if (!newValue) {
-						Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this.getText());
-						
-				        if (webcamIV.isPresent()) {
-				            setGraphic(webcamIV.get());
-				        }
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable,
+					Boolean oldValue, Boolean newValue) {
+				if (!newValue) {
+					Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this
+							.getText());
+
+					if (webcamIV.isPresent()) {
+						setGraphic(webcamIV.get());
 					}
 				}
-			});
-		
+			}
+		});
+
 		if (listener.isPresent()) {
 			this.setOnMouseClicked((event) -> {
-					if (event.getClickCount() < 2) return;
-					
-					this.cancelEdit();
-					
-					if (this.getStyle().isEmpty()) {
-						this.setStyle("-fx-background-color: green");
-						listener.get().registerShotRecorder(this.getText());
-					} else {
-						this.setStyle("");
-						listener.get().unregisterShotRecorder(this.getText());
-					}
-					
-					Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this.getText());
-					
-			        if (webcamIV.isPresent()) {
-			            setGraphic(webcamIV.get());
-			        }
-				});
+				if (event.getClickCount() < 2)
+					return;
+
+				this.cancelEdit();
+
+				if (this.getStyle().isEmpty()) {
+					this.setStyle("-fx-background-color: green");
+					listener.get().registerShotRecorder(this.getText());
+				} else {
+					this.setStyle("");
+					listener.get().unregisterShotRecorder(this.getText());
+				}
+
+				Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this
+						.getText());
+
+				if (webcamIV.isPresent()) {
+					setGraphic(webcamIV.get());
+				}
+			});
 		}
 	}
-	
-    @Override
-    public void updateItem(String item, boolean empty) {  	
-        super.updateItem(item, empty);
-        
-        if (empty || item == null) {
-        	setGraphic(null);
-        	setText(null);
-        	return;
-        }
 
-        Optional<ImageView> webcamIV = fetchWebcamImageView(item);
-        
-        if (recordingCameras.isPresent()) {
-        	for (Camera recordingCamera : recordingCameras.get()) {
-        		if (recordingCamera.getName().equals(item)) {
-        			this.setStyle("-fx-background-color: green");
-        			break;
-        		}
-        	}
-    	}
-        
-        if (webcamIV.isPresent()) {
-            setGraphic(webcamIV.get());
-        }
-        
-        setText(item);
-    }
-    
-    public static void cacheCamera(Camera camera) {
+	@Override
+	public void updateItem(String item, boolean empty) {
+		super.updateItem(item, empty);
+
+		if (empty || item == null) {
+			setGraphic(null);
+			setText(null);
+			return;
+		}
+
+		Optional<ImageView> webcamIV = fetchWebcamImageView(item);
+
+		if (recordingCameras.isPresent()) {
+			for (Camera recordingCamera : recordingCameras.get()) {
+				if (recordingCamera.getName().equals(item)) {
+					this.setStyle("-fx-background-color: green");
+					break;
+				}
+			}
+		}
+
+		if (webcamIV.isPresent()) {
+			setGraphic(webcamIV.get());
+		}
+
+		setText(item);
+	}
+
+	public static void cacheCamera(Camera camera) {
 		ImageView iv = new ImageView();
-        iv.setFitWidth(100);
-        iv.setFitHeight(75);
+		iv.setFitWidth(100);
+		iv.setFitHeight(75);
 		imageCache.put(camera, iv);
-    }
-    
-    private Optional<ImageView> fetchWebcamImageView(String webcamName) {
-    	Optional<ImageView> webcamIV = Optional.empty();
-        
-        if (userDefinedCameraNames == null) {
-        	for (Camera webcam : webcams) {
-        		if (webcam.getName().equals(webcamName)) {
-        			webcamIV = Optional.of(imageCache.get(webcam));
-        		}
-        	}
-        } else {
-        	try {
-	            int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
-	            if (cameraIndex >= 0) {
-	            	webcamIV = Optional.of(imageCache.get(webcams.get(cameraIndex)));	
-	            }
-        	} catch (NullPointerException e) {
-        		logger.error("Error fetching cached image for configured camera: " + webcamName, e);
-        		throw e;
-        	}
-        }
- 
-        return webcamIV;
-    }
-    
-    private Optional<Image> fetchWebcamImage(Camera webcam) {
-    	boolean cameraOpened = false;
-    	
+	}
+
+	private Optional<ImageView> fetchWebcamImageView(String webcamName) {
+		Optional<ImageView> webcamIV = Optional.empty();
+
+		if (userDefinedCameraNames == null) {
+			for (Camera webcam : webcams) {
+				if (webcam.getName().equals(webcamName)) {
+					webcamIV = Optional.of(imageCache.get(webcam));
+				}
+			}
+		} else {
+			try {
+				int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
+				if (cameraIndex >= 0) {
+					webcamIV = Optional.of(imageCache.get(webcams
+							.get(cameraIndex)));
+				}
+			} catch (NullPointerException e) {
+				logger.error(
+						"Error fetching cached image for configured camera: "
+								+ webcamName, e);
+				throw e;
+			}
+		}
+
+		return webcamIV;
+	}
+
+	private Optional<Image> fetchWebcamImage(Camera webcam) {
+		boolean cameraOpened = false;
+
 		if (!webcam.isOpen()) {
-			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
-			webcam.open();			
+			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH,
+					CameraManager.DEFAULT_FEED_HEIGHT));
+			webcam.open();
 			cameraOpened = true;
 		}
 
 		Image webcamImg = null;
 		if (webcam.isOpen()) {
 			BufferedImage img = webcam.getImage();
-			
+
 			if (img != null) {
 				webcamImg = SwingFXUtils.toFXImage(img, null);
 			}
 		}
-		
+
 		if (cameraOpened == true) {
 			webcam.close();
 		}
-		
+
 		return Optional.ofNullable(webcamImg);
-    }
+	}
 }

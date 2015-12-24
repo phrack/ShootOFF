@@ -24,38 +24,38 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 
 public class ImageFrame {
-    private final int delay;
-    private final BufferedImage bufferedImage;
-    private final Image image;
-    private final String disposal;
+	private final int delay;
+	private final BufferedImage bufferedImage;
+	private final Image image;
+	private final String disposal;
 
-    public ImageFrame (BufferedImage image, int delay, String disposal){
-        this.bufferedImage = image;
-        this.image = SwingFXUtils.toFXImage(image, null);
-        this.delay = delay;
-        this.disposal = disposal;
-    }
+	public ImageFrame(BufferedImage image, int delay, String disposal) {
+		this.bufferedImage = image;
+		this.image = SwingFXUtils.toFXImage(image, null);
+		this.delay = delay;
+		this.disposal = disposal;
+	}
 
-    public ImageFrame (BufferedImage image){
-        this.bufferedImage = image;
-        this.image = SwingFXUtils.toFXImage(image, null);
-        this.delay = -1;
-        this.disposal = null;
-    }
+	public ImageFrame(BufferedImage image) {
+		this.bufferedImage = image;
+		this.image = SwingFXUtils.toFXImage(image, null);
+		this.delay = -1;
+		this.disposal = null;
+	}
 
-    public BufferedImage getBufferedImage() {
-        return bufferedImage;
-    }
-    
-    public Image getImage() {
-        return image;
-    }
+	public BufferedImage getBufferedImage() {
+		return bufferedImage;
+	}
 
-    public int getDelay() {
-        return delay;
-    }
+	public Image getImage() {
+		return image;
+	}
 
-    public String getDisposal() {
-        return disposal;
-    }
+	public int getDelay() {
+		return delay;
+	}
+
+	public String getDisposal() {
+		return disposal;
+	}
 }

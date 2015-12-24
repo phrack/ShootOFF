@@ -56,81 +56,103 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class PreferencesController implements DesignateShotRecorderListener {
-	@FXML private ListView<String> webcamListView;
-	@FXML private Slider markerRadiusSlider;
-	@FXML private Label markerRadiusLabel;
-	@FXML private ChoiceBox<String> ignoreLaserColorChoiceBox;
-	@FXML private CheckBox redLaserSoundCheckBox;
-	@FXML private TextField redLaserSoundTextField;
-	@FXML private Button redLaserSoundButton;
-	@FXML private CheckBox greenLaserSoundCheckBox;
-	@FXML private TextField greenLaserSoundTextField;	
-	@FXML private Button greenLaserSoundButton;
-	@FXML private CheckBox virtualMagazineCheckBox;
-	@FXML private Slider virtualMagazineSlider;
-	@FXML private Label virtualMagazineLabel;
-	@FXML private CheckBox malfunctionsCheckBox;
-	@FXML private Slider malfunctionsSlider;
-	@FXML private Label malfunctionsLabel;
-	
+	@FXML
+	private ListView<String> webcamListView;
+	@FXML
+	private Slider markerRadiusSlider;
+	@FXML
+	private Label markerRadiusLabel;
+	@FXML
+	private ChoiceBox<String> ignoreLaserColorChoiceBox;
+	@FXML
+	private CheckBox redLaserSoundCheckBox;
+	@FXML
+	private TextField redLaserSoundTextField;
+	@FXML
+	private Button redLaserSoundButton;
+	@FXML
+	private CheckBox greenLaserSoundCheckBox;
+	@FXML
+	private TextField greenLaserSoundTextField;
+	@FXML
+	private Button greenLaserSoundButton;
+	@FXML
+	private CheckBox virtualMagazineCheckBox;
+	@FXML
+	private Slider virtualMagazineSlider;
+	@FXML
+	private Label virtualMagazineLabel;
+	@FXML
+	private CheckBox malfunctionsCheckBox;
+	@FXML
+	private Slider malfunctionsSlider;
+	@FXML
+	private Label malfunctionsLabel;
+
 	private Stage preferencesStage;
 	private Configuration config;
-	private CameraConfigListener cameraConfigListener; 
+	private CameraConfigListener cameraConfigListener;
 	private boolean cameraConfigChanged = false;
 	private final Set<Camera> recordingCameras = new HashSet<Camera>();
 	private final List<Camera> configuredCameras = new ArrayList<Camera>();
-	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
-	
-	public void setConfig(Configuration config, 
+	private final ObservableList<String> configuredNames = FXCollections
+			.observableArrayList();
+
+	public void setConfig(Configuration config,
 			CameraConfigListener cameraConfigListener) throws IOException {
-	    preferencesStage = (Stage)markerRadiusSlider.getScene().getWindow();
-	    
-	    this.cameraConfigListener = cameraConfigListener;
-	    
-	    ignoreLaserColorChoiceBox.setItems(FXCollections.observableArrayList(
-	    		"None", "red", "green"));
-	    
-	    webcamListView.setCellFactory(new Callback<ListView<String>, 
-	            ListCell<String>>() {
-	                @Override 
-	                public ListCell<String> call(ListView<String> list) {
-	                    return new ImageCell(configuredCameras, configuredNames, Optional.of(PreferencesController.this),
-	                    		Optional.of(config.getRecordingCameras()));
-	                }
-	            }
-	        );
-		
-	    webcamListView.setOnKeyPressed((event) -> {
-	    		if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
-	    			ObservableList<String> selectedNames =
-	    					webcamListView.getSelectionModel().getSelectedItems();
-	    			
-	    			for (Iterator<Camera> it = configuredCameras.iterator(); it.hasNext();) {
-	    				Camera webcam = it.next();
-	    				if (selectedNames.contains(webcam.getName())) {
-	    					it.remove();
-	    				}
-	    			}
-	    			
-	    			boolean changed = configuredNames.removeAll(selectedNames);
-	    			if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
-	    		}
-	    	});
-	    
-	    webcamListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-	    webcamListView.setItems(configuredNames);
-	    
+		preferencesStage = (Stage) markerRadiusSlider.getScene().getWindow();
+
+		this.cameraConfigListener = cameraConfigListener;
+
+		ignoreLaserColorChoiceBox.setItems(FXCollections.observableArrayList(
+				"None", "red", "green"));
+
+		webcamListView
+				.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+					@Override
+					public ListCell<String> call(ListView<String> list) {
+						return new ImageCell(configuredCameras,
+								configuredNames, Optional
+										.of(PreferencesController.this),
+								Optional.of(config.getRecordingCameras()));
+					}
+				});
+
+		webcamListView.setOnKeyPressed((event) -> {
+			if (event.getCode() == KeyCode.DELETE
+					|| event.getCode() == KeyCode.BACK_SPACE) {
+				ObservableList<String> selectedNames = webcamListView
+						.getSelectionModel().getSelectedItems();
+
+				for (Iterator<Camera> it = configuredCameras.iterator(); it
+						.hasNext();) {
+					Camera webcam = it.next();
+					if (selectedNames.contains(webcam.getName())) {
+						it.remove();
+					}
+				}
+
+				boolean changed = configuredNames.removeAll(selectedNames);
+				if (!cameraConfigChanged && changed)
+					cameraConfigChanged = changed;
+			}
+		});
+
+		webcamListView.getSelectionModel().setSelectionMode(
+				SelectionMode.MULTIPLE);
+		webcamListView.setItems(configuredNames);
+
 		this.config = config;
-		
+
 		linkSliderToLabel(markerRadiusSlider, markerRadiusLabel);
 		linkSliderToLabel(virtualMagazineSlider, virtualMagazineLabel);
 		linkSliderToLabel(malfunctionsSlider, malfunctionsLabel);
-		
+
 		for (String webcamName : config.getWebcams().keySet()) {
 			configuredNames.add(webcamName);
 			configuredCameras.add(config.getWebcams().get(webcamName));
 		}
-		
+
 		markerRadiusSlider.setValue(config.getMarkerRadius());
 		ignoreLaserColorChoiceBox.setValue(config.getIgnoreLaserColorName());
 		redLaserSoundCheckBox.setSelected(config.useRedLaserSound());
@@ -148,19 +170,22 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		malfunctionsSlider.setValue(config.getMalfunctionsProbability());
 		malfunctionsSlider.setDisable(!config.useMalfunctions());
 	}
-	
+
 	private void linkSliderToLabel(final Slider slider, final Label label) {
 		slider.valueProperty().addListener(new ChangeListener<Number>() {
-		      @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-		        if (newValue == null) {
-		          label.setText("");
-		          return;
-		        }
-		        label.setText(String.valueOf(newValue.intValue()));
-		      }
-		    });
+			@Override
+			public void changed(
+					ObservableValue<? extends Number> observableValue,
+					Number oldValue, Number newValue) {
+				if (newValue == null) {
+					label.setText("");
+					return;
+				}
+				label.setText(String.valueOf(newValue.intValue()));
+			}
+		});
 	}
-	
+
 	@Override
 	public void registerShotRecorder(String webcamName) {
 		for (Camera c : configuredCameras) {
@@ -180,92 +205,103 @@ public class PreferencesController implements DesignateShotRecorderListener {
 			}
 		}
 	}
-	
-	@FXML 
+
+	@FXML
 	public void redLaserSoundCheckBoxClicked(ActionEvent event) {
 		redLaserSoundTextField.setDisable(!redLaserSoundCheckBox.isSelected());
 		redLaserSoundButton.setDisable(!redLaserSoundCheckBox.isSelected());
 	}
-	
-	@FXML 
+
+	@FXML
 	public void greenLaserSoundCheckBoxClicked(ActionEvent event) {
-		greenLaserSoundTextField.setDisable(!greenLaserSoundCheckBox.isSelected());
+		greenLaserSoundTextField.setDisable(!greenLaserSoundCheckBox
+				.isSelected());
 		greenLaserSoundButton.setDisable(!greenLaserSoundCheckBox.isSelected());
 	}
-	
-	@FXML 
+
+	@FXML
 	public void redLaserSoundButtonClicked(ActionEvent event) {
 		Optional<File> soundFile = selectSoundFile();
-		if (soundFile.isPresent()) redLaserSoundTextField.setText(soundFile.get().getPath());
+		if (soundFile.isPresent())
+			redLaserSoundTextField.setText(soundFile.get().getPath());
 	}
-	
-	@FXML 
+
+	@FXML
 	public void greenLaserSoundButtonClicked(ActionEvent event) {
 		Optional<File> soundFile = selectSoundFile();
-		if (soundFile.isPresent()) greenLaserSoundTextField.setText(soundFile.get().getPath());	
+		if (soundFile.isPresent())
+			greenLaserSoundTextField.setText(soundFile.get().getPath());
 	}
-	
+
 	private Optional<File> selectSoundFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Shot Sound");
-		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "sounds"));
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Sound File", "*.mp3", "*.wav")
-            );
-        
-		return Optional.ofNullable(fileChooser.showOpenDialog(preferencesStage));
+		fileChooser.setInitialDirectory(new File(System
+				.getProperty("shootoff.home") + File.separator + "sounds"));
+		fileChooser.getExtensionFilters()
+				.addAll(new FileChooser.ExtensionFilter("Sound File", "*.mp3",
+						"*.wav"));
+
+		return Optional
+				.ofNullable(fileChooser.showOpenDialog(preferencesStage));
 	}
-	
-	@FXML 
+
+	@FXML
 	public void virtualMagazineCheckBoxClicked(ActionEvent event) {
 		virtualMagazineSlider.setDisable(!virtualMagazineCheckBox.isSelected());
 	}
 
-	@FXML 
+	@FXML
 	public void malfunctionsCheckBoxClicked(ActionEvent event) {
 		malfunctionsSlider.setDisable(!malfunctionsCheckBox.isSelected());
 	}
-	
+
 	@FXML
 	public void addCameraClicked(ActionEvent event) {
-		CameraSelectorScene cameraSelector = new CameraSelectorScene(
-				config, preferencesStage, configuredCameras);
-		
-		cameraSelector.setOnHidden((e) -> {
-				if (cameraSelector.getSelectedWebcams().isEmpty()) return;
+		CameraSelectorScene cameraSelector = new CameraSelectorScene(config,
+				preferencesStage, configuredCameras);
 
-				for (Camera webcam : cameraSelector.getSelectedWebcams()) {
-					boolean changed = configuredNames.add(webcam.getName());
-					configuredCameras.add(webcam);
-					
-	    			if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
-				}
-			});
+		cameraSelector.setOnHidden((e) -> {
+			if (cameraSelector.getSelectedWebcams().isEmpty())
+				return;
+
+			for (Camera webcam : cameraSelector.getSelectedWebcams()) {
+				boolean changed = configuredNames.add(webcam.getName());
+				configuredCameras.add(webcam);
+
+				if (!cameraConfigChanged && changed)
+					cameraConfigChanged = changed;
+			}
+		});
 	}
-	
-	@FXML 
-	public void okClicked(ActionEvent event) throws ConfigurationException, IOException {
+
+	@FXML
+	public void okClicked(ActionEvent event) throws ConfigurationException,
+			IOException {
 		config.setWebcams(configuredNames, configuredCameras);
 		config.setRecordingCameras(recordingCameras);
-		config.setMarkerRadius((int)markerRadiusSlider.getValue());
-		config.setIgnoreLaserColor(!ignoreLaserColorChoiceBox.getValue().equals("None"));
+		config.setMarkerRadius((int) markerRadiusSlider.getValue());
+		config.setIgnoreLaserColor(!ignoreLaserColorChoiceBox.getValue()
+				.equals("None"));
 		config.setIgnoreLaserColorName(ignoreLaserColorChoiceBox.getValue());
 		config.setUseRedLaserSound(redLaserSoundCheckBox.isSelected());
 		config.setRedLaserSound(new File(redLaserSoundTextField.getText()));
 		config.setUseGreenLaserSound(greenLaserSoundCheckBox.isSelected());
 		config.setGreenLaserSound(new File(greenLaserSoundTextField.getText()));
 		config.setUseVirtualMagazine(virtualMagazineCheckBox.isSelected());
-		config.setVirtualMagazineCapacity((int)virtualMagazineSlider.getValue());
+		config.setVirtualMagazineCapacity((int) virtualMagazineSlider
+				.getValue());
 		config.setMalfunctions(malfunctionsCheckBox.isSelected());
-		config.setMalfunctionsProbability((float)malfunctionsSlider.getValue());
-		
+		config.setMalfunctionsProbability((float) malfunctionsSlider.getValue());
+
 		config.writeConfigurationFile();
 		preferencesStage.close();
-		
-		if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
+
+		if (cameraConfigChanged)
+			cameraConfigListener.cameraConfigUpdated();
 	}
 
-	@FXML 
+	@FXML
 	public void cancelClicked(ActionEvent event) {
 		preferencesStage.close();
 	}

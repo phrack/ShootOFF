@@ -27,28 +27,30 @@ public class VirtualMagazineProcessor implements ShotProcessor {
 	private final Configuration config;
 	private boolean useTTS = true;
 	private int roundCount = 0;
-	
+
 	public VirtualMagazineProcessor(Configuration config) {
 		this.config = config;
 		roundCount = config.getVirtualMagazineCapacity();
 	}
-	
+
 	public void setUseTTS(boolean useTTS) {
-		this.useTTS = useTTS; 
+		this.useTTS = useTTS;
 	}
-	
+
 	protected int getRountCount() {
 		return roundCount;
 	}
-	
+
 	@Override
 	public boolean processShot(Shot shot) {
 		if (roundCount == 0) {
 			roundCount = config.getVirtualMagazineCapacity();
-			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
+			if (useTTS)
+				TrainingExerciseBase.playSound(new File(
+						"sounds/voice/shootoff-reload.wav"));
 			return false;
 		}
-		
+
 		roundCount--;
 		return true;
 	}

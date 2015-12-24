@@ -37,83 +37,93 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaController arenaController;
 	private final List<Target> targets = new ArrayList<Target>();
-	
+
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
-	public ProjectorTrainingExerciseBase() {}
-	
+	public ProjectorTrainingExerciseBase() {
+	}
+
 	public ProjectorTrainingExerciseBase(List<Group> targets) {
 		super(targets);
 	}
-	
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, 
-			TableView<ShotEntry> shotTimerTable, ProjectorArenaController arenaController) {
+
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor,
+			TableView<ShotEntry> shotTimerTable,
+			ProjectorArenaController arenaController) {
 		super.init(config, camerasSupervisor, shotTimerTable);
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaController = arenaController;
 	}
-	
+
 	@Override
 	public void reset() {
 		camerasSupervisor.reset();
-		if (config.getExercise().isPresent()) 
-			config.getExercise().get().reset(arenaController.getCanvasManager().getTargetGroups());	
+		if (config.getExercise().isPresent())
+			config.getExercise()
+					.get()
+					.reset(arenaController.getCanvasManager().getTargetGroups());
 	}
-	
+
 	/**
 	 * Add a target to the projector arena at specific coordinates.
 	 * 
-	 * @param target 	the file to load the target from
-	 * @param x			the top left x coordinate of the target
-	 * @param y			the top left y coordinate of the target
+	 * @param target
+	 *            the file to load the target from
+	 * @param x
+	 *            the top left x coordinate of the target
+	 * @param y
+	 *            the top left y coordinate of the target
 	 * 
-	 * @return	the group that was loaded from the target file
+	 * @return the group that was loaded from the target file
 	 */
 	public Optional<Target> addTarget(File target, double x, double y) {
-		if (!target.isAbsolute()) 
-			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
-		
-		Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
-		
+		if (!target.isAbsolute())
+			target = new File(System.getProperty("shootoff.home")
+					+ File.separator + target.getPath());
+
+		Optional<Target> newTarget = arenaController.getCanvasManager()
+				.addTarget(target);
+
 		if (newTarget.isPresent()) {
 			newTarget.get().setPosition(x, y);
 			targets.add(newTarget.get());
 		}
-		
+
 		return newTarget;
 	}
-	
+
 	public void removeTarget(Target target) {
 		arenaController.getCanvasManager().removeTarget(target);
 		targets.remove(target);
 	}
-	
+
 	public double getArenaWidth() {
 		return arenaController.getWidth();
 	}
-	
+
 	public double getArenaHeight() {
 		return arenaController.getHeight();
 	}
-	
+
 	/**
-	 * Returns the current instance of this class. This metehod exists so that we can
-	 * call methods in this class when in an internal class (e.g. to implement Callable)
-	 * that doesn't have access to super.
+	 * Returns the current instance of this class. This metehod exists so that
+	 * we can call methods in this class when in an internal class (e.g. to
+	 * implement Callable) that doesn't have access to super.
 	 * 
 	 * @return the current instance of this class
 	 */
 	public ProjectorTrainingExerciseBase getInstance() {
 		return this;
 	}
-	
+
 	@Override
 	public void destroy() {
 		super.destroy();
-		
-		for (Target target : targets) arenaController.getCanvasManager().removeTarget(target);
-		
+
+		for (Target target : targets)
+			arenaController.getCanvasManager().removeTarget(target);
+
 		targets.clear();
 	}
 }

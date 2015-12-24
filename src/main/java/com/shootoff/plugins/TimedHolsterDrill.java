@@ -34,48 +34,55 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
 
-public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
+public class TimedHolsterDrill extends TrainingExerciseBase implements
+		TrainingExercise, DelayedStartListener {
 	private final static String LENGTH_COL_NAME = "Length";
 	private final static int LENGTH_COL_WIDTH = 60;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors
+			.newScheduledThreadPool(CORE_POOL_SIZE);
 	private TrainingExerciseBase thisSuper;
 	private int delayMin = 4;
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
 	private long beepTime = 0;
 	private boolean coloredRows = false;
-	
-	public TimedHolsterDrill() {}
-	
+
+	public TimedHolsterDrill() {
+	}
+
 	public TimedHolsterDrill(List<Group> targets) {
 		super(targets);
 		this.thisSuper = super.getInstance();
 	}
-	
+
 	@Override
 	public void init() {
 		super.addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
 		super.pauseShotDetection(true);
 		super.getDelayedStartInterval(this);
-		
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);	
+
+		executorService
+				.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
-	
+
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() {
-			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
-			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-			
+			TrainingExerciseBase.playSound(new File(
+					"sounds/voice/shootoff-makeready.wav"));
+			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1)
+					+ delayMin;
+
 			if (repeatExercise)
-				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
-		
+				executorService.schedule(new Round(), randomDelay,
+						TimeUnit.SECONDS);
+
 			return null;
 		}
 	}
-	
+
 	private class Round implements Callable<Void> {
 		@Override
 		public Void call() throws Exception {
@@ -85,56 +92,64 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 				} else {
 					thisSuper.setShotTimerRowColor(null);
 				}
-				
+
 				coloredRows = !coloredRows;
-				
-	            TrainingExerciseBase.playSound("sounds/beep.wav");
-	            thisSuper.pauseShotDetection(false);
-	            beepTime = System.currentTimeMillis();
-	            
-	            int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-	            executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
+
+				TrainingExerciseBase.playSound("sounds/beep.wav");
+				thisSuper.pauseShotDetection(false);
+				beepTime = System.currentTimeMillis();
+
+				int randomDelay = new Random()
+						.nextInt((delayMax - delayMin) + 1) + delayMin;
+				executorService.schedule(new Round(), randomDelay,
+						TimeUnit.SECONDS);
 			}
-			
+
 			return null;
 		}
 	}
-	
+
 	@Override
 	public void updatedDelayedStartInterval(int min, int max) {
 		delayMin = min;
 		delayMax = max;
 	}
-	
+
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("Timed Holster Drill", "1.0", "phrack",
-			    "This exercise does not require a target, but one may be used "
-			    		+ "to give the shooter something to shoot at. When the exercise "
-			    		+ "is started you are asked to enter a range for randomly "
-			    		+ "delayed starts. You are then given 10 seconds to position "
-			    		+ "yourself. After a random wait (within the entered range) a "
-			    		+ "beep tells you to draw their pistol from it's holster, "
-			    		+ "fire at your target, and finally re-holster. This process is "
-			    		+ "repeated as long as this exercise is on.");
+		return new ExerciseMetadata(
+				"Timed Holster Drill",
+				"1.0",
+				"phrack",
+				"This exercise does not require a target, but one may be used "
+						+ "to give the shooter something to shoot at. When the exercise "
+						+ "is started you are asked to enter a range for randomly "
+						+ "delayed starts. You are then given 10 seconds to position "
+						+ "yourself. After a random wait (within the entered range) a "
+						+ "beep tells you to draw their pistol from it's holster, "
+						+ "fire at your target, and finally re-holster. This process is "
+						+ "repeated as long as this exercise is on.");
 	}
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		float drawShotLength = (float)(System.currentTimeMillis() - beepTime) / (float)1000; // s
-		super.setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
+		float drawShotLength = (float) (System.currentTimeMillis() - beepTime)
+				/ (float) 1000; // s
+		super.setShotTimerColumnText(LENGTH_COL_NAME,
+				String.format("%.2f", drawShotLength));
 	}
 
 	@Override
 	public void reset(List<Group> targets) {
 		repeatExercise = false;
-		executorService.shutdownNow();		
+		executorService.shutdownNow();
 		super.getDelayedStartInterval(this);
 		repeatExercise = true;
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+		executorService
+				.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
-	
+
 	@Override
 	public void destroy() {
 		repeatExercise = false;

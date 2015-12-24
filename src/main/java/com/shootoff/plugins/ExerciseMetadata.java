@@ -31,7 +31,7 @@ public class ExerciseMetadata {
 		this.creator = creator;
 		this.description = description;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
