@@ -67,13 +67,11 @@ import javafx.util.Callback;
  * @author phrack
  */
 public class TrainingExerciseBase {
-	private static final Logger logger = LoggerFactory
-			.getLogger(TrainingExerciseBase.class);
+	private static final Logger logger = LoggerFactory.getLogger(TrainingExerciseBase.class);
 
 	private static boolean isSilenced = false;
 
-	@SuppressWarnings("unused")
-	private List<Group> targets;
+	@SuppressWarnings("unused") private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TableView<ShotEntry> shotTimerTable;
@@ -84,21 +82,18 @@ public class TrainingExerciseBase {
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
-	public TrainingExerciseBase() {
-	}
+	public TrainingExerciseBase() {}
 
 	public TrainingExerciseBase(List<Group> targets) {
 		this.targets = targets;
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor,
-			TableView<ShotEntry> shotTimerTable) {
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TableView<ShotEntry> shotTimerTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.shotTimerTable = shotTimerTable;
 
-		for (CanvasManager canvasManager : camerasSupervisor
-				.getCanvasManagers()) {
+		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
 			Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
 			canvasManager.getCanvasGroup().getChildren().add(exerciseLabel);
@@ -135,8 +130,8 @@ public class TrainingExerciseBase {
 	}
 
 	public void getDelayedStartInterval(DelayedStartListener listener) {
-		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-				.getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -145,8 +140,7 @@ public class TrainingExerciseBase {
 
 		Stage delayedStartIntervalStage = new Stage();
 
-		DelayedStartIntervalController controller = (DelayedStartIntervalController) loader
-				.getController();
+		DelayedStartIntervalController controller = (DelayedStartIntervalController) loader.getController();
 		controller.init(listener);
 
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
@@ -168,14 +162,11 @@ public class TrainingExerciseBase {
 	 *            the width of the new column
 	 */
 	public void addShotTimerColumn(String name, int width) {
-		TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(
-				name);
+		TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
-			public ObservableValue<String> call(
-					CellDataFeatures<ShotEntry, String> p) {
-				return new SimpleStringProperty(p.getValue().getExerciseValue(
-						name));
+			public ObservableValue<String> call(CellDataFeatures<ShotEntry, String> p) {
+				return new SimpleStringProperty(p.getValue().getExerciseValue(name));
 			}
 		});
 
@@ -195,9 +186,7 @@ public class TrainingExerciseBase {
 	public void setShotTimerColumnText(String name, String value) {
 		if (shotTimerTable != null) {
 			Platform.runLater(() -> {
-				shotTimerTable.getItems()
-						.get(shotTimerTable.getItems().size() - 1)
-						.setExerciseValue(name, value);
+				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
 			});
 		}
 	}
@@ -222,12 +211,10 @@ public class TrainingExerciseBase {
 	 *            the message to show on every webcam feed
 	 */
 	public void showTextOnFeed(String message) {
-		if (config.inDebugMode())
-			System.out.println(message);
+		if (config.inDebugMode()) System.out.println(message);
 
 		if (config.getSessionRecorder().isPresent()) {
-			config.getSessionRecorder().get()
-					.recordExerciseFeedMessage(message);
+			config.getSessionRecorder().get().recordExerciseFeedMessage(message);
 		}
 
 		Platform.runLater(() -> {
@@ -254,8 +241,7 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		if (config.getExercise().isPresent())
-			config.getExercise().get().reset(camerasSupervisor.getTargets());
+		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());
 	}
 
 	/**
@@ -282,25 +268,21 @@ public class TrainingExerciseBase {
 		playSound(soundFile, Optional.empty());
 	}
 
-	private static void playSound(File soundFile,
-			Optional<LineListener> listener) {
+	private static void playSound(File soundFile, Optional<LineListener> listener) {
 		if (isSilenced) {
 			System.out.println(soundFile.getPath());
 			return;
 		}
 
 		if (!soundFile.isAbsolute())
-			soundFile = new File(System.getProperty("shootoff.home")
-					+ File.separator + soundFile.getPath());
+			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
 
 		AudioInputStream audioInputStream = null;
 
 		try {
 			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
 		} catch (UnsupportedAudioFileException | IOException e) {
-			logger.error(String.format(
-					"Error reading sound file to play: soundFile = %s",
-					soundFile), e);
+			logger.error(String.format("Error reading sound file to play: soundFile = %s", soundFile), e);
 		}
 
 		if (audioInputStream != null) {
@@ -318,13 +300,11 @@ public class TrainingExerciseBase {
 					clip.addLineListener(listener.get());
 				} else {
 					clip.addLineListener((e) -> {
-						if (e.getType().equals(LineEvent.Type.STOP))
-							e.getLine().close();
+						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
 					});
 				}
 			} catch (LineUnavailableException | IOException e) {
-				if (clip != null)
-					clip.close();
+				if (clip != null) clip.close();
 				logger.error("Error playing sound clip", e);
 			}
 		}
@@ -378,10 +358,8 @@ public class TrainingExerciseBase {
 			shotTimerTable.getColumns().remove(column);
 		}
 
-		for (CanvasManager canvasManager : camerasSupervisor
-				.getCanvasManagers()) {
-			canvasManager.getCanvasGroup().getChildren()
-					.remove(exerciseLabels.get(canvasManager));
+		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
+			canvasManager.getCanvasGroup().getChildren().remove(exerciseLabels.get(canvasManager));
 		}
 
 		exerciseLabels.clear();

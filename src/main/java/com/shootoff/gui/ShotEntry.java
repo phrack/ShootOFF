@@ -34,8 +34,8 @@ public class ShotEntry {
 	private final SplitData split;
 	private final Map<String, String> exerciseData = new HashMap<String, String>();
 
-	public ShotEntry(Shot shot, Optional<Shot> lastShot,
-			Optional<Color> rowColor, boolean hadMalfunction, boolean hadReload) {
+	public ShotEntry(Shot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
+			boolean hadReload) {
 		this.shot = shot;
 
 		if (shot.getColor().equals(Color.RED)) {
@@ -51,8 +51,7 @@ public class ShotEntry {
 
 		String split;
 		if (lastShot.isPresent()) {
-			split = String.format("%.2f", timestampS
-					- ((float) lastShot.get().getTimestamp() / (float) 1000));
+			split = String.format("%.2f", timestampS - ((float) lastShot.get().getTimestamp() / (float) 1000));
 		} else {
 			split = "-";
 		}
@@ -66,8 +65,7 @@ public class ShotEntry {
 		private final boolean hadMalfunction;
 		private final boolean hadReload;
 
-		public SplitData(String split, Optional<Color> rowColor,
-				boolean hadMalfunction, boolean hadReload) {
+		public SplitData(String split, Optional<Color> rowColor, boolean hadMalfunction, boolean hadReload) {
 			this.split = split;
 			this.rowColor = rowColor;
 			this.hadMalfunction = hadMalfunction;

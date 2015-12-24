@@ -33,19 +33,16 @@ import javafx.scene.Node;
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
-public class RandomShoot extends TrainingExerciseBase implements
-		TrainingExercise {
+public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
 	private final List<String> subtargets = new ArrayList<String>();
 	private final Stack<Integer> currentSubtargets = new Stack<Integer>();
 	private Random rng = new Random();
 
-	public RandomShoot() {
-	}
+	public RandomShoot() {}
 
 	public RandomShoot(List<Group> targets) {
 		super(targets);
-		if (fetchSubtargets(targets))
-			startRound();
+		if (fetchSubtargets(targets)) startRound();
 	}
 
 	/**
@@ -57,13 +54,11 @@ public class RandomShoot extends TrainingExerciseBase implements
 	protected RandomShoot(List<Group> targets, Random rng) {
 		super(targets);
 		this.rng = rng;
-		if (fetchSubtargets(targets))
-			startRound();
+		if (fetchSubtargets(targets)) startRound();
 	}
 
 	@Override
-	public void init() {
-	}
+	public void init() {}
 
 	private void startRound() {
 		pickSubtargets();
@@ -112,15 +107,13 @@ public class RandomShoot extends TrainingExerciseBase implements
 				}
 			}
 
-			if (foundTarget)
-				break;
+			if (foundTarget) break;
 		}
 
 		if (foundTarget && subtargets.size() > 0) {
 			return true;
 		} else {
-			TrainingExerciseBase.playSound(new File(
-					"sounds/voice/shootoff-subtargets-warning.wav"));
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-subtargets-warning.wav"));
 			return false;
 		}
 	}
@@ -149,8 +142,7 @@ public class RandomShoot extends TrainingExerciseBase implements
 			if (!it.hasNext() && currentSubtargets.size() > 1)
 				soundFiles.add(new File("sounds/voice/shootoff-and.wav"));
 
-			File targetNameSound = new File(String.format(
-					"sounds/voice/shootoff-%s.wav", subtargets.get(index)));
+			File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subtargets.get(index)));
 
 			if (targetNameSound.exists()) {
 				soundFiles.add(targetNameSound);
@@ -169,8 +161,7 @@ public class RandomShoot extends TrainingExerciseBase implements
 	private void saySubtargetsTTS() {
 		StringBuilder sentence = new StringBuilder("shoot subtarget ");
 
-		sentence.append(subtargets.get(currentSubtargets.get(currentSubtargets
-				.size() - 1)));
+		sentence.append(subtargets.get(currentSubtargets.get(currentSubtargets.size() - 1)));
 
 		for (int i = currentSubtargets.size() - 2; i >= 0; i--) {
 			sentence.append(" then ");
@@ -184,9 +175,8 @@ public class RandomShoot extends TrainingExerciseBase implements
 		List<File> soundFiles = new ArrayList<File>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
-		File targetNameSound = new File(String.format(
-				"sounds/voice/shootoff-%s.wav",
-				subtargets.get(currentSubtargets.peek())));
+		File targetNameSound = new File(
+				String.format("sounds/voice/shootoff-%s.wav", subtargets.get(currentSubtargets.peek())));
 
 		if (targetNameSound.exists()) {
 			soundFiles.add(targetNameSound);
@@ -205,10 +195,7 @@ public class RandomShoot extends TrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"Random Shoot",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("Random Shoot", "1.0", "phrack",
 				"This exercise works with targets that have subtarget tags "
 						+ "assigned to some regions. Subtargets are selected at random "
 						+ "and the shooter is asked to shoot those subtargets in order. "
@@ -218,21 +205,17 @@ public class RandomShoot extends TrainingExerciseBase implements
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (currentSubtargets.isEmpty())
-			return;
+		if (currentSubtargets.isEmpty()) return;
 
 		if (hitRegion.isPresent()) {
 			String subtargetValue = hitRegion.get().getTag("subtarget");
-			if (subtargetValue != null
-					&& subtargetValue.equals(subtargets.get(currentSubtargets
-							.peek()))) {
+			if (subtargetValue != null && subtargetValue.equals(subtargets.get(currentSubtargets.peek()))) {
 				currentSubtargets.pop();
 			} else {
 				sayCurrentSubtarget();
 			}
 
-			if (currentSubtargets.isEmpty())
-				startRound();
+			if (currentSubtargets.isEmpty()) startRound();
 		} else {
 			sayCurrentSubtarget();
 		}
@@ -240,8 +223,7 @@ public class RandomShoot extends TrainingExerciseBase implements
 
 	@Override
 	public void reset(List<Group> targets) {
-		if (fetchSubtargets(targets))
-			startRound();
+		if (fetchSubtargets(targets)) startRound();
 	}
 
 	@Override

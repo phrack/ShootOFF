@@ -17,8 +17,7 @@ public class Pixel extends Point {
 
 	private int connectedness = 0;
 
-	public Pixel(int x, int y, Color color, int currentLum, int lumAverage,
-			double colorAverage) {
+	public Pixel(int x, int y, Color color, int currentLum, int lumAverage, double colorAverage) {
 		super(x, y);
 		this.color = color;
 		this.currentLum = currentLum;
@@ -79,9 +78,9 @@ public class Pixel extends Point {
 	}
 
 	public static double colorDistance(Color color, Color c2) {
-		return Math.sqrt(22 * Math.pow(color.getRed() - c2.getRed(), 2) + 43
-				* Math.pow(color.getGreen() - c2.getGreen(), 2) + 35
-				* Math.pow(color.getBlue() - c2.getBlue(), 2));
+		return Math.sqrt(
+				22 * Math.pow(color.getRed() - c2.getRed(), 2) + 43 * Math.pow(color.getGreen() - c2.getGreen(), 2)
+						+ 35 * Math.pow(color.getBlue() - c2.getBlue(), 2));
 	}
 
 	public double colorDistance(Color c2) {

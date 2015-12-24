@@ -26,8 +26,8 @@ public class ShotRecorder {
 	private final IMediaWriter videoWriter;
 	private boolean isFirstShotFrame = true;
 
-	public ShotRecorder(File relativeVideoFile, File videoFile,
-			long cutDuration, IMediaWriter videoWriter, String cameraName) {
+	public ShotRecorder(File relativeVideoFile, File videoFile, long cutDuration, IMediaWriter videoWriter,
+			String cameraName) {
 		this.relativeVideoFile = relativeVideoFile;
 		this.videoFile = videoFile;
 		this.videoWriter = videoWriter;
@@ -36,15 +36,12 @@ public class ShotRecorder {
 		startTime = System.currentTimeMillis();
 		timeOffset = cutDuration;
 
-		logger.debug("Started recording shot video: {}, cut duration = {} ms",
-				videoFile.getName(), cutDuration);
+		logger.debug("Started recording shot video: {}, cut duration = {} ms", videoFile.getName(), cutDuration);
 	}
 
 	public void recordFrame(BufferedImage frame) {
-		BufferedImage image = ConverterFactory.convertToType(frame,
-				BufferedImage.TYPE_3BYTE_BGR);
-		IConverter converter = ConverterFactory.createConverter(image,
-				IPixelFormat.Type.YUV420P);
+		BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+		IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 		long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
 
@@ -75,7 +72,6 @@ public class ShotRecorder {
 	public void close() {
 		videoWriter.close();
 
-		logger.debug("Stopped recording shot video: {}, timeOffset = {}",
-				relativeVideoFile.getPath(), timeOffset);
+		logger.debug("Stopped recording shot video: {}, timeOffset = {}", relativeVideoFile.getPath(), timeOffset);
 	}
 }

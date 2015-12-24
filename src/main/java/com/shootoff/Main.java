@@ -110,9 +110,7 @@ public class Main extends Application {
 		int dataStart = metadataXML.indexOf(fieldName, tagStart);
 
 		if (dataStart == -1) {
-			logger.error(String.format(
-					"Couldn't parse %s field from resources metadata",
-					fieldName));
+			logger.error(String.format("Couldn't parse %s field from resources metadata", fieldName));
 			tryRunningShootOFF();
 			return Optional.empty();
 		}
@@ -129,8 +127,7 @@ public class Main extends Application {
 		Optional<String> fileSize = parseField(metadataXML, "fileSize");
 
 		if (version.isPresent() && fileSize.isPresent()) {
-			return Optional.of(new ResourcesInfo(version.get(), Long
-					.parseLong(fileSize.get()), metadataXML));
+			return Optional.of(new ResourcesInfo(version.get(), Long.parseLong(fileSize.get()), metadataXML));
 		}
 
 		return Optional.empty();
@@ -143,8 +140,7 @@ public class Main extends Application {
 		}
 
 		try {
-			String metadataXML = new String(Files.readAllBytes(metadataFile
-					.toPath()), "UTF-8");
+			String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()), "UTF-8");
 			return deserializeMetadataXML(metadataXML);
 		} catch (IOException e) {
 			logger.error("Error reading metadata XML for JNLP", e);
@@ -153,23 +149,19 @@ public class Main extends Application {
 		return Optional.empty();
 	}
 
-	private Optional<ResourcesInfo> getWebstartResourcesInfo(
-			String metadataAddress) {
+	private Optional<ResourcesInfo> getWebstartResourcesInfo(String metadataAddress) {
 		HttpURLConnection connection = null;
 		InputStream stream = null;
 
 		try {
-			connection = (HttpURLConnection) new URL(metadataAddress)
-					.openConnection();
+			connection = (HttpURLConnection) new URL(metadataAddress).openConnection();
 			stream = connection.getInputStream();
 		} catch (UnknownHostException e) {
-			logger.error("Could not connect to remote host " + e.getMessage()
-					+ " to download writable resources.", e);
+			logger.error("Could not connect to remote host " + e.getMessage() + " to download writable resources.", e);
 			tryRunningShootOFF();
 			return Optional.empty();
 		} catch (IOException e) {
-			if (connection != null)
-				connection.disconnect();
+			if (connection != null) connection.disconnect();
 
 			logger.error("Error download writable resources file", e);
 			tryRunningShootOFF();
@@ -178,13 +170,11 @@ public class Main extends Application {
 
 		StringBuilder metadataXML = new StringBuilder();
 
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(
-				stream, "UTF-8"))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
 
 			String line;
 			while ((line = br.readLine()) != null) {
-				if (metadataXML.length() > 0)
-					metadataXML.append("\n");
+				if (metadataXML.length() > 0) metadataXML.append("\n");
 				metadataXML.append(line);
 			}
 		} catch (IOException e) {
@@ -218,21 +208,16 @@ public class Main extends Application {
 		InputStream stream = null;
 
 		try {
-			connection = (HttpURLConnection) new URL(fileAddress)
-					.openConnection();
+			connection = (HttpURLConnection) new URL(fileAddress).openConnection();
 			stream = connection.getInputStream();
 		} catch (UnknownHostException e) {
-			logger.error("Could not connect to remote host " + e.getMessage()
-					+ " to download writable resources.", e);
+			logger.error("Could not connect to remote host " + e.getMessage() + " to download writable resources.", e);
 			tryRunningShootOFF();
 			return;
 		} catch (IOException e) {
-			if (connection != null)
-				connection.disconnect();
+			if (connection != null) connection.disconnect();
 
-			logger.error(
-					"Failed to get stream to download writable resources file",
-					e);
+			logger.error("Failed to get stream to download writable resources file", e);
 			tryRunningShootOFF();
 			return;
 		}
@@ -250,31 +235,25 @@ public class Main extends Application {
 		Task<Boolean> task = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws InterruptedException {
-				BufferedInputStream bufferedInputStream = new BufferedInputStream(
-						remoteStream);
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
 
-				try (FileOutputStream fileOutputStream = new FileOutputStream(
-						resourcesJARFile)) {
+				try (FileOutputStream fileOutputStream = new FileOutputStream(resourcesJARFile)) {
 
 					long totalDownloaded = 0;
 					int count;
 					byte buffer[] = new byte[1024];
 
-					while ((count = bufferedInputStream.read(buffer, 0,
-							buffer.length)) != -1) {
+					while ((count = bufferedInputStream.read(buffer, 0, buffer.length)) != -1) {
 						fileOutputStream.write(buffer, 0, count);
 						totalDownloaded += count;
-						updateProgress(
-								((double) totalDownloaded / (double) remoteFileLength) * 100,
-								100);
+						updateProgress(((double) totalDownloaded / (double) remoteFileLength) * 100, 100);
 					}
 
 					fileOutputStream.close();
 
 					updateProgress(100, 100);
 				} catch (IOException e) {
-					logger.error("Failed to download writable resources file",
-							e);
+					logger.error("Failed to download writable resources file", e);
 					return false;
 				}
 
@@ -282,24 +261,19 @@ public class Main extends Application {
 			}
 		};
 
-		final ProgressDialog progressDialog = new ProgressDialog(
-				"Downloading Resources...",
-				"Downloading required resources (targets, sounds, etc.)...",
-				task);
+		final ProgressDialog progressDialog = new ProgressDialog("Downloading Resources...",
+				"Downloading required resources (targets, sounds, etc.)...", task);
 		final HttpURLConnection con = connection;
 		task.setOnSucceeded((value) -> {
 			progressDialog.close();
 			con.disconnect();
 			if (task.getValue()) {
 				try {
-					PrintWriter out = new PrintWriter(resourcesMetadataFile,
-							"UTF-8");
+					PrintWriter out = new PrintWriter(resourcesMetadataFile, "UTF-8");
 					out.print(ri.getXML());
 					out.close();
 				} catch (IOException e) {
-					logger.error(
-							"Could't update metadata file: " + e.getMessage(),
-							e);
+					logger.error("Could't update metadata file: " + e.getMessage(), e);
 				}
 
 				extractWebstartResources();
@@ -316,17 +290,15 @@ public class Main extends Application {
 	 * enough to run anyway.
 	 */
 	private void tryRunningShootOFF() {
-		if (!new File(System.getProperty("shootoff.home") + File.separator
-				+ "shootoff.properties").exists()) {
+		if (!new File(System.getProperty("shootoff.home") + File.separator + "shootoff.properties").exists()) {
 			Alert resourcesAlert = new Alert(AlertType.ERROR);
 			resourcesAlert.setTitle("Missing Resources");
 			resourcesAlert.setHeaderText("Missing Required Resources!");
 			resourcesAlert.setResizable(true);
-			resourcesAlert
-					.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
-							+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
-							+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
-							+ "the website.");
+			resourcesAlert.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
+					+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
+					+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
+					+ "the website.");
 			resourcesAlert.showAndWait();
 		} else {
 			runShootOFF();
@@ -346,9 +318,7 @@ public class Main extends Application {
 					int fileCount = 0;
 					while (enumEntries.hasMoreElements()) {
 						JarEntry entry = (JarEntry) enumEntries.nextElement();
-						if (!entry.getName().startsWith("META-INF")
-								&& !entry.isDirectory())
-							fileCount++;
+						if (!entry.getName().startsWith("META-INF") && !entry.isDirectory()) fileCount++;
 					}
 
 					enumEntries = jar.entries();
@@ -356,19 +326,14 @@ public class Main extends Application {
 					while (enumEntries.hasMoreElements()) {
 						JarEntry entry = (JarEntry) enumEntries.nextElement();
 
-						if (entry.getName().startsWith("META-INF"))
-							continue;
+						if (entry.getName().startsWith("META-INF")) continue;
 
-						File f = new File(System.getProperty("shootoff.home")
-								+ File.separator + entry.getName());
+						File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 						if (entry.isDirectory()) {
 							if (!f.exists() && !f.mkdir()) {
 								IOException e = new IOException(
-										"Failed to make directory while extracting JAR: "
-												+ entry.getName());
-								logger.error(
-										"Error making directory to extract writable JAR contents",
-										e);
+										"Failed to make directory while extracting JAR: " + entry.getName());
+								logger.error("Error making directory to extract writable JAR contents", e);
 								throw e;
 							}
 						} else {
@@ -381,26 +346,19 @@ public class Main extends Application {
 							is.close();
 
 							currentCount++;
-							updateProgress(
-									((double) currentCount / (double) fileCount) * 100,
-									100);
+							updateProgress(((double) currentCount / (double) fileCount) * 100, 100);
 						}
 					}
 
 					updateProgress(100, 100);
 				} catch (IOException e) {
-					logger.error(
-							"Error extracting writable resources file for JNLP",
-							e);
+					logger.error("Error extracting writable resources file for JNLP", e);
 					return false;
 				} finally {
 					try {
-						if (jar != null)
-							jar.close();
+						if (jar != null) jar.close();
 					} catch (IOException e) {
-						logger.error(
-								"Error closing writable resources file for JNLP",
-								e);
+						logger.error("Error closing writable resources file for JNLP", e);
 					}
 				}
 
@@ -408,10 +366,8 @@ public class Main extends Application {
 			}
 		};
 
-		final ProgressDialog progressDialog = new ProgressDialog(
-				"Extracting Resources...",
-				"Extracting required resources (targets, sounds, etc.)...",
-				task);
+		final ProgressDialog progressDialog = new ProgressDialog("Extracting Resources...",
+				"Extracting required resources (targets, sounds, etc.)...", task);
 		task.setOnSucceeded((value) -> {
 			progressDialog.close();
 			if (task.getValue()) {
@@ -430,8 +386,7 @@ public class Main extends Application {
 		private final ProgressBar pb = new ProgressBar();
 		private final ProgressIndicator pin = new ProgressIndicator();
 
-		public ProgressDialog(String dialogTitle, String dialogMessage,
-				final Task<?> task) {
+		public ProgressDialog(String dialogTitle, String dialogMessage, final Task<?> task) {
 			stage.setTitle(dialogTitle);
 			stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -445,8 +400,7 @@ public class Main extends Application {
 			hb.setAlignment(Pos.CENTER);
 			hb.getChildren().addAll(pb, pin);
 
-			pb.prefWidthProperty().bind(
-					hb.widthProperty().subtract(hb.getSpacing() * 6));
+			pb.prefWidthProperty().bind(hb.widthProperty().subtract(hb.getSpacing() * 6));
 
 			BorderPane bp = new BorderPane();
 			bp.setTop(messageLabel);
@@ -471,15 +425,13 @@ public class Main extends Application {
 	}
 
 	public void runShootOFF() {
-		String[] args = getParameters().getRaw().toArray(
-				new String[getParameters().getRaw().size()]);
+		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
 		Configuration config;
 		try {
-			config = new Configuration(System.getProperty("shootoff.home")
-					+ File.separator + "shootoff.properties", args);
+			config = new Configuration(System.getProperty("shootoff.home") + File.separator + "shootoff.properties",
+					args);
 		} catch (IOException | ConfigurationException e) {
-			logger.error(
-					"Error fetching ShootOFF configuration to run ShootOFF", e);
+			logger.error("Error fetching ShootOFF configuration to run ShootOFF", e);
 			return;
 		}
 
@@ -505,8 +457,7 @@ public class Main extends Application {
 		}
 
 		try {
-			FXMLLoader loader = new FXMLLoader(
-					Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
+			FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
 			loader.load();
 
 			Scene scene = new Scene(loader.getRoot());
@@ -524,23 +475,19 @@ public class Main extends Application {
 	private boolean showFirstRunMessage() {
 		Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
 		shootoffWelcome.setTitle("Welcome to ShootOFF");
-		shootoffWelcome
-				.setHeaderText("Please Ensure Your Firearm is Unloaded!");
+		shootoffWelcome.setHeaderText("Please Ensure Your Firearm is Unloaded!");
 		shootoffWelcome.setResizable(true);
 
 		FlowPane fp = new FlowPane();
-		Label lbl = new Label(
-				"Thank you for choosing ShootOFF for your training needs.\n"
-						+ "Please be careful to ensure your firearm is not loaded\n"
-						+ "every time you use ShootOFF. We are not liable for any\n"
-						+ "negligent discharges that may result from your use of this\n"
-						+ "software.\n\n"
-						+ "We upload most errors that cause crashes to our servers to\n"
-						+ "help us detect and fix common problems. We do not include any\n"
-						+ "personal information in these reports, but you may uncheck\n"
-						+ "the box below if you do not want to support this effort.\n\n");
-		CheckBox useErrorReporting = new CheckBox(
-				"Allow ShootOFF to Send Error Reports");
+		Label lbl = new Label("Thank you for choosing ShootOFF for your training needs.\n"
+				+ "Please be careful to ensure your firearm is not loaded\n"
+				+ "every time you use ShootOFF. We are not liable for any\n"
+				+ "negligent discharges that may result from your use of this\n" + "software.\n\n"
+				+ "We upload most errors that cause crashes to our servers to\n"
+				+ "help us detect and fix common problems. We do not include any\n"
+				+ "personal information in these reports, but you may uncheck\n"
+				+ "the box below if you do not want to support this effort.\n\n");
+		CheckBox useErrorReporting = new CheckBox("Allow ShootOFF to Send Error Reports");
 		useErrorReporting.setSelected(true);
 
 		fp.getChildren().addAll(lbl, useErrorReporting);
@@ -556,8 +503,7 @@ public class Main extends Application {
 		cameraAlert.setTitle("No Webcams");
 		cameraAlert.setHeaderText("No Webcams Found!");
 		cameraAlert.setResizable(true);
-		cameraAlert
-				.setContentText("ShootOFF needs a webcam to function. Now closing...");
+		cameraAlert.setContentText("ShootOFF needs a webcam to function. Now closing...");
 		cameraAlert.showAndWait();
 		Main.forceClose(-1);
 	}
@@ -567,79 +513,56 @@ public class Main extends Application {
 		this.primaryStage = primaryStage;
 
 		String os = System.getProperty("os.name");
-		if (os != null && os.equals("Mac OS X")
-				&& Camera.getWebcams().isEmpty()) {
+		if (os != null && os.equals("Mac OS X") && Camera.getWebcams().isEmpty()) {
 			closeNoCamera();
 		}
 
 		if (System.getProperty("javawebstart.version", null) != null) {
-			File shootoffHome = new File(System.getProperty("user.home")
-					+ File.separator + ".shootoff");
+			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
 
 			if (!shootoffHome.exists()) {
 				if (!shootoffHome.mkdirs()) {
 					Alert homeAlert = new Alert(AlertType.ERROR);
 					homeAlert.setTitle("No ShootOFF Home");
-					homeAlert
-							.setHeaderText("Missing ShootOFF's Home Directory!");
+					homeAlert.setHeaderText("Missing ShootOFF's Home Directory!");
 					homeAlert.setResizable(true);
-					homeAlert
-							.setContentText("ShootOFF's home directory "
-									+ shootoffHome.getPath()
-									+ " "
-									+ "does not exist and could not be created. Now closing...");
+					homeAlert.setContentText("ShootOFF's home directory " + shootoffHome.getPath() + " "
+							+ "does not exist and could not be created. Now closing...");
 					homeAlert.showAndWait();
 					return;
 				}
 			}
 
 			System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
-			System.setProperty("shootoff.sessions",
-					System.getProperty("shootoff.home") + File.separator
-							+ "sessions");
-			System.setProperty("shootoff.courses",
-					System.getProperty("shootoff.home") + File.separator
-							+ "courses");
+			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 
 			resourcesMetadataFile = new File(
-					System.getProperty("shootoff.home") + File.separator
-							+ RESOURCES_METADATA_NAME);
+					System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
 			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
-			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo("http://shootoffapp.com/jws/"
-					+ RESOURCES_METADATA_NAME);
+			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(
+					"http://shootoffapp.com/jws/" + RESOURCES_METADATA_NAME);
 
 			if (!localRI.isPresent() && remoteRI.isPresent()) {
-				resourcesJARFile = new File(System.getProperty("shootoff.home")
-						+ File.separator + RESOURCES_JAR_NAME);
-				downloadWebstartResources(remoteRI.get(),
-						"http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
+				resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
+				downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 			} else if (localRI.isPresent() && remoteRI.isPresent()) {
-				if (!localRI.get().getVersion()
-						.equals(remoteRI.get().getVersion())) {
-					System.out.println(String.format(
-							"Local version: %s, Remote version: %s", localRI
-									.get().getVersion(), remoteRI.get()
-									.getVersion()));
+				if (!localRI.get().getVersion().equals(remoteRI.get().getVersion())) {
+					System.out.println(String.format("Local version: %s, Remote version: %s",
+							localRI.get().getVersion(), remoteRI.get().getVersion()));
 					resourcesJARFile = new File(
-							System.getProperty("shootoff.home")
-									+ File.separator + RESOURCES_JAR_NAME);
-					downloadWebstartResources(remoteRI.get(),
-							"http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
+							System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
+					downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 				} else {
 					runShootOFF();
 				}
 			} else {
-				System.err
-						.println("Could not locate local or remote resources metadata");
+				System.err.println("Could not locate local or remote resources metadata");
 			}
 		} else {
 			System.setProperty("shootoff.home", System.getProperty("user.dir"));
-			System.setProperty("shootoff.sessions",
-					System.getProperty("shootoff.home") + File.separator
-							+ "sessions");
-			System.setProperty("shootoff.courses",
-					System.getProperty("shootoff.home") + File.separator
-							+ "courses");
+			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
+			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 			runShootOFF();
 		}
 	}

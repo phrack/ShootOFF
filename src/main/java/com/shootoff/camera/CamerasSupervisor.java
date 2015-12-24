@@ -34,8 +34,7 @@ public class CamerasSupervisor {
 		this.config = config;
 	}
 
-	public CameraManager addCameraManager(Camera webcam,
-			CanvasManager canvasManager) {
+	public CameraManager addCameraManager(Camera webcam, CanvasManager canvasManager) {
 		CameraManager manager = new CameraManager(webcam, canvasManager, config);
 		managers.add(manager);
 		return manager;

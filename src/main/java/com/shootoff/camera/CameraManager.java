@@ -117,11 +117,9 @@ public class CameraManager {
 
 	private ShootOFFController controller;
 
-	private final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(
-			this);
+	private final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
 
-	public CameraManager(Camera webcam, CanvasManager canvas,
-			Configuration config) {
+	public CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
 		processingLock = null;
 		this.canvasManager = canvas;
@@ -131,13 +129,11 @@ public class CameraManager {
 
 		initDetector(new Detector());
 
-		this.shotDetectionManager = new ShotDetectionManager(this, config,
-				canvas);
+		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 
 	}
 
-	protected CameraManager(File videoFile, Object processingLock,
-			CanvasManager canvas, Configuration config,
+	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config,
 			boolean[][] sectorStatuses, Optional<Bounds> projectionBounds) {
 		this.webcam = Optional.empty();
 		this.processingLock = processingLock;
@@ -153,11 +149,9 @@ public class CameraManager {
 
 		Detector detector = new Detector();
 
-		this.shotDetectionManager = new ShotDetectionManager(this, config,
-				canvas);
+		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 
-		IMediaReader reader = ToolFactory.makeReader(videoFile
-				.getAbsolutePath());
+		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 		reader.addListener(detector);
 
@@ -166,8 +160,7 @@ public class CameraManager {
 		setSectorStatuses(sectorStatuses);
 
 		while (reader.readPacket() == null)
-			do {
-			} while (false);
+			do {} while (false);
 	}
 
 	private void initDetector(Detector detector) {
@@ -218,10 +211,8 @@ public class CameraManager {
 	}
 
 	public void close() {
-		if (webcam.isPresent())
-			webcam.get().close();
-		if (recordingStream)
-			stopRecordingStream();
+		if (webcam.isPresent()) webcam.get().close();
+		if (recordingStream) stopRecordingStream();
 		if (brightnessDiagnosticTimer != null) {
 			brightnessDiagnosticTimer.cancel();
 			brightnessDiagnosticTimer = null;
@@ -244,16 +235,14 @@ public class CameraManager {
 			return;
 		}
 
-		logger.debug("setDetecting was {} now {}", this.isDetecting,
-				isDetecting);
+		logger.debug("setDetecting was {} now {}", this.isDetecting, isDetecting);
 
 		this.isDetecting = isDetecting;
 	}
 
 	public void setCalibrating(boolean isCalibrating) {
 		this.isCalibrating = isCalibrating;
-		if (isCalibrating)
-			setDetecting(false);
+		if (isCalibrating) setDetecting(false);
 	}
 
 	public boolean isDetecting() {
@@ -287,8 +276,7 @@ public class CameraManager {
 	public void startRecordingStream(File videoFile) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
 		videoWriterStream = ToolFactory.makeWriter(videoFile.getName());
-		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264,
-				getFeedWidth(), getFeedHeight());
+		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, getFeedWidth(), getFeedHeight());
 		recordingStartTime = System.currentTimeMillis();
 		isFirstStreamFrame = true;
 
@@ -313,19 +301,12 @@ public class CameraManager {
 		if (config.getSessionRecorder().isPresent()) {
 			sessionName = config.getSessionRecorder().get().getSessionName();
 
-			File sessionVideoFolder = new File(
-					System.getProperty("shootoff.home")
-							+ File.separator
-							+ "sessions"
-							+ File.separator
-							+ config.getSessionRecorder().get()
-									.getSessionName());
+			File sessionVideoFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions"
+					+ File.separator + config.getSessionRecorder().get().getSessionName());
 
 			if (!sessionVideoFolder.exists()) {
 				if (!sessionVideoFolder.mkdirs()) {
-					logger.error(
-							"Could not create video folder for session: {}",
-							sessionVideoFolder.getAbsolutePath());
+					logger.error("Could not create video folder for session: {}", sessionVideoFolder.getAbsolutePath());
 				}
 			}
 		}
@@ -333,8 +314,7 @@ public class CameraManager {
 		String cameraName = "UNNAMED";
 
 		if (webcam.isPresent()) {
-			Optional<String> userCameraName = config.getWebcamsUserName(webcam
-					.get());
+			Optional<String> userCameraName = config.getWebcamsUserName(webcam.get());
 
 			if (userCameraName.isPresent()) {
 				cameraName = userCameraName.get();
@@ -345,8 +325,7 @@ public class CameraManager {
 
 		setDetecting(false);
 
-		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4",
-				sessionName, cameraName, this);
+		rollingRecorder = new RollingRecorder(ICodec.ID.CODEC_ID_MPEG4, ".mp4", sessionName, cameraName, this);
 		recordingShots = true;
 	}
 
@@ -408,8 +387,7 @@ public class CameraManager {
 		return webcamFPS;
 	}
 
-	private final ExecutorService detectionExecutor = Executors
-			.newFixedThreadPool(200);
+	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 	private Timer brightnessDiagnosticTimer = null;
 	private Timer motionDiagnosticTimer = null;
 
@@ -420,13 +398,11 @@ public class CameraManager {
 		public void run() {
 			if (webcam.isPresent()) {
 				if (!webcam.get().isOpen()) {
-					webcam.get().setViewSize(
-							new Dimension(getFeedWidth(), getFeedHeight()));
+					webcam.get().setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 					webcam.get().open();
 
 					Dimension openDimension = webcam.get().getViewSize();
-					setFeedResolution((int) openDimension.getWidth(),
-							(int) openDimension.getHeight());
+					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 				}
 
 				streamCameraFrames();
@@ -469,37 +445,31 @@ public class CameraManager {
 
 		private void streamCameraFrames() {
 			while (isStreaming) {
-				if (!webcam.isPresent() || !webcam.get().isImageNew())
-					continue;
+				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
 				BufferedImage currentFrame = webcam.get().getImage();
 
-				if (currentFrame == null && webcam.isPresent()
-						&& !webcam.get().isOpen()) {
+				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					// Camera appears to have closed
 					showMissingCameraError();
 					detectionExecutor.shutdown();
 					return;
-				} else if (currentFrame == null && webcam.isPresent()
-						&& webcam.get().isOpen()) {
+				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 					// Camera appears to be open but got a null frame
-					logger.warn("Null frame from camera: {}", webcam.get()
-							.getName());
+					logger.warn("Null frame from camera: {}", webcam.get().getName());
 					continue;
 				}
 
 				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
 
-				if (!pFramePair.getKey())
-					continue;
+				if (!pFramePair.getKey()) continue;
 
 				currentFrame = pFramePair.getValue();
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
 
-					currentFrame = currentFrame.getSubimage((int) b.getMinX(),
-							(int) b.getMinY(), (int) b.getWidth(),
+					currentFrame = currentFrame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
 							(int) b.getHeight());
 				}
 
@@ -521,15 +491,11 @@ public class CameraManager {
 				}
 
 				if (recordingStream) {
-					BufferedImage image = ConverterFactory.convertToType(
-							currentFrame, BufferedImage.TYPE_3BYTE_BGR);
-					IConverter converter = ConverterFactory.createConverter(
-							image, IPixelFormat.Type.YUV420P);
+					BufferedImage image = ConverterFactory.convertToType(currentFrame, BufferedImage.TYPE_3BYTE_BGR);
+					IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-					IVideoPicture frame = converter
-							.toPicture(
-									image,
-									(System.currentTimeMillis() - recordingStartTime) * 1000);
+					IVideoPicture frame = converter.toPicture(image,
+							(System.currentTimeMillis() - recordingStartTime) * 1000);
 					frame.setKeyFrame(isFirstStreamFrame);
 					frame.setQuality(0);
 					isFirstStreamFrame = false;
@@ -538,19 +504,16 @@ public class CameraManager {
 				}
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					canvasManager.updateBackground(currentFrame,
-							projectionBounds);
+					canvasManager.updateBackground(currentFrame, projectionBounds);
 				} else {
-					canvasManager.updateBackground(currentFrame,
-							Optional.empty());
+					canvasManager.updateBackground(currentFrame, Optional.empty());
 				}
 			}
 
 			detectionExecutor.shutdown();
 		}
 
-		private Pair<Boolean, BufferedImage> processFrame(
-				BufferedImage currentFrame) {
+		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
 			frameCount++;
 
 			if (autoCalibrationEnabled && (getFrameCount() % DEFAULT_FPS == 0)) {
@@ -561,16 +524,14 @@ public class CameraManager {
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			Boolean result = shotDetectionManager.processFrame(currentFrame,
-					isDetecting);
+			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
 
 			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS) == 0) {
 
 				setFPS(webcam.get().getFPS());
 
 				if (debuggerListener.isPresent()) {
-					debuggerListener.get().updateFeedData(webcamFPS,
-							Optional.empty());
+					debuggerListener.get().updateFeedData(webcamFPS, Optional.empty());
 				}
 				checkIfMinimumFPS();
 			}
@@ -590,8 +551,7 @@ public class CameraManager {
 
 		private void checkIfMinimumFPS() {
 			if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
-				logger.warn(
-						"[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
+				logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
 						webcam.get().getName(), webcamFPS);
 				showFPSWarning(webcamFPS);
 				showedFPSWarning = true;
@@ -605,8 +565,7 @@ public class CameraManager {
 
 				@Override
 				public Void call(Optional<Bounds> bounds) {
-					if (bounds.isPresent())
-						autoCalibrateSuccess(bounds.get());
+					if (bounds.isPresent()) autoCalibrateSuccess(bounds.get());
 					return null;
 				}
 
@@ -621,8 +580,7 @@ public class CameraManager {
 
 				cameraAutoCalibrated = true;
 
-				logger.debug("autoCalibrateSuccess {} {} {} {}",
-						(int) bounds.getMinX(), (int) bounds.getMinY(),
+				logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
 						(int) bounds.getWidth(), (int) bounds.getHeight());
 
 				Platform.runLater(() -> {
@@ -637,23 +595,20 @@ public class CameraManager {
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.ERROR);
 
-				Optional<String> cameraName = config.getWebcamsUserName(webcam
-						.get());
+				Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
 				String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
 				String message;
 				if (cameraName.isPresent()) {
 					message = String.format(messageFormat, cameraName.get());
 				} else {
-					message = String.format(messageFormat, webcam.get()
-							.getName());
+					message = String.format(messageFormat, webcam.get().getName());
 				}
 
 				cameraAlert.setTitle("Webcam Missing");
 				cameraAlert.setHeaderText("Cannot Communicate with Camera!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
-				if (controller != null)
-					cameraAlert.initOwner(controller.getStage());
+				if (controller != null) cameraAlert.initOwner(controller.getStage());
 				cameraAlert.show();
 			});
 		}
@@ -662,25 +617,21 @@ public class CameraManager {
 			Platform.runLater(() -> {
 				Alert cameraAlert = new Alert(AlertType.WARNING);
 
-				Optional<String> cameraName = config.getWebcamsUserName(webcam
-						.get());
+				Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
 				String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
 						+ " shots may be missed. You may be able to raise the FPS by closing other applications.";
 				String message;
 				if (cameraName.isPresent()) {
-					message = String.format(messageFormat, cameraName.get(),
-							fps);
+					message = String.format(messageFormat, cameraName.get(), fps);
 				} else {
-					message = String.format(messageFormat, webcam.get()
-							.getName(), fps);
+					message = String.format(messageFormat, webcam.get().getName(), fps);
 				}
 
 				cameraAlert.setTitle("Webcam FPS Too Low");
 				cameraAlert.setHeaderText("Webcam FPS is too low!");
 				cameraAlert.setResizable(true);
 				cameraAlert.setContentText(message);
-				if (controller != null)
-					cameraAlert.initOwner(controller.getStage());
+				if (controller != null) cameraAlert.initOwner(controller.getStage());
 				cameraAlert.show();
 			});
 		}
@@ -694,9 +645,8 @@ public class CameraManager {
 		if (!showingBrightnessWarning) {
 			showingBrightnessWarning = true;
 			Platform.runLater(() -> {
-				brightnessDiagnosticWarning = canvasManager
-						.addDiagnosticMessage("Warning: Excessive brightness",
-								Color.RED);
+				brightnessDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive brightness",
+						Color.RED);
 			});
 		} else {
 			// Stop the existing timer and start a new one
@@ -708,8 +658,7 @@ public class CameraManager {
 				Platform.runLater(new Runnable() {
 					public void run() {
 						if (brightnessDiagnosticWarning != null) {
-							canvasManager
-									.removeDiagnosticMessage(brightnessDiagnosticWarning);
+							canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
 							brightnessDiagnosticWarning = null;
 						}
 						showingBrightnessWarning = false;
@@ -718,14 +667,12 @@ public class CameraManager {
 			}
 		}, brightnessDiagnosticLengthMS);
 
-		if (!webcam.isPresent() || shownBrightnessWarning)
-			return;
+		if (!webcam.isPresent() || shownBrightnessWarning) return;
 		shownBrightnessWarning = true;
 		Platform.runLater(() -> {
 			Alert brightnessAlert = new Alert(AlertType.WARNING);
 
-			Optional<String> cameraName = config.getWebcamsUserName(webcam
-					.get());
+			Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
 			String messageFormat = "The camera %s is streaming frames that are very bright. "
 					+ " This will increase the odds of shots falsely being detected."
 					+ " For best results, please do any mix of the following:\n\n"
@@ -740,12 +687,10 @@ public class CameraManager {
 			}
 
 			brightnessAlert.setTitle("Conditions Very Bright");
-			brightnessAlert
-					.setHeaderText("Webcam detected very bright conditions!");
+			brightnessAlert.setHeaderText("Webcam detected very bright conditions!");
 			brightnessAlert.setResizable(true);
 			brightnessAlert.setContentText(message);
-			if (controller != null)
-				brightnessAlert.initOwner(controller.getStage());
+			if (controller != null) brightnessAlert.initOwner(controller.getStage());
 			brightnessAlert.show();
 		});
 	}
@@ -758,8 +703,7 @@ public class CameraManager {
 		if (!showingMotionDiagnosticWarning) {
 			showingMotionDiagnosticWarning = true;
 			Platform.runLater(() -> {
-				motionDiagnosticWarning = canvasManager.addDiagnosticMessage(
-						"Warning: Excessive motion", Color.RED);
+				motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 			});
 		} else {
 			// Stop the existing timer and start a new one
@@ -771,8 +715,7 @@ public class CameraManager {
 				Platform.runLater(new Runnable() {
 					public void run() {
 						if (motionDiagnosticWarning != null) {
-							canvasManager
-									.removeDiagnosticMessage(motionDiagnosticWarning);
+							canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
 							motionDiagnosticWarning = null;
 						}
 						showingMotionDiagnosticWarning = false;

@@ -35,8 +35,7 @@ public class Shot {
 
 	private Ellipse marker;
 
-	public Shot(Color color, double x, double y, long timestamp, int frame,
-			int markerRadius) {
+	public Shot(Color color, double x, double y, long timestamp, int frame, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
@@ -46,8 +45,7 @@ public class Shot {
 		this.marker.setFill(color);
 	}
 
-	public Shot(Color color, double x, double y, long timestamp,
-			int markerRadius) {
+	public Shot(Color color, double x, double y, long timestamp, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
@@ -81,19 +79,16 @@ public class Shot {
 		return marker;
 	}
 
-	public void setTranslation(int displayWidth, int displayHeight,
-			int feedWidth, int feedHeight) {
+	public void setTranslation(int displayWidth, int displayHeight, int feedWidth, int feedHeight) {
 		double scaleX = (double) displayWidth / (double) feedWidth;
 		double scaleY = (double) displayHeight / (double) feedHeight;
 
 		double scaledX = (x * scaleX);
 		double scaledY = (y * scaleY);
 
-		logger.debug("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY,
-				x, y, scaledX, scaledY);
+		logger.debug("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
 
-		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(),
-				marker.radiusYProperty().get());
+		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
 		marker.setFill(color);
 
 		x = scaledX;

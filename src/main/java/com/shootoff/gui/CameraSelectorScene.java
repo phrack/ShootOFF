@@ -56,11 +56,9 @@ public class CameraSelectorScene extends Stage {
 	private final List<Camera> unconfiguredWebcams = new ArrayList<Camera>();
 	private final List<Camera> selectedWebcams = new ArrayList<Camera>();
 	private final ListView<String> webcamListView = new ListView<String>();
-	private final ObservableList<String> webcams = FXCollections
-			.observableArrayList();
+	private final ObservableList<String> webcams = FXCollections.observableArrayList();
 
-	public CameraSelectorScene(Configuration config, Window parent,
-			List<Camera> configuredCameras) {
+	public CameraSelectorScene(Configuration config, Window parent, List<Camera> configuredCameras) {
 		super();
 		this.initOwner(parent);
 		this.initModality(Modality.WINDOW_MODAL);
@@ -84,14 +82,12 @@ public class CameraSelectorScene extends Stage {
 			collectIpCamInfo();
 		});
 
-		webcamListView
-				.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
-					@Override
-					public ListCell<String> call(ListView<String> list) {
-						return new ImageCell(unconfiguredWebcams, null,
-								Optional.empty(), Optional.empty());
-					}
-				});
+		webcamListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
+			@Override
+			public ListCell<String> call(ListView<String> list) {
+				return new ImageCell(unconfiguredWebcams, null, Optional.empty(), Optional.empty());
+			}
+		});
 
 		webcamListView.setOnMouseClicked((event) -> {
 			if (event.getClickCount() == 2) {
@@ -102,14 +98,12 @@ public class CameraSelectorScene extends Stage {
 		webcamListView.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				addSelection();
-			} else if (event.getCode() == KeyCode.DELETE
-					|| event.getCode() == KeyCode.BACK_SPACE) {
+			} else if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
 				removeSelectedIpCams();
 			}
 		});
 
-		webcamListView.getSelectionModel().setSelectionMode(
-				SelectionMode.MULTIPLE);
+		webcamListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		webcamListView.setItems(webcams);
 
 		VBox v = new VBox(registerIpCamButton, webcamListView);
@@ -157,21 +151,17 @@ public class CameraSelectorScene extends Stage {
 		ipcamPane.add(okButton, 1, 2);
 
 		okButton.setOnAction((e) -> {
-			if (nameTextField.getText().isEmpty()
-					|| urlTextField.getText().isEmpty()) {
+			if (nameTextField.getText().isEmpty() || urlTextField.getText().isEmpty()) {
 				Alert ipcamInfoAlert = new Alert(AlertType.ERROR);
 				ipcamInfoAlert.setTitle("Missing Information");
-				ipcamInfoAlert
-						.setHeaderText("Missing Required IPCam Information!");
+				ipcamInfoAlert.setHeaderText("Missing Required IPCam Information!");
 				ipcamInfoAlert.setResizable(true);
-				ipcamInfoAlert
-						.setContentText("Please fill in both the IPCam name and the URL.");
+				ipcamInfoAlert.setContentText("Please fill in both the IPCam name and the URL.");
 				ipcamInfoAlert.showAndWait();
 				return;
 			}
 
-			Optional<Camera> cam = config.registerIpCam(
-					nameTextField.getText(), urlTextField.getText());
+			Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText());
 
 			if (cam.isPresent()) {
 				ImageCell.cacheCamera(cam.get());
@@ -199,11 +189,9 @@ public class CameraSelectorScene extends Stage {
 	}
 
 	private void addSelection() {
-		final ObservableList<String> selectedNames = webcamListView
-				.getSelectionModel().getSelectedItems();
+		final ObservableList<String> selectedNames = webcamListView.getSelectionModel().getSelectedItems();
 
-		if (selectedNames.isEmpty())
-			return;
+		if (selectedNames.isEmpty()) return;
 
 		for (Camera webcam : unconfiguredWebcams) {
 			if (selectedNames.contains(webcam.getName())) {
@@ -215,11 +203,9 @@ public class CameraSelectorScene extends Stage {
 	}
 
 	private void removeSelectedIpCams() {
-		final ObservableList<String> selectedNames = webcamListView
-				.getSelectionModel().getSelectedItems();
+		final ObservableList<String> selectedNames = webcamListView.getSelectionModel().getSelectedItems();
 
-		if (selectedNames.isEmpty())
-			return;
+		if (selectedNames.isEmpty()) return;
 
 		final List<String> removedCameraNames = new ArrayList<String>();
 

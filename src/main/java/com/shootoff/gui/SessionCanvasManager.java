@@ -80,47 +80,34 @@ public class SessionCanvasManager {
 			se.getShot().getMarker().setVisible(true);
 
 			if (se.getVideoString().isPresent()) {
-				se.getShot()
-						.getMarker()
-						.setOnMouseClicked(
-								(event) -> {
-									if (event.getClickCount() < 2)
-										return;
+				se.getShot().getMarker().setOnMouseClicked((event) -> {
+					if (event.getClickCount() < 2) return;
 
-									FXMLLoader loader = new FXMLLoader(
-											getClass()
-													.getClassLoader()
-													.getResource(
-															"com/shootoff/gui/VideoPlayer.fxml"));
-									try {
-										loader.load();
-									} catch (IOException ioe) {
-										ioe.printStackTrace();
-									}
+					FXMLLoader loader = new FXMLLoader(
+							getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
+					try {
+						loader.load();
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
 
-									Stage videoPlayerStage = new Stage();
+					Stage videoPlayerStage = new Stage();
 
-									VideoPlayerController controller = (VideoPlayerController) loader
-											.getController();
-									controller.init(se.getVideos());
+					VideoPlayerController controller = (VideoPlayerController) loader.getController();
+					controller.init(se.getVideos());
 
-									videoPlayerStage.setTitle("Video Player");
-									videoPlayerStage.setScene(new Scene(loader
-											.getRoot()));
-									videoPlayerStage.show();
+					videoPlayerStage.setTitle("Video Player");
+					videoPlayerStage.setScene(new Scene(loader.getRoot()));
+					videoPlayerStage.show();
 
-									config.registerVideoPlayer(controller);
-									controller
-											.getStage()
-											.setOnCloseRequest(
-													(closeEvent) -> {
-														config.unregisterVideoPlayer(controller);
-													});
-								});
+					config.registerVideoPlayer(controller);
+					controller.getStage().setOnCloseRequest((closeEvent) -> {
+						config.unregisterVideoPlayer(controller);
+					});
+				});
 			}
 
-			if (se.getTargetIndex().isPresent()
-					&& se.getHitRegionIndex().isPresent()) {
+			if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
 				animateTarget(se, false);
 			}
 
@@ -133,25 +120,20 @@ public class SessionCanvasManager {
 		case TARGET_REMOVED:
 			TargetRemovedEvent tre = (TargetRemovedEvent) e;
 			eventToContainer.put(e, targets.get(tre.getTargetIndex()));
-			canvas.getChildren().remove(
-					targets.get(tre.getTargetIndex()).getTargetGroup());
+			canvas.getChildren().remove(targets.get(tre.getTargetIndex()).getTargetGroup());
 			targets.remove(tre.getTargetIndex());
 			break;
 
 		case TARGET_RESIZED:
 			TargetResizedEvent trre = (TargetResizedEvent) e;
-			eventToDimension.put(e, targets.get(trre.getTargetIndex())
-					.getDimension());
-			targets.get(trre.getTargetIndex()).setDimensions(
-					trre.getNewWidth(), trre.getNewHeight());
+			eventToDimension.put(e, targets.get(trre.getTargetIndex()).getDimension());
+			targets.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
 			break;
 
 		case TARGET_MOVED:
 			TargetMovedEvent tme = (TargetMovedEvent) e;
-			eventToPosition.put(e, targets.get(tme.getTargetIndex())
-					.getPosition());
-			targets.get(tme.getTargetIndex()).setPosition(tme.getNewX(),
-					tme.getNewY());
+			eventToPosition.put(e, targets.get(tme.getTargetIndex()).getPosition());
+			targets.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
@@ -168,16 +150,14 @@ public class SessionCanvasManager {
 			ShotEvent se = (ShotEvent) e;
 			canvas.getChildren().remove(se.getShot().getMarker());
 
-			if (se.getTargetIndex().isPresent()
-					&& se.getHitRegionIndex().isPresent()) {
+			if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
 				animateTarget(se, true);
 			}
 
 			break;
 
 		case TARGET_ADDED:
-			canvas.getChildren().remove(
-					eventToContainer.get(e).getTargetGroup());
+			canvas.getChildren().remove(eventToContainer.get(e).getTargetGroup());
 			targets.remove(eventToContainer.get(e));
 			break;
 
@@ -191,15 +171,13 @@ public class SessionCanvasManager {
 		case TARGET_RESIZED:
 			TargetResizedEvent trre = (TargetResizedEvent) e;
 			Dimension2D oldDimension = eventToDimension.get(e);
-			targets.get(trre.getTargetIndex()).setDimensions(
-					oldDimension.getWidth(), oldDimension.getHeight());
+			targets.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
 			break;
 
 		case TARGET_MOVED:
 			TargetMovedEvent tme = (TargetMovedEvent) e;
 			Point2D oldPosition = eventToPosition.get(e);
-			targets.get(tme.getTargetIndex()).setPosition(oldPosition.getX(),
-					oldPosition.getY());
+			targets.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
@@ -210,11 +188,9 @@ public class SessionCanvasManager {
 
 	private void animateTarget(ShotEvent se, boolean undo) {
 		Target target = targets.get(se.getTargetIndex().get());
-		TargetRegion region = (TargetRegion) target.getTargetGroup()
-				.getChildren().get(se.getHitRegionIndex().get());
+		TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren().get(se.getHitRegionIndex().get());
 
-		if (!region.tagExists("command"))
-			return;
+		if (!region.tagExists("command")) return;
 
 		Target.parseCommandTag(region, (commands, commandName, args) -> {
 			if (!undo) {
@@ -249,11 +225,8 @@ public class SessionCanvasManager {
 						if (region.getType() == RegionType.IMAGE) {
 							((ImageRegion) region).reset();
 						} else {
-							Optional<TargetRegion> t = Target
-									.getTargetRegionByName(targets, region,
-											args.get(0));
-							if (t.isPresent())
-								((ImageRegion) t.get()).reset();
+							Optional<TargetRegion> t = Target.getTargetRegionByName(targets, region, args.get(0));
+							if (t.isPresent()) ((ImageRegion) t.get()).reset();
 						}
 					}
 				}
@@ -262,11 +235,8 @@ public class SessionCanvasManager {
 	}
 
 	private void addTarget(TargetAddedEvent e) {
-		Optional<Group> target = TargetIO.loadTarget(new File(System
-				.getProperty("shootoff.home")
-				+ File.separator
-				+ "targets/"
-				+ e.getTargetName()));
+		Optional<Group> target = TargetIO.loadTarget(
+				new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
 
 		if (target.isPresent()) {
 			canvas.getChildren().add(target.get());

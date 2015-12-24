@@ -40,10 +40,8 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
 
-public class ISSFStandardPistol extends TrainingExerciseBase implements
-		TrainingExercise, DelayedStartListener {
-	private static final Logger logger = LoggerFactory
-			.getLogger(ISSFStandardPistol.class);
+public class ISSFStandardPistol extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
+	private static final Logger logger = LoggerFactory.getLogger(ISSFStandardPistol.class);
 
 	private final static String SCORE_COL_NAME = "Score";
 	private final static int SCORE_COL_WIDTH = 60;
@@ -51,8 +49,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 	private final static int ROUND_COL_WIDTH = 60;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 4;
-	private ScheduledExecutorService executorService = Executors
-			.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	private ScheduledFuture<Void> endRound;
 	private TrainingExerciseBase thisSuper;
 	private static int[] ROUND_TIMES = { 150, 20, 10 };
@@ -67,8 +64,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 	private boolean coloredRows = false;
 	private boolean testing = false;
 
-	public ISSFStandardPistol() {
-	}
+	public ISSFStandardPistol() {}
 
 	public ISSFStandardPistol(List<Group> targets) {
 		super(targets);
@@ -110,8 +106,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 		super.addShotTimerColumn(ROUND_COL_NAME, ROUND_COL_WIDTH);
 
 		if (!testing) {
-			executorService.schedule(new SetupWait(), START_DELAY,
-					TimeUnit.SECONDS);
+			executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 		} else {
 			new SetupWait().call();
 		}
@@ -127,13 +122,10 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 		@Override
 		public Void call() {
 			if (repeatExercise) {
-				TrainingExerciseBase.playSound(new File(
-						"sounds/voice/shootoff-makeready.wav"));
-				int randomDelay = new Random()
-						.nextInt((delayMax - delayMin) + 1) + delayMin;
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
+				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 				if (!testing) {
-					executorService.schedule(new StartRound(), randomDelay,
-							TimeUnit.SECONDS);
+					executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 				} else {
 					new StartRound().call();
 				}
@@ -159,8 +151,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 
 				TrainingExerciseBase.playSound("sounds/beep.wav");
 				thisSuper.pauseShotDetection(false);
-				endRound = executorService.schedule(new EndRound(),
-						ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
+				endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
 			}
 
 			return null;
@@ -172,18 +163,15 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 		public Void call() {
 			if (repeatExercise) {
 				thisSuper.pauseShotDetection(true);
-				TrainingExerciseBase.playSound(new File(
-						"sounds/voice/shootoff-roundover.wav"));
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
 
-				int randomDelay = new Random()
-						.nextInt((delayMax - delayMin) + 1) + delayMin;
+				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
 				if (round < 4) {
 					// Go to next round
 					round++;
 					if (!testing) {
-						executorService.schedule(new StartRound(), randomDelay,
-								TimeUnit.SECONDS);
+						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 					} else {
 						new StartRound().call();
 					}
@@ -192,14 +180,12 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 					round = 1;
 					roundTimeIndex++;
 					if (!testing) {
-						executorService.schedule(new StartRound(), randomDelay,
-								TimeUnit.SECONDS);
+						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 					} else {
 						new StartRound().call();
 					}
 				} else {
-					TextToSpeech.say("Event over... Your score is "
-							+ runningScore);
+					TextToSpeech.say("Event over... Your score is " + runningScore);
 					thisSuper.pauseShotDetection(false);
 					// At this point we end and the user has to hit reset to
 					// start again
@@ -212,10 +198,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"ISSF 25M Standard Pistol",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("ISSF 25M Standard Pistol", "1.0", "phrack",
 				"This exercise implements the ISSF event describe at: "
 						+ "http://www.pistol.org.au/events/disciplines/issf. You "
 						+ "can use any scored target with this exercise, but use "
@@ -234,24 +217,20 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 			if (r.tagExists("points")) {
 				hitScore = Integer.parseInt(r.getTag("points"));
 				sessionScores.put(ROUND_TIMES[roundTimeIndex],
-						sessionScores.get(ROUND_TIMES[roundTimeIndex])
-								+ hitScore);
+						sessionScores.get(ROUND_TIMES[roundTimeIndex]) + hitScore);
 				runningScore += hitScore;
 			}
 
 			StringBuilder message = new StringBuilder();
 
 			for (Integer time : ROUND_TIMES) {
-				message.append(String.format("%ss score: %d%n", time,
-						sessionScores.get(time)));
+				message.append(String.format("%ss score: %d%n", time, sessionScores.get(time)));
 			}
 
-			super.showTextOnFeed(message.toString() + "total score: "
-					+ runningScore);
+			super.showTextOnFeed(message.toString() + "total score: " + runningScore);
 		}
 
-		String currentRound = String.format("R%d (%ds)", round,
-				ROUND_TIMES[roundTimeIndex]);
+		String currentRound = String.format("R%d (%ds)", round, ROUND_TIMES[roundTimeIndex]);
 		super.setShotTimerColumnText(SCORE_COL_NAME, String.valueOf(hitScore));
 		super.setShotTimerColumnText(ROUND_COL_NAME, currentRound);
 
@@ -261,9 +240,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 				endRound.cancel(true);
 				new EndRound().call();
 			} catch (Exception e) {
-				logger.error(
-						"Error ending current ISSF round (five shots detected)",
-						e);
+				logger.error("Error ending current ISSF round (five shots detected)", e);
 			}
 		}
 
@@ -289,8 +266,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements
 
 		repeatExercise = true;
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		executorService
-				.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 
 	@Override

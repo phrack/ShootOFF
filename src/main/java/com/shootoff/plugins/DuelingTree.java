@@ -33,15 +33,13 @@ import javafx.scene.Node;
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
-public class DuelingTree extends ProjectorTrainingExerciseBase implements
-		TrainingExercise {
+public class DuelingTree extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String HIT_COL_NAME = "Hit By";
 	private final static int HIT_COL_WIDTH = 60;
 
 	private static final int NEW_ROUND_DELAY = 5; // s
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors
-			.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	private TrainingExerciseBase thisSuper;
 
 	private boolean continueExercise = true;
@@ -51,8 +49,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 	private List<TargetRegion> paddlesOnLeft = new ArrayList<TargetRegion>();
 	private List<TargetRegion> paddlesOnRight = new ArrayList<TargetRegion>();
 
-	public DuelingTree() {
-	}
+	public DuelingTree() {}
 
 	public DuelingTree(List<Group> targets) {
 		super(targets);
@@ -76,8 +73,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 		// Find the first target with directional subtargets and gets its
 		// regions
 		for (Group target : targets) {
-			if (foundTarget)
-				break;
+			if (foundTarget) break;
 
 			for (Node node : target.getChildren()) {
 				TargetRegion region = (TargetRegion) node;
@@ -86,8 +82,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 					if (region.getTag("subtarget").startsWith("left_paddle")) {
 						paddlesOnLeft.add(region);
 						foundTarget = true;
-					} else if (region.getTag("subtarget").startsWith(
-							"right_paddle")) {
+					} else if (region.getTag("subtarget").startsWith("right_paddle")) {
 						paddlesOnRight.add(region);
 						foundTarget = true;
 					}
@@ -96,8 +91,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 		}
 
 		if (!foundTarget) {
-			TrainingExerciseBase.playSound(new File(
-					"sounds/voice/shootoff-duelingtree-warning.wav"));
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-duelingtree-warning.wav"));
 			continueExercise = false;
 		}
 
@@ -106,10 +100,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"Dueling Tree",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("Dueling Tree", "1.0", "phrack",
 				"This exercise works with the dueling tree target. Challenge "
 						+ "a friend, assign a side (left or right) to each participant, "
 						+ "and try to shoot the plates from your side to your friend's "
@@ -118,15 +109,13 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (!continueExercise)
-			return;
+		if (!continueExercise) return;
 
 		if (hitRegion.isPresent()) {
 			TargetRegion r = hitRegion.get();
 
-			if (r.tagExists("subtarget")
-					&& (r.getTag("subtarget").startsWith("left_paddle") || r
-							.getTag("subtarget").startsWith("right_paddle"))) {
+			if (r.tagExists("subtarget") && (r.getTag("subtarget").startsWith("left_paddle")
+					|| r.getTag("subtarget").startsWith("right_paddle"))) {
 
 				String hitBy = "";
 
@@ -157,11 +146,9 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements
 
 	private void roundOver() {
 		if (continueExercise) {
-			thisSuper.showTextOnFeed(String.format(
-					"left score: %d%nright score: %d", leftScore, rightScore));
+			thisSuper.showTextOnFeed(String.format("left score: %d%nright score: %d", leftScore, rightScore));
 			super.pauseShotDetection(true);
-			executorService.schedule(new NewRound(), NEW_ROUND_DELAY,
-					TimeUnit.SECONDS);
+			executorService.schedule(new NewRound(), NEW_ROUND_DELAY, TimeUnit.SECONDS);
 		}
 	}
 

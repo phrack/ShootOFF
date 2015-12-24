@@ -23,8 +23,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	// itself
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
-	public double getColorDifference(BufferedImage frame,
-			double[][] colorDiffMovingAverage) {
+	public double getColorDifference(BufferedImage frame, double[][] colorDiffMovingAverage) {
 		ArrayList<Pixel> visited = new ArrayList<Pixel>();
 
 		double diff = 0;
@@ -34,22 +33,17 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 			if (pixel.getConnectedness() < MAXIMUM_CONNECTEDNESS) {
 				for (int h = -1; h <= 1; h++)
 					for (int w = -1; w <= 1; w++) {
-						if (h == 0 && w == 0)
-							continue;
+						if (h == 0 && w == 0) continue;
 
 						int rx = pixel.x + w;
 						int ry = pixel.y + h;
 
-						if (rx < 0 || ry < 0 || rx >= frame.getWidth()
-								|| ry >= frame.getHeight())
-							continue;
+						if (rx < 0 || ry < 0 || rx >= frame.getWidth() || ry >= frame.getHeight()) continue;
 
 						Pixel nearPoint = new Pixel(rx, ry);
-						if (!this.contains(nearPoint)
-								&& !visited.contains(nearPoint)) {
+						if (!this.contains(nearPoint) && !visited.contains(nearPoint)) {
 
-							java.awt.Color npColor = new java.awt.Color(
-									frame.getRGB(rx, ry));
+							java.awt.Color npColor = new java.awt.Color(frame.getRGB(rx, ry));
 
 							double rcd = pixel.redColorDistance(npColor);
 							double gcd = pixel.greenColorDistance(npColor);
@@ -58,8 +52,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 							visited.add(nearPoint);
 
-							logger.trace("Visiting pixel {} {} - {} - {}", rx,
-									ry, (rcd - gcd),
+							logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd - gcd),
 									colorDiffMovingAverage[rx][ry]);
 						}
 					}
@@ -71,8 +64,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		return diff - lumDiff;
 	}
 
-	public Optional<javafx.scene.paint.Color> getColorJavafx(
-			BufferedImage frame, double[][] colorDiffMovingAverage) {
+	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, double[][] colorDiffMovingAverage) {
 		double colorDist = getColorDifference(frame, colorDiffMovingAverage);
 
 		logger.trace("getcolorjavafx {} - {}", colorDist, (colorDist < 0));

@@ -141,23 +141,21 @@ public class Configuration {
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 
-	protected Configuration(InputStream configInputStream, String name)
-			throws IOException, ConfigurationException {
+	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		readConfigurationFile();
 
 	}
 
-	public Configuration(String name) throws IOException,
-			ConfigurationException {
+	public Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
 
 	}
 
-	protected Configuration(InputStream configInputStream, String name,
-			String[] args) throws IOException, ConfigurationException {
+	protected Configuration(InputStream configInputStream, String name, String[] args)
+			throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		parseCmdLine(args);
@@ -180,8 +178,7 @@ public class Configuration {
 	 * @throws ConfigurationException
 	 *             a specific property value is out of spec
 	 */
-	public Configuration(String name, String[] args) throws IOException,
-			ConfigurationException {
+	public Configuration(String name, String[] args) throws IOException, ConfigurationException {
 		configName = name;
 		parseCmdLine(args);
 		readConfigurationFile();
@@ -194,8 +191,7 @@ public class Configuration {
 		parseCmdLine(args);
 	}
 
-	private void readConfigurationFile() throws ConfigurationException,
-			IOException {
+	private void readConfigurationFile() throws ConfigurationException, IOException {
 		Properties prop = new Properties();
 
 		InputStream inputStream;
@@ -215,8 +211,7 @@ public class Configuration {
 				inputStream.close();
 			}
 		} else {
-			throw new FileNotFoundException(
-					"Could not read configuration file " + configName);
+			throw new FileNotFoundException("Could not read configuration file " + configName);
 		}
 
 		if (prop.containsKey(FIRST_RUN_PROP)) {
@@ -226,8 +221,7 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(ERROR_REPORTING_PROP)) {
-			setUseErrorReporting(Boolean.parseBoolean(prop
-					.getProperty(ERROR_REPORTING_PROP)));
+			setUseErrorReporting(Boolean.parseBoolean(prop.getProperty(ERROR_REPORTING_PROP)));
 		}
 
 		if (prop.containsKey(IPCAMS_PROP)) {
@@ -262,8 +256,7 @@ public class Configuration {
 
 		Set<Camera> recordingCameras = new HashSet<Camera>();
 		if (prop.containsKey(RECORDING_WEBCAMS_PROP)) {
-			for (String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP)
-					.split(",")) {
+			for (String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP).split(",")) {
 				for (Camera webcam : webcams.values()) {
 					if (webcam.getName().equals(nameString)) {
 						recordingCameras.add(webcam);
@@ -275,8 +268,7 @@ public class Configuration {
 		setRecordingCameras(recordingCameras);
 
 		if (prop.containsKey(MARKER_RADIUS_PROP)) {
-			setMarkerRadius(Integer.parseInt(prop
-					.getProperty(MARKER_RADIUS_PROP)));
+			setMarkerRadius(Integer.parseInt(prop.getProperty(MARKER_RADIUS_PROP)));
 		}
 
 		if (prop.containsKey(IGNORE_LASER_COLOR_PROP)) {
@@ -289,8 +281,7 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(USE_RED_LASER_SOUND_PROP)) {
-			setUseRedLaserSound(Boolean.parseBoolean(prop
-					.getProperty(USE_RED_LASER_SOUND_PROP)));
+			setUseRedLaserSound(Boolean.parseBoolean(prop.getProperty(USE_RED_LASER_SOUND_PROP)));
 		}
 
 		if (prop.containsKey(RED_LASER_SOUND_PROP)) {
@@ -298,55 +289,45 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(USE_GREEN_LASER_SOUND_PROP)) {
-			setUseGreenLaserSound(Boolean.parseBoolean(prop
-					.getProperty(USE_GREEN_LASER_SOUND_PROP)));
+			setUseGreenLaserSound(Boolean.parseBoolean(prop.getProperty(USE_GREEN_LASER_SOUND_PROP)));
 		}
 
 		if (prop.containsKey(GREEN_LASER_SOUND_PROP)) {
-			setGreenLaserSound(new File(
-					prop.getProperty(GREEN_LASER_SOUND_PROP)));
+			setGreenLaserSound(new File(prop.getProperty(GREEN_LASER_SOUND_PROP)));
 		}
 
 		if (prop.containsKey(USE_VIRTUAL_MAGAZINE_PROP)) {
-			setUseVirtualMagazine(Boolean.parseBoolean(prop
-					.getProperty(USE_VIRTUAL_MAGAZINE_PROP)));
+			setUseVirtualMagazine(Boolean.parseBoolean(prop.getProperty(USE_VIRTUAL_MAGAZINE_PROP)));
 		}
 
 		if (prop.containsKey(VIRTUAL_MAGAZINE_CAPACITY_PROP)) {
-			setVirtualMagazineCapacity(Integer.parseInt(prop
-					.getProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP)));
+			setVirtualMagazineCapacity(Integer.parseInt(prop.getProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP)));
 		}
 
 		if (prop.containsKey(USE_MALFUNCTIONS_PROP)) {
-			setMalfunctions(Boolean.parseBoolean(prop
-					.getProperty(USE_MALFUNCTIONS_PROP)));
+			setMalfunctions(Boolean.parseBoolean(prop.getProperty(USE_MALFUNCTIONS_PROP)));
 		}
 
 		if (prop.containsKey(MALFUNCTIONS_PROBABILITY_PROP)) {
-			setMalfunctionsProbability(Float.parseFloat(prop
-					.getProperty(MALFUNCTIONS_PROBABILITY_PROP)));
+			setMalfunctionsProbability(Float.parseFloat(prop.getProperty(MALFUNCTIONS_PROBABILITY_PROP)));
 		}
 
-		if (prop.containsKey(ARENA_POSITION_X_PROP)
-				&& prop.containsKey(ARENA_POSITION_Y_PROP)) {
-			setArenaPosition(
-					Double.parseDouble(prop.getProperty(ARENA_POSITION_X_PROP)),
+		if (prop.containsKey(ARENA_POSITION_X_PROP) && prop.containsKey(ARENA_POSITION_Y_PROP)) {
+			setArenaPosition(Double.parseDouble(prop.getProperty(ARENA_POSITION_X_PROP)),
 					Double.parseDouble(prop.getProperty(ARENA_POSITION_Y_PROP)));
 		}
 
 		validateConfiguration();
 	}
 
-	public void writeConfigurationFile() throws ConfigurationException,
-			IOException {
+	public void writeConfigurationFile() throws ConfigurationException, IOException {
 		validateConfiguration();
 
 		Properties prop = new Properties();
 
 		StringBuilder ipcamList = new StringBuilder();
 		for (Entry<String, URL> entry : ipcams.entrySet()) {
-			if (ipcamList.length() > 0)
-				ipcamList.append(",");
+			if (ipcamList.length() > 0) ipcamList.append(",");
 			ipcamList.append(entry.getKey());
 			ipcamList.append("|");
 			ipcamList.append(entry.getValue().toString());
@@ -354,8 +335,7 @@ public class Configuration {
 
 		StringBuilder webcamList = new StringBuilder();
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
-			if (webcamList.length() > 0)
-				webcamList.append(",");
+			if (webcamList.length() > 0) webcamList.append(",");
 			webcamList.append(entry.getKey());
 			webcamList.append(":");
 			webcamList.append(entry.getValue().getName());
@@ -363,40 +343,31 @@ public class Configuration {
 
 		StringBuilder recordingWebcamList = new StringBuilder();
 		for (Camera c : recordingCameras) {
-			if (recordingWebcamList.length() > 0)
-				recordingWebcamList.append(",");
+			if (recordingWebcamList.length() > 0) recordingWebcamList.append(",");
 			recordingWebcamList.append(c.getName());
 		}
 
 		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
-		prop.setProperty(ERROR_REPORTING_PROP,
-				String.valueOf(useErrorReporting));
+		prop.setProperty(ERROR_REPORTING_PROP, String.valueOf(useErrorReporting));
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
 		prop.setProperty(WEBCAMS_PROP, webcamList.toString());
 		prop.setProperty(RECORDING_WEBCAMS_PROP, recordingWebcamList.toString());
 		prop.setProperty(MARKER_RADIUS_PROP, String.valueOf(markerRadius));
 		prop.setProperty(IGNORE_LASER_COLOR_PROP, ignoreLaserColorName);
-		prop.setProperty(USE_RED_LASER_SOUND_PROP,
-				String.valueOf(useRedLaserSound));
+		prop.setProperty(USE_RED_LASER_SOUND_PROP, String.valueOf(useRedLaserSound));
 		prop.setProperty(RED_LASER_SOUND_PROP, redLaserSound.getPath());
-		prop.setProperty(USE_GREEN_LASER_SOUND_PROP,
-				String.valueOf(useGreenLaserSound));
+		prop.setProperty(USE_GREEN_LASER_SOUND_PROP, String.valueOf(useGreenLaserSound));
 		prop.setProperty(GREEN_LASER_SOUND_PROP, greenLaserSound.getPath());
-		prop.setProperty(USE_VIRTUAL_MAGAZINE_PROP,
-				String.valueOf(useVirtualMagazine));
-		prop.setProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP,
-				String.valueOf(virtualMagazineCapacity));
+		prop.setProperty(USE_VIRTUAL_MAGAZINE_PROP, String.valueOf(useVirtualMagazine));
+		prop.setProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP, String.valueOf(virtualMagazineCapacity));
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
-		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP,
-				String.valueOf(malfunctionsProbability));
+		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
 
 		if (getArenaPosition().isPresent()) {
 			Point2D arenaPosition = getArenaPosition().get();
 
-			prop.setProperty(ARENA_POSITION_X_PROP,
-					String.valueOf(arenaPosition.getX()));
-			prop.setProperty(ARENA_POSITION_Y_PROP,
-					String.valueOf(arenaPosition.getY()));
+			prop.setProperty(ARENA_POSITION_X_PROP, String.valueOf(arenaPosition.getX()));
+			prop.setProperty(ARENA_POSITION_Y_PROP, String.valueOf(arenaPosition.getY()));
 		}
 
 		OutputStream outputStream = new FileOutputStream(configName);
@@ -415,8 +386,7 @@ public class Configuration {
 		Options options = new Options();
 
 		options.addOption("d", "debug", false, "turn on debug log messages");
-		options.addOption("m", "marker-radius", true,
-				"sets the radius of shot markers in pixels [1,20]");
+		options.addOption("m", "marker-radius", true, "sets the radius of shot markers in pixels [1,20]");
 		options.addOption("c", "ignore-laser-color", true,
 				"sets the color of laser that should be ignored by ShootOFF (green "
 						+ "or red). No color is ignored by default");
@@ -429,11 +399,9 @@ public class Configuration {
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
 
-			if (cmd.hasOption("d"))
-				setDebugMode(true);
+			if (cmd.hasOption("d")) setDebugMode(true);
 
-			if (cmd.hasOption("m"))
-				setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
+			if (cmd.hasOption("m")) setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
 
 			if (cmd.hasOption("c")) {
 				setIgnoreLaserColor(true);
@@ -442,14 +410,12 @@ public class Configuration {
 
 			if (cmd.hasOption("u")) {
 				setUseVirtualMagazine(true);
-				setVirtualMagazineCapacity(Integer.parseInt(cmd
-						.getOptionValue("u")));
+				setVirtualMagazineCapacity(Integer.parseInt(cmd.getOptionValue("u")));
 			}
 
 			if (cmd.hasOption("f")) {
 				setMalfunctions(true);
-				setMalfunctionsProbability(Float.parseFloat(cmd
-						.getOptionValue("f")));
+				setMalfunctionsProbability(Float.parseFloat(cmd.getOptionValue("f")));
 			}
 		} catch (ParseException e) {
 			System.err.println(e.getMessage());
@@ -463,43 +429,33 @@ public class Configuration {
 
 	protected void validateConfiguration() throws ConfigurationException {
 		if (markerRadius < 1 || markerRadius > 20) {
-			throw new ConfigurationException(String.format(
-					MARKER_RADIUS_MESSAGE, markerRadius));
+			throw new ConfigurationException(String.format(MARKER_RADIUS_MESSAGE, markerRadius));
 		}
 
 		if (!redLaserSound.isAbsolute())
-			redLaserSound = new File(System.getProperty("shootoff.home")
-					+ File.separator + redLaserSound.getPath());
+			redLaserSound = new File(System.getProperty("shootoff.home") + File.separator + redLaserSound.getPath());
 
 		if (useRedLaserSound && !redLaserSound.exists()) {
-			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE,
-					redLaserSound.getPath()));
+			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
 
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(System.getProperty("shootoff.home")
-					+ File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
-			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE,
-					greenLaserSound.getPath()));
+			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
 		}
 
-		if (ignoreLaserColor && !ignoreLaserColorName.equals("red")
-				&& !ignoreLaserColorName.equals("green")) {
-			throw new ConfigurationException(String.format(LASER_COLOR_MESSAGE,
-					ignoreLaserColorName));
+		if (ignoreLaserColor && !ignoreLaserColorName.equals("red") && !ignoreLaserColorName.equals("green")) {
+			throw new ConfigurationException(String.format(LASER_COLOR_MESSAGE, ignoreLaserColorName));
 		}
 
 		if (virtualMagazineCapacity < 1 || virtualMagazineCapacity > 45) {
-			throw new ConfigurationException(String.format(
-					VIRTUAL_MAGAZINE_MESSAGE, virtualMagazineCapacity));
+			throw new ConfigurationException(String.format(VIRTUAL_MAGAZINE_MESSAGE, virtualMagazineCapacity));
 		}
 
-		if (malfunctionsProbability < (float) 0.1
-				|| malfunctionsProbability > (float) 99.9) {
-			throw new ConfigurationException(String.format(
-					INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
+		if (malfunctionsProbability < (float) 0.1 || malfunctionsProbability > (float) 99.9) {
+			throw new ConfigurationException(String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
 		}
 	}
 
@@ -533,10 +489,8 @@ public class Configuration {
 	}
 
 	public static void disableErrorReporting() {
-		Logger rootLogger = (Logger) LoggerFactory
-				.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory
-				.getILoggerFactory();
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		setLogConsoleAppender(rootLogger, loggerContext);
 	}
 
@@ -563,33 +517,26 @@ public class Configuration {
 			ipcamURLAlert.setTitle("Malformed URL");
 			ipcamURLAlert.setHeaderText("IPCam URL is Malformed!");
 			ipcamURLAlert.setResizable(true);
-			ipcamURLAlert.setContentText("IPCam URL is not valid: \n\n"
-					+ ue.getMessage());
+			ipcamURLAlert.setContentText("IPCam URL is not valid: \n\n" + ue.getMessage());
 			ipcamURLAlert.showAndWait();
 		} catch (UnknownHostException uhe) {
 			Alert ipcamHostAlert = new Alert(AlertType.ERROR);
 			ipcamHostAlert.setTitle("Unknown Host");
 			ipcamHostAlert.setHeaderText("IPCam URL Unknown!");
 			ipcamHostAlert.setResizable(true);
-			ipcamHostAlert
-					.setContentText("The IPCam at "
-							+ cameraURL
-							+ " cannot be resolved. Ensure the URL is correct "
-							+ "and that you are either connected to the internet or on the same network as the camera.");
+			ipcamHostAlert.setContentText("The IPCam at " + cameraURL
+					+ " cannot be resolved. Ensure the URL is correct "
+					+ "and that you are either connected to the internet or on the same network as the camera.");
 			ipcamHostAlert.showAndWait();
 		} catch (TimeoutException te) {
 			Alert ipcamTimeoutAlert = new Alert(AlertType.ERROR);
 			ipcamTimeoutAlert.setTitle("IPCam Timeout");
-			ipcamTimeoutAlert
-					.setHeaderText("Connection to IPCam Reached Timeout!");
+			ipcamTimeoutAlert.setHeaderText("Connection to IPCam Reached Timeout!");
 			ipcamTimeoutAlert.setResizable(true);
-			ipcamTimeoutAlert
-					.setContentText("Could not communicate with the IP at "
-							+ cameraURL
-							+ ". Please check the following:\n\n"
-							+ "-The IPCam URL is correct\n"
-							+ "-You are connected to the Internet (for external cameras)"
-							+ "-You are connected to the same network as the camera (for local cameras)");
+			ipcamTimeoutAlert.setContentText("Could not communicate with the IP at " + cameraURL
+					+ ". Please check the following:\n\n" + "-The IPCam URL is correct\n"
+					+ "-You are connected to the Internet (for external cameras)"
+					+ "-You are connected to the same network as the camera (for local cameras)");
 			ipcamTimeoutAlert.showAndWait();
 		}
 
@@ -597,8 +544,7 @@ public class Configuration {
 	}
 
 	public void unregisterIpCam(String cameraName) {
-		if (Camera.unregisterIpCamera(cameraName))
-			ipcams.remove(cameraName);
+		if (Camera.unregisterIpCamera(cameraName)) ipcams.remove(cameraName);
 	}
 
 	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
@@ -689,12 +635,10 @@ public class Configuration {
 			setFirstRun(false);
 		}
 
-		Logger rootLogger = (Logger) LoggerFactory
-				.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
 		if (debugMode) {
-			LoggerContext loggerContext = (LoggerContext) LoggerFactory
-					.getILoggerFactory();
+			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 			setLogConsoleAppender(rootLogger, loggerContext);
 
 			if (rootLogger.getLevel().equals(Level.TRACE)) {
@@ -706,16 +650,14 @@ public class Configuration {
 			// Ensure webcam-capture logger stays at info because it is quite
 			// noisy
 			// and doesn't output information we care about.
-			Logger webcamCaptureLogger = (Logger) loggerContext
-					.getLogger("com.github.sarxos");
+			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
 		} else {
 			rootLogger.setLevel(Level.WARN);
 		}
 	}
 
-	private static void setLogConsoleAppender(Logger rootLogger,
-			LoggerContext loggerContext) {
+	private static void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
 
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
@@ -760,8 +702,7 @@ public class Configuration {
 	}
 
 	public void setExercise(TrainingExercise exercise) {
-		if (currentExercise != null)
-			currentExercise.destroy();
+		if (currentExercise != null) currentExercise.destroy();
 
 		currentExercise = exercise;
 	}
@@ -780,8 +721,7 @@ public class Configuration {
 
 	public Optional<String> getWebcamsUserName(Camera webcam) {
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
-			if (entry.getValue().equals(webcam))
-				return Optional.of(entry.getKey());
+			if (entry.getValue().equals(webcam)) return Optional.of(entry.getKey());
 		}
 
 		return Optional.empty();
@@ -815,8 +755,7 @@ public class Configuration {
 
 	public File getRedLaserSound() {
 		if (!redLaserSound.isAbsolute())
-			redLaserSound = new File(System.getProperty("shootoff.home")
-					+ File.separator + redLaserSound.getPath());
+			redLaserSound = new File(System.getProperty("shootoff.home") + File.separator + redLaserSound.getPath());
 
 		return redLaserSound;
 	}
@@ -826,9 +765,8 @@ public class Configuration {
 	}
 
 	public File getGreenLaserSound() {
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(System.getProperty("shootoff.home")
-					+ File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		return greenLaserSound;
 	}
@@ -866,8 +804,7 @@ public class Configuration {
 	}
 
 	public Optional<TrainingExercise> getExercise() {
-		if (currentExercise == null)
-			return Optional.empty();
+		if (currentExercise == null) return Optional.empty();
 
 		return Optional.of(currentExercise);
 	}

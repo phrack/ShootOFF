@@ -42,29 +42,22 @@ public class TagEditorPanel extends Pane {
 		tagTable.setPrefWidth(200);
 
 		TableColumn<Tag, String> nameCol = new TableColumn<Tag, String>("Name");
-		nameCol.setCellValueFactory(new PropertyValueFactory<Tag, String>(
-				"name"));
+		nameCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("name"));
 		nameCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		nameCol.setOnEditCommit(new EventHandler<CellEditEvent<Tag, String>>() {
 			@Override
 			public void handle(CellEditEvent<Tag, String> t) {
-				((Tag) t.getTableView().getItems()
-						.get(t.getTablePosition().getRow())).setName(t
-						.getNewValue());
+				((Tag) t.getTableView().getItems().get(t.getTablePosition().getRow())).setName(t.getNewValue());
 			}
 		});
 
-		TableColumn<Tag, String> valueCol = new TableColumn<Tag, String>(
-				"Value");
+		TableColumn<Tag, String> valueCol = new TableColumn<Tag, String>("Value");
 		valueCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
-		valueCol.setCellValueFactory(new PropertyValueFactory<Tag, String>(
-				"value"));
+		valueCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("value"));
 		valueCol.setOnEditCommit(new EventHandler<CellEditEvent<Tag, String>>() {
 			@Override
 			public void handle(CellEditEvent<Tag, String> t) {
-				((Tag) t.getTableView().getItems()
-						.get(t.getTablePosition().getRow())).setValue(t
-						.getNewValue());
+				((Tag) t.getTableView().getItems().get(t.getTablePosition().getRow())).setValue(t.getNewValue());
 			}
 		});
 

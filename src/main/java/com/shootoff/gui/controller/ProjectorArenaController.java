@@ -53,17 +53,13 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ProjectorArenaController implements CalibrationListener {
-	private final Logger logger = LoggerFactory
-			.getLogger(ProjectorArenaController.class);
+	private final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	private Stage arenaStage;
 	private Stage shootOFFStage;
-	@FXML
-	private AnchorPane arenaAnchor;
-	@FXML
-	private Group arenaCanvasGroup;
-	@FXML
-	private Label calibrationLabel;
+	@FXML private AnchorPane arenaAnchor;
+	@FXML private Group arenaCanvasGroup;
+	@FXML private Label calibrationLabel;
 
 	private Configuration config;
 	private CanvasManager canvasManager;
@@ -87,8 +83,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setScene(scene);
 	}
 
-	public void init(ShootOFFController shootOFFController,
-			Configuration config, CamerasSupervisor camerasSupervisor) {
+	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
 
 		this.shootOFFController = shootOFFController;
@@ -96,43 +91,35 @@ public class ProjectorArenaController implements CalibrationListener {
 		shootOFFStage = shootOFFController.getStage();
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
 
-		canvasManager = new CanvasManager(arenaCanvasGroup, config,
-				camerasSupervisor, "arena", null);
+		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
 
-		arenaAnchor.widthProperty().addListener(
-				(e) -> {
-					canvasManager.setBackgroundFit(arenaAnchor.getWidth(),
-							arenaAnchor.getHeight());
-				});
+		arenaAnchor.widthProperty().addListener((e) -> {
+			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+		});
 
-		arenaAnchor.heightProperty().addListener(
-				(e) -> {
-					canvasManager.setBackgroundFit(arenaAnchor.getWidth(),
-							arenaAnchor.getHeight());
-				});
+		arenaAnchor.heightProperty().addListener((e) -> {
+			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
-		ObservableList<Screen> stageHomeScreens = Screen
-				.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
+		ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
 
 		if (stageHomeScreens.isEmpty()) {
-			StringBuilder message = new StringBuilder(String.format(
-					"Didn't find screen for stage with title %s at (%f, %f)."
-							+ " Existing screens: %n%n", stage.getTitle(),
-					stage.getX(), stage.getY()));
+			StringBuilder message = new StringBuilder(
+					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens: %n%n",
+							stage.getTitle(), stage.getX(), stage.getY()));
 
 			Iterator<Screen> it = Screen.getScreens().iterator();
 
 			while (it.hasNext()) {
 				Screen s = it.next();
 
-				message.append(String.format("(w = %f, h = %f, dpi = %f)", s
-						.getBounds().getWidth(), s.getBounds().getHeight(), s
-						.getDpi()));
+				message.append(String.format("(w = %f, h = %f, dpi = %f)", s.getBounds().getWidth(),
+						s.getBounds().getHeight(), s.getDpi()));
 
 				if (it.hasNext()) {
 					message.append("\n");
@@ -143,8 +130,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			return Optional.empty();
 		} else if (stageHomeScreens.size() > 1) {
-			logger.warn(
-					"Found multiple screens as the possible arena home screen, this is unexpected: {}",
+			logger.warn("Found multiple screens as the possible arena home screen, this is unexpected: {}",
 					stageHomeScreens.size());
 		}
 
@@ -175,8 +161,8 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			Point2D arenaPosition = config.getArenaPosition().get();
 
-			ObservableList<Screen> screens = Screen.getScreensForRectangle(
-					arenaPosition.getX(), arenaPosition.getY(), 1, 1);
+			ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(), arenaPosition.getY(),
+					1, 1);
 
 			if (!screens.isEmpty()) {
 				arenaStage.setX(arenaPosition.getX());
@@ -186,8 +172,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 				return;
 			} else {
-				logger.debug(
-						"Saved screen coordinates ({}, {}) no longer exists, attempting fallback approaches...",
+				logger.debug("Saved screen coordinates ({}, {}) no longer exists, attempting fallback approaches...",
 						arenaPosition.getX(), arenaPosition.getY());
 			}
 		}
@@ -199,8 +184,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			homeScreen = getStageHomeScreen(shootOFFStage);
 
-			if (!homeScreen.isPresent())
-				return;
+			if (!homeScreen.isPresent()) return;
 
 			Screen shootOFFScreen = homeScreen.get();
 
@@ -221,9 +205,8 @@ public class ProjectorArenaController implements CalibrationListener {
 					smallest = screen;
 				} else {
 					if (screen.getBounds().getHeight()
-							* screen.getBounds().getWidth() < smallest
-							.getBounds().getHeight()
-							* smallest.getBounds().getWidth()) {
+							* screen.getBounds().getWidth() < smallest.getBounds().getHeight()
+									* smallest.getBounds().getWidth()) {
 						smallest = screen;
 					}
 				}
@@ -238,10 +221,8 @@ public class ProjectorArenaController implements CalibrationListener {
 			double newX = arenaHome.getVisualBounds().getMinX();
 			double newY = arenaHome.getVisualBounds().getMinY();
 
-			logger.debug(
-					"Found likely projector screen: resolution = {}x{}, newX = {}, newY = {}",
-					arenaHome.getBounds().getWidth(), arenaHome.getBounds()
-							.getHeight(), newX, newY);
+			logger.debug("Found likely projector screen: resolution = {}x{}, newX = {}, newY = {}",
+					arenaHome.getBounds().getWidth(), arenaHome.getBounds().getHeight(), newX, newY);
 
 			arenaStage.setX(newX + 10);
 			arenaStage.setY(newY + 10);
@@ -330,33 +311,25 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	@FXML
 	public void canvasKeyPressed(KeyEvent event) throws Exception {
-		boolean macFullscreen = event.getCode() == KeyCode.F
-				&& event.isControlDown() && event.isShortcutDown();
+		boolean macFullscreen = event.getCode() == KeyCode.F && event.isControlDown() && event.isShortcutDown();
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
 			// Manually going full screen with an arena that was manually
 			// moved to another screen
 			Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
 
-			if (!currentArenaScreen.isPresent())
-				return;
+			if (!currentArenaScreen.isPresent()) return;
 
-			boolean fullyManual = !detectedProjectorScreen.isPresent()
-					&& !arenaStage.isFullScreen()
-					&& !originalArenaHomeScreen
-							.equals(currentArenaScreen.get());
-			boolean movedAfterAuto = detectedProjectorScreen.isPresent()
-					&& !arenaStage.isFullScreen()
-					&& !detectedProjectorScreen
-							.equals(currentArenaScreen.get());
+			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
+					&& !originalArenaHomeScreen.equals(currentArenaScreen.get());
+			boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
+					&& !detectedProjectorScreen.equals(currentArenaScreen.get());
 
 			if (fullyManual || movedAfterAuto) {
 				config.setArenaPosition(arenaStage.getX(), arenaStage.getY());
 				try {
 					config.writeConfigurationFile();
 				} catch (ConfigurationException | IOException e) {
-					logger.error(
-							"Error writing configuration with arena location",
-							e);
+					logger.error("Error writing configuration with arena location", e);
 					throw e;
 				}
 			}
@@ -402,13 +375,10 @@ public class ProjectorArenaController implements CalibrationListener {
 	private CanvasManager feedCanvasManager;
 
 	private void cursorWarningToggle(boolean mouseEntered) {
-		if (feedCanvasManager == null || shootOFFController.isCalibrating())
-			return;
+		if (feedCanvasManager == null || shootOFFController.isCalibrating()) return;
 
 		// If everything is still the same, return
-		if (mouseEntered && showingCursorWarning
-				&& !shootOFFController.isCalibrating())
-			return;
+		if (mouseEntered && showingCursorWarning && !shootOFFController.isCalibrating()) return;
 
 		// If the mouse entered OR the mouse is in the window but we haven't
 		// been showing the warning, show the warning
@@ -416,16 +386,12 @@ public class ProjectorArenaController implements CalibrationListener {
 			Platform.runLater(new Runnable() {
 				public void run() {
 					mouseInWindow = true;
-					if (!shootOFFController.isCalibrating()
-							&& arenaStage.isFullScreen()) {
+					if (!shootOFFController.isCalibrating() && arenaStage.isFullScreen()) {
 						showingCursorWarning = true;
-						mouseOnArenaLabel = feedCanvasManager
-								.addDiagnosticMessage(
-										"Cursor On Arena: Shot Detection Disabled",
-										15000 /* ms */, Color.YELLOW);
+						mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage(
+								"Cursor On Arena: Shot Detection Disabled", 15000 /* ms */, Color.YELLOW);
 
-						feedCanvasManager.getCameraManager()
-								.setDetecting(false);
+						feedCanvasManager.getCameraManager().setDetecting(false);
 					}
 				}
 			});
@@ -440,14 +406,12 @@ public class ProjectorArenaController implements CalibrationListener {
 					Platform.runLater(new Runnable() {
 						public void run() {
 							if (showingCursorWarning) {
-								feedCanvasManager
-										.removeDiagnosticMessage(mouseOnArenaLabel);
+								feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
 								showingCursorWarning = false;
 								mouseOnArenaLabel = null;
 							}
 							if (!shootOFFController.isCalibrating())
-								feedCanvasManager.getCameraManager()
-										.setDetecting(true);
+								feedCanvasManager.getCameraManager().setDetecting(true);
 						}
 					});
 				}

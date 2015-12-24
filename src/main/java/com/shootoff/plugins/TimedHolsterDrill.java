@@ -34,14 +34,12 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
 
-public class TimedHolsterDrill extends TrainingExerciseBase implements
-		TrainingExercise, DelayedStartListener {
+public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private final static String LENGTH_COL_NAME = "Length";
 	private final static int LENGTH_COL_WIDTH = 60;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors
-			.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	private TrainingExerciseBase thisSuper;
 	private int delayMin = 4;
 	private int delayMax = 8;
@@ -49,8 +47,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements
 	private long beepTime = 0;
 	private boolean coloredRows = false;
 
-	public TimedHolsterDrill() {
-	}
+	public TimedHolsterDrill() {}
 
 	public TimedHolsterDrill(List<Group> targets) {
 		super(targets);
@@ -63,21 +60,16 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements
 		super.pauseShotDetection(true);
 		super.getDelayedStartInterval(this);
 
-		executorService
-				.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() {
-			TrainingExerciseBase.playSound(new File(
-					"sounds/voice/shootoff-makeready.wav"));
-			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1)
-					+ delayMin;
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
+			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
-			if (repeatExercise)
-				executorService.schedule(new Round(), randomDelay,
-						TimeUnit.SECONDS);
+			if (repeatExercise) executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 
 			return null;
 		}
@@ -99,10 +91,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements
 				thisSuper.pauseShotDetection(false);
 				beepTime = System.currentTimeMillis();
 
-				int randomDelay = new Random()
-						.nextInt((delayMax - delayMin) + 1) + delayMin;
-				executorService.schedule(new Round(), randomDelay,
-						TimeUnit.SECONDS);
+				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 			}
 
 			return null;
@@ -117,10 +107,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"Timed Holster Drill",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("Timed Holster Drill", "1.0", "phrack",
 				"This exercise does not require a target, but one may be used "
 						+ "to give the shooter something to shoot at. When the exercise "
 						+ "is started you are asked to enter a range for randomly "
@@ -133,10 +120,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		float drawShotLength = (float) (System.currentTimeMillis() - beepTime)
-				/ (float) 1000; // s
-		super.setShotTimerColumnText(LENGTH_COL_NAME,
-				String.format("%.2f", drawShotLength));
+		float drawShotLength = (float) (System.currentTimeMillis() - beepTime) / (float) 1000; // s
+		super.setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
 	}
 
 	@Override
@@ -146,8 +131,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements
 		super.getDelayedStartInterval(this);
 		repeatExercise = true;
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		executorService
-				.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 
 	@Override

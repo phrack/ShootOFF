@@ -45,8 +45,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 		frameThreshold = ft;
 	}
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(DeduplicationProcessor.class);
+	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
 
 	public DeduplicationProcessor(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
@@ -57,8 +56,8 @@ public class DeduplicationProcessor implements ShotProcessor {
 	}
 
 	private void setDistanceThreshold() {
-		distanceThreshold = (cameraManager.getFeedWidth() * cameraManager
-				.getFeedHeight()) / DISTANCE_THRESHOLD_DIVISION_FACTOR;
+		distanceThreshold = (cameraManager.getFeedWidth() * cameraManager.getFeedHeight())
+				/ DISTANCE_THRESHOLD_DIVISION_FACTOR;
 	}
 
 	protected Optional<Shot> getLastShot() {
@@ -71,11 +70,9 @@ public class DeduplicationProcessor implements ShotProcessor {
 			if (logger.isTraceEnabled()) {
 				logger.trace("processShot {} {}", shot.getX(), shot.getY());
 
-				logger.trace("processShot {} - {}", shot.getFrame()
-						- lastShot.get().getFrame(), frameThreshold);
+				logger.trace("processShot {} - {}", shot.getFrame() - lastShot.get().getFrame(), frameThreshold);
 
-				logger.trace("processShot distance {}",
-						euclideanDistance(lastShot.get(), shot));
+				logger.trace("processShot distance {}", euclideanDistance(lastShot.get(), shot));
 			}
 
 			// If two shots have the same color, appear to have happened fast
@@ -92,15 +89,13 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 		}
 
-		if (updateLastShot)
-			lastShot = Optional.of(shot);
+		if (updateLastShot) lastShot = Optional.of(shot);
 
 		return true;
 	}
 
 	public double euclideanDistance(Shot shot1, Shot shot2) {
-		return Math.sqrt(Math.pow(shot1.getX() - shot2.getX(), 2)
-				+ Math.pow(shot1.getY() - shot2.getY(), 2));
+		return Math.sqrt(Math.pow(shot1.getX() - shot2.getX(), 2) + Math.pow(shot1.getY() - shot2.getY(), 2));
 	}
 
 	@Override

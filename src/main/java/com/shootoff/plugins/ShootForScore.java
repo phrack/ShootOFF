@@ -27,16 +27,14 @@ import javafx.scene.paint.Color;
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
 
-public class ShootForScore extends TrainingExerciseBase implements
-		TrainingExercise {
+public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
 	private final static String POINTS_COL_NAME = "Score";
 	private final static int POINTS_COL_WIDTH = 60;
 
 	private int redScore = 0;
 	private int greenScore = 0;
 
-	public ShootForScore() {
-	}
+	public ShootForScore() {}
 
 	public ShootForScore(List<Group> targets) {
 		super(targets);
@@ -69,43 +67,34 @@ public class ShootForScore extends TrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"Shoot for Score",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("Shoot for Score", "1.0", "phrack",
 				"This exercise works with targets that have score tags "
 						+ "assigned to regions. Any time a target region is hit, "
-						+ "the number of points assigned to that region are added "
-						+ "to your total score.");
+						+ "the number of points assigned to that region are added " + "to your total score.");
 	}
 
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (!hitRegion.isPresent())
-			return;
+		if (!hitRegion.isPresent()) return;
 
 		if (hitRegion.get().tagExists("points")) {
-			super.setShotTimerColumnText(POINTS_COL_NAME, hitRegion.get()
-					.getTag("points"));
+			super.setShotTimerColumnText(POINTS_COL_NAME, hitRegion.get().getTag("points"));
 
 			if (shot.getColor().equals(Color.RED)) {
 				redScore += Integer.parseInt(hitRegion.get().getTag("points"));
 			} else if (shot.getColor().equals(Color.GREEN)) {
-				greenScore += Integer
-						.parseInt(hitRegion.get().getTag("points"));
+				greenScore += Integer.parseInt(hitRegion.get().getTag("points"));
 			}
 		}
 
 		String message = "score: 0";
 
 		if (redScore > 0 && greenScore > 0) {
-			message = String.format("red score: %d%ngreen score: %d", redScore,
-					greenScore);
+			message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
 		}
 
 		if (redScore > 0 && greenScore > 0) {
-			message = String.format("red score: %d%ngreen score: %d", redScore,
-					greenScore);
+			message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
 		} else if (redScore > 0) {
 			message = String.format("red score: %d", redScore);
 		} else if (greenScore > 0) {

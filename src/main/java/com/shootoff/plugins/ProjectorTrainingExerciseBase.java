@@ -40,15 +40,13 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
-	public ProjectorTrainingExerciseBase() {
-	}
+	public ProjectorTrainingExerciseBase() {}
 
 	public ProjectorTrainingExerciseBase(List<Group> targets) {
 		super(targets);
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor,
-			TableView<ShotEntry> shotTimerTable,
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TableView<ShotEntry> shotTimerTable,
 			ProjectorArenaController arenaController) {
 		super.init(config, camerasSupervisor, shotTimerTable);
 		this.config = config;
@@ -60,9 +58,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	public void reset() {
 		camerasSupervisor.reset();
 		if (config.getExercise().isPresent())
-			config.getExercise()
-					.get()
-					.reset(arenaController.getCanvasManager().getTargetGroups());
+			config.getExercise().get().reset(arenaController.getCanvasManager().getTargetGroups());
 	}
 
 	/**
@@ -79,11 +75,9 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 */
 	public Optional<Target> addTarget(File target, double x, double y) {
 		if (!target.isAbsolute())
-			target = new File(System.getProperty("shootoff.home")
-					+ File.separator + target.getPath());
+			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
 
-		Optional<Target> newTarget = arenaController.getCanvasManager()
-				.addTarget(target);
+		Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
 
 		if (newTarget.isPresent()) {
 			newTarget.get().setPosition(x, y);

@@ -35,8 +35,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 
-public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
-		TrainingExercise {
+public class ShootDontShoot extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String TARGET_COL_NAME = "TARGET";
 	private final static int TARGET_COL_WIDTH = 60;
 
@@ -45,8 +44,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 	private final static int ROUND_DURATION = 10; // s
 
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors
-			.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 	private boolean continueExercise = true;
 	private ProjectorTrainingExerciseBase thisSuper;
@@ -55,8 +53,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 	private final List<Target> shootTargets = new ArrayList<Target>();
 	private final List<Target> dontShootTargets = new ArrayList<Target>();
 
-	public ShootDontShoot() {
-	}
+	public ShootDontShoot() {}
 
 	public ShootDontShoot(List<Group> targets) {
 		super(targets);
@@ -68,12 +65,10 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 		super.addShotTimerColumn(TARGET_COL_NAME, TARGET_COL_WIDTH);
 
 		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
-		addTargets(dontShootTargets,
-				"targets/shoot_dont_shoot/dont_shoot.target");
+		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
 		super.showTextOnFeed("missed targets: 0\nbad hits: 0");
 
-		executorService.schedule(new NewRound(), ROUND_DURATION,
-				TimeUnit.SECONDS);
+		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 	}
 
 	private class NewRound implements Callable<Void> {
@@ -83,16 +78,12 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 				missedTargets += shootTargets.size();
 
 				if (shootTargets.size() == 1) {
-					TextToSpeech.say(String.format("You missed %d target.",
-							shootTargets.size()));
+					TextToSpeech.say(String.format("You missed %d target.", shootTargets.size()));
 				} else if (shootTargets.size() > 1) {
-					TextToSpeech.say(String.format("You missed %d targets.",
-							shootTargets.size()));
+					TextToSpeech.say(String.format("You missed %d targets.", shootTargets.size()));
 				}
 
-				thisSuper.showTextOnFeed(String.format(
-						"missed targets: %d%nbad hits: %d", missedTargets,
-						badHits));
+				thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", missedTargets, badHits));
 
 				for (Target target : shootTargets)
 					thisSuper.removeTarget(target);
@@ -101,16 +92,12 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 					thisSuper.removeTarget(target);
 				dontShootTargets.clear();
 
-				addTargets(shootTargets,
-						"targets/shoot_dont_shoot/shoot.target");
-				addTargets(dontShootTargets,
-						"targets/shoot_dont_shoot/dont_shoot.target");
+				addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
+				addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
 
 				thisSuper.clearShots();
 
-				if (continueExercise)
-					executorService.schedule(new NewRound(), ROUND_DURATION,
-							TimeUnit.SECONDS);
+				if (continueExercise) executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 			}
 
 			return null;
@@ -119,10 +106,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"Shoot Don't Shoot",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("Shoot Don't Shoot", "1.0", "phrack",
 				"This exercise randomly puts up targets and gives you 10 seconds "
 						+ "to decide which ones to shoot and which ones to ignore. If "
 						+ "you do not shoot a target you are supposed to shoot, it gets "
@@ -133,20 +117,14 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 	}
 
 	private void addTargets(List<Target> targets, String target) {
-		int count = new Random()
-				.nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1)
-				+ MIN_TARGETS_PER_ROUND;
+		int count = new Random().nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1) + MIN_TARGETS_PER_ROUND;
 
 		for (int i = 0; i < count; i++) {
-			int x = new Random()
-					.nextInt(((int) super.getArenaWidth() - 100) + 1) + 0;
-			int y = new Random()
-					.nextInt(((int) super.getArenaHeight() - 100) + 1) + 0;
+			int x = new Random().nextInt(((int) super.getArenaWidth() - 100) + 1) + 0;
+			int y = new Random().nextInt(((int) super.getArenaHeight() - 100) + 1) + 0;
 
-			Optional<Target> newTarget = super
-					.addTarget(new File(target), x, y);
-			if (newTarget.isPresent())
-				targets.add(newTarget.get());
+			Optional<Target> newTarget = super.addTarget(new File(target), x, y);
+			if (newTarget.isPresent()) targets.add(newTarget.get());
 		}
 	}
 
@@ -203,16 +181,14 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements
 		dontShootTargets.clear();
 
 		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
-		addTargets(dontShootTargets,
-				"targets/shoot_dont_shoot/dont_shoot.target");
+		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
 
 		super.showTextOnFeed("missed targets: 0\nbad hits: 0");
 
 		continueExercise = true;
 
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
-		executorService.schedule(new NewRound(), ROUND_DURATION,
-				TimeUnit.SECONDS);
+		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 	}
 
 	@Override

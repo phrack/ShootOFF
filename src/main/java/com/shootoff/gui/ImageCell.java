@@ -50,12 +50,10 @@ public class ImageCell extends TextFieldListCell<String> {
 	private final Optional<Set<Camera>> recordingCameras;
 
 	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames,
-			Optional<DesignateShotRecorderListener> listener,
-			Optional<Set<Camera>> recordingCameras) {
+			Optional<DesignateShotRecorderListener> listener, Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<Camera>(webcams);
 		if (userDefinedCameraNames != null) {
-			this.userDefinedCameraNames = new ArrayList<String>(
-					userDefinedCameraNames);
+			this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
 		} else {
 			this.userDefinedCameraNames = null;
 		}
@@ -64,8 +62,7 @@ public class ImageCell extends TextFieldListCell<String> {
 		this.setConverter(new DefaultStringConverter());
 
 		for (Camera c : webcams) {
-			if (imageCache.containsKey(c))
-				continue;
+			if (imageCache.containsKey(c)) continue;
 
 			cacheCamera(c);
 
@@ -80,11 +77,9 @@ public class ImageCell extends TextFieldListCell<String> {
 
 		this.editingProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
-			public void changed(ObservableValue<? extends Boolean> observable,
-					Boolean oldValue, Boolean newValue) {
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 				if (!newValue) {
-					Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this
-							.getText());
+					Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this.getText());
 
 					if (webcamIV.isPresent()) {
 						setGraphic(webcamIV.get());
@@ -95,8 +90,7 @@ public class ImageCell extends TextFieldListCell<String> {
 
 		if (listener.isPresent()) {
 			this.setOnMouseClicked((event) -> {
-				if (event.getClickCount() < 2)
-					return;
+				if (event.getClickCount() < 2) return;
 
 				this.cancelEdit();
 
@@ -108,8 +102,7 @@ public class ImageCell extends TextFieldListCell<String> {
 					listener.get().unregisterShotRecorder(this.getText());
 				}
 
-				Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this
-						.getText());
+				Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this.getText());
 
 				if (webcamIV.isPresent()) {
 					setGraphic(webcamIV.get());
@@ -166,13 +159,10 @@ public class ImageCell extends TextFieldListCell<String> {
 			try {
 				int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
-					webcamIV = Optional.of(imageCache.get(webcams
-							.get(cameraIndex)));
+					webcamIV = Optional.of(imageCache.get(webcams.get(cameraIndex)));
 				}
 			} catch (NullPointerException e) {
-				logger.error(
-						"Error fetching cached image for configured camera: "
-								+ webcamName, e);
+				logger.error("Error fetching cached image for configured camera: " + webcamName, e);
 				throw e;
 			}
 		}
@@ -184,8 +174,7 @@ public class ImageCell extends TextFieldListCell<String> {
 		boolean cameraOpened = false;
 
 		if (!webcam.isOpen()) {
-			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH,
-					CameraManager.DEFAULT_FEED_HEIGHT));
+			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
 			webcam.open();
 			cameraOpened = true;
 		}

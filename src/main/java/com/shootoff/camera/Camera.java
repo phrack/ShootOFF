@@ -84,8 +84,7 @@ public class Camera {
 	}
 
 	public static Camera registerIpCamera(String cameraName, URL cameraURL)
-			throws MalformedURLException, URISyntaxException,
-			UnknownHostException, TimeoutException {
+			throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
 		// These are here because webcam-capture wraps this exception in a
 		// WebcamException if the
 		// URL has a syntax issue. We don't want to use webcam-capture classes
@@ -96,8 +95,7 @@ public class Camera {
 		cameraURL.toURI();
 
 		try {
-			IpCamDevice ipcam = IpCamDeviceRegistry.register(new IpCamDevice(
-					cameraName, cameraURL, IpCamMode.PUSH));
+			IpCamDevice ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
 
 			// If a camera can't be reached, webcam capture seems to freeze
 			// indefinitely. This is done
@@ -146,8 +144,7 @@ public class Camera {
 		this.webcam = webcam;
 		this.isIpCam = false;
 
-		logger.debug("WebcamDevice type: {}", webcam.getDevice().getClass()
-				.getName());
+		logger.debug("WebcamDevice type: {}", webcam.getDevice().getClass().getName());
 	}
 
 	private Camera(IpCamDevice ipcam) {
@@ -182,8 +179,7 @@ public class Camera {
 	}
 
 	public static List<Camera> getWebcams() {
-		if (isMac)
-			return knownWebcams;
+		if (isMac) return knownWebcams;
 
 		List<Camera> webcams = new ArrayList<Camera>();
 
@@ -255,10 +251,7 @@ public class Camera {
 
 			webcam.setViewSize(size);
 		} catch (IllegalArgumentException e) {
-			logger.error(
-					String.format(
-							"Failed to set dimensions for camera: camera.getName() = %s",
-							getName()), e);
+			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
 		}
 
 	}
@@ -273,15 +266,11 @@ public class Camera {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		Camera other = (Camera) obj;
-		if (!this.getName().equals(other.getName()))
-			return false;
+		if (!this.getName().equals(other.getName())) return false;
 		return true;
 	}
 }

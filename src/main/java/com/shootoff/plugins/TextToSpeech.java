@@ -32,15 +32,13 @@ import marytts.exceptions.SynthesisException;
 import marytts.util.data.audio.AudioPlayer;
 
 public final class TextToSpeech {
-	private static final Logger logger = LoggerFactory
-			.getLogger(TextToSpeech.class);
+	private static final Logger logger = LoggerFactory.getLogger(TextToSpeech.class);
 
 	private static boolean inited = false;
 	private static boolean isSilenced = false;
 	private static MaryInterface marytts = null;
 
-	protected TextToSpeech() {
-	}
+	protected TextToSpeech() {}
 
 	private static void init() throws MaryConfigurationException {
 		marytts = new LocalMaryInterface();
@@ -60,8 +58,7 @@ public final class TextToSpeech {
 				init();
 			}
 
-			if (comment.isEmpty())
-				return;
+			if (comment.isEmpty()) return;
 
 			AudioInputStream audio = marytts.generateAudio(comment);
 			AudioPlayer player = new AudioPlayer(audio);

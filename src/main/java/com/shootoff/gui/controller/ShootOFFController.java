@@ -110,50 +110,30 @@ import javafx.stage.Stage;
 
 public class ShootOFFController implements CameraConfigListener, TargetListener {
 	private Stage shootOFFStage;
-	@FXML
-	private MenuBar mainMenu;
-	@FXML
-	private Menu addTargetMenu;
-	@FXML
-	private Menu editTargetMenu;
-	@FXML
-	private Menu trainingMenu;
-	@FXML
-	private RadioMenuItem noneTrainingMenuItem;
-	@FXML
-	private MenuItem toggleSessionRecordingMenuItem;
-	@FXML
-	private MenuItem showSessionViewerMenuItem;
-	@FXML
-	private ToggleGroup trainingToggleGroup;
-	@FXML
-	private TabPane cameraTabPane;
-	@FXML
-	private TableView<ShotEntry> shotTimerTable;
-	@FXML
-	private MenuItem startArenaMenuItem;
-	@FXML
-	private MenuItem toggleArenaCalibrationMenuItem;
-	@FXML
-	private Menu calibrationOptionsMenu;
-	@FXML
-	private ToggleGroup calibrationToggleGroup;
-	@FXML
-	private Menu addArenaTargetMenu;
-	@FXML
-	private Menu arenaBackgroundMenu;
-	@FXML
-	private Menu coursesMenu;
-	@FXML
-	private MenuItem toggleArenaShotsMenuItem;
+	@FXML private MenuBar mainMenu;
+	@FXML private Menu addTargetMenu;
+	@FXML private Menu editTargetMenu;
+	@FXML private Menu trainingMenu;
+	@FXML private RadioMenuItem noneTrainingMenuItem;
+	@FXML private MenuItem toggleSessionRecordingMenuItem;
+	@FXML private MenuItem showSessionViewerMenuItem;
+	@FXML private ToggleGroup trainingToggleGroup;
+	@FXML private TabPane cameraTabPane;
+	@FXML private TableView<ShotEntry> shotTimerTable;
+	@FXML private MenuItem startArenaMenuItem;
+	@FXML private MenuItem toggleArenaCalibrationMenuItem;
+	@FXML private Menu calibrationOptionsMenu;
+	@FXML private ToggleGroup calibrationToggleGroup;
+	@FXML private Menu addArenaTargetMenu;
+	@FXML private Menu arenaBackgroundMenu;
+	@FXML private Menu coursesMenu;
+	@FXML private MenuItem toggleArenaShotsMenuItem;
 
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
-	private final Logger logger = LoggerFactory
-			.getLogger(ShootOFFController.class);
-	private final ObservableList<ShotEntry> shotEntries = FXCollections
-			.observableArrayList();
+	private final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
+	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 
 	private ProjectorArenaController arenaController;
@@ -180,22 +160,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		shootOFFStage = (Stage) mainMenu.getScene().getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
-		shootOFFStage
-				.getIcons()
-				.addAll(new Image(ShootOFFController.class
-						.getResourceAsStream("/images/icon_16x16.png")),
-						new Image(ShootOFFController.class
-								.getResourceAsStream("/images/icon_32x32.png")),
-						new Image(ShootOFFController.class
-								.getResourceAsStream("/images/icon_48x48.png")),
-						new Image(ShootOFFController.class
-								.getResourceAsStream("/images/icon_64x64.png")),
-						new Image(
-								ShootOFFController.class
-										.getResourceAsStream("/images/icon_128x128.png")),
-						new Image(
-								ShootOFFController.class
-										.getResourceAsStream("/images/icon_256x256.png")));
+		shootOFFStage.getIcons().addAll(
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_16x16.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_32x32.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_48x48.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_64x64.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_128x128.png")),
+				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_256x256.png")));
 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
@@ -210,8 +181,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				disableShotDetectionTimer = null;
 			}
 
-			if (config.getExercise().isPresent())
-				config.getExercise().get().destroy();
+			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
 			if (arenaController != null) {
 				arenaController.getCanvasManager().close();
@@ -233,21 +203,18 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			GlobalExecutorPool.getPool().shutdownNow();
 
 			if (!config.getVideoPlayers().isEmpty()) {
-				for (VideoPlayerController videoPlayer : config
-						.getVideoPlayers()) {
+				for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
 					videoPlayer.getStage().close();
 				}
 			}
 
-			if (!config.inDebugMode())
-				Main.forceClose(0);
+			if (!config.inDebugMode()) Main.forceClose(0);
 		});
 
 		if (config.getWebcams().isEmpty()) {
 			Camera defaultCamera = Camera.getDefault();
 			if (defaultCamera != null) {
-				if (!addCameraTab("Default", defaultCamera))
-					cameraLockFailure(defaultCamera, true);
+				if (!addCameraTab("Default", defaultCamera)) cameraLockFailure(defaultCamera, true);
 			} else {
 				Main.closeNoCamera();
 			}
@@ -255,91 +222,63 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			addConfiguredCameras();
 		}
 
-		TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>(
-				"Time");
+		TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
 		timeCol.setMinWidth(85);
-		timeCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>(
-				"timestamp"));
+		timeCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>("timestamp"));
 
-		TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<ShotEntry, ShotEntry.SplitData>(
-				"Split");
+		TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<ShotEntry, ShotEntry.SplitData>("Split");
 		splitCol.setMinWidth(85);
-		splitCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, ShotEntry.SplitData>(
-				"split"));
+		splitCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, ShotEntry.SplitData>("split"));
 
-		TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>(
-				"Laser");
+		TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
 		laserCol.setMinWidth(85);
-		laserCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>(
-				"color"));
+		laserCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>("color"));
 
 		shotEntries.addListener(new ListChangeListener<ShotEntry>() {
 			@Override
 			public void onChanged(Change<? extends ShotEntry> change) {
 				change.next();
-				if (change.getAddedSize() < 1)
-					return;
+				if (change.getAddedSize() < 1) return;
 				Platform.runLater(() -> {
 					final int size = shotTimerTable.getItems().size();
-					if (size > 0)
-						shotTimerTable.scrollTo(size - 1);
+					if (size > 0) shotTimerTable.scrollTo(size - 1);
 				});
 			}
 		});
 
-		calibrationToggleGroup.selectedToggleProperty().addListener(
-				new ChangeListener<Toggle>() {
-					public void changed(ObservableValue<? extends Toggle> ov,
-							Toggle oldToggle, Toggle newToggle) {
-						if (newToggle == null)
-							return;
+		calibrationToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
+				if (newToggle == null) return;
 
-						configureArenaCamera(getSelectedCalibrationOption());
+				configureArenaCamera(getSelectedCalibrationOption());
+			}
+		});
+
+		shotTimerTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<ShotEntry>() {
+			@Override
+			public void onChanged(Change<? extends ShotEntry> change) {
+				while (change.next()) {
+					for (ShotEntry unselected : change.getRemoved()) {
+						unselected.getShot().getMarker().setFill(unselected.getShot().getColor());
 					}
-				});
 
-		shotTimerTable.getSelectionModel().getSelectedItems()
-				.addListener(new ListChangeListener<ShotEntry>() {
-					@Override
-					public void onChanged(Change<? extends ShotEntry> change) {
-						while (change.next()) {
-							for (ShotEntry unselected : change.getRemoved()) {
-								unselected
-										.getShot()
-										.getMarker()
-										.setFill(
-												unselected.getShot().getColor());
-							}
+					for (ShotEntry selected : change.getAddedSubList()) {
+						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
 
-							for (ShotEntry selected : change.getAddedSubList()) {
-								selected.getShot()
-										.getMarker()
-										.setFill(
-												TargetRegion.SELECTED_STROKE_COLOR);
-
-								// Move all selected shots to top the of their
-								// z-stack to ensure visibility
-								for (CanvasManager cm : camerasSupervisor
-										.getCanvasManagers()) {
-									Shape marker = selected.getShot()
-											.getMarker();
-									if (cm.getCanvasGroup().getChildren()
-											.indexOf(marker) < cm
-											.getCanvasGroup().getChildren()
-											.size() - 1) {
-										cm.getCanvasGroup().getChildren()
-												.remove(marker);
-										cm.getCanvasGroup()
-												.getChildren()
-												.add(cm.getCanvasGroup()
-														.getChildren().size(),
-														marker);
-									}
-								}
+						// Move all selected shots to top the of their
+						// z-stack to ensure visibility
+						for (CanvasManager cm : camerasSupervisor.getCanvasManagers()) {
+							Shape marker = selected.getShot().getMarker();
+							if (cm.getCanvasGroup().getChildren()
+									.indexOf(marker) < cm.getCanvasGroup().getChildren().size() - 1) {
+								cm.getCanvasGroup().getChildren().remove(marker);
+								cm.getCanvasGroup().getChildren().add(cm.getCanvasGroup().getChildren().size(), marker);
 							}
 						}
 					}
-				});
+				}
+			}
+		});
 
 		shotTimerTable.setRowFactory(tableView -> new TableRow<ShotEntry>() {
 			@Override
@@ -352,9 +291,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				}
 
 				if (item.getRowColor().isPresent()) {
-					setStyle("-fx-background-color: "
-							+ CanvasManager.colorToWebCode(item.getRowColor()
-									.get()));
+					setStyle("-fx-background-color: " + CanvasManager.colorToWebCode(item.getRowColor().get()));
 				} else {
 					setStyle("");
 				}
@@ -380,9 +317,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					} else if (item.hadReload()) {
 						setStyle("-fx-background-color: lightskyblue");
 					} else if (item.getRowColor().isPresent()) {
-						setStyle("-fx-background-color: "
-								+ CanvasManager.colorToWebCode(item
-										.getRowColor().get()));
+						setStyle("-fx-background-color: " + CanvasManager.colorToWebCode(item.getRowColor().get()));
 					} else {
 						setStyle("");
 					}
@@ -394,15 +329,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shotTimerTable.getColumns().add(splitCol);
 		shotTimerTable.getColumns().add(laserCol);
 		shotTimerTable.setItems(shotEntries);
-		shotTimerTable.getSelectionModel().setSelectionMode(
-				SelectionMode.MULTIPLE);
+		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 
 	private CalibrationOption getSelectedCalibrationOption() {
 		Toggle selectedToggle = calibrationToggleGroup.getSelectedToggle();
 		if (selectedToggle != null && selectedToggle instanceof RadioMenuItem) {
-			RadioMenuItem selectedOption = (RadioMenuItem) calibrationToggleGroup
-					.getSelectedToggle();
+			RadioMenuItem selectedOption = (RadioMenuItem) calibrationToggleGroup.getSelectedToggle();
 
 			switch (selectedOption.getText().toLowerCase(Locale.getDefault())) {
 			case "detect everywhere":
@@ -415,8 +348,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				return CalibrationOption.CROP;
 
 			default:
-				logger.error(
-						"Unknown calibration option, defaulting to only in projection bounds: {}",
+				logger.error("Unknown calibration option, defaulting to only in projection bounds: {}",
 						selectedOption.getText());
 
 				return CalibrationOption.ONLY_IN_BOUNDS;
@@ -442,8 +374,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.clearManagers();
 
 		if (config.getWebcams().isEmpty()) {
-			if (!addCameraTab("Default", Camera.getDefault()))
-				cameraLockFailure(Camera.getDefault(), true);
+			if (!addCameraTab("Default", Camera.getDefault())) cameraLockFailure(Camera.getDefault(), true);
 		} else {
 			int failureCount = 0;
 
@@ -452,8 +383,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 				if (!addCameraTab(webcamName, webcam)) {
 					failureCount++;
-					cameraLockFailure(webcam, failureCount == config
-							.getWebcams().size());
+					cameraLockFailure(webcam, failureCount == config.getWebcams().size());
 				}
 			}
 		}
@@ -470,8 +400,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (allCamerasFailed) {
 			messageFormat = "Cannot open the webcam %s. It is being "
-					+ "used by another program. This is the only configured camera, thus "
-					+ "ShootOFF must close.";
+					+ "used by another program. This is the only configured camera, thus " + "ShootOFF must close.";
 		} else {
 			messageFormat = "Cannot open the webcam %s. It is being "
 					+ "used by another program or you have ShootOFF open more than once.";
@@ -479,8 +408,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		Optional<String> webcamName = config.getWebcamsUserName(webcam);
 
-		cameraAlert.setContentText(String.format(messageFormat,
-				webcamName.isPresent() ? webcamName.get() : webcam.getName()));
+		cameraAlert.setContentText(
+				String.format(messageFormat, webcamName.isPresent() ? webcamName.get() : webcam.getName()));
 
 		if (allCamerasFailed) {
 			cameraAlert.showAndWait();
@@ -512,10 +441,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
-		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup,
-				config, camerasSupervisor, webcamName, shotEntries);
-		CameraManager cameraManager = camerasSupervisor.addCameraManager(
-				webcam, canvasManager);
+		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, webcamName,
+				shotEntries);
+		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, canvasManager);
 
 		if (config.getRecordingCameras().contains(webcam)) {
 			config.registerRecordingCameraManager(cameraManager);
@@ -525,12 +453,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		// Show coords of mouse when in canvas during debug mode
 		if (config.inDebugMode()) {
-			canvasManager.getCanvasGroup().setOnMouseMoved(
-					(event) -> {
-						shootOFFStage.setTitle(defaultWindowTitle
-								+ String.format(" (%.1f, %.1f)", event.getX(),
-										event.getY()));
-					});
+			canvasManager.getCanvasGroup().setOnMouseMoved((event) -> {
+				shootOFFStage.setTitle(defaultWindowTitle + String.format(" (%.1f, %.1f)", event.getX(), event.getY()));
+			});
 
 			canvasManager.getCanvasGroup().setOnMouseExited((event) -> {
 				shootOFFStage.setTitle(defaultWindowTitle);
@@ -543,39 +468,35 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private ContextMenu createContextMenu() {
 		ContextMenu contextMenu = new ContextMenu();
 
-		MenuItem toggleDetectionSectors = new MenuItem(
-				"Toggle Shot Detection Sectors");
+		MenuItem toggleDetectionSectors = new MenuItem("Toggle Shot Detection Sectors");
 
 		toggleDetectionSectors.setOnAction((event) -> {
-			AnchorPane tabAnchor = (AnchorPane) cameraTabPane
-					.getSelectionModel().getSelectedItem().getContent();
+			AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
 
 			// Only add the pane if it isn't already open
-				boolean hasPane = false;
-				for (Node node : tabAnchor.getChildren()) {
-					if (node instanceof ShotSectorPane) {
-						hasPane = true;
-						break;
-					}
+			boolean hasPane = false;
+			for (Node node : tabAnchor.getChildren()) {
+				if (node instanceof ShotSectorPane) {
+					hasPane = true;
+					break;
 				}
+			}
 
-				if (!hasPane) {
-					CameraManager cameraManager = camerasSupervisor
-							.getCameraManager(cameraTabPane.getSelectionModel()
-									.getSelectedIndex());
-					new ShotSectorPane(tabAnchor, cameraManager);
-				}
-			});
+			if (!hasPane) {
+				CameraManager cameraManager = camerasSupervisor
+						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+				new ShotSectorPane(tabAnchor, cameraManager);
+			}
+		});
 
 		contextMenu.getItems().add(toggleDetectionSectors);
 
 		if (config.inDebugMode()) {
-			MenuItem startStreamDebuggerMenuItem = new MenuItem(
-					"Start Stream Debugger");
+			MenuItem startStreamDebuggerMenuItem = new MenuItem("Start Stream Debugger");
 
 			startStreamDebuggerMenuItem.setOnAction((event) -> {
-				FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-						.getResource("com/shootoff/gui/StreamDebugger.fxml"));
+				FXMLLoader loader = new FXMLLoader(
+						getClass().getClassLoader().getResource("com/shootoff/gui/StreamDebugger.fxml"));
 				try {
 					loader.load();
 				} catch (Exception e) {
@@ -585,17 +506,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				Stage streamDebuggerStage = new Stage();
 				streamDebuggerStages.add(streamDebuggerStage);
 
-				String tabName = cameraTabPane.getSelectionModel()
-						.getSelectedItem().getText();
-				streamDebuggerStage.setTitle(String.format(
-						"Stream Debugger -- %s", tabName));
+				String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
+				streamDebuggerStage.setTitle(String.format("Stream Debugger -- %s", tabName));
 				streamDebuggerStage.setScene(new Scene(loader.getRoot()));
 				streamDebuggerStage.show();
 				CameraManager cameraManager = camerasSupervisor
-						.getCameraManager(cameraTabPane.getSelectionModel()
-								.getSelectedIndex());
-				((StreamDebuggerController) loader.getController())
-						.init(cameraManager);
+						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+				((StreamDebuggerController) loader.getController()).init(cameraManager);
 
 				startStreamDebuggerMenuItem.setDisable(true);
 
@@ -612,14 +529,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 			recordMenuItem.setOnAction((event) -> {
 				CameraManager cameraManager = camerasSupervisor
-						.getCameraManager(cameraTabPane.getSelectionModel()
-								.getSelectedIndex());
+						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 
 				if (recordMenuItem.getText().equals("Start Recording")) {
 					recordMenuItem.setText("Stop Recording");
 
-					String tabName = cameraTabPane.getSelectionModel()
-							.getSelectedItem().getText();
+					String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
 					String videoName = tabName + ".mp4";
 					cameraManager.startRecordingStream(new File(videoName));
 				} else {
@@ -635,8 +550,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void findTargets() {
-		File targetsFolder = new File(System.getProperty("shootoff.home")
-				+ File.separator + "targets");
+		File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
 
 		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
 
@@ -657,27 +571,22 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void addTrainingExercise(TrainingExercise exercise) {
-		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo()
-				.getName());
+		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
 		exerciseItem.setToggleGroup(trainingToggleGroup);
 
 		exerciseItem.setOnAction((e) -> {
 			try {
-				Constructor<?> ctor = exercise.getClass().getConstructor(
-						List.class);
+				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 
 				List<Group> knownTargets = new ArrayList<Group>();
 				knownTargets.addAll(camerasSupervisor.getTargets());
 
 				if (arenaController != null) {
-					knownTargets.addAll(arenaController.getCanvasManager()
-							.getTargetGroups());
+					knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
 				}
 
-				TrainingExercise newExercise = (TrainingExercise) ctor
-						.newInstance(knownTargets);
-				((TrainingExerciseBase) newExercise).init(config,
-						camerasSupervisor, shotTimerTable);
+				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
+				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, shotTimerTable);
 				newExercise.init();
 				config.setExercise(newExercise);
 			} catch (Exception ex) {
@@ -695,21 +604,17 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void addProjectorTrainingExercise(TrainingExercise exercise) {
-		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo()
-				.getName());
+		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
 		exerciseItem.setToggleGroup(trainingToggleGroup);
-		if (arenaController == null)
-			exerciseItem.setDisable(true);
+		if (arenaController == null) exerciseItem.setDisable(true);
 
 		exerciseItem.setOnAction((e) -> {
 			try {
-				Constructor<?> ctor = exercise.getClass().getConstructor(
-						List.class);
+				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
-						.newInstance(arenaController.getCanvasManager()
-								.getTargetGroups());
-				((ProjectorTrainingExerciseBase) newExercise).init(config,
-						camerasSupervisor, shotTimerTable, arenaController);
+						.newInstance(arenaController.getCanvasManager().getTargetGroups());
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, shotTimerTable,
+						arenaController);
 				newExercise.init();
 				config.setExercise(newExercise);
 			} catch (Exception ex) {
@@ -728,8 +633,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 	@FXML
 	public void preferencesClicked(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-				.getResource("com/shootoff/gui/Preferences.fxml"));
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/Preferences.fxml"));
 		loader.load();
 
 		Stage preferencesStage = new Stage();
@@ -739,8 +644,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		preferencesStage.setTitle("Preferences");
 		preferencesStage.setScene(new Scene(loader.getRoot()));
 		preferencesStage.show();
-		((PreferencesController) loader.getController())
-				.setConfig(config, this);
+		((PreferencesController) loader.getController()).setConfig(config, this);
 	}
 
 	@FXML
@@ -750,12 +654,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				cm.stopRecordingShots();
 			}
 
-			SessionIO.saveSession(config.getSessionRecorder().get(), new File(
-					System.getProperty("shootoff.home")
-							+ File.separator
-							+ "sessions/"
-							+ config.getSessionRecorder().get()
-									.getSessionName() + ".xml"));
+			SessionIO.saveSession(config.getSessionRecorder().get(), new File(System.getProperty("shootoff.home")
+					+ File.separator + "sessions/" + config.getSessionRecorder().get().getSessionName() + ".xml"));
 
 			config.setSessionRecorder(null);
 
@@ -772,12 +672,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	@FXML
-	public void showSessionViewerMenuItemClicked(ActionEvent event)
-			throws IOException {
+	public void showSessionViewerMenuItemClicked(ActionEvent event) throws IOException {
 		showSessionViewerMenuItem.setDisable(true);
 
-		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-				.getResource("com/shootoff/gui/SessionViewer.fxml"));
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
 		loader.load();
 
 		sessionViewerStage = new Stage();
@@ -786,8 +685,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		sessionViewerStage.setScene(new Scene(loader.getRoot()));
 		sessionViewerStage.show();
 
-		SessionViewerController sessionViewerController = (SessionViewerController) loader
-				.getController();
+		SessionViewerController sessionViewerController = (SessionViewerController) loader.getController();
 		sessionViewerController.init(config);
 
 		sessionViewerStage.setOnCloseRequest((e) -> {
@@ -801,8 +699,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		startArenaMenuItem.setDisable(true);
 
 		if (arenaController == null) {
-			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-					.getResource("com/shootoff/gui/ProjectorArena.fxml"));
+			FXMLLoader loader = new FXMLLoader(
+					getClass().getClassLoader().getResource("com/shootoff/gui/ProjectorArena.fxml"));
 			loader.load();
 
 			Stage arenaStage = new Stage();
@@ -814,29 +712,28 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			arenaController.init(this, config, camerasSupervisor);
 			arenaController.getCanvasManager().setShowShots(false);
 
-			arenaStage
-					.setOnCloseRequest((e) -> {
-						if (config.getExercise().isPresent()
-								&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
-							noneTrainingMenuItem.setSelected(true);
-							noneTrainingMenuItem.fire();
-						}
-						toggleArenaShotsMenuItem.setText("Show Shot Markers");
-						if (isCalibrating) {
-							stopCalibration();
-						}
-						toggleProjectorMenus(true);
-						startArenaMenuItem.setDisable(false);
-						arenaCameraManager.setProjectionBounds(null);
+			arenaStage.setOnCloseRequest((e) -> {
+				if (config.getExercise().isPresent()
+						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
+					noneTrainingMenuItem.setSelected(true);
+					noneTrainingMenuItem.fire();
+				}
+				toggleArenaShotsMenuItem.setText("Show Shot Markers");
+				if (isCalibrating) {
+					stopCalibration();
+				}
+				toggleProjectorMenus(true);
+				startArenaMenuItem.setDisable(false);
+				arenaCameraManager.setProjectionBounds(null);
 
-						// We can't remove this until stopCalibration's
-						// runlaters finish
-						Platform.runLater(() -> {
-							arenaCameraManager = null;
-							arenaController.setFeedCanvasManager(null);
-							arenaController = null;
-						});
-					});
+				// We can't remove this until stopCalibration's
+				// runlaters finish
+				Platform.runLater(() -> {
+					arenaCameraManager = null;
+					arenaController.setFeedCanvasManager(null);
+					arenaController = null;
+				});
+			});
 		}
 
 		arenaController.toggleArena();
@@ -870,8 +767,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			enableCalibration();
 		} else {
 			if (calibrationTarget.isPresent())
-				calibrate(calibrationTarget.get().getTargetGroup()
-						.getBoundsInParent(), true);
+				calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
 			else
 				stopCalibration();
 		}
@@ -882,11 +778,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		toggleArenaCalibrationMenuItemText();
 
-		arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane
-				.getSelectionModel().getSelectedIndex());
+		arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 
-		arenaController.setFeedCanvasManager(arenaCameraManager
-				.getCanvasManager());
+		arenaController.setFeedCanvasManager(arenaCameraManager.getCanvasManager());
 
 		// Sets calibrating and not detecting
 		arenaCameraManager.setCalibrating(true);
@@ -910,28 +804,23 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private volatile boolean showingManualCalibrationRequestMessage = false;
 
 	private void showManualCalibrationRequestMessage() {
-		if (showingManualCalibrationRequestMessage)
-			return;
+		if (showingManualCalibrationRequestMessage) return;
 
 		showingManualCalibrationRequestMessage = true;
 		Platform.runLater(() -> {
-			manualCalibrationRequestMessage = arenaCameraManager
-					.getCanvasManager().addDiagnosticMessage(
-							"Please manually calibrate the projection region",
-							20000, Color.ORANGE);
+			manualCalibrationRequestMessage = arenaCameraManager.getCanvasManager()
+					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
 		});
 	}
 
 	private void removeManualCalibrationRequestMessage() {
-		logger.trace("removeFullScreenRequest {}",
-				manualCalibrationRequestMessage);
+		logger.trace("removeFullScreenRequest {}", manualCalibrationRequestMessage);
 
 		if (showingManualCalibrationRequestMessage) {
 			showingManualCalibrationRequestMessage = false;
 
 			Platform.runLater(() -> {
-				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(
-						manualCalibrationRequestMessage);
+				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(manualCalibrationRequestMessage);
 				manualCalibrationRequestMessage = null;
 			});
 		}
@@ -941,16 +830,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private volatile boolean showingFullScreenRequestMessage = false;
 
 	private void showFullScreenRequest() {
-		if (showingFullScreenRequestMessage)
-			return;
+		if (showingFullScreenRequestMessage) return;
 
 		showingFullScreenRequestMessage = true;
 		Platform.runLater(() -> {
-			fullScreenRequestMessage = arenaCameraManager
-					.getCanvasManager()
-					.addDiagnosticMessage(
-							"Please move the arena to your projector and hit F11",
-							Color.YELLOW);
+			fullScreenRequestMessage = arenaCameraManager.getCanvasManager()
+					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
 		});
 	}
 
@@ -961,8 +846,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			showingFullScreenRequestMessage = false;
 
 			Platform.runLater(() -> {
-				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(
-						fullScreenRequestMessage);
+				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(fullScreenRequestMessage);
 				fullScreenRequestMessage = null;
 			});
 		}
@@ -974,8 +858,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
 
-		InputStream is = this.getClass().getClassLoader()
-				.getResourceAsStream("pattern.png");
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream("pattern.png");
 		LocatedImage img = new LocatedImage(is, "chessboard");
 		arenaController.startCalibration();
 		arenaController.setCalibrationMessageVisible(false);
@@ -1007,8 +890,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void cancelAutoCalibrationTimer() {
-		if (autoCalibrationTimer != null)
-			autoCalibrationTimer.cancel();
+		if (autoCalibrationTimer != null) autoCalibrationTimer.cancel();
 		autoCalibrationTimer = null;
 	}
 
@@ -1016,34 +898,28 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private volatile boolean showingAutoCalibrationMessage = false;
 
 	private void showAutoCalibrationMessage() {
-		logger.trace(
-				"showAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
+		logger.trace("showAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
 				showingAutoCalibrationMessage, autoCalibrationMessage);
 
-		if (showingAutoCalibrationMessage)
-			return;
+		if (showingAutoCalibrationMessage) return;
 
 		showingAutoCalibrationMessage = true;
 		Platform.runLater(() -> {
 			autoCalibrationMessage = arenaCameraManager.getCanvasManager()
-					.addDiagnosticMessage("Attempting autocalibration", 11000,
-							Color.CYAN);
+					.addDiagnosticMessage("Attempting autocalibration", 11000, Color.CYAN);
 		});
 	}
 
 	private void removeAutoCalibrationMessage() {
-		logger.trace(
-				"removeAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
+		logger.trace("removeAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
 				showingAutoCalibrationMessage, autoCalibrationMessage);
 
 		if (showingAutoCalibrationMessage) {
 			showingAutoCalibrationMessage = false;
 
 			Platform.runLater(() -> {
-				logger.trace("removeAutoCalibrationMessage {} ",
-						autoCalibrationMessage);
-				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(
-						autoCalibrationMessage);
+				logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
+				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(autoCalibrationMessage);
 				autoCalibrationMessage = null;
 			});
 
@@ -1082,11 +958,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		showManualCalibrationRequestMessage();
 
 		if (!calibrationTarget.isPresent()) {
-			createCalibrationTarget(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_POS,
-					DEFAULT_POS);
+			createCalibrationTarget(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_POS, DEFAULT_POS);
 		} else {
-			arenaCameraManager.getCanvasManager().addTarget(
-					calibrationTarget.get());
+			arenaCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
 		}
 	}
 
@@ -1096,10 +970,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		removeManualCalibrationRequestMessage();
 	}
 
-	public void createCalibrationTarget(double x, double y, double width,
-			double height) {
-		RectangleRegion calibrationRectangle = new RectangleRegion(x, y, width,
-				height);
+	public void createCalibrationTarget(double x, double y, double width, double height) {
+		RectangleRegion calibrationRectangle = new RectangleRegion(x, y, width, height);
 		calibrationRectangle.setFill(Color.PURPLE);
 		calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
 
@@ -1109,19 +981,16 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		});
 		calibrationGroup.getChildren().add(calibrationRectangle);
 
-		calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager()
-				.addTarget(null, calibrationGroup, false));
+		calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
 		calibrationTarget.get().setKeepInBounds(true);
 	}
 
 	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
 		removeCalibrationTargetIfPresent();
 
-		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(),
-				bounds.getWidth(), bounds.getHeight());
+		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
 
-		configureArenaCamera(getSelectedCalibrationOption(), bounds,
-				calibratedFromCanvas);
+		configureArenaCamera(getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
 
 		stopCalibration();
 	}
@@ -1153,49 +1022,37 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void removeCalibrationTargetIfPresent() {
-		if (calibrationTarget.isPresent())
-			arenaCameraManager.getCanvasManager().removeTarget(
-					calibrationTarget.get());
+		if (calibrationTarget.isPresent()) arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
 	}
 
-	private void configureArenaCamera(CalibrationOption option, Bounds bounds,
-			boolean calibratedFromCanvas) {
+	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
 
 		Bounds translatedToCanvasBounds;
 		if (bounds != null && !calibratedFromCanvas)
-			translatedToCanvasBounds = arenaCameraManager.getCanvasManager()
-					.translateCameraToCanvas(bounds);
+			translatedToCanvasBounds = arenaCameraManager.getCanvasManager().translateCameraToCanvas(bounds);
 		else
 			translatedToCanvasBounds = bounds;
 
 		Bounds translatedToCameraBounds;
 		if (bounds != null && calibratedFromCanvas)
-			translatedToCameraBounds = arenaCameraManager.getCanvasManager()
-					.translateCanvasToCamera(bounds);
+			translatedToCameraBounds = arenaCameraManager.getCanvasManager().translateCanvasToCamera(bounds);
 		else
 			translatedToCameraBounds = bounds;
 
-		arenaCameraManager.getCanvasManager().setProjectorArena(
-				arenaController, translatedToCanvasBounds);
+		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, translatedToCanvasBounds);
 		configureArenaCamera(option);
 		arenaCameraManager.setProjectionBounds(translatedToCameraBounds);
 	}
 
 	private void configureArenaCamera(CalibrationOption option) {
-		arenaCameraManager.setCropFeedToProjection(CalibrationOption.CROP
-				.equals(option));
-		arenaCameraManager
-				.setLimitDetectProjection(CalibrationOption.ONLY_IN_BOUNDS
-						.equals(option));
+		arenaCameraManager.setCropFeedToProjection(CalibrationOption.CROP.equals(option));
+		arenaCameraManager.setLimitDetectProjection(CalibrationOption.ONLY_IN_BOUNDS.equals(option));
 	}
 
 	private void initDefaultBackgrounds() {
-		addDefaultBackground("Indoor Range",
-				"/arena/backgrounds/indoor_range.gif");
-		addDefaultBackground("Outdoor Range",
-				"/arena/backgrounds/outdoor_range.gif");
-		addDefaultBackground("Kiang West Savanna",
-				"/arena/backgrounds/kiang_west_savanna.gif");
+		addDefaultBackground("Indoor Range", "/arena/backgrounds/indoor_range.gif");
+		addDefaultBackground("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
+		addDefaultBackground("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
 	}
 
 	private void addDefaultBackground(String menuName, String resourceName) {
@@ -1220,16 +1077,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Arena Background");
 		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter(
-						"Portable Network Graphic (*.png)", "*.png"),
-				new FileChooser.ExtensionFilter(
-						"Graphics Interchange Format (*.gif)", "*.gif"));
+				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"),
+				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"));
 
 		File backgroundFile = fileChooser.showOpenDialog(shootOFFStage);
 
 		if (backgroundFile != null) {
-			LocatedImage img = new LocatedImage(backgroundFile.toURI()
-					.toString());
+			LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
 			arenaController.setBackground(img);
 		}
 	}
@@ -1240,25 +1094,20 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (!coursesDir.exists()) {
 			if (!coursesDir.mkdirs()) {
-				logger.error(
-						"Courses folder does not exist and cannot be created: {}",
-						coursesDir.getAbsolutePath());
+				logger.error("Courses folder does not exist and cannot be created: {}", coursesDir.getAbsolutePath());
 			}
 		}
 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Course");
 		fileChooser.setInitialDirectory(coursesDir);
-		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Course File (*.course)",
-						"*.course"));
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Course File (*.course)", "*.course"));
 
 		File courseFile = fileChooser.showSaveDialog(shootOFFStage);
 
 		if (courseFile != null) {
 			String path = courseFile.getPath();
-			if (!path.endsWith(".course"))
-				path += ".course";
+			if (!path.endsWith(".course")) path += ".course";
 
 			courseFile = new File(path);
 
@@ -1272,24 +1121,19 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (!coursesDir.exists()) {
 			if (!coursesDir.mkdirs()) {
-				logger.error(
-						"Courses folder does not exist and cannot be created: {}",
-						coursesDir.getAbsolutePath());
+				logger.error("Courses folder does not exist and cannot be created: {}", coursesDir.getAbsolutePath());
 			}
 		}
 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Course");
 		fileChooser.setInitialDirectory(coursesDir);
-		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Course File (*.course)",
-						"*.course"));
+		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Course File (*.course)", "*.course"));
 
 		File courseFile = fileChooser.showOpenDialog(shootOFFStage);
 
 		if (courseFile != null) {
-			Optional<Course> course = CourseIO.loadCourse(arenaController,
-					courseFile);
+			Optional<Course> course = CourseIO.loadCourse(arenaController, courseFile);
 
 			if (course.isPresent()) {
 				arenaController.setCourse(course.get());
@@ -1338,16 +1182,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		FXMLLoader loader = createPreferencesStage();
 
 		CameraManager currentCamera = camerasSupervisor
-				.getCameraManager(cameraTabPane.getSelectionModel()
-						.getSelectedIndex());
+				.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 		Image currentFrame = currentCamera.getCurrentFrame();
-		((TargetEditorController) loader.getController()).init(currentFrame,
-				this);
+		((TargetEditorController) loader.getController()).init(currentFrame, this);
 	}
 
 	private FXMLLoader createPreferencesStage() throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getClassLoader()
-				.getResource("com/shootoff/gui/TargetEditor.fxml"));
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
 		loader.load();
 
 		Stage preferencesStage = new Stage();
@@ -1374,8 +1216,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			knownTargets.addAll(camerasSupervisor.getTargets());
 
 			if (arenaController != null) {
-				knownTargets.addAll(arenaController.getCanvasManager()
-						.getTargetGroups());
+				knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
 			}
 
 			config.getExercise().get().reset(knownTargets);
@@ -1407,7 +1248,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 						if (!isCalibrating) {
 							camerasSupervisor.setDetectingAll(true);
 						} else {
-							logger.info("disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
+							logger.info(
+									"disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
 						}
 						disableShotDetectionTimerEnabled = false;
 					}
@@ -1421,18 +1263,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Feed Image");
 		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter(
-						"Graphics Interchange Format (*.gif)", "*.gif"),
-				new FileChooser.ExtensionFilter(
-						"Portable Network Graphic (*.png)", "*.png"));
+				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
+				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
 		File feedFile = fileChooser.showSaveDialog(shootOFFStage);
 
 		if (feedFile != null) {
-			String extension = fileChooser.getSelectedExtensionFilter()
-					.getExtensions().get(0).substring(2);
+			String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
 			File imageFile = new File(feedFile.getPath() + "." + extension);
-			RenderedImage renderedImage = SwingFXUtils.fromFXImage(
-					shootOFFStage.getScene().snapshot(null), null);
+			RenderedImage renderedImage = SwingFXUtils.fromFXImage(shootOFFStage.getScene().snapshot(null), null);
 			try {
 				ImageIO.write(renderedImage, extension, imageFile);
 			} catch (IOException e) {
@@ -1445,17 +1283,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void newTarget(File path) {
 		String targetPath = path.getPath();
 
-		String targetName = targetPath.substring(
-				targetPath.lastIndexOf(File.separator) + 1,
+		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
 				targetPath.lastIndexOf('.'));
 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		addTargetItem.setMnemonicParsing(false);
 
 		addTargetItem.setOnAction((e) -> {
-			camerasSupervisor.getCanvasManager(
-					cameraTabPane.getSelectionModel().getSelectedIndex())
-					.addTarget(path);
+			camerasSupervisor.getCanvasManager(cameraTabPane.getSelectionModel().getSelectedIndex()).addTarget(path);
 		});
 
 		MenuItem addProjectorTargetItem = new MenuItem(targetName);
@@ -1473,11 +1308,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				FXMLLoader loader = createPreferencesStage();
 
 				CameraManager currentCamera = camerasSupervisor
-						.getCameraManager(cameraTabPane.getSelectionModel()
-								.getSelectedIndex());
+						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 				Image currentFrame = currentCamera.getCurrentFrame();
-				((TargetEditorController) loader.getController()).init(
-						currentFrame, this, path);
+				((TargetEditorController) loader.getController()).init(currentFrame, this, path);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

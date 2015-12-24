@@ -29,10 +29,8 @@ import javafx.stage.Stage;
 
 public class DelayedStartIntervalController {
 	private Stage delayedStartIntervalStage;
-	@FXML
-	private TextField minTextField;
-	@FXML
-	private TextField maxTextField;
+	@FXML private TextField minTextField;
+	@FXML private TextField maxTextField;
 
 	private DelayedStartListener listener;
 
@@ -41,8 +39,7 @@ public class DelayedStartIntervalController {
 
 		minTextField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
-			public void changed(ObservableValue<? extends String> observable,
-					String oldValue, String newValue) {
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (newValue.matches("\\d*")) {
 					// int value = Integer.parseInt(newValue);
 				} else {
@@ -54,8 +51,7 @@ public class DelayedStartIntervalController {
 
 		maxTextField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
-			public void changed(ObservableValue<? extends String> observable,
-					String oldValue, String newValue) {
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (newValue.matches("\\d*")) {
 					// int value = Integer.parseInt(newValue);
 				} else {
@@ -70,8 +66,7 @@ public class DelayedStartIntervalController {
 	public void okClicked(ActionEvent event) {
 		delayedStartIntervalStage = (Stage) minTextField.getScene().getWindow();
 		delayedStartIntervalStage.close();
-		listener.updatedDelayedStartInterval(
-				Integer.parseInt(minTextField.getText()),
+		listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
 				Integer.parseInt(maxTextField.getText()));
 	}
 }

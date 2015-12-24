@@ -29,8 +29,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 
-public class BouncingTargets extends ProjectorTrainingExerciseBase implements
-		TrainingExercise {
+public class BouncingTargets extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private int shootCount = 4;
 	private int dontShootCount = 1;
 	private static int maxVelocity = 10;
@@ -44,8 +43,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 
 	private boolean testing = false;
 
-	public BouncingTargets() {
-	}
+	public BouncingTargets() {}
 
 	public BouncingTargets(List<Group> targets) {
 		super(targets);
@@ -76,13 +74,10 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 	private void startExercise() {
 		super.showTextOnFeed("Score: 0");
 
-		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target",
-				shootCount);
-		addTargets(dontShootTargets,
-				"targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
+		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
+		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
 
-		targetAnimation = new Timeline(new KeyFrame(Duration.millis(20),
-				e -> updateTargets()));
+		targetAnimation = new Timeline(new KeyFrame(Duration.millis(20), e -> updateTargets()));
 		targetAnimation.setCycleCount(Timeline.INDEFINITE);
 		targetAnimation.play();
 	}
@@ -95,8 +90,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 
 		final ColumnConstraints cc = new ColumnConstraints(100);
 		cc.setHalignment(HPos.CENTER);
-		bouncingTargetsPane.getColumnConstraints().addAll(
-				new ColumnConstraints(), cc);
+		bouncingTargetsPane.getColumnConstraints().addAll(new ColumnConstraints(), cc);
 
 		final int MAX_TARGETS = 10;
 		final int MAX_VELOCITY = 30;
@@ -105,31 +99,24 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 		final int DONT_SHOOT_DEFAULT_COUNT = 1 - 1;
 		final int DEFAULT_MAX_VELOCITY = 10;
 
-		final ObservableList<String> targetCounts = FXCollections
-				.observableArrayList();
+		final ObservableList<String> targetCounts = FXCollections.observableArrayList();
 		for (int i = 1; i <= MAX_TARGETS; i++)
 			targetCounts.add(Integer.toString(i));
-		final ComboBox<String> shootTargetsComboBox = new ComboBox<String>(
-				targetCounts);
+		final ComboBox<String> shootTargetsComboBox = new ComboBox<String>(targetCounts);
 		shootTargetsComboBox.getSelectionModel().select(SHOOT_DEFAULT_COUNT);
 		bouncingTargetsPane.add(new Label("Shoot Targets:"), 0, 0);
 		bouncingTargetsPane.add(shootTargetsComboBox, 1, 0);
 
-		final ComboBox<String> dontShootTargetsComboBox = new ComboBox<String>(
-				targetCounts);
-		dontShootTargetsComboBox.getSelectionModel().select(
-				DONT_SHOOT_DEFAULT_COUNT);
+		final ComboBox<String> dontShootTargetsComboBox = new ComboBox<String>(targetCounts);
+		dontShootTargetsComboBox.getSelectionModel().select(DONT_SHOOT_DEFAULT_COUNT);
 		bouncingTargetsPane.add(new Label("Don't Shoot Targets:"), 0, 1);
 		bouncingTargetsPane.add(dontShootTargetsComboBox, 1, 1);
 
-		final ObservableList<String> maxVelocity = FXCollections
-				.observableArrayList();
+		final ObservableList<String> maxVelocity = FXCollections.observableArrayList();
 		for (int i = 1; i <= MAX_VELOCITY; i++)
 			maxVelocity.add(Integer.toString(i));
-		final ComboBox<String> maxVelocityComboBox = new ComboBox<String>(
-				maxVelocity);
-		maxVelocityComboBox.getSelectionModel()
-				.select(DEFAULT_MAX_VELOCITY - 1);
+		final ComboBox<String> maxVelocityComboBox = new ComboBox<String>(maxVelocity);
+		maxVelocityComboBox.getSelectionModel().select(DEFAULT_MAX_VELOCITY - 1);
 		bouncingTargetsPane.add(new Label("Max Target Speed:"), 0, 2);
 		bouncingTargetsPane.add(maxVelocityComboBox, 1, 2);
 
@@ -138,12 +125,9 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 		bouncingTargetsPane.add(okButton, 1, 3);
 
 		okButton.setOnAction((e) -> {
-			shootCount = Integer.parseInt(shootTargetsComboBox
-					.getSelectionModel().getSelectedItem());
-			dontShootCount = Integer.parseInt(dontShootTargetsComboBox
-					.getSelectionModel().getSelectedItem());
-			BouncingTargets.maxVelocity = Integer.parseInt(maxVelocityComboBox
-					.getSelectionModel().getSelectedItem());
+			shootCount = Integer.parseInt(shootTargetsComboBox.getSelectionModel().getSelectedItem());
+			dontShootCount = Integer.parseInt(dontShootTargetsComboBox.getSelectionModel().getSelectedItem());
+			BouncingTargets.maxVelocity = Integer.parseInt(maxVelocityComboBox.getSelectionModel().getSelectedItem());
 
 			bouncingTargetsStage.close();
 		});
@@ -186,10 +170,8 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 			dx = r.nextInt(maxVelocity + 1) + 1;
 			dy = r.nextInt(maxVelocity + 1) + 1;
 
-			if (r.nextBoolean())
-				dx *= -1;
-			if (r.nextBoolean())
-				dy *= -1;
+			if (r.nextBoolean()) dx *= -1;
+			if (r.nextBoolean()) dy *= -1;
 		}
 
 		public Target getTarget() {
@@ -201,8 +183,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 		}
 
 		private CollisionType checkCollision() {
-			final Bounds targetBounds = target.getTargetGroup()
-					.getBoundsInParent();
+			final Bounds targetBounds = target.getTargetGroup().getBoundsInParent();
 			List<BouncingTarget> collisionList;
 
 			if (shootTargets.contains(this)) {
@@ -212,24 +193,18 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 			}
 
 			for (BouncingTarget b : collisionList) {
-				if (b.getTarget().equals(target))
-					continue;
+				if (b.getTarget().equals(target)) continue;
 
-				final Bounds bBounds = b.getTarget().getTargetGroup()
-						.getBoundsInParent();
+				final Bounds bBounds = b.getTarget().getTargetGroup().getBoundsInParent();
 
 				if (targetBounds.intersects(bBounds)) {
-					final boolean atRight = targetBounds.getMaxX() > bBounds
-							.getMinX()
+					final boolean atRight = targetBounds.getMaxX() > bBounds.getMinX()
 							&& targetBounds.getMaxX() - bBounds.getMinX() < maxVelocity * 2;
-					final boolean atLeft = bBounds.getMaxX() > bBounds
-							.getMinX()
+					final boolean atLeft = bBounds.getMaxX() > bBounds.getMinX()
 							&& bBounds.getMaxX() - bBounds.getMinX() < maxVelocity * 2;
-					final boolean atBottom = targetBounds.getMaxY() > bBounds
-							.getMinY()
+					final boolean atBottom = targetBounds.getMaxY() > bBounds.getMinY()
 							&& targetBounds.getMaxY() - bBounds.getMinY() < maxVelocity * 2;
-					final boolean atTop = bBounds.getMaxY() > targetBounds
-							.getMinY()
+					final boolean atTop = bBounds.getMaxY() > targetBounds.getMinY()
 							&& bBounds.getMaxY() - targetBounds.getMinY() < maxVelocity * 2;
 
 					if ((atRight || atLeft) && (atBottom || atTop)) {
@@ -246,25 +221,20 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 		}
 
 		public void moveTarget() {
-			if (maxVelocity == 0)
-				return;
+			if (maxVelocity == 0) return;
 
 			Bounds b = target.getTargetGroup().getBoundsInParent();
 			Point2D p = target.getPosition();
 			Dimension2D d = target.getDimension();
 			CollisionType ct = checkCollision();
 
-			if (b.getMinX() <= 1
-					|| b.getMinX() + d.getWidth() > thisSuper.getArenaWidth()
-					|| ct == CollisionType.COLLISION_X
-					|| ct == CollisionType.COLLISION_BOTH) {
+			if (b.getMinX() <= 1 || b.getMinX() + d.getWidth() > thisSuper.getArenaWidth()
+					|| ct == CollisionType.COLLISION_X || ct == CollisionType.COLLISION_BOTH) {
 				dx *= -1;
 			}
 
-			if (b.getMinY() <= 1
-					|| b.getMinY() + d.getHeight() > thisSuper.getArenaHeight()
-					|| ct == CollisionType.COLLISION_X
-					|| ct == CollisionType.COLLISION_BOTH) {
+			if (b.getMinY() <= 1 || b.getMinY() + d.getHeight() > thisSuper.getArenaHeight()
+					|| ct == CollisionType.COLLISION_X || ct == CollisionType.COLLISION_BOTH) {
 				dy *= -1;
 			}
 
@@ -272,20 +242,16 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 		}
 	}
 
-	private void addTargets(List<BouncingTarget> targets, String target,
-			int count) {
+	private void addTargets(List<BouncingTarget> targets, String target, int count) {
 		for (int i = 0; i < count; i++) {
-			Optional<Target> newTarget = super
-					.addTarget(new File(target), 0, 0);
+			Optional<Target> newTarget = super.addTarget(new File(target), 0, 0);
 
 			if (newTarget.isPresent()) {
 				// Randomly place the target
-				int maxX = (int) (super.getArenaWidth()
-						- newTarget.get().getDimension().getWidth() - 50);
+				int maxX = (int) (super.getArenaWidth() - newTarget.get().getDimension().getWidth() - 50);
 				int x = new Random().nextInt(maxX + 1) + 1;
 
-				int maxY = (int) (super.getArenaHeight()
-						- newTarget.get().getDimension().getHeight() - 50);
+				int maxY = (int) (super.getArenaHeight() - newTarget.get().getDimension().getHeight() - 50);
 				int y = new Random().nextInt(maxY + 1) + 1;
 
 				newTarget.get().setPosition(x, y);
@@ -297,10 +263,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata(
-				"Bouncing Targets",
-				"1.0",
-				"phrack",
+		return new ExerciseMetadata("Bouncing Targets", "1.0", "phrack",
 				"This exercise randomly moves shoot (gray ring) and don't shoot (red ring) targets"
 						+ " around the arena. All targets bounce off the arena bounds and targets of the "
 						+ "same type can bounce off of each other. Don't shoot targets are always able to "
@@ -342,13 +305,10 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements
 			super.removeTarget(b.getTarget());
 		dontShootTargets.clear();
 
-		if (!testing)
-			collectSettings();
+		if (!testing) collectSettings();
 
-		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target",
-				shootCount);
-		addTargets(dontShootTargets,
-				"targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
+		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
+		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
 
 		targetAnimation.play();
 
