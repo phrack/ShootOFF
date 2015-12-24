@@ -27,16 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 
 import javax.imageio.ImageIO;
 
 import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import marytts.util.io.FileFilter;
 
 import com.shootoff.Main;
 import com.shootoff.camera.Camera;
@@ -52,9 +49,12 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
+import com.shootoff.gui.TimerPool;
 import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
+import com.shootoff.plugins.ParForScore;
+import com.shootoff.plugins.ParRandomShot;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootDontShoot;
@@ -83,6 +83,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -98,15 +99,16 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import marytts.util.io.FileFilter;
 
 public class ShootOFFController implements CameraConfigListener, TargetListener {
 	private Stage shootOFFStage;
@@ -128,6 +130,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
+	@FXML private GridPane buttonsGridPane;
 
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
@@ -171,16 +174,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
 
-			if (autoCalibrationTimer != null) {
-				autoCalibrationTimer.cancel();
-				autoCalibrationTimer = null;
-			}
-
-			if (disableShotDetectionTimer != null) {
-				disableShotDetectionTimer.cancel();
-				disableShotDetectionTimer = null;
-			}
-
 			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
 			if (arenaController != null) {
@@ -200,6 +193,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				sessionViewerStage.close();
 			}
 
+			TimerPool.close();
 			GlobalExecutorPool.getPool().shutdownNow();
 
 			if (!config.getVideoPlayers().isEmpty()) {
@@ -265,8 +259,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 					for (ShotEntry selected : change.getAddedSubList()) {
 						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
 
-						// Move all selected shots to top the of their
-						// z-stack to ensure visibility
+						// Move all selected shots to top the of their z-stack
+						// to ensure visibility
 						for (CanvasManager cm : camerasSupervisor.getCanvasManagers()) {
 							Shape marker = selected.getShot().getMarker();
 							if (cm.getCanvasGroup().getChildren()
@@ -361,6 +355,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 	public Stage getStage() {
 		return shootOFFStage;
+	}
+
+	public GridPane getButtonsPane() {
+		return buttonsGridPane;
+	}
+
+	public TableView<ShotEntry> getShotEntryTable() {
+		return shotTimerTable;
 	}
 
 	@Override
@@ -568,6 +570,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addTrainingExercise(new RandomShoot());
 		addTrainingExercise(new ShootForScore());
 		addTrainingExercise(new TimedHolsterDrill());
+		addTrainingExercise(new ParForScore());
+		addTrainingExercise(new ParRandomShot());
 	}
 
 	private void addTrainingExercise(TrainingExercise exercise) {
@@ -586,7 +590,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				}
 
 				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
-				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, shotTimerTable);
+				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
 				newExercise.init();
 				config.setExercise(newExercise);
 			} catch (Exception ex) {
@@ -613,8 +617,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
 						.newInstance(arenaController.getCanvasManager().getTargetGroups());
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, shotTimerTable,
-						arenaController);
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
 				newExercise.init();
 				config.setExercise(newExercise);
 			} catch (Exception ex) {
@@ -726,8 +729,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				startArenaMenuItem.setDisable(false);
 				arenaCameraManager.setProjectionBounds(null);
 
-				// We can't remove this until stopCalibration's
-				// runlaters finish
+				// We can't remove this until stopCalibration's runlaters finish
 				Platform.runLater(() -> {
 					arenaCameraManager = null;
 					arenaController.setFeedCanvasManager(null);
@@ -852,8 +854,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 	}
 
-	private Timer autoCalibrationTimer = null;
-	private final static int autoCalibrationTime = 10 * 1000;
+	private ScheduledFuture<?> autoCalibrationFuture = null;
+	private final static int AUTO_CALIBRATION_TIME = 10 * 1000;
 
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
@@ -870,28 +872,16 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		showAutoCalibrationMessage();
 
-		cancelAutoCalibrationTimer();
+		TimerPool.cancelTimer(autoCalibrationFuture);
 
-		autoCalibrationTimer = new Timer("Auto Calibration");
-
-		autoCalibrationTimer.schedule(new TimerTask() {
-			public void run() {
-				Platform.runLater(new Runnable() {
-					public void run() {
-						if (isCalibrating) {
-							arenaCameraManager.disableAutoCalibration();
-							enableManualCalibration();
-						}
-					}
-				});
-
-			}
-		}, autoCalibrationTime);
-	}
-
-	private void cancelAutoCalibrationTimer() {
-		if (autoCalibrationTimer != null) autoCalibrationTimer.cancel();
-		autoCalibrationTimer = null;
+		autoCalibrationFuture = TimerPool.schedule(() -> {
+			Platform.runLater(() -> {
+				if (isCalibrating) {
+					arenaCameraManager.disableAutoCalibration();
+					enableManualCalibration();
+				}
+			});
+		} , AUTO_CALIBRATION_TIME);
 	}
 
 	private Label autoCalibrationMessage = null;
@@ -1000,7 +990,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		arenaCameraManager.disableAutoCalibration();
 
-		cancelAutoCalibrationTimer();
+		TimerPool.cancelTimer(autoCalibrationFuture);
 
 		toggleArenaCalibrationMenuItemText();
 
@@ -1225,37 +1215,26 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		disableShotDetectionForPeriod(500);
 	}
 
-	private Timer disableShotDetectionTimer = null;
-	private volatile boolean disableShotDetectionTimerEnabled = false;
-
 	// Technically the period could be shorter than the previous call
 	// and we don't handle that right now. I'm not too worried about that
 	// because I don't think the periods are going to be vastly different
 	// This is only intended for very short disablement periods
 	public void disableShotDetectionForPeriod(int msPeriod) {
-		if (disableShotDetectionTimerEnabled) {
-			disableShotDetectionTimer.cancel();
-		}
-		disableShotDetectionTimerEnabled = true;
+		// Don't disable the cameras if they are already disabled (e.g. because
+		// a training protocol paused shot detection)
+		if (!camerasSupervisor.areDetecting()) return;
 
 		camerasSupervisor.setDetectingAll(false);
 
-		disableShotDetectionTimer = new Timer("Disable Shot Detect");
-		disableShotDetectionTimer.schedule(new TimerTask() {
-			public void run() {
-				Platform.runLater(new Runnable() {
-					public void run() {
-						if (!isCalibrating) {
-							camerasSupervisor.setDetectingAll(true);
-						} else {
-							logger.info(
-									"disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
-						}
-						disableShotDetectionTimerEnabled = false;
-					}
-				});
+		Runnable restartDetection = () -> {
+			if (!isCalibrating) {
+				camerasSupervisor.setDetectingAll(true);
+			} else {
+				logger.info("disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
 			}
-		}, msPeriod);
+		};
+
+		TimerPool.schedule(restartDetection, msPeriod);
 	}
 
 	@FXML

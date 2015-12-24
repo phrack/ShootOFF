@@ -59,7 +59,7 @@ public class TestBouncingTargets {
 	    ProjectorArenaController pac = new ProjectorArenaController();
 		pac.init(config, new MockCanvasManager(config));
 			
-		bt.init(config, cs, null, pac);
+		bt.init(config, cs, null, null, pac);
 		bt.init(6, 5, 0);
 		
 		shootRegion = (TargetRegion)bt.getShootTargets().get(0).getTarget().getTargetGroup().getChildren().get(0);

@@ -28,7 +28,7 @@ def libTempDir = dist + 'libs'
 def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'
-def version = '3.5.2'
+def version = '3.6'
 def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
@@ -77,9 +77,9 @@ dependencies {
     compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.+'
 
     // tts dependencies
-    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.+'
-    compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.+'
-    compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.+'
+    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.1.+'
+    compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.1.+'
+    compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.1.+'
 
     // xuggle for recording and playing back video
     compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.+'

@@ -32,7 +32,7 @@ public class DelayedStartIntervalController {
 	@FXML private TextField minTextField;
 	@FXML private TextField maxTextField;
 
-	private DelayedStartListener listener;
+	protected DelayedStartListener listener;
 
 	public void init(DelayedStartListener listener) {
 		this.listener = listener;

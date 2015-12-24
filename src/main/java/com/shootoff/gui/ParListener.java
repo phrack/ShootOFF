@@ -18,6 +18,6 @@
 
 package com.shootoff.gui;
 
-public interface PlaybackListener {
-	public void frameUpdated(long timestamp);
+public interface ParListener extends DelayedStartListener {
+	public void updatedParInterval(double parTime);
 }

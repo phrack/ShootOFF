@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +35,7 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
+import com.shootoff.gui.TimerPool;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -257,7 +257,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	public void close() {
 		arenaStage.close();
-		closeMouseExitedTimer();
+		TimerPool.cancelTimer(mouseExitedFuture);
 	}
 
 	public void setBackground(LocatedImage img) {
@@ -370,7 +370,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	private volatile boolean mouseInWindow = false;
 	private volatile boolean showingCursorWarning = false;
-	private Timer mouseExitedTimer = null;
+	private ScheduledFuture<?> mouseExitedFuture = null;
 
 	private CanvasManager feedCanvasManager;
 
@@ -398,31 +398,18 @@ public class ProjectorArenaController implements CalibrationListener {
 		} else if (!mouseEntered && showingCursorWarning) {
 			mouseInWindow = false;
 
-			closeMouseExitedTimer();
+			TimerPool.cancelTimer(mouseExitedFuture);
 
-			mouseExitedTimer = new Timer("Mouse Exited");
-			mouseExitedTimer.schedule(new TimerTask() {
-				public void run() {
-					Platform.runLater(new Runnable() {
-						public void run() {
-							if (showingCursorWarning) {
-								feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
-								showingCursorWarning = false;
-								mouseOnArenaLabel = null;
-							}
-							if (!shootOFFController.isCalibrating())
-								feedCanvasManager.getCameraManager().setDetecting(true);
-						}
-					});
-				}
-			}, 100 /* ms */);
-		}
-	}
-
-	private void closeMouseExitedTimer() {
-		if (mouseExitedTimer != null) {
-			mouseExitedTimer.cancel();
-			mouseExitedTimer = null;
+			mouseExitedFuture = TimerPool.schedule(() -> {
+				Platform.runLater(() -> {
+					if (showingCursorWarning) {
+						feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
+						showingCursorWarning = false;
+						mouseOnArenaLabel = null;
+					}
+					if (!shootOFFController.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
+				});
+			} , 100 /* ms */);
 		}
 	}
 

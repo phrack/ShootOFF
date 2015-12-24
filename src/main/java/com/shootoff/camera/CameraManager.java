@@ -26,11 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 
 import javafx.geometry.Bounds;
 
@@ -42,6 +41,7 @@ import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
+import com.shootoff.gui.TimerPool;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
@@ -75,6 +75,8 @@ public class CameraManager {
 	public static final int MIN_SHOT_DETECTION_FPS = 5;
 	public static final int DEFAULT_FPS = 30;
 
+	private final static int DIAGNOSTIC_MESSAGE_DURATION = 1000; // ms
+	
 	private final ShotDetectionManager shotDetectionManager;
 
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
@@ -213,14 +215,8 @@ public class CameraManager {
 	public void close() {
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
-		if (brightnessDiagnosticTimer != null) {
-			brightnessDiagnosticTimer.cancel();
-			brightnessDiagnosticTimer = null;
-		}
-		if (motionDiagnosticTimer != null) {
-			motionDiagnosticTimer.cancel();
-			motionDiagnosticTimer = null;
-		}
+		TimerPool.cancelTimer(brightnessDiagnosticFuture);
+		TimerPool.cancelTimer(motionDiagnosticFuture);
 		detectionExecutor.shutdownNow();
 	}
 
@@ -388,8 +384,8 @@ public class CameraManager {
 	}
 
 	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
-	private Timer brightnessDiagnosticTimer = null;
-	private Timer motionDiagnosticTimer = null;
+	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
+	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
@@ -637,35 +633,27 @@ public class CameraManager {
 		}
 	}
 
+
 	private Label brightnessDiagnosticWarning = null;
-	private final static int brightnessDiagnosticLengthMS = 1000;
-	private volatile boolean showingBrightnessWarning = false;
 
 	public void showBrightnessWarning() {
-		if (!showingBrightnessWarning) {
-			showingBrightnessWarning = true;
+		if (!TimerPool.isWaiting(brightnessDiagnosticFuture)) {
 			Platform.runLater(() -> {
 				brightnessDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive brightness",
 						Color.RED);
 			});
 		} else {
 			// Stop the existing timer and start a new one
-			brightnessDiagnosticTimer.cancel();
+			TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		}
-		brightnessDiagnosticTimer = new Timer("Brightness Diagnostic");
-		brightnessDiagnosticTimer.schedule(new TimerTask() {
-			public void run() {
-				Platform.runLater(new Runnable() {
-					public void run() {
-						if (brightnessDiagnosticWarning != null) {
-							canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
-							brightnessDiagnosticWarning = null;
-						}
-						showingBrightnessWarning = false;
-					}
-				});
-			}
-		}, brightnessDiagnosticLengthMS);
+		brightnessDiagnosticFuture = TimerPool.schedule(() -> {
+			Platform.runLater(() -> {
+				if (brightnessDiagnosticWarning != null) {
+					canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
+					brightnessDiagnosticWarning = null;
+				}
+			});
+		} , DIAGNOSTIC_MESSAGE_DURATION);
 
 		if (!webcam.isPresent() || shownBrightnessWarning) return;
 		shownBrightnessWarning = true;
@@ -696,34 +684,26 @@ public class CameraManager {
 	}
 
 	private Label motionDiagnosticWarning = null;
-	private final static int motionDiagnosticLengthMS = 1000;
-	private volatile boolean showingMotionDiagnosticWarning = false;
 
 	public void showMotionWarning() {
-		if (!showingMotionDiagnosticWarning) {
-			showingMotionDiagnosticWarning = true;
+		if (!TimerPool.isWaiting(motionDiagnosticFuture)) {
 			Platform.runLater(() -> {
 				motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 			});
 		} else {
 			// Stop the existing timer and start a new one
-			motionDiagnosticTimer.cancel();
+			TimerPool.cancelTimer(motionDiagnosticFuture);
 		}
-		motionDiagnosticTimer = new Timer("Motion Diagnostic");
-		motionDiagnosticTimer.schedule(new TimerTask() {
-			public void run() {
-				Platform.runLater(new Runnable() {
-					public void run() {
-						if (motionDiagnosticWarning != null) {
-							canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
-							motionDiagnosticWarning = null;
-						}
-						showingMotionDiagnosticWarning = false;
-					}
-				});
-			}
-		}, motionDiagnosticLengthMS);
+		motionDiagnosticFuture = TimerPool.schedule(() -> {
+			Platform.runLater(() -> {
+				if (motionDiagnosticWarning != null) {
+					canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
+					motionDiagnosticWarning = null;
+				}
+			});
+		} , DIAGNOSTIC_MESSAGE_DURATION);
 	}
+
 
 	public void enableAutoCalibration() {
 		acm = new AutoCalibrationManager(this);

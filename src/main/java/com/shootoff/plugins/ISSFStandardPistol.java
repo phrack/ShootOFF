@@ -46,7 +46,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private final static String SCORE_COL_NAME = "Score";
 	private final static int SCORE_COL_WIDTH = 60;
 	private final static String ROUND_COL_NAME = "Round";
-	private final static int ROUND_COL_WIDTH = 60;
+	private final static int ROUND_COL_WIDTH = 80;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 4;
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
@@ -234,7 +234,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		super.setShotTimerColumnText(SCORE_COL_NAME, String.valueOf(hitScore));
 		super.setShotTimerColumnText(ROUND_COL_NAME, currentRound);
 
-		if (shotCount == 5) {
+		if (shotCount == 5 && !endRound.isDone()) {
 			try {
 				thisSuper.pauseShotDetection(true);
 				endRound.cancel(true);
@@ -248,20 +248,14 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 
 	@Override
 	public void reset(List<Group> targets) {
+		super.pauseShotDetection(true);
+
 		repeatExercise = false;
 		executorService.shutdownNow();
 
 		setInitialValues();
 
-		roundTimeIndex = 0;
-		round = 1;
-		shotCount = 0;
-		runningScore = 0;
-
-		for (int time : ROUND_TIMES) {
-			sessionScores.put(time, 0);
-		}
-
+		thisSuper.setShotTimerRowColor(null);
 		super.showTextOnFeed("");
 
 		repeatExercise = true;

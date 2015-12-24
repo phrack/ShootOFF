@@ -20,7 +20,9 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,19 +44,27 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DelayedStartListener;
+import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.DelayedStartIntervalController;
+import com.shootoff.gui.controller.ParIntervalController;
+import com.shootoff.gui.controller.ShootOFFController;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -74,11 +84,13 @@ public class TrainingExerciseBase {
 	@SuppressWarnings("unused") private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
+	private GridPane buttonsPane;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 
 	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
 	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
+	private final List<Button> exerciseButtons = new ArrayList<Button>();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
@@ -88,10 +100,18 @@ public class TrainingExerciseBase {
 		this.targets = targets;
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TableView<ShotEntry> shotTimerTable) {
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
+		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
+	}
+
+	// This is only required for unit tests where we don't want to create a full
+	// ShootOFFController
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, GridPane buttonsPane,
+			TableView<ShotEntry> shotEntryTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
-		this.shotTimerTable = shotTimerTable;
+		this.buttonsPane = buttonsPane;
+		this.shotTimerTable = shotEntryTable;
 
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
 			Label exerciseLabel = new Label();
@@ -146,6 +166,32 @@ public class TrainingExerciseBase {
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
 		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
 		delayedStartIntervalStage.setTitle("Delayed Start Interval");
+		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
+		delayedStartIntervalStage.showAndWait();
+	}
+
+	/**
+	 * A copy of getDelayedStartInterval() plus setting the PAR time.
+	 * 
+	 * @param listener
+	 */
+	public void getParInterval(ParListener listener) {
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
+		try {
+			loader.load();
+		} catch (IOException e) {
+			logger.error("Error reading ParInterval FXML file", e);
+		}
+
+		Stage delayedStartIntervalStage = new Stage();
+
+		ParIntervalController controller = (ParIntervalController) loader.getController();
+		controller.init(listener);
+
+		delayedStartIntervalStage.initOwner(getShootOFFStage());
+		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
+		delayedStartIntervalStage.setTitle("Par Intervals");
 		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
 		delayedStartIntervalStage.showAndWait();
 	}
@@ -255,7 +301,30 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * Plays an audio file asyncronously.
+	 * Adds a button to the right of the reset button with caption <tt>text</tt>
+	 * and action handler <tt>eventHandler</tt>.
+	 */
+	public Button addShootOFFButton(String text, EventHandler<ActionEvent> eventHandler) {
+		Button exerciseButton = new Button(text);
+		exerciseButton.setOnAction(eventHandler);
+		GridPane.setMargin(exerciseButton, GridPane.getMargin(buttonsPane.getChildren().get(0)));
+		GridPane.setHalignment(exerciseButton, HPos.CENTER);
+		exerciseButtons.add(exerciseButton);
+
+		buttonsPane.add(exerciseButton, buttonsPane.getChildren().size(), 0);
+
+		return exerciseButton;
+	}
+
+	public void removeShootOFFButton(Button exerciseButton) {
+		if (!exerciseButtons.contains(exerciseButton)) return;
+
+		buttonsPane.getChildren().remove(exerciseButton);
+		exerciseButtons.remove(exerciseButton);
+	}
+
+	/**
+	 * Plays an audio file asynchronously.
 	 * 
 	 * @param soundFilePath
 	 *            the audio file to play (e.g. "sounds/metal_clang.wav")
@@ -362,8 +431,20 @@ public class TrainingExerciseBase {
 			canvasManager.getCanvasGroup().getChildren().remove(exerciseLabels.get(canvasManager));
 		}
 
+		Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
+
+		while (itExerciseButtons.hasNext()) {
+			Button exerciseButton = itExerciseButtons.next();
+			buttonsPane.getChildren().remove(exerciseButton);
+			itExerciseButtons.remove();
+		}
+
 		exerciseLabels.clear();
 
 		pauseShotDetection(false);
+	}
+
+	protected CamerasSupervisor getCamerasSupervisor() {
+		return camerasSupervisor;
 	}
 }
