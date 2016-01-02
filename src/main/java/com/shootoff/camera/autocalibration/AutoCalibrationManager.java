@@ -74,8 +74,8 @@ public class AutoCalibrationManager implements Runnable {
 
 	public AutoCalibrationManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
-		// ((ch.qos.logback.classic.Logger)
-		// logger).setLevel(ch.qos.logback.classic.Level.TRACE);
+		 //((ch.qos.logback.classic.Logger)
+		 //logger).setLevel(ch.qos.logback.classic.Level.TRACE);
 	}
 
 	// Stores the transformation matrix
@@ -93,7 +93,18 @@ public class AutoCalibrationManager implements Runnable {
 	// Edge is 11 pixels wide. Squares are 168 pixels wide.
 	// 11/168 = 0.06547619047619047619047619047619
 	// Maybe I should have made it divisible...
-	private final static double borderFactor = 0.065476;
+	private static final double BORDER_FACTOR = 0.065476;
+
+	private static final double CANNY_THRESHOLD_1 = 50;
+	private static final double CANNY_THRESHOLD_2 = 150;
+	private static final double GAUSSIANBLUR_SIGMA = 3.0;
+
+	private static final double HOUGHLINES_RHO = 1;
+
+	private static final double HOUGHLINES_THETA = Math.PI / 180;
+
+	private static final int HOUGHLINES_THRESHOLD = 40;
+	private Size gaussianBlurSize;
 
 	private void reset() {
 		isCalibrated = false;
@@ -125,6 +136,8 @@ public class AutoCalibrationManager implements Runnable {
 		if (logger.isTraceEnabled()) {
 			traceMat = mat.clone();
 		}
+		
+		initializeSize(frame.getWidth(), frame.getHeight());
 
 		// Step 1: Find the chessboard corners
 		Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
@@ -179,6 +192,18 @@ public class AutoCalibrationManager implements Runnable {
 
 		return Optional.of(boundingBox);
 
+	}
+
+	private void initializeSize(int width, int height) {
+		// If smaller or equal to 800x600, use 3,3
+		// Otherwise 5,5 seems to work well up past 1280x720 at least
+		// This is a fudge but I'm not trying to perfect resolution handling
+		
+		// Must be odd numbers
+		if (width*height <= 480000)
+			gaussianBlurSize = new Size(3,3);
+		else
+			gaussianBlurSize = new Size(5,5);
 	}
 
 	public BufferedImage undistortFrame(BufferedImage frame) {
@@ -319,10 +344,10 @@ public class AutoCalibrationManager implements Runnable {
 		// Estimate the square widths, that is what we base the estimate of the
 		// real corners on
 
-		double squareTopWidth = (1 + borderFactor) * (topWidth / (PATTERN_WIDTH - 1));
-		double squareLeftHeight = (1 + borderFactor) * (leftHeight / (PATTERN_HEIGHT - 1));
-		double squareBottomWidth = (1 + borderFactor) * (bottomWidth / (PATTERN_WIDTH - 1));
-		double squareRightHeight = (1 + borderFactor) * (rightHeight / (PATTERN_HEIGHT - 1));
+		double squareTopWidth = (1 + BORDER_FACTOR) * (topWidth / (PATTERN_WIDTH - 1));
+		double squareLeftHeight = (1 + BORDER_FACTOR) * (leftHeight / (PATTERN_HEIGHT - 1));
+		double squareBottomWidth = (1 + BORDER_FACTOR) * (bottomWidth / (PATTERN_WIDTH - 1));
+		double squareRightHeight = (1 + BORDER_FACTOR) * (rightHeight / (PATTERN_HEIGHT - 1));
 
 		// The estimations
 		double[] newTopLeft = { topLeft.x - squareTopWidth, topLeft.y - squareLeftHeight };
@@ -388,20 +413,19 @@ public class AutoCalibrationManager implements Runnable {
 
 		// pixel distance, dynamic because we want to allow any resolution or
 		// distance from pattern
-		final int TOLERANCE_THRESHOLD = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 2.0);
+		final int toleranceThreshold = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 2.0);
 
-		logger.trace("tolerance threshold {} minimumDimension {}", TOLERANCE_THRESHOLD, minimumDimension);
+		logger.trace("tolerance threshold {} minimumDimension {}", toleranceThreshold, minimumDimension);
 
 		// Grey scale conversion.
 		Mat grey = new Mat();
 		Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
 
 		// Find edges
-		Imgproc.Canny(grey, grey, 50, 150);
+		Imgproc.Canny(grey, grey, CANNY_THRESHOLD_1, CANNY_THRESHOLD_2);
 
 		// Blur the lines, otherwise the lines algorithm does not consider them
-		// lines
-		Imgproc.GaussianBlur(grey, grey, new Size(3, 3), 3.0);
+		Imgproc.GaussianBlur(grey, grey, gaussianBlurSize, GAUSSIANBLUR_SIGMA);
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-undist-grey-lines.png");
@@ -426,12 +450,11 @@ public class AutoCalibrationManager implements Runnable {
 		// Find lines
 		// These parameters are just guesswork right now
 		final Mat mLines = new Mat();
-		final int threshold = 40;
 		final int minLineSize = (int) (minimumDimension * .90);
-		final int lineGap = TOLERANCE_THRESHOLD;
+		final int lineGap = toleranceThreshold;
 
 		// Do it
-		Imgproc.HoughLinesP(grey, mLines, 1, Math.PI / 180, threshold, minLineSize, lineGap);
+		Imgproc.HoughLinesP(grey, mLines, HOUGHLINES_RHO, HOUGHLINES_THETA, HOUGHLINES_THRESHOLD, minLineSize, lineGap);
 
 		// Find the lines that match our estimates
 		List<double[]> verifiedLines = new ArrayList<double[]>();
@@ -442,8 +465,8 @@ public class AutoCalibrationManager implements Runnable {
 			Point start = new Point(x1, y1);
 			Point end = new Point(x2, y2);
 
-			if (nearPoints(estimatedPoints, start, TOLERANCE_THRESHOLD)
-					&& nearPoints(estimatedPoints, end, TOLERANCE_THRESHOLD)) {
+			if (nearPoints(estimatedPoints, start, toleranceThreshold)
+					&& nearPoints(estimatedPoints, end, toleranceThreshold)) {
 				verifiedLines.add(vec);
 
 				if (logger.isTraceEnabled()) {
@@ -463,7 +486,7 @@ public class AutoCalibrationManager implements Runnable {
 			for (double[] line2 : verifiedLines) {
 				if (line1 == line2) continue;
 
-				logger.trace("compare {} {}", line1, line2);
+				//logger.trace("compare {} {}", line1, line2);
 
 				Optional<Point> intersection = computeIntersect(line1, line2);
 
@@ -474,8 +497,8 @@ public class AutoCalibrationManager implements Runnable {
 
 		// Reduce the possible corners to ideal corners
 		Point[] idealCorners = new Point[4];
-		double[] idealDistances = { TOLERANCE_THRESHOLD, TOLERANCE_THRESHOLD, TOLERANCE_THRESHOLD,
-				TOLERANCE_THRESHOLD };
+		double[] idealDistances = { toleranceThreshold, toleranceThreshold, toleranceThreshold,
+				toleranceThreshold };
 
 		for (Point pt : possibleCorners) {
 
@@ -488,6 +511,9 @@ public class AutoCalibrationManager implements Runnable {
 				}
 			}
 		}
+		
+		logger.trace("idealDistances {} {} {} {}", idealDistances[0],
+				idealDistances[1], idealDistances[2], idealDistances[3] );
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-lines.png");
@@ -728,8 +754,8 @@ public class AutoCalibrationManager implements Runnable {
 	}
 
 	private double euclideanDistance(Point pt1, Point pt2) {
-		if (logger.isTraceEnabled()) logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
-				Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
+		//if (logger.isTraceEnabled()) logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
+		//		Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
 
 		return Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
 	}
