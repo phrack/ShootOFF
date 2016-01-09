@@ -10,9 +10,6 @@
     <tags>shootoff-version:3.6</tags>
   </appender>
 
-  <logger name="com.xuggle" level="debug" />
-
-
   <root level="warn">
     <appender-ref ref="Sentry"/>
   </root>
@@ -20,8 +17,5 @@
   <root level="warn">
     <appender-ref ref="STDOUT"/>
   </root>
-  
-  <logger name="com.xuggle" level="trace" />
-  
 </configuration>
 
