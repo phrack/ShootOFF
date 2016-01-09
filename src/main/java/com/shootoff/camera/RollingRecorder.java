@@ -41,8 +41,8 @@ public class RollingRecorder {
 
 	private final List<IVideoPicture> bufferedFrames = new ArrayList<IVideoPicture>();
 
-	private static int recordWidth;
-	private static int recordHeight;
+	private int recordWidth;
+	private int recordHeight;
 
 	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName,
 			CameraManager cameraManager) {

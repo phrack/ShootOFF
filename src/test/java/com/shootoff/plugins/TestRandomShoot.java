@@ -90,7 +90,7 @@ public class TestRandomShoot {
 		
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 		
-		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n", ""))[0]);
+		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n"))[0]);
 		stringOut.reset();
 		
 		// Simulate missing a shot

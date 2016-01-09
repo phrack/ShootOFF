@@ -28,7 +28,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 	// About 12.5 pixels at 640x480
 	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 24576.0;
-	private static double distanceThreshold;
+	private double distanceThreshold;
 
 	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 8.0;
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
