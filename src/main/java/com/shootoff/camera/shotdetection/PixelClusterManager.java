@@ -34,8 +34,8 @@ public class PixelClusterManager {
 		points = p;
 		this.shotDetectionManager = shotDetectionManager;
 		
-		 ((ch.qos.logback.classic.Logger)
-		 logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+		 //((ch.qos.logback.classic.Logger)
+		 //logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
 	}
 
 	void clusterPixels() {

@@ -140,6 +140,7 @@ public class CameraManager {
 
 	}
 
+	File videoFile;
 	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config,
 			boolean[][] sectorStatuses, Optional<Bounds> projectionBounds) {
 		this.webcam = Optional.empty();
@@ -156,21 +157,26 @@ public class CameraManager {
 			setProjectionBounds(projectionBounds.get());
 		}
 
-		Detector detector = new Detector();
+
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 
+		this.videoFile = videoFile;
+		
 
+	}
+	public void processVideo()
+	{
+		Detector detector = new Detector();
+		
 		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 		reader.addListener(detector);
 		
+		logger.trace("opening {}", videoFile.getAbsolutePath());
 		
 		while (reader.readPacket() == null)
 			do {} while (false);
-
-		logger.warn("opening {}", videoFile.getAbsolutePath());
-		
 	}
 
 	private void initDetector(Detector detector) {
@@ -435,7 +441,7 @@ public class CameraManager {
 				shotDetectionManager.reInitializeDimensions();
 			}
 
-			if (lastVideoTimestamp > -1 && (getFrameCount() % DEFAULT_FPS) == 0) {
+			if (lastVideoTimestamp > -1 && (getFrameCount() % 5) == 0) {
 
 				double estimateFPS = (double) SECOND_IN_MICROSECONDS
 						/ (double) (event.getTimeStamp() - lastVideoTimestamp);
@@ -534,7 +540,7 @@ public class CameraManager {
 			if (webcam.isPresent() && (int)(getFrameCount() % DEFAULT_FPS) == 0) {
 				estimateCameraFPS();
 			}
-
+			
 			if (autoCalibrationEnabled && (getFrameCount() % (int)getFPS() == 0)) {
 				fireAutoCalibration(currentFrame);
 			}
@@ -610,7 +616,6 @@ public class CameraManager {
 		}
 
 		protected void autoCalibrateSuccess(Bounds bounds) {
-
 			if (autoCalibrationEnabled && controller != null) {
 				autoCalibrationEnabled = false;
 
