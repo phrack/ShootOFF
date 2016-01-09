@@ -10,8 +10,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
@@ -19,7 +17,6 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
 
 public class TestCameraManagerHighRes extends ShotDetectionTestor {
-	private final Logger logger = LoggerFactory.getLogger(TestCameraManagerHighRes.class);
 	private Configuration config;
 	private MockCanvasManager mockManager;
 	private boolean[][] sectorStatuses;
@@ -42,9 +39,11 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 	}
 
 	@Test
-	// Shots are missed because shot detection has not been modified to support other resolutions
+	// Shots are missed because shot detection has not been modified to support
+	// other resolutions
 	public void test1280x720Green() {
-		List<Shot> shots = findShots("/shotsearcher/highres-green.mp4", Optional.empty(), mockManager, config, sectorStatuses);
+		List<Shot> shots = findShots("/shotsearcher/highres-green.mp4", Optional.empty(), mockManager, config,
+				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 586.30, 395.44, 0, 2));
