@@ -86,7 +86,7 @@ public class Shot {
 		double scaledX = (x * scaleX);
 		double scaledY = (y * scaleY);
 
-		logger.debug("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
+		logger.trace("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
 
 		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
 		marker.setFill(color);
