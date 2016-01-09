@@ -28,38 +28,38 @@ import org.slf4j.LoggerFactory;
 
 public class XMLCourseWriter implements CourseVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(XMLCourseWriter.class);
-	
+
 	private final File courseFile;
 	private StringBuilder xmlBody = new StringBuilder();
-	
+
 	public XMLCourseWriter(File courseFile) {
 		this.courseFile = courseFile;
 	}
 
 	@Override
 	public void visitBackground(String url, boolean isResource) {
-		xmlBody.append(String.format("\t<background url=\"%s\" isResource=\"%b\" />%n",
-				url, isResource));		
+		xmlBody.append(String.format("\t<background url=\"%s\" isResource=\"%b\" />%n", url, isResource));
 	}
 
 	@Override
 	public void visitTarget(File targetFile, double x, double y, double width, double height) {
-		xmlBody.append(String.format(Locale.US, "\t<target file=\"%s\" x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" />%n",
-				targetFile.getPath(), x, y, width, height));
+		xmlBody.append(
+				String.format(Locale.US, "\t<target file=\"%s\" x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" />%n",
+						targetFile.getPath(), x, y, width, height));
 	}
 
 	@Override
 	public void visitEnd() {
 		try {
 			PrintWriter out = new PrintWriter(courseFile, "UTF-8");
-			
+
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			out.println("<course>");
 			out.print(xmlBody.toString());
 			out.println("</course>");
-			
+
 			out.close();
-			
+
 		} catch (IOException e) {
 			logger.error("Error writing XML course", e);
 		}

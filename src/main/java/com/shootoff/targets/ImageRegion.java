@@ -34,49 +34,53 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class ImageRegion extends ImageView implements TargetRegion {
-	private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
-	
+	private static final Logger logger = LoggerFactory
+			.getLogger(ImageRegion.class);
+
 	private final Map<String, String> tags = new HashMap<String, String>();
 	private final File imageFile;
-	
+
 	private Optional<SpriteAnimation> animation = Optional.empty();
 
 	public ImageRegion(double x, double y, File imageFile) {
 		super();
-		
+
 		this.setLayoutX(x);
 		this.setLayoutY(y);
 		this.imageFile = imageFile;
-		
+
 		try {
 			this.setImage(new Image(new FileInputStream(imageFile)));
 		} catch (IOException e) {
-			logger.error("Error reading image file to set image target region's picture", e);
+			logger.error(
+					"Error reading image file to set image target region's picture",
+					e);
 		}
 	}
-	
+
 	public boolean onFirstFrame() {
 		if (!animation.isPresent()) {
-			return true; 
+			return true;
 		} else {
 			return this.getImage().equals(animation.get().getFirstFrame());
 		}
 	}
-	
+
 	public File getImageFile() {
 		return imageFile;
 	}
-	
+
 	public void setAnimation(SpriteAnimation animation) {
 		this.animation = Optional.of(animation);
 	}
-	
+
 	public Optional<SpriteAnimation> getAnimation() {
 		return animation;
 	}
-	
+
 	public void reset() {
-		if (animation.isPresent()) animation.get().reset();
+		if (animation.isPresent())
+			animation.get().reset();
 	}
 
 	@Override
@@ -86,27 +90,27 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	@Override
 	public void changeHeight(double heightDelta) {
 	}
-	
+
 	@Override
 	public RegionType getType() {
 		return RegionType.IMAGE;
 	}
-	
+
 	@Override
 	public boolean tagExists(String name) {
 		return tags.containsKey(name);
 	}
-	
+
 	@Override
 	public String getTag(String name) {
 		return tags.get(name);
 	}
-	
+
 	@Override
 	public Map<String, String> getAllTags() {
 		return tags;
 	}
-	
+
 	@Override
 	public void setTags(Map<String, String> newTags) {
 		tags.clear();

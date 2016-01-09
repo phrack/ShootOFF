@@ -101,6 +101,9 @@ public class Configuration {
 
 	private static final String DEFAULT_CONFIG_FILE = "shootoff.properties";
 
+	private static final int DEFAULT_DISPLAY_WIDTH = 640;
+	private static final int DEFAULT_DISPLAY_HEIGHT = 480;
+
 	private InputStream configInput;
 	private String configName;
 
@@ -127,6 +130,10 @@ public class Configuration {
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
+
+	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
+
+	private int displayHeight = DEFAULT_DISPLAY_HEIGHT;
 
 	private boolean debugShotsRecordToFiles = false;
 
@@ -335,8 +342,7 @@ public class Configuration {
 
 		StringBuilder ipcamList = new StringBuilder();
 		for (Entry<String, URL> entry : ipcams.entrySet()) {
-			if (ipcamList.length() > 0)
-				ipcamList.append(",");
+			if (ipcamList.length() > 0) ipcamList.append(",");
 			ipcamList.append(entry.getKey());
 			ipcamList.append("|");
 			ipcamList.append(entry.getValue().toString());
@@ -344,8 +350,7 @@ public class Configuration {
 
 		StringBuilder webcamList = new StringBuilder();
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
-			if (webcamList.length() > 0)
-				webcamList.append(",");
+			if (webcamList.length() > 0) webcamList.append(",");
 			webcamList.append(entry.getKey());
 			webcamList.append(":");
 			webcamList.append(entry.getValue().getName());
@@ -353,8 +358,7 @@ public class Configuration {
 
 		StringBuilder recordingWebcamList = new StringBuilder();
 		for (Camera c : recordingCameras) {
-			if (recordingWebcamList.length() > 0)
-				recordingWebcamList.append(",");
+			if (recordingWebcamList.length() > 0) recordingWebcamList.append(",");
 			recordingWebcamList.append(c.getName());
 		}
 
@@ -412,11 +416,9 @@ public class Configuration {
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = parser.parse(options, args);
 
-			if (cmd.hasOption("d"))
-				setDebugMode(true);
+			if (cmd.hasOption("d")) setDebugMode(true);
 
-			if (cmd.hasOption("m"))
-				setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
+			if (cmd.hasOption("m")) setMarkerRadius(Integer.parseInt(cmd.getOptionValue("m")));
 
 			if (cmd.hasOption("c")) {
 				setIgnoreLaserColor(true);
@@ -454,9 +456,8 @@ public class Configuration {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
 
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(
-					System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
@@ -473,6 +474,19 @@ public class Configuration {
 		if (malfunctionsProbability < (float) 0.1 || malfunctionsProbability > (float) 99.9) {
 			throw new ConfigurationException(String.format(INJECT_MALFUNCTIONS_MESSAGE, malfunctionsProbability));
 		}
+	}
+
+	public int getDisplayWidth() {
+		return displayWidth;
+	}
+
+	public int getDisplayHeight() {
+		return displayHeight;
+	}
+
+	public void setDisplayResolution(int displayWidth, int displayHeight) {
+		this.displayWidth = displayWidth;
+		this.displayHeight = displayHeight;
 	}
 
 	public boolean isFirstRun() {
@@ -538,7 +552,7 @@ public class Configuration {
 			ipcamTimeoutAlert.setResizable(true);
 			ipcamTimeoutAlert.setContentText("Could not communicate with the IP at " + cameraURL
 					+ ". Please check the following:\n\n" + "-The IPCam URL is correct\n"
-					+ "-You are connected to the Internet (for external cameras)\n"
+					+ "-You are connected to the Internet (for external cameras)"
 					+ "-You are connected to the same network as the camera (for local cameras)");
 			ipcamTimeoutAlert.showAndWait();
 		}
@@ -547,8 +561,7 @@ public class Configuration {
 	}
 
 	public void unregisterIpCam(String cameraName) {
-		if (Camera.unregisterIpCamera(cameraName))
-			ipcams.remove(cameraName);
+		if (Camera.unregisterIpCamera(cameraName)) ipcams.remove(cameraName);
 	}
 
 	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
@@ -706,8 +719,7 @@ public class Configuration {
 	}
 
 	public void setExercise(TrainingExercise exercise) {
-		if (currentExercise != null)
-			currentExercise.destroy();
+		if (currentExercise != null) currentExercise.destroy();
 
 		currentExercise = exercise;
 	}
@@ -726,8 +738,7 @@ public class Configuration {
 
 	public Optional<String> getWebcamsUserName(Camera webcam) {
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
-			if (entry.getValue().equals(webcam))
-				return Optional.of(entry.getKey());
+			if (entry.getValue().equals(webcam)) return Optional.of(entry.getKey());
 		}
 
 		return Optional.empty();
@@ -771,9 +782,8 @@ public class Configuration {
 	}
 
 	public File getGreenLaserSound() {
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(
-					System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		return greenLaserSound;
 	}
@@ -811,8 +821,7 @@ public class Configuration {
 	}
 
 	public Optional<TrainingExercise> getExercise() {
-		if (currentExercise == null)
-			return Optional.empty();
+		if (currentExercise == null) return Optional.empty();
 
 		return Optional.of(currentExercise);
 	}

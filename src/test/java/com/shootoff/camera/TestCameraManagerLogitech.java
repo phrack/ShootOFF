@@ -50,6 +50,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
 				projectionBounds);
 		
+		mockManager.setCameraManager(cameraManager);		
+		
 		try {
 			synchronized (processingLock) {
 				while (!cameraManager.isVideoProcessed())
@@ -170,5 +172,13 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty());
 	
 		assertEquals(0, shots.size());
+	}
+	
+	@Test
+	public void testChiemCam() {
+		
+		List<Shot> shots = findShots("/shotsearcher/shot-sample-sirt.mp4", Optional.empty());
+	
+		assertEquals(30, shots.size());
 	}
 }

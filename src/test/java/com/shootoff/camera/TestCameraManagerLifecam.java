@@ -49,6 +49,8 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
 				projectionBounds);
 		
+		mockManager.setCameraManager(cameraManager);
+		
 		try {
 			synchronized (processingLock) {
 				while (!cameraManager.isVideoProcessed())

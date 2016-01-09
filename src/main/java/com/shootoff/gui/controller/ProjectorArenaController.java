@@ -262,7 +262,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	public void setBackground(LocatedImage img) {
 		background = Optional.ofNullable(img);
-		canvasManager.updateBackground(img, Optional.empty());
+		canvasManager.updateBackground(img);
 	}
 
 	/**

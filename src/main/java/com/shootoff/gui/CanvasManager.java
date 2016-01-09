@@ -19,6 +19,7 @@
 package com.shootoff.gui;
 
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
-import com.shootoff.camera.DeduplicationProcessor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
@@ -58,6 +58,7 @@ import com.shootoff.targets.io.TargetIO;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -123,22 +124,22 @@ public class CanvasManager {
 
 		if (Platform.isFxApplicationThread()) {
 			progress = new ProgressIndicator(ProgressIndicator.INDETERMINATE_PROGRESS);
-			progress.setPrefHeight(CameraManager.FEED_HEIGHT);
-			progress.setPrefWidth(CameraManager.FEED_WIDTH);
+			progress.setPrefHeight(config.getDisplayHeight());
+			progress.setPrefWidth(config.getDisplayWidth());
 			canvasGroup.getChildren().add(progress);
 			canvasGroup.getChildren().add(diagnosticsVBox);
 			diagnosticsVBox.setAlignment(Pos.CENTER);
 			diagnosticsVBox.setFillWidth(true);
-			diagnosticsVBox.setPrefWidth(CameraManager.FEED_WIDTH);
+			diagnosticsVBox.setPrefWidth(config.getDisplayWidth());
 		}
 
 		canvasGroup.setOnMouseClicked((event) -> {
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
-					addShot(Color.RED, event.getX(), event.getY());
+					addShot(Color.RED, event.getX(), event.getY(), true);
 				} else if (event.isControlDown()) {
-					addShot(Color.GREEN, event.getX(), event.getY());
+					addShot(Color.GREEN, event.getX(), event.getY(), true);
 				}
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
@@ -217,7 +218,43 @@ public class CanvasManager {
 		background.setFitHeight(height);
 	}
 
-	public void updateBackground(Image img, Optional<Bounds> projectionBounds) {
+	public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds) {
+		updateCanvasGroup();
+
+		if (frame == null) {
+			background.setX(0);
+			background.setY(0);
+			background.setImage(null);
+			return;
+		}
+
+		Image img;
+		if (projectionBounds.isPresent()) {
+			Bounds translatedBounds = translateCameraToCanvas(projectionBounds.get());
+			background.setX(translatedBounds.getMinX());
+			background.setY(translatedBounds.getMinY());
+
+			img = SwingFXUtils.toFXImage(
+					resize(frame, (int) translatedBounds.getWidth(), (int) translatedBounds.getHeight()), null);
+		} else {
+			background.setX(0);
+			background.setY(0);
+
+			img = SwingFXUtils.toFXImage(resize(frame, (int) config.getDisplayWidth(), (int) config.getDisplayHeight()),
+					null);
+		}
+
+		background.setImage(img);
+	}
+
+	public void updateBackground(Image img) {
+		updateCanvasGroup();
+		background.setX(0);
+		background.setY(0);
+		background.setImage(img);
+	}
+
+	private void updateCanvasGroup() {
 		if (!canvasGroup.getChildren().contains(background)) {
 			Platform.runLater(() -> {
 				if (canvasGroup.getChildren().isEmpty()) {
@@ -229,16 +266,55 @@ public class CanvasManager {
 				}
 			});
 		}
+	}
 
-		if (projectionBounds.isPresent()) {
-			background.setX(projectionBounds.get().getMinX());
-			background.setY(projectionBounds.get().getMinY());
-		} else {
-			background.setX(0);
-			background.setY(0);
-		}
+	private BufferedImage resize(BufferedImage source, int width, int height) {
+		if (source.getWidth() == width && source.getHeight() == height) return source;
 
-		background.setImage(img);
+		BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = tmp.createGraphics();
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2.drawImage(source, 0, 0, width, height, null);
+		g2.dispose();
+		return tmp;
+	}
+
+	public Bounds translateCameraToCanvas(Bounds bounds) {
+		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
+				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return bounds;
+
+		double scaleX = (double) config.getDisplayWidth() / (double) cameraManager.getFeedWidth();
+		double scaleY = (double) config.getDisplayHeight() / (double) cameraManager.getFeedHeight();
+
+		double minX = (bounds.getMinX() * scaleX);
+		double minY = (bounds.getMinY() * scaleY);
+		double width = (bounds.getWidth() * scaleX);
+		double height = (bounds.getHeight() * scaleY);
+
+		logger.info("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
+
+		return new BoundingBox(minX, minY, width, height);
+	}
+
+	public Bounds translateCanvasToCamera(Bounds bounds) {
+		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
+				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return bounds;
+
+		double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
+		double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
+
+		double minX = (bounds.getMinX() * scaleX);
+		double minY = (bounds.getMinY() * scaleY);
+		double width = (bounds.getWidth() * scaleX);
+		double height = (bounds.getHeight() * scaleY);
+
+		logger.info("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
+
+		return new BoundingBox(minX, minY, width, height);
 	}
 
 	public Group getCanvasGroup() {
@@ -283,6 +359,7 @@ public class CanvasManager {
 
 	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {
 		this.arenaController = Optional.ofNullable(arenaController);
+
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
 
@@ -329,12 +406,6 @@ public class CanvasManager {
 
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 
-		if (!getCameraManager().getDeduplicationProcessor().processShot(shot)) {
-			logger.debug("Processing Shot: Shot Rejected By {}",
-					getCameraManager().getDeduplicationProcessor().getClass().getName());
-			return Optional.of(getCameraManager().getDeduplicationProcessor());
-		}
-
 		for (ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) {
 				if (processor instanceof MalfunctionsProcessor) {
@@ -353,22 +424,19 @@ public class CanvasManager {
 	}
 
 	private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
-		// Record video for rejected shots as long as they weren't rejected
-		// for being dupes
+
 		if (!config.getSessionRecorder().isPresent()) return;
 
-		if (rejectingProcessor instanceof DeduplicationProcessor == false) {
-			notifyShot(shot);
+		notifyShot(shot);
 
-			Optional<String> videoString = createVideoString(shot);
+		Optional<String> videoString = createVideoString(shot);
 
-			if (rejectingProcessor instanceof MalfunctionsProcessor) {
-				config.getSessionRecorder().get().recordShot(cameraName, shot, true, false, Optional.empty(),
-						Optional.empty(), videoString);
-			} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
-				config.getSessionRecorder().get().recordShot(cameraName, shot, false, true, Optional.empty(),
-						Optional.empty(), videoString);
-			}
+		if (rejectingProcessor instanceof MalfunctionsProcessor) {
+			config.getSessionRecorder().get().recordShot(cameraName, shot, true, false, Optional.empty(),
+					Optional.empty(), videoString);
+		} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
+			config.getSessionRecorder().get().recordShot(cameraName, shot, false, true, Optional.empty(),
+					Optional.empty(), videoString);
 		}
 	}
 
@@ -378,10 +446,22 @@ public class CanvasManager {
 	}
 
 	public void addShot(Color color, double x, double y) {
+		addShot(color, x, y, false);
+	}
+
+	public void addShot(Color color, double x, double y, boolean cameFromCanvas) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
 
 		Shot shot = new Shot(color, x, y, System.currentTimeMillis() - startTime, cameraManager.getFrameCount(),
 				config.getMarkerRadius());
+
+		// If the shot didn't come from click to shoot (cameFromCanvas) and the
+		// resolution of the display and feed differ, translate shot coordinates
+		if (!cameFromCanvas && (config.getDisplayWidth() != cameraManager.getFeedWidth()
+				|| config.getDisplayHeight() != cameraManager.getFeedHeight())) {
+			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
+					cameraManager.getFeedHeight());
+		}
 
 		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 		if (rejectingProcessor.isPresent()) {
@@ -615,9 +695,10 @@ public class CanvasManager {
 				break;
 
 			case "play_sound":
-				// If there is a second parameter, we should look to see if it's
-				// an
-				// image region that is down and if so, don't play the sound
+				// If there is a second parameter, we should look to see
+				// if it's an
+				// image region that is down and if so, don't play the
+				// sound
 				if (args.size() == 2) {
 					Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(),
 							args.get(1));

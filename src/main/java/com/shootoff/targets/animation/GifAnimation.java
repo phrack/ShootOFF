@@ -41,106 +41,124 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class GifAnimation extends SpriteAnimation {
-	private static ImageFrame[] frames; 
-	
-	public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
+	private static ImageFrame[] frames;
+
+	public GifAnimation(ImageView imageView, File gifFile)
+			throws FileNotFoundException, IOException {
 		super(imageView, readGif(new FileInputStream(gifFile)));
-		
+
 		int delay = frames[0].getDelay();
 		if (delay < 1)
 			delay = SpriteAnimation.DEFAULT_DELAY;
-		
+
 		this.setCycleDuration(Duration.millis(delay));
 	}
-	
+
 	// This method is from http://stackoverflow.com/a/17269591
-    private static ImageFrame[] readGif(InputStream stream) throws IOException{
-       ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
+	private static ImageFrame[] readGif(InputStream stream) throws IOException {
+		ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
 
-        int width = -1;
-        int height = -1;
+		int width = -1;
+		int height = -1;
 
-        ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName("gif").next();
-        reader.setInput(ImageIO.createImageInputStream(stream));
-        IIOMetadata metadata = reader.getStreamMetadata();
-        if (metadata != null) {
-            IIOMetadataNode globalRoot = (IIOMetadataNode) metadata.getAsTree(metadata.getNativeMetadataFormatName());
+		ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName(
+				"gif").next();
+		reader.setInput(ImageIO.createImageInputStream(stream));
+		IIOMetadata metadata = reader.getStreamMetadata();
+		if (metadata != null) {
+			IIOMetadataNode globalRoot = (IIOMetadataNode) metadata
+					.getAsTree(metadata.getNativeMetadataFormatName());
 
-            NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
+			NodeList globalScreenDescriptor = globalRoot
+					.getElementsByTagName("LogicalScreenDescriptor");
 
-            if (globalScreenDescriptor != null && globalScreenDescriptor.getLength() > 0) {
-                IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
+			if (globalScreenDescriptor != null
+					&& globalScreenDescriptor.getLength() > 0) {
+				IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor
+						.item(0);
 
-                if (screenDescriptor != null) {
-                    width = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenWidth"));
-                    height = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenHeight"));
-                }
-            }
-        }
+				if (screenDescriptor != null) {
+					width = Integer.parseInt(screenDescriptor
+							.getAttribute("logicalScreenWidth"));
+					height = Integer.parseInt(screenDescriptor
+							.getAttribute("logicalScreenHeight"));
+				}
+			}
+		}
 
-        BufferedImage master = null;
-        Graphics2D masterGraphics = null;
+		BufferedImage master = null;
+		Graphics2D masterGraphics = null;
 
-        for (int frameIndex = 0;; frameIndex++) {
-            BufferedImage image;
-            try {
-                image = reader.read(frameIndex);
-            } catch (IndexOutOfBoundsException io) {
-                break;
-            }
+		for (int frameIndex = 0;; frameIndex++) {
+			BufferedImage image;
+			try {
+				image = reader.read(frameIndex);
+			} catch (IndexOutOfBoundsException io) {
+				break;
+			}
 
-            if (width == -1 || height == -1) {
-                width = image.getWidth();
-                height = image.getHeight();
-            }
+			if (width == -1 || height == -1) {
+				width = image.getWidth();
+				height = image.getHeight();
+			}
 
-            IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex).getAsTree("javax_imageio_gif_image_1.0");
-            IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
-            int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
-            String disposal = gce.getAttribute("disposalMethod");
+			IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(
+					frameIndex).getAsTree("javax_imageio_gif_image_1.0");
+			IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName(
+					"GraphicControlExtension").item(0);
+			int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
+			String disposal = gce.getAttribute("disposalMethod");
 
-            int x = 0;
-            int y = 0;
+			int x = 0;
+			int y = 0;
 
-            if (master == null) {
-                master = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                masterGraphics = master.createGraphics();
-                masterGraphics.setBackground(new Color(0, 0, 0, 0));
-            } else {
-                NodeList children = root.getChildNodes();
-                for (int nodeIndex = 0; nodeIndex < children.getLength(); nodeIndex++) {
-                    Node nodeItem = children.item(nodeIndex);
-                    if (nodeItem.getNodeName().equals("ImageDescriptor")) {
-                        NamedNodeMap map = nodeItem.getAttributes();
-                        x = Integer.parseInt(map.getNamedItem("imageLeftPosition").getNodeValue());
-                        y = Integer.parseInt(map.getNamedItem("imageTopPosition").getNodeValue());
-                    }
-                }
-            }
-            masterGraphics.drawImage(image, x, y, null);
+			if (master == null) {
+				master = new BufferedImage(width, height,
+						BufferedImage.TYPE_INT_ARGB);
+				masterGraphics = master.createGraphics();
+				masterGraphics.setBackground(new Color(0, 0, 0, 0));
+			} else {
+				NodeList children = root.getChildNodes();
+				for (int nodeIndex = 0; nodeIndex < children.getLength(); nodeIndex++) {
+					Node nodeItem = children.item(nodeIndex);
+					if (nodeItem.getNodeName().equals("ImageDescriptor")) {
+						NamedNodeMap map = nodeItem.getAttributes();
+						x = Integer.parseInt(map.getNamedItem(
+								"imageLeftPosition").getNodeValue());
+						y = Integer.parseInt(map.getNamedItem(
+								"imageTopPosition").getNodeValue());
+					}
+				}
+			}
+			masterGraphics.drawImage(image, x, y, null);
 
-            BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null), master.isAlphaPremultiplied(), null);
-            frames.add(new ImageFrame(copy, delay, disposal));
+			BufferedImage copy = new BufferedImage(master.getColorModel(),
+					master.copyData(null), master.isAlphaPremultiplied(), null);
+			frames.add(new ImageFrame(copy, delay, disposal));
 
-            if (disposal.equals("restoreToPrevious")) {
-                BufferedImage from = null;
-                for (int i = frameIndex - 1; i >= 0; i--) {
-                    if (!frames.get(i).getDisposal().equals("restoreToPrevious") || frameIndex == 0) {
-                        from = frames.get(i).getBufferedImage();
-                        break;
-                    }
-                }
+			if (disposal.equals("restoreToPrevious")) {
+				BufferedImage from = null;
+				for (int i = frameIndex - 1; i >= 0; i--) {
+					if (!frames.get(i).getDisposal()
+							.equals("restoreToPrevious")
+							|| frameIndex == 0) {
+						from = frames.get(i).getBufferedImage();
+						break;
+					}
+				}
 
-                master = new BufferedImage(from.getColorModel(), from.copyData(null), from.isAlphaPremultiplied(), null);
-                masterGraphics = master.createGraphics();
-                masterGraphics.setBackground(new Color(0, 0, 0, 0));
-            } else if (disposal.equals("restoreToBackgroundColor")) {
-                masterGraphics.clearRect(x, y, image.getWidth(), image.getHeight());
-            }
-        }
-        reader.dispose();
+				master = new BufferedImage(from.getColorModel(),
+						from.copyData(null), from.isAlphaPremultiplied(), null);
+				masterGraphics = master.createGraphics();
+				masterGraphics.setBackground(new Color(0, 0, 0, 0));
+			} else if (disposal.equals("restoreToBackgroundColor")) {
+				masterGraphics.clearRect(x, y, image.getWidth(),
+						image.getHeight());
+			}
+		}
+		reader.dispose();
 
-        GifAnimation.frames = frames.toArray(new ImageFrame[frames.size()]);
-        return GifAnimation.frames;
-    }
+		GifAnimation.frames = frames.toArray(new ImageFrame[frames.size()]);
+		return GifAnimation.frames;
+	}
 }

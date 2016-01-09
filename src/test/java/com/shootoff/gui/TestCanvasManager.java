@@ -30,11 +30,13 @@ public class TestCanvasManager {
 	private Target ipscTarget;
 	private ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	
+	private Configuration config;
+	
 	@Before
 	public void setUp() throws ConfigurationException {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
-		Configuration config = new Configuration(new String[0]);
+		config = new Configuration(new String[0]);
 		config.setDebugMode(true);
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 		cm = new CanvasManager(new Group(), config, cs, "test", shotEntries);
@@ -124,5 +126,47 @@ public class TestCanvasManager {
 		cm.addShot(Color.RED, 0, 0);
 		
 		assertEquals(1, cm.getShots().size());
+	}
+	
+	@Test
+	public void testDisplayResolutionTranslationLarger() {
+		config.setDisplayResolution(800, 600);
+		
+		assertEquals(0, cm.getShots().size());
+		
+		cm.addShot(Color.RED, 640, 480);
+		
+		assertEquals(1, cm.getShots().size());
+		
+		assertEquals(800, cm.getShots().get(0).getX(), 1.0);
+		assertEquals(600, cm.getShots().get(0).getY(), 1.0);
+	}
+	
+	@Test
+	public void testDisplayResolutionTranslationSmaller() {
+		config.setDisplayResolution(320, 240);
+		
+		assertEquals(0, cm.getShots().size());
+		
+		cm.addShot(Color.RED, 640, 480);
+		
+		assertEquals(1, cm.getShots().size());
+		
+		assertEquals(320, cm.getShots().get(0).getX(), 1.0);
+		assertEquals(240, cm.getShots().get(0).getY(), 1.0);
+	}
+	
+	@Test
+	public void testClickToShoot() {
+		config.setDisplayResolution(320, 240);
+		
+		assertEquals(0, cm.getShots().size());
+		
+		cm.addShot(Color.RED, 320, 240, true);
+		
+		assertEquals(1, cm.getShots().size());
+		
+		assertEquals(320, cm.getShots().get(0).getX(), 1.0);
+		assertEquals(240, cm.getShots().get(0).getY(), 1.0);
 	}
 }

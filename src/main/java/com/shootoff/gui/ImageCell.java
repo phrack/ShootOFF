@@ -174,7 +174,7 @@ public class ImageCell extends TextFieldListCell<String> {
 		boolean cameraOpened = false;
 
 		if (!webcam.isOpen()) {
-			webcam.setViewSize(new Dimension(CameraManager.FEED_WIDTH, CameraManager.FEED_HEIGHT));
+			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
 			webcam.open();
 			cameraOpened = true;
 		}

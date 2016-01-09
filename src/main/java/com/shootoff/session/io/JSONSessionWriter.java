@@ -33,13 +33,14 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.Shot;
 
 public class JSONSessionWriter implements EventVisitor {
-	private final Logger logger = LoggerFactory.getLogger(JSONSessionWriter.class);
-	
+	private final Logger logger = LoggerFactory
+			.getLogger(JSONSessionWriter.class);
+
 	private final File sessionFile;
 	private final JSONArray cameras = new JSONArray();
 	private JSONObject currentCamera;
 	private JSONArray currentCameraEvents;
-	
+
 	public JSONSessionWriter(File sessionFile) {
 		this.sessionFile = sessionFile;
 	}
@@ -49,7 +50,7 @@ public class JSONSessionWriter implements EventVisitor {
 	public void visitCamera(String cameraName) {
 		currentCamera = new JSONObject();
 		currentCamera.put("name", cameraName);
-		
+
 		currentCameraEvents = new JSONArray();
 	}
 
@@ -62,36 +63,37 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload, 
-			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
-		
+	public void visitShot(long timestamp, Shot shot, boolean isMalfunction,
+			boolean isReload, Optional<Integer> targetIndex,
+			Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+
 		JSONObject event = new JSONObject();
 		event.put("type", "shot");
 		event.put("timestamp", timestamp);
 		event.put("color", shot.getColor().toString());
 		event.put("x", shot.getX());
 		event.put("y", shot.getY());
-		event.put("shotTimestamp", shot.getTimestamp());		
-		event.put("markerRadius", (int)shot.getMarker().getRadiusX());
+		event.put("shotTimestamp", shot.getTimestamp());
+		event.put("markerRadius", (int) shot.getMarker().getRadiusX());
 		event.put("isMalfunction", isMalfunction);
 		event.put("isReload", isReload);
-		
+
 		if (targetIndex.isPresent()) {
 			event.put("targetIndex", targetIndex.get());
 		} else {
 			event.put("targetIndex", -1);
 		}
-		
+
 		if (hitRegionIndex.isPresent()) {
 			event.put("hitRegionIndex", hitRegionIndex.get());
 		} else {
 			event.put("hitRegionIndex", -1);
 		}
-		
+
 		if (videoString.isPresent()) {
 			event.put("videos", videoString.get());
 		}
-		
+
 		currentCameraEvents.add(event);
 	}
 
@@ -102,7 +104,7 @@ public class JSONSessionWriter implements EventVisitor {
 		event.put("type", "targetAdded");
 		event.put("timestamp", timestamp);
 		event.put("name", targetName);
-		
+
 		currentCameraEvents.add(event);
 	}
 
@@ -113,33 +115,35 @@ public class JSONSessionWriter implements EventVisitor {
 		event.put("type", "targetRemoved");
 		event.put("timestamp", timestamp);
 		event.put("index", targetIndex);
-		
+
 		currentCameraEvents.add(event);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitTargetResize(long timestamp, int targetIndex, double newWidth, double newHeight) {	
+	public void visitTargetResize(long timestamp, int targetIndex,
+			double newWidth, double newHeight) {
 		JSONObject event = new JSONObject();
 		event.put("type", "targetResized");
 		event.put("timestamp", timestamp);
 		event.put("index", targetIndex);
 		event.put("newWidth", newWidth);
 		event.put("newHeight", newHeight);
-		
+
 		currentCameraEvents.add(event);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitTargetMove(long timestamp, int targetIndex, int newX, int newY) {
+	public void visitTargetMove(long timestamp, int targetIndex, int newX,
+			int newY) {
 		JSONObject event = new JSONObject();
 		event.put("type", "targetMoved");
 		event.put("timestamp", timestamp);
 		event.put("index", targetIndex);
 		event.put("newX", newX);
 		event.put("newY", newY);
-		
+
 		currentCameraEvents.add(event);
 	}
 
@@ -150,7 +154,7 @@ public class JSONSessionWriter implements EventVisitor {
 		event.put("type", "exerciseFeedMessage");
 		event.put("timestamp", timestamp);
 		event.put("message", message);
-		
+
 		currentCameraEvents.add(event);
 	}
 
@@ -159,22 +163,24 @@ public class JSONSessionWriter implements EventVisitor {
 	public void visitEnd() {
 		JSONObject session = new JSONObject();
 		session.put("cameras", cameras);
-		
+
 		Writer file = null;
-		
+
 		try {
-			file = new OutputStreamWriter(new FileOutputStream(sessionFile), "UTF-8");
+			file = new OutputStreamWriter(new FileOutputStream(sessionFile),
+					"UTF-8");
 			file.write(session.toJSONString());
 			file.flush();
 		} catch (IOException e) {
 			logger.error("Error writing JSON session", e);
 		} finally {
 			try {
-				if (file != null) file.close();
+				if (file != null)
+					file.close();
 			} catch (IOException e) {
 				logger.error("Error closing JSON session", e);
 			}
-					
+
 		}
 	}
 }

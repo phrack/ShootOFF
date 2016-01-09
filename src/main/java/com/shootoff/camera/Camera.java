@@ -20,6 +20,7 @@ package com.shootoff.camera;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +42,7 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
 import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
+import com.xuggle.xuggler.video.ConverterFactory;
 
 public class Camera {
 	// These are used in a hack to get this code to work on Mac.
@@ -210,6 +214,10 @@ public class Camera {
 		return open;
 	}
 
+	public Dimension getViewSize() {
+		return webcam.getViewSize();
+	}
+
 	public boolean close() {
 		if (isMac) {
 			new Thread(() -> {
@@ -243,10 +251,13 @@ public class Camera {
 
 	public void setViewSize(Dimension size) {
 		try {
+			webcam.setCustomViewSizes(new Dimension[] { size });
+
 			webcam.setViewSize(size);
 		} catch (IllegalArgumentException e) {
 			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
 		}
+
 	}
 
 	@Override
@@ -265,5 +276,26 @@ public class Camera {
 		Camera other = (Camera) obj;
 		if (!this.getName().equals(other.getName())) return false;
 		return true;
+	}
+	
+	public static BufferedImage matToBufferedImage(Mat matBGR) {
+		int width = matBGR.width(), height = matBGR.height(), channels = matBGR.channels();
+		byte[] sourcePixels = new byte[width * height * channels];
+		matBGR.get(0, 0, sourcePixels);
+
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
+
+		return image;
+	}
+	
+	public static Mat bufferedImageToMat(BufferedImage frame) {
+		BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+		byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
+		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
+		mat.put(0, 0, pixels);
+
+		return mat;
 	}
 }

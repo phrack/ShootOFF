@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2015 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -19,7 +19,6 @@
 package com.shootoff.camera.autocalibration;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,6 @@ import javafx.util.Callback;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -47,8 +45,9 @@ import org.slf4j.LoggerFactory;
 
 //import ch.qos.logback.classic.Level;
 
+
+import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
-import com.xuggle.xuggler.video.ConverterFactory;
 
 public class AutoCalibrationManager implements Runnable {
 
@@ -56,11 +55,13 @@ public class AutoCalibrationManager implements Runnable {
 
 	private final static int PATTERN_WIDTH = 9;
 	private final static int PATTERN_HEIGHT = 6;
-	private Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
+	private final static Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
 	private BufferedImage frame;
 
 	private Callback<Optional<Bounds>, Void> callback;
+
+	private CameraManager cameraManager;
 
 	public void setCallback(Callback<Optional<Bounds>, Void> callback) {
 		this.callback = callback;
@@ -70,8 +71,10 @@ public class AutoCalibrationManager implements Runnable {
 		this.frame = frame;
 	}
 
-	public AutoCalibrationManager() {
-		// ((ch.qos.logback.classic.Logger) logger).setLevel(Level.TRACE);
+	public AutoCalibrationManager(CameraManager cameraManager) {
+		this.cameraManager = cameraManager;
+		 //((ch.qos.logback.classic.Logger)
+		 //logger).setLevel(ch.qos.logback.classic.Level.TRACE);
 	}
 
 	// Stores the transformation matrix
@@ -89,7 +92,18 @@ public class AutoCalibrationManager implements Runnable {
 	// Edge is 11 pixels wide. Squares are 168 pixels wide.
 	// 11/168 = 0.06547619047619047619047619047619
 	// Maybe I should have made it divisible...
-	private final static double borderFactor = 0.065476;
+	private static final double BORDER_FACTOR = 0.065476;
+
+	private static final double CANNY_THRESHOLD_1 = 50;
+	private static final double CANNY_THRESHOLD_2 = 150;
+	private static final double GAUSSIANBLUR_SIGMA = 3.0;
+
+	private static final double HOUGHLINES_RHO = 1;
+
+	private static final double HOUGHLINES_THETA = Math.PI / 180;
+
+	private static final int HOUGHLINES_THRESHOLD = 40;
+	private Size gaussianBlurSize;
 
 	private void reset() {
 		isCalibrated = false;
@@ -114,13 +128,15 @@ public class AutoCalibrationManager implements Runnable {
 	}
 
 	public Optional<Bounds> processFrame(BufferedImage frame) {
-		Mat mat = bufferedImageToMat(frame);
+		Mat mat = Camera.bufferedImageToMat(frame);
 
 		// For debugging
 		Mat traceMat = null;
 		if (logger.isTraceEnabled()) {
 			traceMat = mat.clone();
 		}
+		
+		initializeSize(frame.getWidth(), frame.getHeight());
 
 		// Step 1: Find the chessboard corners
 		Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
@@ -145,8 +161,9 @@ public class AutoCalibrationManager implements Runnable {
 		// Step 4: Initialize the warp matrix and bounding box
 		initializeWarpPerspective(mat, idealCorners.get());
 
-		if (boundingBox.getMinX() < 0 || boundingBox.getMinY() < 0 || boundingBox.getWidth() > CameraManager.FEED_WIDTH
-				|| boundingBox.getHeight() > CameraManager.FEED_HEIGHT)
+		if (boundingBox.getMinX() < 0 || boundingBox.getMinY() < 0
+				|| boundingBox.getWidth() > cameraManager.getFeedWidth()
+				|| boundingBox.getHeight() > cameraManager.getFeedHeight())
 			return Optional.empty();
 
 		logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
@@ -176,15 +193,27 @@ public class AutoCalibrationManager implements Runnable {
 
 	}
 
+	private void initializeSize(int width, int height) {
+		// If smaller or equal to 800x600, use 3,3
+		// Otherwise 5,5 seems to work well up past 1280x720 at least
+		// This is a fudge but I'm not trying to perfect resolution handling
+		
+		// Must be odd numbers
+		if (width*height <= 480000)
+			gaussianBlurSize = new Size(3,3);
+		else
+			gaussianBlurSize = new Size(5,5);
+	}
+
 	public BufferedImage undistortFrame(BufferedImage frame) {
 		if (!isCalibrated) {
 			logger.warn("undistortFrame called when isCalibrated is false");
 			return frame;
 		}
 
-		Mat mat = bufferedImageToMat(frame);
+		Mat mat = Camera.bufferedImageToMat(frame);
 
-		frame = matToBufferedImage(warpPerspective(mat));
+		frame = Camera.matToBufferedImage(warpPerspective(mat));
 
 		return frame;
 	}
@@ -314,10 +343,10 @@ public class AutoCalibrationManager implements Runnable {
 		// Estimate the square widths, that is what we base the estimate of the
 		// real corners on
 
-		double squareTopWidth = (1 + borderFactor) * (topWidth / (PATTERN_WIDTH - 1));
-		double squareLeftHeight = (1 + borderFactor) * (leftHeight / (PATTERN_HEIGHT - 1));
-		double squareBottomWidth = (1 + borderFactor) * (bottomWidth / (PATTERN_WIDTH - 1));
-		double squareRightHeight = (1 + borderFactor) * (rightHeight / (PATTERN_HEIGHT - 1));
+		double squareTopWidth = (1 + BORDER_FACTOR) * (topWidth / (PATTERN_WIDTH - 1));
+		double squareLeftHeight = (1 + BORDER_FACTOR) * (leftHeight / (PATTERN_HEIGHT - 1));
+		double squareBottomWidth = (1 + BORDER_FACTOR) * (bottomWidth / (PATTERN_WIDTH - 1));
+		double squareRightHeight = (1 + BORDER_FACTOR) * (rightHeight / (PATTERN_HEIGHT - 1));
 
 		// The estimations
 		double[] newTopLeft = { topLeft.x - squareTopWidth, topLeft.y - squareLeftHeight };
@@ -383,20 +412,19 @@ public class AutoCalibrationManager implements Runnable {
 
 		// pixel distance, dynamic because we want to allow any resolution or
 		// distance from pattern
-		final int TOLERANCE_THRESHOLD = (int) (minimumDimension / PATTERN_HEIGHT - 1 / 5);
+		final int toleranceThreshold = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 2.0);
 
-		logger.debug("tolerance threshold {}", TOLERANCE_THRESHOLD);
+		logger.trace("tolerance threshold {} minimumDimension {}", toleranceThreshold, minimumDimension);
 
 		// Grey scale conversion.
 		Mat grey = new Mat();
 		Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
 
 		// Find edges
-		Imgproc.Canny(grey, grey, 50, 150);
+		Imgproc.Canny(grey, grey, CANNY_THRESHOLD_1, CANNY_THRESHOLD_2);
 
 		// Blur the lines, otherwise the lines algorithm does not consider them
-		// lines
-		Imgproc.GaussianBlur(grey, grey, new Size(3, 3), 3.0);
+		Imgproc.GaussianBlur(grey, grey, gaussianBlurSize, GAUSSIANBLUR_SIGMA);
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-undist-grey-lines.png");
@@ -421,12 +449,11 @@ public class AutoCalibrationManager implements Runnable {
 		// Find lines
 		// These parameters are just guesswork right now
 		final Mat mLines = new Mat();
-		final int threshold = 40;
 		final int minLineSize = (int) (minimumDimension * .90);
-		final int lineGap = TOLERANCE_THRESHOLD;
+		final int lineGap = toleranceThreshold;
 
 		// Do it
-		Imgproc.HoughLinesP(grey, mLines, 1, Math.PI / 180, threshold, minLineSize, lineGap);
+		Imgproc.HoughLinesP(grey, mLines, HOUGHLINES_RHO, HOUGHLINES_THETA, HOUGHLINES_THRESHOLD, minLineSize, lineGap);
 
 		// Find the lines that match our estimates
 		List<double[]> verifiedLines = new ArrayList<double[]>();
@@ -437,8 +464,8 @@ public class AutoCalibrationManager implements Runnable {
 			Point start = new Point(x1, y1);
 			Point end = new Point(x2, y2);
 
-			if (nearPoints(estimatedPoints, start, TOLERANCE_THRESHOLD)
-					&& nearPoints(estimatedPoints, end, TOLERANCE_THRESHOLD)) {
+			if (nearPoints(estimatedPoints, start, toleranceThreshold)
+					&& nearPoints(estimatedPoints, end, toleranceThreshold)) {
 				verifiedLines.add(vec);
 
 				if (logger.isTraceEnabled()) {
@@ -458,7 +485,7 @@ public class AutoCalibrationManager implements Runnable {
 			for (double[] line2 : verifiedLines) {
 				if (line1 == line2) continue;
 
-				logger.trace("compare {} {}", line1, line2);
+				//logger.trace("compare {} {}", line1, line2);
 
 				Optional<Point> intersection = computeIntersect(line1, line2);
 
@@ -469,8 +496,8 @@ public class AutoCalibrationManager implements Runnable {
 
 		// Reduce the possible corners to ideal corners
 		Point[] idealCorners = new Point[4];
-		double[] idealDistances = { TOLERANCE_THRESHOLD, TOLERANCE_THRESHOLD, TOLERANCE_THRESHOLD,
-				TOLERANCE_THRESHOLD };
+		double[] idealDistances = { toleranceThreshold, toleranceThreshold, toleranceThreshold,
+				toleranceThreshold };
 
 		for (Point pt : possibleCorners) {
 
@@ -483,6 +510,9 @@ public class AutoCalibrationManager implements Runnable {
 				}
 			}
 		}
+		
+		logger.trace("idealDistances {} {} {} {}", idealDistances[0],
+				idealDistances[1], idealDistances[2], idealDistances[3] );
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-lines.png");
@@ -565,7 +595,6 @@ public class AutoCalibrationManager implements Runnable {
 	 * The one time calculation of the transformations.
 	 * 
 	 * After this is done, the transformation is just applied
-	 * 
 	 */
 	private void initializeWarpPerspective(final Mat frame, MatOfPoint2f sourceCorners) {
 
@@ -692,27 +721,6 @@ public class AutoCalibrationManager implements Runnable {
 		return result;
 	}
 
-	private BufferedImage matToBufferedImage(Mat matBGR) {
-		int width = matBGR.width(), height = matBGR.height(), channels = matBGR.channels();
-		byte[] sourcePixels = new byte[width * height * channels];
-		matBGR.get(0, 0, sourcePixels);
-
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
-
-		return image;
-	}
-
-	private Mat bufferedImageToMat(BufferedImage frame) {
-		BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
-		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
-		mat.put(0, 0, pixels);
-
-		return mat;
-	}
-
 	private Point[] matOfPoint2fToPoints(MatOfPoint2f mat) {
 		Point[] points = new Point[4];
 		points[0] = new Point(mat.get(0, 0)[0], mat.get(0, 0)[1]);
@@ -724,8 +732,8 @@ public class AutoCalibrationManager implements Runnable {
 	}
 
 	private double euclideanDistance(Point pt1, Point pt2) {
-		if (logger.isTraceEnabled()) logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
-				Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
+		//if (logger.isTraceEnabled()) logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
+		//		Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
 
 		return Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
 	}

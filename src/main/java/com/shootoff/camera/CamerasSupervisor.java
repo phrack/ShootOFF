@@ -81,9 +81,7 @@ public class CamerasSupervisor {
 		allDetecting = isDetecting;
 
 		for (CameraManager manager : managers) {
-			// Designated cameras aren't supposed to detect shots
-			// because they are pointed at and recording the shooter
-			if (!manager.isRecordingShots()) manager.setDetecting(isDetecting);
+			manager.setDetecting(isDetecting);
 		}
 	}
 

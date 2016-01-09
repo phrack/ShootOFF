@@ -47,6 +47,8 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
 				projectionBounds);
 		
+		mockManager.setCameraManager(cameraManager);
+		
 		try {
 			synchronized (processingLock) {
 				while (!cameraManager.isVideoProcessed())
