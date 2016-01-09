@@ -157,13 +157,5 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 		assertEquals(0, shots.size());
 	}
-	
-	@Test
-	public void testChiemCam() {
-		
-		List<Shot> shots = findShots("/shotsearcher/shot-sample-sirt.mp4", 
-				Optional.empty(), mockManager, config, sectorStatuses);
-	
-		assertEquals(30, shots.size());
-	}
+
 }
