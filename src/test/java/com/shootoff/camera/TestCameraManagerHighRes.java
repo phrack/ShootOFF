@@ -42,17 +42,15 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 	}
 
 	@Test
-	// BRIGHT
-	public void test1280x720() {
-		List<Shot> shots = findShots("/shotsearcher/testvid800x600.avi", Optional.empty(), mockManager, config, sectorStatuses);
+	// Shots are missed because shot detection has not been modified to support other resolutions
+	public void test1280x720Green() {
+		List<Shot> shots = findShots("/shotsearcher/highres-green.mp4", Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 176.5, 251.3, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 586.30, 395.44, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.RED, 236.5, 169.5, 0, 2));
-		// optionalShots.add(new Shot(Color.RED, 175, 191.5, 0, 2));
-		// optionalShots.add(new Shot(Color.RED, 229.5, 227.5, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 587.80, 396.73, 0, 2));
 
 		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
