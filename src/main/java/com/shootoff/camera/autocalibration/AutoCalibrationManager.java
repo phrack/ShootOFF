@@ -19,7 +19,6 @@
 package com.shootoff.camera.autocalibration;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +30,6 @@ import javafx.util.Callback;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -47,8 +45,9 @@ import org.slf4j.LoggerFactory;
 
 //import ch.qos.logback.classic.Level;
 
+
+import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
-import com.xuggle.xuggler.video.ConverterFactory;
 
 public class AutoCalibrationManager implements Runnable {
 
@@ -129,7 +128,7 @@ public class AutoCalibrationManager implements Runnable {
 	}
 
 	public Optional<Bounds> processFrame(BufferedImage frame) {
-		Mat mat = bufferedImageToMat(frame);
+		Mat mat = Camera.bufferedImageToMat(frame);
 
 		// For debugging
 		Mat traceMat = null;
@@ -212,9 +211,9 @@ public class AutoCalibrationManager implements Runnable {
 			return frame;
 		}
 
-		Mat mat = bufferedImageToMat(frame);
+		Mat mat = Camera.bufferedImageToMat(frame);
 
-		frame = matToBufferedImage(warpPerspective(mat));
+		frame = Camera.matToBufferedImage(warpPerspective(mat));
 
 		return frame;
 	}
@@ -720,27 +719,6 @@ public class AutoCalibrationManager implements Runnable {
 				bottomLeft.y);
 
 		return result;
-	}
-
-	private BufferedImage matToBufferedImage(Mat matBGR) {
-		int width = matBGR.width(), height = matBGR.height(), channels = matBGR.channels();
-		byte[] sourcePixels = new byte[width * height * channels];
-		matBGR.get(0, 0, sourcePixels);
-
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
-
-		return image;
-	}
-
-	private Mat bufferedImageToMat(BufferedImage frame) {
-		BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
-		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
-		mat.put(0, 0, pixels);
-
-		return mat;
 	}
 
 	private Point[] matOfPoint2fToPoints(MatOfPoint2f mat) {

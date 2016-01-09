@@ -37,16 +37,12 @@ public final class ShotDetectionManager {
 	private boolean filtersInitialized = false;
 
 	// This is the long term storage for the MAs
-	// "final" does apply here, the data in the arrays can be changed but the
-	// arrays themselves cannot be overwritten
-	private final int[][] lumsMovingAverage;
-	private final double[][] colorDiffMovingAverage;
+	private int[][] lumsMovingAverage;
+	private double[][] colorDiffMovingAverage;
 
 	// New data is stored here until the shot detection has finished for a frame
-	// "final" does apply here, the data in the arrays can be changed but the
-	// arrays themselves cannot be overwritten
-	private final int[][] newLumsMovingAverage;
-	private final double[][] newColorDiffMovingAverage;
+	private int[][] newLumsMovingAverage;
+	private double[][] newColorDiffMovingAverage;
 
 	private double avgThresholdPixels = -1;
 
@@ -81,21 +77,31 @@ public final class ShotDetectionManager {
 	private BufferedImage currentFullFrame;
 
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config, CanvasManager canvasManager) {
-		// ((ch.qos.logback.classic.Logger)
+		//((ch.qos.logback.classic.Logger)
 		// logger).setLevel(ch.qos.logback.classic.Level.TRACE);
 
 		this.canvasManager = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;
 
-		lumsMovingAverage = new int[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
-		newLumsMovingAverage = new int[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
+		initializeDimensions(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
+	}
+	
+	public void reInitializeDimensions()
+	{
+		initializeDimensions(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
+	}
+	
+	private void initializeDimensions(int width, int height)
+	{
+		lumsMovingAverage = new int[width][height];
+		newLumsMovingAverage = new int[width][height];
 
-		colorDiffMovingAverage = new double[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
-		newColorDiffMovingAverage = new double[cameraManager.getFeedWidth()][cameraManager.getFeedHeight()];
+		colorDiffMovingAverage = new double[width][height];;
+		newColorDiffMovingAverage = new double[width][height];;
 
-		for (int y = 0; y < cameraManager.getFeedHeight(); y++)
-			for (int x = 0; x < cameraManager.getFeedWidth(); x++) {
+		for (int y = 0; y < height; y++)
+			for (int x = 0; x < width; x++) {
 				lumsMovingAverage[x][y] = -1;
 				colorDiffMovingAverage[x][y] = -1;
 			}
@@ -114,13 +120,16 @@ public final class ShotDetectionManager {
 		int currentLum = Pixel.calcLums(currentRGB);
 
 		double colorDiff = Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN);
-
 		if (lumsMovingAverage[x][y] == -1) {
+			
 			newLumsMovingAverage[x][y] = Math.min(currentLum, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 			newColorDiffMovingAverage[x][y] = Math.min(colorDiff, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
+			
 			return Optional.empty();
 
 		}
+		
+
 
 		if (!detectShots) result = Optional.empty();
 
@@ -135,6 +144,7 @@ public final class ShotDetectionManager {
 		else if (pixelAboveThreshold(currentLum, lumsMovingAverage[x][y])) result = Optional
 				.of(new Pixel(x, y, currentC, currentLum, lumsMovingAverage[x][y], colorDiffMovingAverage[x][y]));
 
+		
 		// Update the average brightness
 		newLumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (INIT_FRAME_COUNT - 1)) + currentLum)
 				/ INIT_FRAME_COUNT;
@@ -142,7 +152,7 @@ public final class ShotDetectionManager {
 		// Update the color distance
 		newColorDiffMovingAverage[x][y] = ((colorDiffMovingAverage[x][y] * (INIT_FRAME_COUNT - 1)) + colorDiff)
 				/ INIT_FRAME_COUNT;
-
+		
 		return result;
 
 	}
@@ -245,7 +255,7 @@ public final class ShotDetectionManager {
 			workingCopy = deepCopy(frame);
 
 		}
-
+		
 		// Must reset before every updateFilter loop
 		brightPixels = 0;
 
@@ -362,6 +372,7 @@ public final class ShotDetectionManager {
 	private ArrayList<Pixel> findThresholdPixelsAndUpdateFilter(BufferedImage workingCopy, boolean detectShots) {
 		final int subWidth = workingCopy.getWidth() / SECTOR_COLUMNS;
 		final int subHeight = workingCopy.getHeight() / SECTOR_ROWS;
+		
 
 		final boolean[][] sectorstatuses = cameraManager.getSectorStatuses();
 
@@ -374,20 +385,23 @@ public final class ShotDetectionManager {
 		Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
 
 			public void perform(Integer sector) {
+				
 				Integer sectorX = (sector % SECTOR_COLUMNS);
 				Integer sectorY = (int) Math.floor((sector / SECTOR_ROWS));
 
 				Integer startX = subWidth * sectorX;
 				Integer startY = subHeight * sectorY;
-
-				logger.trace("{} - {} {} - {} {}", sector, sectorX, sectorY, startX, startY);
+								
+				logger.trace("sector {} - {} - {} {} - {} {}", sector, sectorstatuses[sectorY][sectorX], sectorX, sectorY, startX, startY);
 
 				if (!sectorstatuses[sectorY][sectorX]) return;
-
+				
 				for (Integer y = startY; y < startY + subHeight; y++) {
 
 					for (Integer x = startX; x < startX + subWidth; x++) {
+
 						Optional<Pixel> pixel = updateFilter(workingCopy, x, y, detectShots);
+
 
 						if (pixel.isPresent()) {
 							synchronized (thresholdPixels) {
@@ -398,6 +412,7 @@ public final class ShotDetectionManager {
 					}
 				}
 
+				
 			}
 
 		});

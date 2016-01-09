@@ -77,6 +77,11 @@ public class CameraManager {
 
 	private final static int DIAGNOSTIC_MESSAGE_DURATION = 1000; // ms
 	
+	private long lastVideoTimestamp = -1;
+	private long lastCameraTimestamp = -1;
+	private long lastFrameCount = 0;
+	private static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
+	
 	private final ShotDetectionManager shotDetectionManager;
 
 	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
@@ -143,6 +148,8 @@ public class CameraManager {
 		this.config = config;
 
 		this.canvasManager.setCameraManager(this);
+		
+		setSectorStatuses(sectorStatuses);
 
 		if (projectionBounds.isPresent()) {
 			setLimitDetectProjection(true);
@@ -153,16 +160,17 @@ public class CameraManager {
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 
+
 		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 		reader.addListener(detector);
-
-		logger.debug("opening {}", videoFile.getAbsolutePath());
-
-		setSectorStatuses(sectorStatuses);
-
+		
+		
 		while (reader.readPacket() == null)
 			do {} while (false);
+
+		logger.warn("opening {}", videoFile.getAbsolutePath());
+		
 	}
 
 	private void initDetector(Detector detector) {
@@ -398,6 +406,12 @@ public class CameraManager {
 					webcam.get().open();
 
 					Dimension openDimension = webcam.get().getViewSize();
+					
+					if ((int)openDimension.getWidth() != getFeedWidth() || (int)openDimension.getHeight() != getFeedHeight())
+					{
+						logger.warn("Camera dimension differs from requested dimensions, requested {} {} actual {} {}", getFeedWidth(), getFeedHeight(), (int)openDimension.getWidth(), (int)openDimension.getHeight());
+					}
+					
 					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 				}
 
@@ -410,17 +424,22 @@ public class CameraManager {
 		 * from a video that is being played back in a unit test, not to get a
 		 * frame from the webcam.
 		 */
-		private long lastVideoTimestamp = -1;
-		private static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
 
 		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
 			BufferedImage currentFrame = event.getImage();
+			
+			if (getFrameCount() == 0)
+			{
+				setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
+				shotDetectionManager.reInitializeDimensions();
+			}
 
 			if (lastVideoTimestamp > -1 && (getFrameCount() % DEFAULT_FPS) == 0) {
 
 				double estimateFPS = (double) SECOND_IN_MICROSECONDS
 						/ (double) (event.getTimeStamp() - lastVideoTimestamp);
+				
 
 				setFPS(estimateFPS);
 			}
@@ -438,7 +457,7 @@ public class CameraManager {
 
 			detectionExecutor.shutdown();
 		}
-
+		
 		private void streamCameraFrames() {
 			while (isStreaming) {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
@@ -511,8 +530,12 @@ public class CameraManager {
 
 		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
 			frameCount++;
+			
+			if (webcam.isPresent() && (int)(getFrameCount() % DEFAULT_FPS) == 0) {
+				estimateCameraFPS();
+			}
 
-			if (autoCalibrationEnabled && (getFrameCount() % DEFAULT_FPS == 0)) {
+			if (autoCalibrationEnabled && (getFrameCount() % (int)getFPS() == 0)) {
 				fireAutoCalibration(currentFrame);
 			}
 
@@ -521,18 +544,31 @@ public class CameraManager {
 			}
 
 			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
-
-			if (webcam.isPresent() && (getFrameCount() % DEFAULT_FPS) == 0) {
-
-				setFPS(webcam.get().getFPS());
-
-				if (debuggerListener.isPresent()) {
-					debuggerListener.get().updateFeedData(webcamFPS, Optional.empty());
-				}
-				checkIfMinimumFPS();
-			}
-
+			
 			return new Pair<Boolean, BufferedImage>(result, currentFrame);
+		}
+		
+		private void estimateCameraFPS()
+		{
+			if (lastCameraTimestamp > -1) {
+
+				double estimateFPS =  ((double) getFrameCount() - (double) lastFrameCount) / 
+							(
+								((double)System.currentTimeMillis() - (double)lastCameraTimestamp) /
+								1000.0
+							);
+				
+				
+				setFPS(estimateFPS);
+				logger.trace("fps comparison estimate {} reported {}", estimateFPS, webcam.get().getFPS());
+			}
+			lastCameraTimestamp = System.currentTimeMillis();
+			lastFrameCount = getFrameCount();
+			
+			if (debuggerListener.isPresent()) {
+				debuggerListener.get().updateFeedData(webcamFPS, Optional.empty());
+			}
+			checkIfMinimumFPS();
 		}
 
 		private void setFPS(double newFPS) {
@@ -540,7 +576,11 @@ public class CameraManager {
 				logger.debug("New FPS read from webcam is very low: {}", newFPS);
 			}
 
-			webcamFPS = newFPS;
+			// This just tells us if it's the first FPS estimate
+			if (getFrameCount() > DEFAULT_FPS)
+				webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
+			else
+				webcamFPS = newFPS;
 			deduplicationProcessor.setThresholdUsingFPS(webcamFPS);
 
 		}
