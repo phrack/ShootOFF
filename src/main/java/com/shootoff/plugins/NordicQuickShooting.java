@@ -18,27 +18,17 @@
 
 package com.shootoff.plugins;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javafx.scene.Group;
-import javafx.scene.paint.Color;
-
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
+import javafx.scene.Group;
+import javafx.scene.paint.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class NordicQuickShooting extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private static final Logger logger = LoggerFactory.getLogger(NordicQuickShooting.class);
@@ -52,14 +42,11 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 	private ScheduledFuture<Void> endRound;
 	private TrainingExerciseBase thisSuper;
-	private static int[] ROUND_TIMES = { 150, 20, 10 };
-	private int roundTimeIndex = 0;
 	private int round = 1;
 	private int shotCount = 0;
 	private int runningScore = 0;
-	private Map<Integer, Integer> sessionScores = new HashMap<Integer, Integer>();
-	private int delayMin = 4;
-	private int delayMax = 8;
+	private int showDelay = 7;
+	private int roundTime = 3;
 	private boolean repeatExercise = true;
 	private boolean coloredRows = false;
 	private boolean testing = false;
@@ -73,14 +60,9 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	}
 
 	private void setInitialValues() {
-		roundTimeIndex = 0;
 		round = 1;
 		shotCount = 0;
 		runningScore = 0;
-
-		for (int time : ROUND_TIMES) {
-			sessionScores.put(time, 0);
-		}
 	}
 
 	@Override
@@ -92,9 +74,8 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	}
 
 	// For testing
-	protected void init(int delayMin, int delayMax) {
-		this.delayMin = delayMin;
-		this.delayMax = delayMax;
+	protected void init(int delay) {
+		this.showDelay = delay;
 
 		testing = true;
 
@@ -106,7 +87,7 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 		super.addShotTimerColumn(ROUND_COL_NAME, ROUND_COL_WIDTH);
 
 		if (!testing) {
-			executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+			executorService.schedule(new SetupWait(), showDelay, TimeUnit.SECONDS);
 		} else {
 			new SetupWait().call();
 		}
@@ -114,18 +95,17 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 
 	@Override
 	public void updatedDelayedStartInterval(int min, int max) {
-		delayMin = min;
-		delayMax = max;
+
 	}
+
 
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() {
 			if (repeatExercise) {
 				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
-				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 				if (!testing) {
-					executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+					executorService.schedule(new StartRound(), START_DELAY, TimeUnit.SECONDS);
 				} else {
 					new StartRound().call();
 				}
@@ -138,7 +118,6 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	private class StartRound implements Callable<Void> {
 		@Override
 		public Void call() {
-			shotCount = 0;
 
 			if (repeatExercise) {
 				if (coloredRows) {
@@ -151,7 +130,7 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 
 				TrainingExerciseBase.playSound("sounds/beep.wav");
 				thisSuper.pauseShotDetection(false);
-				endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
+				endRound = executorService.schedule(new EndRound(), roundTime, TimeUnit.SECONDS);
 			}
 
 			return null;
@@ -161,28 +140,26 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	private class EndRound implements Callable<Void> {
 		@Override
 		public Void call() {
-			if (repeatExercise) {
-				thisSuper.pauseShotDetection(true);
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
 
-				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+				thisSuper.pauseShotDetection(true);
+				TrainingExerciseBase.playSound("sounds/chime.wav");
 
 				if (round < 4) {
 					// Go to next round
-					round++;
 					if (!testing) {
-						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+						executorService.schedule(new StartRound(), showDelay, TimeUnit.SECONDS);
 					} else {
 						new StartRound().call();
 					}
-				} else if (roundTimeIndex < ROUND_TIMES.length - 1) {
-					// Go to round 1 for next time
-					round = 1;
-					roundTimeIndex++;
-					if (!testing) {
-						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
-					} else {
-						new StartRound().call();
+				} else if (round > 4) {
+					if (repeatExercise) {
+						// Go to round 1 for next time
+						round = 1;
+						if (!testing) {
+							executorService.schedule(new StartRound(), showDelay, TimeUnit.SECONDS);
+						} else {
+							new StartRound().call();
+						}
 					}
 				} else {
 					TextToSpeech.say("Event over... Your score is " + runningScore);
@@ -190,7 +167,7 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 					// At this point we end and the user has to hit reset to
 					// start again
 				}
-			}
+
 
 			return null;
 		}
@@ -198,10 +175,14 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("ISSF 25M Standard Pistol", "1.0", "phrack",
-				"This exercise implements the ISSF event describe at: "
-						+ "http://www.pistol.org.au/events/disciplines/issf. You "
-						+ "can use any scored target with this exercise, but use "
+		return new ExerciseMetadata("Nordic Quick Shot event", "1.0", "oluies",
+				"This exercise implements the Nordic Quick Shot event ( Snabbpistol) described at: "
+						+ "http://www.pistolskytteforbundet.se/om-pistolskytte/snabbskjutning.  "
+						+ " In Nordic region and rules (Sweden, Finland, Norway, Denmark) "
+						+ " there is a event type called Snabbpistol earlier \"duel\". "
+						+ "One shoots at a target with 5 shots. "
+						+ "The target is turned away and is shown after 10 seconds, shown 3, gone 7 and so on (5 times)."
+				        + "You can use any scored target with this exercise, but use "
 						+ "the ISSF target for the most authentic experience.");
 	}
 
@@ -216,31 +197,25 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 
 			if (r.tagExists("points")) {
 				hitScore = Integer.parseInt(r.getTag("points"));
-				sessionScores.put(ROUND_TIMES[roundTimeIndex],
-						sessionScores.get(ROUND_TIMES[roundTimeIndex]) + hitScore);
 				runningScore += hitScore;
 			}
 
 			StringBuilder message = new StringBuilder();
 
-			for (Integer time : ROUND_TIMES) {
-				message.append(String.format("%ss score: %d%n", time, sessionScores.get(time)));
-			}
-
 			super.showTextOnFeed(message.toString() + "total score: " + runningScore);
 		}
 
-		String currentRound = String.format("R%d (%ds)", round, ROUND_TIMES[roundTimeIndex]);
+		String currentRound = String.format("R%d (%ds)", round, showDelay);
 		super.setShotTimerColumnText(SCORE_COL_NAME, String.valueOf(hitScore));
 		super.setShotTimerColumnText(ROUND_COL_NAME, currentRound);
 
-		if (shotCount == 5 && !endRound.isDone()) {
+		if (shotCount == 1 && !endRound.isDone()) {
 			try {
 				thisSuper.pauseShotDetection(true);
 				endRound.cancel(true);
 				new EndRound().call();
 			} catch (Exception e) {
-				logger.error("Error ending current ISSF round (five shots detected)", e);
+				logger.error("Error ending current  round", e);
 			}
 		}
 

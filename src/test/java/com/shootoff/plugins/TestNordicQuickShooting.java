@@ -1,20 +1,5 @@
 package com.shootoff.plugins;
 
-import static org.junit.Assert.*;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
@@ -24,13 +9,26 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.control.TableView;
 import javafx.scene.paint.Color;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
 
 public class TestNordicQuickShooting {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -39,7 +37,7 @@ public class TestNordicQuickShooting {
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
 	private List<Group> targetGroups;
-	private ISSFStandardPistol issfExercise;
+	private NordicQuickShooting nqsExercise;
 	private TargetRegion scoredRegion;
 	private int regionScore;
 	
@@ -68,13 +66,13 @@ public class TestNordicQuickShooting {
 		scoredRegion = (TargetRegion)issfTarget.getTargetGroup().getChildren().get(0);
 		regionScore = Integer.parseInt(scoredRegion.getTag("points"));
 		
-		issfExercise = new ISSFStandardPistol(targetGroups);
+		nqsExercise = new NordicQuickShooting(targetGroups);
 		TableView<ShotEntry> shotTimerTable = new TableView<ShotEntry>();
 		ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 		shotEntries.add(new ShotEntry(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
 		shotTimerTable.setItems(shotEntries);
-		issfExercise.init(config, cs, null, shotTimerTable);
-		issfExercise.init(0, 0);
+		nqsExercise.init(config, cs, null, shotTimerTable);
+		nqsExercise.init(0);
 	}
 	
 	@After
@@ -104,75 +102,28 @@ public class TestNordicQuickShooting {
 		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 
-		// 150s round 1-4
-		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
-		
-		// 20s round 1-4
-		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 2, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 3, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 4, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 5, 0, true, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
-		
+
 		// 10s round 1-4
 		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			// (regionScore * 5 * i) = last round's score
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 2, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 3, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 4, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
 			boolean gameOver = i == 3;
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 5, true, gameOver), stringOut.toString("UTF-8"));
 			stringOut.reset();
 		}
@@ -185,31 +136,31 @@ public class TestNordicQuickShooting {
 
 		// 150s round 1-4
 		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			// (regionScore * 5 * i) = last round's score
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 			
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 		}
 		
-		issfExercise.reset(targetGroups);
+		nqsExercise.reset(targetGroups);
 		
-		issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
+		nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
 		// (regionScore * 5 * i) = last round's score
 		assertEquals(String.format("%n") + getScoreString(regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
 		stringOut.reset();

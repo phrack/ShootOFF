@@ -31,6 +31,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import javax.imageio.ImageIO;
 
+import com.shootoff.plugins.*;
 import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,18 +51,6 @@ import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
 import com.shootoff.gui.TimerPool;
-import com.shootoff.plugins.BouncingTargets;
-import com.shootoff.plugins.DuelingTree;
-import com.shootoff.plugins.ISSFStandardPistol;
-import com.shootoff.plugins.ParForScore;
-import com.shootoff.plugins.ParRandomShot;
-import com.shootoff.plugins.ProjectorTrainingExerciseBase;
-import com.shootoff.plugins.RandomShoot;
-import com.shootoff.plugins.ShootDontShoot;
-import com.shootoff.plugins.ShootForScore;
-import com.shootoff.plugins.TimedHolsterDrill;
-import com.shootoff.plugins.TrainingExercise;
-import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
@@ -566,6 +555,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void registerTrainingExercises() {
+		addTrainingExercise(new NordicQuickShooting());
 		addTrainingExercise(new ISSFStandardPistol());
 		addTrainingExercise(new RandomShoot());
 		addTrainingExercise(new ShootForScore());
