@@ -245,7 +245,7 @@ public class CameraManager {
 			return;
 		}
 
-		logger.debug("setDetecting was {} now {}", this.isDetecting, isDetecting);
+		logger.trace("setDetecting was {} now {}", this.isDetecting, isDetecting);
 
 		this.isDetecting = isDetecting;
 	}

@@ -260,7 +260,7 @@ public class TestAutoCalibration {
 	
 	@Test
 	public void testCalibrateHighRes() throws IOException {
-		Boolean result = autoCalibrationVideo("/shotsearcher/highres-autocalibration-1280x720.mp4");
+		Boolean result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
 		assertEquals(true, result);
 	}
 	
