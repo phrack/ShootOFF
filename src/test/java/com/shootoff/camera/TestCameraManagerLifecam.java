@@ -1,11 +1,9 @@
 package com.shootoff.camera;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -41,31 +39,10 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		
 	}
 	
-	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
-		Object processingLock = new Object();
-		File videoFile = new  File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
-		
-		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
-				projectionBounds);
-		
-		mockManager.setCameraManager(cameraManager);
-		
-		try {
-			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		return mockManager.getShots();
-	}
-	
 	@Test
 	public void testLifecamIndoorGreen() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-green.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 432.7, 309.5, 0, 2));
@@ -84,7 +61,8 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 	
 	@Test
 	public void testLifecamOutdoorGreen() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-outdoor-green.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/lifecam-outdoor-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 449.1, 324.5, 0, 2));
@@ -103,7 +81,8 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 	
 	@Test
 	public void testLifecamSafariGreen() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-safari-green.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/lifecam-safari-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 413.0, 265.4, 0, 2));
@@ -121,7 +100,8 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 	
 	@Test
 	public void testLifecamMotion() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-motion-in-room.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/lifecam-motion-in-room.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		// This is noise but we can't get rid of it without really messing up other tests.
 		List<Shot> optionalShots = new ArrayList<Shot>();
@@ -132,7 +112,8 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 	
 	@Test
 	public void testLifecamDuelTree() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-tree-green.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-tree-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 350.4, 275.5, 0, 2));

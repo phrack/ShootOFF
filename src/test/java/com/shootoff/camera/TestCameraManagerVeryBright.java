@@ -2,12 +2,10 @@ package com.shootoff.camera;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -43,24 +41,6 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		
 	}
 	
-	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
-		Object processingLock = new Object();
-		File videoFile = new  File(TestCameraManagerVeryBright.class.getResource(videoPath).getFile());
-		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
-				projectionBounds);
-		
-		try {
-			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return mockManager.getShots();
-	}
-	
 	@Test
 	// VERY BRIGHT
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOff() {
@@ -70,7 +50,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		}
 		
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4", 
-				Optional.empty());
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 251.3, 275.2, 0, 2));
@@ -99,7 +79,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		}
 		
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_on.mp4",
-				Optional.empty());
+				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 378.5, 168.5, 0, 2));
@@ -128,7 +108,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		// Currently missing first shot in top left and last two shots on
 		// bottom right
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_min_contrast_whitebalance_off.mp4",
-				Optional.empty());
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 377.1, 274.7, 0, 2));
@@ -152,7 +132,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 	// VERY BRIGHT
 	public void testMSHD3000HardwareDefaultsAmbientLightNatureScene() {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4", 
-				Optional.empty());
+				Optional.empty(), mockManager, config, sectorStatuses);
 
 		assertEquals(0, shots.size());
 	}

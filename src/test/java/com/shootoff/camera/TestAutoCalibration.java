@@ -3,6 +3,7 @@ package com.shootoff.camera;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -11,18 +12,74 @@ import javafx.geometry.Bounds;
 import javax.imageio.ImageIO;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ErrorCollector;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.shotdetection.ShotDetectionManager;
+import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.gui.controller.MockShootOFFController;
 public class TestAutoCalibration {
 	private AutoCalibrationManager acm;
+	
+	private Configuration config;
+	private MockCanvasManager mockManager;
+	private boolean[][] sectorStatuses;
+	
+	
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
+
 	
 	@Before
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
 		
 		acm = new AutoCalibrationManager(new MockCameraManager());
+		
+		config = new Configuration(new String[0]);
+		config.setDebugMode(false);
+		mockManager = new MockCanvasManager(config, true);
+		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
+		
+		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
+				sectorStatuses[y][x] = true;
+			}
+		}
+	}
+
+
+	
+	private Boolean autoCalibrationVideo(String videoPath) {
+		Object processingLock = new Object();
+		File videoFile = new  File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
+		
+		CameraManager cameraManager;
+		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
+				Optional.empty());
+		
+		mockManager.setCameraManager(cameraManager);
+		
+		cameraManager.setController(new MockShootOFFController());
+				
+		cameraManager.enableAutoCalibration();
+		
+		cameraManager.processVideo();
+		
+		try {
+			synchronized (processingLock) {
+				while (!cameraManager.isVideoProcessed())
+					processingLock.wait();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		return cameraManager.cameraAutoCalibrated;
 	}
 	
 	@Test
@@ -43,7 +100,7 @@ public class TestAutoCalibration {
 		
 		assertEquals(false, acm.getPerspMat() == null);
 		
-		double[][] expectedMatrix = { { 1.03, 0.02, -7.76 }, { -0.00, 1.04, -1.67 }, { 0.00, 0.00, 1.00 } };
+		double[][] expectedMatrix = { { 1.03, 0.02, -10.27 }, { -0.00, 1.04, -2.44 }, { 0.00, 0.00, 1.00 } };
 		
 		for (int i = 0; i < acm.getPerspMat().rows(); i++)
 		{
@@ -77,7 +134,7 @@ public class TestAutoCalibration {
 		
 		assertEquals(false, acm.getPerspMat() == null);
 		
-		double[][] expectedMatrix = { { 1.04, 0.03, -12.03 }, { -0.00, 1.04, -1.90 }, { 0.00, 0.00, 1.00 } };
+		double[][] expectedMatrix = { { 1.04, 0.03, -14.97 }, { -0.00, 1.04, -3.05 }, { 0.00, 0.00, 1.00 } };
 		
 		for (int i = 0; i < acm.getPerspMat().rows(); i++)
 		{
@@ -185,7 +242,7 @@ public class TestAutoCalibration {
 		
 		assertEquals(false, acm.getPerspMat() == null);
 		
-		double[][] expectedMatrix = { { 0.88, -0.34, 86.78 }, { 0.24, 0.80, -61.16 }, { -0.00, -0.00, 1.00 } };
+		double[][] expectedMatrix = { { 0.88, -0.34, 89.04 }, { 0.24, 0.80, -55.49 }, { -0.00, -0.00, 1.00 } };
 		
 		for (int i = 0; i < acm.getPerspMat().rows(); i++)
 		{
@@ -200,6 +257,13 @@ public class TestAutoCalibration {
 
 		assertEquals(true, compareImages(compareFrame, resultFrame));
 	}
+	
+	@Test
+	public void testCalibrateHighRes() throws IOException {
+		Boolean result = autoCalibrationVideo("/shotsearcher/highres-autocalibration-1280x720.mp4");
+		assertEquals(true, result);
+	}
+	
 	
 	/* http://stackoverflow.com/questions/11006394/is-there-a-simple-way-to-compare-bufferedimage-instances */
 	public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {

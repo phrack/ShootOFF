@@ -1,15 +1,19 @@
 package com.shootoff.camera;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+
+import javafx.geometry.Bounds;
 
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.rules.ErrorCollector;
 
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.MockCanvasManager;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -101,4 +105,25 @@ public class ShotDetectionTestor {
 		
 		return Optional.empty();
 	}
+	
+	protected List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds, MockCanvasManager mockManager, Configuration config, boolean[][] sectorStatuses) {
+		Object processingLock = new Object();
+		File videoFile = new  File(TestCameraManagerVeryBright.class.getResource(videoPath).getFile());
+		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
+				projectionBounds);
+		
+		cameraManager.processVideo();
+		
+		try {
+			synchronized (processingLock) {
+				while (!cameraManager.isVideoProcessed())
+					processingLock.wait();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return mockManager.getShots();
+	}
+	
 }

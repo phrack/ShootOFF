@@ -1,11 +1,9 @@
 package com.shootoff.camera;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -41,30 +39,12 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 		
 	}
 	
-	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
-		Object processingLock = new Object();
-		File videoFile = new  File(TestCameraManagerBright.class.getResource(videoPath).getFile());
-		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
-				projectionBounds);
-		
-		mockManager.setCameraManager(cameraManager);
-		
-		try {
-			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return mockManager.getShots();
-	}
 	
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 176.5, 251.3, 0, 2));
@@ -81,7 +61,7 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
-				Optional.empty());
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 473.6, 126.5, 0, 2));
@@ -100,7 +80,8 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 464.1, 23.1, 0, 2));

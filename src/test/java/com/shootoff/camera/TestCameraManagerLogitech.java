@@ -2,12 +2,10 @@ package com.shootoff.camera;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
@@ -42,32 +40,12 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		}
 	}
 	
-	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
-		Object processingLock = new Object();
-		File videoFile = new  File(TestCameraManagerLogitech.class.getResource(videoPath).getFile());
-		
-		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
-				projectionBounds);
-		
-		mockManager.setCameraManager(cameraManager);		
-		
-		try {
-			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		return mockManager.getShots();
-	}
 	
 	@Test
 	public void testLogitechIndoorGreen() {
 		// Missing 3 shots
-		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 517.1, 255.3, 0, 2));
@@ -83,7 +61,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechOutdoorGreen2() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 415.6, 50.7, 0, 2));
@@ -102,7 +81,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	@Test
 	public void testLogitechSafariGreen() {
 		// Missing 1 shot
-		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 488.8, 237.0, 0, 2));
@@ -119,7 +99,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechOutdoorRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 432.6, 74.4, 0, 2));
@@ -138,7 +119,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechSafariRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 440.5, 90.0, 0, 2));
@@ -159,7 +141,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		config.setIgnoreLaserColor(true);
 		config.setIgnoreLaserColorName("green");
 		
-		List<Shot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		assertEquals(0, shots.size());
 	}
@@ -169,7 +152,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		config.setIgnoreLaserColor(true);
 		config.setIgnoreLaserColorName("green");
 		
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 	
 		assertEquals(0, shots.size());
 	}
@@ -177,7 +161,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	@Test
 	public void testChiemCam() {
 		
-		List<Shot> shots = findShots("/shotsearcher/shot-sample-sirt.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/shot-sample-sirt.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 	
 		assertEquals(30, shots.size());
 	}

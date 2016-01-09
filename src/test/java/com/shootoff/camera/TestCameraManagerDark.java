@@ -2,7 +2,6 @@ package com.shootoff.camera;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,31 +42,11 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		}
 	}
 	
-	private List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds) {
-		Object processingLock = new Object();
-		File videoFile = new  File(TestCameraManagerDark.class.getResource(videoPath).getFile());
-		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses, 
-				projectionBounds);
-		
-		mockManager.setCameraManager(cameraManager);
-		
-		try {
-			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return mockManager.getShots();
-	}
-	
 	@Test
 	// DARK
 	public void testNoInterferenceTwoShots() {
-		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/no_interference_two_shots.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 438.7, 132.4, 0, 2));
@@ -79,7 +58,8 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsDarkRoom() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_projector_dark_room.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_projector_dark_room.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 118.8, 143.3, 0, 2));
@@ -100,7 +80,8 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsAmbientLightNatureScene() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_ambient_light_nature_scene.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		assertEquals(0, shots.size());
 	}	
@@ -109,7 +90,8 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	// DARK
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
 		// Misses middle water shot
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 467.2, 120.3, 0, 2));
@@ -128,7 +110,8 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	// DARK
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOffSafari() {
 		// Misses middle shot on bottom row
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4", Optional.empty());
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_off.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 472.8, 62.9, 0, 2));
@@ -154,7 +137,8 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		
 		Bounds projectionBounds = new BoundingBox(109, 104, 379, 297);
 		
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.of(projectionBounds));
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", 
+				Optional.of(projectionBounds), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 176.5, 251.3, 0, 2));
@@ -173,7 +157,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		Bounds projectionBounds = new BoundingBox(131, 77, 390, 265);
 		
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
-				Optional.of(projectionBounds));
+				Optional.of(projectionBounds), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 473.6, 126.5, 0, 2));
