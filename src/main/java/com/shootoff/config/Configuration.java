@@ -313,9 +313,24 @@ public class Configuration {
 		validateConfiguration();
 	}
 
-	public void writeConfigurationFile() throws ConfigurationException, IOException {
+	public boolean writeConfigurationFile() throws ConfigurationException, IOException {
 		validateConfiguration();
 
+		if (!new File(configName).canWrite()) {
+			Alert writeAlert = new Alert(AlertType.ERROR);
+			writeAlert.setTitle("Cannot Persist Preferences");
+			writeAlert.setHeaderText("Configuration File Unwritable!");
+			writeAlert.setResizable(true);
+			writeAlert.setContentText("The file " + configName + " is not writable, thus your preferences"
+					+ " cannot be saved. This is likely the case because you placed ShootOFF in a location"
+					+ " that only the administrator can write to, but ShootOFF is not running as an"
+					+ " administrator. Please either move ShootOFF to a different location or grant write"
+					+ " privileges to the file.");
+			writeAlert.showAndWait();
+
+			return false;
+		}
+		
 		Properties prop = new Properties();
 
 		StringBuilder ipcamList = new StringBuilder();
@@ -376,6 +391,8 @@ public class Configuration {
 		} finally {
 			outputStream.close();
 		}
+		
+		return true;
 	}
 
 	private void parseCmdLine(String[] args) throws ConfigurationException {
