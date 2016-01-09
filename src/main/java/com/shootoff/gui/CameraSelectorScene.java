@@ -36,6 +36,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
@@ -142,13 +143,23 @@ public class CameraSelectorScene extends Stage {
 		ipcamPane.add(new Label("IPCam Name:"), 0, 0);
 		ipcamPane.add(nameTextField, 1, 0);
 
+		final TextField userTextField = new TextField();
+		userTextField.setPromptText("Optional Username");
+		ipcamPane.add(new Label("Username:"), 0, 1);
+		ipcamPane.add(userTextField, 1, 1);
+
+		final PasswordField passwordField = new PasswordField();
+		passwordField.setPromptText("Optional Password");
+		ipcamPane.add(new Label("Password:"), 0, 2);
+		ipcamPane.add(passwordField, 1, 2);
+
 		final TextField urlTextField = new TextField("http://");
-		ipcamPane.add(new Label("IPCam URL:"), 0, 1);
-		ipcamPane.add(urlTextField, 1, 1);
+		ipcamPane.add(new Label("IPCam URL:"), 0, 3);
+		ipcamPane.add(urlTextField, 1, 3);
 
 		final Button okButton = new Button("OK");
 		okButton.setDefaultButton(true);
-		ipcamPane.add(okButton, 1, 2);
+		ipcamPane.add(okButton, 1, 4);
 
 		okButton.setOnAction((e) -> {
 			if (nameTextField.getText().isEmpty() || urlTextField.getText().isEmpty()) {
@@ -161,7 +172,16 @@ public class CameraSelectorScene extends Stage {
 				return;
 			}
 
-			Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText());
+			Optional<String> username = Optional.empty();
+			Optional<String> password = Optional.empty();
+
+			if (!userTextField.getText().isEmpty() || !passwordField.getText().isEmpty()) {
+				username = Optional.of(userTextField.getText());
+				password = Optional.of(passwordField.getText());
+			}
+
+			Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText(), username,
+					password);
 
 			if (cam.isPresent()) {
 				ImageCell.cacheCamera(cam.get());
