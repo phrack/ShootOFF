@@ -33,6 +33,9 @@ public class PixelClusterManager {
 	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager) {
 		points = p;
 		this.shotDetectionManager = shotDetectionManager;
+		
+		 ((ch.qos.logback.classic.Logger)
+		 logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
 	}
 
 	void clusterPixels() {
@@ -114,9 +117,9 @@ public class PixelClusterManager {
 					Pixel nextPixel = next.getKey();
 
 					if (nextPixel.x < minX) minX = nextPixel.x;
-					if (nextPixel.x > maxX) maxX = nextPixel.x;
+					else if (nextPixel.x > maxX) maxX = nextPixel.x;
 					if (nextPixel.y < minY) minY = nextPixel.y;
-					if (nextPixel.y > maxY) maxY = nextPixel.y;
+					else if (nextPixel.y > maxY) maxY = nextPixel.y;
 
 					cluster.add(nextPixel);
 					logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, nextPixel.getConnectedness());
@@ -131,6 +134,27 @@ public class PixelClusterManager {
 			}
 
 			if (cluster.size() < shotDetectionManager.getMinimumShotDimension()) continue;
+			
+			
+			
+			averageX = (averageX / avgconnectedness);
+			averageY = (averageY / avgconnectedness);
+
+			avgconnectedness = avgconnectedness / cluster.size();
+
+			// We scale up the minimum in a linear scale as the cluster size
+			// increases. This is an approximate density
+			double scaled_minimum = MINIMUM_CONNECTEDNESS
+					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
+							* MINIMUM_CONNECTEDNESS_FACTOR);
+
+			logger.debug("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
+					cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
+
+			
+
+			
+			if (avgconnectedness < scaled_minimum) continue;
 
 			int shotWidth = (maxX - minX) + 1;
 			int shotHeight = (maxY - minY) + 1;
@@ -145,26 +169,14 @@ public class PixelClusterManager {
 			double circleArea = Math.PI * Math.pow(r, 2);
 			double density = (double) cluster.size() / circleArea;
 
-			logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
+			logger.debug("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
 					density);
 
 			if (density < MINIMUM_DENSITY) continue;
 
-			averageX = (averageX / avgconnectedness);
-			averageY = (averageY / avgconnectedness);
 
-			avgconnectedness = avgconnectedness / cluster.size();
 
-			// We scale up the minimum in a linear scale as the cluster size
-			// increases. This is an approximate density
-			double scaled_minimum = MINIMUM_CONNECTEDNESS
-					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
-							* MINIMUM_CONNECTEDNESS_FACTOR);
 
-			logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - ratio {} - density {} - {} {}", i,
-					cluster.size(), avgconnectedness, scaled_minimum, shotRatio, density, averageX, averageY);
-
-			if (avgconnectedness < scaled_minimum) continue;
 
 			cluster.centerPixelX = averageX;
 			cluster.centerPixelY = averageY;
