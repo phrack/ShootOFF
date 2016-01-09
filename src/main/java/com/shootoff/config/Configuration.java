@@ -110,6 +110,7 @@ public class Configuration {
 	private boolean isFirstRun = false;
 	private boolean useErrorReporting = true;
 	private Map<String, URL> ipcams = new HashMap<String, URL>();
+	private Map<String, String> ipcamCredentials = new HashMap<String, String>();
 	private Map<String, Camera> webcams = new HashMap<String, Camera>();
 	private int markerRadius = 4;
 	private boolean ignoreLaserColor = false;
@@ -227,9 +228,10 @@ public class Configuration {
 		if (prop.containsKey(IPCAMS_PROP)) {
 			for (String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
 				String[] names = nameString.split("\\|");
-				if (names.length > 1) {
-					registerIpCam(names[0], names[1]);
-					;
+				if (names.length == 2) {
+					registerIpCam(names[0], names[1], Optional.empty(), Optional.empty());
+				} else if (names.length > 2) {
+					registerIpCam(names[0], names[1], Optional.of(names[2]), Optional.of(names[3]));
 				}
 			}
 		}
@@ -346,6 +348,11 @@ public class Configuration {
 			ipcamList.append(entry.getKey());
 			ipcamList.append("|");
 			ipcamList.append(entry.getValue().toString());
+			
+			if (ipcamCredentials.containsKey(entry.getKey())) {
+				ipcamList.append("|");
+				ipcamList.append(ipcamCredentials.get(entry.getKey()));
+			}
 		}
 
 		StringBuilder webcamList = new StringBuilder();
@@ -523,11 +530,17 @@ public class Configuration {
 		return videoPlayers;
 	}
 
-	public Optional<Camera> registerIpCam(String cameraName, String cameraURL) {
+	public Optional<Camera> registerIpCam(String cameraName, String cameraURL, Optional<String> username,
+			Optional<String> password) {
 		try {
 			URL url = new URL(cameraURL);
-			Camera cam = Camera.registerIpCamera(cameraName, url);
+			Camera cam = Camera.registerIpCamera(cameraName, url, username, password);
 			ipcams.put(cameraName, url);
+			
+			if (username.isPresent() && password.isPresent()) {
+				ipcamCredentials.put(cameraName, username.get() + "|" + password.get());
+			}
+			
 			return Optional.of(cam);
 		} catch (MalformedURLException | URISyntaxException ue) {
 			Alert ipcamURLAlert = new Alert(AlertType.ERROR);

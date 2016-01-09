@@ -27,6 +27,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 import org.opencv.core.CvType;
@@ -38,6 +39,7 @@ import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamCompositeDriver;
 import com.github.sarxos.webcam.WebcamException;
 import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
+import com.github.sarxos.webcam.ds.ipcam.IpCamAuth;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
@@ -87,8 +89,9 @@ public class Camera {
 		}
 	}
 
-	public static Camera registerIpCamera(String cameraName, URL cameraURL)
-			throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
+	public static Camera registerIpCamera(String cameraName, URL cameraURL, Optional<String> username,
+			Optional<String> password)
+					throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
 		// These are here because webcam-capture wraps this exception in a
 		// WebcamException if the
 		// URL has a syntax issue. We don't want to use webcam-capture classes
@@ -99,8 +102,14 @@ public class Camera {
 		cameraURL.toURI();
 
 		try {
-			IpCamDevice ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
-
+			IpCamDevice ipcam;
+			if (username.isPresent() && password.isPresent()) {
+				IpCamAuth auth = new IpCamAuth(username.get(), password.get());
+				ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH, auth));
+			} else {
+				ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
+			}
+			
 			// If a camera can't be reached, webcam capture seems to freeze
 			// indefinitely. This is done
 			// to add an artificial timeout.
