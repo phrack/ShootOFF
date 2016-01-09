@@ -387,7 +387,7 @@ public final class ShotDetectionManager {
 			public void perform(Integer sector) {
 				
 				Integer sectorX = (sector % SECTOR_COLUMNS);
-				Integer sectorY = (int) Math.floor((sector / SECTOR_ROWS));
+				Integer sectorY = (int)Math.floor((sector / SECTOR_ROWS));
 
 				Integer startX = subWidth * sectorX;
 				Integer startY = subHeight * sectorY;

@@ -402,10 +402,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (allCamerasFailed) {
 			messageFormat = "Cannot open the webcam %s. It is being "
-					+ "used by another program. This is the only configured camera, thus " + "ShootOFF must close.";
+					+ "used by another program or it is an IPCam with the wrong credentials. This "
+					+ "is the only configured camera, thus ShootOFF must close.";
 		} else {
 			messageFormat = "Cannot open the webcam %s. It is being "
-					+ "used by another program or you have ShootOFF open more than once.";
+					+ "used by another program, it is an IPCam with the wrong credentials, or you "
+					+ "have ShootOFF open more than once.";
 		}
 
 		Optional<String> webcamName = config.getWebcamsUserName(webcam);

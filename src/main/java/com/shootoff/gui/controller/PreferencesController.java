@@ -252,10 +252,11 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		config.setMalfunctions(malfunctionsCheckBox.isSelected());
 		config.setMalfunctionsProbability((float) malfunctionsSlider.getValue());
 
-		config.writeConfigurationFile();
-		preferencesStage.close();
+		if (config.writeConfigurationFile()) {
+			preferencesStage.close();
 
-		if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
+			if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
+		}
 	}
 
 	@FXML
