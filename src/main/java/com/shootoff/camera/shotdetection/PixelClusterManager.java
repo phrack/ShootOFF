@@ -66,7 +66,9 @@ public class PixelClusterManager {
 
 						Pixel nearPoint = new Pixel(rx, ry);
 						if (points.contains(nearPoint)) {
-							logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint),
+							
+							if (logger.isTraceEnabled())
+								logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint),
 									!pixelMapping.containsKey(nearPoint));
 
 							if (pixelMapping.containsKey(nearPoint)
@@ -74,7 +76,7 @@ public class PixelClusterManager {
 								connectedness++;
 							}
 
-							else if (!pixelMapping.containsKey(nearPoint)) {
+							else {
 
 								connectedness++;
 
@@ -122,7 +124,9 @@ public class PixelClusterManager {
 					else if (nextPixel.y > maxY) maxY = nextPixel.y;
 
 					cluster.add(nextPixel);
-					logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, nextPixel.getConnectedness());
+					
+					if (logger.isTraceEnabled())
+						logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, nextPixel.getConnectedness());
 					averageX += nextPixel.x * nextPixel.getConnectedness();
 					averageY += nextPixel.y * nextPixel.getConnectedness();
 
@@ -148,7 +152,7 @@ public class PixelClusterManager {
 					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
 							* MINIMUM_CONNECTEDNESS_FACTOR);
 
-			logger.debug("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
+			logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
 					cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
 
 			
@@ -169,7 +173,7 @@ public class PixelClusterManager {
 			double circleArea = Math.PI * Math.pow(r, 2);
 			double density = (double) cluster.size() / circleArea;
 
-			logger.debug("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
+			logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
 					density);
 
 			if (density < MINIMUM_DENSITY) continue;
