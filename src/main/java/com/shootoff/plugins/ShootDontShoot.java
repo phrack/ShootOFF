@@ -39,8 +39,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private final static String TARGET_COL_NAME = "TARGET";
 	private final static int TARGET_COL_WIDTH = 60;
 
-	private final static int MIN_TARGETS_PER_ROUND = 0;
-	private final static int MAX_TARGETS_PER_ROUND = 4;
+	private final static int MIN_TARGETS_PER_ROUND = 1;
+	private final static int MAX_TARGETS_PER_ROUND = 6;
 	private final static int ROUND_DURATION = 10; // s
 
 	private static final int CORE_POOL_SIZE = 2;
@@ -135,7 +135,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("Shoot Don't Shoot", "1.0", "phrack",
+		return new ExerciseMetadata("Shoot Don't Shoot", "1.1", "phrack",
 				"This exercise randomly puts up targets and gives you 10 seconds "
 						+ "to decide which ones to shoot and which ones to ignore. If "
 						+ "you do not shoot a target you are supposed to shoot, it gets "

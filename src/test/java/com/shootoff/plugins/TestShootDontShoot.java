@@ -71,22 +71,22 @@ public class TestShootDontShoot {
 	public void testAddRemoveTargets() {
 		sds.addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
 		
-		assertEquals(1, shootTargets.size());
+		assertEquals(4, shootTargets.size());
 		
 		sds.removeTarget(shootTargets, (TargetRegion)shootTargets.get(0).getTargetGroup().getChildren().get(0));
 		
-		assertEquals(0, shootTargets.size());
+		assertEquals(3, shootTargets.size());
 	}
 
 	@Test
 	public void testMissGoodOneBad() throws UnsupportedEncodingException {
 		sds.addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
 
-		assertEquals(1, shootTargets.size());
+		assertEquals(4, shootTargets.size());
 		
 		sds.addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
 		
-		assertEquals(2, dontShootTargets.size());
+		assertEquals(5, dontShootTargets.size());
 	
 		// Shoot dont shoot target
 		sds.shotListener(null,
@@ -97,7 +97,7 @@ public class TestShootDontShoot {
 		
 		sds.callNewRound();
 
-		String roundEndText = String.format("You missed %d target.%nmissed targets: %d%nbad hits: %d%n", 
+		String roundEndText = String.format("You missed %d targets.%nmissed targets: %d%nbad hits: %d%n", 
 				shootTargets.size(), shootTargets.size(), 1);
 		
 		assertEquals(roundEndText, stringOut.toString("UTF-8"));
