@@ -607,7 +607,12 @@ public class CanvasManager {
 							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
 							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
 							
-							if (adjustedX < 0 || adjustedY < 0) return Optional.empty();
+							if (adjustedX < 0 || adjustedY < 0) {
+								logger.debug("An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
+										+ " nodeBounds.getMin ({}, {})", adjustedX, adjustedY, shot.getX(), shot.getY(),
+										nodeBounds.getMaxX(), nodeBounds.getMinY());
+								return Optional.empty();
+							}
 
 							if (Math.abs(currentImage.getWidth() - nodeBounds.getWidth()) > .0000001
 									|| Math.abs(currentImage.getHeight() - nodeBounds.getHeight()) > .0000001) {
@@ -637,6 +642,7 @@ public class CanvasManager {
 											adjustedX, adjustedY, shot.getX(), shot.getY(), bufferedResized.getWidth(),
 											bufferedResized.getHeight());
 									logger.error(message, e);
+									return Optional.empty();
 								}
 							} else {
 								if (adjustedX > currentImage.getWidth() || adjustedY > currentImage.getHeight()
