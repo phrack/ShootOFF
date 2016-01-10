@@ -148,7 +148,7 @@ public class PixelClusterManager {
 					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
 							* MINIMUM_CONNECTEDNESS_FACTOR);
 
-			logger.debug("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
+			logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
 					cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
 
 			
@@ -169,7 +169,7 @@ public class PixelClusterManager {
 			double circleArea = Math.PI * Math.pow(r, 2);
 			double density = (double) cluster.size() / circleArea;
 
-			logger.debug("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
+			logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
 					density);
 
 			if (density < MINIMUM_DENSITY) continue;
