@@ -46,7 +46,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	/**
-	 * This is use to make this plugin deterministic for testing.
+	 * This is used to make this plugin deterministic for testing.
 	 * 
 	 * @param rng
 	 *            an rng with a known seed

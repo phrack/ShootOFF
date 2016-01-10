@@ -47,11 +47,14 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
 
 	private boolean continueExercise = true;
+	private boolean testRun = false;
 	private ProjectorTrainingExerciseBase thisSuper;
 	private int missedTargets = 0;
 	private int badHits = 0;
-	private final List<Target> shootTargets = new ArrayList<Target>();
-	private final List<Target> dontShootTargets = new ArrayList<Target>();
+	private List<Target> shootTargets = new ArrayList<Target>();
+	private List<Target> dontShootTargets = new ArrayList<Target>();
+	
+	private Random rng = new Random();
 
 	public ShootDontShoot() {}
 
@@ -60,6 +63,20 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		this.thisSuper = super.getInstance();
 	}
 
+	/**
+	 * This is used to make this plugin deterministic for testing.
+	 * 
+	 * @param rng
+	 *            an rng with a known seed
+	 */
+	protected ShootDontShoot(List<Group> targets, Random rng, List<Target> shootTargets, List<Target> dontShootTargets) {
+		this(targets);
+		this.rng = rng;
+		this.shootTargets = shootTargets;
+		this.dontShootTargets = dontShootTargets;
+	}
+
+	
 	@Override
 	public void init() {
 		super.addShotTimerColumn(TARGET_COL_NAME, TARGET_COL_WIDTH);
@@ -69,6 +86,16 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		super.showTextOnFeed("missed targets: 0\nbad hits: 0");
 
 		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+	}
+	
+	// Used to call NewRound from a test
+	protected void callNewRound() {
+		try {
+			testRun = true;
+			new NewRound().call();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private class NewRound implements Callable<Void> {
@@ -85,19 +112,21 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 				thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", missedTargets, badHits));
 
-				for (Target target : shootTargets)
-					thisSuper.removeTarget(target);
-				shootTargets.clear();
-				for (Target target : dontShootTargets)
-					thisSuper.removeTarget(target);
-				dontShootTargets.clear();
-
-				addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
-				addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
-
+				if (!testRun) {
+					for (Target target : shootTargets)
+						thisSuper.removeTarget(target);
+					shootTargets.clear();
+					for (Target target : dontShootTargets)
+						thisSuper.removeTarget(target);
+					dontShootTargets.clear();
+				
+					addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
+					addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
+				}
+				
 				thisSuper.clearShots();
 
-				if (continueExercise) executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+				if (continueExercise && !testRun) executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 			}
 
 			return null;
@@ -116,19 +145,19 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 						+ "with the red ring, don't shoot the other targets.");
 	}
 
-	private void addTargets(List<Target> targets, String target) {
-		int count = new Random().nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1) + MIN_TARGETS_PER_ROUND;
+	protected void addTargets(List<Target> targets, String target) {
+		int count = rng.nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1) + MIN_TARGETS_PER_ROUND;
 
 		for (int i = 0; i < count; i++) {
-			int x = new Random().nextInt(((int) super.getArenaWidth() - 100) + 1) + 0;
-			int y = new Random().nextInt(((int) super.getArenaHeight() - 100) + 1) + 0;
+			int x = rng.nextInt(((int) super.getArenaWidth() - 100) + 1) + 0;
+			int y = rng.nextInt(((int) super.getArenaHeight() - 100) + 1) + 0;
 
 			Optional<Target> newTarget = super.addTarget(new File(target), x, y);
 			if (newTarget.isPresent()) targets.add(newTarget.get());
 		}
 	}
 
-	private void removeTarget(List<Target> targets, TargetRegion region) {
+	protected void removeTarget(List<Target> targets, TargetRegion region) {
 		Iterator<Target> it = targets.iterator();
 
 		while (it.hasNext()) {
