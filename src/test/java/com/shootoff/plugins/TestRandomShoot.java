@@ -18,20 +18,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
 public class TestRandomShoot {
+	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
@@ -39,14 +42,12 @@ public class TestRandomShoot {
 	
 	@Before
 	public void setUp() throws UnsupportedEncodingException {
-		new JFXPanel(); // Initialize the JFX toolkit
-		
 		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		TextToSpeech.silence(true);
 		TrainingExerciseBase.silence(true);
 		originalOut = System.out;
 		System.setOut(stringOutStream);
-		rng = new Random(15);
+		rng = new Random(15); // Changing this seed will cause tests to fail
 	}
 	
 	@After
@@ -123,4 +124,28 @@ public class TestRandomShoot {
 			stringOut.reset();
 		}
 	}	
+	
+	@Test
+	public void testNoSoundFilesForSubtargetNames() throws IOException {
+		List<Group> targets = new ArrayList<Group>();
+		targets.add(TargetIO.loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile())).get());
+		
+		RandomShoot rs = new RandomShoot(targets, rng);
+		
+		// Make sure initial state makes sense
+		
+		assertEquals(5, rs.getSubtargets().size());
+		
+		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
+		
+		assertEquals("shoot subtarget undefined_region_name_5 then undefined_region_name_3", stringOut.toString("UTF-8").replace(String.format("%n"), ""));
+		stringOut.reset();
+		
+		// Simulate missing a shot
+		
+		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
+		
+		assertEquals(String.format("shoot %s%n", firstSubtarget), stringOut.toString("UTF-8"));
+		stringOut.reset();
+	}
 }

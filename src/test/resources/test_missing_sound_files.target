@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<ellipse centerX="229.500000" centerY="69.500000" radiusX="54.000000" radiusY="52.000000" fill="black">
+		<tag name="subtarget" value="undefined_region_name_1" />
+	</ellipse>
+	<ellipse centerX="229.500000" centerY="261.500000" radiusX="54.000000" radiusY="51.000000" fill="black">
+		<tag name="subtarget" value="undefined_region_name_4" />
+	</ellipse>
+	<ellipse centerX="341.500000" centerY="165.500000" radiusX="55.000000" radiusY="52.000000" fill="black">
+		<tag name="subtarget" value="undefined_region_name_3" />
+	</ellipse>
+	<ellipse centerX="464.500000" centerY="261.500000" radiusX="54.000000" radiusY="51.000000" fill="black">
+		<tag name="subtarget" value="undefined_region_name_5" />
+	</ellipse>
+	<ellipse centerX="464.500000" centerY="70.500000" radiusX="54.000000" radiusY="53.000000" fill="black">
+		<tag name="subtarget" value="undefined_region_name_2" />
+	</ellipse>
+</target>

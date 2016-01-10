@@ -606,6 +606,13 @@ public class CanvasManager {
 
 							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
 							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+							
+							if (adjustedX < 0 || adjustedY < 0) {
+								logger.debug("An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
+										+ " nodeBounds.getMin ({}, {})", adjustedX, adjustedY, shot.getX(), shot.getY(),
+										nodeBounds.getMaxX(), nodeBounds.getMinY());
+								return Optional.empty();
+							}
 
 							if (Math.abs(currentImage.getWidth() - nodeBounds.getWidth()) > .0000001
 									|| Math.abs(currentImage.getHeight() - nodeBounds.getHeight()) > .0000001) {
@@ -621,9 +628,21 @@ public class CanvasManager {
 								g2d.drawImage(tmp, 0, 0, null);
 								g2d.dispose();
 
-								if (adjustedX > bufferedResized.getWidth() || adjustedY > bufferedResized.getHeight()
-										|| bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
-									continue;
+								try {
+									if (adjustedX > bufferedResized.getWidth()
+											|| adjustedY > bufferedResized.getHeight()
+											|| bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
+										continue;
+									}
+								} catch (ArrayIndexOutOfBoundsException e) {
+									String message = String.format(
+											"Index out of bounds while trying to find adjusted coordinate (%d, %d) "
+													+ "from original (%.2f, %.2f) in adjusted BufferedImage with width = %d, "
+													+ "height = %d",
+											adjustedX, adjustedY, shot.getX(), shot.getY(), bufferedResized.getWidth(),
+											bufferedResized.getHeight());
+									logger.error(message, e);
+									return Optional.empty();
 								}
 							} else {
 								if (adjustedX > currentImage.getWidth() || adjustedY > currentImage.getHeight()
