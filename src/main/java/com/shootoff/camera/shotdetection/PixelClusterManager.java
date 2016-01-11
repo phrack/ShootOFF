@@ -23,7 +23,7 @@ public class PixelClusterManager {
 	private ShotDetectionManager shotDetectionManager;
 
 	private final static double MINIMUM_CONNECTEDNESS = 3.66f;
-	private final static double MAXIMUM_CONNECTEDNESS_SCALE = 7f;
+	private final static double MAXIMUM_CONNECTEDNESS_SCALE = 6f;
 	
 	private final static double MINIMUM_CONNECTEDNESS_FACTOR = .018f;
 
