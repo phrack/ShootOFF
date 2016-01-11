@@ -92,4 +92,20 @@ public class TestCourseIO {
 
 		if (!tempXMLCourse.delete()) System.err.println("Failed to delete " + tempXMLCourse.getPath());
 	}
+	
+	@Test
+	public void testCourseDoesntExist() {
+		File XMLCourse = new File("does_not_exist.course");
+		Optional<Course> course = CourseIO.loadCourse(arenaController, XMLCourse);
+		
+		assertEquals(Optional.empty(), course);
+	}
+	
+	@Test
+	public void testUnknownCourseExtension() {
+		File XMLCourse = new File("does_not_exist.watisthis");
+		Optional<Course> course = CourseIO.loadCourse(arenaController, XMLCourse);
+		
+		assertEquals(Optional.empty(), course);
+	}
 }

@@ -574,7 +574,10 @@ public class Configuration {
 	}
 
 	public void unregisterIpCam(String cameraName) {
-		if (Camera.unregisterIpCamera(cameraName)) ipcams.remove(cameraName);
+		if (Camera.unregisterIpCamera(cameraName)) {
+			ipcams.remove(cameraName);
+			ipcamCredentials.remove(cameraName);
+		}
 	}
 
 	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
