@@ -50,7 +50,8 @@ public final class ShotDetectionManager {
 
 	private final static int MOTION_WARNING_FRAMECOUNT = 30;
 	private final static int MOTION_WARNING_AVG_THRESHOLD = 100;
-	private final static int MOTION_WARNING_THRESHOLD_PIXELS = 300;
+	private final static int MOTION_WARNING_THRESHOLD_PIXELS = 600;
+	private final static int MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG = 600;
 
 	// Individual pixel threshold
 	private final static int EXCESSIVE_BRIGHTNESS_THRESHOLD = 245;
@@ -78,7 +79,7 @@ public final class ShotDetectionManager {
 
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config, CanvasManager canvasManager) {
 		//((ch.qos.logback.classic.Logger)
-		// logger).setLevel(ch.qos.logback.classic.Level.TRACE);
+		//logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
 
 		this.canvasManager = canvasManager;
 		this.cameraManager = cameraManager;
@@ -261,10 +262,12 @@ public final class ShotDetectionManager {
 
 		ArrayList<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingCopy,
 				(detectShots && filtersInitialized));
+		
+		int thresholdPixelsSize = thresholdPixels.size();
 
 		if (logger.isTraceEnabled()) {
-			if (thresholdPixels.size() >= 4) logger.debug("thresholdPixels {} getMinimumShotDimension {}",
-					thresholdPixels.size(), getMinimumShotDimension());
+			if (thresholdPixelsSize >= 1) logger.trace("thresholdPixels {} getMinimumShotDimension {}",
+					thresholdPixelsSize, getMinimumShotDimension());
 
 			for (Pixel pixel : thresholdPixels) {
 				logger.trace("thresholdPixel {} {} - from array {} from pixel cur {} avg {}", pixel.x, pixel.y,
@@ -273,9 +276,12 @@ public final class ShotDetectionManager {
 		}
 
 		if (checkIfInitialized()) filtersInitialized = true;
+		
+		
+		//if (thresholdPixelsSize >= 1) logger.debug("detectShots {} filtersInitialized {}", detectShots, filtersInitialized);
 
 		if (detectShots && filtersInitialized) {
-			updateAvgThresholdPixels(thresholdPixels.size());
+			updateAvgThresholdPixels(thresholdPixelsSize);
 
 			updateAvgBrightPixels(brightPixels);
 
@@ -288,19 +294,23 @@ public final class ShotDetectionManager {
 			// early in the feed
 			// But we still need to skip detection on those frames
 			// That's why this is in two ifs
-			if (isExcessiveMotion(thresholdPixels.size())) {
-				if (shouldShowMotionWarning(thresholdPixels.size())) cameraManager.showMotionWarning();
+			if (isExcessiveMotion(thresholdPixelsSize)) {
+				logger.trace("excessiveMotion {}", thresholdPixelsSize);
+				
+				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
 				for (Pixel pixel : thresholdPixels) {
 					drawOnCurrentFrame(pixel.x, pixel.y, 0x0000FF);
 				}
 			}
 
-			else if (thresholdPixels.size() >= getMinimumShotDimension()) {
+			else if (thresholdPixelsSize >= getMinimumShotDimension()) {
 
-				logger.trace("thresholdPixels {}", thresholdPixels.size());
+				logger.trace("thresholdPixels {}", thresholdPixelsSize);
 
 				ArrayList<PixelCluster> clusters = clusterPixels(thresholdPixels);
+				
+				logger.trace("clusters {}", clusters.size());
 
 				detectShots(workingCopy, clusters);
 			}
@@ -331,7 +341,8 @@ public final class ShotDetectionManager {
 
 	private boolean isExcessiveMotion(int thresholdPixels) {
 
-		if (thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS) return true;
+		if (thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS
+				|| avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD) return true;
 
 		return false;
 	}
@@ -391,9 +402,7 @@ public final class ShotDetectionManager {
 
 				Integer startX = subWidth * sectorX;
 				Integer startY = subHeight * sectorY;
-								
-				logger.trace("sector {} - {} - {} {} - {} {}", sector, sectorstatuses[sectorY][sectorX], sectorX, sectorY, startX, startY);
-
+				
 				if (!sectorstatuses[sectorY][sectorX]) return;
 				
 				for (Integer y = startY; y < startY + subHeight; y++) {
@@ -425,7 +434,7 @@ public final class ShotDetectionManager {
 			avgThresholdPixels = Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
 			avgThresholdPixels = (((cameraManager.getFPS() - 1) * avgThresholdPixels)
-					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG)) / cameraManager.getFPS();
+					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / cameraManager.getFPS();
 
 	}
 

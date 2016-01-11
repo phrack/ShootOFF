@@ -23,19 +23,24 @@ public class PixelClusterManager {
 	private ShotDetectionManager shotDetectionManager;
 
 	private final static double MINIMUM_CONNECTEDNESS = 3.66f;
+	private final static double MAXIMUM_CONNECTEDNESS_SCALE = 7f;
+	
 	private final static double MINIMUM_CONNECTEDNESS_FACTOR = .018f;
 
-	private final static double MINIMUM_DENSITY = .74f;
+	private final static double MINIMUM_DENSITY = .69f;
 
 	private final static double MINIMUM_SHOT_RATIO = .5f;
 	private final static double MAXIMUM_SHOT_RATIO = 1.5f;
+	
+	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
+	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
 
 	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager) {
 		points = p;
 		this.shotDetectionManager = shotDetectionManager;
 		
-		 //((ch.qos.logback.classic.Logger)
-		 //logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+		 ((ch.qos.logback.classic.Logger)
+		 logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
 	}
 
 	void clusterPixels() {
@@ -48,6 +53,11 @@ public class PixelClusterManager {
 				mustExamine.add(point);
 				pixelMapping.put(point, numberOfRegions);
 			}
+			if (numberOfRegions > EXCESSIVE_PIXEL_REGION_COUNT && points.size() > EXCESSIVE_PIXEL_CUTOFF)
+				break;
+			
+
+			
 			while (mustExamine.size() > 0) {
 				Pixel thisPoint = mustExamine.pop();
 
@@ -66,32 +76,16 @@ public class PixelClusterManager {
 
 						Pixel nearPoint = new Pixel(rx, ry);
 						if (points.contains(nearPoint)) {
-							
-							if (logger.isTraceEnabled())
-								logger.trace("{} {} - {} - {} {}", rx, ry, numberOfRegions, points.contains(nearPoint),
-									!pixelMapping.containsKey(nearPoint));
-
-							if (pixelMapping.containsKey(nearPoint)
-									&& pixelMapping.get(nearPoint).intValue() == numberOfRegions) {
-								connectedness++;
-							}
-
-							else {
-
-								connectedness++;
-
-								nearPoint = points.get(points.indexOf(nearPoint));
+							if (!pixelMapping.containsKey(nearPoint)) {
 
 								mustExamine.push(nearPoint);
 								pixelMapping.put(nearPoint, numberOfRegions);
 
 							}
+							
+							connectedness++;
 						}
-
 					}
-
-				logger.trace("{} {} - {}", thisPoint.x, thisPoint.y, connectedness);
-
 				thisPoint.setConnectedness(connectedness);
 			}
 		}
@@ -125,12 +119,14 @@ public class PixelClusterManager {
 
 					cluster.add(nextPixel);
 					
+					
+					int connectedness = nextPixel.getConnectedness();
 					if (logger.isTraceEnabled())
-						logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, nextPixel.getConnectedness());
-					averageX += nextPixel.x * nextPixel.getConnectedness();
-					averageY += nextPixel.y * nextPixel.getConnectedness();
+						logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, connectedness);
+					averageX += nextPixel.x * connectedness;
+					averageY += nextPixel.y * connectedness;
 
-					avgconnectedness += nextPixel.getConnectedness();
+					avgconnectedness += connectedness;
 
 					it.remove();
 				}
@@ -140,7 +136,6 @@ public class PixelClusterManager {
 			if (cluster.size() < shotDetectionManager.getMinimumShotDimension()) continue;
 			
 			
-			
 			averageX = (averageX / avgconnectedness);
 			averageY = (averageY / avgconnectedness);
 
@@ -148,15 +143,12 @@ public class PixelClusterManager {
 
 			// We scale up the minimum in a linear scale as the cluster size
 			// increases. This is an approximate density
-			double scaled_minimum = MINIMUM_CONNECTEDNESS
+			double scaled_minimum = Math.min(MINIMUM_CONNECTEDNESS
 					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
-							* MINIMUM_CONNECTEDNESS_FACTOR);
+							* MINIMUM_CONNECTEDNESS_FACTOR), MAXIMUM_CONNECTEDNESS_SCALE);
 
 			logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
 					cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
-
-			
-
 			
 			if (avgconnectedness < scaled_minimum) continue;
 
@@ -177,10 +169,6 @@ public class PixelClusterManager {
 					density);
 
 			if (density < MINIMUM_DENSITY) continue;
-
-
-
-
 
 			cluster.centerPixelX = averageX;
 			cluster.centerPixelY = averageY;

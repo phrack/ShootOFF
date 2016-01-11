@@ -49,8 +49,8 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.RED, 438.7, 132.4, 0, 2));
-		optionalShots.add(new Shot(Color.RED, 626, 168.5, 0, 2));
+		optionalShots.add(new Shot(Color.RED, 431.7, 132.4, 0, 2));
+		optionalShots.add(new Shot(Color.RED, 633.0, 159.0, 0, 4));
 		
 		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
 	}
@@ -89,7 +89,6 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 	@Test
 	// DARK
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOffSafari() {
-		// Misses middle water shot
 		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_off.mp4", 
 				Optional.empty(), mockManager, config, sectorStatuses);
 		
@@ -102,6 +101,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 503.6, 218.1, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 323.2, 311.0, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 194.4, 314.9, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 372.0, 222.3, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
