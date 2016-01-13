@@ -1044,7 +1044,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void initDefaultBackgrounds() {
 		addDefaultBackground("Hickok45 Autumn", "/arena/backgrounds/hickok45_autumn.gif");
 		addDefaultBackground("Hickok45 Summer", "/arena/backgrounds/hickok45_summer.gif");
-		addDefaultBackground("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
 		addDefaultBackground("Indoor Range", "/arena/backgrounds/indoor_range.gif");
 		addDefaultBackground("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
 		addDefaultBackground("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
