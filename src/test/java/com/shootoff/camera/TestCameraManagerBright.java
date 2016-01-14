@@ -97,4 +97,20 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 		
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
+	
+	@Test
+	// BRIGHT
+	public void testGreen45inch() {
+		List<Shot> shots = findShots("/shotsearcher/45in-green.mp4", 
+				Optional.empty(), mockManager, config, sectorStatuses);
+
+		List<Shot> requiredShots = new ArrayList<Shot>();
+		requiredShots.add(new Shot(Color.GREEN, 334.0, 164.9, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 334.1, 166.5, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 332.4, 165.5, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 325.0, 161.5, 0, 2));
+		
+		
+		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
+	}
 }

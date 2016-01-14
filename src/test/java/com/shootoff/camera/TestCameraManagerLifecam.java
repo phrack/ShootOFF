@@ -105,7 +105,9 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		
 		// This is noise but we can't get rid of it without really messing up other tests.
 		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.GREEN, 308.4, 394.6, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 440.9, 350.7, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 373.5, 390.1, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 354.5, 387.6, 0, 2));
 
 		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
 	}
