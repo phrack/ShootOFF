@@ -125,6 +125,14 @@ public class Target {
 	public void setPosition(double x, double y) {
 		targetGroup.setLayoutX(x);
 		targetGroup.setLayoutY(y);
+		
+		if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
+			config.get()
+					.getSessionRecorder()
+					.get()
+					.recordTargetMoved(cameraName, this, (int) targetGroup.getLayoutX(),
+							(int) targetGroup.getLayoutY());
+		}
 	}
 
 	public Point2D getPosition() {

@@ -18,6 +18,7 @@
 
 package com.shootoff.session;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,8 +88,7 @@ public class SessionRecorder {
 
 			recordTargetAdded(cameraName, target);
 			Point2D p = target.getPosition();
-			recordTargetMoved(cameraName, target, (int) p.getX(),
-					(int) p.getY());
+			recordTargetMoved(cameraName, target, (int) p.getX(), (int) p.getY());
 			Dimension2D d = target.getDimension();
 			recordTargetResized(cameraName, target, d.getWidth(), d.getHeight());
 
@@ -96,22 +96,20 @@ public class SessionRecorder {
 		}
 	}
 
-	public void recordShot(String cameraName, Shot shot, boolean isMalfunction,
-			boolean isReload, Optional<Target> target,
-			Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+	public void recordShot(String cameraName, Shot shot, boolean isMalfunction, boolean isReload,
+			Optional<Target> target, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		Optional<Integer> targetIndex = Optional.empty();
 
 		if (target.isPresent()) {
 			targetIndex = Optional.of(target.get().getTargetIndex());
-			if (!ignoreTargetCheck)
-				checkTarget(cameraName, target.get());
+			if (!ignoreTargetCheck) checkTarget(cameraName, target.get());
 		}
 
 		long timestamp = System.currentTimeMillis() - startTime;
 
 		getCameraEvents(cameraName).add(
-				new ShotEvent(cameraName, timestamp, shot, isMalfunction,
-						isReload, targetIndex, hitRegionIndex, videoString));
+				new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex, hitRegionIndex,
+						videoString));
 	}
 
 	public void recordTargetAdded(String cameraName, Target target) {
@@ -121,80 +119,75 @@ public class SessionRecorder {
 
 		seenTargets.get(cameraName).add(target);
 
+		String targetName;
+
+		if (target.getTargetFile().isAbsolute()) {
+			targetName = target.getTargetFile().getPath()
+					.replace(System.getProperty("shootoff.home") + File.separator + "targets" + File.separator, "");
+		} else {
+			targetName = target.getTargetFile().getPath().replace("targets" + File.separator, "");
+		}
+
 		getCameraEvents(cameraName).add(
-				new TargetAddedEvent(cameraName, System.currentTimeMillis()
-						- startTime, target.getTargetFile().getName()));
+				new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
 	}
 
 	public void recordTargetRemoved(String cameraName, Target target) {
-		if (!ignoreTargetCheck)
-			checkTarget(cameraName, target);
+		if (!ignoreTargetCheck) checkTarget(cameraName, target);
 
 		getCameraEvents(cameraName).add(
-				new TargetRemovedEvent(cameraName, System.currentTimeMillis()
-						- startTime, target.getTargetIndex()));
+				new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex()));
 	}
 
-	private void collapseTargetEvents(String cameraName, EventType type,
-			Target target) {
-		ListIterator<Event> it = getCameraEvents(cameraName).listIterator(
-				getCameraEvents(cameraName).size());
+	private void collapseTargetEvents(String cameraName, EventType type, Target target) {
+		ListIterator<Event> it = getCameraEvents(cameraName).listIterator(getCameraEvents(cameraName).size());
 
 		while (it.hasPrevious()) {
 			Event e = it.previous();
 
-			if (e.getType() != EventType.TARGET_RESIZED
-					&& e.getType() != EventType.TARGET_MOVED) {
+			if (e.getType() != EventType.TARGET_RESIZED && e.getType() != EventType.TARGET_MOVED) {
 				break;
 			}
 
 			if (e.getType() == type) {
 				if (type == EventType.TARGET_RESIZED
-						&& ((TargetResizedEvent) e).getTargetIndex() == target
-								.getTargetIndex()) {
+						&& ((TargetResizedEvent) e).getTargetIndex() == target.getTargetIndex()) {
 					it.remove();
 				} else if (type == EventType.TARGET_MOVED
-						&& ((TargetMovedEvent) e).getTargetIndex() == target
-								.getTargetIndex()) {
+						&& ((TargetMovedEvent) e).getTargetIndex() == target.getTargetIndex()) {
 					it.remove();
 				}
 			}
 		}
 	}
 
-	public void recordTargetResized(String cameraName, Target target,
-			double newWidth, double newHeight) {
-		if (!ignoreTargetCheck)
-			checkTarget(cameraName, target);
+	public void recordTargetResized(String cameraName, Target target, double newWidth, double newHeight) {
+		if (!ignoreTargetCheck) checkTarget(cameraName, target);
 
 		// Remove all resize events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, target);
 
 		getCameraEvents(cameraName).add(
-				new TargetResizedEvent(cameraName, System.currentTimeMillis()
-						- startTime, target.getTargetIndex(), newWidth,
-						newHeight));
+				new TargetResizedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex(),
+						newWidth, newHeight));
 	}
 
-	public void recordTargetMoved(String cameraName, Target target, int newX,
-			int newY) {
-		if (!ignoreTargetCheck)
-			checkTarget(cameraName, target);
+	public void recordTargetMoved(String cameraName, Target target, int newX, int newY) {
+		if (!ignoreTargetCheck) checkTarget(cameraName, target);
 
 		// Remove all move events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_MOVED, target);
 
 		getCameraEvents(cameraName).add(
-				new TargetMovedEvent(cameraName, System.currentTimeMillis()
-						- startTime, target.getTargetIndex(), newX, newY));
+				new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex(), newX,
+						newY));
 	}
 
 	public void recordExerciseFeedMessage(String message) {
 		// Add an event for this message to each camera
 		for (String cameraName : seenTargets.keySet()) {
 			getCameraEvents(cameraName).add(
-					new ExerciseFeedMessageEvent(cameraName, System
-							.currentTimeMillis() - startTime, message));
+					new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
 		}
 	}
 }
