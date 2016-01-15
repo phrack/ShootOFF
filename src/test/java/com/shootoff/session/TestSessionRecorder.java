@@ -78,7 +78,7 @@ public class TestSessionRecorder {
 		assertEquals(Color.RED, ((ShotEvent)events.get(SHOT_INDEX)).getShot().getColor());
 		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).isMalfunction());
 		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).isReload());
-		assertEquals(0, ((ShotEvent)events.get(SHOT_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(targetIndex1, ((ShotEvent)events.get(SHOT_INDEX)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(SHOT_INDEX)).getHitRegionIndex().get().intValue());
 		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).getVideoString().isPresent());
 		
