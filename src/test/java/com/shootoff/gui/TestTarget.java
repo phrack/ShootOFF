@@ -232,7 +232,7 @@ public class TestTarget {
                 KeyCode.LEFT, true, false, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), leftArrowEvent);
 		
-		assertEquals(oldWidth - Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldWidth + Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight, pepperPopper.getDimension().getHeight(), .001);
 	}
 	
@@ -245,7 +245,7 @@ public class TestTarget {
                 KeyCode.RIGHT, true, false, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), rightArrowEvent);
 		
-		assertEquals(oldWidth + Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldWidth - Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight, pepperPopper.getDimension().getHeight(), .001);
 	}
 	
@@ -259,7 +259,7 @@ public class TestTarget {
 		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
 		
 		assertEquals(oldWidth, pepperPopper.getDimension().getWidth(), .001);
-		assertEquals(oldHeight - Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+		assertEquals(oldHeight + Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 	
 	@Test
@@ -272,6 +272,32 @@ public class TestTarget {
 		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
 		
 		assertEquals(oldWidth, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight - Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+	}
+	
+	@Test
+	public void testUpArrowKeyProportionalResizeTarget() {
+		double oldWidth = pepperPopper.getDimension().getWidth();
+		double oldHeight = pepperPopper.getDimension().getHeight();
+		
+		KeyEvent upArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "up", "up",
+                KeyCode.UP, true, true, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
+		
+		assertEquals(oldWidth + Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight + Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+	}
+	
+	@Test
+	public void testDownArrowKeyProportionalResizeTarget() {
+		double oldWidth = pepperPopper.getDimension().getWidth();
+		double oldHeight = pepperPopper.getDimension().getHeight();
+		
+		KeyEvent downArrowEvent = new KeyEvent(null, pepperPopper.getTargetGroup(), KeyEvent.KEY_PRESSED, "down", "down",
+                KeyCode.DOWN, true, true, false, false);
+		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
+		
+		assertEquals(oldWidth - Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight - Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 }

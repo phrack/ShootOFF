@@ -24,11 +24,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+
+
 import com.shootoff.config.Configuration;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.SpriteAnimation;
+
+
 
 import javafx.animation.Animation.Status;
 import javafx.geometry.Dimension2D;
@@ -36,6 +40,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -457,10 +463,10 @@ public class Target {
 				break;
 
 			case LEFT: {
-				double newWidth = currentWidth + SCALE_DELTA;
-				double scaleDelta = (newWidth - currentWidth) / currentWidth;
-
 				if (event.isShiftDown()) {
+					double newWidth = currentWidth - SCALE_DELTA;
+					double scaleDelta = (newWidth - currentWidth) / currentWidth;
+					
 					targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
 
 					if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
@@ -486,10 +492,10 @@ public class Target {
 				break;
 
 			case RIGHT: {
-				double newWidth = currentWidth - SCALE_DELTA;
-				double scaleDelta = (newWidth - currentWidth) / currentWidth;
-
 				if (event.isShiftDown()) {
+					double newWidth = currentWidth + SCALE_DELTA;
+					double scaleDelta = (newWidth - currentWidth) / currentWidth;
+					
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + (SCALE_DELTA / 2) >= 0
 							&& targetGroup.getBoundsInParent().getMaxX() + (SCALE_DELTA / 2) <= config.get()
 									.getDisplayWidth())) {
@@ -519,16 +525,23 @@ public class Target {
 				break;
 
 			case UP: {
-				double newHeight = currentHeight + SCALE_DELTA;
-				double scaleDelta = (newHeight - currentHeight) / currentHeight;
-
 				if (event.isShiftDown()) {
+					double newHeight = currentHeight - SCALE_DELTA;
+					double scaleDelta = (newHeight - currentHeight) / currentHeight;
+					
 					targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 
 					if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 						config.get().getSessionRecorder().get().recordTargetResized(cameraName, this,
 								targetGroup.getBoundsInParent().getWidth(),
 								targetGroup.getBoundsInParent().getHeight());
+					}
+
+					// Scale up proportionally if ctrl is down
+					if (event.isControlDown()) {
+						KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, true, true, false, false);
+					
+						targetGroup.fireEvent(ke);
 					}
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() - MOVEMENT_DELTA >= 0
@@ -548,10 +561,10 @@ public class Target {
 				break;
 
 			case DOWN: {
-				double newHeight = currentHeight - SCALE_DELTA;
-				double scaleDelta = (newHeight - currentHeight) / currentHeight;
-
 				if (event.isShiftDown()) {
+					double newHeight = currentHeight + SCALE_DELTA;
+					double scaleDelta = (newHeight - currentHeight) / currentHeight;
+					
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + (SCALE_DELTA / 2) >= 0
 							&& targetGroup.getBoundsInParent().getMaxY() + (SCALE_DELTA / 2) <= config.get()
 									.getDisplayHeight())) {
@@ -562,6 +575,13 @@ public class Target {
 						config.get().getSessionRecorder().get().recordTargetResized(cameraName, this,
 								targetGroup.getBoundsInParent().getWidth(),
 								targetGroup.getBoundsInParent().getHeight());
+					}
+					
+					// Scale down proportionally if ctrl is down
+					if (event.isControlDown()) {
+						KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.RIGHT, true, true, false, false);
+					
+						targetGroup.fireEvent(ke);
 					}
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + MOVEMENT_DELTA >= 0
