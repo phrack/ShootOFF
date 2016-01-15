@@ -128,7 +128,7 @@ public class XMLCourseReader {
 
 				if (targetNodes.isPresent()) {
 					Target t = new Target(targetFile, targetNodes.get(), arenaController.getConfiguration(),
-							arenaController.getCanvasManager(), true, targets.size());
+							arenaController.getCanvasManager(), true);
 
 					t.setPosition(Double.parseDouble(attributes.getValue("x")),
 							Double.parseDouble(attributes.getValue("y")));

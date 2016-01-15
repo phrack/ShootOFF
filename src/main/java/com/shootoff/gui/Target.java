@@ -58,7 +58,6 @@ public class Target {
 	private final Optional<List<Target>> targets;
 	private final boolean userDeletable;
 	private final String cameraName;
-	private final int targetIndex;
 	private boolean keepInBounds = false;
 	private boolean move;
 	private boolean resize;
@@ -70,8 +69,7 @@ public class Target {
 	private double x;
 	private double y;
 
-	public Target(File targetFile, Group target, Configuration config, CanvasManager parent, boolean userDeletable,
-			int targetIndex) {
+	public Target(File targetFile, Group target, Configuration config, CanvasManager parent, boolean userDeletable) {
 		this.targetFile = targetFile;
 		this.targetGroup = target;
 		this.config = Optional.of(config);
@@ -79,7 +77,6 @@ public class Target {
 		this.targets = Optional.empty();
 		this.userDeletable = userDeletable;
 		this.cameraName = parent.getCameraName();
-		this.targetIndex = targetIndex;
 
 		targetGroup.setOnMouseClicked((event) -> {
 			parent.toggleTargetSelection(Optional.of(targetGroup));
@@ -101,7 +98,6 @@ public class Target {
 		this.targets = Optional.of(targets);
 		this.userDeletable = false;
 		this.cameraName = null;
-		this.targetIndex = 0;
 
 		mousePressed();
 		mouseDragged();
@@ -119,7 +115,10 @@ public class Target {
 	}
 
 	public int getTargetIndex() {
-		return targetIndex;
+		if (parent.isPresent())
+			return parent.get().getTargets().indexOf(this);
+		else
+			return -1;
 	}
 
 	public void setPosition(double x, double y) {

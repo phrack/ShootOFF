@@ -55,7 +55,7 @@ public class TestCourseIO {
 
 		File targetFile = new File(targetName);
 		Target target = new Target(targetFile, TargetIO.loadTarget(targetFile).get(), config,
-				new MockCanvasManager(config), false, 0);
+				new MockCanvasManager(config), false);
 		target.setPosition(targetX, targetY);
 		target.setDimensions(targetWidth, targetHeight);
 

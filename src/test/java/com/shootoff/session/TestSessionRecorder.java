@@ -23,10 +23,9 @@ public class TestSessionRecorder {
 	private String cameraName ;
 	private Shot shot;
 	private String targetName1;
-	private int targetIndex1;
 	private Target target1;
+	private int targetIndex1;
 	private String targetName2;
-	private int targetIndex2;
 	private Target target2;
 	private int hitRegionIndex;
 	private String exerciseMessage;
@@ -34,21 +33,21 @@ public class TestSessionRecorder {
 	@Before
 	public void setUp() throws ConfigurationException {
 		Configuration config = new Configuration(new String[0]);
-		
-		sessionRecorder = new SessionRecorder(); 
+		MockCanvasManager canvasManager = new MockCanvasManager(config);
+
+		sessionRecorder = new SessionRecorder();
 		cameraName = "Default";
 		shot = new Shot(Color.RED, 0, 0, 0, 2);
-		
+
 		targetName1 = "bullseye.target";
-		targetIndex1 = 1;
-		target1 = new Target(new File(targetName1), new Group(), config, 
-				new MockCanvasManager(config), false, targetIndex1);
-		
+		target1 = new Target(new File(targetName1), new Group(), config, canvasManager, false);
+
 		targetName2 = "shoot_dont_shoot" + File.separator + " shoot.target";
-		targetIndex2 = 2;
-		target2 = new Target(new File(targetName2), new Group(), config, 
-				new MockCanvasManager(config), false, targetIndex2);
-		
+		target2 = new Target(new File(targetName2), new Group(), config, canvasManager, false);
+
+		canvasManager.addTarget(target1);
+		canvasManager.addTarget(target2);
+		targetIndex1 = target1.getTargetIndex();
 
 		hitRegionIndex = 0;
 		exerciseMessage = "This is a test";
@@ -79,7 +78,7 @@ public class TestSessionRecorder {
 		assertEquals(Color.RED, ((ShotEvent)events.get(SHOT_INDEX)).getShot().getColor());
 		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).isMalfunction());
 		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).isReload());
-		assertEquals(targetIndex1, ((ShotEvent)events.get(SHOT_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(0, ((ShotEvent)events.get(SHOT_INDEX)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(SHOT_INDEX)).getHitRegionIndex().get().intValue());
 		assertFalse(((ShotEvent)events.get(SHOT_INDEX)).getVideoString().isPresent());
 		

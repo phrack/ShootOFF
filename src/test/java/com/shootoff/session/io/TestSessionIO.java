@@ -34,7 +34,6 @@ public class TestSessionIO {
 	private Shot redShot;
 	private Shot greenShot;
 	private String targetName;
-	private int targetIndex;
 	private int hitRegionIndex;
 	private String exerciseMessage;
 	
@@ -50,12 +49,13 @@ public class TestSessionIO {
 		redShot = new Shot(Color.RED, 10, 11, 3, 2);
 		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
-		targetIndex = 1;
 		exerciseMessage = "This is a\n\t test";
 		
 		Configuration config = new Configuration(new String[0]);
+		MockCanvasManager canvasManager = new MockCanvasManager(config);
 		Target target = new Target(new File(targetName), new Group(), 
-				config, new MockCanvasManager(config), false, targetIndex);
+				config, canvasManager, false);
+		canvasManager.addTarget(target);
 		
 		hitRegionIndex = 0;
 		
@@ -81,12 +81,12 @@ public class TestSessionIO {
 		assertEquals(targetName, ((TargetAddedEvent)events.get(CAM1_TARGET_ADDED_INDEX)).getTargetName());
 		
 		final int CAM1_TARGET_RESIZED_INDEX = 1;
-		assertEquals(targetIndex, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getTargetIndex());
+		assertEquals(0, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getTargetIndex());
 		assertEquals(10, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getNewWidth(), 1);
 		assertEquals(20, ((TargetResizedEvent)events.get(CAM1_TARGET_RESIZED_INDEX)).getNewHeight(), 1);
 		
 		final int CAM1_TARGET_MOVED_INDEX = 2;
-		assertEquals(targetIndex, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getTargetIndex());
+		assertEquals(0, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getTargetIndex());
 		assertEquals(4, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getNewX());
 		assertEquals(3, ((TargetMovedEvent)events.get(CAM1_TARGET_MOVED_INDEX)).getNewY());
 
@@ -98,7 +98,7 @@ public class TestSessionIO {
 		assertEquals(redShot.getMarker().getRadiusX(), ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getShot().getMarker().getRadiusX(), 1);
 		assertFalse(((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).isMalfunction());
 		assertFalse(((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).isReload());
-		assertEquals(targetIndex, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(0, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getHitRegionIndex().get().intValue());
 		assertEquals(videoString, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getVideoString().get());
 		assertEquals(2, ((ShotEvent)events.get(CAM1_SHOT_RED_INDEX)).getVideos().size());
@@ -113,7 +113,7 @@ public class TestSessionIO {
 		assertEquals(greenShot.getMarker().getRadiusX(), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getMarker().getRadiusX(), 1);
 		assertTrue(((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).isMalfunction());
 		assertFalse(((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).isReload());
-		assertEquals(targetIndex, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getTargetIndex().get().intValue());
+		assertEquals(0, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getHitRegionIndex().get().intValue());
 		assertEquals(videoString, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideoString().get());
 		assertEquals(2, ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideos().size());
@@ -121,7 +121,7 @@ public class TestSessionIO {
 		assertEquals(new File("sessions/what/ax.vid"), ((ShotEvent)events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getVideos().get("camera2"));
 		
 		final int CAM1_TARGET_REMOVED_INDEX = 5;
-		assertEquals(targetIndex, ((TargetRemovedEvent)events.get(CAM1_TARGET_REMOVED_INDEX)).getTargetIndex());
+		assertEquals(0, ((TargetRemovedEvent)events.get(CAM1_TARGET_REMOVED_INDEX)).getTargetIndex());
 		
 		final int CAM1_SHOT_GREEN_TWO_INDEX = 6;
 		assertEquals(Color.GREEN, ((ShotEvent)events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getColor());
