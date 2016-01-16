@@ -61,6 +61,7 @@ public class ProjectorArenaController implements CalibrationListener {
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
 
+	private String defaultWindowTitle = "";
 	private Configuration config;
 	private CanvasManager canvasManager;
 	private Label mouseOnArenaLabel = null;
@@ -90,16 +91,28 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		shootOFFStage = shootOFFController.getStage();
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
+		defaultWindowTitle = arenaStage.getTitle();
 
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
+		
+		// Show coords of mouse when in canvas during debug mode
+		if (config.inDebugMode()) {
+			arenaCanvasGroup.setOnMouseMoved((event) -> {
+				arenaStage.setTitle(defaultWindowTitle + String.format(" (%.1f, %.1f)", event.getX(), event.getY()));
+			});
+
+			arenaCanvasGroup.setOnMouseExited((event) -> {
+				arenaStage.setTitle(defaultWindowTitle);
+			});
+		}
 
 		arenaAnchor.widthProperty().addListener((e) -> {
-			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
 		arenaAnchor.heightProperty().addListener((e) -> {
-			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
@@ -305,8 +318,26 @@ public class ProjectorArenaController implements CalibrationListener {
 		for (Target t : new ArrayList<Target>(canvasManager.getTargets()))
 			canvasManager.removeTarget(t);
 
-		for (Target t : course.getTargets())
+		boolean scaleCourse = course.getResolution().isPresent()
+				&& (course.getResolution().get().getWidth() != getWidth()
+				|| course.getResolution().get().getHeight() != getHeight());
+		
+		double widthScaleFactor = 1;
+		double heightScaleFactor = 1;
+		
+		if (scaleCourse) {
+			widthScaleFactor = getWidth() / course.getResolution().get().getWidth();
+			heightScaleFactor = getHeight() / course.getResolution().get().getHeight();
+		}
+
+		for (Target t : course.getTargets()) {
+			if (scaleCourse) {
+				t.setDimensions(t.getDimension().getWidth() * widthScaleFactor, t.getDimension().getHeight()
+						* heightScaleFactor);
+			}
+
 			canvasManager.addTarget(t);
+		}
 	}
 
 	@FXML
