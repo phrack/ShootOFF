@@ -28,7 +28,7 @@ def libTempDir = dist + 'libs'
 def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'
-def version = '3.6'
+def version = '3.7'
 def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
