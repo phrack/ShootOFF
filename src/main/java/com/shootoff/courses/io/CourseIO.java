@@ -48,6 +48,8 @@ public class CourseIO {
 			visitor.visitTarget(relativeTargetFile, t.getPosition().getX(), t.getPosition().getY(),
 					t.getDimension().getWidth(), t.getDimension().getHeight());
 		}
+		
+		visitor.visitResolution(arenaController.getWidth(), arenaController.getHeight());
 
 		visitor.visitEnd();
 	}

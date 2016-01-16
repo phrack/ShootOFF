@@ -43,6 +43,7 @@ import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.io.TargetIO;
 
 import javafx.application.Platform;
+import javafx.geometry.Dimension2D;
 import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -68,7 +69,9 @@ public class XMLCourseReader {
 
 			Course c;
 
-			if (handler.getBackground().isPresent()) {
+			if (handler.getResolution().isPresent()) {
+				c = new Course(handler.getBackground(), handler.getTargets(), handler.getResolution().get());
+			} else if (handler.getBackground().isPresent()) {
 				c = new Course(handler.getBackground().get(), handler.getTargets());
 			} else {
 				c = new Course(handler.getTargets());
@@ -93,6 +96,7 @@ public class XMLCourseReader {
 	private class CourseXMLHandler extends DefaultHandler {
 		private Optional<LocatedImage> background = Optional.empty();
 		private final List<Target> targets = new ArrayList<Target>();
+		private Optional<Dimension2D> resolution = Optional.empty();
 
 		public Optional<LocatedImage> getBackground() {
 			return background;
@@ -102,11 +106,14 @@ public class XMLCourseReader {
 			return targets;
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes attributes)
-				throws SAXException {
+		public Optional<Dimension2D> getResolution() {
+			return resolution;
+		}
+
+		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
 			switch (qName) {
-			case "background":
+			case "background": {
 				boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
 
 				LocatedImage background;
@@ -119,10 +126,10 @@ public class XMLCourseReader {
 				}
 
 				this.background = Optional.of(background);
-
+			}
 				break;
 
-			case "target":
+			case "target": {
 				File targetFile = new File(attributes.getValue("file"));
 				Optional<Group> targetNodes = TargetIO.loadTarget(targetFile);
 
@@ -140,7 +147,13 @@ public class XMLCourseReader {
 				} else {
 					showTargetError(targetFile.getPath());
 				}
+			}
+				break;
 
+			case "resolution": {
+				resolution = Optional.of(new Dimension2D(Double.parseDouble(attributes.getValue("width")), Double
+						.parseDouble(attributes.getValue("height"))));
+			}
 				break;
 			}
 		}
@@ -149,9 +162,8 @@ public class XMLCourseReader {
 			Platform.runLater(() -> {
 				Alert targetAlert = new Alert(AlertType.ERROR);
 
-				String message = String.format(
-						"The course %s requires the target %s, but the "
-								+ "target file is missing. This target will not appear in your projector arena.",
+				String message = String.format("The course %s requires the target %s, but the "
+						+ "target file is missing. This target will not appear in your projector arena.",
 						courseFile.getName(), targetPath);
 
 				targetAlert.setTitle("Missing Target");
