@@ -70,6 +70,7 @@ public class Main extends Application {
 
 	public static final String SHOOTOFF_DOMAIN = "http://shootoffapp.com/";
 
+	private boolean isJWS = false;
 	private final String RESOURCES_METADATA_NAME = "shootoff-writable-resources.xml";
 	private final String RESOURCES_JAR_NAME = "shootoff-writable-resources.jar";
 	private File resourcesMetadataFile;
@@ -103,24 +104,24 @@ public class Main extends Application {
 		}
 	}
 
-	private Optional<String> parseField(String metadataXML, String fieldName) {
-		String tagName = "<resources";
-		int tagStart = metadataXML.indexOf(tagName);
+	private Optional<String> parseField(String metadataXML, String tagName, String fieldName) {
+		String tag = "<" + tagName;		
+		int tagStart = metadataXML.indexOf(tag);
 
 		if (tagStart == -1) {
-			logger.error("Couldn't parse resources tag from resources metadata");
-			tryRunningShootOFF();
+			logger.error("Couldn't parse " + tag + " tag from metadata");
+			if (isJWS) tryRunningShootOFF();
 			return Optional.empty();
 		}
 
-		tagStart += tagName.length();
+		tagStart += tag.length();
 
 		fieldName += "=\"";
 		int dataStart = metadataXML.indexOf(fieldName, tagStart);
 
 		if (dataStart == -1) {
-			logger.error("Couldn't parse {} field from resources metadata", fieldName);
-			tryRunningShootOFF();
+			logger.error("Couldn't parse {} field from metadata", fieldName);
+			if (isJWS) tryRunningShootOFF();
 			return Optional.empty();
 		}
 
@@ -132,8 +133,8 @@ public class Main extends Application {
 	}
 
 	protected Optional<ResourcesInfo> deserializeMetadataXML(String metadataXML) {
-		Optional<String> version = parseField(metadataXML, "version");
-		Optional<String> fileSize = parseField(metadataXML, "fileSize");
+		Optional<String> version = parseField(metadataXML, "resources", "version");
+		Optional<String> fileSize = parseField(metadataXML, "resources", "fileSize");
 
 		if (version.isPresent() && fileSize.isPresent()) {
 			return Optional.of(new ResourcesInfo(version.get(), Long.parseLong(fileSize.get()), metadataXML));
@@ -434,32 +435,6 @@ public class Main extends Application {
 		System.exit(status);
 	}
 
-	private Optional<String> parseField(String versionXML, String versionName, String fieldName) {
-		String tagName = "<" + versionName;
-		int tagStart = versionXML.indexOf(tagName);
-
-		if (tagStart == -1) {
-			logger.error("Couldn't parse " + tagName + "tag from version metadata");
-			return Optional.empty();
-		}
-
-		tagStart += tagName.length();
-
-		fieldName += "=\"";
-		int dataStart = versionXML.indexOf(fieldName, tagStart);
-
-		if (dataStart == -1) {
-			logger.error("Couldn't parse {} field from resources metadata", fieldName);
-			return Optional.empty();
-		}
-
-		dataStart += fieldName.length();
-
-		int dataEnd = versionXML.indexOf("\"", dataStart);
-
-		return Optional.of(versionXML.substring(dataStart, dataEnd));
-	}
-
 	private Optional<String> getVersionXML(String versionAddress) {
 		HttpURLConnection connection = null;
 		InputStream stream = null;
@@ -556,7 +531,7 @@ public class Main extends Application {
 			return;
 		}
 
-		if (version.isPresent() && !config.inDebugMode()) checkVersion();
+		if (version.isPresent() && !config.inDebugMode() && !isJWS) checkVersion();
 
 		// This initializes the TTS engine
 		TextToSpeech.say("");
@@ -644,6 +619,7 @@ public class Main extends Application {
 		}
 
 		if (System.getProperty("javawebstart.version", null) != null) {
+			isJWS = true;
 			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
 
 			if (!shootoffHome.exists()) {
