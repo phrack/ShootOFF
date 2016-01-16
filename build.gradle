@@ -22,13 +22,16 @@ eclipse {
 
 def javaHome = System.properties['java.home']
 
+ext.extProp = new Properties()
+extProp.load(new FileInputStream("src/main/resources/version.properties"))
+def version = extProp["version"]
+
 def dist = 'build/dist/'
 def archivePath = dist + 'ShootOFF.jar'
 def libTempDir = dist + 'libs'
 def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'
-def version = '3.7'
 def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
@@ -284,7 +287,7 @@ task fxWebstartSignedJar(){
     }
 }
 
-task fxDeploy(dependsOn: fxWebstartSignedJar){
+task fxRelease(dependsOn: fxWebstartSignedJar){
     def antfx = NamespaceBuilder.newInstance(
             ant,
             'javafx:com.sun.javafx.tools.ant')
@@ -346,4 +349,9 @@ task fxDeploy(dependsOn: fxWebstartSignedJar){
             }
         }
     }
+}
+
+task release(){
+    dependsOn(zipRelease)
+    dependsOn(fxRelease)
 }
