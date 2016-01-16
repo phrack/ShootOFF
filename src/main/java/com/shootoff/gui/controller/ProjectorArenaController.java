@@ -332,8 +332,19 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		for (Target t : course.getTargets()) {
 			if (scaleCourse) {
-				t.setDimensions(t.getDimension().getWidth() * widthScaleFactor, t.getDimension().getHeight()
-						* heightScaleFactor);
+				double newWidth = t.getDimension().getWidth() * widthScaleFactor;
+				double widthDelta = newWidth - t.getDimension().getWidth();
+				double newX = t.getTargetGroup().getBoundsInParent().getMinX() * widthScaleFactor;
+				double deltaX = newX - t.getTargetGroup().getBoundsInParent().getMinX() + (widthDelta / 2);
+			
+				double newHeight = t.getDimension().getHeight() * heightScaleFactor;
+				double heightDelta = newHeight - t.getDimension().getHeight();
+				double newY = t.getTargetGroup().getBoundsInParent().getMinY() * heightScaleFactor;
+				double deltaY = newY - t.getTargetGroup().getBoundsInParent().getMinY() + (heightDelta / 2);
+				
+				t.setPosition(t.getPosition().getX() + deltaX, t.getPosition().getY() + deltaY);
+				
+				t.setDimensions(newWidth, newHeight);
 			}
 
 			canvasManager.addTarget(t);
