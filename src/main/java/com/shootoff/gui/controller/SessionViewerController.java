@@ -57,12 +57,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
@@ -271,10 +272,14 @@ public class SessionViewerController {
 
 		for (String cameraName : currentSession.getEvents().keySet()) {
 			Group canvas = new Group();
+			ScrollPane scrollPane = new ScrollPane(canvas);
+			scrollPane.setPrefSize(cameraTabPane.getPrefWidth(), cameraTabPane.getPrefHeight());
+			scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+			scrollPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 			cameraGroups.put(cameraName, new SessionCanvasManager(canvas, config));
 
 			Tab cameraTab = new Tab(cameraName);
-			cameraTab.setContent(new AnchorPane(canvas));
+			cameraTab.setContent(scrollPane);
 			cameraTabPane.getTabs().add(cameraTab);
 		}
 	}
@@ -309,7 +314,7 @@ public class SessionViewerController {
 			}
 		}
 	}
-
+	
 	@FXML
 	public void nextButtonClicked(ActionEvent event) {
 		if (isPlaying) togglePlaybackButton.fire();
