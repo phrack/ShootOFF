@@ -162,7 +162,7 @@ task updateJars() {
     }
 }
 
-task fxJar(dependsOn: build){
+task fxJar(dependsOn: build) {
     dependsOn('copyConfig')
     dependsOn('copyTargets')
     dependsOn('copySounds')
@@ -259,7 +259,7 @@ task pushZipRelease(dependsOn: zipRelease) {
     }
 }
 
-task fxSignedJar(dependsOn: fxJar){
+task fxSignedJar(dependsOn: fxJar) {
     doFirst { 
         assert file(keyStore).exists() 
     }
@@ -296,7 +296,7 @@ task fxJarWritableResources() {
     }
 }
 
-task fxWebstartSignedJar(){
+task fxWebstartSignedJar() {
     dependsOn(fxJar)
     dependsOn('updateJars')
     dependsOn(fxJarWritableResources)
@@ -343,7 +343,7 @@ task fxWebstartSignedJar(){
     }
 }
 
-task fxRelease(dependsOn: fxWebstartSignedJar){
+task fxRelease(dependsOn: fxWebstartSignedJar) {
     def antfx = NamespaceBuilder.newInstance(
             ant,
             'javafx:com.sun.javafx.tools.ant')
@@ -425,7 +425,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar){
     }
 }
 
-task release(){
+task release() {
     dependsOn(pushZipRelease)
     dependsOn(fxRelease)
 }

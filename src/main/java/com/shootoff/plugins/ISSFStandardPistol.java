@@ -92,7 +92,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	}
 
 	// For testing
-	protected void init(int delayMin, int delayMax) {
+	protected void init(final int delayMin, final int delayMax) {
 		this.delayMin = delayMin;
 		this.delayMax = delayMax;
 
@@ -123,7 +123,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		public Void call() {
 			if (repeatExercise) {
 				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
-				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+				final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 				if (!testing) {
 					executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 				} else {
