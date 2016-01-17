@@ -200,6 +200,7 @@ task zipRelease(type: Zip){
         include 'shootoff.properties'
         include 'ShootOFF.jar'
     }
+
     archiveName = 'shootoff-' + version + '-final.zip'
     destinationDir = file(dist)
 }
@@ -229,7 +230,7 @@ task fxJarWritableResources() {
             'javafx:com.sun.javafx.tools.ant')
 
     doLast {
-        ant.jar(destfile: 'build/dist/' + writableResources) {
+        ant.jar(destfile: "${project.buildDir}/webstart/" + writableResources) {
             fileset(dir: 'build/dist/', includes: 'targets/**')
             fileset(dir: 'build/dist/', includes: 'sounds/**')
             fileset(dir: 'build/dist/', includes: 'shootoff.properties')
@@ -254,21 +255,21 @@ task fxWebstartSignedJar(){
         keyPassword = new String(keyPassword)
 
         ant.signjar(
-                keystore: keyStore,
-                storepass: keyPassword,
-                alias: keyAlias,
-                tsaurl: tsaURL
+            keystore: keyStore,
+            storepass: keyPassword,
+            alias: keyAlias,
+            tsaurl: tsaURL
         ) {
                 ant.fileset(
-                        dir: 'build/dist/',
-                        includes: '*.jar'
+                    dir: 'build/dist/',
+                    includes: '*.jar'
                 )
         }
 
         def path = ant.path {
                 ant.fileset(
-                        dir: 'build/dist/',
-                        includes: 'libs/*.jar',
+                    dir: 'build/dist/',
+                    includes: 'libs/*.jar',
                 )
         }
 
@@ -294,64 +295,93 @@ task fxRelease(dependsOn: fxWebstartSignedJar){
 
     doLast {
         antfx.deploy(
+                codebase: "http://shootoffapp.com/jws/",
                 outdir: "${project.buildDir}/webstart",
                 outfile: project.name
         ) {
             antfx.application(
-                    mainClass: mainClassName,
-                    name: 'ShootOFF'
+                mainClass: mainClassName,
+                name: 'ShootOFF',
+                toolkit: 'fx',
+                version: version
             )
 
             antfx.platform(
-                    javafx: '8.0+',
-                    j2se: '1.8+'
+                javafx: '8.0+',
+                j2se: '1.8+'
             )
 
             antfx.info(
-                    title: project.name,
-                    vendor: project.name,
-                    license: license,
-                    description: 'Software to enhance laser dry fire training'
+                title: project.name,
+                vendor: project.name,
+                license: license,
+                description: 'A virtual shooting range to enhance laser dry fire training.'
             ) {
                 antfx.icon(
-                        href: 'icon_32x32.png'
+                    kind: 'shortcut',
+                    href: 'icon_32x32.png',
+                    width: '32', 
+                    height: '32'
                 )
             }
 
             antfx.permissions(
-                    elevated: true,
-                    cachecertificates: true
+                elevated: true,
+                cachecertificates: true
             )
 
-
             antfx.preferences(
-                    shortcut: true,
-                    install: false,
-                    menu: false
+                shortcut: true,
+                install: false,
+                menu: false
             )
 
             antfx.resources {
                 antfx.fileset(
-                        dir: 'build/dist/',
-                        includes: 'ShootOFF.jar'
+                    dir: 'build/dist/',
+                    includes: 'ShootOFF.jar'
                 )
 
                 antfx.fileset(
-                        dir: 'build/dist/',
-                        includes: 'libs/*.jar'
+                    dir: 'build/dist/',
+                    includes: 'libs/*.jar'
                 )
 
                 antfx.fileset(
-                        type: 'icon',
-                        dir: 'src/main/resources/images/',
-                        includes: 'icon_32x32.png'
+                    type: 'icon',
+                    dir: 'src/main/resources/images/',
+                    includes: 'icon_32x32.png'
                 )
             }
         }
+
+        def jnlpPath = "${project.buildDir}/webstart/" + project.name + '.jnlp'
+        String contents = new File(jnlpPath).getText('UTF-8') 
+        
+        // Can't update HREF in jnlp tag with antfx
+        contents = contents.replace('href=\"ShootOFF.jnlp\">', 
+            'href=\"http://shootoffapp.com/jws/ShootOFF.jnlp\">')
+        
+        // antfx.icon is not working for jnlp
+        contents = contents.replace('<offline-allowed/>',
+            '<icon href=\"icon_32x32.png\" width=\"32\" height=\"32\" />\n    <offline-allowed/>')
+
+        new File(jnlpPath).write(contents, 'UTF-8')
     }
 }
 
 task release(){
     dependsOn(zipRelease)
     dependsOn(fxRelease)
+}
+
+release.doLast {
+    print("-----------------------------------------\n" +
+          "REMAINING RELEASE TASKS\n" + 
+          "-----------------------------------------\n\n" +
+          "- Publish release draft\n" + 
+          "- Commit website artifacts\n" + 
+          "- Make Reddit release post\n" + 
+          "- Make Twitter release post\n" + 
+          "- Make release email")
 }
