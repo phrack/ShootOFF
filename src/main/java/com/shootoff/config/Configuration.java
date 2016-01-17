@@ -200,19 +200,19 @@ public class Configuration {
 		if (configInput != null) {
 			inputStream = configInput;
 		} else {
-			inputStream = new FileInputStream(configName);
+			try {
+				inputStream = new FileInputStream(configName);
+			} catch (FileNotFoundException e) {
+				throw new FileNotFoundException("Could not read configuration file " + configName);
+			}
 		}
 
-		if (inputStream != null) {
-			try {
-				prop.load(inputStream);
-			} catch (IOException ioe) {
-				throw ioe;
-			} finally {
-				inputStream.close();
-			}
-		} else {
-			throw new FileNotFoundException("Could not read configuration file " + configName);
+		try {
+			prop.load(inputStream);
+		} catch (IOException ioe) {
+			throw ioe;
+		} finally {
+			inputStream.close();
 		}
 
 		if (prop.containsKey(FIRST_RUN_PROP)) {
