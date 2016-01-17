@@ -34,7 +34,7 @@ public class ShotRecorder {
 	// The number of milliseconds before and after a shot to record
 	public static final long RECORD_LENGTH = 5000; // ms
 
-	private final Logger logger = LoggerFactory.getLogger(ShotRecorder.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShotRecorder.class);
 
 	private final long startTime;
 	private final long timeOffset;

@@ -53,7 +53,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ProjectorArenaController implements CalibrationListener {
-	private final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	private Stage arenaStage;
 	private Stage shootOFFStage;

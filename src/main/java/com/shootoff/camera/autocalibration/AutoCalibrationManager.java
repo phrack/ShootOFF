@@ -51,7 +51,7 @@ import com.shootoff.camera.CameraManager;
 
 public class AutoCalibrationManager implements Runnable {
 
-	private final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);
 
 	private final static int PATTERN_WIDTH = 9;
 	private final static int PATTERN_HEIGHT = 6;
@@ -153,7 +153,7 @@ public class AutoCalibrationManager implements Runnable {
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-dist.png");
-			File file = new File(filename);
+			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, traceMat);
 		}

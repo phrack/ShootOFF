@@ -25,7 +25,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
 public class Shot {
-	private final Logger logger = LoggerFactory.getLogger(Shot.class);
+	private static final Logger logger = LoggerFactory.getLogger(Shot.class);
 	private final Color color;
 	private double x;
 	private double y;
@@ -80,14 +80,16 @@ public class Shot {
 	}
 
 	public void setTranslation(int displayWidth, int displayHeight, int feedWidth, int feedHeight) {
-		double scaleX = (double) displayWidth / (double) feedWidth;
-		double scaleY = (double) displayHeight / (double) feedHeight;
+		final double scaleX = (double) displayWidth / (double) feedWidth;
+		final double scaleY = (double) displayHeight / (double) feedHeight;
 
-		double scaledX = (x * scaleX);
-		double scaledY = (y * scaleY);
+		final double scaledX = x * scaleX;
+		final double scaledY = y * scaleY;
 
-		logger.trace("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
-
+		if (logger.isTraceEnabled()) {
+			logger.trace("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
+		}
+		
 		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
 		marker.setFill(color);
 

@@ -614,7 +614,7 @@ public class TargetEditorController {
 			});
 		} else {
 			cursorRegion = Optional.empty();
-			System.err.println("Unimplemented region type selected.");
+			logger.error("Unimplemented region type selected.");
 			return;
 		}
 

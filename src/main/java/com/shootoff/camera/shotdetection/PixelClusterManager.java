@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class PixelClusterManager {
 
-	private final Logger logger = LoggerFactory.getLogger(PixelClusterManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(PixelClusterManager.class);
 
 	private int numberOfRegions = -1;
 
@@ -44,7 +44,7 @@ public class PixelClusterManager {
 	}
 
 	void clusterPixels() {
-		Stack<Pixel> mustExamine = new Stack<Pixel>();
+		final Stack<Pixel> mustExamine = new Stack<Pixel>();
 
 		for (Pixel point : points) {
 
@@ -120,9 +120,10 @@ public class PixelClusterManager {
 					cluster.add(nextPixel);
 					
 					
-					int connectedness = nextPixel.getConnectedness();
-					if (logger.isTraceEnabled())
+					final int connectedness = nextPixel.getConnectedness();
+					if (logger.isTraceEnabled()) {
 						logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, connectedness);
+					}
 					averageX += nextPixel.x * connectedness;
 					averageY += nextPixel.y * connectedness;
 

@@ -27,7 +27,7 @@ public final class ShotDetectionManager {
 	public static final int SECTOR_COLUMNS = 3;
 	public static final int SECTOR_ROWS = 3;
 
-	private final Logger logger = LoggerFactory.getLogger(ShotDetectionManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShotDetectionManager.class);
 
 	private CanvasManager canvasManager;
 	private CameraManager cameraManager;
@@ -98,8 +98,8 @@ public final class ShotDetectionManager {
 		lumsMovingAverage = new int[width][height];
 		newLumsMovingAverage = new int[width][height];
 
-		colorDiffMovingAverage = new double[width][height];;
-		newColorDiffMovingAverage = new double[width][height];;
+		colorDiffMovingAverage = new double[width][height];
+		newColorDiffMovingAverage = new double[width][height];
 
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++) {
@@ -175,8 +175,8 @@ public final class ShotDetectionManager {
 
 		Parallel.forIndex(0, source.length, 1, new Operation<Integer>() {
 			public void perform(Integer i) {
-				int[] aMatrix = source[i];
-				int aLength = aMatrix.length;
+				final int[] aMatrix = source[i];
+				final int aLength = aMatrix.length;
 				System.arraycopy(aMatrix, 0, destination[i], 0, aLength);
 			}
 		});
@@ -202,13 +202,12 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean pixelAboveExcessiveBrightnessThreshold(int lumsMovingAverage) {
-		if (lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD) return true;
-		return false;
+		return lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD;
 	}
 
 	private boolean pixelAboveThreshold(int currentLum, int lumsMovingAverage) {
-		int threshold = (int) ((double) (255 - lumsMovingAverage) / 4f);
-		int increase = (currentLum - lumsMovingAverage);
+		final int threshold = (int) ((double) (255 - lumsMovingAverage) / 4f);
+		final int increase = (currentLum - lumsMovingAverage);
 
 		// int dynamic_increase = 0;
 		// if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD ||
