@@ -1,12 +1,17 @@
 import groovyx.gpars.GParsPool
 import groovy.xml.NamespaceBuilder
+import org.kohsuke.github.GitHub
 
 buildscript {
     repositories {
         mavenCentral()
+        maven {
+            url  "http://repo.jenkins-ci.org/releases/" 
+        }
     }
     dependencies {
         classpath group: 'org.codehaus.gpars', name: 'gpars', version: '1.1.0'
+        classpath group: 'org.kohsuke', name: 'github-api', version: '1.+'
     }
 }
 
@@ -155,7 +160,6 @@ task fxJar(dependsOn: build){
     dependsOn('copyTargets')
     dependsOn('copySounds')
     dependsOn('copyLibs')
-    dependsOn('updateJars')
 
     def antfx = NamespaceBuilder.newInstance(
             ant,
@@ -203,6 +207,27 @@ task zipRelease(type: Zip){
 
     archiveName = 'shootoff-' + version + '-final.zip'
     destinationDir = file(dist)
+
+    doLast{
+        // Create GitHub release
+        def username = System.console().readLine('\nPlease enter GitHub username: ')
+        def password = System.console().readPassword('Please enter GitHub password: ')
+        password = new String(password)
+
+        def gh = GitHub.connectUsingPassword(username, password)
+
+        if (!gh.isCredentialValid()) print('Incorrect GitHub credentials')
+
+        def ghRepo = gh.getRepository('phrack/ShootOFF-NG')
+        def repoReleaseBuilder = ghRepo.createRelease(version + '-FINAL')
+        repoReleaseBuilder.body('1. Download shootoff-' + version + '-final.zip and extract it.\n' +
+                            '2. Double click ShootOFF.jar.')
+        repoReleaseBuilder.draft(true)
+        repoReleaseBuilder.commitish('master')
+        repoReleaseBuilder.name('shootoff-' + version + '-final')
+        def repoRelease = repoReleaseBuilder.create()
+        repoRelease.uploadAsset(new File(dist + archiveName), 'application/zip')
+    }
 }
 
 task fxSignedJar(dependsOn: fxJar){
@@ -244,6 +269,7 @@ task fxJarWritableResources() {
 
 task fxWebstartSignedJar(){
     dependsOn(fxJar)
+    dependsOn('updateJars')
     dependsOn(fxJarWritableResources)
 
     doFirst { 
@@ -376,11 +402,13 @@ task release(){
 }
 
 release.doLast {
+    // Some of these are worth trying to automate later!
     print("-----------------------------------------\n" +
           "REMAINING RELEASE TASKS\n" + 
           "-----------------------------------------\n\n" +
           "- Publish release draft\n" + 
-          "- Commit website artifacts\n" + 
+          "- Commit JWS artifacts\n" + 
+          "- Update website\n" + 
           "- Make Reddit release post\n" + 
           "- Make Twitter release post\n" + 
           "- Make release email")
