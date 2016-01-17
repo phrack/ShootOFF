@@ -61,7 +61,6 @@ public class ProjectorArenaController implements CalibrationListener {
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
 
-	private String defaultWindowTitle = "";
 	private Configuration config;
 	private CanvasManager canvasManager;
 	private Label mouseOnArenaLabel = null;
@@ -91,21 +90,9 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		shootOFFStage = shootOFFController.getStage();
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
-		defaultWindowTitle = arenaStage.getTitle();
 
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
-		
-		// Show coords of mouse when in canvas during debug mode
-		if (config.inDebugMode()) {
-			arenaCanvasGroup.setOnMouseMoved((event) -> {
-				arenaStage.setTitle(defaultWindowTitle + String.format(" (%.1f, %.1f)", event.getX(), event.getY()));
-			});
-
-			arenaCanvasGroup.setOnMouseExited((event) -> {
-				arenaStage.setTitle(defaultWindowTitle);
-			});
-		}
 
 		arenaAnchor.widthProperty().addListener((e) -> {
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
