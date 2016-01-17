@@ -1,6 +1,8 @@
 import groovyx.gpars.GParsPool
 import groovy.xml.NamespaceBuilder
 import org.kohsuke.github.GitHub
+import org.ajoberstar.grgit.Grgit 
+import org.ajoberstar.grgit.Credentials
 
 buildscript {
     repositories {
@@ -13,6 +15,10 @@ buildscript {
         classpath group: 'org.codehaus.gpars', name: 'gpars', version: '1.1.0'
         classpath group: 'org.kohsuke', name: 'github-api', version: '1.+'
     }
+}
+
+plugins {
+    id 'org.ajoberstar.grgit' version '1.3.2'
 }
 
 apply plugin: 'java'
@@ -37,6 +43,7 @@ def libTempDir = dist + 'libs'
 def webstartDir = 'build/webstart'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'
+def releaseZip = 'shootoff-' + version + '-final.zip'
 def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
@@ -194,7 +201,7 @@ task fxJar(dependsOn: build){
     }
 }
 
-task zipRelease(type: Zip){
+task zipRelease(type: Zip) {
     dependsOn('fxJar')
 
     from(file(dist)) {
@@ -205,9 +212,11 @@ task zipRelease(type: Zip){
         include 'ShootOFF.jar'
     }
 
-    archiveName = 'shootoff-' + version + '-final.zip'
+    archiveName = releaseZip
     destinationDir = file(dist)
+}
 
+task pushZipRelease(dependsOn: zipRelease) {
     doLast{
         // Create GitHub release
         def username = System.console().readLine('\nPlease enter GitHub username: ')
@@ -216,7 +225,9 @@ task zipRelease(type: Zip){
 
         def gh = GitHub.connectUsingPassword(username, password)
 
-        if (!gh.isCredentialValid()) print('Incorrect GitHub credentials')
+        if (!gh.isCredentialValid()) {
+            throw new InvalidUserDataException('Incorrect GitHub credentials')
+        }
 
         def ghRepo = gh.getRepository('phrack/ShootOFF-NG')
         def repoReleaseBuilder = ghRepo.createRelease(version + '-FINAL')
@@ -227,6 +238,24 @@ task zipRelease(type: Zip){
         repoReleaseBuilder.name('shootoff-' + version + '-final')
         def repoRelease = repoReleaseBuilder.create()
         repoRelease.uploadAsset(new File(dist + archiveName), 'application/zip')
+
+        // Update version metadata
+        def grgit = Grgit.open('.', new Credentials(username: username, password: password))
+        grgit.checkout(branch: 'gh-pages', createBranch: false)
+
+        def versionMetadata = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
+            '<stableRelease version=\"' + version + '\" ' +
+            'download=\"https://github.com/phrack/ShootOFF/releases/download/v' + version + 
+                '-FINAL/shootoff-' + version + '-final.zip\"/>'
+
+        def versionFile = new File('shootoff-version.xml')
+        versionFile.write(versionMetadata, 'UTF-8')
+
+        grgit.commit(message: 'Update version file to ' + version, all: true)
+        grgit.push()
+
+        grgit.checkout(branch: 'master', createBranch: false)
+        grgit.close()
     }
 }
 
@@ -397,7 +426,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar){
 }
 
 task release(){
-    dependsOn(zipRelease)
+    dependsOn(pushZipRelease)
     dependsOn(fxRelease)
 }
 
