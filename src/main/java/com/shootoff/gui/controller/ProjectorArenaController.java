@@ -331,9 +331,9 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 			canvasManager.removeTarget(t);
 
 		boolean scaleCourse = course.getResolution().isPresent()
-				&& (course.getResolution().get().getWidth() != getWidth()
-				|| course.getResolution().get().getHeight() != getHeight());
-		
+				&& (Math.abs(course.getResolution().get().getWidth() - getWidth()) > .0001
+						|| Math.abs(course.getResolution().get().getHeight() - getHeight()) > .0001);
+
 		double widthScaleFactor = 1;
 		double heightScaleFactor = 1;
 		

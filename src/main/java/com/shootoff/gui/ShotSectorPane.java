@@ -38,7 +38,7 @@ public class ShotSectorPane extends BorderPane {
 			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
 				CheckBox sector = new CheckBox();
 				sectors[y][x] = sector;
-				sector.setSelected(cameraManager.getSectorStatuses()[y][x]);
+				sector.setSelected(cameraManager.isSectorOn(x, y));
 
 				sector.setOnAction((event) -> {
 					cameraManager.setSectorStatuses(getSectorStatuses());

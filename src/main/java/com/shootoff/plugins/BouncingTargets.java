@@ -65,7 +65,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 	public BouncingTargets(List<Group> targets) {
 		super(targets);
-		thisSuper = super.getInstance();
+		setThisSuper(super.getInstance());
 	}
 
 	// For testing
@@ -74,12 +74,20 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 		this.shootCount = shootCount;
 		this.dontShootCount = dontShootCount;
-		BouncingTargets.maxVelocity = maxVelocity;
+		setMaxVelocity(maxVelocity);
 
 		shootTargets.clear();
 		dontShootTargets.clear();
 
 		startExercise();
+	}
+	
+	private static void setThisSuper(ProjectorTrainingExerciseBase thisSuper) {
+		BouncingTargets.thisSuper = thisSuper;
+	}
+	
+	private static void setMaxVelocity(int maxVelocity) {
+		BouncingTargets.maxVelocity = maxVelocity;
 	}
 
 	@Override

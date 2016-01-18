@@ -199,10 +199,10 @@ public class CameraManager {
 		new Thread(detector).start();
 	}
 
-	public boolean[][] getSectorStatuses() {
-		return sectorStatuses;
+	public boolean isSectorOn(int x, int y) {
+		return sectorStatuses[y][x];
 	}
-
+	
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
 		this.sectorStatuses = sectorStatuses;
 	}
@@ -232,6 +232,9 @@ public class CameraManager {
 	}
 
 	public void close() {
+		getCanvasManager().close();
+		setDetecting(false);
+		setStreaming(false);
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
