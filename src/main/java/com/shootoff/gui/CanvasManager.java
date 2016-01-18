@@ -579,8 +579,8 @@ public class CanvasManager {
 		Optional<String> videoString = createVideoString(shot);
 
 		// Targets are in order of when they were added, thus we must search in
-		// reverse
-		// to ensure shots register for the top target when targets overlap
+		// reverse to ensure shots register for the top target when targets
+		// overlap
 		for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
 			Target target = li.previous();
 			Group targetGroup = target.getTargetGroup();
@@ -598,10 +598,9 @@ public class CanvasManager {
 						TargetRegion region = (TargetRegion) node;
 						if (region.getType() == RegionType.IMAGE) {
 							// The image you get from the image view is its
-							// original size
-							// We need to resize it if it has changed size to
-							// accurately
-							// determine if a pixel is transparent
+							// original size. We need to resize it if it has
+							// changed size to accurately determine if a pixel
+							// is transparent
 							Image currentImage = ((ImageRegion) region).getImage();
 
 							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
@@ -629,23 +628,24 @@ public class CanvasManager {
 								g2d.dispose();
 
 								try {
-									if (adjustedX > bufferedResized.getWidth()
-											|| adjustedY > bufferedResized.getHeight()
+									if (adjustedX >= bufferedResized.getWidth()
+											|| adjustedY >= bufferedResized.getHeight()
 											|| bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
 										continue;
 									}
 								} catch (ArrayIndexOutOfBoundsException e) {
 									String message = String.format(
 											"Index out of bounds while trying to find adjusted coordinate (%d, %d) "
-													+ "from original (%.2f, %.2f) in adjusted BufferedImage with width = %d, "
-													+ "height = %d",
-											adjustedX, adjustedY, shot.getX(), shot.getY(), bufferedResized.getWidth(),
+													+ "from original (%.2f, %.2f) in adjusted BufferedImage for target %s "
+													+ "with width = %d, height = %d",
+											adjustedX, adjustedY, shot.getX(), shot.getY(),
+											target.getTargetFile().getPath(), bufferedResized.getWidth(),
 											bufferedResized.getHeight());
 									logger.error(message, e);
 									return Optional.empty();
 								}
 							} else {
-								if (adjustedX > currentImage.getWidth() || adjustedY > currentImage.getHeight()
+								if (adjustedX >= currentImage.getWidth() || adjustedY >= currentImage.getHeight()
 										|| currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
 									continue;
 								}
