@@ -39,10 +39,11 @@ def version = extProp["version"]
 
 def dist = 'build/dist/'
 def archivePath = dist + 'ShootOFF.jar'
-def libTempDir = dist + 'libs'
-def webstartDir = 'build/webstart'
+def libTempDir = dist + 'libs'                              // Location of ShootOFF's dependencies staged for release
+def webstartDir = 'build/webstart'                          // The staging area for the JWS release
 def mainClassName = 'com.shootoff.Main'
-def writableResources = 'shootoff-writable-resources.jar'
+def writableResources = 'shootoff-writable-resources.jar'   // JAR to contain files that should be writable (targets, settings, etc.) for JWS
+def diagnosticsJar = 'ShootOFF-diagnostics.jar'
 def releaseZip = 'shootoff-' + version + '-final.zip'
 def license = 'GPLv3'
 
@@ -148,6 +149,8 @@ task copyLibs(type:Copy) {
     exclude "*freetts-de*.jar"
 }
 
+// JWS is picky about whether or not it will access classes from non-trusted JARs,
+// thus mark all dependencies as trusted
 task updateJars() {
     doLast {
         FileCollection jars = files { file(libTempDir).listFiles() }
@@ -201,6 +204,10 @@ task fxJar(dependsOn: build) {
     }
 }
 
+// Creates the release zip file (sans the diagnostic tool)
+// THIS IS USED BY THE CI SERVER TO CREATE THE ZIP UPLOADED TO THE
+// NIGHTLIES SERVER. DO NOT RENAME THIS WITHOUT ALSO UPDATING THE
+// TRAVIS-CI CONFIGURATION!
 task zipRelease(type: Zip) {
     dependsOn('fxJar')
 
@@ -216,9 +223,12 @@ task zipRelease(type: Zip) {
     destinationDir = file(dist)
 }
 
+// 1. Add latest version of diagnostic tool to release zip
+// 2. Create release on GH and upload the zip
+// 3. Upload the xml file that contains version metadata to let users know a new version is out
 task pushZipRelease(dependsOn: zipRelease) {
     doLast{
-        // Create GitHub release
+        
         def username = System.console().readLine('\nPlease enter GitHub username: ')
         def password = System.console().readPassword('Please enter GitHub password: ')
         password = new String(password)
@@ -229,8 +239,37 @@ task pushZipRelease(dependsOn: zipRelease) {
             throw new InvalidUserDataException('Incorrect GitHub credentials')
         }
 
-        def ghRepo = gh.getRepository('phrack/ShootOFF-NG')
-        def repoReleaseBuilder = ghRepo.createRelease('v' + version + '-FINAL')
+        // Add latest version of diagnostic tool to release zip
+
+        def diagnosticTool = new File(dist + diagnosticsJar)
+        if (!diagnosticTool.exists()) {
+            def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
+            def diagReleases = ghDiagRepo.listReleases().asList()
+
+            def newestRelease = diagReleases.get(0)
+            
+            for (release in diagReleases.subList(1, diagReleases.size())) {
+                if (!release.isDraft() && !release.isPrerelease()) {
+                    if (release.getTagName() > newestRelease.getTagName()) {
+                        newestRelease = release
+                    }
+                }
+            }
+
+            new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
+                .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
+        }
+
+        ant.zip(update: "true", 
+                basedir: "${dist}", 
+                destfile: "${dist}/${releaseZip}", 
+                includes: "${diagnosticsJar}"
+               )
+
+        // Create GitHub release
+
+        def ghMainRepo = gh.getRepository('phrack/ShootOFF-NG')
+        def repoReleaseBuilder = ghMainRepo.createRelease('v' + version + '-FINAL')
         repoReleaseBuilder.body('1. Download ' + releaseZip + ' and extract it.\n' +
                             '2. Double click ShootOFF.jar.')
         repoReleaseBuilder.draft(true)
@@ -240,6 +279,7 @@ task pushZipRelease(dependsOn: zipRelease) {
         repoRelease.uploadAsset(new File(dist + releaseZip), 'application/zip')
 
         // Update version metadata
+
         def grgit = Grgit.open('.', new Credentials(username: username, password: password))
         grgit.checkout(branch: 'gh-pages', createBranch: false)
 
