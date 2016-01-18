@@ -923,7 +923,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (!isCalibrating) {
 			enableCalibration();
-		} else if (isCalibrating && !fullScreen) {
+		} else if (!fullScreen) {
 			arenaCameraManager.disableAutoCalibration();
 
 			removeCalibrationTargetIfPresent();

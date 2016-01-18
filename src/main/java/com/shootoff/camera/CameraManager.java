@@ -55,6 +55,7 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
+import cern.colt.Arrays;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Alert;
@@ -194,10 +195,10 @@ public class CameraManager {
 		new Thread(detector).start();
 	}
 
-	public boolean[][] getSectorStatuses() {
-		return sectorStatuses;
+	public boolean isSectorOn(int x, int y) {
+		return sectorStatuses[y][x];
 	}
-
+	
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
 		this.sectorStatuses = sectorStatuses;
 	}

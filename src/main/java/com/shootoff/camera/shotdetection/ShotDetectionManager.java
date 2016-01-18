@@ -129,8 +129,6 @@ public final class ShotDetectionManager {
 			return Optional.empty();
 
 		}
-		
-
 
 		if (!detectShots) result = Optional.empty();
 
@@ -382,9 +380,6 @@ public final class ShotDetectionManager {
 	private ArrayList<Pixel> findThresholdPixelsAndUpdateFilter(BufferedImage workingCopy, boolean detectShots) {
 		final int subWidth = workingCopy.getWidth() / SECTOR_COLUMNS;
 		final int subHeight = workingCopy.getHeight() / SECTOR_ROWS;
-		
-
-		final boolean[][] sectorstatuses = cameraManager.getSectorStatuses();
 
 		ArrayList<Pixel> thresholdPixels = new ArrayList<Pixel>();
 
@@ -395,34 +390,26 @@ public final class ShotDetectionManager {
 		Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
 
 			public void perform(Integer sector) {
-				
-				Integer sectorX = (sector % SECTOR_COLUMNS);
-				Integer sectorY = (int)Math.floor((sector / SECTOR_ROWS));
+				int sectorX = (sector.intValue() % SECTOR_COLUMNS);
+				int sectorY = sector.intValue() / SECTOR_ROWS;
 
-				Integer startX = subWidth * sectorX;
-				Integer startY = subHeight * sectorY;
+				int startX = subWidth * sectorX;
+				int startY = subHeight * sectorY;
 				
-				if (!sectorstatuses[sectorY][sectorX]) return;
+				if (!cameraManager.isSectorOn(sectorX, sectorY)) return;
 				
 				for (Integer y = startY; y < startY + subHeight; y++) {
-
 					for (Integer x = startX; x < startX + subWidth; x++) {
-
 						Optional<Pixel> pixel = updateFilter(workingCopy, x, y, detectShots);
-
 
 						if (pixel.isPresent()) {
 							synchronized (thresholdPixels) {
 								thresholdPixels.add(pixel.get());
 							}
 						}
-
 					}
-				}
-
-				
+				}				
 			}
-
 		});
 
 		return thresholdPixels;
