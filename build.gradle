@@ -230,14 +230,14 @@ task pushZipRelease(dependsOn: zipRelease) {
         }
 
         def ghRepo = gh.getRepository('phrack/ShootOFF-NG')
-        def repoReleaseBuilder = ghRepo.createRelease(version + '-FINAL')
-        repoReleaseBuilder.body('1. Download shootoff-' + version + '-final.zip and extract it.\n' +
+        def repoReleaseBuilder = ghRepo.createRelease('v' + version + '-FINAL')
+        repoReleaseBuilder.body('1. Download ' + releaseZip + ' and extract it.\n' +
                             '2. Double click ShootOFF.jar.')
         repoReleaseBuilder.draft(true)
         repoReleaseBuilder.commitish('master')
         repoReleaseBuilder.name('shootoff-' + version + '-final')
         def repoRelease = repoReleaseBuilder.create()
-        repoRelease.uploadAsset(new File(dist + archiveName), 'application/zip')
+        repoRelease.uploadAsset(new File(dist + releaseZip), 'application/zip')
 
         // Update version metadata
         def grgit = Grgit.open('.', new Credentials(username: username, password: password))
@@ -246,7 +246,7 @@ task pushZipRelease(dependsOn: zipRelease) {
         def versionMetadata = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
             '<stableRelease version=\"' + version + '\" ' +
             'download=\"https://github.com/phrack/ShootOFF/releases/download/v' + version + 
-                '-FINAL/shootoff-' + version + '-final.zip\"/>'
+                '-FINAL/' + releaseZip + '\"/>'
 
         def versionFile = new File('shootoff-version.xml')
         versionFile.write(versionMetadata, 'UTF-8')
