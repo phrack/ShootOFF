@@ -37,7 +37,7 @@ public class CamerasSupervisor {
 	}
 
 	public CameraManager addCameraManager(Camera webcam, CanvasManager canvasManager) {
-		CameraManager manager = new CameraManager(webcam, canvasManager, config);
+		final CameraManager manager = new CameraManager(webcam, canvasManager, config);
 		managers.add(manager);
 		allDetecting = true;
 		return manager;
@@ -62,25 +62,25 @@ public class CamerasSupervisor {
 	}
 
 	public void reset() {
-		for (CameraManager manager : managers) {
+		for (final CameraManager manager : managers) {
 			manager.reset();
 		}
 
-		for (ShotProcessor processor : config.getShotProcessors()) {
+		for (final ShotProcessor processor : config.getShotProcessors()) {
 			processor.reset();
 		}
 	}
 
-	public void setStreamingAll(boolean isStreaming) {
-		for (CameraManager manager : managers) {
+	public void setStreamingAll(final boolean isStreaming) {
+		for (final CameraManager manager : managers) {
 			manager.setStreaming(isStreaming);
 		}
 	}
 
-	public void setDetectingAll(boolean isDetecting) {
+	public void setDetectingAll(final boolean isDetecting) {
 		allDetecting = isDetecting;
 
-		for (CameraManager manager : managers) {
+		for (final CameraManager manager : managers) {
 			manager.setDetecting(isDetecting);
 		}
 	}
@@ -90,41 +90,39 @@ public class CamerasSupervisor {
 	}
 
 	public void closeAll() {
-		for (CameraManager manager : managers) {
-			manager.getCanvasManager().close();
-			manager.setDetecting(false);
-			manager.setStreaming(false);
-			allDetecting = false;
+		for (final CameraManager manager : managers) {
 			manager.close();
 		}
+		
+		allDetecting = false;
 	}
 
 	public List<CameraManager> getCameraManagers() {
 		return managers;
 	}
 
-	public CameraManager getCameraManager(int index) {
+	public CameraManager getCameraManager(final int index) {
 		return managers.get(index);
 	}
 
 	public List<CanvasManager> getCanvasManagers() {
-		List<CanvasManager> canvasManagers = new ArrayList<CanvasManager>();
+		final List<CanvasManager> canvasManagers = new ArrayList<CanvasManager>();
 
-		for (CameraManager manager : managers) {
+		for (final CameraManager manager : managers) {
 			canvasManagers.add(manager.getCanvasManager());
 		}
 
 		return canvasManagers;
 	}
 
-	public CanvasManager getCanvasManager(int index) {
+	public CanvasManager getCanvasManager(final int index) {
 		return managers.get(index).getCanvasManager();
 	}
 
 	public List<Group> getTargets() {
-		List<Group> targets = new ArrayList<Group>();
+		final List<Group> targets = new ArrayList<Group>();
 
-		for (CameraManager manager : managers) {
+		for (final CameraManager manager : managers) {
 			targets.addAll(manager.getCanvasManager().getTargetGroups());
 		}
 

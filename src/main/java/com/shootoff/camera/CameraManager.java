@@ -55,7 +55,6 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-import cern.colt.Arrays;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Alert;
@@ -228,6 +227,9 @@ public class CameraManager {
 	}
 
 	public void close() {
+		getCanvasManager().close();
+		setDetecting(false);
+		setStreaming(false);
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);

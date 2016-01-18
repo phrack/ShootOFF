@@ -206,9 +206,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		});
 
 		if (config.getWebcams().isEmpty()) {
-			Camera defaultCamera = Camera.getDefault();
-			if (defaultCamera != null) {
-				if (!addCameraTab("Default", defaultCamera)) cameraLockFailure(defaultCamera, true);
+			Optional<Camera> defaultCamera = Camera.getDefault();
+			if (defaultCamera.isPresent()) {
+				if (!addCameraTab("Default", defaultCamera.get())) cameraLockFailure(defaultCamera.get(), true);
 			} else {
 				Main.closeNoCamera();
 			}
@@ -376,7 +376,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.clearManagers();
 
 		if (config.getWebcams().isEmpty()) {
-			if (!addCameraTab("Default", Camera.getDefault())) cameraLockFailure(Camera.getDefault(), true);
+			Optional<Camera> defaultCam = Camera.getDefault();
+			
+			if (defaultCam.isPresent()) {
+				if (!addCameraTab("Default", defaultCam.get())) cameraLockFailure(defaultCam.get(), true);
+			} else {
+				logger.error("Default camera was not fetched after clearing camera settings!");
+				Main.closeNoCamera();
+			}
 		} else {
 			int failureCount = 0;
 
