@@ -249,11 +249,10 @@ public final class ShotDetectionManager {
 			Bounds b = cameraManager.getProjectionBounds().get();
 			BufferedImage subFrame = frame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
 					(int) b.getHeight());
-			workingCopy = deepCopy(subFrame);
+			workingCopy = subFrame;
 
 		} else {
-
-			workingCopy = deepCopy(frame);
+			workingCopy = frame;
 
 		}
 		
@@ -290,21 +289,7 @@ public final class ShotDetectionManager {
 
 			}
 
-			// We don't show a warning if the excessive motion happens very
-			// early in the feed
-			// But we still need to skip detection on those frames
-			// That's why this is in two ifs
-			if (isExcessiveMotion(thresholdPixelsSize)) {
-				logger.trace("excessiveMotion {}", thresholdPixelsSize);
-				
-				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
-
-				for (Pixel pixel : thresholdPixels) {
-					drawOnCurrentFrame(pixel.x, pixel.y, 0x0000FF);
-				}
-			}
-
-			else if (thresholdPixelsSize >= getMinimumShotDimension()) {
+			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
 
 				logger.trace("thresholdPixels {}", thresholdPixelsSize);
 
@@ -314,6 +299,16 @@ public final class ShotDetectionManager {
 
 				detectShots(workingCopy, clusters);
 			}
+			
+			// Moved to after detectShots because otherwise we'll have changed pixels in the frame that's being checked for shots
+			else if (isExcessiveMotion(thresholdPixelsSize)) {
+				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
+				
+				for (Pixel pixel : thresholdPixels) {
+					drawOnCurrentFrame(pixel.x, pixel.y, 0x0000FF);
+				}
+			}
+			
 		}
 
 		applyFilter();

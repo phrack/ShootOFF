@@ -276,7 +276,15 @@ public class CanvasManager {
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g2.drawImage(source, 0, 0, width, height, null);
 		g2.dispose();
+		
+		
 		return tmp;
+	}
+	
+	public BufferedImage getBufferedImage()
+	{
+		BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
+		return projectedScene;
 	}
 
 	public Bounds translateCameraToCanvas(Bounds bounds) {
@@ -292,7 +300,7 @@ public class CanvasManager {
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
 
-		logger.info("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+		logger.debug("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
 
 		return new BoundingBox(minX, minY, width, height);
@@ -311,7 +319,7 @@ public class CanvasManager {
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
 
-		logger.info("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+		logger.debug("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
 
 		return new BoundingBox(minX, minY, width, height);

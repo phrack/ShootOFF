@@ -18,6 +18,7 @@
 
 package com.shootoff.gui.controller;
 
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -1277,9 +1278,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		MenuItem addProjectorTargetItem = new MenuItem(targetName);
 		addProjectorTargetItem.setMnemonicParsing(false);
 
-		addProjectorTargetItem.setOnAction((e) -> {
-			arenaController.getCanvasManager().addTarget(path);
-		});
+        addProjectorTargetItem.setOnAction((e) -> {
+            Optional<Target> t = arenaController.getCanvasManager().addTarget(path);
+           
+            if (t.isPresent()) {
+                t.get().setTargetEventListener(arenaController);
+            }
+        });
 
 		MenuItem editTargetItem = new MenuItem(targetName);
 		editTargetItem.setMnemonicParsing(false);
@@ -1301,5 +1306,5 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addArenaTargetMenu.getItems().add(addProjectorTargetItem);
 		editTargetMenu.getItems().add(editTargetItem);
 	}
-
+	
 }

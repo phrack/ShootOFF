@@ -18,6 +18,7 @@
 
 package com.shootoff.gui.controller;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetEventListener;
 import com.shootoff.gui.TimerPool;
 
 import javafx.application.Platform;
@@ -52,7 +54,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ProjectorArenaController implements CalibrationListener {
+public class ProjectorArenaController implements CalibrationListener, TargetEventListener {
 	private final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	private Stage arenaStage;
@@ -81,6 +83,8 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
 		Scene scene = new Scene(arenaAnchor, 500, 500);
 		arenaStage.setScene(scene);
+		
+		updateCameraManagerArenaImage();
 	}
 
 	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
@@ -103,6 +107,8 @@ public class ProjectorArenaController implements CalibrationListener {
 		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
+		
+		updateCameraManagerArenaImage();
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
@@ -136,6 +142,23 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		return Optional.of(stageHomeScreens.get(0));
 	}
+	
+    @Override
+    public void targetMoved(Target t, double newX, double newY) {
+    	updateCameraManagerArenaImage();
+    }
+    
+    private void updateCameraManagerArenaImage()
+    {
+    	BufferedImage arenaImage = getCanvasManager().getBufferedImage();
+    	
+    	Thread t = new Thread(() -> {
+    	if (feedCanvasManager != null && feedCanvasManager.getCameraManager() != null)
+    		feedCanvasManager.getCameraManager().setArenaImage(arenaImage);
+    	});
+    	t.start();
+    }
+
 
 	public void autoPlaceArena() {
 		Optional<Screen> homeScreen = getStageHomeScreen(arenaStage);

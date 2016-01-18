@@ -123,11 +123,22 @@ public class Target {
 	public void setPosition(double x, double y) {
 		targetGroup.setLayoutX(x);
 		targetGroup.setLayoutY(y);
+		
+        if (targetEventListener.isPresent()) {
+            targetEventListener.get().targetMoved(this, x, y);
+        }
+
 	}
 
 	public Point2D getPosition() {
 		return new Point2D(targetGroup.getLayoutX(), targetGroup.getLayoutY());
 	}
+	
+    private Optional<TargetEventListener> targetEventListener = Optional.empty();
+    public void setTargetEventListener(TargetEventListener l) {
+        targetEventListener = Optional.ofNullable(l);
+    }
+
 
 	public void setDimensions(double newWidth, double newHeight) {
 		double currentWidth = targetGroup.getBoundsInParent().getWidth();

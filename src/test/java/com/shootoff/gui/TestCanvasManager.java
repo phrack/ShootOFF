@@ -36,6 +36,8 @@ public class TestCanvasManager {
 	public void setUp() throws ConfigurationException {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		
+		nu.pattern.OpenCV.loadShared();
+		
 		config = new Configuration(new String[0]);
 		config.setDebugMode(true);
 		CamerasSupervisor cs = new CamerasSupervisor(config);

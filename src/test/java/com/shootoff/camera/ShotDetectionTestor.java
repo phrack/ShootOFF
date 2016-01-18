@@ -25,6 +25,8 @@ public class ShotDetectionTestor {
     public static void setUpBaseClass() {
     	System.setProperty("shootoff.home", System.getProperty("user.dir"));
         Configuration.disableErrorReporting();
+        
+        nu.pattern.OpenCV.loadShared();
     }
 	
 	public void checkShots(ErrorCollector collector, final List<Shot> actualShots, 

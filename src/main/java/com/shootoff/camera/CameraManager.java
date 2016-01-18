@@ -33,6 +33,11 @@ import java.util.concurrent.ScheduledFuture;
 
 import javafx.geometry.Bounds;
 
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -400,6 +405,24 @@ public class CameraManager {
 	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
+	
+
+	private Mat stageMask = new Mat();
+	public void setArenaImage(BufferedImage projectedScene) {
+		
+		if (!projectionBounds.isPresent())
+			return;
+				
+		Mat src = Camera.bufferedImageToMat(projectedScene);	
+		Size dsize = new Size(projectionBounds.get().getWidth(),projectionBounds.get().getHeight());
+		
+		synchronized (stageMask)
+		{
+			Imgproc.resize(src, stageMask, dsize);
+		
+			Imgproc.GaussianBlur(stageMask, stageMask, new Size(7,7), 6.0);			
+		}
+	}
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
 		private boolean showedFPSWarning = false;
@@ -483,7 +506,7 @@ public class CameraManager {
 
 				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
 
-				if (!pFramePair.getKey()) continue;
+				Boolean filtersInitialized = pFramePair.getKey();
 
 				currentFrame = pFramePair.getValue();
 
@@ -523,17 +546,21 @@ public class CameraManager {
 
 					videoWriterStream.encodeVideo(0, frame);
 				}
-
+				
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					canvasManager.updateBackground(currentFrame, projectionBounds);
 				} else {
 					canvasManager.updateBackground(currentFrame, Optional.empty());
 				}
+				
+				
 			}
 
 			detectionExecutor.shutdown();
 		}
-
+		
+		
+		
 		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
 			frameCount++;
 			
@@ -547,6 +574,45 @@ public class CameraManager {
 
 			if (cameraAutoCalibrated) {
 				currentFrame = acm.undistortFrame(currentFrame);
+			}
+			
+			
+			if (cameraAutoCalibrated && controller != null && projectionBounds.isPresent() && stageMask.width() > 0)
+			{
+				final Mat matFrame = Camera.bufferedImageToMat(currentFrame);
+				
+					
+				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(), (int) projectionBounds.get().getMaxY(),
+							(int) projectionBounds.get().getMinX(), (int) projectionBounds.get().getMaxX());
+
+				logger.trace("mask {} {} bounds {} {} smFrame {} {}", stageMask.width(),  stageMask.height(),
+						(int) projectionBounds.get().getWidth(), (int) projectionBounds.get().getHeight(),
+						submatFrame.width(), submatFrame.height());
+
+				
+				/*String filename = String.format("mask-submatFrame-pre-copy.png");
+				File file = new File(filename);
+				filename = file.toString();
+				Highgui.imwrite(filename, submatFrame);*/
+				
+				synchronized (stageMask)
+				{
+					Core.subtract(submatFrame, stageMask, submatFrame);
+				}
+				//dst.copyTo(submatFrame);
+				
+				/*filename = String.format("mask-submatFrame-post-copy.png");
+				file = new File(filename);
+				filename = file.toString();
+				Highgui.imwrite(filename, submatFrame);*/
+				
+				currentFrame = Camera.matToBufferedImage(matFrame);
+				
+				/*if (getDebuggerListener().isPresent()) {
+					getDebuggerListener().get().updateDebugView(subtractedImage);
+				}*/
+
+
 			}
 
 			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
@@ -767,4 +833,5 @@ public class CameraManager {
 	public DeduplicationProcessor getDeduplicationProcessor() {
 		return deduplicationProcessor;
 	}
+
 }
