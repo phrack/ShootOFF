@@ -22,21 +22,21 @@ public class MockCanvasManager extends CanvasManager {
 	private final Configuration config;
 	private final String cameraName;
 	private final boolean useShotProcessors;
-	
+
 	private long startTime = 0;
-	
+
 	public MockCanvasManager(Configuration config) {
-		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()), 
-				FXCollections.observableArrayList());
+		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()), FXCollections
+				.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
 		this.cameraName = "Default";
 		this.useShotProcessors = false;
 	}
-	
+
 	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
-		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()), 
-				FXCollections.observableArrayList());
+		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()), FXCollections
+				.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
 		this.cameraName = "Default";
@@ -46,17 +46,15 @@ public class MockCanvasManager extends CanvasManager {
 	public String getCameraName() {
 		return cameraName;
 	}
-	
+
 	@Override
 	public void addShot(Color color, double x, double y) {
 		if (startTime == 0) startTime = System.currentTimeMillis();
-		Shot shot = new Shot(color, x, y, 
-				System.currentTimeMillis(), this.cameraManager.getFrameCount(), config.getMarkerRadius());
-		
-		
+		Shot shot = new Shot(color, x, y, System.currentTimeMillis(), this.cameraManager.getFrameCount(),
+				config.getMarkerRadius());
+
 		if (useShotProcessors) {
-	
-			
+
 			for (ShotProcessor p : config.getShotProcessors()) {
 				if (!p.processShot(shot)) {
 					logger.info("Processing Shot: Shot Rejected By {}", p.getClass().getName());
@@ -64,20 +62,20 @@ public class MockCanvasManager extends CanvasManager {
 				}
 			}
 		}
-		
+
 		logger.info("Processing Shot: Shot Validated {} {}", shot.getX(), shot.getY());
 		shots.add(shot);
 	}
-	
+
 	public List<Shot> getShots() {
 		return shots;
 	}
-	
+
 	@Override
 	public Target addTarget(Target newTarget) {
 		super.getCanvasGroup().getChildren().add(newTarget.getTargetGroup());
 		super.getTargets().add(newTarget);
-		
+
 		return newTarget;
 	}
 }

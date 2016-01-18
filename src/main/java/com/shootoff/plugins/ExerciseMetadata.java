@@ -24,7 +24,7 @@ public class ExerciseMetadata {
 	private final String creator;
 	private final String description;
 
-	public ExerciseMetadata(String name, String version, String creator, String description) {
+	public ExerciseMetadata(final String name, final String version, final String creator, final String description) {
 		this.name = name;
 		this.version = version;
 		this.creator = creator;

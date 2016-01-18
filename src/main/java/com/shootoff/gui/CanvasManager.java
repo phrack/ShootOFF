@@ -758,7 +758,7 @@ public class CanvasManager {
 
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
 
-		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable, targets.size());
+		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable);
 
 		return addTarget(newTarget);
 	}

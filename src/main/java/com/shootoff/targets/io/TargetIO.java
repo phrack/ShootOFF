@@ -23,6 +23,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
@@ -37,6 +40,8 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 public class TargetIO {
+	private static final Logger logger = LoggerFactory.getLogger(TargetIO.class);
+
 	public static final double DEFAULT_OPACITY = 0.5;
 
 	public static void saveTarget(List<Node> regions, File targetFile) {
@@ -45,62 +50,58 @@ public class TargetIO {
 		if (targetFile.getName().endsWith("target")) {
 			visitor = new XMLTargetWriter(targetFile);
 		} else {
-			System.err.println("Unknown target file type.");
+			logger.error("Unknown target file type.");
 			return;
 		}
 
-		for (Node node : regions) {
-			TargetRegion region = (TargetRegion) node;
+		final URI baseURI = new File(System.getProperty("user.dir")).toURI();
+		
+		for (final Node node : regions) {
+			final TargetRegion region = (TargetRegion) node;
 
 			switch (region.getType()) {
-			case IMAGE:
+			case IMAGE: {
 				ImageRegion img = (ImageRegion) node;
 
 				// Make image path relative to cwd so that image files can be
 				// found on different machines
-				URI baseURI = new File(System.getProperty("user.dir")).toURI();
-				URI imgURI = new File(img.getImageFile().getAbsolutePath())
-						.toURI();
-				File relativeImageFile = new File(baseURI.relativize(imgURI)
-						.getPath());
+				final URI imgURI = new File(img.getImageFile().getAbsolutePath()).toURI();
+				final File relativeImageFile = new File(baseURI.relativize(imgURI).getPath());
 
-				visitor.visitImageRegion(img.getBoundsInParent().getMinX(), img
-						.getBoundsInParent().getMinY(), relativeImageFile, img
-						.getAllTags());
+				visitor.visitImageRegion(img.getBoundsInParent().getMinX(), img.getBoundsInParent().getMinY(),
+						relativeImageFile, img.getAllTags());
+			}
 				break;
-			case RECTANGLE:
-				RectangleRegion rec = (RectangleRegion) node;
-				visitor.visitRectangleRegion(rec.getBoundsInParent().getMinX(),
-						rec.getBoundsInParent().getMinY(), rec.getWidth(), rec
-								.getHeight(), TargetEditorController
-								.getColorName((Color) rec.getFill()), rec
-								.getAllTags());
+			case RECTANGLE: {
+				final RectangleRegion rec = (RectangleRegion) node;
+				visitor.visitRectangleRegion(rec.getBoundsInParent().getMinX(), rec.getBoundsInParent().getMinY(),
+						rec.getWidth(), rec.getHeight(), TargetEditorController.getColorName((Color) rec.getFill()),
+						rec.getAllTags());
+			}
 				break;
-			case ELLIPSE:
-				EllipseRegion ell = (EllipseRegion) node;
-				double absoluteCenterX = ell.getBoundsInParent().getMinX()
-						+ ell.getRadiusX();
-				double absoluteCenterY = ell.getBoundsInParent().getMinY()
-						+ ell.getRadiusY();
-				visitor.visitEllipse(absoluteCenterX, absoluteCenterY, ell
-						.getRadiusX(), ell.getRadiusY(), TargetEditorController
-						.getColorName((Color) ell.getFill()), ell.getAllTags());
+			case ELLIPSE: {
+				final EllipseRegion ell = (EllipseRegion) node;
+				final double absoluteCenterX = ell.getBoundsInParent().getMinX() + ell.getRadiusX();
+				final double absoluteCenterY = ell.getBoundsInParent().getMinY() + ell.getRadiusY();
+				visitor.visitEllipse(absoluteCenterX, absoluteCenterY, ell.getRadiusX(), ell.getRadiusY(),
+						TargetEditorController.getColorName((Color) ell.getFill()), ell.getAllTags());
+			}
 				break;
-			case POLYGON:
+			case POLYGON: {
 				PolygonRegion pol = (PolygonRegion) node;
 
 				Double[] points = new Double[pol.getPoints().size()];
 
 				for (int i = 0; i < pol.getPoints().size(); i += 2) {
-					Point2D p = pol.localToParent(pol.getPoints().get(i), pol
-							.getPoints().get(i + 1));
+					Point2D p = pol.localToParent(pol.getPoints().get(i), pol.getPoints().get(i + 1));
 
 					points[i] = p.getX();
 					points[i + 1] = p.getY();
 				}
 
-				visitor.visitPolygonRegion(points, TargetEditorController
-						.getColorName((Color) pol.getFill()), pol.getAllTags());
+				visitor.visitPolygonRegion(points, TargetEditorController.getColorName((Color) pol.getFill()),
+						pol.getAllTags());
+			}
 				break;
 			}
 		}
@@ -108,28 +109,27 @@ public class TargetIO {
 		visitor.visitEnd();
 	}
 
-	public static Optional<Group> loadTarget(File targetFile) {
+	public static Optional<Group> loadTarget(final File targetFile) {
 		List<Node> regions;
 
 		if (targetFile.getName().endsWith("target")) {
 			regions = new XMLTargetReader(targetFile).load();
 		} else {
-			System.err.println("Unknown target file type.");
+			logger.error("Unknown target file type.");
 			return Optional.empty();
 		}
 
-		Group targetGroup = new Group();
-		for (Node node : regions) {
-			TargetRegion region = (TargetRegion) node;
+		final Group targetGroup = new Group();
+		for (final Node node : regions) {
+			final TargetRegion region = (TargetRegion) node;
 
-			if (region.tagExists("visible")
-					&& region.getTag("visible").equals("false")) {
-
+			if (region.tagExists("visible") && region.getTag("visible").equals("false")) {
 				node.setVisible(false);
 			}
 
-			if (region.getType() != RegionType.IMAGE)
+			if (region.getType() != RegionType.IMAGE) {
 				node.setOpacity(DEFAULT_OPACITY);
+			}
 			targetGroup.getChildren().add(node);
 		}
 

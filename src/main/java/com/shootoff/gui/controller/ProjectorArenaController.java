@@ -55,7 +55,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ProjectorArenaController implements CalibrationListener, TargetEventListener {
-	private final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	private Stage arenaStage;
 	private Stage shootOFFStage;
@@ -99,11 +99,13 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 		canvasManager.updateBackground(null, Optional.empty());
 
 		arenaAnchor.widthProperty().addListener((e) -> {
-			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+
+			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
 		arenaAnchor.heightProperty().addListener((e) -> {
-			canvasManager.setBackgroundFit(arenaAnchor.getWidth(), arenaAnchor.getHeight());
+
+			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
@@ -328,8 +330,37 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 		for (Target t : new ArrayList<Target>(canvasManager.getTargets()))
 			canvasManager.removeTarget(t);
 
-		for (Target t : course.getTargets())
+		boolean scaleCourse = course.getResolution().isPresent()
+				&& (course.getResolution().get().getWidth() != getWidth()
+				|| course.getResolution().get().getHeight() != getHeight());
+		
+		double widthScaleFactor = 1;
+		double heightScaleFactor = 1;
+		
+		if (scaleCourse) {
+			widthScaleFactor = getWidth() / course.getResolution().get().getWidth();
+			heightScaleFactor = getHeight() / course.getResolution().get().getHeight();
+		}
+
+		for (Target t : course.getTargets()) {
+			if (scaleCourse) {
+				double newWidth = t.getDimension().getWidth() * widthScaleFactor;
+				double widthDelta = newWidth - t.getDimension().getWidth();
+				double newX = t.getTargetGroup().getBoundsInParent().getMinX() * widthScaleFactor;
+				double deltaX = newX - t.getTargetGroup().getBoundsInParent().getMinX() + (widthDelta / 2);
+			
+				double newHeight = t.getDimension().getHeight() * heightScaleFactor;
+				double heightDelta = newHeight - t.getDimension().getHeight();
+				double newY = t.getTargetGroup().getBoundsInParent().getMinY() * heightScaleFactor;
+				double deltaY = newY - t.getTargetGroup().getBoundsInParent().getMinY() + (heightDelta / 2);
+				
+				t.setPosition(t.getPosition().getX() + deltaX, t.getPosition().getY() + deltaY);
+				
+				t.setDimensions(newWidth, newHeight);
+			}
+
 			canvasManager.addTarget(t);
+	}
 	}
 
 	@FXML

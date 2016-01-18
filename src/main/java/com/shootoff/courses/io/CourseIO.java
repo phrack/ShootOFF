@@ -21,40 +21,47 @@ package com.shootoff.courses.io;
 import java.io.File;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.courses.Course;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
 
 public class CourseIO {
-	public static void saveCourse(ProjectorArenaController arenaController, File courseFile) {
+	private static final Logger logger = LoggerFactory.getLogger(CourseIO.class);
+	
+	public static void saveCourse(ProjectorArenaController arenaController, final File courseFile) {
 		CourseVisitor visitor;
 
 		if (courseFile.getName().endsWith("course")) {
 			visitor = new XMLCourseWriter(courseFile);
 		} else {
-			System.err.println("Unknown course file type.");
+			logger.error("Unknown course file type.");
 			return;
 		}
 
 		if (arenaController.getBackground().isPresent()) {
-			LocatedImage background = arenaController.getBackground().get();
+			final LocatedImage background = arenaController.getBackground().get();
 			visitor.visitBackground(background.getURL(), background.isResource());
 		}
 
-		for (Target t : arenaController.getCanvasManager().getTargets()) {
-			File relativeTargetFile = new File(t.getTargetFile().getAbsolutePath()
+		for (final Target t : arenaController.getCanvasManager().getTargets()) {
+			final File relativeTargetFile = new File(t.getTargetFile().getAbsolutePath()
 					.replace(System.getProperty("shootoff.home") + File.separator, ""));
 			visitor.visitTarget(relativeTargetFile, t.getPosition().getX(), t.getPosition().getY(),
 					t.getDimension().getWidth(), t.getDimension().getHeight());
 		}
+		
+		visitor.visitResolution(arenaController.getWidth(), arenaController.getHeight());
 
 		visitor.visitEnd();
 	}
 
-	public static Optional<Course> loadCourse(ProjectorArenaController arenaController, File courseFile) {
+	public static Optional<Course> loadCourse(ProjectorArenaController arenaController, final File courseFile) {
 		if (!courseFile.getName().endsWith("course")) {
-			System.err.println("Unknown course file type.");
+			logger.error("Unknown course file type.");
 			return Optional.empty();
 		}
 

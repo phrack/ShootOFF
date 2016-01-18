@@ -55,7 +55,7 @@ public class TestCourseIO {
 
 		File targetFile = new File(targetName);
 		Target target = new Target(targetFile, TargetIO.loadTarget(targetFile).get(), config,
-				new MockCanvasManager(config), false, 0);
+				new MockCanvasManager(config), false);
 		target.setPosition(targetX, targetY);
 		target.setDimensions(targetWidth, targetHeight);
 
@@ -80,6 +80,12 @@ public class TestCourseIO {
 		assertEquals(targetY, targets.get(FIRST_TARGET_INDEX).getPosition().getY(), 1);
 		assertEquals(targetWidth, targets.get(FIRST_TARGET_INDEX).getDimension().getWidth(), 1);
 		assertEquals(targetHeight, targets.get(FIRST_TARGET_INDEX).getDimension().getHeight(), 1);
+		
+		// Default arena dimensions (this will fail if you change the dimensions in the fxml file for
+		// the arena)
+		assertTrue(course.get().getResolution().isPresent());
+		assertEquals(500, course.get().getResolution().get().getWidth(), 1);
+		assertEquals(500, course.get().getResolution().get().getHeight(), 1);
 	}
 
 	@Test

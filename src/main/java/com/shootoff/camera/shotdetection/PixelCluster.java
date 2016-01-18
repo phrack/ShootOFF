@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 public class PixelCluster extends java.util.ArrayList<Pixel> {
 
-	private final Logger logger = LoggerFactory.getLogger(PixelCluster.class);
+	private static final Logger logger = LoggerFactory.getLogger(PixelCluster.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,7 +24,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
 	public double getColorDifference(BufferedImage frame, double[][] colorDiffMovingAverage) {
-		ArrayList<Pixel> visited = new ArrayList<Pixel>();
+		final ArrayList<Pixel> visited = new ArrayList<Pixel>();
 
 		double diff = 0;
 		double lumDiff = 0;
@@ -65,7 +65,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	}
 
 	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, double[][] colorDiffMovingAverage) {
-		double colorDist = getColorDifference(frame, colorDiffMovingAverage);
+		final double colorDist = getColorDifference(frame, colorDiffMovingAverage);
 
 		logger.trace("getcolorjavafx {} - {}", colorDist, (colorDist < 0));
 

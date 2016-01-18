@@ -89,7 +89,7 @@ public class CameraManager {
 	
 	private final ShotDetectionManager shotDetectionManager;
 
-	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	private final Optional<Camera> webcam;
 	private final Object processingLock;
 	private boolean processedVideo = false;

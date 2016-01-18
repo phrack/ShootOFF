@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="53.000000" y="34.000000" file="targets/pig.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_1.wav)" />
+	</image>
+</target>
