@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 
 import javafx.geometry.Bounds;
@@ -41,8 +39,8 @@ import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
-import com.shootoff.gui.TimerPool;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -191,7 +189,7 @@ public class CameraManager {
 			}
 		}
 
-		new Thread(detector).start();
+		new Thread(detector, "ShotDetector").start();
 	}
 
 	public boolean isSectorOn(int x, int y) {
@@ -234,7 +232,6 @@ public class CameraManager {
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		TimerPool.cancelTimer(motionDiagnosticFuture);
-		detectionExecutor.shutdownNow();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -400,7 +397,6 @@ public class CameraManager {
 		return webcamFPS;
 	}
 
-	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
@@ -463,8 +459,6 @@ public class CameraManager {
 				processedVideo = true;
 				processingLock.notifyAll();
 			}
-
-			detectionExecutor.shutdown();
 		}
 		
 		private void streamCameraFrames() {
@@ -476,7 +470,6 @@ public class CameraManager {
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					// Camera appears to have closed
 					showMissingCameraError();
-					detectionExecutor.shutdown();
 					return;
 				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 					// Camera appears to be open but got a null frame
@@ -533,8 +526,6 @@ public class CameraManager {
 					canvasManager.updateBackground(currentFrame, Optional.empty());
 				}
 			}
-
-			detectionExecutor.shutdown();
 		}
 
 		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
@@ -615,7 +606,7 @@ public class CameraManager {
 				}
 
 			});
-			new Thread(acm).start();
+			new Thread(acm, "AutoCalibration").start();
 		}
 
 		protected void autoCalibrateSuccess(Bounds bounds) {

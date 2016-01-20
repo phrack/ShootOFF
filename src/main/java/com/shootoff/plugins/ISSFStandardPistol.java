@@ -39,6 +39,7 @@ import javafx.scene.paint.Color;
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.util.NamedThreadFactory;
 
 public class ISSFStandardPistol extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private static final Logger logger = LoggerFactory.getLogger(ISSFStandardPistol.class);
@@ -49,7 +50,8 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private final static int ROUND_COL_WIDTH = 80;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 4;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, 
+			new NamedThreadFactory("ISSFStandardPistolExercise"));
 	private ScheduledFuture<Void> endRound;
 	private TrainingExerciseBase thisSuper;
 	private static int[] ROUND_TIMES = { 150, 20, 10 };
@@ -259,7 +261,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		super.showTextOnFeed("");
 
 		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory("ISSFStandardPistolExercise"));
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 

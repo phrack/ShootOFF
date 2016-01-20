@@ -1,4 +1,4 @@
-package com.shootoff.gui;
+package com.shootoff.util;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TimerPool {
 	private static final int CORE_POOL_SIZE = 20;
-	private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+			new NamedThreadFactory("ShootOFFTimerPool"));
 
 	public static ScheduledFuture<?> schedule(Runnable task, long msDelay) {
 		return executorService.schedule(task, msDelay, TimeUnit.MILLISECONDS);

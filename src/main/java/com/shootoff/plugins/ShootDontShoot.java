@@ -34,6 +34,7 @@ import javafx.scene.Group;
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.util.NamedThreadFactory;
 
 public class ShootDontShoot extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String TARGET_COL_NAME = "TARGET";
@@ -44,7 +45,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private final static int ROUND_DURATION = 10; // s
 
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+			new NamedThreadFactory("ShootDontShootExercise"));
 
 	private boolean continueExercise = true;
 	private boolean testRun = false;
@@ -53,7 +55,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private int badHits = 0;
 	private List<Target> shootTargets = new ArrayList<Target>();
 	private List<Target> dontShootTargets = new ArrayList<Target>();
-	
+
 	private Random rng = new Random();
 
 	public ShootDontShoot() {}
@@ -76,7 +78,6 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		this.dontShootTargets = dontShootTargets;
 	}
 
-	
 	@Override
 	public void init() {
 		super.addShotTimerColumn(TARGET_COL_NAME, TARGET_COL_WIDTH);
@@ -87,7 +88,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 	}
-	
+
 	// Used to call NewRound from a test
 	protected void callNewRound() {
 		try {
@@ -119,14 +120,15 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 					for (Target target : dontShootTargets)
 						thisSuper.removeTarget(target);
 					dontShootTargets.clear();
-				
+
 					addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
 					addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
 				}
-				
+
 				thisSuper.clearShots();
 
-				if (continueExercise && !testRun) executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+				if (continueExercise && !testRun)
+					executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 			}
 
 			return null;
@@ -216,7 +218,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 		continueExercise = true;
 
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory(
+				"ShootDontShootExercise"));
 		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 	}
 

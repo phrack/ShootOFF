@@ -49,7 +49,6 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
-import com.shootoff.gui.TimerPool;
 import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
@@ -67,6 +66,7 @@ import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;

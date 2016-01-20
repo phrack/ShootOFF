@@ -32,6 +32,7 @@ import javafx.scene.Node;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.util.NamedThreadFactory;
 
 public class DuelingTree extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String HIT_COL_NAME = "Hit By";
@@ -39,7 +40,8 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 	private static final int NEW_ROUND_DELAY = 5; // s
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+			new NamedThreadFactory("DuelingTreeExercise"));
 	private TrainingExerciseBase thisSuper;
 
 	private boolean continueExercise = true;

@@ -292,7 +292,7 @@ public class Main extends Application {
 			}
 		});
 
-		new Thread(task).start();
+		new Thread(task, "DownloadJNLPResources").start();
 	}
 
 	/**
@@ -388,7 +388,7 @@ public class Main extends Application {
 			}
 		});
 
-		new Thread(task).start();
+		new Thread(task, "ExtractJNLPResources").start();
 	}
 
 	public static class ProgressDialog {

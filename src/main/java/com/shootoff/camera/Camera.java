@@ -117,7 +117,7 @@ public class Camera {
 			// If a camera can't be reached, webcam capture seems to freeze
 			// indefinitely. This is done
 			// to add an artificial timeout.
-			Thread t = new Thread(() -> ipcam.getResolution());
+			Thread t = new Thread(() -> ipcam.getResolution(), "GetIPcamResolution");
 			t.start();
 			final int ipcamTimeout = 3000;
 			try {
@@ -236,7 +236,7 @@ public class Camera {
 		if (isMac) {
 			new Thread(() -> {
 				webcam.close();
-			}).start();
+			}, "CloseMacOSXWebcam").start();
 			return true;
 		} else {
 			return webcam.close();
