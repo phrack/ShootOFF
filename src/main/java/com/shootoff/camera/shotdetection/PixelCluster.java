@@ -52,14 +52,14 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 							visited.add(nearPoint);
 
-							logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd - gcd),
+							if (logger.isTraceEnabled()) logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd - gcd),
 									colorDiffMovingAverage[rx][ry]);
 						}
 					}
 			}
 		}
 
-		logger.trace("Done visiting - {}", diff - lumDiff);
+		if (logger.isTraceEnabled()) logger.trace("Done visiting - {}", diff - lumDiff);
 
 		return diff - lumDiff;
 	}
@@ -67,7 +67,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, double[][] colorDiffMovingAverage) {
 		final double colorDist = getColorDifference(frame, colorDiffMovingAverage);
 
-		logger.trace("getcolorjavafx {} - {}", colorDist, (colorDist < 0));
+		if (logger.isTraceEnabled()) logger.trace("getcolorjavafx {} - {}", colorDist, (colorDist < 0));
 
 		if (Math.abs(colorDist) < 2) {
 			return Optional.empty();

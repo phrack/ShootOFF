@@ -61,7 +61,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import javafx.util.Pair;
 
 public class CameraManager {
 	public static final int DEFAULT_FEED_WIDTH = 640;
@@ -477,11 +476,7 @@ public class CameraManager {
 					continue;
 				}
 
-				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
-
-				if (!pFramePair.getKey()) continue;
-
-				currentFrame = pFramePair.getValue();
+				currentFrame = processFrame(currentFrame);
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
@@ -528,7 +523,7 @@ public class CameraManager {
 			}
 		}
 
-		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
+		private BufferedImage processFrame(BufferedImage currentFrame) {
 			frameCount++;
 			
 			if (webcam.isPresent() && (int)(getFrameCount() % DEFAULT_FPS) == 0) {
@@ -543,9 +538,9 @@ public class CameraManager {
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
+			shotDetectionManager.processFrame(currentFrame, isDetecting);
 			
-			return new Pair<Boolean, BufferedImage>(result, currentFrame);
+			return currentFrame;
 		}
 		
 		private void estimateCameraFPS()

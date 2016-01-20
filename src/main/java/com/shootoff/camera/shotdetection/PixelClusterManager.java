@@ -148,25 +148,25 @@ public class PixelClusterManager {
 					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
 							* MINIMUM_CONNECTEDNESS_FACTOR), MAXIMUM_CONNECTEDNESS_SCALE);
 
-			logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
+			if (logger.isTraceEnabled()) logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
 					cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
 			
 			if (avgconnectedness < scaled_minimum) continue;
 
-			int shotWidth = (maxX - minX) + 1;
-			int shotHeight = (maxY - minY) + 1;
-			double shotRatio = (double) shotWidth / (double) shotHeight;
+			final int shotWidth = (maxX - minX) + 1;
+			final int shotHeight = (maxY - minY) + 1;
+			final double shotRatio = (double) shotWidth / (double) shotHeight;
 
-			logger.trace("Cluster {}: shotRatio {} {} - {} - {} {} {} {}", i, shotWidth, shotHeight, shotRatio, minX,
+			if (logger.isTraceEnabled()) logger.trace("Cluster {}: shotRatio {} {} - {} - {} {} {} {}", i, shotWidth, shotHeight, shotRatio, minX,
 					minY, maxX, maxY);
 
 			if (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO) continue;
 
-			double r = (double) (shotWidth + shotHeight) / 4.0f;
-			double circleArea = Math.PI * Math.pow(r, 2);
-			double density = (double) cluster.size() / circleArea;
+			final double r = (double) (shotWidth + shotHeight) / 4.0f;
+			final double circleArea = Math.PI * Math.pow(r, 2);
+			final double density = (double) cluster.size() / circleArea;
 
-			logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
+			if (logger.isTraceEnabled()) logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
 					density);
 
 			if (density < MINIMUM_DENSITY) continue;
@@ -177,7 +177,7 @@ public class PixelClusterManager {
 			clusters.add(cluster);
 		}
 
-		logger.trace("---- Detected {} shots from {} regions ------", clusters.size(), numberOfRegions + 1);
+		if (logger.isTraceEnabled()) logger.trace("---- Detected {} shots from {} regions ------", clusters.size(), numberOfRegions + 1);
 
 		return clusters;
 	}

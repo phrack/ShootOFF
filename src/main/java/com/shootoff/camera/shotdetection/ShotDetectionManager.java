@@ -229,13 +229,13 @@ public final class ShotDetectionManager {
 		boolean drawImageComplete = g.drawImage(source, 0, 0, null);
 
 		if (!drawImageComplete) {
-			logger.error("deepCopy drawImageComplete false");
+			if (logger.isErrorEnabled()) logger.error("deepCopy drawImageComplete false");
 		}
 		g.dispose();
 		return b;
 	}
 
-	public boolean processFrame(BufferedImage frame, boolean detectShots) {
+	public void processFrame(BufferedImage frame, boolean detectShots) {
 		// This is the FULL, ORIGINAL FRAME passed from CameraManager
 		currentFullFrame = frame;
 
@@ -272,8 +272,7 @@ public final class ShotDetectionManager {
 			}
 		}
 
-		if (checkIfInitialized()) filtersInitialized = true;
-		
+		if (!filtersInitialized) filtersInitialized = checkIfInitialized();
 		
 		//if (thresholdPixelsSize >= 1) logger.debug("detectShots {} filtersInitialized {}", detectShots, filtersInitialized);
 
@@ -292,7 +291,7 @@ public final class ShotDetectionManager {
 			// But we still need to skip detection on those frames
 			// That's why this is in two ifs
 			if (isExcessiveMotion(thresholdPixelsSize)) {
-				logger.trace("excessiveMotion {}", thresholdPixelsSize);
+				if (logger.isTraceEnabled()) logger.trace("excessiveMotion {}", thresholdPixelsSize);
 				
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
@@ -302,12 +301,11 @@ public final class ShotDetectionManager {
 			}
 
 			else if (thresholdPixelsSize >= getMinimumShotDimension()) {
-
-				logger.trace("thresholdPixels {}", thresholdPixelsSize);
+				if (logger.isTraceEnabled()) logger.trace("thresholdPixels {}", thresholdPixelsSize);
 
 				ArrayList<PixelCluster> clusters = clusterPixels(thresholdPixels);
 				
-				logger.trace("clusters {}", clusters.size());
+				if (logger.isTraceEnabled()) logger.trace("clusters {}", clusters.size());
 
 				detectShots(workingCopy, clusters);
 			}
@@ -318,8 +316,6 @@ public final class ShotDetectionManager {
 		if (cameraManager.getDebuggerListener().isPresent()) {
 			cameraManager.getDebuggerListener().get().updateDebugView(workingCopy);
 		}
-
-		return filtersInitialized;
 	}
 
 	private ArrayList<PixelCluster> clusterPixels(ArrayList<Pixel> thresholdPixels) {
@@ -356,7 +352,7 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean shouldShowBrightnessWarning() {
-		logger.trace("avgBrightPixels {}", avgBrightPixels);
+		if (logger.isTraceEnabled()) logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount() > BRIGHTNESS_WARNING_FRAMECOUNT) {
