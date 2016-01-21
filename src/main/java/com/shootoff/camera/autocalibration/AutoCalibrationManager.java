@@ -46,6 +46,12 @@ import org.slf4j.LoggerFactory;
 //import ch.qos.logback.classic.Level;
 
 
+
+
+
+
+
+
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 
@@ -56,29 +62,36 @@ public class AutoCalibrationManager implements Runnable {
 	private final static int PATTERN_WIDTH = 9;
 	private final static int PATTERN_HEIGHT = 6;
 	private final static Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
+	
+	private BufferedImage frame = null;
 
-	private BufferedImage frame;
-
-	private Callback<Optional<Bounds>, Void> callback;
+	private Callback<Void, Void> callback;
 
 	private CameraManager cameraManager;
 
-	public void setCallback(Callback<Optional<Bounds>, Void> callback) {
+	public void setCallback(Callback<Void, Void> callback) {
 		this.callback = callback;
 	}
 
 	public void setFrame(BufferedImage frame) {
-		this.frame = frame;
+		synchronized (frame)
+		{
+			this.frame = frame;
+		};
 	}
 
 	public AutoCalibrationManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
-		 //((ch.qos.logback.classic.Logger)
-		 //logger).setLevel(ch.qos.logback.classic.Level.TRACE);
+		 ((ch.qos.logback.classic.Logger)
+		 logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
 	}
 
 	// Stores the transformation matrix
 	private Mat perspMat = null;
+	public Mat getPerspMat() {
+		return perspMat;
+	}
+	
 
 	// Stores the bounding box we'll pass back to CameraManager
 	private Bounds boundingBox = null;
@@ -105,10 +118,31 @@ public class AutoCalibrationManager implements Runnable {
 	private static final int HOUGHLINES_THRESHOLD = 40;
 	private Size gaussianBlurSize;
 
+
+	private long frameTimestampBeforeFrameChange;
+	
+	private Bounds boundsResult = null;
+	private long frameDelayResult;
+	public Bounds getBoundsResult()
+	{
+		if (boundsResult == null)
+			logger.error("getBoundsResult called when boundsResult==null, isCalibrated {}", isCalibrated);
+		
+		return boundsResult;
+	}
+	public long getFrameDelayResult()
+	{
+		return frameDelayResult;
+	}
+	
 	private void reset() {
 		isCalibrated = false;
 		warpInitialized = false;
+		boundsResult = null;
 	}
+	
+	public final Object monitor = new Object();
+	
 
 	@Override
 	public void run() {
@@ -116,19 +150,87 @@ public class AutoCalibrationManager implements Runnable {
 			reset();
 		}
 
-		Optional<Bounds> bounds = processFrame(frame);
+		Optional<Bounds> bounds = Optional.empty();
+		do
+		{
+			synchronized(monitor)
+			{
+				try {
+					monitor.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			};
+			bounds = processFrame(frame);
+			
+		} while (!bounds.isPresent());
+		
+		boundsResult = bounds.get();
+		
+		Optional<Long> frameDelay = Optional.empty();
+		frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
+		cameraManager.setArenaBackground(null);
+		do
+		{
+			synchronized(monitor)
+			{
+				try {
+					monitor.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			};
+			frameDelay = checkForFrameChange(frame);
+		} while (!frameDelay.isPresent());
+		
+		frameDelayResult = frameDelay.get();
 
 		if (callback != null && bounds.isPresent()) {
-			callback.call(bounds);
+			callback.call(null);
 		}
 	}
 
-	public Mat getPerspMat() {
-		return perspMat;
+	private Optional<Long> checkForFrameChange(BufferedImage frame) {
+		Mat mat;
+		
+		synchronized (frame)
+		{
+			undistortFrame(frame);
+			mat = Camera.bufferedImageToMat(frame);
+		};
+		
+		double[] pixel = getFrameDelayPixel(mat);
+		
+		logger.debug("checkForFrameChange {}", pixel);
+		
+		if (pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10)
+		{
+			return Optional.of(cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange);
+		}
+		return Optional.empty();
+	}
+
+	private double[] getFrameDelayPixel(Mat mat) {
+		double squareHeight = boundsResult.getHeight() / (double)(PATTERN_HEIGHT+1);
+		double squareWidth = boundsResult.getWidth() / (double)(PATTERN_WIDTH+1);
+		
+		int secondSquareCenterX = (int)(boundsResult.getMinX() + (squareWidth*1.5));
+		int secondSquareCenterY = (int)(boundsResult.getMinY() + (squareHeight*.5));
+		
+		logger.debug("getFrameDelayPixel x {} y{}", secondSquareCenterX, secondSquareCenterY);
+		
+		return mat.get(secondSquareCenterX, secondSquareCenterY);
 	}
 
 	public Optional<Bounds> processFrame(BufferedImage frame) {
-		Mat mat = Camera.bufferedImageToMat(frame);
+		Mat mat;
+		
+		synchronized (frame)
+		{
+			mat = Camera.bufferedImageToMat(frame);
+		};
 
 		// For debugging
 		Mat traceMat = null;
@@ -168,29 +270,74 @@ public class AutoCalibrationManager implements Runnable {
 
 		logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
 				boundingBox.getHeight());
+		
+		Mat undistorted = warpPerspective(mat);
 
 		if (logger.isTraceEnabled()) {
-
-			Mat undistorted = warpPerspective(mat);
 
 			String filename = String.format("calibrate-undist.png");
 			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, undistorted);
-
-			undistorted = undistorted.submat((int) boundingBox.getMinY(), (int) boundingBox.getMaxY(),
+			
+			Mat undistortedCropped = undistorted.submat((int) boundingBox.getMinY(), (int) boundingBox.getMaxY(),
 					(int) boundingBox.getMinX(), (int) boundingBox.getMaxX());
 
 			filename = String.format("calibrate-undist-cropped.png");
 			file = new File(filename);
 			filename = file.toString();
-			Highgui.imwrite(filename, undistorted);
+			Highgui.imwrite(filename, undistortedCropped);
 		}
+		
+		Mat warpedBoardCorners = warpCorners(boardCorners.get());
+		findColors(undistorted, warpedBoardCorners);
+		
+
+
 
 		isCalibrated = true;
+		
+		double squareHeight = boundingBox.getHeight() / (double)(PATTERN_HEIGHT+1);
+		double squareWidth = boundingBox.getWidth() / (double)(PATTERN_WIDTH+1);
+		
+		int secondSquareCenterX = (int)(boundingBox.getMinX() + (squareWidth*1.5));
+		int secondSquareCenterY = (int)(boundingBox.getMinY() + (squareHeight*.5));
+		
+		logger.debug("pF getFrameDelayPixel x {} y{}", secondSquareCenterX, secondSquareCenterY);
 
 		return Optional.of(boundingBox);
 
+	}
+	
+	private void findColors(Mat frame, Mat warpedBoardCorners)
+	{
+		Point rCenter = findChessBoardSquareCenter(frame, warpedBoardCorners, 2, 3);
+		Point gCenter = findChessBoardSquareCenter(frame, warpedBoardCorners, 2, 5);
+		Point bCenter = findChessBoardSquareCenter(frame, warpedBoardCorners, 2, 7);
+		
+		logger.debug("findColors {} {} {}", rCenter, gCenter, bCenter);
+		logger.debug("findColors r {} {} {} {}", (int)rCenter.y-10, (int)rCenter.y+10, (int)rCenter.x-10, (int)rCenter.x+10);
+
+		Scalar rMeanColor = Core.mean(frame.submat((int)rCenter.y-10, (int)rCenter.y+10, (int)rCenter.x-10, (int)rCenter.x+10));
+		Scalar gMeanColor = Core.mean(frame.submat((int)gCenter.y-10, (int)gCenter.y+10, (int)gCenter.x-10, (int)gCenter.x+10));
+		Scalar bMeanColor = Core.mean(frame.submat((int)bCenter.y-10, (int)bCenter.y+10, (int)bCenter.x-10, (int)bCenter.x+10));
+		
+		String filename = String.format("rColor.png");
+		File file = new File(filename);
+		filename = file.toString();
+		Highgui.imwrite(filename, frame.submat((int)rCenter.y-10, (int)rCenter.y+10, (int)rCenter.x-10, (int)rCenter.x+10));
+
+		filename = String.format("gColor.png");
+		file = new File(filename);
+		filename = file.toString();
+		Highgui.imwrite(filename, frame.submat((int)gCenter.y-10, (int)gCenter.y+10, (int)gCenter.x-10, (int)gCenter.x+10));
+
+		filename = String.format("bColor.png");
+		file = new File(filename);
+		filename = file.toString();
+		Highgui.imwrite(filename, frame.submat((int)bCenter.y-10, (int)bCenter.y+10, (int)bCenter.x-10, (int)bCenter.x+10));
+
+		logger.debug("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);		
 	}
 
 	private void initializeSize(int width, int height) {
@@ -681,6 +828,27 @@ public class AutoCalibrationManager implements Runnable {
 		}
 
 	}
+	
+	
+	// initializeWarpPerspective MUST BE CALLED first
+	private Mat warpCorners(MatOfPoint2f imageCorners) {
+		
+		if (warpInitialized) {
+
+			Mat mat = new Mat();
+			
+			Core.transform(imageCorners, mat, perspMat);
+			
+
+			return mat;
+		} else {
+			logger.warn("warpCorners called when warpInitialized is false - {} {} - {}", perspMat, boundingBox,
+					isCalibrated);
+
+			return null;
+		}
+
+	}
 
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
 
@@ -718,6 +886,28 @@ public class AutoCalibrationManager implements Runnable {
 		result.put(0, 0, topLeft.x, topLeft.y, topRight.x, topRight.y, bottomRight.x, bottomRight.y, bottomLeft.x,
 				bottomLeft.y);
 
+		return result;
+	}
+	
+	private Point findChessBoardSquareCenter(Mat frame, Mat corners, int row, int col) {
+		if (row >= PATTERN_HEIGHT-1 || col >= PATTERN_WIDTH-1)
+		{
+			logger.warn("findChessBoardSquareColor invalid row or col {} {}", row, col);
+			return null;
+		}
+
+		logger.warn("findChessBoardSquareColor {}", corners.size());
+		
+		logger.warn("findChessBoardSquareColor {} {}", (row*PATTERN_WIDTH-1)+col,
+					((row+1)*PATTERN_WIDTH-1)+col+1);
+				
+		Point topLeft = new Point(corners.get((row*PATTERN_WIDTH-1)+col, 0)[0], corners.get((row*PATTERN_WIDTH-1)+col, 0)[1]);
+		Point bottomRight = new Point(corners.get(((row+1)*PATTERN_WIDTH-1)+col+1, 0)[0], corners.get(((row+1)*PATTERN_WIDTH-1)+col+1, 0)[1]);
+
+		Point result = new Point((topLeft.x+bottomRight.x)/2, (topLeft.y+bottomRight.y)/2);
+		
+		logger.warn("findChessBoardSquareColor {} {} {}", topLeft, bottomRight, result);
+		
 		return result;
 	}
 

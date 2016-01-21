@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -120,6 +122,11 @@ public class CameraManager {
 	private boolean[][] sectorStatuses;
 
 	private int frameCount = 0;
+	private long currentFrameTimestamp = -1;
+	public long getCurrentFrameTimestamp()
+	{
+		return currentFrameTimestamp;
+	}
 
 	private static double webcamFPS = DEFAULT_FPS;
 
@@ -128,8 +135,19 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 
 	private ShootOFFController controller;
+	public ShootOFFController getController() {
+		return controller;
+	}
+	
+	public void setController(ShootOFFController controller) {
+		this.controller = controller;
+	}
+
 
 	private final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
+	public DeduplicationProcessor getDeduplicationProcessor() {
+		return deduplicationProcessor;
+	}
 
 	public CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
@@ -419,12 +437,28 @@ public class CameraManager {
 		Mat src = Camera.bufferedImageToMat(projectedScene);	
 		Size dsize = new Size(projectionBounds.get().getWidth(),projectionBounds.get().getHeight());
 		
-		synchronized (stageMask)
-		{
-			Imgproc.resize(src, stageMask, dsize);
 		
-			Imgproc.GaussianBlur(stageMask, stageMask, new Size(7,7), 6.0);			
-		}
+	    Timer timer = new Timer();
+
+	    TimerTask delayedThreadStartTask = new TimerTask() {
+	        @Override
+	        public void run() {
+	            new Thread(new Runnable() {
+	                @Override
+	                public void run() {
+	            		synchronized (stageMask)
+	            		{
+	            			Imgproc.resize(src, stageMask, dsize);
+	            		
+	            			Imgproc.GaussianBlur(stageMask, stageMask, new Size(9,9), 6.0);			
+	            		}
+	                }
+	            }).start();
+	        }
+	    };
+
+	    timer.schedule(delayedThreadStartTask, 90);
+
 	}
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
@@ -461,6 +495,8 @@ public class CameraManager {
 		public void onVideoPicture(IVideoPictureEvent event) {
 			BufferedImage currentFrame = event.getImage();
 			
+			currentFrameTimestamp = event.getTimeStamp();
+			
 			if (getFrameCount() == 0)
 			{
 				setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
@@ -495,6 +531,8 @@ public class CameraManager {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
 				BufferedImage currentFrame = webcam.get().getImage();
+				currentFrameTimestamp = System.currentTimeMillis();
+				
 
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					// Camera appears to have closed
@@ -571,8 +609,12 @@ public class CameraManager {
 				estimateCameraFPS();
 			}
 			
-			if (autoCalibrationEnabled && (getFrameCount() % (int)getFPS() == 0)) {
-				fireAutoCalibration(currentFrame);
+			if (autoCalibrationEnabled) {
+				acm.setFrame(currentFrame);
+				synchronized(acm.monitor)
+				{
+					acm.monitor.notify();
+				};
 			}
 
 			if (cameraAutoCalibrated) {
@@ -669,37 +711,7 @@ public class CameraManager {
 			}
 		}
 
-		private void fireAutoCalibration(BufferedImage frame) {
 
-			acm.setFrame(frame);
-			acm.setCallback(new Callback<Optional<Bounds>, Void>() {
-
-				@Override
-				public Void call(Optional<Bounds> bounds) {
-					if (bounds.isPresent()) autoCalibrateSuccess(bounds.get());
-					return null;
-				}
-
-			});
-			new Thread(acm).start();
-		}
-
-		protected void autoCalibrateSuccess(Bounds bounds) {
-			if (autoCalibrationEnabled && controller != null) {
-				autoCalibrationEnabled = false;
-
-				cameraAutoCalibrated = true;
-
-				logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
-						(int) bounds.getWidth(), (int) bounds.getHeight());
-
-				Platform.runLater(() -> {
-					controller.calibrate(bounds, false);
-				});
-
-			}
-
-		}
 
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
@@ -818,23 +830,59 @@ public class CameraManager {
 		} , DIAGNOSTIC_MESSAGE_DURATION);
 	}
 
+	private long frameDelay;
+	
+	private void fireAutoCalibration() {
+		acm.setCallback(new Callback<Void, Void>() {
+
+			@Override
+			public Void call(Void param) {
+				autoCalibrateSuccess(acm.getBoundsResult());
+				frameDelay = acm.getFrameDelayResult();
+				return null;
+			}
+		});
+		new Thread(acm).start();
+	}
+
+	protected void autoCalibrateSuccess(Bounds bounds) {
+		if (autoCalibrationEnabled && controller != null) {
+			autoCalibrationEnabled = false;
+
+			cameraAutoCalibrated = true;
+
+			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
+					(int) bounds.getWidth(), (int) bounds.getHeight());
+
+			Platform.runLater(() -> {
+				controller.calibrate(bounds, false);
+			});
+
+		}
+
+	}
 
 	public void enableAutoCalibration() {
 		acm = new AutoCalibrationManager(this);
 		autoCalibrationEnabled = true;
 		cameraAutoCalibrated = false;
+		fireAutoCalibration();
 	}
 
 	public void disableAutoCalibration() {
 		autoCalibrationEnabled = false;
 	}
 
-	public void setController(ShootOFFController controller) {
-		this.controller = controller;
+	public void setArenaBackground(String resourceFilename)
+	{
+		if (controller == null)
+		{
+			logger.error("setArenaBackground called when controller is null");
+			return;
+		}
+			
+		controller.setArenaBackground(resourceFilename);
 	}
 
-	public DeduplicationProcessor getDeduplicationProcessor() {
-		return deduplicationProcessor;
-	}
 
 }

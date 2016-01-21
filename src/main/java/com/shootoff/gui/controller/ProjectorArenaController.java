@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.Timer;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
@@ -145,9 +146,15 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 		return Optional.of(stageHomeScreens.get(0));
 	}
 	
+    private long arenaImageLastUpdate = -1;
     @Override
     public void targetMoved(Target t, double newX, double newY) {
-    	updateCameraManagerArenaImage();
+    	
+    	if (arenaImageLastUpdate == -1 || System.currentTimeMillis() > arenaImageLastUpdate+5)
+    	{
+    		updateCameraManagerArenaImage();
+    		arenaImageLastUpdate = System.currentTimeMillis();
+    	}
     }
     
     private void updateCameraManagerArenaImage()
@@ -158,6 +165,7 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
     	if (feedCanvasManager != null && feedCanvasManager.getCameraManager() != null)
     		feedCanvasManager.getCameraManager().setArenaImage(arenaImage);
     	});
+    	
     	t.start();
     }
 

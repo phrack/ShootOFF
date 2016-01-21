@@ -258,6 +258,20 @@ public class TestAutoCalibration {
 		assertEquals(true, compareImages(compareFrame, resultFrame));
 	}
 	
+	
+	@Test
+	public void testCalibratePatternColor() throws IOException {
+		BufferedImage testFrame = ImageIO.read(
+					TestAutoCalibration.class.getResourceAsStream("/autocalibration/pattern-colors.png"));
+
+		Optional<Bounds> calibrationBounds = acm.processFrame(testFrame);
+		
+
+		assertTrue(calibrationBounds.isPresent());
+		
+
+	}
+	
 	@Test
 	public void testCalibrateHighRes() throws IOException {
 		Boolean result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");

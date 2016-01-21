@@ -870,12 +870,12 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
 
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream("pattern.png");
-		LocatedImage img = new LocatedImage(is, "chessboard");
+
 		arenaController.startCalibration();
 		arenaController.setCalibrationMessageVisible(false);
 		arenaController.saveCurrentBackground();
-		arenaController.setBackground(img);
+		setArenaBackground("pattern-colors.png");
+		
 
 		arenaCameraManager.setController(this);
 		arenaCameraManager.enableAutoCalibration();
@@ -892,6 +892,20 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 				}
 			});
 		} , AUTO_CALIBRATION_TIME);
+	}
+	
+	public void setArenaBackground(String resourceFilename)
+	{
+		if (resourceFilename != null)
+		{
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
+			LocatedImage img = new LocatedImage(is, resourceFilename);
+			arenaController.setBackground(img);
+		}
+		else
+		{
+			arenaController.setBackground(null);
+		}
 	}
 
 	private Label autoCalibrationMessage = null;

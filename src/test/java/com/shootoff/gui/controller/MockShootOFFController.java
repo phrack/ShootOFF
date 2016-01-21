@@ -7,4 +7,10 @@ public class MockShootOFFController extends ShootOFFController {
 	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
 		
 	}
+	
+	@Override
+	public void setArenaBackground(String resourceFilename)
+	{
+	
+	}
 }
