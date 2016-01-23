@@ -59,7 +59,7 @@ public class TestSteelChallenge {
 		pac.init(config, new MockCanvasManager(config));
 
 		Optional<Course> course = CourseIO.loadCourse(pac,
-				new File("courses/steel_challenge/steel_challenge_accelerator.course".replaceAll("/", File.separator)));
+				new File("courses/steel_challenge/accelerator.course".replaceAll("/", File.separator)));
 		steelChallengeExercise.init(config, cs, null, null, pac);
 		steelChallengeExercise.init(course.get());
 		this.course = course.get();

@@ -186,6 +186,8 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 			}
 
 			if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
+				super.pauseShotDetection(true);
+				
 				String roundAnnouncement;
 
 				if (roundTargets.size() > 0) {
@@ -197,7 +199,11 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 				TextToSpeech.say(roundAnnouncement);
 
-				startRound();
+				if (!testing) {
+					executorService.schedule(() -> startRound(), START_DELAY, TimeUnit.SECONDS);
+				} else {
+					startRound();
+				}
 			}
 		} else {
 			super.setShotTimerColumnText(HIT_COL_NAME, "No");
@@ -214,6 +220,8 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		repeatExercise = true;
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 				new NamedThreadFactory("SteelChallengeExercise"));
+
+		this.targets = targets;
 
 		if (checkTargets(targets)) startRound();
 	}
