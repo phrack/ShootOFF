@@ -135,6 +135,10 @@ task copyTargets(type:Copy) {
     from 'targets' into 'build/dist/targets'
 }
 
+task copyCourses(type:Copy) {
+    from 'courses' into 'build/dist/courses'
+}
+
 task copySounds(type:Copy) {
     from 'sounds' into 'build/dist/sounds'
 }
@@ -168,6 +172,7 @@ task updateJars() {
 task fxJar(dependsOn: build) {
     dependsOn('copyConfig')
     dependsOn('copyTargets')
+    dependsOn('copyCourses')
     dependsOn('copySounds')
     dependsOn('copyLibs')
 
@@ -223,6 +228,7 @@ task zipRelease(type: Zip) {
     from(file(dist)) {
         include 'targets/**'
         include 'sounds/**'
+        include 'courses/**'
         include 'libs/**/*.jar'
         include 'shootoff.properties'
         include 'ShootOFF.jar'
@@ -482,7 +488,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
 
 task release() {
     description 'Perform all automated tasks to release a new version of ShootOFF and print ' +
-		'todo list for remaining tasks'
+                'todo list for remaining tasks'
     group 'Release'
 
     dependsOn(pushZipRelease)
