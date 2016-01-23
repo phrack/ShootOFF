@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -50,9 +49,9 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private final static int ROUND_COL_WIDTH = 80;
 	private final static int START_DELAY = 10; // s
 	private static final int CORE_POOL_SIZE = 4;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, 
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("ISSFStandardPistolExercise"));
-	private ScheduledFuture<Void> endRound;
+	private ScheduledFuture<?> endRound;
 	private TrainingExerciseBase thisSuper;
 	private static int[] ROUND_TIMES = { 150, 20, 10 };
 	private int roundTimeIndex = 0;
@@ -110,7 +109,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		if (!testing) {
 			executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 		} else {
-			new SetupWait().call();
+			new SetupWait().run();
 		}
 	}
 
@@ -120,82 +119,79 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		delayMax = max;
 	}
 
-	private class SetupWait implements Callable<Void> {
+	private class SetupWait implements Runnable {
 		@Override
-		public Void call() {
-			if (repeatExercise) {
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
-				final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+		public void run() {
+			if (!repeatExercise) return;
+
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
+			final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+			if (!testing) {
+				executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
+			} else {
+				new StartRound().run();
+			}
+
+		}
+	}
+
+	private class StartRound implements Runnable {
+		@Override
+		public void run() {
+			shotCount = 0;
+
+			if (!repeatExercise) return;
+
+			if (coloredRows) {
+				thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+			} else {
+				thisSuper.setShotTimerRowColor(null);
+			}
+
+			coloredRows = !coloredRows;
+
+			TrainingExerciseBase.playSound("sounds/beep.wav");
+			thisSuper.pauseShotDetection(false);
+			endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
+		}
+
+	}
+
+	private class EndRound implements Runnable {
+		@Override
+		public void run() {
+			if (!repeatExercise) return;
+
+			thisSuper.pauseShotDetection(true);
+			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
+
+			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+
+			if (round < 4) {
+				// Go to next round
+				round++;
 				if (!testing) {
 					executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 				} else {
-					new StartRound().call();
+					new StartRound().run();
 				}
-			}
-
-			return null;
-		}
-	}
-
-	private class StartRound implements Callable<Void> {
-		@Override
-		public Void call() {
-			shotCount = 0;
-
-			if (repeatExercise) {
-				if (coloredRows) {
-					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+			} else if (roundTimeIndex < ROUND_TIMES.length - 1) {
+				// Go to round 1 for next time
+				round = 1;
+				roundTimeIndex++;
+				if (!testing) {
+					executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
 				} else {
-					thisSuper.setShotTimerRowColor(null);
+					new StartRound().run();
 				}
-
-				coloredRows = !coloredRows;
-
-				TrainingExerciseBase.playSound("sounds/beep.wav");
+			} else {
+				TextToSpeech.say("Event over... Your score is " + runningScore);
 				thisSuper.pauseShotDetection(false);
-				endRound = executorService.schedule(new EndRound(), ROUND_TIMES[roundTimeIndex], TimeUnit.SECONDS);
+				// At this point we end and the user has to hit reset to
+				// start again
 			}
-
-			return null;
 		}
-	}
 
-	private class EndRound implements Callable<Void> {
-		@Override
-		public Void call() {
-			if (repeatExercise) {
-				thisSuper.pauseShotDetection(true);
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
-
-				int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-
-				if (round < 4) {
-					// Go to next round
-					round++;
-					if (!testing) {
-						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
-					} else {
-						new StartRound().call();
-					}
-				} else if (roundTimeIndex < ROUND_TIMES.length - 1) {
-					// Go to round 1 for next time
-					round = 1;
-					roundTimeIndex++;
-					if (!testing) {
-						executorService.schedule(new StartRound(), randomDelay, TimeUnit.SECONDS);
-					} else {
-						new StartRound().call();
-					}
-				} else {
-					TextToSpeech.say("Event over... Your score is " + runningScore);
-					thisSuper.pauseShotDetection(false);
-					// At this point we end and the user has to hit reset to
-					// start again
-				}
-			}
-
-			return null;
-		}
 	}
 
 	@Override
@@ -240,7 +236,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 			try {
 				thisSuper.pauseShotDetection(true);
 				endRound.cancel(true);
-				new EndRound().call();
+				new EndRound().run();
 			} catch (Exception e) {
 				logger.error("Error ending current ISSF round (five shots detected)", e);
 			}
@@ -261,7 +257,8 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		super.showTextOnFeed("");
 
 		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory("ISSFStandardPistolExercise"));
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+				new NamedThreadFactory("ISSFStandardPistolExercise"));
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 
