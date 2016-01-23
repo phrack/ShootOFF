@@ -59,6 +59,7 @@ import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
+import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
@@ -616,6 +617,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addProjectorTrainingExercise(new BouncingTargets());
 		addProjectorTrainingExercise(new DuelingTree());
 		addProjectorTrainingExercise(new ShootDontShoot());
+		addProjectorTrainingExercise(new SteelChallenge());
 	}
 
 	private void addProjectorTrainingExercise(TrainingExercise exercise) {
