@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +70,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	 * @param rng
 	 *            an rng with a known seed
 	 */
-	protected ShootDontShoot(List<Group> targets, Random rng, List<Target> shootTargets, List<Target> dontShootTargets) {
+	protected ShootDontShoot(List<Group> targets, Random rng, List<Target> shootTargets,
+			List<Target> dontShootTargets) {
 		this(targets);
 		this.rng = rng;
 		this.shootTargets = shootTargets;
@@ -93,45 +93,43 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	protected void callNewRound() {
 		try {
 			testRun = true;
-			new NewRound().call();
+			new NewRound().run();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private class NewRound implements Callable<Void> {
+	private class NewRound implements Runnable {
 		@Override
-		public Void call() throws Exception {
-			if (continueExercise) {
-				missedTargets += shootTargets.size();
+		public void run() {
+			if (!continueExercise) return;
 
-				if (shootTargets.size() == 1) {
-					TextToSpeech.say(String.format("You missed %d target.", shootTargets.size()));
-				} else if (shootTargets.size() > 1) {
-					TextToSpeech.say(String.format("You missed %d targets.", shootTargets.size()));
-				}
+			missedTargets += shootTargets.size();
 
-				thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", missedTargets, badHits));
-
-				if (!testRun) {
-					for (Target target : shootTargets)
-						thisSuper.removeTarget(target);
-					shootTargets.clear();
-					for (Target target : dontShootTargets)
-						thisSuper.removeTarget(target);
-					dontShootTargets.clear();
-
-					addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
-					addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
-				}
-
-				thisSuper.clearShots();
-
-				if (continueExercise && !testRun)
-					executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+			if (shootTargets.size() == 1) {
+				TextToSpeech.say(String.format("You missed %d target.", shootTargets.size()));
+			} else if (shootTargets.size() > 1) {
+				TextToSpeech.say(String.format("You missed %d targets.", shootTargets.size()));
 			}
 
-			return null;
+			thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", missedTargets, badHits));
+
+			if (!testRun) {
+				for (Target target : shootTargets)
+					thisSuper.removeTarget(target);
+				shootTargets.clear();
+				for (Target target : dontShootTargets)
+					thisSuper.removeTarget(target);
+				dontShootTargets.clear();
+
+				addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target");
+				addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
+			}
+
+			thisSuper.clearShots();
+
+			if (continueExercise && !testRun)
+				executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 		}
 	}
 
@@ -218,8 +216,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 		continueExercise = true;
 
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory(
-				"ShootDontShootExercise"));
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+				new NamedThreadFactory("ShootDontShootExercise"));
 		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 	}
 

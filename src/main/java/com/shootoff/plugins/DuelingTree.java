@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -154,15 +153,13 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 		}
 	}
 
-	private class NewRound implements Callable<Void> {
+	private class NewRound implements Runnable {
 		@Override
-		public Void call() {
+		public void run() {
 			isResetting = true;
 			thisSuper.reset();
 			isResetting = false;
 			thisSuper.pauseShotDetection(false);
-
-			return null;
 		}
 	}
 
