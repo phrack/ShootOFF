@@ -346,6 +346,7 @@ task fxJarWritableResources() {
 
     doLast {
         ant.jar(destfile: "${project.buildDir}/webstart/" + writableResources) {
+            fileset(dir: 'build/dist/', includes: 'courses/**')
             fileset(dir: 'build/dist/', includes: 'targets/**')
             fileset(dir: 'build/dist/', includes: 'sounds/**')
             fileset(dir: 'build/dist/', includes: 'shootoff.properties')
