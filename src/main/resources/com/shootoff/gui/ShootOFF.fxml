@@ -63,6 +63,7 @@
                      </items>
                   </Menu>
                   <Menu fx:id="addArenaTargetMenu" disable="true" mnemonicParsing="false" text="Add Target" />
+                  <MenuItem fx:id="clearArenaTargetsMenuItem" disable="true" mnemonicParsing="false" onAction="#clearArenaTargetsMenuItemClicked" text="Clear Targets" />
                   <Menu fx:id="arenaBackgroundMenu" disable="true" mnemonicParsing="false" text="Background">
                     <items>
                       <MenuItem mnemonicParsing="false" onAction="#openArenaBackgroundMenuItemClicked" text="Open..." />

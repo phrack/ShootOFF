@@ -129,6 +129,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu calibrationOptionsMenu;
 	@FXML private ToggleGroup calibrationToggleGroup;
 	@FXML private Menu addArenaTargetMenu;
+	@FXML private MenuItem clearArenaTargetsMenuItem;
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
@@ -761,6 +762,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
 		calibrationOptionsMenu.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
+		clearArenaTargetsMenuItem.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
 		coursesMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
@@ -1072,6 +1074,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		arenaBackgroundMenu.getItems().add(backgroundMenuItem);
 	}
 
+	@FXML
+	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
+		arenaController.getCanvasManager().clearTargets();
+	}
+	
 	@FXML
 	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
 		arenaController.setBackground(null);
