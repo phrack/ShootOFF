@@ -43,7 +43,7 @@ public class TestCourseIO {
 		arenaController.init(config, new MockCanvasManager(config));
 		backgroundURL = "/arena/backgrounds/indoor_range.gif";
 		backgroundIsResource = true;
-		targetName = "targets/reset.target";
+		targetName = "targets/Reset.target";
 		targetX = 10;
 		targetY = 100;
 		targetWidth = 10;

@@ -1278,7 +1278,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		String targetPath = path.getPath();
 
 		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
-				targetPath.lastIndexOf('.'));
+				targetPath.lastIndexOf('.')).replace("_", " ");
 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		addTargetItem.setMnemonicParsing(false);
