@@ -37,12 +37,18 @@ ext.extProp = new Properties()
 extProp.load(new FileInputStream("src/main/resources/version.properties"))
 def version = extProp["version"]
 
+def username = ''                                           // Username for GitHub (will request JIT via console input)
+def password = ''                                           // Password for GitHub (will request JIT via console input)
+def grgit = null
+
 def dist = 'build/dist/'
 def archivePath = dist + 'ShootOFF.jar'
 def libTempDir = dist + 'libs'                              // Location of ShootOFF's dependencies staged for release
-def webstartDir = 'build/webstart'                          // The staging area for the JWS release
+def webstartDir = "${project.buildDir}/webstart/"           // The staging area for the JWS release
+def jwsDir = 'jws/'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'   // JAR to contain files that should be writable (targets, settings, etc.) for JWS
+def writableResourcesMetadata = 'shootoff-writable-resources.xml'
 def diagnosticsJar = 'ShootOFF-diagnostics.jar'
 def releaseZip = 'shootoff-' + version + '-final.zip'
 def license = 'GPLv3'
@@ -247,9 +253,11 @@ task pushZipRelease(dependsOn: zipRelease) {
     group 'Release' 
 
     doLast{
-        def username = System.console().readLine('\nPlease enter GitHub username: ')
-        def password = System.console().readPassword('Please enter GitHub password: ')
-        password = new String(password)
+        if (username == '' && password == '') {
+            username = System.console().readLine('\nPlease enter GitHub username: ')
+            password = System.console().readPassword('Please enter GitHub password: ')
+            password = new String(password)
+        }
 
         def gh = GitHub.connectUsingPassword(username, password)
 
@@ -298,13 +306,13 @@ task pushZipRelease(dependsOn: zipRelease) {
 
         // Update version metadata
 
-        def grgit = Grgit.open('.', new Credentials(username: username, password: password))
+        grgit = Grgit.open('.', new Credentials(username: username, password: password))
         grgit.checkout(branch: 'gh-pages', createBranch: false)
 
         def versionMetadata = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
             '<stableRelease version=\"' + version + '\" ' +
             'download=\"https://github.com/phrack/ShootOFF/releases/download/v' + version + 
-                '-FINAL/' + releaseZip + '\"/>'
+                '-FINAL/' + releaseZip + '\" />'
 
         def versionFile = new File('shootoff-version.xml')
         versionFile.write(versionMetadata, 'UTF-8')
@@ -345,7 +353,7 @@ task fxJarWritableResources() {
             'javafx:com.sun.javafx.tools.ant')
 
     doLast {
-        ant.jar(destfile: "${project.buildDir}/webstart/" + writableResources) {
+        ant.jar(destfile: webstartDir + writableResources) {
             fileset(dir: 'build/dist/', includes: 'courses/**')
             fileset(dir: 'build/dist/', includes: 'targets/**')
             fileset(dir: 'build/dist/', includes: 'sounds/**')
@@ -413,7 +421,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
     doLast {
         antfx.deploy(
                 codebase: "http://shootoffapp.com/jws/",
-                outdir: "${project.buildDir}/webstart",
+                outdir: webstartDir,
                 outfile: project.name
         ) {
             antfx.application(
@@ -472,7 +480,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
             }
         }
 
-        def jnlpPath = "${project.buildDir}/webstart/" + project.name + '.jnlp'
+        def jnlpPath = webstartDir + project.name + '.jnlp'
         String contents = new File(jnlpPath).getText('UTF-8') 
         
         // Can't update HREF in jnlp tag with antfx
@@ -487,13 +495,62 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
     }
 }
 
+task copyJWSLibs(type: Copy) {
+    from webstartDir + 'libs'
+    into jwsDir + 'libs'
+}
+
+task copyJWSConfig(type: Copy) {
+    from webstartDir + writableResources
+    from webstartDir + project.name + '.jnlp'
+    from webstartDir + 'ShootOFF.jar'
+    into jwsDir
+}
+
+task pushFxRelease(dependsOn: fxRelease) {
+    description 'Replace old JNLP artifacts with new ones in gh-pages'
+    group 'Release'
+
+    doLast {
+        if (username == '' && password == '') {
+            username = System.console().readLine('\nPlease enter GitHub username: ')
+            password = System.console().readPassword('Please enter GitHub password: ')
+            password = new String(password)
+        }
+
+        grgit = Grgit.open('.', new Credentials(username: username, password: password))
+        grgit.checkout(branch: 'gh-pages', createBranch: false)
+
+        delete jwsDir + 'libs'
+        copyJWSLibs.execute()
+        copyJWSConfig.execute()
+
+        grgit.add(patterns: [jwsDir + 'libs'])
+
+        def resourcesArchive = new File(jwsDir + writableResources)
+
+        def resourcesMetadata = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
+            '<resources version=\"' + version + '\" ' +
+            'fileSize=\"' + resourcesArchive.length() + '\" />'
+
+        def resourcesFile = new File(jwsDir + writableResourcesMetadata)
+        resourcesFile.write(resourcesMetadata, 'UTF-8')
+
+        grgit.commit(message: 'Update JWS to ' + version, all: true)
+        grgit.push()
+
+        grgit.checkout(branch: 'master', createBranch: false)
+        grgit.close()
+    }
+}
+
 task release() {
     description 'Perform all automated tasks to release a new version of ShootOFF and print ' +
                 'todo list for remaining tasks'
     group 'Release'
 
     dependsOn(pushZipRelease)
-    dependsOn(fxRelease)
+    dependsOn(pushFxRelease)
 }
 
 release.doLast {
@@ -502,7 +559,6 @@ release.doLast {
           "REMAINING RELEASE TASKS\n" + 
           "-----------------------------------------\n\n" +
           "- Publish release draft\n" + 
-          "- Commit JWS artifacts\n" + 
           "- Update website\n" + 
           "- Make Reddit release post\n" + 
           "- Make Twitter release post\n" + 
