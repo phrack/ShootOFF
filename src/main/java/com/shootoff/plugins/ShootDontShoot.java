@@ -47,7 +47,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("ShootDontShootExercise"));
 
-	private boolean continueExercise = true;
+	private volatile boolean continueExercise = true;
 	private boolean testRun = false;
 	private ProjectorTrainingExerciseBase thisSuper;
 	private int missedTargets = 0;
@@ -223,8 +223,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public void destroy() {
-		super.destroy();
-		executorService.shutdownNow();
 		continueExercise = false;
+		executorService.shutdownNow();
+		super.destroy();
 	}
 }

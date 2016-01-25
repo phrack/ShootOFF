@@ -777,9 +777,7 @@ public class CanvasManager {
 	}
 	
 	public void clearTargets() {
-		List<Target> tempTargets = new ArrayList<Target>(targets);
-		
-		for (Target t : tempTargets) {
+		for (Target t : new ArrayList<Target>(targets)) {
 			removeTarget(t);
 		}
 	}

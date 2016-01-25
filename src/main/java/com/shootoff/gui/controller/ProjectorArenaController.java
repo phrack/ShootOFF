@@ -19,7 +19,6 @@
 package com.shootoff.gui.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
@@ -302,8 +301,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			setBackground(null);
 		}
 
-		for (Target t : new ArrayList<Target>(canvasManager.getTargets()))
-			canvasManager.removeTarget(t);
+		canvasManager.clearTargets();
 
 		boolean scaleCourse = course.getResolution().isPresent()
 				&& (Math.abs(course.getResolution().get().getWidth() - getWidth()) > .0001
