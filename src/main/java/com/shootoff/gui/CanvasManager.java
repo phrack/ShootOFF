@@ -65,6 +65,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -88,7 +89,9 @@ public class CanvasManager {
 	private final ScheduledExecutorService diagnosticExecutorService = Executors
 			.newScheduledThreadPool(DIAGNOSTIC_POOL_SIZE);
 	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<Label, ScheduledFuture<Void>>();
-
+	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
+	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
+	
 	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
@@ -159,16 +162,46 @@ public class CanvasManager {
 		return cameraManager;
 	}
 
-	public Label addDiagnosticMessage(String message, long chimeDelay, Color backgroundColor) {
-		Label diagnosticLabel = new Label(message);
+	public Label addDiagnosticMessage(final String message, final long chimeDelay, final Color backgroundColor) {
+		final Label diagnosticLabel = new Label(message);
 		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));
+
+		final ImageView muteView = new ImageView();
+		muteView.setFitHeight(20);
+		muteView.setFitWidth(muteView.getFitHeight());
+		if (config.isChimeMuted(message)) {
+			muteView.setImage(soundImage);
+		} else {
+			muteView.setImage(muteImage);
+		}
+
+		diagnosticLabel.setContentDisplay(ContentDisplay.RIGHT);
+		diagnosticLabel.setGraphic(muteView);
+		diagnosticLabel.setOnMouseClicked((event) -> {
+			if (config.isChimeMuted(message)) {
+				muteView.setImage(muteImage);
+				config.unmuteMessageChime(message);
+			} else {
+				muteView.setImage(soundImage);
+				config.muteMessageChime(message);
+			}
+
+			try {
+				config.writeConfigurationFile();
+			} catch (Exception e) {
+				logger.error("Failed persisting message's (" + message + ") chime mute settings.", e);
+			}
+		});
+
 		diagnosticsVBox.getChildren().add(diagnosticLabel);
 
-		@SuppressWarnings("unchecked")
-		ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService
-				.schedule(() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
-		diagnosticFutures.put(diagnosticLabel, chimeFuture);
-
+		if (!config.isChimeMuted(message)) {
+			@SuppressWarnings("unchecked")
+			ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
+					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
+			diagnosticFutures.put(diagnosticLabel, chimeFuture);
+		}
+		
 		return diagnosticLabel;
 	}
 
@@ -177,8 +210,11 @@ public class CanvasManager {
 	}
 
 	public void removeDiagnosticMessage(Label diagnosticLabel) {
-		diagnosticFutures.get(diagnosticLabel).cancel(false);
-		diagnosticFutures.remove(diagnosticLabel);
+		if (diagnosticFutures.containsKey(diagnosticLabel)) {
+			diagnosticFutures.get(diagnosticLabel).cancel(false);
+			diagnosticFutures.remove(diagnosticLabel);
+		}
+
 		diagnosticsVBox.getChildren().remove(diagnosticLabel);
 	}
 

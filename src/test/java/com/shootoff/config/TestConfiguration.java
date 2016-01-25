@@ -38,6 +38,7 @@ public class TestConfiguration {
 		assertTrue(defaultConfig.getMalfunctionsProbability() == 10.0);
 		assertEquals(false, defaultConfig.inDebugMode());
 		assertFalse(defaultConfig.getArenaPosition().isPresent());
+		assertFalse(defaultConfig.isChimeMuted("Rare and worth hearing"));
 	}
 	
 	@Test(expected=ConfigurationException.class)
@@ -202,6 +203,9 @@ public class TestConfiguration {
 		assertTrue(config.getArenaPosition().isPresent());
 		assertEquals(10, config.getArenaPosition().get().getX(), 0.1);
 		assertEquals(200, config.getArenaPosition().get().getY(), 0.1);
+		assertTrue(config.isChimeMuted("Test message1"));
+		assertTrue(config.isChimeMuted("annoying message2"));
+		assertFalse(config.isChimeMuted("Rare and worth hearing"));
 	}
 	
 	@Test
@@ -273,6 +277,11 @@ public class TestConfiguration {
 				"--use-malfunctions", "43.15" 
 			});
 		
+		writtenConfig.muteMessageChime("annoying message");
+		writtenConfig.muteMessageChime("good message");
+		writtenConfig.muteMessageChime("bad message");
+		writtenConfig.unmuteMessageChime("good message");
+		
 		writtenConfig.writeConfigurationFile();
 		
 		Configuration readConfig = new Configuration(props.getPath());
@@ -285,6 +294,9 @@ public class TestConfiguration {
 		assertEquals(writtenConfig.getVirtualMagazineCapacity(), readConfig.getVirtualMagazineCapacity());
 		assertEquals(writtenConfig.useMalfunctions(), readConfig.useMalfunctions());
 		assertEquals(43.15f, writtenConfig.getMalfunctionsProbability(), 0.5f);
+		assertTrue(readConfig.isChimeMuted("annoying message"));
+		assertTrue(readConfig.isChimeMuted("bad message"));
+		assertFalse(readConfig.isChimeMuted("good message"));
 		
 		if (!props.delete()) {
 			System.err.println("Can't delete test config file: " + props.getPath());

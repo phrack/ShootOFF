@@ -88,6 +88,7 @@ public class Configuration {
 	private static final String MALFUNCTIONS_PROBABILITY_PROP = "shootoff.malfunctions.probability";
 	private static final String ARENA_POSITION_X_PROP = "shootoff.arena.x";
 	private static final String ARENA_POSITION_Y_PROP = "shootoff.arena.y";
+	private static final String MUTED_CHIME_MESSAGES = "shootoff.diagnosticmessages.chime.muted";
 
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
@@ -131,6 +132,7 @@ public class Configuration {
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
+	private Set<String> messagesChimeMuted = new HashSet<String>();
 
 	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
 
@@ -155,8 +157,8 @@ public class Configuration {
 
 	}
 
-	protected Configuration(InputStream configInputStream, String name, String[] args)
-			throws IOException, ConfigurationException {
+	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException,
+			ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		parseCmdLine(args);
@@ -319,6 +321,12 @@ public class Configuration {
 					Double.parseDouble(prop.getProperty(ARENA_POSITION_Y_PROP)));
 		}
 
+		if (prop.containsKey(MUTED_CHIME_MESSAGES)) {
+			for (String message : prop.getProperty(MUTED_CHIME_MESSAGES).split("\\|")) {
+				muteMessageChime(message);
+			}
+		}
+
 		validateConfiguration();
 	}
 
@@ -339,7 +347,7 @@ public class Configuration {
 
 			return false;
 		}
-		
+
 		Properties prop = new Properties();
 
 		StringBuilder ipcamList = new StringBuilder();
@@ -348,7 +356,7 @@ public class Configuration {
 			ipcamList.append(entry.getKey());
 			ipcamList.append("|");
 			ipcamList.append(entry.getValue().toString());
-			
+
 			if (ipcamCredentials.containsKey(entry.getKey())) {
 				ipcamList.append("|");
 				ipcamList.append(ipcamCredentials.get(entry.getKey()));
@@ -369,6 +377,12 @@ public class Configuration {
 			recordingWebcamList.append(c.getName());
 		}
 
+		StringBuilder mutedChimeMessages = new StringBuilder();
+		for (String m : messagesChimeMuted) {
+			if (mutedChimeMessages.length() > 0) mutedChimeMessages.append("|");
+			mutedChimeMessages.append(m);
+		}
+
 		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
 		prop.setProperty(ERROR_REPORTING_PROP, String.valueOf(useErrorReporting));
 		prop.setProperty(IPCAMS_PROP, ipcamList.toString());
@@ -384,6 +398,7 @@ public class Configuration {
 		prop.setProperty(VIRTUAL_MAGAZINE_CAPACITY_PROP, String.valueOf(virtualMagazineCapacity));
 		prop.setProperty(USE_MALFUNCTIONS_PROP, String.valueOf(useMalfunctions));
 		prop.setProperty(MALFUNCTIONS_PROBABILITY_PROP, String.valueOf(malfunctionsProbability));
+		prop.setProperty(MUTED_CHIME_MESSAGES, mutedChimeMessages.toString());
 
 		if (getArenaPosition().isPresent()) {
 			Point2D arenaPosition = getArenaPosition().get();
@@ -402,7 +417,7 @@ public class Configuration {
 		} finally {
 			outputStream.close();
 		}
-		
+
 		return true;
 	}
 
@@ -463,8 +478,8 @@ public class Configuration {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
 
-		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
-				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute())
+			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
@@ -536,11 +551,11 @@ public class Configuration {
 			URL url = new URL(cameraURL);
 			Camera cam = Camera.registerIpCamera(cameraName, url, username, password);
 			ipcams.put(cameraName, url);
-			
+
 			if (username.isPresent() && password.isPresent()) {
 				ipcamCredentials.put(cameraName, username.get() + "|" + password.get());
 			}
-			
+
 			return Optional.of(cam);
 		} catch (MalformedURLException | URISyntaxException ue) {
 			Alert ipcamURLAlert = new Alert(AlertType.ERROR);
@@ -714,6 +729,14 @@ public class Configuration {
 		shotRowColor = Optional.ofNullable(c);
 	}
 
+	public void muteMessageChime(String message) {
+		messagesChimeMuted.add(message);
+	}
+
+	public void unmuteMessageChime(String message) {
+		messagesChimeMuted.remove(message);
+	}
+
 	public Set<Camera> getRecordingCameras() {
 		return recordingCameras;
 	}
@@ -798,8 +821,8 @@ public class Configuration {
 	}
 
 	public File getGreenLaserSound() {
-		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
-				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute())
+			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		return greenLaserSound;
 	}
@@ -852,5 +875,9 @@ public class Configuration {
 
 	public Optional<Point2D> getArenaPosition() {
 		return arenaPosition;
+	}
+
+	public boolean isChimeMuted(String message) {
+		return messagesChimeMuted.contains(message);
 	}
 }

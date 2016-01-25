@@ -4,6 +4,7 @@ gnome_*.png -- GNU/GPL
 tags.png -- Freeware by Midtone Design Studios
 bring_forward.png -- LGPL
 send_backward.png -- LGPL
+mute.png and sound.png  Creative Commons Attribution by brsev (http://findicons.com/icon/80540/mute?id=80683 and http://findicons.com/icon/80522/sound)
 
 All of these were found via https://www.iconfinder.com or http://www.findicons.com.
 
