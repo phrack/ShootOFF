@@ -88,9 +88,9 @@ public class TrainingExerciseBase {
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 
-	private final Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
-	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
-	private final List<Button> exerciseButtons = new ArrayList<Button>();
+	private final static Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
+	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
+	private final static List<Button> exerciseButtons = new ArrayList<Button>();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
@@ -106,15 +106,15 @@ public class TrainingExerciseBase {
 
 	// This is only required for unit tests where we don't want to create a full
 	// ShootOFFController
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, GridPane buttonsPane,
-			TableView<ShotEntry> shotEntryTable) {
+	public void init(final Configuration config, final CamerasSupervisor camerasSupervisor, final GridPane buttonsPane,
+			final TableView<ShotEntry> shotEntryTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.buttonsPane = buttonsPane;
 		this.shotTimerTable = shotEntryTable;
 
-		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
-			Label exerciseLabel = new Label();
+		for (final CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
+			final Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
 			canvasManager.getCanvasGroup().getChildren().add(exerciseLabel);
 			exerciseLabels.put(canvasManager, exerciseLabel);
@@ -149,18 +149,18 @@ public class TrainingExerciseBase {
 		return (Stage) shotTimerTable.getScene().getWindow();
 	}
 
-	public void getDelayedStartInterval(DelayedStartListener listener) {
-		FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
+	public void getDelayedStartInterval(final DelayedStartListener listener) {
+		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
+				"com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
 			logger.error("Error reading DelayedStartInterval FXML file", e);
 		}
 
-		Stage delayedStartIntervalStage = new Stage();
+		final Stage delayedStartIntervalStage = new Stage();
 
-		DelayedStartIntervalController controller = (DelayedStartIntervalController) loader.getController();
+		final DelayedStartIntervalController controller = (DelayedStartIntervalController) loader.getController();
 		controller.init(listener);
 
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
@@ -175,18 +175,18 @@ public class TrainingExerciseBase {
 	 * 
 	 * @param listener
 	 */
-	public void getParInterval(ParListener listener) {
-		FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
+	public void getParInterval(final ParListener listener) {
+		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
+				"com/shootoff/gui/ParInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
 			logger.error("Error reading ParInterval FXML file", e);
 		}
 
-		Stage delayedStartIntervalStage = new Stage();
+		final Stage delayedStartIntervalStage = new Stage();
 
-		ParIntervalController controller = (ParIntervalController) loader.getController();
+		final ParIntervalController controller = (ParIntervalController) loader.getController();
 		controller.init(listener);
 
 		delayedStartIntervalStage.initOwner(getShootOFFStage());
@@ -208,7 +208,7 @@ public class TrainingExerciseBase {
 	 *            the width of the new column
 	 */
 	public void addShotTimerColumn(String name, int width) {
-		TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
+		final TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
 			public ObservableValue<String> call(CellDataFeatures<ShotEntry, String> p) {
@@ -229,7 +229,7 @@ public class TrainingExerciseBase {
 	 * @param value
 	 *            the text that should be inserted
 	 */
-	public void setShotTimerColumnText(String name, String value) {
+	public void setShotTimerColumnText(final String name, final String value) {
 		if (shotTimerTable != null) {
 			Platform.runLater(() -> {
 				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
@@ -245,7 +245,7 @@ public class TrainingExerciseBase {
 	 *            the color to use in the style string for the row. Set to null
 	 *            to return the row color to the default color
 	 */
-	public void setShotTimerRowColor(Color c) {
+	public void setShotTimerRowColor(final Color c) {
 		changedRowColor = true;
 		config.setShotTimerRowColor(c);
 	}
@@ -296,7 +296,7 @@ public class TrainingExerciseBase {
 	 * @param isPaused
 	 *            <tt>true</tt> to temporarily stop detecting shots
 	 */
-	public void pauseShotDetection(boolean isPaused) {
+	public void pauseShotDetection(final boolean isPaused) {
 		camerasSupervisor.setDetectingAll(!isPaused);
 	}
 
@@ -304,7 +304,7 @@ public class TrainingExerciseBase {
 	 * Adds a button to the right of the reset button with caption <tt>text</tt>
 	 * and action handler <tt>eventHandler</tt>.
 	 */
-	public Button addShootOFFButton(String text, EventHandler<ActionEvent> eventHandler) {
+	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
 		Button exerciseButton = new Button(text);
 		exerciseButton.setOnAction(eventHandler);
 		GridPane.setMargin(exerciseButton, GridPane.getMargin(buttonsPane.getChildren().get(0)));
@@ -316,7 +316,7 @@ public class TrainingExerciseBase {
 		return exerciseButton;
 	}
 
-	public void removeShootOFFButton(Button exerciseButton) {
+	public void removeShootOFFButton(final Button exerciseButton) {
 		if (!exerciseButtons.contains(exerciseButton)) return;
 
 		buttonsPane.getChildren().remove(exerciseButton);
@@ -343,8 +343,9 @@ public class TrainingExerciseBase {
 			return;
 		}
 
-		if (!soundFile.isAbsolute())
+		if (!soundFile.isAbsolute()) {
 			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
+		}
 
 		AudioInputStream audioInputStream = null;
 
@@ -379,7 +380,7 @@ public class TrainingExerciseBase {
 		}
 	}
 
-	public static void playSounds(List<File> soundFiles) {
+	public static void playSounds(final List<File> soundFiles) {
 		if (isSilenced) {
 			soundFiles.forEach(System.out::println);
 		} else {
@@ -401,7 +402,7 @@ public class TrainingExerciseBase {
 		}
 
 		@Override
-		public void update(LineEvent event) {
+		public void update(final LineEvent event) {
 			if (event.getType().equals(LineEvent.Type.STOP)) {
 				event.getLine().close();
 
