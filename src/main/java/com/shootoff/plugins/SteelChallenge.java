@@ -1,5 +1,6 @@
 package com.shootoff.plugins;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,9 +84,14 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 			if (hasStopTarget) break;
 		}
-
-		if (!hasStopTarget) TextToSpeech.say("This training exercise requires you to lay out your own "
-				+ "course on the projector arena. Ensure you add at least one stop target.");
+		
+		if (!hasStopTarget) {
+			List<File> errorMessages = new ArrayList<File>();
+			errorMessages.add(new File("sounds/voice/shootoff-lay-out-own-course.wav"));
+			errorMessages.add(new File("sounds/voice/shootoff-add-stop-target.wav"));
+			
+			TrainingExerciseBase.playSounds(errorMessages);
+		}
 
 		return hasStopTarget;
 	}
@@ -108,7 +114,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		public void run() {
 			if (!repeatExercise) return;
 
-			TextToSpeech.say("Are you ready?");
+			TrainingExerciseBase.playSound("sounds/voice/shootoff-are-you-ready.wav");
 
 			if (!testing) {
 				executorService.schedule(new Standby(), PAUSE_DELAY, TimeUnit.SECONDS);
@@ -124,7 +130,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		public void run() {
 			if (!repeatExercise) return;
 
-			TextToSpeech.say("Standby!");
+			TrainingExerciseBase.playSound("sounds/voice/shootoff-standby.wav");
 
 			if (testing) {
 				new BeginTimer().run();

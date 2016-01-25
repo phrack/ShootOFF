@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.junit.After;
@@ -34,7 +35,8 @@ public class TestSteelChallenge {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
-	private SteelChallenge steelChallengeExercise;
+	private SteelChallenge noTargetsSC;
+	private SteelChallenge targetsSC;
 	private Course course;
 	private TargetRegion nonStopRegion;
 	private TargetRegion stopRegion;
@@ -49,19 +51,30 @@ public class TestSteelChallenge {
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 
-		steelChallengeExercise = new SteelChallenge();
+		// Init without targets
+
+		noTargetsSC = new SteelChallenge();
 		Configuration config = new Configuration(new String[0]);
 		config.setDebugMode(true);
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
+
+		ProjectorArenaController pacNoTargets = new ProjectorArenaController();
+		pacNoTargets.init(config, new MockCanvasManager(config));
+
+		noTargetsSC.init(config, cs, null, null, pacNoTargets);
+
+		// Init with target
+
+		targetsSC = new SteelChallenge();
 
 		ProjectorArenaController pac = new ProjectorArenaController();
 		pac.init(config, new MockCanvasManager(config));
 
 		Optional<Course> course = CourseIO.loadCourse(pac,
 				new File("courses/steel_challenge/accelerator.course".replaceAll("/", File.separator)));
-		steelChallengeExercise.init(config, cs, null, null, pac);
-		steelChallengeExercise.init(course.get());
+		targetsSC.init(config, cs, null, null, pac);
+		targetsSC.init(course.get());
 		this.course = course.get();
 
 		for (Target t : course.get().getTargets()) {
@@ -85,40 +98,54 @@ public class TestSteelChallenge {
 	}
 
 	@Test
-	public void testMissAllTargets() throws UnsupportedEncodingException {
-		assertEquals(String.format("Are you ready?%nStandby!%nsounds/beep.wav%n").replace(File.separatorChar, '/'),
-				stringOut.toString("UTF-8"));
+	public void testNoTargets() throws UnsupportedEncodingException {
 		stringOut.reset();
 
-		steelChallengeExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+		noTargetsSC.init(new Course(new ArrayList<Target>()));
 
-		assertEquals(String
-				.format("Your time was 0.00 seconds. You missed %d targets!%nAre you ready?%nStandby!%nsounds/beep.wav%n",
-						course.getTargets().size() - 1)
+		assertEquals(String.format(
+				"sounds/voice/shootoff-lay-out-own-course.wav%nsounds/voice/shootoff-add-stop-target.wav%n")
+				.replace(File.separatorChar, '/'), stringOut.toString("UTF-8"));
+		stringOut.reset();
+	}
+
+	@Test
+	public void testMissAllTargets() throws UnsupportedEncodingException {
+		assertEquals(String.format(
+				"sounds/voice/shootoff-are-you-ready.wav%n" + "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n")
+				.replace(File.separatorChar, '/'), stringOut.toString("UTF-8"));
+		stringOut.reset();
+
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+
+		assertEquals(String.format(
+				"Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
+						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n", course.getTargets().size() - 1)
 				.replace(File.separatorChar, '/'), stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 
 	@Test
 	public void testMissAllThenThreeTargets() throws UnsupportedEncodingException {
-		assertEquals(String.format("Are you ready?%nStandby!%nsounds/beep.wav%n").replace(File.separatorChar, '/'),
-				stringOut.toString("UTF-8"));
-		stringOut.reset();
-
-		steelChallengeExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
-
-		assertEquals(String
-				.format("Your time was 0.00 seconds. You missed %d targets!%nAre you ready?%nStandby!%nsounds/beep.wav%n",
-						course.getTargets().size() - 1)
+		assertEquals(String.format(
+				"sounds/voice/shootoff-are-you-ready.wav%n" + "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n")
 				.replace(File.separatorChar, '/'), stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		steelChallengeExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(nonStopRegion));
-		steelChallengeExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
 
-		assertEquals(String
-				.format("Your time was 0.00 seconds. You missed %d targets!%nAre you ready?%nStandby!%nsounds/beep.wav%n",
-						course.getTargets().size() - 2)
+		assertEquals(String.format(
+				"Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
+						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n", course.getTargets().size() - 1)
+				.replace(File.separatorChar, '/'), stringOut.toString("UTF-8"));
+		stringOut.reset();
+
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(nonStopRegion));
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+
+		assertEquals(String.format(
+				"Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
+						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n", course.getTargets().size() - 2)
 				.replace(File.separatorChar, '/'), stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
