@@ -96,10 +96,10 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		this.roundTargets = new HashSet<Group>();
 		this.roundTargets.addAll(targets);
 
-		if (!testing) {
-			executorService.schedule(new AreYouReady(), START_DELAY, TimeUnit.SECONDS);
-		} else {
+		if (testing) {
 			new AreYouReady().run();
+		} else {
+			executorService.schedule(new AreYouReady(), START_DELAY, TimeUnit.SECONDS);
 		}
 	}
 
@@ -126,10 +126,10 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 			TextToSpeech.say("Standby!");
 
-			if (!testing) {
-				executorService.schedule(new BeginTimer(), START_DELAY, TimeUnit.SECONDS);
-			} else {
+			if (testing) {
 				new BeginTimer().run();
+			} else {
+				executorService.schedule(new BeginTimer(), START_DELAY, TimeUnit.SECONDS);
 			}
 
 		}
@@ -159,8 +159,14 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	@Override
 	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
 		final long elapsedTime = System.currentTimeMillis() - startTime;
-		final String elapsedTimeSeconds = String.format("%.2f", (double) elapsedTime / (double) 1000);
-
+		final String elapsedTimeSeconds;
+		
+		if (testing) {
+			elapsedTimeSeconds = "0.00";
+		} else {
+			elapsedTimeSeconds = String.format("%.2f", (double) elapsedTime / (double) 1000);
+		}
+		
 		super.setShotTimerColumnText(LENGTH_COL_NAME, elapsedTimeSeconds);
 
 		if (hitRegion.isPresent()) {
@@ -189,7 +195,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 				super.pauseShotDetection(true);
 				
 				String roundAnnouncement;
-
+				
 				if (roundTargets.size() > 0) {
 					roundAnnouncement = String.format("Your time was %s seconds. You missed %d targets!",
 							elapsedTimeSeconds, roundTargets.size());
@@ -199,10 +205,10 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 				TextToSpeech.say(roundAnnouncement);
 
-				if (!testing) {
-					executorService.schedule(() -> startRound(), START_DELAY, TimeUnit.SECONDS);
-				} else {
+				if (testing) {
 					startRound();
+				} else {
+					executorService.schedule(() -> startRound(), START_DELAY, TimeUnit.SECONDS);
 				}
 			}
 		} else {
