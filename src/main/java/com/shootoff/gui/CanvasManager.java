@@ -170,19 +170,19 @@ public class CanvasManager {
 		muteView.setFitHeight(20);
 		muteView.setFitWidth(muteView.getFitHeight());
 		if (config.isChimeMuted(message)) {
-			muteView.setImage(soundImage);
-		} else {
 			muteView.setImage(muteImage);
+		} else {
+			muteView.setImage(soundImage);
 		}
 
 		diagnosticLabel.setContentDisplay(ContentDisplay.RIGHT);
 		diagnosticLabel.setGraphic(muteView);
 		diagnosticLabel.setOnMouseClicked((event) -> {
 			if (config.isChimeMuted(message)) {
-				muteView.setImage(muteImage);
+				muteView.setImage(soundImage);
 				config.unmuteMessageChime(message);
 			} else {
-				muteView.setImage(soundImage);
+				muteView.setImage(muteImage);
 				config.muteMessageChime(message);
 			}
 
