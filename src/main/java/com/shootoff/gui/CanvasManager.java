@@ -535,8 +535,9 @@ public class CanvasManager {
 			TrainingExerciseBase.playSound(config.getGreenLaserSound());
 		}
 
+		Optional<String> videoString = createVideoString(shot);
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot);
+		Optional<Hit> hit = checkHit(shot, videoString);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 
 		boolean processedShot = false;
@@ -553,7 +554,7 @@ public class CanvasManager {
 
 						shot.getTimestamp(), shot.getFrame(), config.getMarkerRadius());
 
-				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot);
+				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, videoString);
 			}
 		}
 
@@ -565,12 +566,12 @@ public class CanvasManager {
 		}
 	}
 
-	public boolean addArenaShot(Shot shot) {
+	public boolean addArenaShot(Shot shot, Optional<String> videoString) {
 		shots.add(shot);
 		drawShot(shot);
 
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot);
+		Optional<Hit> hit = checkHit(shot, videoString);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
 			executeRegionCommands(hit.get());
 		}
@@ -611,9 +612,7 @@ public class CanvasManager {
 		}
 	}
 
-	protected Optional<Hit> checkHit(Shot shot) {
-		Optional<String> videoString = createVideoString(shot);
-
+	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
