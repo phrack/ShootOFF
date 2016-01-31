@@ -47,7 +47,7 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	private int runningScore = 0;
 	private int showDelay = 7;
 	private int roundTime = 3;
-	private boolean repeatExercise = true;
+	private boolean repeatExercise = false;
 	private boolean coloredRows = false;
 	private boolean testing = false;
 
@@ -98,15 +98,13 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	private class SetupWait implements Callable<Void> {
 		@Override
 		public Void call() {
-			if (repeatExercise) {
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
-				if (!testing) {
-					executorService.schedule(new StartRound(), START_DELAY, TimeUnit.SECONDS);
-				} else {
-					new StartRound().call();
-				}
-			}
 
+            TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-makeready.wav"));
+            if (!testing) {
+                executorService.schedule(new StartRound(), START_DELAY, TimeUnit.SECONDS);
+            } else {
+                new StartRound().call();
+            }
 			return null;
 		}
 	}
@@ -115,19 +113,17 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 		@Override
 		public Void call() {
 
-			if (repeatExercise) {
-				if (coloredRows) {
-					thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
-				} else {
-					thisSuper.setShotTimerRowColor(null);
-				}
+            if (coloredRows) {
+                thisSuper.setShotTimerRowColor(Color.LIGHTGRAY);
+            } else {
+                thisSuper.setShotTimerRowColor(null);
+            }
 
-				coloredRows = !coloredRows;
+            coloredRows = !coloredRows;
 
-				TrainingExerciseBase.playSound("sounds/beep.wav");
-				thisSuper.pauseShotDetection(false);
-				endRound = executorService.schedule(new EndRound(), roundTime, TimeUnit.SECONDS);
-			}
+            TrainingExerciseBase.playSound("sounds/beep.wav");
+            thisSuper.pauseShotDetection(false);
+            endRound = executorService.schedule(new EndRound(), roundTime, TimeUnit.SECONDS);
 
 			return null;
 		}
@@ -140,22 +136,13 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 				thisSuper.pauseShotDetection(true);
 				TrainingExerciseBase.playSound("sounds/chime.wav");
 
-				if (round < 4) {
+
+				if (round < 5) {
 					// Go to next round
 					if (!testing) {
 						executorService.schedule(new StartRound(), showDelay, TimeUnit.SECONDS);
 					} else {
 						new StartRound().call();
-					}
-				} else if (round > 4) {
-					if (repeatExercise) {
-						// Go to round 1 for next time
-						round = 1;
-						if (!testing) {
-							executorService.schedule(new StartRound(), showDelay, TimeUnit.SECONDS);
-						} else {
-							new StartRound().call();
-						}
 					}
 				} else {
 					TextToSpeech.say("Event over... Your score is " + runningScore);
@@ -164,7 +151,7 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 					// start again
 				}
 
-
+            ++round;
 			return null;
 		}
 	}

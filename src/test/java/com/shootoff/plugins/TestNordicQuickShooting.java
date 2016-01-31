@@ -82,17 +82,12 @@ public class TestNordicQuickShooting {
 		System.setOut(originalOut);
 	}
 	
-	private String getScoreString(int roundOne, int roundTwo, int roundThree, boolean roundOver, boolean gameOver) {
-		String scoreString = String.format("150s score: %d%n20s score: %d%n10s score: %d%ntotal score: %d%n",
-				roundOne, roundTwo, roundThree, roundOne + roundTwo + roundThree);
-		
-		if (gameOver) {
-			return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nEvent over... Your score is 60%n").replace('/', File.separatorChar);
-		}
-		
-		if (roundOver) {
-			return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nsounds/beep.wav%n").replace('/', File.separatorChar);
-		}
+	private String getScoreString(int score) {
+		String scoreString = String.format("total score: %d%n",score);
+
+        scoreString += "sounds/chime.wav"
+                    +  "\nsounds/beep.wav"
+                    +  "\n";
 		
 		return scoreString;
 	}
@@ -102,67 +97,10 @@ public class TestNordicQuickShooting {
 		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
 
-
-		// 10s round 1-4
-		for (int i = 0; i < 4; i++) {
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 2, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 3, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 4, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			boolean gameOver = i == 3;
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 5, true, gameOver), stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
-	}
-	
-	@Test
-	public void testFull150sThenReset() throws UnsupportedEncodingException {
-		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
-
-		// 150s round 1-4
-		for (int i = 0; i < 4; i++) {
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-			
-			nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
-		
-		nqsExercise.reset(targetGroups);
-		
 		nqsExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegion));
-		// (regionScore * 5 * i) = last round's score
-		assertEquals(String.format("%n") + getScoreString(regionScore, 0, 0, false, false), stringOut.toString("UTF-8"));
+		assertEquals(getScoreString(regionScore), stringOut.toString("UTF-8"));
 		stringOut.reset();
+
 	}
+
 }
