@@ -30,7 +30,7 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class NordicQuickShooting extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
+public class NordicQuickShooting extends TrainingExerciseBase implements TrainingExercise {
 	private static final Logger logger = LoggerFactory.getLogger(NordicQuickShooting.class);
 
 	private final static String SCORE_COL_NAME = "Score";
@@ -68,7 +68,6 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 	@Override
 	public void init() {
 		super.pauseShotDetection(true);
-		super.getDelayedStartInterval(this);
 
 		startExercise();
 	}
@@ -93,10 +92,7 @@ public class NordicQuickShooting extends TrainingExerciseBase implements Trainin
 		}
 	}
 
-	@Override
-	public void updatedDelayedStartInterval(int min, int max) {
 
-	}
 
 
 	private class SetupWait implements Callable<Void> {
