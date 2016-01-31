@@ -60,8 +60,8 @@ public final class TextToSpeech {
 
 			if (comment.isEmpty()) return;
 
-			AudioInputStream audio = marytts.generateAudio(comment);
-			AudioPlayer player = new AudioPlayer(audio);
+			final AudioInputStream audio = marytts.generateAudio(comment);
+			final AudioPlayer player = new AudioPlayer(audio);
 			player.start();
 		} catch (MaryConfigurationException | SynthesisException e) {
 			logger.error("Error sythesizing text to voice", e);
@@ -77,7 +77,7 @@ public final class TextToSpeech {
 	 *            set to <tt>true</tt> if spoken phrases should instead be
 	 *            printed to stdout, <tt>false</tt> for normal operation.
 	 */
-	public static void silence(boolean isSilenced) {
+	public static void silence(final boolean isSilenced) {
 		TextToSpeech.isSilenced = isSilenced;
 	}
 }

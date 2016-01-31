@@ -27,7 +27,7 @@ public final class ShotDetectionManager {
 	public static final int SECTOR_COLUMNS = 3;
 	public static final int SECTOR_ROWS = 3;
 
-	private final Logger logger = LoggerFactory.getLogger(ShotDetectionManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShotDetectionManager.class);
 
 	private CanvasManager canvasManager;
 	private CameraManager cameraManager;
@@ -98,8 +98,8 @@ public final class ShotDetectionManager {
 		lumsMovingAverage = new int[width][height];
 		newLumsMovingAverage = new int[width][height];
 
-		colorDiffMovingAverage = new double[width][height];;
-		newColorDiffMovingAverage = new double[width][height];;
+		colorDiffMovingAverage = new double[width][height];
+		newColorDiffMovingAverage = new double[width][height];
 
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++) {
@@ -129,8 +129,6 @@ public final class ShotDetectionManager {
 			return Optional.empty();
 
 		}
-		
-
 
 		if (!detectShots) result = Optional.empty();
 
@@ -175,8 +173,8 @@ public final class ShotDetectionManager {
 
 		Parallel.forIndex(0, source.length, 1, new Operation<Integer>() {
 			public void perform(Integer i) {
-				int[] aMatrix = source[i];
-				int aLength = aMatrix.length;
+				final int[] aMatrix = source[i];
+				final int aLength = aMatrix.length;
 				System.arraycopy(aMatrix, 0, destination[i], 0, aLength);
 			}
 		});
@@ -202,13 +200,12 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean pixelAboveExcessiveBrightnessThreshold(int lumsMovingAverage) {
-		if (lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD) return true;
-		return false;
+		return lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD;
 	}
 
 	private boolean pixelAboveThreshold(int currentLum, int lumsMovingAverage) {
-		int threshold = (int) ((double) (255 - lumsMovingAverage) / 4f);
-		int increase = (currentLum - lumsMovingAverage);
+		final int threshold = (int) ((double) (255 - lumsMovingAverage) / 4f);
+		final int increase = (currentLum - lumsMovingAverage);
 
 		// int dynamic_increase = 0;
 		// if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD ||
@@ -232,13 +229,13 @@ public final class ShotDetectionManager {
 		boolean drawImageComplete = g.drawImage(source, 0, 0, null);
 
 		if (!drawImageComplete) {
-			logger.error("deepCopy drawImageComplete false");
+			if (logger.isErrorEnabled()) logger.error("deepCopy drawImageComplete false");
 		}
 		g.dispose();
 		return b;
 	}
 
-	public boolean processFrame(BufferedImage frame, boolean detectShots) {
+	public void processFrame(BufferedImage frame, boolean detectShots) {
 		// This is the FULL, ORIGINAL FRAME passed from CameraManager
 		currentFullFrame = frame;
 
@@ -275,8 +272,7 @@ public final class ShotDetectionManager {
 			}
 		}
 
-		if (checkIfInitialized()) filtersInitialized = true;
-		
+		if (!filtersInitialized) filtersInitialized = checkIfInitialized();
 		
 		//if (thresholdPixelsSize >= 1) logger.debug("detectShots {} filtersInitialized {}", detectShots, filtersInitialized);
 
@@ -295,7 +291,7 @@ public final class ShotDetectionManager {
 			// But we still need to skip detection on those frames
 			// That's why this is in two ifs
 			if (isExcessiveMotion(thresholdPixelsSize)) {
-				logger.trace("excessiveMotion {}", thresholdPixelsSize);
+				if (logger.isTraceEnabled()) logger.trace("excessiveMotion {}", thresholdPixelsSize);
 				
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
@@ -305,12 +301,11 @@ public final class ShotDetectionManager {
 			}
 
 			else if (thresholdPixelsSize >= getMinimumShotDimension()) {
-
-				logger.trace("thresholdPixels {}", thresholdPixelsSize);
+				if (logger.isTraceEnabled()) logger.trace("thresholdPixels {}", thresholdPixelsSize);
 
 				ArrayList<PixelCluster> clusters = clusterPixels(thresholdPixels);
 				
-				logger.trace("clusters {}", clusters.size());
+				if (logger.isTraceEnabled()) logger.trace("clusters {}", clusters.size());
 
 				detectShots(workingCopy, clusters);
 			}
@@ -321,8 +316,6 @@ public final class ShotDetectionManager {
 		if (cameraManager.getDebuggerListener().isPresent()) {
 			cameraManager.getDebuggerListener().get().updateDebugView(workingCopy);
 		}
-
-		return filtersInitialized;
 	}
 
 	private ArrayList<PixelCluster> clusterPixels(ArrayList<Pixel> thresholdPixels) {
@@ -359,7 +352,7 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean shouldShowBrightnessWarning() {
-		logger.trace("avgBrightPixels {}", avgBrightPixels);
+		if (logger.isTraceEnabled()) logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount() > BRIGHTNESS_WARNING_FRAMECOUNT) {
@@ -383,9 +376,6 @@ public final class ShotDetectionManager {
 	private ArrayList<Pixel> findThresholdPixelsAndUpdateFilter(BufferedImage workingCopy, boolean detectShots) {
 		final int subWidth = workingCopy.getWidth() / SECTOR_COLUMNS;
 		final int subHeight = workingCopy.getHeight() / SECTOR_ROWS;
-		
-
-		final boolean[][] sectorstatuses = cameraManager.getSectorStatuses();
 
 		ArrayList<Pixel> thresholdPixels = new ArrayList<Pixel>();
 
@@ -396,34 +386,26 @@ public final class ShotDetectionManager {
 		Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
 
 			public void perform(Integer sector) {
-				
-				Integer sectorX = (sector % SECTOR_COLUMNS);
-				Integer sectorY = (int)Math.floor((sector / SECTOR_ROWS));
+				int sectorX = (sector.intValue() % SECTOR_COLUMNS);
+				int sectorY = sector.intValue() / SECTOR_ROWS;
 
-				Integer startX = subWidth * sectorX;
-				Integer startY = subHeight * sectorY;
+				int startX = subWidth * sectorX;
+				int startY = subHeight * sectorY;
 				
-				if (!sectorstatuses[sectorY][sectorX]) return;
+				if (!cameraManager.isSectorOn(sectorX, sectorY)) return;
 				
 				for (Integer y = startY; y < startY + subHeight; y++) {
-
 					for (Integer x = startX; x < startX + subWidth; x++) {
-
 						Optional<Pixel> pixel = updateFilter(workingCopy, x, y, detectShots);
-
 
 						if (pixel.isPresent()) {
 							synchronized (thresholdPixels) {
 								thresholdPixels.add(pixel.get());
 							}
 						}
-
 					}
-				}
-
-				
+				}				
 			}
-
 		});
 
 		return thresholdPixels;

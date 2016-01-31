@@ -61,8 +61,12 @@ public class Camera {
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera.class);
 
+	private final Webcam webcam;
+	private final boolean isIpCam;
+
 	public static class CompositeDriver extends WebcamCompositeDriver {
 		public CompositeDriver() {
+			super();
 			add(new WebcamDefaultDriver());
 			add(new IpCamDriver());
 		}
@@ -70,7 +74,7 @@ public class Camera {
 
 	static {
 		Webcam.setDriver(new CompositeDriver());
-		String os = System.getProperty("os.name");
+		final String os = System.getProperty("os.name");
 
 		if (os != null && os.equals("Mac OS X")) {
 			isMac = true;
@@ -78,7 +82,7 @@ public class Camera {
 
 			knownWebcams = new ArrayList<Camera>();
 
-			for (Webcam w : Webcam.getWebcams()) {
+			for (final Webcam w : Webcam.getWebcams()) {
 				knownWebcams.add(new Camera(w));
 			}
 
@@ -109,11 +113,11 @@ public class Camera {
 			} else {
 				ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
 			}
-			
+
 			// If a camera can't be reached, webcam capture seems to freeze
 			// indefinitely. This is done
 			// to add an artificial timeout.
-			Thread t = new Thread(() -> ipcam.getResolution());
+			Thread t = new Thread(() -> ipcam.getResolution(), "GetIPcamResolution");
 			t.start();
 			final int ipcamTimeout = 3000;
 			try {
@@ -140,12 +144,9 @@ public class Camera {
 		}
 	}
 
-	public static boolean unregisterIpCamera(String cameraName) {
+	public static boolean unregisterIpCamera(final String cameraName) {
 		return IpCamDeviceRegistry.unregister(cameraName);
 	}
-
-	private final Webcam webcam;
-	private final boolean isIpCam;
 
 	// For testing
 	protected Camera() {
@@ -153,17 +154,17 @@ public class Camera {
 		this.isIpCam = false;
 	}
 
-	private Camera(Webcam webcam) {
+	private Camera(final Webcam webcam) {
 		this.webcam = webcam;
 		this.isIpCam = false;
 
 		logger.debug("WebcamDevice type: {}", webcam.getDevice().getClass().getName());
 	}
 
-	private Camera(IpCamDevice ipcam) {
+	private Camera(final IpCamDevice ipcam) {
 		this.isIpCam = true;
 
-		for (Camera webcam : getWebcams()) {
+		for (final Camera webcam : getWebcams()) {
 			if (webcam.getName().equals(ipcam.getName())) {
 				this.webcam = webcam.getWebcam();
 				return;
@@ -177,24 +178,28 @@ public class Camera {
 		return webcam;
 	}
 
-	public static Camera getDefault() {
+	public static Optional<Camera> getDefault() {
+		Camera defaultCam;
+		
 		if (isMac) {
-			return new Camera(defaultWebcam);
+			defaultCam = new Camera(defaultWebcam);
 		} else {
-			Webcam webcam = Webcam.getDefault();
-
-			if (webcam != null) {
-				return new Camera(webcam);
+			final Webcam cam = Webcam.getDefault();
+			
+			if (cam == null) {
+				defaultCam = null;
 			} else {
-				return null;
+				defaultCam = new Camera(cam);
 			}
 		}
+		
+		return Optional.ofNullable(defaultCam);
 	}
 
 	public static List<Camera> getWebcams() {
 		if (isMac) return knownWebcams;
 
-		List<Camera> webcams = new ArrayList<Camera>();
+		final List<Camera> webcams = new ArrayList<Camera>();
 
 		for (Webcam w : Webcam.getWebcams()) {
 			webcams.add(new Camera(w));
@@ -231,7 +236,7 @@ public class Camera {
 		if (isMac) {
 			new Thread(() -> {
 				webcam.close();
-			}).start();
+			}, "CloseMacOSXWebcam").start();
 			return true;
 		} else {
 			return webcam.close();
@@ -258,7 +263,7 @@ public class Camera {
 		return webcam.getFPS();
 	}
 
-	public void setViewSize(Dimension size) {
+	public void setViewSize(final Dimension size) {
 		try {
 			webcam.setCustomViewSizes(new Dimension[] { size });
 
@@ -286,7 +291,7 @@ public class Camera {
 		if (!this.getName().equals(other.getName())) return false;
 		return true;
 	}
-	
+
 	public static BufferedImage matToBufferedImage(Mat matBGR) {
 		int width = matBGR.width(), height = matBGR.height(), channels = matBGR.channels();
 		byte[] sourcePixels = new byte[width * height * channels];
@@ -298,7 +303,7 @@ public class Camera {
 
 		return image;
 	}
-	
+
 	public static Mat bufferedImageToMat(BufferedImage frame) {
 		BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
 		byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();

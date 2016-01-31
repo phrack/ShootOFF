@@ -25,17 +25,17 @@ import com.shootoff.config.Configuration;
 import com.shootoff.plugins.TrainingExerciseBase;
 
 public class MalfunctionsProcessor implements ShotProcessor {
-	private final Random rand;
+	private static boolean useTTS = true;
+	
+	private static final Random rand = new Random();
 	private final float prob;
-	private boolean useTTS = true;
 
-	public MalfunctionsProcessor(Configuration config) {
-		this.rand = new Random();
+	public MalfunctionsProcessor(final Configuration config) {
 		this.prob = config.getMalfunctionsProbability() / 100;
 	}
 
-	public void setUseTTS(boolean useTTS) {
-		this.useTTS = useTTS;
+	public static void setUseTTS(final boolean useTTS) {
+		MalfunctionsProcessor.useTTS = useTTS;
 	}
 
 	@Override

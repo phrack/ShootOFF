@@ -43,6 +43,7 @@ import com.shootoff.session.Event;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.ShotEvent;
 import com.shootoff.session.io.SessionIO;
+import com.shootoff.util.NamedThreadFactory;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -376,7 +377,7 @@ public class SessionViewerController {
 			togglePlaybackButton.setGraphic(new ImageView(new Image(
 					SessionViewerController.class.getResourceAsStream("/images/gnome_media_playback_pause.png"))));
 
-			executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+			executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory("SessionPlayback"));
 			executorService.schedule(new AdvanceSlider(), STEP_INTERVAL, TimeUnit.MILLISECONDS);
 		} else {
 			togglePlaybackButton.setGraphic(new ImageView(new Image(

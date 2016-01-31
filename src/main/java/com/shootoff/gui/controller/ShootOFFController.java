@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -50,12 +51,25 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
-import com.shootoff.gui.TimerPool;
+import com.shootoff.plugins.BouncingTargets;
+import com.shootoff.plugins.DuelingTree;
+import com.shootoff.plugins.ISSFStandardPistol;
+import com.shootoff.plugins.ParForScore;
+import com.shootoff.plugins.ParRandomShot;
+import com.shootoff.plugins.ProjectorTrainingExerciseBase;
+import com.shootoff.plugins.RandomShoot;
+import com.shootoff.plugins.ShootDontShoot;
+import com.shootoff.plugins.ShootForScore;
+import com.shootoff.plugins.SteelChallenge;
+import com.shootoff.plugins.TimedHolsterDrill;
+import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -116,6 +130,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu calibrationOptionsMenu;
 	@FXML private ToggleGroup calibrationToggleGroup;
 	@FXML private Menu addArenaTargetMenu;
+	@FXML private MenuItem clearArenaTargetsMenuItem;
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
@@ -195,9 +210,9 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		});
 
 		if (config.getWebcams().isEmpty()) {
-			Camera defaultCamera = Camera.getDefault();
-			if (defaultCamera != null) {
-				if (!addCameraTab("Default", defaultCamera)) cameraLockFailure(defaultCamera, true);
+			Optional<Camera> defaultCamera = Camera.getDefault();
+			if (defaultCamera.isPresent()) {
+				if (!addCameraTab("Default", defaultCamera.get())) cameraLockFailure(defaultCamera.get(), true);
 			} else {
 				Main.closeNoCamera();
 			}
@@ -365,7 +380,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		camerasSupervisor.clearManagers();
 
 		if (config.getWebcams().isEmpty()) {
-			if (!addCameraTab("Default", Camera.getDefault())) cameraLockFailure(Camera.getDefault(), true);
+			Optional<Camera> defaultCam = Camera.getDefault();
+			
+			if (defaultCam.isPresent()) {
+				if (!addCameraTab("Default", defaultCam.get())) cameraLockFailure(defaultCam.get(), true);
+			} else {
+				logger.error("Default camera was not fetched after clearing camera settings!");
+				Main.closeNoCamera();
+			}
 		} else {
 			int failureCount = 0;
 
@@ -548,6 +570,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
 
 		if (targetFiles != null) {
+			Arrays.sort(targetFiles);
 			for (File file : targetFiles) {
 				newTarget(file);
 			}
@@ -597,6 +620,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addProjectorTrainingExercise(new BouncingTargets());
 		addProjectorTrainingExercise(new DuelingTree());
 		addProjectorTrainingExercise(new ShootDontShoot());
+		addProjectorTrainingExercise(new SteelChallenge());
 	}
 
 	private void addProjectorTrainingExercise(TrainingExercise exercise) {
@@ -740,6 +764,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
 		calibrationOptionsMenu.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
+		clearArenaTargetsMenuItem.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
 		coursesMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
@@ -913,7 +938,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (!isCalibrating) {
 			enableCalibration();
-		} else if (isCalibrating && !fullScreen) {
+		} else if (!fullScreen) {
 			arenaCameraManager.disableAutoCalibration();
 
 			removeCalibrationTargetIfPresent();
@@ -1051,6 +1076,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		arenaBackgroundMenu.getItems().add(backgroundMenuItem);
 	}
 
+	@FXML
+	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
+		arenaController.getCanvasManager().clearTargets();
+	}
+	
 	@FXML
 	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
 		arenaController.setBackground(null);
@@ -1257,7 +1287,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		String targetPath = path.getPath();
 
 		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
-				targetPath.lastIndexOf('.'));
+				targetPath.lastIndexOf('.')).replace("_", " ");
 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		addTargetItem.setMnemonicParsing(false);

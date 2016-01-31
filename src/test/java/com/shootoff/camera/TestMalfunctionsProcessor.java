@@ -19,6 +19,8 @@ public class TestMalfunctionsProcessor {
 		config.setMalfunctions(true);
 		
 		shot = new Shot(Color.GREEN, 0, 0, 0, 0);
+		
+		MalfunctionsProcessor.setUseTTS(false);
 	}
 	
 	private int simulateShots(MalfunctionsProcessor malfunctionsProcessor) {
@@ -41,8 +43,6 @@ public class TestMalfunctionsProcessor {
 			if (s instanceof MalfunctionsProcessor) malfunctionsProcessor = (MalfunctionsProcessor)s;
 		}
 		
-		malfunctionsProcessor.setUseTTS(false);
-		
 		assertTrue(simulateShots(malfunctionsProcessor) >= 80);
 	}
 	
@@ -55,8 +55,6 @@ public class TestMalfunctionsProcessor {
 		for (ShotProcessor s : config.getShotProcessors()) {
 			if (s instanceof MalfunctionsProcessor) malfunctionsProcessor = (MalfunctionsProcessor)s;
 		}
-
-		malfunctionsProcessor.setUseTTS(false);
 		
 		assertTrue(simulateShots(malfunctionsProcessor) <= 20);
 	}

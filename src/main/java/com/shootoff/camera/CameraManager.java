@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 
 import javafx.geometry.Bounds;
@@ -41,8 +39,8 @@ import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
-import com.shootoff.gui.TimerPool;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -63,7 +61,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import javafx.util.Pair;
 
 public class CameraManager {
 	public static final int DEFAULT_FEED_WIDTH = 640;
@@ -84,7 +81,7 @@ public class CameraManager {
 	
 	private final ShotDetectionManager shotDetectionManager;
 
-	private final Logger logger = LoggerFactory.getLogger(CameraManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	private final Optional<Camera> webcam;
 	private final Object processingLock;
 	private boolean processedVideo = false;
@@ -191,13 +188,13 @@ public class CameraManager {
 			}
 		}
 
-		new Thread(detector).start();
+		new Thread(detector, "ShotDetector").start();
 	}
 
-	public boolean[][] getSectorStatuses() {
-		return sectorStatuses;
+	public boolean isSectorOn(int x, int y) {
+		return sectorStatuses[y][x];
 	}
-
+	
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
 		this.sectorStatuses = sectorStatuses;
 	}
@@ -227,11 +224,13 @@ public class CameraManager {
 	}
 
 	public void close() {
+		getCanvasManager().close();
+		setDetecting(false);
+		setStreaming(false);
 		if (webcam.isPresent()) webcam.get().close();
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		TimerPool.cancelTimer(motionDiagnosticFuture);
-		detectionExecutor.shutdownNow();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -397,7 +396,6 @@ public class CameraManager {
 		return webcamFPS;
 	}
 
-	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
@@ -460,8 +458,6 @@ public class CameraManager {
 				processedVideo = true;
 				processingLock.notifyAll();
 			}
-
-			detectionExecutor.shutdown();
 		}
 		
 		private void streamCameraFrames() {
@@ -473,7 +469,6 @@ public class CameraManager {
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					// Camera appears to have closed
 					showMissingCameraError();
-					detectionExecutor.shutdown();
 					return;
 				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 					// Camera appears to be open but got a null frame
@@ -481,11 +476,7 @@ public class CameraManager {
 					continue;
 				}
 
-				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
-
-				if (!pFramePair.getKey()) continue;
-
-				currentFrame = pFramePair.getValue();
+				currentFrame = processFrame(currentFrame);
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
@@ -530,11 +521,9 @@ public class CameraManager {
 					canvasManager.updateBackground(currentFrame, Optional.empty());
 				}
 			}
-
-			detectionExecutor.shutdown();
 		}
 
-		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
+		private BufferedImage processFrame(BufferedImage currentFrame) {
 			frameCount++;
 			
 			if (webcam.isPresent() && (int)(getFrameCount() % DEFAULT_FPS) == 0) {
@@ -549,9 +538,9 @@ public class CameraManager {
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
+			shotDetectionManager.processFrame(currentFrame, isDetecting);
 			
-			return new Pair<Boolean, BufferedImage>(result, currentFrame);
+			return currentFrame;
 		}
 		
 		private void estimateCameraFPS()
@@ -612,7 +601,7 @@ public class CameraManager {
 				}
 
 			});
-			new Thread(acm).start();
+			new Thread(acm, "AutoCalibration").start();
 		}
 
 		protected void autoCalibrateSuccess(Bounds bounds) {

@@ -60,9 +60,9 @@ public class TestTarget {
 		
 		targets = new ArrayList<Target>();
 		pepperPopper = canvasManager.addTarget(
-				new Target(TargetIO.loadTarget(new File("targets/pepper_popper.target")).get(), targets));
+				new Target(TargetIO.loadTarget(new File("targets/Pepper_Popper.target")).get(), targets));
 		targets.add(pepperPopper);
-		targets.add(new Target(TargetIO.loadTarget(new File("targets/reset.target")).get(), targets));
+		targets.add(new Target(TargetIO.loadTarget(new File("targets/Reset.target")).get(), targets));
 	}
 
 	@Test

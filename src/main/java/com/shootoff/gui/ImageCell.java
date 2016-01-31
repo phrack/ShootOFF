@@ -42,7 +42,7 @@ import javafx.scene.image.ImageView;
 import javafx.util.converter.DefaultStringConverter;
 
 public class ImageCell extends TextFieldListCell<String> {
-	private final Logger logger = LoggerFactory.getLogger(ImageCell.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImageCell.class);
 
 	private static final Map<Camera, ImageView> imageCache = new HashMap<Camera, ImageView>();
 	private final List<Camera> webcams;
@@ -50,7 +50,7 @@ public class ImageCell extends TextFieldListCell<String> {
 	private final Optional<Set<Camera>> recordingCameras;
 
 	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames,
-			Optional<DesignateShotRecorderListener> listener, Optional<Set<Camera>> recordingCameras) {
+			final Optional<DesignateShotRecorderListener> listener, final Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<Camera>(webcams);
 		if (userDefinedCameraNames != null) {
 			this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
@@ -72,14 +72,14 @@ public class ImageCell extends TextFieldListCell<String> {
 				if (img.isPresent()) {
 					imageCache.get(c).setImage(img.get());
 				}
-			}).start();
+			}, "FetchImageCellWebcamImages").start();
 		}
 
 		this.editingProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 				if (!newValue) {
-					Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this.getText());
+					final Optional<ImageView> webcamIV = fetchWebcamImageView(ImageCell.this.getText());
 
 					if (webcamIV.isPresent()) {
 						setGraphic(webcamIV.get());
@@ -121,7 +121,7 @@ public class ImageCell extends TextFieldListCell<String> {
 			return;
 		}
 
-		Optional<ImageView> webcamIV = fetchWebcamImageView(item);
+		final Optional<ImageView> webcamIV = fetchWebcamImageView(item);
 
 		if (recordingCameras.isPresent()) {
 			for (Camera recordingCamera : recordingCameras.get()) {

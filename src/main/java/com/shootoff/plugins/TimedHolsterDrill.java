@@ -34,6 +34,7 @@ import javafx.scene.paint.Color;
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.util.NamedThreadFactory;
 
 public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private final static String LENGTH_COL_NAME = "Length";
@@ -42,7 +43,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private final static int RESUME_DELAY = 5; // s
 	private static final int CORE_POOL_SIZE = 2;
 	private static final String PAUSE = "Pause";
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+			new NamedThreadFactory("TimedHolsterDrillExercise"));
 	private int delayMin = 4;
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
@@ -95,7 +97,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		pauseResumeButton.setText(PAUSE);
 		resetValues();
 		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory(
+				"TimedHolsterDrillExercise"));
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 

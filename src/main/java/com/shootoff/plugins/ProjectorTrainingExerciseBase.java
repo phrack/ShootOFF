@@ -84,11 +84,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * 
 	 * @return the group that was loaded from the target file
 	 */
-	public Optional<Target> addTarget(File target, double x, double y) {
+	public Optional<Target> addTarget(File target, final double x, final double y) {
 		if (!target.isAbsolute())
 			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
 
-		Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
+		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
 
 		if (newTarget.isPresent()) {
 			newTarget.get().setPosition(x, y);
@@ -124,11 +124,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 	@Override
 	public void destroy() {
-		super.destroy();
-
 		for (Target target : targets)
 			arenaController.getCanvasManager().removeTarget(target);
 
 		targets.clear();
+		
+		super.destroy();
 	}
 }

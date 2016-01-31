@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<course>
+	<target file="targets/Steel_Challenge_Stop_Circle.target" x="164.000000" y="148.000000" width="68.000000" height="130.000000" />
+	<target file="targets/Steel_Challenge_Circle.target" x="-69.000000" y="41.000000" width="55.525970" height="119.000000" />
+	<target file="targets/Steel_Challenge_Circle.target" x="386.000000" y="49.000000" width="55.526001" height="119.000000" />
+	<target file="targets/Steel_Challenge_Rectangle.target" x="96.000000" y="-109.000000" width="54.672882" height="163.000000" />
+	<target file="targets/Steel_Challenge_Rectangle.target" x="324.000000" y="-112.000000" width="54.672913" height="163.000000" />
+	<resolution width="640.000000" height="483.000000" />
+</course>

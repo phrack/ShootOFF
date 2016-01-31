@@ -68,6 +68,10 @@ public class SessionCanvasManager {
 	public void doEvent(Event e) {
 		switch (e.getType()) {
 		case SHOT:
+			if (!(e instanceof ShotEvent)) {
+			    throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
+			}
+			
 			ShotEvent se = (ShotEvent) e;
 			canvas.getChildren().add(se.getShot().getMarker());
 
@@ -114,10 +118,18 @@ public class SessionCanvasManager {
 			break;
 
 		case TARGET_ADDED:
+			if (!(e instanceof TargetAddedEvent)) {
+			    throw new AssertionError("Expected type TargetAddedEvent but got type " + e.getClass().getName());
+			}
+			
 			addTarget((TargetAddedEvent) e);
 			break;
 
 		case TARGET_REMOVED:
+			if (!(e instanceof TargetRemovedEvent)) {
+			    throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
+			}
+			
 			TargetRemovedEvent tre = (TargetRemovedEvent) e;
 			eventToContainer.put(e, targets.get(tre.getTargetIndex()));
 			canvas.getChildren().remove(targets.get(tre.getTargetIndex()).getTargetGroup());
@@ -125,18 +137,30 @@ public class SessionCanvasManager {
 			break;
 
 		case TARGET_RESIZED:
+			if (!(e instanceof TargetResizedEvent)) {
+			    throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
+			}
+			
 			TargetResizedEvent trre = (TargetResizedEvent) e;
 			eventToDimension.put(e, targets.get(trre.getTargetIndex()).getDimension());
 			targets.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
 			break;
 
 		case TARGET_MOVED:
+			if (!(e instanceof TargetMovedEvent)) {
+			    throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
+			}
+			
 			TargetMovedEvent tme = (TargetMovedEvent) e;
 			eventToPosition.put(e, targets.get(tme.getTargetIndex()).getPosition());
 			targets.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
+			if (!(e instanceof ExerciseFeedMessageEvent)) {
+			    throw new AssertionError("Expected type ExerciseFeedMessageEvent but got type " + e.getClass().getName());
+			}
+			
 			ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
 			eventToExerciseMessage.put(e, exerciseLabel.getText());
 			exerciseLabel.setText(pfme.getMessage());
@@ -147,6 +171,10 @@ public class SessionCanvasManager {
 	public void undoEvent(Event e) {
 		switch (e.getType()) {
 		case SHOT:
+			if (!(e instanceof ShotEvent)) {
+			    throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
+			}
+			
 			ShotEvent se = (ShotEvent) e;
 			canvas.getChildren().remove(se.getShot().getMarker());
 
@@ -162,6 +190,10 @@ public class SessionCanvasManager {
 			break;
 
 		case TARGET_REMOVED:
+			if (!(e instanceof TargetRemovedEvent)) {
+			    throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
+			}
+			
 			TargetRemovedEvent tre = (TargetRemovedEvent) e;
 			Target oldTarget = eventToContainer.get(e);
 			canvas.getChildren().add(oldTarget.getTargetGroup());
@@ -169,12 +201,20 @@ public class SessionCanvasManager {
 			break;
 
 		case TARGET_RESIZED:
+			if (!(e instanceof TargetResizedEvent)) {
+			    throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
+			}
+			
 			TargetResizedEvent trre = (TargetResizedEvent) e;
 			Dimension2D oldDimension = eventToDimension.get(e);
 			targets.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
 			break;
 
 		case TARGET_MOVED:
+			if (!(e instanceof TargetMovedEvent)) {
+			    throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
+			}
+			
 			TargetMovedEvent tme = (TargetMovedEvent) e;
 			Point2D oldPosition = eventToPosition.get(e);
 			targets.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
