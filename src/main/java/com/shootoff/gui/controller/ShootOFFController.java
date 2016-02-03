@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -50,7 +51,6 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
-import com.shootoff.gui.TimerPool;
 import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ISSFStandardPistol;
@@ -60,6 +60,7 @@ import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
+import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
@@ -68,6 +69,7 @@ import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -128,6 +130,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	@FXML private Menu calibrationOptionsMenu;
 	@FXML private ToggleGroup calibrationToggleGroup;
 	@FXML private Menu addArenaTargetMenu;
+	@FXML private MenuItem clearArenaTargetsMenuItem;
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
@@ -567,6 +570,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
 
 		if (targetFiles != null) {
+			Arrays.sort(targetFiles);
 			for (File file : targetFiles) {
 				newTarget(file);
 			}
@@ -615,6 +619,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addProjectorTrainingExercise(new BouncingTargets());
 		addProjectorTrainingExercise(new DuelingTree());
 		addProjectorTrainingExercise(new ShootDontShoot());
+		addProjectorTrainingExercise(new SteelChallenge());
 	}
 
 	private void addProjectorTrainingExercise(TrainingExercise exercise) {
@@ -758,6 +763,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
 		calibrationOptionsMenu.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
+		clearArenaTargetsMenuItem.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
 		coursesMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
@@ -874,7 +880,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		arenaController.startCalibration();
 		arenaController.setCalibrationMessageVisible(false);
 		arenaController.saveCurrentBackground();
-		setArenaBackground("pattern-colors.png");
+		setArenaBackground("pattern.png");
 		
 
 		arenaCameraManager.setController(this);
@@ -1084,6 +1090,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	@FXML
+	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
+		arenaController.getCanvasManager().clearTargets();
+	}
+	
+	@FXML
 	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
 		arenaController.setBackground(null);
 	}
@@ -1289,7 +1300,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		String targetPath = path.getPath();
 
 		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
-				targetPath.lastIndexOf('.'));
+				targetPath.lastIndexOf('.')).replace("_", " ");
 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		addTargetItem.setMnemonicParsing(false);
@@ -1300,11 +1311,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		MenuItem addProjectorTargetItem = new MenuItem(targetName);
 		addProjectorTargetItem.setMnemonicParsing(false);
-
-        addProjectorTargetItem.setOnAction((e) -> {
-            Optional<Target> t = arenaController.getCanvasManager().addTarget(path);
-           
-        });
 
 		MenuItem editTargetItem = new MenuItem(targetName);
 		editTargetItem.setMnemonicParsing(false);

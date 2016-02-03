@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="118.000000" y="61.000000" file="targets/plate_stand.png">
+	</image>
+	<ellipse centerX="160.500000" centerY="157.500000" radiusX="77.000000" radiusY="77.000000" fill="gray">
+		<tag name="opacity" value="1.0" />
+		<tag name="command" value="play_sound(sounds/steel_sound_1.wav)" />
+	</ellipse>
+</target>

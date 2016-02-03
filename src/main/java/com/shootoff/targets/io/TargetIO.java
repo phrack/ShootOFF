@@ -123,12 +123,16 @@ public class TargetIO {
 		for (final Node node : regions) {
 			final TargetRegion region = (TargetRegion) node;
 
-			if (region.tagExists("visible") && region.getTag("visible").equals("false")) {
+			if (region.tagExists("visible") && region.getTag("visible").equalsIgnoreCase("false")) {
 				node.setVisible(false);
 			}
 
 			if (region.getType() != RegionType.IMAGE) {
-				node.setOpacity(DEFAULT_OPACITY);
+				if (region.tagExists("opacity")) {
+					node.setOpacity(Double.parseDouble(region.getTag("opacity")));
+				} else {
+					node.setOpacity(DEFAULT_OPACITY);
+				}
 			}
 			targetGroup.getChildren().add(node);
 		}

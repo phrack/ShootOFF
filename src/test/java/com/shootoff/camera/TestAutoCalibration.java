@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Optional;
 
 import javafx.geometry.Bounds;
@@ -16,14 +15,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
-import org.opencv.imgproc.Imgproc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
@@ -36,8 +27,6 @@ public class TestAutoCalibration {
 	private Configuration config;
 	private MockCanvasManager mockManager;
 	private boolean[][] sectorStatuses;
-	
-	private static final Logger logger = LoggerFactory.getLogger(TestAutoCalibration.class);
 
 	
     @Rule
@@ -287,130 +276,6 @@ public class TestAutoCalibration {
 		Boolean result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
 		assertEquals(true, result);
 	}
-	
-	@Test
-	public void testCalibrate() throws IOException {
-		/*Boolean result = autoCalibrationVideo("/autocalibration/calibration-with-disappear.avi");
-		assertEquals(true, result);*/
-		
-		BufferedImage mask420 = ImageIO.read(
-				TestAutoCalibration.class.getResourceAsStream("/mask-237-27.png"));
-		BufferedImage submatFrame420 = ImageIO.read(
-				TestAutoCalibration.class.getResourceAsStream("/shot-237-27_orig.png"));
-
-		Mat mask420mat = Camera.bufferedImageToMat(mask420);
-		Mat submatFrame420mat = Camera.bufferedImageToMat(submatFrame420);
-		
-		
-		/*Imgproc.cvtColor(mask420mat, mask420mat, Imgproc.COLOR_BGR2YCrCb);
-		Imgproc.cvtColor(submatFrame420mat, submatFrame420mat, Imgproc.COLOR_BGR2YCrCb);
-
-		ArrayList<Mat> maskchannels = new ArrayList<Mat>();
-		Core.split(mask420mat, maskchannels);
-		ArrayList<Mat> submatchannels = new ArrayList<Mat>();
-		Core.split(submatFrame420mat, submatchannels);
-		
-		Imgproc.equalizeHist(maskchannels.get(0), maskchannels.get(0));
-		Imgproc.equalizeHist(submatchannels.get(0), submatchannels.get(0));
-		
-		Core.merge(maskchannels, mask420mat);
-		Core.merge(submatchannels, submatFrame420mat);
-		
-		Imgproc.cvtColor(mask420mat, mask420mat, Imgproc.COLOR_YCrCb2BGR);
-		Imgproc.cvtColor(submatFrame420mat, submatFrame420mat, Imgproc.COLOR_YCrCb2BGR);*/
-		
-		//Imgproc.blur(mask420mat, mask420mat, new Size(3,3));
-		
-		//mask420mat.convertTo(mask420mat, -1, 1, -20);
-		
-		int dilation_size = 3;
-		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*dilation_size + 1, 2*dilation_size+1));
-		Imgproc.dilate(mask420mat, mask420mat, kern);
-		
-		String filename = String.format("mask.png");
-		File file = new File(filename);
-		filename = file.toString();
-		Highgui.imwrite(filename, mask420mat);
-		
-		
-		filename = String.format("submatFrame.png");
-		file = new File(filename);
-		filename = file.toString();
-		Highgui.imwrite(filename, submatFrame420mat);
-		
-		Mat subtracted = new Mat();
-		
-		Imgproc.cvtColor(mask420mat, mask420mat, Imgproc.COLOR_BGR2HSV);
-		Imgproc.cvtColor(submatFrame420mat, submatFrame420mat, Imgproc.COLOR_BGR2HSV);
-		
-		ArrayList<Mat> maskchannels2 = new ArrayList<Mat>();
-		Core.split(mask420mat, maskchannels2);
-		ArrayList<Mat> submatchannels2 = new ArrayList<Mat>();
-		Core.split(submatFrame420mat, submatchannels2);
-		
-		//Core.subtract(submatchannels2.get(2),maskchannels2.get(2), submatchannels2.get(2));
-		
-		double submat_brightness = 0;
-		double mask_brightness = 0;
-		
-
-		
-		Imgproc.equalizeHist(maskchannels2.get(2), maskchannels2.get(2));
-		Imgproc.equalizeHist(submatchannels2.get(2), submatchannels2.get(2));
-		
-		for (int y = 0; y < submatchannels2.get(2).rows(); y++)
-		{
-			for (int x = 0; x < submatchannels2.get(2).cols(); x++)
-			{
-				submat_brightness += submatchannels2.get(2).get(y, x)[0];
-				mask_brightness += maskchannels2.get(2).get(y, x)[0];
-			}
-		}
-		submat_brightness /= (submatchannels2.get(2).rows() * submatchannels2.get(2).cols());
-		mask_brightness /= (maskchannels2.get(2).rows() * maskchannels2.get(2).cols());
-
-		double brightness_scale = mask_brightness / submat_brightness;
-		
-		for (int y = 0; y < submatchannels2.get(2).rows(); y++)
-		{
-			for (int x = 0; x < submatchannels2.get(2).cols(); x++)
-			{
-				/*if (((x+y)%50)==0)
-				{
-					logger.warn("{} {} orig {} {} ", x, y, submatchannels2.get(2).get(y, x)[0], maskchannels2.get(2).get(y, x)[0]);
-				}*/
-				
-				//submatchannels2.get(2).put(y, x, submatchannels2.get(2).get(y, x)[0] *  brightness_scale);
-				
-				if (submatchannels2.get(2).get(y, x)[0] > maskchannels2.get(2).get(y, x)[0])
-				{
-					submatchannels2.get(2).put(y, x, submatchannels2.get(2).get(y, x)[0] - maskchannels2.get(2).get(y, x)[0]);
-				}
-				else
-				{
-					
-					submatchannels2.get(2).put(y, x, 0);
-				}
-				
-				/*if (((x+y)%50)==0)
-				{
-					logger.warn("{} {} mod  {}", x, y, submatchannels2.get(2).get(y, x)[0]);
-				}*/
-
-			}
-		}
-		
-		Core.merge(maskchannels2, mask420mat);
-		Core.merge(submatchannels2, submatFrame420mat);
-		
-		Imgproc.cvtColor(submatFrame420mat, submatFrame420mat, Imgproc.COLOR_HSV2BGR);
-		
-		filename = String.format("subtracted.png");
-		file = new File(filename);
-		filename = file.toString();
-		Highgui.imwrite(filename, submatFrame420mat);
-	}
-	
 	
 	/* http://stackoverflow.com/questions/11006394/is-there-a-simple-way-to-compare-bufferedimage-instances */
 	public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {

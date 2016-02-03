@@ -27,16 +27,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 
 import javafx.geometry.Bounds;
 
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,8 +42,8 @@ import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
-import com.shootoff.gui.TimerPool;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -213,7 +209,7 @@ public class CameraManager {
 			}
 		}
 
-		new Thread(detector).start();
+		new Thread(detector, "ShotDetector").start();
 	}
 
 	public boolean isSectorOn(int x, int y) {
@@ -256,7 +252,6 @@ public class CameraManager {
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		TimerPool.cancelTimer(motionDiagnosticFuture);
-		detectionExecutor.shutdownNow();
 	}
 
 	public void setStreaming(boolean isStreaming) {
@@ -422,7 +417,6 @@ public class CameraManager {
 		return webcamFPS;
 	}
 
-	private final ExecutorService detectionExecutor = Executors.newFixedThreadPool(200);
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 	
@@ -509,8 +503,6 @@ public class CameraManager {
 				processedVideo = true;
 				processingLock.notifyAll();
 			}
-
-			detectionExecutor.shutdown();
 		}
 		
 		private void streamCameraFrames() {
@@ -524,7 +516,6 @@ public class CameraManager {
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					// Camera appears to have closed
 					showMissingCameraError();
-					detectionExecutor.shutdown();
 					return;
 				} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 					// Camera appears to be open but got a null frame
@@ -532,13 +523,13 @@ public class CameraManager {
 					continue;
 				}
 				
+
 				if ((int)(getFrameCount() % getFPS()) == 0) {
 					estimateCameraFPS();
 				}
 				
 
 				currentFrame = processFrame(currentFrame);
-				
 				if (currentFrame == null)
 					continue;
 
@@ -587,12 +578,10 @@ public class CameraManager {
 				
 				
 			}
-
-			detectionExecutor.shutdown();
 		}
 		
-	
-		
+
+
 		private BufferedImage processFrame(BufferedImage currentFrame) {
 			frameCount++;
 			
@@ -605,145 +594,10 @@ public class CameraManager {
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 			
-			
-			if (cameraAutoCalibrated && controller != null && projectionBounds.isPresent())
-			{
-				final Mat matFrame = Camera.bufferedImageToMat(currentFrame);
-				
-					
-				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(), (int) projectionBounds.get().getMaxY(),
-							(int) projectionBounds.get().getMinX(), (int) projectionBounds.get().getMaxX());
-
-
-				
-				/*String filename = String.format("mask-submatFrame-pre-copy.png");
-				File file = new File(filename);
-				filename = file.toString();
-				Highgui.imwrite(filename, submatFrame);*/
-
-				
-				Mat gmask = new Mat();
-				Imgproc.cvtColor(arenaMaskManager.getMask(), gmask, Imgproc.COLOR_GRAY2BGR);
-				if (getDebuggerListener().isPresent())
-					getDebuggerListener().get().updateDebugView(Camera.matToBufferedImage(gmask));
-
-				
-				long maskTime = getCurrentFrameTimestamp();
-				
-				Mat mask = getArenaMask(projectionBounds.get(), maskTime);
-				
-				if (false && mask != null)
-				{
-					
-					
-					//mask = Camera.colorTransfer(submatFrame, mask);
-					
-					//Core.subtract(mask, submatFrame, mask);
-
-					if (getDebuggerListener().isPresent())
-						getDebuggerListener().get().updateDebugView(Camera.matToBufferedImage(mask));
-					
-					
-					Imgproc.cvtColor(mask, mask, Imgproc.COLOR_BGR2HSV);
-					Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_BGR2HSV);
-					
-					ArrayList<Mat> maskchannels2 = new ArrayList<Mat>();
-					Core.split(mask, maskchannels2);
-					ArrayList<Mat> submatchannels2 = new ArrayList<Mat>();
-					Core.split(submatFrame, submatchannels2);
-					
-					//Core.subtract(submatchannels2.get(2),maskchannels2.get(2), submatchannels2.get(2));
-					
-					Imgproc.equalizeHist(maskchannels2.get(2), maskchannels2.get(2));
-					Imgproc.equalizeHist(submatchannels2.get(2), submatchannels2.get(2));
-					
-					for (int y = 0; y < submatchannels2.get(2).rows(); y++)
-					{
-						for (int x = 0; x < submatchannels2.get(2).cols(); x++)
-						{
-							/*if (((x+y)%50)==0)
-							{
-								logger.warn("{} {} orig {} {} ", x, y, submatchannels2.get(2).get(y, x)[0], maskchannels2.get(2).get(y, x)[0]);
-							}*/
-							
-							if (submatchannels2.get(2).get(y, x)[0] > maskchannels2.get(2).get(y, x)[0])
-							{
-								submatchannels2.get(2).put(y, x, submatchannels2.get(2).get(y, x)[0] - maskchannels2.get(2).get(y, x)[0]);
-							}
-							else
-							{
-								
-								submatchannels2.get(2).put(y, x, 0);
-							}
-							
-							/*if (((x+y)%50)==0)
-							{
-								logger.warn("{} {} mod  {}", x, y, submatchannels2.get(2).get(y, x)[0]);
-							}*/
-
-						}
-					}
-					
-					Core.merge(maskchannels2, mask);
-					Core.merge(submatchannels2, submatFrame);
-					
-					Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);
-					
-					/*if ((getFrameCount()%30)==0)
-					{
-						String filename = String.format("mask-%d.png", getFrameCount());
-						File file = new File(filename);
-						filename = file.toString();
-						Highgui.imwrite(filename, mask);
-						
-						
-						filename = String.format("submatFrame-%d.png", getFrameCount());
-						file = new File(filename);
-						filename = file.toString();
-						Highgui.imwrite(filename, submatFrame);
-					}*/
-					/*Mat mask_grayscale = new Mat();
-					Imgproc.cvtColor(mask, mask_grayscale, Imgproc.COLOR_BGR2GRAY);
-					
-					Imgproc.threshold(mask_grayscale, mask_grayscale, 20, 255, Imgproc.THRESH_BINARY);
-					
-					Mat mask_grayscale_bgr = new Mat();
-					Imgproc.cvtColor(mask_grayscale, mask_grayscale_bgr, Imgproc.COLOR_GRAY2BGR);
-
-
-					
-					//Core.absdiff(submatFrame, mask, submatFrame);
-					
-					Mat result = new Mat();
-					
-					submatFrame.copyTo(result, mask_grayscale_bgr);
-					//Core.subtract(submatFrame, submatFrame, submatFrame, mask_grayscale);
-					
-					
-					result.copyTo(submatFrame);*/
-					//Core.subtract(submatFrame, mask, submatFrame);
-				}
-				//dst.copyTo(submatFrame);
-				
-				/*filename = String.format("mask-submatFrame-post-copy.png");
-				file = new File(filename);
-				filename = file.toString();
-				Highgui.imwrite(filename, submatFrame);*/
-				
-				currentFrame = Camera.matToBufferedImage(matFrame);
-				
-				/*if (getDebuggerListener().isPresent()) {
-					getDebuggerListener().get().updateDebugView(subtractedImage);
-				}*/
-
-
-			}
-
 			shotDetectionManager.processFrame(currentFrame, isDetecting);
 			
-			arenaMaskManager.updateAvgLums(shotDetectionManager.getLumsMovingAverageAcrossFrame(), getCurrentFrameTimestamp());
-			
 			return currentFrame;
+
 		}
 		
 		private void estimateCameraFPS()
@@ -913,6 +767,7 @@ public class CameraManager {
 
 	private long frameDelay;
 	
+
 	private void fireAutoCalibration() {
 		acm.reset();
 		acm.setCallback(new Callback<Void, Void>() {
@@ -934,12 +789,8 @@ public class CameraManager {
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
 					(int) bounds.getWidth(), (int) bounds.getHeight());
 			
-			arenaMaskManager.setDelay(delay);
-			
-			arenaMaskManager.start();
-
 			Platform.runLater(() -> {
-				controller.setArenaMaskManager(arenaMaskManager);
+
 				controller.calibrate(bounds, false);
 			});
 

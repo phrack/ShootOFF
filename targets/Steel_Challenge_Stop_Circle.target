@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="118.000000" y="61.000000" file="targets/plate_stand.png">
+	</image>
+	<image x="83.500000" y="80.500000" file="targets/stop_plate_circle.png">
+		<tag name="subtarget" value="stop_target" />
+		<tag name="command" value="play_sound(sounds/steel_sound_1.wav)" />
+	</image>
+</target>

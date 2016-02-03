@@ -292,7 +292,7 @@ public class Main extends Application {
 			}
 		});
 
-		new Thread(task).start();
+		new Thread(task, "DownloadJNLPResources").start();
 	}
 
 	/**
@@ -388,7 +388,7 @@ public class Main extends Application {
 			}
 		});
 
-		new Thread(task).start();
+		new Thread(task, "ExtractJNLPResources").start();
 	}
 
 	public static class ProgressDialog {
@@ -635,7 +635,9 @@ public class Main extends Application {
 				}
 			}
 
-			System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
+			if (System.getProperty("shootoff.home") == null) {
+				System.setProperty("shootoff.home", shootoffHome.getAbsolutePath());
+			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 
@@ -662,7 +664,9 @@ public class Main extends Application {
 				System.err.println("Could not locate local or remote resources metadata");
 			}
 		} else {
-			System.setProperty("shootoff.home", System.getProperty("user.dir"));
+			if (System.getProperty("shootoff.home") == null) {
+				System.setProperty("shootoff.home", System.getProperty("user.dir"));
+			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 			runShootOFF();

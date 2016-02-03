@@ -14,14 +14,11 @@ import javax.imageio.ImageIO;
 
 import javafx.geometry.Bounds;
 
-import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
@@ -67,6 +64,7 @@ public final class ShotDetectionManager {
 
 	private int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 300;
 
+
 	private int MINIMUM_SHOT_DIMENSION = 6;
 
 	// This is updated for every bright pixel
@@ -103,6 +101,7 @@ public final class ShotDetectionManager {
 	{
 		lumsMovingAverage = new double[width][height];
 		colorDiffMovingAverage = new double[width][height];
+
 
 		for (int y = 0; y < height; y++)
 		{
@@ -144,11 +143,13 @@ public final class ShotDetectionManager {
 		double currentLum = Pixel.calcLums(currentRGB);
 		double colorDiff = Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN);
 		
+
 		if (lumsMovingAverage[x][y] == -1) {
 			
 			lumsMovingAverage[x][y] = Math.min(currentLum, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 			colorDiffMovingAverage[x][y] = Math.min(colorDiff, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 			
+
 			return result;
 
 		}
@@ -213,6 +214,7 @@ public final class ShotDetectionManager {
 		});
 	}*/
 
+
 	private boolean pixelAboveExcessiveBrightnessThreshold(int lumsMovingAverage) {
 		return lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD;
 	}
@@ -226,6 +228,7 @@ public final class ShotDetectionManager {
 		// avgThresholdPixels > BRIGHTNESS_WARNING_AVG_THRESHOLD)
 		double dynamic_increase = ((255.0 - threshold)
 				* (avgThresholdPixels / MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+
 
 		double dynamic_threshold = threshold + dynamic_increase;
 
@@ -243,13 +246,15 @@ public final class ShotDetectionManager {
 		boolean drawImageComplete = g.drawImage(source, 0, 0, null);
 
 		if (!drawImageComplete) {
-			logger.error("deepCopy drawImageComplete false");
+
+			if (logger.isErrorEnabled()) logger.error("deepCopy drawImageComplete false");
 		}
 		g.dispose();
 		return b;
 	}
 
-	public boolean processFrame(BufferedImage frame, boolean detectShots) {
+
+	public void processFrame(BufferedImage frame, boolean detectShots) {
 		movingAveragePeriod = Math.max((int)(cameraManager.getFPS()/5.0),INIT_FRAME_COUNT);
 		
 		
@@ -268,10 +273,12 @@ public final class ShotDetectionManager {
 		} else {
 			workingFrame = frame;
 
+
 		}
 		
 		// Must reset before every updateFilter loop
 		brightPixels.clear();
+
 
 		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame,
 				(detectShots && filtersInitialized));
@@ -288,8 +295,8 @@ public final class ShotDetectionManager {
 			}
 		}
 
-		if (checkIfInitialized()) filtersInitialized = true;
-		
+
+		if (!filtersInitialized) filtersInitialized = checkIfInitialized();
 		
 		//if (thresholdPixelsSize >= 1) logger.debug("detectShots {} filtersInitialized {}", detectShots, filtersInitialized);
 
@@ -303,8 +310,8 @@ public final class ShotDetectionManager {
 
 			}
 
-			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
-
+			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize))
+			{
 
 				ArrayList<PixelCluster> clusters = clusterPixels(thresholdPixels);
 
@@ -336,12 +343,6 @@ public final class ShotDetectionManager {
 			}
 			
 		}
-
-		/*if (cameraManager.getDebuggerListener().isPresent()) {
-			cameraManager.getDebuggerListener().get().updateDebugView(workingFrame);
-		}*/
-
-		return filtersInitialized;
 	}
 
 	private ArrayList<PixelCluster> clusterPixels(List<Pixel> thresholdPixels) {
@@ -378,7 +379,8 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean shouldShowBrightnessWarning() {
-		logger.trace("avgBrightPixels {}", avgBrightPixels);
+
+		if (logger.isTraceEnabled()) logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount() > BRIGHTNESS_WARNING_FRAMECOUNT) {
@@ -403,7 +405,9 @@ public final class ShotDetectionManager {
 		final int subWidth = workingFrame.getWidth() / SECTOR_COLUMNS;
 		final int subHeight = workingFrame.getHeight() / SECTOR_ROWS;
 
+
 		List<Pixel> thresholdPixels = Collections.synchronizedList( new ArrayList<Pixel>() );
+
 
 		if (!cameraManager.isDetecting()) return thresholdPixels;
 		
@@ -426,6 +430,7 @@ public final class ShotDetectionManager {
 					for (Integer x = startX; x < startX + subWidth; x++) {
 						Optional<Pixel> pixel = updateFilter(workingFrame, x, y, detectShots);
 						
+
 						lumsMovingAverageAcrossFrameCurrentCalc += lumsMovingAverage[x][y];
 
 						if (pixel.isPresent())
@@ -496,9 +501,6 @@ public final class ShotDetectionManager {
 
 		if (config.isDebugShotsRecordToFiles()) {
 			
-			//Mat mask = cameraManager.getMaskForCurrentFrame();
-			Mat mask = null;
-			
 			File outputfile = new File(
 					String.format("shot-%d-%d_orig.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
 			try {
@@ -507,19 +509,7 @@ public final class ShotDetectionManager {
 				logger.error("Error writing original shot detection image", e);
 			}
 			
-			if (mask != null)
-			{
-				
-				
-				mask = Camera.colorTransfer(Camera.bufferedImageToMat(workingCopy), mask);
-				
-				String filename = String.format("mask-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY);
-				File file = new File(filename);
-				filename = file.toString();
-				Highgui.imwrite(filename, mask);
-				
-			}
-			
+
 			
 			
 			for (Pixel p : pc) {

@@ -125,11 +125,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 	@Override
 	public void destroy() {
-		super.destroy();
-
 		for (Target target : targets)
 			arenaController.getCanvasManager().removeTarget(target);
 
 		targets.clear();
+		
+		super.destroy();
 	}
 }

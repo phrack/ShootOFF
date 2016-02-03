@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="72.000000" y="72.000000" file="targets/plate_stand.png">
+	</image>
+	<rectangle x="60.500000" y="91.500000" width="107.000000" height="140.000000" fill="gray">
+		<tag name="opacity" value="1.0" />
+		<tag name="command" value="play_sound(sounds/steel_sound_1.wav)" />
+	</rectangle>
+</target>

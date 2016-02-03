@@ -52,7 +52,7 @@ public class TestDuelingTree {
 		
 		targets = new ArrayList<Group>();
 		Group duelTree = TargetIO.loadTarget(new File("targets" + File.separator + 
-				"duel_tree.target")).get();
+				"Duel_Tree.target")).get();
 		targets.add(duelTree);
 		
 		leftPaddles = new ArrayList<TargetRegion>();

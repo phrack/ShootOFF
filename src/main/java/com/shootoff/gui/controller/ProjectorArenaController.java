@@ -20,7 +20,6 @@ package com.shootoff.gui.controller;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Timer;
@@ -40,7 +39,7 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
-import com.shootoff.gui.TimerPool;
+import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -145,8 +144,6 @@ public class ProjectorArenaController implements CalibrationListener {
 		return Optional.of(stageHomeScreens.get(0));
 	}
 	
-    private long arenaImageLastUpdate = -1;
-
 	public void autoPlaceArena() {
 		Optional<Screen> homeScreen = getStageHomeScreen(arenaStage);
 
@@ -314,8 +311,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			setBackground(null);
 		}
 
-		for (Target t : new ArrayList<Target>(canvasManager.getTargets()))
-			canvasManager.removeTarget(t);
+		canvasManager.clearTargets();
 
 		boolean scaleCourse = course.getResolution().isPresent()
 				&& (Math.abs(course.getResolution().get().getWidth() - getWidth()) > .0001

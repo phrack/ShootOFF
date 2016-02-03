@@ -65,8 +65,6 @@ public class AutoCalibrationManager{
 	private final static int PATTERN_HEIGHT = 6;
 	private final static Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 	
-	private BufferedImage frame = null;
-
 	private Callback<Void, Void> callback;
 
 	private CameraManager cameraManager;
@@ -75,13 +73,6 @@ public class AutoCalibrationManager{
 
 	public void setCallback(Callback<Void, Void> callback) {
 		this.callback = callback;
-	}
-
-	public void setFrame(BufferedImage frame) {
-		synchronized (frame)
-		{
-			this.frame = frame;
-		};
 	}
 
 	public AutoCalibrationManager(CameraManager cameraManager, boolean calculateFrameDelay) {

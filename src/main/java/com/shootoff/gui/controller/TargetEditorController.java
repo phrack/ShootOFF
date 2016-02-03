@@ -111,7 +111,7 @@ public class TargetEditorController {
 		this.targetListener = targetListener;
 
 		regionColorChoiceBox
-				.setItems(FXCollections.observableArrayList("black", "blue", "green", "orange", "red", "white"));
+				.setItems(FXCollections.observableArrayList("black", "blue", "brown", "gray", "green", "orange", "red", "white"));
 
 		regionColorChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 			@Override
@@ -160,6 +160,10 @@ public class TargetEditorController {
 			return Color.BLACK;
 		case "blue":
 			return Color.BLUE;
+		case "brown":
+			return Color.SADDLEBROWN;
+		case "gray":
+			return Color.GRAY;
 		case "green":
 			return Color.GREEN;
 		case "orange":
@@ -178,6 +182,10 @@ public class TargetEditorController {
 			return "black";
 		} else if (color == Color.BLUE) {
 			return "blue";
+		} else if (color == Color.SADDLEBROWN) {
+			return "brown";
+		} else if (color == Color.GRAY) {
+			return "gray";
 		} else if (color == Color.GREEN) {
 			return "green";
 		} else if (color == Color.ORANGE) {
