@@ -39,7 +39,6 @@ public class TestCanvasManager {
 		nu.pattern.OpenCV.loadShared();
 		
 		config = new Configuration(new String[0]);
-		config.setDebugMode(true);
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 		cm = new CanvasManager(new Group(), config, cs, "test", shotEntries);
 		CameraManager cameraManager = cs.addCameraManager(new MockCamera(), cm);
