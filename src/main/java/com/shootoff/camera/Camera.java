@@ -30,8 +30,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -312,4 +315,41 @@ public class Camera {
 
 		return mat;
 	}
+	
+	public static Mat colorTransfer(Mat source, Mat target)
+	{
+		Mat src = new Mat();
+		Mat dst = new Mat();
+		
+		Imgproc.cvtColor(source, src, Imgproc.COLOR_BGR2Lab);
+		Imgproc.cvtColor(target, dst, Imgproc.COLOR_BGR2Lab);
+		
+		ArrayList<Mat> src_channels = new ArrayList<Mat>();
+		ArrayList<Mat> dst_channels = new ArrayList<Mat>();
+		Core.split(src, src_channels);
+		Core.split(dst, dst_channels);
+
+
+		for (int i = 0; i < 3; i++)
+		{
+			MatOfDouble src_mean = new MatOfDouble(), src_std = new MatOfDouble();
+			MatOfDouble dst_mean = new MatOfDouble(), dst_std = new MatOfDouble();
+			Core.meanStdDev(src_channels.get(i), src_mean, src_std);
+			Core.meanStdDev(dst_channels.get(i), dst_mean, dst_std);
+			
+			dst_channels.get(i).convertTo(dst_channels.get(i), CvType.CV_64FC1);
+			Core.subtract(dst_channels.get(i), dst_mean, dst_channels.get(i));
+			Core.divide(dst_std, src_std, dst_std);
+			Core.multiply(dst_channels.get(i), dst_std, dst_channels.get(i));
+			Core.add(dst_channels.get(i), src_mean, dst_channels.get(i));
+			dst_channels.get(i).convertTo(dst_channels.get(i), CvType.CV_8UC1);
+		}
+		
+		Core.merge(dst_channels, dst);
+		
+		Imgproc.cvtColor(dst, dst, Imgproc.COLOR_Lab2BGR);
+		
+		return dst;
+	}
+	
 }

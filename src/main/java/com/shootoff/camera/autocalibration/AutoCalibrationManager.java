@@ -30,6 +30,7 @@ import javafx.util.Callback;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -52,10 +53,11 @@ import org.slf4j.LoggerFactory;
 
 
 
+
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 
-public class AutoCalibrationManager implements Runnable {
+public class AutoCalibrationManager{
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);
 
@@ -135,7 +137,7 @@ public class AutoCalibrationManager implements Runnable {
 		return frameDelayResult;
 	}
 	
-	private void reset() {
+	public void reset() {
 		isCalibrated = false;
 		warpInitialized = false;
 		boundsResult = null;
@@ -144,7 +146,7 @@ public class AutoCalibrationManager implements Runnable {
 	public final Object monitor = new Object();
 	
 
-	@Override
+	/*@Override
 	public void run() {
 		if (isCalibrated) {
 			reset();
@@ -164,14 +166,19 @@ public class AutoCalibrationManager implements Runnable {
 			};
 			bounds = processFrame(frame);
 			
+			logger.debug("acm.run {}", cameraManager.getFrameCount());
+			
 		} while (!bounds.isPresent());
 		
 		boundsResult = bounds.get();
 		
 		Optional<Long> frameDelay = Optional.empty();
+		
+		// First call initializes what the current luminosity is.
+		checkForFrameChange(frame);
 		frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
 		cameraManager.setArenaBackground(null);
-		do
+		while (!frameDelay.isPresent())
 		{
 			synchronized(monitor)
 			{
@@ -183,15 +190,52 @@ public class AutoCalibrationManager implements Runnable {
 				}
 			};
 			frameDelay = checkForFrameChange(frame);
-		} while (!frameDelay.isPresent());
+			//logger.debug("acm.run {}", cameraManager.getFrameCount());
+		}
 		
 		frameDelayResult = frameDelay.get();
 
-		if (callback != null && bounds.isPresent()) {
+		logger.debug("frameDelayResult {}", frameDelayResult);
+		
+		if (callback != null) {
 			callback.call(null);
+		}
+	}*/
+	
+	public void processFrame(BufferedImage frame)
+	{
+		
+		if (boundsResult == null)
+		{
+			Optional<Bounds> bounds = calibrateFrame(frame);
+		
+			if (bounds.isPresent())
+			{
+				boundsResult = bounds.get();
+				checkForFrameChange(frame);
+				frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
+				cameraManager.setArenaBackground(null);
+			}
+		}
+		else
+		{
+			Optional<Long> frameDelay = checkForFrameChange(frame);
+			
+			if (frameDelay.isPresent())
+			{
+				frameDelayResult = frameDelay.get();
+	
+				logger.debug("frameDelayResult {}", frameDelayResult);
+			
+				if (callback != null) {
+					callback.call(null);
+				}
+			}
 		}
 	}
 
+	
+	private double[] patternLuminosity = { -1, -1, -1 };
 	private Optional<Long> checkForFrameChange(BufferedImage frame) {
 		Mat mat;
 		
@@ -203,14 +247,33 @@ public class AutoCalibrationManager implements Runnable {
 		
 		double[] pixel = getFrameDelayPixel(mat);
 		
-		logger.debug("checkForFrameChange {}", pixel);
-		
-		if (pixel[0] < 10 && pixel[1] < 10 && pixel[2] < 10)
+		// Initialize
+		if (patternLuminosity[0] == -1)
 		{
+			patternLuminosity = pixel;
+			return Optional.empty();
+		}
+		
+		Mat tempMat = new Mat(1,2, CvType.CV_8UC3);
+		tempMat.put(0, 0, patternLuminosity);
+		tempMat.put(0, 1, pixel);
+		
+		//logger.debug("checkForFrameChange {}", pixel);
+		
+		
+		Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
+		
+		//logger.debug("checkForFrameChange {} {}", tempMat.get(0,0), tempMat.get(0,1));
+		
+		if (tempMat.get(0,1)[2] < .9 * tempMat.get(0,0)[2])
+		{
+			//logger.debug("checkForFrameChange {} {} - frameDelay {}", cameraManager.getCurrentFrameTimestamp(), frameTimestampBeforeFrameChange,  cameraManager.getCurrentFrameTimestamp()- frameTimestampBeforeFrameChange);
+			
 			return Optional.of(cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange);
 		}
 		return Optional.empty();
 	}
+
 
 	private double[] getFrameDelayPixel(Mat mat) {
 		double squareHeight = boundsResult.getHeight() / (double)(PATTERN_HEIGHT+1);
@@ -218,13 +281,11 @@ public class AutoCalibrationManager implements Runnable {
 		
 		int secondSquareCenterX = (int)(boundsResult.getMinX() + (squareWidth*1.5));
 		int secondSquareCenterY = (int)(boundsResult.getMinY() + (squareHeight*.5));
-		
-		logger.debug("getFrameDelayPixel x {} y{}", secondSquareCenterX, secondSquareCenterY);
-		
-		return mat.get(secondSquareCenterX, secondSquareCenterY);
+
+		return mat.get(secondSquareCenterY, secondSquareCenterX);
 	}
 
-	public Optional<Bounds> processFrame(BufferedImage frame) {
+	public Optional<Bounds> calibrateFrame(BufferedImage frame) {
 		Mat mat;
 		
 		synchronized (frame)
@@ -303,7 +364,8 @@ public class AutoCalibrationManager implements Runnable {
 		int secondSquareCenterX = (int)(boundingBox.getMinX() + (squareWidth*1.5));
 		int secondSquareCenterY = (int)(boundingBox.getMinY() + (squareHeight*.5));
 		
-		logger.debug("pF getFrameDelayPixel x {} y{}", secondSquareCenterX, secondSquareCenterY);
+		logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX, secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
+	
 
 		return Optional.of(boundingBox);
 

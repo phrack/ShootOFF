@@ -3,8 +3,8 @@ package com.shootoff.camera.shotdetection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
-
 import java.util.Stack;
 
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class PixelClusterManager {
 
 	private int numberOfRegions = -1;
 
-	private ArrayList<Pixel> points;
+	private List<Pixel> points;
 
 	HashMap<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 
@@ -35,7 +35,7 @@ public class PixelClusterManager {
 	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
 
-	PixelClusterManager(ArrayList<Pixel> p, ShotDetectionManager shotDetectionManager) {
+	PixelClusterManager(List<Pixel> p, ShotDetectionManager shotDetectionManager) {
 		points = p;
 		this.shotDetectionManager = shotDetectionManager;
 		

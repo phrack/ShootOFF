@@ -24,12 +24,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
@@ -84,8 +87,7 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
 		Scene scene = new Scene(arenaAnchor, 500, 500);
 		arenaStage.setScene(scene);
-		
-		updateCameraManagerArenaImage();
+	
 	}
 
 	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
@@ -110,8 +112,6 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
-		
-		updateCameraManagerArenaImage();
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
@@ -149,24 +149,6 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
     private long arenaImageLastUpdate = -1;
     @Override
     public void targetMoved(Target t, double newX, double newY) {
-    	
-    	if (arenaImageLastUpdate == -1 || System.currentTimeMillis() > arenaImageLastUpdate+5)
-    	{
-    		updateCameraManagerArenaImage();
-    		arenaImageLastUpdate = System.currentTimeMillis();
-    	}
-    }
-    
-    private void updateCameraManagerArenaImage()
-    {
-    	BufferedImage arenaImage = getCanvasManager().getBufferedImage();
-    	
-    	Thread t = new Thread(() -> {
-    	if (feedCanvasManager != null && feedCanvasManager.getCameraManager() != null)
-    		feedCanvasManager.getCameraManager().setArenaImage(arenaImage);
-    	});
-    	
-    	t.start();
     }
 
 
@@ -291,6 +273,8 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 	public void close() {
 		arenaStage.close();
 		TimerPool.cancelTimer(mouseExitedFuture);
+		if (updateMaskTimer != null)
+			updateMaskTimer.cancel();
 	}
 
 	public void setBackground(LocatedImage img) {
@@ -494,5 +478,44 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 		arenaStage.getScene().setOnMouseExited((event) -> {
 			cursorWarningToggle(false);
 		});
+	}
+
+	@SuppressWarnings("unused")
+	private ArenaMaskManager arenaMaskManager = null;
+	private Timer updateMaskTimer = null;
+	private BufferedImage bImage;
+	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+		this.arenaMaskManager = arenaMaskManager;
+		
+		if (updateMaskTimer != null)
+			return;
+		
+		updateMaskTimer = new Timer();
+		TimerTask newTask = new TimerTask() {
+		    @Override
+		    public void run() {
+		    			    	
+                final CountDownLatch latch = new CountDownLatch(1);
+                Platform.runLater(new Runnable() {                          
+                    @Override
+                    public void run() {
+                        try{
+                        	bImage = getCanvasManager().getBufferedImage();
+                        }finally{
+                            latch.countDown();
+                        }
+                    }
+                });
+                try {
+					latch.await();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}                      
+		        arenaMaskManager.insert(bImage, System.currentTimeMillis());
+		    }
+		};
+
+		updateMaskTimer.schedule(newTask, 0, 3);
 	}
 }

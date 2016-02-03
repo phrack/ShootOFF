@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledFuture;
 import javafx.geometry.Bounds;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
@@ -43,6 +44,7 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
@@ -142,6 +144,8 @@ public class CameraManager {
 	public void setController(ShootOFFController controller) {
 		this.controller = controller;
 	}
+	
+	private final ArenaMaskManager arenaMaskManager = new ArenaMaskManager(DEFAULT_FEED_WIDTH, DEFAULT_FEED_HEIGHT);
 
 
 	private final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
@@ -160,7 +164,7 @@ public class CameraManager {
 		initDetector(new Detector());
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
-
+		
 	}
 
 	File videoFile;
@@ -427,38 +431,21 @@ public class CameraManager {
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 	
-
-	private Mat stageMask = new Mat();
-	public void setArenaImage(BufferedImage projectedScene) {
+	
+	private Mat getArenaMask(Bounds bounds, long timestamp)
+	{
+		Size dsize = new Size(bounds.getWidth(),bounds.getHeight());
 		
-		if (!projectionBounds.isPresent())
-			return;
-				
-		Mat src = Camera.bufferedImageToMat(projectedScene);	
-		Size dsize = new Size(projectionBounds.get().getWidth(),projectionBounds.get().getHeight());
+		return arenaMaskManager.getMaskForTimestamp(dsize, timestamp);
+	}
+	
+	public Mat getMaskForCurrentFrame()
+	{
+		long maskTime = getCurrentFrameTimestamp() - frameDelay;
 		
+		Mat mask = getArenaMask(projectionBounds.get(), maskTime);
 		
-	    Timer timer = new Timer();
-
-	    TimerTask delayedThreadStartTask = new TimerTask() {
-	        @Override
-	        public void run() {
-	            new Thread(new Runnable() {
-	                @Override
-	                public void run() {
-	            		synchronized (stageMask)
-	            		{
-	            			Imgproc.resize(src, stageMask, dsize);
-	            		
-	            			Imgproc.GaussianBlur(stageMask, stageMask, new Size(9,9), 6.0);			
-	            		}
-	                }
-	            }).start();
-	        }
-	    };
-
-	    timer.schedule(delayedThreadStartTask, 90);
-
+		return mask;
 	}
 
 	private class Detector extends MediaListenerAdapter implements Runnable {
@@ -491,11 +478,16 @@ public class CameraManager {
 		 * frame from the webcam.
 		 */
 
+		private long initialSystemTimeAtVideoStart = -1;
+		
 		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
 			BufferedImage currentFrame = event.getImage();
+		
+			if (initialSystemTimeAtVideoStart == -1)
+				initialSystemTimeAtVideoStart = System.currentTimeMillis();
 			
-			currentFrameTimestamp = event.getTimeStamp();
+			currentFrameTimestamp = (event.getTimeStamp() / 1000) + initialSystemTimeAtVideoStart;
 			
 			if (getFrameCount() == 0)
 			{
@@ -544,12 +536,16 @@ public class CameraManager {
 					logger.warn("Null frame from camera: {}", webcam.get().getName());
 					continue;
 				}
+				
+				if ((int)(getFrameCount() % getFPS()) == 0) {
+					estimateCameraFPS();
+				}
+				
 
-				Pair<Boolean, BufferedImage> pFramePair = processFrame(currentFrame);
-
-				Boolean filtersInitialized = pFramePair.getKey();
-
-				currentFrame = pFramePair.getValue();
+				currentFrame = processFrame(currentFrame);
+				
+				if (currentFrame == null)
+					continue;
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
@@ -600,21 +596,14 @@ public class CameraManager {
 			detectionExecutor.shutdown();
 		}
 		
+	
 		
-		
-		private Pair<Boolean, BufferedImage> processFrame(BufferedImage currentFrame) {
+		private BufferedImage processFrame(BufferedImage currentFrame) {
 			frameCount++;
 			
-			if (webcam.isPresent() && (int)(getFrameCount() % DEFAULT_FPS) == 0) {
-				estimateCameraFPS();
-			}
-			
 			if (autoCalibrationEnabled) {
-				acm.setFrame(currentFrame);
-				synchronized(acm.monitor)
-				{
-					acm.monitor.notify();
-				};
+				acm.processFrame(currentFrame);
+				return null;
 			}
 
 			if (cameraAutoCalibrated) {
@@ -622,7 +611,7 @@ public class CameraManager {
 			}
 			
 			
-			if (cameraAutoCalibrated && controller != null && projectionBounds.isPresent() && stageMask.width() > 0)
+			if (cameraAutoCalibrated && controller != null && projectionBounds.isPresent())
 			{
 				final Mat matFrame = Camera.bufferedImageToMat(currentFrame);
 				
@@ -630,19 +619,114 @@ public class CameraManager {
 				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(), (int) projectionBounds.get().getMaxY(),
 							(int) projectionBounds.get().getMinX(), (int) projectionBounds.get().getMaxX());
 
-				logger.trace("mask {} {} bounds {} {} smFrame {} {}", stageMask.width(),  stageMask.height(),
-						(int) projectionBounds.get().getWidth(), (int) projectionBounds.get().getHeight(),
-						submatFrame.width(), submatFrame.height());
 
 				
 				/*String filename = String.format("mask-submatFrame-pre-copy.png");
 				File file = new File(filename);
 				filename = file.toString();
 				Highgui.imwrite(filename, submatFrame);*/
+
 				
-				synchronized (stageMask)
+				Mat gmask = new Mat();
+				Imgproc.cvtColor(arenaMaskManager.getMask(), gmask, Imgproc.COLOR_GRAY2BGR);
+				if (getDebuggerListener().isPresent())
+					getDebuggerListener().get().updateDebugView(Camera.matToBufferedImage(gmask));
+
+				
+				long maskTime = getCurrentFrameTimestamp();
+				
+				Mat mask = getArenaMask(projectionBounds.get(), maskTime);
+				
+				if (false && mask != null)
 				{
-					Core.subtract(submatFrame, stageMask, submatFrame);
+					
+					
+					//mask = Camera.colorTransfer(submatFrame, mask);
+					
+					//Core.subtract(mask, submatFrame, mask);
+
+					if (getDebuggerListener().isPresent())
+						getDebuggerListener().get().updateDebugView(Camera.matToBufferedImage(mask));
+					
+					
+					Imgproc.cvtColor(mask, mask, Imgproc.COLOR_BGR2HSV);
+					Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_BGR2HSV);
+					
+					ArrayList<Mat> maskchannels2 = new ArrayList<Mat>();
+					Core.split(mask, maskchannels2);
+					ArrayList<Mat> submatchannels2 = new ArrayList<Mat>();
+					Core.split(submatFrame, submatchannels2);
+					
+					//Core.subtract(submatchannels2.get(2),maskchannels2.get(2), submatchannels2.get(2));
+					
+					Imgproc.equalizeHist(maskchannels2.get(2), maskchannels2.get(2));
+					Imgproc.equalizeHist(submatchannels2.get(2), submatchannels2.get(2));
+					
+					for (int y = 0; y < submatchannels2.get(2).rows(); y++)
+					{
+						for (int x = 0; x < submatchannels2.get(2).cols(); x++)
+						{
+							/*if (((x+y)%50)==0)
+							{
+								logger.warn("{} {} orig {} {} ", x, y, submatchannels2.get(2).get(y, x)[0], maskchannels2.get(2).get(y, x)[0]);
+							}*/
+							
+							if (submatchannels2.get(2).get(y, x)[0] > maskchannels2.get(2).get(y, x)[0])
+							{
+								submatchannels2.get(2).put(y, x, submatchannels2.get(2).get(y, x)[0] - maskchannels2.get(2).get(y, x)[0]);
+							}
+							else
+							{
+								
+								submatchannels2.get(2).put(y, x, 0);
+							}
+							
+							/*if (((x+y)%50)==0)
+							{
+								logger.warn("{} {} mod  {}", x, y, submatchannels2.get(2).get(y, x)[0]);
+							}*/
+
+						}
+					}
+					
+					Core.merge(maskchannels2, mask);
+					Core.merge(submatchannels2, submatFrame);
+					
+					Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);
+					
+					/*if ((getFrameCount()%30)==0)
+					{
+						String filename = String.format("mask-%d.png", getFrameCount());
+						File file = new File(filename);
+						filename = file.toString();
+						Highgui.imwrite(filename, mask);
+						
+						
+						filename = String.format("submatFrame-%d.png", getFrameCount());
+						file = new File(filename);
+						filename = file.toString();
+						Highgui.imwrite(filename, submatFrame);
+					}*/
+					/*Mat mask_grayscale = new Mat();
+					Imgproc.cvtColor(mask, mask_grayscale, Imgproc.COLOR_BGR2GRAY);
+					
+					Imgproc.threshold(mask_grayscale, mask_grayscale, 20, 255, Imgproc.THRESH_BINARY);
+					
+					Mat mask_grayscale_bgr = new Mat();
+					Imgproc.cvtColor(mask_grayscale, mask_grayscale_bgr, Imgproc.COLOR_GRAY2BGR);
+
+
+					
+					//Core.absdiff(submatFrame, mask, submatFrame);
+					
+					Mat result = new Mat();
+					
+					submatFrame.copyTo(result, mask_grayscale_bgr);
+					//Core.subtract(submatFrame, submatFrame, submatFrame, mask_grayscale);
+					
+					
+					result.copyTo(submatFrame);*/
+					//Core.subtract(submatFrame, mask, submatFrame);
 				}
 				//dst.copyTo(submatFrame);
 				
@@ -660,9 +744,11 @@ public class CameraManager {
 
 			}
 
-			Boolean result = shotDetectionManager.processFrame(currentFrame, isDetecting);
+			shotDetectionManager.processFrame(currentFrame, isDetecting);
 			
-			return new Pair<Boolean, BufferedImage>(result, currentFrame);
+			arenaMaskManager.updateAvgLums(shotDetectionManager.getLumsMovingAverageAcrossFrame(), getCurrentFrameTimestamp());
+			
+			return currentFrame;
 		}
 		
 		private void estimateCameraFPS()
@@ -683,7 +769,7 @@ public class CameraManager {
 			lastFrameCount = getFrameCount();
 			
 			if (debuggerListener.isPresent()) {
-				debuggerListener.get().updateFeedData(webcamFPS, Optional.empty());
+				debuggerListener.get().updateFeedData(getFPS(), Optional.empty());
 			}
 			checkIfMinimumFPS();
 		}
@@ -692,21 +778,21 @@ public class CameraManager {
 			if (newFPS < 1.0) {
 				logger.debug("New FPS read from webcam is very low: {}", newFPS);
 			}
-
+			
 			// This just tells us if it's the first FPS estimate
 			if (getFrameCount() > DEFAULT_FPS)
 				webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
 			else
 				webcamFPS = newFPS;
-			deduplicationProcessor.setThresholdUsingFPS(webcamFPS);
+			deduplicationProcessor.setThresholdUsingFPS(getFPS());
 
 		}
 
 		private void checkIfMinimumFPS() {
-			if (webcamFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
+			if (getFPS() < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 				logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
-						webcam.get().getName(), webcamFPS);
-				showFPSWarning(webcamFPS);
+						webcam.get().getName(), getFPS());
+				showFPSWarning(getFPS());
 				showedFPSWarning = true;
 			}
 		}
@@ -833,19 +919,18 @@ public class CameraManager {
 	private long frameDelay;
 	
 	private void fireAutoCalibration() {
+		acm.reset();
 		acm.setCallback(new Callback<Void, Void>() {
 
 			@Override
 			public Void call(Void param) {
-				autoCalibrateSuccess(acm.getBoundsResult());
-				frameDelay = acm.getFrameDelayResult();
+				autoCalibrateSuccess(acm.getBoundsResult(), acm.getFrameDelayResult());
 				return null;
 			}
 		});
-		new Thread(acm).start();
 	}
 
-	protected void autoCalibrateSuccess(Bounds bounds) {
+	protected void autoCalibrateSuccess(Bounds bounds, long delay) {
 		if (autoCalibrationEnabled && controller != null) {
 			autoCalibrationEnabled = false;
 
@@ -853,8 +938,13 @@ public class CameraManager {
 
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
 					(int) bounds.getWidth(), (int) bounds.getHeight());
+			
+			arenaMaskManager.setDelay(delay);
+			
+			arenaMaskManager.start();
 
 			Platform.runLater(() -> {
+				controller.setArenaMaskManager(arenaMaskManager);
 				controller.calibrate(bounds, false);
 			});
 

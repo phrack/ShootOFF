@@ -48,9 +48,9 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 586.30, 395.44, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 532.16, 347.98, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 587.80, 396.73, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.GREEN, 587.80, 396.73, 0, 2));
 
 		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}

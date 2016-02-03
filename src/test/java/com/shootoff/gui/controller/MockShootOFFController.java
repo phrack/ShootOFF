@@ -1,5 +1,7 @@
 package com.shootoff.gui.controller;
 
+import com.shootoff.camera.arenamask.ArenaMaskManager;
+
 import javafx.geometry.Bounds;
 
 public class MockShootOFFController extends ShootOFFController {
@@ -12,5 +14,10 @@ public class MockShootOFFController extends ShootOFFController {
 	public void setArenaBackground(String resourceFilename)
 	{
 	
+	}
+	
+	@Override
+	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+		
 	}
 }

@@ -40,6 +40,7 @@ import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
@@ -1328,6 +1329,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		addTargetMenu.getItems().add(addTargetItem);
 		addArenaTargetMenu.getItems().add(addProjectorTargetItem);
 		editTargetMenu.getItems().add(editTargetItem);
+	}
+
+	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
 	
 }

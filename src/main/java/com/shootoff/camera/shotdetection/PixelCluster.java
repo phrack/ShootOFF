@@ -15,6 +15,9 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 	public double centerPixelX;
 	public double centerPixelY;
+	
+
+	private final static double COLOR_THRESHOLD_PER_PIXEL = .000391;
 
 	// We ignore fully connected pixels because they are not on the edges
 	private final static int MAXIMUM_CONNECTEDNESS = 8;
@@ -41,7 +44,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 						if (rx < 0 || ry < 0 || rx >= frame.getWidth() || ry >= frame.getHeight()) continue;
 
 						Pixel nearPoint = new Pixel(rx, ry);
-						if (!this.contains(nearPoint) && !visited.contains(nearPoint)) {
+						if (!visited.contains(nearPoint) && !this.contains(nearPoint)) {
 
 							java.awt.Color npColor = new java.awt.Color(frame.getRGB(rx, ry));
 
@@ -52,7 +55,8 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 							visited.add(nearPoint);
 
-							logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd - gcd),
+							if (logger.isTraceEnabled())
+								logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd - gcd),
 									colorDiffMovingAverage[rx][ry]);
 						}
 					}
@@ -66,10 +70,15 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, double[][] colorDiffMovingAverage) {
 		final double colorDist = getColorDifference(frame, colorDiffMovingAverage);
+		
+		double colorThreshold = (frame.getHeight() * frame.getWidth() * COLOR_THRESHOLD_PER_PIXEL);
 
-		logger.trace("getcolorjavafx {} - {}", colorDist, (colorDist < 0));
+		//if (logger.isTraceEnabled())
+			logger.warn("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
+		
+		
 
-		if (Math.abs(colorDist) < 2) {
+		if (Math.abs(colorDist) < colorThreshold) {
 			return Optional.empty();
 		} else if (colorDist < 0) {
 			return Optional.of(javafx.scene.paint.Color.RED);
