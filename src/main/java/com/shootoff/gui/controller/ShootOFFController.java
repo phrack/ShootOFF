@@ -32,6 +32,7 @@ import java.util.concurrent.ScheduledFuture;
 
 import javax.imageio.ImageIO;
 
+import com.shootoff.plugins.*;
 import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -580,6 +581,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	}
 
 	private void registerTrainingExercises() {
+		addTrainingExercise(new NordicQuickShooting());
 		addTrainingExercise(new ISSFStandardPistol());
 		addTrainingExercise(new RandomShoot());
 		addTrainingExercise(new ShootForScore());
