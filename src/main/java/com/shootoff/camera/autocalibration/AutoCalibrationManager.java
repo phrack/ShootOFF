@@ -257,8 +257,9 @@ public class AutoCalibrationManager {
 				|| boundingBox.getWidth() > cameraManager.getFeedWidth()
 				|| boundingBox.getHeight() > cameraManager.getFeedHeight()) return Optional.empty();
 
-		logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
-				boundingBox.getHeight());
+		if (logger.isDebugEnabled())
+			logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
+					boundingBox.getHeight());
 
 		Mat undistorted = warpPerspective(mat);
 
@@ -289,8 +290,9 @@ public class AutoCalibrationManager {
 		int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
 		int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
 
-		logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX, secondSquareCenterY,
-				undistorted.get(secondSquareCenterY, secondSquareCenterX));
+		if (logger.isDebugEnabled())
+			logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX, secondSquareCenterY,
+					undistorted.get(secondSquareCenterY, secondSquareCenterX));
 
 		return Optional.of(boundingBox);
 
@@ -301,9 +303,11 @@ public class AutoCalibrationManager {
 		Point gCenter = findChessBoardSquareCenter(frame, warpedBoardCorners, 2, 5);
 		Point bCenter = findChessBoardSquareCenter(frame, warpedBoardCorners, 2, 7);
 
-		logger.debug("findColors {} {} {}", rCenter, gCenter, bCenter);
-		logger.debug("findColors r {} {} {} {}", (int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
-				(int) rCenter.x + 10);
+		if (logger.isDebugEnabled()) {
+			logger.debug("findColors {} {} {}", rCenter, gCenter, bCenter);
+			logger.debug("findColors r {} {} {} {}", (int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
+					(int) rCenter.x + 10);
+		}
 
 		Scalar rMeanColor = Core.mean(frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
 				(int) rCenter.x + 10));
@@ -312,25 +316,27 @@ public class AutoCalibrationManager {
 		Scalar bMeanColor = Core.mean(frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10,
 				(int) bCenter.x + 10));
 
-		String filename = String.format("rColor.png");
-		File file = new File(filename);
-		filename = file.toString();
-		Highgui.imwrite(filename,
-				frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10, (int) rCenter.x + 10));
+		if (logger.isTraceEnabled()) {
+			String filename = String.format("rColor.png");
+			File file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
+					(int) rCenter.x + 10));
 
-		filename = String.format("gColor.png");
-		file = new File(filename);
-		filename = file.toString();
-		Highgui.imwrite(filename,
-				frame.submat((int) gCenter.y - 10, (int) gCenter.y + 10, (int) gCenter.x - 10, (int) gCenter.x + 10));
+			filename = String.format("gColor.png");
+			file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, frame.submat((int) gCenter.y - 10, (int) gCenter.y + 10, (int) gCenter.x - 10,
+					(int) gCenter.x + 10));
 
-		filename = String.format("bColor.png");
-		file = new File(filename);
-		filename = file.toString();
-		Highgui.imwrite(filename,
-				frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10, (int) bCenter.x + 10));
+			filename = String.format("bColor.png");
+			file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10,
+					(int) bCenter.x + 10));
+		}
 
-		logger.debug("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);
+		if (logger.isDebugEnabled()) logger.debug("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);
 	}
 
 	private void initializeSize(int width, int height) {
@@ -373,8 +379,9 @@ public class AutoCalibrationManager {
 		Mat unRotMat = getRotationMatrix(massCenterMatOfPoint2f(boardRect), boardBoxAngle);
 		MatOfPoint2f unRotatedRect = rotateRect(unRotMat, boardRect);
 
-		logger.trace("center {} angle {} width {} height {}", boardBox.center, boardBoxAngle, boardBox.size.width,
-				boardBox.size.height);
+		if (logger.isTraceEnabled())
+			logger.trace("center {} angle {} width {} height {}", boardBox.center, boardBoxAngle, boardBox.size.width,
+					boardBox.size.height);
 
 		// This is the estimated projection area that has minimum angle (Not
 		// rotated)
@@ -384,9 +391,10 @@ public class AutoCalibrationManager {
 		// back to the cameramanager
 		boundsRect = Imgproc.minAreaRect(estimatedPatternSizeRect);
 
-		logger.debug("boundsRect {} {} {} {}", boundsRect.boundingRect().x, boundsRect.boundingRect().y,
-				boundsRect.boundingRect().x + boundsRect.boundingRect().width,
-				boundsRect.boundingRect().y + boundsRect.boundingRect().height);
+		if (logger.isDebugEnabled())
+			logger.debug("boundsRect {} {} {} {}", boundsRect.boundingRect().x, boundsRect.boundingRect().y,
+					boundsRect.boundingRect().x + boundsRect.boundingRect().width, boundsRect.boundingRect().y
+							+ boundsRect.boundingRect().height);
 
 		// We now rotate the estimation back to the original angle to use for
 		// transformation source
@@ -558,7 +566,8 @@ public class AutoCalibrationManager {
 		// distance from pattern
 		final int toleranceThreshold = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 2.0);
 
-		logger.trace("tolerance threshold {} minimumDimension {}", toleranceThreshold, minimumDimension);
+		if (logger.isTraceEnabled())
+			logger.trace("tolerance threshold {} minimumDimension {}", toleranceThreshold, minimumDimension);
 
 		// Grey scale conversion.
 		Mat grey = new Mat();
@@ -577,8 +586,9 @@ public class AutoCalibrationManager {
 			Highgui.imwrite(filename, grey);
 		}
 
-		logger.debug("estimation {} {} {} {}", estimatedPatternRect.get(0, 0), estimatedPatternRect.get(1, 0),
-				estimatedPatternRect.get(2, 0), estimatedPatternRect.get(3, 0));
+		if (logger.isDebugEnabled())
+			logger.debug("estimation {} {} {} {}", estimatedPatternRect.get(0, 0), estimatedPatternRect.get(1, 0),
+					estimatedPatternRect.get(2, 0), estimatedPatternRect.get(3, 0));
 
 		// Easier to work off of Points
 		Point[] estimatedPoints = matOfPoint2fToPoints(estimatedPatternRect);
@@ -620,7 +630,7 @@ public class AutoCalibrationManager {
 
 		}
 
-		logger.trace("verifiedLines: {}", verifiedLines.size());
+		if (logger.isTraceEnabled()) logger.trace("verifiedLines: {}", verifiedLines.size());
 
 		// Reduce the lines to possible corners
 		List<Point> possibleCorners = new ArrayList<Point>();
@@ -654,10 +664,10 @@ public class AutoCalibrationManager {
 			}
 		}
 
-		logger.trace("idealDistances {} {} {} {}", idealDistances[0], idealDistances[1], idealDistances[2],
-				idealDistances[3]);
-
 		if (logger.isTraceEnabled()) {
+			logger.trace("idealDistances {} {} {} {}", idealDistances[0], idealDistances[1], idealDistances[2],
+					idealDistances[3]);
+
 			String filename = String.format("calibrate-lines.png");
 			File file = new File(filename);
 			filename = file.toString();
@@ -740,7 +750,6 @@ public class AutoCalibrationManager {
 	 * After this is done, the transformation is just applied
 	 */
 	private void initializeWarpPerspective(final Mat frame, MatOfPoint2f sourceCorners) {
-
 		MatOfPoint2f destCorners = new MatOfPoint2f();
 		destCorners.alloc(4);
 
@@ -760,10 +769,12 @@ public class AutoCalibrationManager {
 				new double[] { boundsRect.boundingRect().x + boundsRect.boundingRect().width,
 						boundsRect.boundingRect().y + boundsRect.boundingRect().height });
 
-		logger.debug("initializeWarpPerspective {} {} {} {}", sourceCorners.get(0, 0), sourceCorners.get(1, 0),
-				sourceCorners.get(2, 0), sourceCorners.get(3, 0));
-		logger.debug("initializeWarpPerspective {} {} {} {}", destCorners.get(0, 0), destCorners.get(1, 0),
-				destCorners.get(2, 0), destCorners.get(3, 0));
+		if (logger.isDebugEnabled()) {
+			logger.debug("initializeWarpPerspective {} {} {} {}", sourceCorners.get(0, 0), sourceCorners.get(1, 0),
+					sourceCorners.get(2, 0), sourceCorners.get(3, 0));
+			logger.debug("initializeWarpPerspective {} {} {} {}", destCorners.get(0, 0), destCorners.get(1, 0),
+					destCorners.get(2, 0), destCorners.get(3, 0));
+		}
 
 		perspMat = Imgproc.getPerspectiveTransform(sourceCorners, destCorners);
 
