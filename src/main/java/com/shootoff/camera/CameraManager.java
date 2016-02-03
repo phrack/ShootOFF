@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,10 +34,8 @@ import java.util.concurrent.ScheduledFuture;
 import javafx.geometry.Bounds;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +68,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import javafx.util.Pair;
 
 public class CameraManager {
 	public static final int DEFAULT_FEED_WIDTH = 640;
@@ -952,8 +947,8 @@ public class CameraManager {
 
 	}
 
-	public void enableAutoCalibration() {
-		acm = new AutoCalibrationManager(this);
+	public void enableAutoCalibration(boolean calculateFrameDelay) {
+		acm = new AutoCalibrationManager(this, calculateFrameDelay);
 		autoCalibrationEnabled = true;
 		cameraAutoCalibrated = false;
 		fireAutoCalibration();

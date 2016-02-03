@@ -40,7 +40,6 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
-import com.shootoff.gui.TargetEventListener;
 import com.shootoff.gui.TimerPool;
 
 import javafx.application.Platform;
@@ -58,7 +57,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ProjectorArenaController implements CalibrationListener, TargetEventListener {
+public class ProjectorArenaController implements CalibrationListener {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	private Stage arenaStage;
@@ -147,10 +146,6 @@ public class ProjectorArenaController implements CalibrationListener, TargetEven
 	}
 	
     private long arenaImageLastUpdate = -1;
-    @Override
-    public void targetMoved(Target t, double newX, double newY) {
-    }
-
 
 	public void autoPlaceArena() {
 		Optional<Screen> homeScreen = getStageHomeScreen(arenaStage);

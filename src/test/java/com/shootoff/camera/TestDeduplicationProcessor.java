@@ -14,6 +14,8 @@ public class TestDeduplicationProcessor {
 
 	@Test 
 	public void testReset() throws ConfigurationException {
+		nu.pattern.OpenCV.loadShared();
+		
 		DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(new MockCameraManager());
 				
 		assertFalse(deduplicationProcessor.getLastShot().isPresent());

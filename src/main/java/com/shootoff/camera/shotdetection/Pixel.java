@@ -10,14 +10,14 @@ public class Pixel extends Point {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private int currentLum;
-	private int lumAverage;
+	private double currentLum;
+	private double lumAverage;
 	private Color color;
 	private double colorAverage;
 
 	private int connectedness = 0;
 
-	public Pixel(int x, int y, Color color, int currentLum, int lumAverage, double colorAverage) {
+	public Pixel(int x, int y, Color color, double currentLum, double lumAverage, double colorAverage) {
 		super(x, y);
 		this.color = color;
 		this.currentLum = currentLum;
@@ -37,19 +37,19 @@ public class Pixel extends Point {
 		this.connectedness = connectedness;
 	}
 
-	public int getCurrentLum() {
+	public double getCurrentLum() {
 		return currentLum;
 	}
 
-	public void setCurrentLum(int currentLum) {
+	public void setCurrentLum(double currentLum) {
 		this.currentLum = currentLum;
 	}
 
-	public int getLumAverage() {
+	public double getLumAverage() {
 		return lumAverage;
 	}
 
-	public void setLumAverage(int lumAverage) {
+	public void setLumAverage(double lumAverage) {
 		this.lumAverage = lumAverage;
 	}
 

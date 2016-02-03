@@ -94,9 +94,6 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
             newTarget.get().setPosition(x, y);
             targets.add(newTarget.get());
            
-            if (newTarget.isPresent()) {
-                newTarget.get().setTargetEventListener(arenaController);
-            }
         }
 
 		return newTarget;

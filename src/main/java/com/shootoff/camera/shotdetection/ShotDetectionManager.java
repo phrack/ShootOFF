@@ -14,11 +14,8 @@ import javax.imageio.ImageIO;
 
 import javafx.geometry.Bounds;
 
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
-import org.opencv.imgproc.Imgproc;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
@@ -136,7 +133,7 @@ public final class ShotDetectionManager {
 		return cameraManager;
 	}
 
-	private Optional<Pixel> updateFilter(BufferedImage frame, Mat workingMat, int x, int y, boolean detectShots) {
+	private Optional<Pixel> updateFilter(BufferedImage frame, int x, int y, boolean detectShots) {
 
 		
 		
@@ -144,12 +141,8 @@ public final class ShotDetectionManager {
 		java.awt.Color currentC = new java.awt.Color(frame.getRGB(x, y));
 		int currentRGB = currentC.getRGB();
 
-		//int currentLum = Pixel.calcLums(currentRGB);
-
-		//double colorDiff = Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN);
-		
-		double colorDiff = workingMat.get(y, x)[1]; // a*
-		double currentLum = workingMat.get(y, x)[0]; // L*
+		double currentLum = Pixel.calcLums(currentRGB);
+		double colorDiff = Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN);
 		
 		if (lumsMovingAverage[x][y] == -1) {
 			
@@ -168,8 +161,8 @@ public final class ShotDetectionManager {
 
 		}
 
-		else if (pixelAboveThreshold(currentLum, (int)lumsMovingAverage[x][y])) result = Optional
-				.of(new Pixel(x, y, currentC, currentLum, (int)lumsMovingAverage[x][y], colorDiffMovingAverage[x][y]));
+		else if (pixelAboveThreshold(currentLum,lumsMovingAverage[x][y])) result = Optional
+				.of(new Pixel(x, y, currentC, currentLum, lumsMovingAverage[x][y], colorDiffMovingAverage[x][y]));
 
 		
 		// Update the average brightness
@@ -224,17 +217,17 @@ public final class ShotDetectionManager {
 		return lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD;
 	}
 
-	private boolean pixelAboveThreshold(int currentLum, int lumsMovingAverage) {
-		final int threshold = (int) ((double) (255 - lumsMovingAverage) / 4f);
-		final int increase = (currentLum - lumsMovingAverage);
+	private boolean pixelAboveThreshold(double currentLum, double lumsMovingAverage) {
+		final double threshold = ((255.0 - lumsMovingAverage) / 4.0);
+		final double increase = (currentLum - lumsMovingAverage);
 
 		// int dynamic_increase = 0;
 		// if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD ||
 		// avgThresholdPixels > BRIGHTNESS_WARNING_AVG_THRESHOLD)
-		int dynamic_increase = (int) ((255 - threshold)
-				* (avgThresholdPixels / (double) MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+		double dynamic_increase = ((255.0 - threshold)
+				* (avgThresholdPixels / MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
 
-		int dynamic_threshold = threshold + dynamic_increase;
+		double dynamic_threshold = threshold + dynamic_increase;
 
 		if (increase < MINIMUM_BRIGHTNESS_INCREASE) return false;
 
@@ -415,9 +408,6 @@ public final class ShotDetectionManager {
 		if (!cameraManager.isDetecting()) return thresholdPixels;
 		
 		lumsMovingAverageAcrossFrameCurrentCalc = 0;
-		
-		Mat workingMat = Camera.bufferedImageToMat(workingFrame);
-		Imgproc.cvtColor(workingMat, workingMat, Imgproc.COLOR_BGR2Lab);
 
 		// In this loop we accomplish both MovingAverage updates AND threshold
 		// pixel detection
@@ -434,7 +424,7 @@ public final class ShotDetectionManager {
 				
 				for (Integer y = startY; y < startY + subHeight; y++) {
 					for (Integer x = startX; x < startX + subWidth; x++) {
-						Optional<Pixel> pixel = updateFilter(workingFrame, workingMat, x, y, detectShots);
+						Optional<Pixel> pixel = updateFilter(workingFrame, x, y, detectShots);
 						
 						lumsMovingAverageAcrossFrameCurrentCalc += lumsMovingAverage[x][y];
 

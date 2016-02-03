@@ -18,7 +18,6 @@
 
 package com.shootoff.gui.controller;
 
-import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -879,7 +878,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		
 
 		arenaCameraManager.setController(this);
-		arenaCameraManager.enableAutoCalibration();
+		arenaCameraManager.enableAutoCalibration(true);
 
 		showAutoCalibrationMessage();
 
@@ -1305,9 +1304,6 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
         addProjectorTargetItem.setOnAction((e) -> {
             Optional<Target> t = arenaController.getCanvasManager().addTarget(path);
            
-            if (t.isPresent()) {
-                t.get().setTargetEventListener(arenaController);
-            }
         });
 
 		MenuItem editTargetItem = new MenuItem(targetName);

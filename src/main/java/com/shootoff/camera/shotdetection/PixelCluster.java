@@ -73,8 +73,8 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		
 		double colorThreshold = (frame.getHeight() * frame.getWidth() * COLOR_THRESHOLD_PER_PIXEL);
 
-		//if (logger.isTraceEnabled())
-			logger.warn("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
+		if (logger.isTraceEnabled())
+			logger.trace("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
 		
 		
 

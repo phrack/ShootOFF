@@ -71,6 +71,8 @@ public class AutoCalibrationManager{
 
 	private CameraManager cameraManager;
 
+	private boolean calculateFrameDelay;
+
 	public void setCallback(Callback<Void, Void> callback) {
 		this.callback = callback;
 	}
@@ -82,10 +84,12 @@ public class AutoCalibrationManager{
 		};
 	}
 
-	public AutoCalibrationManager(CameraManager cameraManager) {
+	public AutoCalibrationManager(CameraManager cameraManager, boolean calculateFrameDelay) {
+		 //((ch.qos.logback.classic.Logger)
+		 //logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+		
 		this.cameraManager = cameraManager;
-		 ((ch.qos.logback.classic.Logger)
-		 logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+		this.calculateFrameDelay = calculateFrameDelay;
 	}
 
 	// Stores the transformation matrix
@@ -142,65 +146,7 @@ public class AutoCalibrationManager{
 		warpInitialized = false;
 		boundsResult = null;
 	}
-	
-	public final Object monitor = new Object();
-	
 
-	/*@Override
-	public void run() {
-		if (isCalibrated) {
-			reset();
-		}
-
-		Optional<Bounds> bounds = Optional.empty();
-		do
-		{
-			synchronized(monitor)
-			{
-				try {
-					monitor.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			};
-			bounds = processFrame(frame);
-			
-			logger.debug("acm.run {}", cameraManager.getFrameCount());
-			
-		} while (!bounds.isPresent());
-		
-		boundsResult = bounds.get();
-		
-		Optional<Long> frameDelay = Optional.empty();
-		
-		// First call initializes what the current luminosity is.
-		checkForFrameChange(frame);
-		frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
-		cameraManager.setArenaBackground(null);
-		while (!frameDelay.isPresent())
-		{
-			synchronized(monitor)
-			{
-				try {
-					monitor.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			};
-			frameDelay = checkForFrameChange(frame);
-			//logger.debug("acm.run {}", cameraManager.getFrameCount());
-		}
-		
-		frameDelayResult = frameDelay.get();
-
-		logger.debug("frameDelayResult {}", frameDelayResult);
-		
-		if (callback != null) {
-			callback.call(null);
-		}
-	}*/
 	
 	public void processFrame(BufferedImage frame)
 	{
@@ -212,9 +158,18 @@ public class AutoCalibrationManager{
 			if (bounds.isPresent())
 			{
 				boundsResult = bounds.get();
-				checkForFrameChange(frame);
-				frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
-				cameraManager.setArenaBackground(null);
+				
+				if (!calculateFrameDelay)
+				{
+					if (callback != null) {
+						callback.call(null);
+					}
+				}
+				else {
+					checkForFrameChange(frame);
+					frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();	
+					cameraManager.setArenaBackground(null);
+				}
 			}
 		}
 		else

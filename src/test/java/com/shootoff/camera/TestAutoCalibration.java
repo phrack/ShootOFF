@@ -21,11 +21,9 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.Video;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
@@ -50,7 +48,7 @@ public class TestAutoCalibration {
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
 		
-		acm = new AutoCalibrationManager(new MockCameraManager());
+		acm = new AutoCalibrationManager(new MockCameraManager(), false);
 		
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
@@ -78,7 +76,7 @@ public class TestAutoCalibration {
 		
 		cameraManager.setController(new MockShootOFFController());
 				
-		cameraManager.enableAutoCalibration();
+		cameraManager.enableAutoCalibration(false);
 		
 		cameraManager.processVideo();
 		
