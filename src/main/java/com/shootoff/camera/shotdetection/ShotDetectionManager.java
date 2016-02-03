@@ -223,9 +223,6 @@ public final class ShotDetectionManager {
 		final double threshold = ((255.0 - lumsMovingAverage) / 4.0);
 		final double increase = (currentLum - lumsMovingAverage);
 
-		// int dynamic_increase = 0;
-		// if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD ||
-		// avgThresholdPixels > BRIGHTNESS_WARNING_AVG_THRESHOLD)
 		double dynamic_increase = ((255.0 - threshold)
 				* (avgThresholdPixels / MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
 
@@ -456,8 +453,8 @@ public final class ShotDetectionManager {
 		if (avgThresholdPixels == -1)
 			avgThresholdPixels = Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
-			avgThresholdPixels = (((movingAveragePeriod - 1) * avgThresholdPixels)
-					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / movingAveragePeriod;
+			avgThresholdPixels = (((cameraManager.getFPS() - 1) * avgThresholdPixels)
+					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / cameraManager.getFPS();
 
 	}
 
@@ -465,8 +462,8 @@ public final class ShotDetectionManager {
 		if (avgBrightPixels == -1)
 			avgBrightPixels = Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
-			avgBrightPixels = (((movingAveragePeriod - 1) * avgBrightPixels)
-					+ Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG)) / movingAveragePeriod;
+			avgBrightPixels = (((cameraManager.getFPS() - 1) * avgBrightPixels)
+					+ Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG)) / cameraManager.getFPS();
 	}
 
 	public int getMinimumShotDimension() {

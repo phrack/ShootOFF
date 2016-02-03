@@ -108,6 +108,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 440.9, 350.7, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 373.5, 390.1, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 354.5, 387.6, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 444.34, 330.75, 0, 2));
 
 		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
 	}
@@ -131,7 +132,9 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		// This is noise on the table in the middle
-		optionalShots.add(new Shot(Color.GREEN, 268.3, 264.05, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 268.3, 264.1, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 295.2, 222.7, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 253.5, 192.0, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}

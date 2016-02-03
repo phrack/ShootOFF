@@ -100,10 +100,12 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 441.6, 250.2, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 503.6, 218.1, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 323.2, 311.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 194.4, 314.9, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 372.0, 222.3, 0, 2));
 		
-		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
+		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(Color.RED, 194.4, 314.9, 0, 2));
+		
+		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
 	
 	@Test
