@@ -641,6 +641,7 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exercises");
 
 			resourcesMetadataFile = new File(
 					System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
@@ -670,7 +671,7 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
-			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exericses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exercises");
 			runShootOFF();
 		}
 	}
