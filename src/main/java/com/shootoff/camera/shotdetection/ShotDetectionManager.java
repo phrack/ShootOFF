@@ -38,13 +38,13 @@ public final class ShotDetectionManager {
 
 	private boolean filtersInitialized = false;
 
-	private double lumsMovingAverageAcrossFrame = 0;
-	private double lumsMovingAverageAcrossFrameCurrentCalc = 0;
+	private int lumsMovingAverageAcrossFrame = 0;
+	private int lumsMovingAverageAcrossFrameCurrentCalc = 0;
 	
-	private double[][] lumsMovingAverage;
-	private double[][] colorDiffMovingAverage;
+	private int[][] lumsMovingAverage;
+	private int[][] colorDiffMovingAverage;
 
-	private double avgThresholdPixels = -1;
+	private int avgThresholdPixels = -1;
 
 	private final static int INIT_FRAME_COUNT = 5;
 	private int movingAveragePeriod = INIT_FRAME_COUNT;
@@ -56,7 +56,7 @@ public final class ShotDetectionManager {
 
 	// Individual pixel threshold
 	private final static  int EXCESSIVE_BRIGHTNESS_THRESHOLD = 245;
-	private final static  int MINIMUM_BRIGHTNESS_INCREASE = 255 - EXCESSIVE_BRIGHTNESS_THRESHOLD;
+	private final static  int MINIMUM_BRIGHTNESS_INCREASE = 10;
 
 	// Aggregate # of pixel threshold
 	private int BRIGHTNESS_WARNING_AVG_THRESHOLD = 100;
@@ -71,7 +71,7 @@ public final class ShotDetectionManager {
 	ArrayList<Pixel> brightPixels = new ArrayList<Pixel>();
 
 	// The average is then calculated here
-	private double avgBrightPixels = -1;
+	private int avgBrightPixels = -1;
 
 	// This is a short circuit for our pixel-color-changer to set the bad pixels
 	// red
@@ -99,8 +99,8 @@ public final class ShotDetectionManager {
 	
 	private void initializeDimensions(int width, int height)
 	{
-		lumsMovingAverage = new double[width][height];
-		colorDiffMovingAverage = new double[width][height];
+		lumsMovingAverage = new int[width][height];
+		colorDiffMovingAverage = new int[width][height];
 
 
 		for (int y = 0; y < height; y++)
@@ -140,8 +140,8 @@ public final class ShotDetectionManager {
 		java.awt.Color currentC = new java.awt.Color(frame.getRGB(x, y));
 		int currentRGB = currentC.getRGB();
 
-		double currentLum = Pixel.calcLums(currentRGB);
-		double colorDiff = Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN);
+		int currentLum = Pixel.calcLums(currentRGB);
+		int colorDiff = (int)(Pixel.colorDistance(currentC, Color.RED) - Pixel.colorDistance(currentC, Color.GREEN));
 		
 
 		if (lumsMovingAverage[x][y] == -1) {
@@ -156,7 +156,7 @@ public final class ShotDetectionManager {
 
 		if (!detectShots) result = Optional.empty();
 
-		if (pixelAboveExcessiveBrightnessThreshold((int)lumsMovingAverage[x][y])) {
+		if (pixelAboveExcessiveBrightnessThreshold(lumsMovingAverage[x][y])) {
 			brightPixels.add(new Pixel(x, y));
 
 
@@ -167,8 +167,8 @@ public final class ShotDetectionManager {
 
 		
 		// Update the average brightness
-		lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (double)(movingAveragePeriod - 1)) + (double)currentLum)
-				/ (double)movingAveragePeriod;
+		lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (movingAveragePeriod - 1)) + currentLum)
+				/ movingAveragePeriod;
 
 		// Update the color distance
 		colorDiffMovingAverage[x][y] = ((colorDiffMovingAverage[x][y] * (movingAveragePeriod - 1)) + colorDiff)
@@ -453,8 +453,11 @@ public final class ShotDetectionManager {
 		if (avgThresholdPixels == -1)
 			avgThresholdPixels = Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
-			avgThresholdPixels = (((cameraManager.getFPS() - 1) * avgThresholdPixels)
-					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / cameraManager.getFPS();
+		{
+			int fps = (int)cameraManager.getFPS();
+			avgThresholdPixels = (((fps - 1) * avgThresholdPixels)
+					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / fps;
+		}
 
 	}
 
@@ -462,8 +465,11 @@ public final class ShotDetectionManager {
 		if (avgBrightPixels == -1)
 			avgBrightPixels = Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else
-			avgBrightPixels = (((cameraManager.getFPS() - 1) * avgBrightPixels)
-					+ Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG)) / cameraManager.getFPS();
+		{
+			int fps = (int)cameraManager.getFPS();
+			avgBrightPixels = (((fps - 1) * avgBrightPixels)
+					+ Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG)) / fps;
+		}
 	}
 
 	public int getMinimumShotDimension() {
@@ -479,7 +485,10 @@ public final class ShotDetectionManager {
 		double x = pc.centerPixelX;
 		double y = pc.centerPixelY;
 
-		if (!color.isPresent()) return;
+		if (!color.isPresent()) {
+			logger.debug("Processing Shot: Shot Rejected By Lack Of Color Density");
+			return;
+		}
 
 		Shot shot = new Shot(color.get(), x, y, 0, cameraManager.getFrameCount(), config.getMarkerRadius());
 

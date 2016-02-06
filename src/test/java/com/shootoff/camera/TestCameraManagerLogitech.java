@@ -43,7 +43,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechIndoorGreen() {
-		// Missing 3 shots
+		// Missing 2 shots
 		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", 
 				Optional.empty(), mockManager, config, sectorStatuses);
 		
@@ -55,7 +55,10 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 388.3, 85.6, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 216.9, 71.4, 0, 2));
 		
-		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
+		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(Color.GREEN, 379.0, 258.5, 0, 2));
+		
+		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
 	
 	
@@ -83,13 +86,11 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechSafariGreen() {
-		// Missing 1 shot
 		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", 
 				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 488.8, 237.0, 0, 2));
-
 		requiredShots.add(new Shot(Color.GREEN, 239.7, 255.7, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 259.3, 141.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 386.8, 185.5, 0, 2));
@@ -99,6 +100,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.GREEN, 366.8, 253.3, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 390.44, 84.62, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}

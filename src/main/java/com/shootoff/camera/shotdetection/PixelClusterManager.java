@@ -30,7 +30,12 @@ public class PixelClusterManager {
 	private final static double MINIMUM_DENSITY = .69f;
 
 	private final static double MINIMUM_SHOT_RATIO = .5f;
-	private final static double MAXIMUM_SHOT_RATIO = 1.5f;
+	private final static double MAXIMUM_SHOT_RATIO = 1.4f;
+	
+	//Use different values if shot width + shot height <= 16 px
+	private final static int SMALL_SHOT_THRESHOLD = 16;
+	private final static double MINIMUM_SHOT_RATIO_SMALL = .5f;
+	private final static double MAXIMUM_SHOT_RATIO_SMALL = 1.5f;
 	
 	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
@@ -40,7 +45,7 @@ public class PixelClusterManager {
 		this.shotDetectionManager = shotDetectionManager;
 		
 		//((ch.qos.logback.classic.Logger)
-		//logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+		//logger).setLevel(ch.qos.logback.classic.Level.TRACE);
 	}
 
 	void clusterPixels() {
@@ -133,24 +138,26 @@ public class PixelClusterManager {
 				}
 
 			}
+			
+			int clustersize = cluster.size();
 
-			if (cluster.size() < shotDetectionManager.getMinimumShotDimension()) continue;
+			if (clustersize < shotDetectionManager.getMinimumShotDimension()) continue;
 			
 			
 			averageX = (averageX / avgconnectedness);
 			averageY = (averageY / avgconnectedness);
 
-			avgconnectedness = avgconnectedness / cluster.size();
+			avgconnectedness = avgconnectedness / clustersize;
 
 			// We scale up the minimum in a linear scale as the cluster size
 			// increases. This is an approximate density
 			double scaled_minimum = Math.min(MINIMUM_CONNECTEDNESS
-					+ ((cluster.size() - shotDetectionManager.getMinimumShotDimension())
+					+ ((clustersize - shotDetectionManager.getMinimumShotDimension())
 							* MINIMUM_CONNECTEDNESS_FACTOR), MAXIMUM_CONNECTEDNESS_SCALE);
 
 
 			if (logger.isTraceEnabled()) logger.trace("Cluster {}: size {} connectedness {} scaled_minimum {} - {} {}", i,
-					cluster.size(), avgconnectedness, scaled_minimum, averageX, averageY);
+					clustersize, avgconnectedness, scaled_minimum, averageX, averageY);
 			
 			
 			if (avgconnectedness < scaled_minimum) continue;
@@ -165,12 +172,13 @@ public class PixelClusterManager {
 					minY, maxX, maxY);
 			
 
-			if (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO) continue;
+			if ((shotWidth+shotHeight) > SMALL_SHOT_THRESHOLD && (shotRatio < MINIMUM_SHOT_RATIO || shotRatio > MAXIMUM_SHOT_RATIO)) continue;
+			else if (shotRatio < MINIMUM_SHOT_RATIO_SMALL || shotRatio > MAXIMUM_SHOT_RATIO_SMALL) continue;
 
 
 			final double r = (double) (shotWidth + shotHeight) / 4.0f;
 			final double circleArea = Math.PI * Math.pow(r, 2);
-			final double density = (double) cluster.size() / circleArea;
+			final double density = (double)(clustersize) / circleArea;
 
 
 			if (logger.isTraceEnabled()) logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea, cluster.size(),
