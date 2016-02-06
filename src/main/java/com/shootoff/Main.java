@@ -44,6 +44,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
+import com.shootoff.plugins.engine.PluginEngine;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 
@@ -105,7 +106,7 @@ public class Main extends Application {
 	}
 
 	private Optional<String> parseField(String metadataXML, String tagName, String fieldName) {
-		String tag = "<" + tagName;		
+		String tag = "<" + tagName;
 		int tagStart = metadataXML.indexOf(tag);
 
 		if (tagStart == -1) {
@@ -305,11 +306,10 @@ public class Main extends Application {
 			resourcesAlert.setTitle("Missing Resources");
 			resourcesAlert.setHeaderText("Missing Required Resources!");
 			resourcesAlert.setResizable(true);
-			resourcesAlert
-					.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
-							+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
-							+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
-							+ "the website.");
+			resourcesAlert.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
+					+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
+					+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
+					+ "the website.");
 			resourcesAlert.showAndWait();
 		} else {
 			runShootOFF();
@@ -342,8 +342,8 @@ public class Main extends Application {
 						File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 						if (entry.isDirectory()) {
 							if (!f.exists() && !f.mkdir()) {
-								IOException e = new IOException("Failed to make directory while extracting JAR: "
-										+ entry.getName());
+								IOException e = new IOException(
+										"Failed to make directory while extracting JAR: " + entry.getName());
 								logger.error("Error making directory to extract writable JAR contents", e);
 								throw e;
 							}
@@ -495,9 +495,9 @@ public class Main extends Application {
 				shootoffWelcome.setResizable(true);
 
 				FlowPane fp = new FlowPane();
-				Label lbl = new Label("The current stable release of ShootOFF is " + stableVersion.get()
-						+ ", but you are running " + version.get() + ". "
-						+ "You can download the current version of ShootOFF here:\n\n");
+				Label lbl = new Label(
+						"The current stable release of ShootOFF is " + stableVersion.get() + ", but you are running "
+								+ version.get() + ". " + "You can download the current version of ShootOFF here:\n\n");
 
 				Hyperlink lnk = new Hyperlink(link);
 
@@ -565,7 +565,8 @@ public class Main extends Application {
 			else
 				primaryStage.setTitle("ShootOFF");
 			primaryStage.setScene(scene);
-			((ShootOFFController) loader.getController()).init(config);
+			ShootOFFController controller = (ShootOFFController) loader.getController();
+			controller.init(config, new PluginEngine(controller));
 			primaryStage.show();
 		} catch (IOException e) {
 			logger.error("Error loading ShootOFF FXML file", e);
@@ -641,21 +642,21 @@ public class Main extends Application {
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
 
-			resourcesMetadataFile = new File(System.getProperty("shootoff.home") + File.separator
-					+ RESOURCES_METADATA_NAME);
+			resourcesMetadataFile = new File(
+					System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
 			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
-			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(SHOOTOFF_DOMAIN + "jws/"
-					+ RESOURCES_METADATA_NAME);
+			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(
+					SHOOTOFF_DOMAIN + "jws/" + RESOURCES_METADATA_NAME);
 
 			if (!localRI.isPresent() && remoteRI.isPresent()) {
 				resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
 				downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 			} else if (localRI.isPresent() && remoteRI.isPresent()) {
 				if (!localRI.get().getVersion().equals(remoteRI.get().getVersion())) {
-					System.out.println(String.format("Local version: %s, Remote version: %s", localRI.get()
-							.getVersion(), remoteRI.get().getVersion()));
-					resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator
-							+ RESOURCES_JAR_NAME);
+					System.out.println(String.format("Local version: %s, Remote version: %s",
+							localRI.get().getVersion(), remoteRI.get().getVersion()));
+					resourcesJARFile = new File(
+							System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
 					downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 				} else {
 					runShootOFF();
@@ -669,6 +670,7 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exericses");
 			runShootOFF();
 		}
 	}

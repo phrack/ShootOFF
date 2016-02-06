@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -51,19 +52,11 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
-import com.shootoff.plugins.BouncingTargets;
-import com.shootoff.plugins.DuelingTree;
-import com.shootoff.plugins.ISSFStandardPistol;
-import com.shootoff.plugins.ParForScore;
-import com.shootoff.plugins.ParRandomShot;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
-import com.shootoff.plugins.RandomShoot;
-import com.shootoff.plugins.ShootDontShoot;
-import com.shootoff.plugins.ShootForScore;
-import com.shootoff.plugins.SteelChallenge;
-import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.plugins.engine.PluginEngine;
+import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.RectangleRegion;
@@ -113,7 +106,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
-public class ShootOFFController implements CameraConfigListener, TargetListener {
+public class ShootOFFController implements CameraConfigListener, TargetListener, PluginListener {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private Menu addTargetMenu;
@@ -139,7 +132,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
-	private final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 
@@ -156,14 +149,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		EVERYWHERE, ONLY_IN_BOUNDS, CROP
 	}
 
-	public void init(Configuration config) {
+	public void init(Configuration config, PluginEngine pluginEngine) {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
 
 		findTargets();
 		initDefaultBackgrounds();
-		registerTrainingExercises();
-		registerProjectorExercises();
+		pluginEngine.startWatching();
 
 		shootOFFStage = (Stage) mainMenu.getScene().getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
@@ -177,6 +169,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			camerasSupervisor.closeAll();
+			pluginEngine.stopWatching();
 
 			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
@@ -381,7 +374,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (config.getWebcams().isEmpty()) {
 			Optional<Camera> defaultCam = Camera.getDefault();
-			
+
 			if (defaultCam.isPresent()) {
 				if (!addCameraTab("Default", defaultCam.get())) cameraLockFailure(defaultCam.get(), true);
 			} else {
@@ -579,16 +572,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		}
 	}
 
-	private void registerTrainingExercises() {
-		addTrainingExercise(new ISSFStandardPistol());
-		addTrainingExercise(new RandomShoot());
-		addTrainingExercise(new ShootForScore());
-		addTrainingExercise(new TimedHolsterDrill());
-		addTrainingExercise(new ParForScore());
-		addTrainingExercise(new ParRandomShot());
-	}
-
-	private void addTrainingExercise(TrainingExercise exercise) {
+	@Override
+	public void registerExercise(TrainingExercise exercise) {
 		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
 		exerciseItem.setToggleGroup(trainingToggleGroup);
 
@@ -615,14 +600,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		trainingMenu.getItems().add(exerciseItem);
 	}
 
-	private void registerProjectorExercises() {
-		addProjectorTrainingExercise(new BouncingTargets());
-		addProjectorTrainingExercise(new DuelingTree());
-		addProjectorTrainingExercise(new ShootDontShoot());
-		addProjectorTrainingExercise(new SteelChallenge());
-	}
-
-	private void addProjectorTrainingExercise(TrainingExercise exercise) {
+	@Override
+	public void registerProjectorExercise(TrainingExercise exercise) {
 		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
 		exerciseItem.setToggleGroup(trainingToggleGroup);
 		if (arenaController == null) exerciseItem.setDisable(true);
@@ -644,9 +623,30 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		projectorExerciseMenuItems.add(exerciseItem);
 	}
 
+	@Override
+	public void unregisterExercise(TrainingExercise exercise) {
+		Platform.runLater(() -> {
+			// If we just unregistered the exercise that is on, disable it
+			if (config.getExercise().isPresent() && config.getExercise().get().getInfo().equals(exercise.getInfo())) {
+				noneTrainingMenuItem.fire();
+			}
+
+			Iterator<MenuItem> it = trainingMenu.getItems().iterator();
+
+			while (it.hasNext()) {
+				MenuItem m = it.next();
+
+				if (m.getText() != null && m.getText().equals(exercise.getInfo().getName())) {
+					it.remove();
+				}
+			}
+		});
+	}
+
 	@FXML
 	public void clickedNoneExercise(ActionEvent event) {
 		config.setExercise(null);
+		trainingToggleGroup.selectToggle(noneTrainingMenuItem);
 	}
 
 	@FXML
@@ -876,12 +876,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
 
-
 		arenaController.startCalibration();
 		arenaController.setCalibrationMessageVisible(false);
 		arenaController.saveCurrentBackground();
 		setArenaBackground("pattern.png");
-		
 
 		arenaCameraManager.setController(this);
 		arenaCameraManager.enableAutoCalibration(true);
@@ -899,17 +897,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			});
 		} , AUTO_CALIBRATION_TIME);
 	}
-	
-	public void setArenaBackground(String resourceFilename)
-	{
-		if (resourceFilename != null)
-		{
+
+	public void setArenaBackground(String resourceFilename) {
+		if (resourceFilename != null) {
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
 			LocatedImage img = new LocatedImage(is, resourceFilename);
 			arenaController.setBackground(img);
-		}
-		else
-		{
+		} else {
 			arenaController.setBackground(null);
 		}
 	}
@@ -1093,7 +1087,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
 		arenaController.getCanvasManager().clearTargets();
 	}
-	
+
 	@FXML
 	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
 		arenaController.setBackground(null);
@@ -1299,8 +1293,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void newTarget(File path) {
 		String targetPath = path.getPath();
 
-		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
-				targetPath.lastIndexOf('.')).replace("_", " ");
+		String targetName = targetPath
+				.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		addTargetItem.setMnemonicParsing(false);
@@ -1336,5 +1330,5 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
-	
+
 }

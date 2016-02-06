@@ -110,8 +110,9 @@ public class XMLCourseReader {
 			return resolution;
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-
+		@Override
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+				throws SAXException {
 			switch (qName) {
 			case "background": {
 				boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
@@ -151,8 +152,8 @@ public class XMLCourseReader {
 				break;
 
 			case "resolution": {
-				resolution = Optional.of(new Dimension2D(Double.parseDouble(attributes.getValue("width")), Double
-						.parseDouble(attributes.getValue("height"))));
+				resolution = Optional.of(new Dimension2D(Double.parseDouble(attributes.getValue("width")),
+						Double.parseDouble(attributes.getValue("height"))));
 			}
 				break;
 			}
@@ -162,8 +163,9 @@ public class XMLCourseReader {
 			Platform.runLater(() -> {
 				Alert targetAlert = new Alert(AlertType.ERROR);
 
-				String message = String.format("The course %s requires the target %s, but the "
-						+ "target file is missing. This target will not appear in your projector arena.",
+				String message = String.format(
+						"The course %s requires the target %s, but the "
+								+ "target file is missing. This target will not appear in your projector arena.",
 						courseFile.getName(), targetPath);
 
 				targetAlert.setTitle("Missing Target");
