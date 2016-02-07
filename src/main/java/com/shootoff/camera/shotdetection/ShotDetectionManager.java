@@ -224,7 +224,7 @@ public final class ShotDetectionManager {
 		final double increase = (currentLum - lumsMovingAverage);
 
 		double dynamic_increase = ((255.0 - threshold)
-				* (avgThresholdPixels / MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+				* ((double)avgThresholdPixels / (double)MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
 
 
 		double dynamic_threshold = threshold + dynamic_increase;

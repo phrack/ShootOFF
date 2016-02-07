@@ -91,7 +91,7 @@ public class CanvasManager {
 	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<Label, ScheduledFuture<Void>>();
 	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
 	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
-	
+
 	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
@@ -201,7 +201,7 @@ public class CanvasManager {
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
 			diagnosticFutures.put(diagnosticLabel, chimeFuture);
 		}
-		
+
 		return diagnosticLabel;
 	}
 
@@ -312,13 +312,11 @@ public class CanvasManager {
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g2.drawImage(source, 0, 0, width, height, null);
 		g2.dispose();
-		
-		
+
 		return tmp;
 	}
-	
-	public BufferedImage getBufferedImage()
-	{
+
+	public BufferedImage getBufferedImage() {
 		BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
 		return projectedScene;
 	}
@@ -648,11 +646,13 @@ public class CanvasManager {
 
 							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
 							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
-							
+
 							if (adjustedX < 0 || adjustedY < 0) {
-								logger.debug("An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
-										+ " nodeBounds.getMin ({}, {})", adjustedX, adjustedY, shot.getX(), shot.getY(),
-										nodeBounds.getMaxX(), nodeBounds.getMinY());
+								logger.debug(
+										"An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
+												+ " nodeBounds.getMin ({}, {})",
+										adjustedX, adjustedY, shot.getX(), shot.getY(), nodeBounds.getMaxX(),
+										nodeBounds.getMinY());
 								return Optional.empty();
 							}
 
@@ -818,7 +818,7 @@ public class CanvasManager {
 
 		targets.remove(target);
 	}
-	
+
 	public void clearTargets() {
 		for (Target t : new ArrayList<Target>(targets)) {
 			removeTarget(t);

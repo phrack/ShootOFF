@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.ScheduledFuture;
 
 import javax.imageio.ImageIO;
 
@@ -39,18 +38,21 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.Main;
 import com.shootoff.camera.Camera;
+import com.shootoff.camera.CameraErrorView;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
+import com.shootoff.gui.CalibrationConfigurator;
+import com.shootoff.gui.CalibrationManager;
+import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
-import com.shootoff.gui.Target;
 import com.shootoff.gui.TargetListener;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
@@ -59,9 +61,7 @@ import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
-import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.TargetRegion;
-import com.shootoff.targets.io.TargetIO;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
@@ -74,14 +74,12 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -99,14 +97,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
-public class ShootOFFController implements CameraConfigListener, TargetListener, PluginListener {
+public class ShootOFFController
+		implements CameraConfigListener, CameraErrorView, TargetListener, PluginListener, CalibrationConfigurator {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private Menu addTargetMenu;
@@ -137,17 +135,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 
 	private ProjectorArenaController arenaController;
-	private Optional<Target> calibrationTarget = Optional.empty();
-	private CameraManager arenaCameraManager;
+	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 
 	private Stage sessionViewerStage;
-
-	private boolean isCalibrating = false;
-
-	private enum CalibrationOption {
-		EVERYWHERE, ONLY_IN_BOUNDS, CROP
-	}
 
 	public void init(Configuration config, PluginEngine pluginEngine) {
 		this.config = config;
@@ -241,7 +232,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
 				if (newToggle == null) return;
 
-				configureArenaCamera(getSelectedCalibrationOption());
+				if (calibrationManager.isPresent())
+					calibrationManager.get().configureArenaCamera(getSelectedCalibrationOption());
 			}
 		});
 
@@ -323,7 +315,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 
-	private CalibrationOption getSelectedCalibrationOption() {
+	@Override
+	public CalibrationOption getSelectedCalibrationOption() {
+		if (calibrationToggleGroup == null) return CalibrationOption.EVERYWHERE;
+
 		Toggle selectedToggle = calibrationToggleGroup.getSelectedToggle();
 		if (selectedToggle != null && selectedToggle instanceof RadioMenuItem) {
 			RadioMenuItem selectedOption = (RadioMenuItem) calibrationToggleGroup.getSelectedToggle();
@@ -451,7 +446,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, webcamName,
 				shotEntries);
-		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, canvasManager);
+		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, this, canvasManager);
 
 		if (config.getRecordingCameras().contains(webcam)) {
 			config.registerRecordingCameraManager(cameraManager);
@@ -727,9 +722,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 			arenaStage.setScene(new Scene(loader.getRoot()));
 
 			arenaController = (ProjectorArenaController) loader.getController();
-			arenaController.init(this, config, camerasSupervisor);
+			CameraManager calibratingCameraManager = camerasSupervisor
+					.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+			arenaController.init(this.getStage(), config, camerasSupervisor);
+			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
+			arenaController.setCalibrationManager(calibrationManager.get());
 			arenaController.getCanvasManager().setShowShots(false);
-
+			
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()
 						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
@@ -737,16 +736,18 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 					noneTrainingMenuItem.fire();
 				}
 				toggleArenaShotsMenuItem.setText("Show Shot Markers");
-				if (isCalibrating) {
-					stopCalibration();
+				if (calibrationManager.isPresent()) {
+					if (calibrationManager.get().isCalibrating()) {
+						calibrationManager.get().stopCalibration();
+					} else {
+						calibrationManager.get().arenaClosing();
+					}
 				}
 				toggleProjectorMenus(true);
 				startArenaMenuItem.setDisable(false);
-				arenaCameraManager.setProjectionBounds(null);
 
 				// We can't remove this until stopCalibration's runlaters finish
 				Platform.runLater(() -> {
-					arenaCameraManager = null;
 					arenaController.setFeedCanvasManager(null);
 					arenaController = null;
 				});
@@ -772,7 +773,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 			m.setDisable(isDisabled);
 	}
 
-	private void toggleArenaCalibrationMenuItemText() {
+	@Override
+	public void toggleCalibrating() {
 		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate"))
 			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
 		else
@@ -781,286 +783,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 
 	@FXML
 	public void toggleArenaCalibrationClicked(ActionEvent event) {
-		if (!isCalibrating) {
-			enableCalibration();
+		if (!calibrationManager.isPresent()) return;
+
+		if (!calibrationManager.get().isCalibrating()) {
+			calibrationManager.get().enableCalibration();
 		} else {
-			if (calibrationTarget.isPresent())
-				calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
-			else
-				stopCalibration();
+			calibrationManager.get().stopCalibration();
 		}
-	}
-
-	private void enableCalibration() {
-		isCalibrating = true;
-
-		toggleArenaCalibrationMenuItemText();
-
-		arenaCameraManager = camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-
-		arenaController.setFeedCanvasManager(arenaCameraManager.getCanvasManager());
-
-		// Sets calibrating and not detecting
-		arenaCameraManager.setCalibrating(true);
-
-		arenaController.setTargetsVisible(false);
-		arenaCameraManager.setProjectionBounds(null);
-
-		if (arenaController.isFullScreen()) {
-			enableAutoCalibration();
-		} else {
-			showFullScreenRequest();
-		}
-
-	}
-
-	public boolean isCalibrating() {
-		return isCalibrating;
-	}
-
-	private Label manualCalibrationRequestMessage = null;
-	private volatile boolean showingManualCalibrationRequestMessage = false;
-
-	private void showManualCalibrationRequestMessage() {
-		if (showingManualCalibrationRequestMessage) return;
-
-		showingManualCalibrationRequestMessage = true;
-		Platform.runLater(() -> {
-			manualCalibrationRequestMessage = arenaCameraManager.getCanvasManager()
-					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
-		});
-	}
-
-	private void removeManualCalibrationRequestMessage() {
-		logger.trace("removeFullScreenRequest {}", manualCalibrationRequestMessage);
-
-		if (showingManualCalibrationRequestMessage) {
-			showingManualCalibrationRequestMessage = false;
-
-			Platform.runLater(() -> {
-				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(manualCalibrationRequestMessage);
-				manualCalibrationRequestMessage = null;
-			});
-		}
-	}
-
-	private Label fullScreenRequestMessage = null;
-	private volatile boolean showingFullScreenRequestMessage = false;
-
-	private void showFullScreenRequest() {
-		if (showingFullScreenRequestMessage) return;
-
-		showingFullScreenRequestMessage = true;
-		Platform.runLater(() -> {
-			fullScreenRequestMessage = arenaCameraManager.getCanvasManager()
-					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
-		});
-	}
-
-	private void removeFullScreenRequest() {
-		logger.trace("removeFullScreenRequest {}", fullScreenRequestMessage);
-
-		if (showingFullScreenRequestMessage) {
-			showingFullScreenRequestMessage = false;
-
-			Platform.runLater(() -> {
-				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(fullScreenRequestMessage);
-				fullScreenRequestMessage = null;
-			});
-		}
-	}
-
-	private ScheduledFuture<?> autoCalibrationFuture = null;
-	private final static int AUTO_CALIBRATION_TIME = 10 * 1000;
-
-	private void enableAutoCalibration() {
-		logger.trace("enableAutoCalibration");
-
-		arenaController.startCalibration();
-		arenaController.setCalibrationMessageVisible(false);
-		arenaController.saveCurrentBackground();
-		setArenaBackground("pattern.png");
-
-		arenaCameraManager.setController(this);
-		arenaCameraManager.enableAutoCalibration(true);
-
-		showAutoCalibrationMessage();
-
-		TimerPool.cancelTimer(autoCalibrationFuture);
-
-		autoCalibrationFuture = TimerPool.schedule(() -> {
-			Platform.runLater(() -> {
-				if (isCalibrating) {
-					arenaCameraManager.disableAutoCalibration();
-					enableManualCalibration();
-				}
-			});
-		} , AUTO_CALIBRATION_TIME);
-	}
-
-	public void setArenaBackground(String resourceFilename) {
-		if (resourceFilename != null) {
-			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
-			LocatedImage img = new LocatedImage(is, resourceFilename);
-			arenaController.setBackground(img);
-		} else {
-			arenaController.setBackground(null);
-		}
-	}
-
-	private Label autoCalibrationMessage = null;
-	private volatile boolean showingAutoCalibrationMessage = false;
-
-	private void showAutoCalibrationMessage() {
-		logger.trace("showAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
-				showingAutoCalibrationMessage, autoCalibrationMessage);
-
-		if (showingAutoCalibrationMessage) return;
-
-		showingAutoCalibrationMessage = true;
-		Platform.runLater(() -> {
-			autoCalibrationMessage = arenaCameraManager.getCanvasManager()
-					.addDiagnosticMessage("Attempting autocalibration", 11000, Color.CYAN);
-		});
-	}
-
-	private void removeAutoCalibrationMessage() {
-		logger.trace("removeAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
-				showingAutoCalibrationMessage, autoCalibrationMessage);
-
-		if (showingAutoCalibrationMessage) {
-			showingAutoCalibrationMessage = false;
-
-			Platform.runLater(() -> {
-				logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
-				arenaCameraManager.getCanvasManager().removeDiagnosticMessage(autoCalibrationMessage);
-				autoCalibrationMessage = null;
-			});
-
-		}
-	}
-
-	public void setFullScreenStatus(boolean fullScreen) {
-		logger.trace("setFullScreenStatus - {} {}", fullScreen, isCalibrating);
-
-		if (!isCalibrating) {
-			enableCalibration();
-		} else if (!fullScreen) {
-			arenaCameraManager.disableAutoCalibration();
-
-			removeCalibrationTargetIfPresent();
-
-			removeAutoCalibrationMessage();
-
-			disableManualCalibration();
-
-			showFullScreenRequest();
-		} else {
-			removeFullScreenRequest();
-			enableAutoCalibration();
-		}
-	}
-
-	private void enableManualCalibration() {
-		logger.trace("enableManualCalibration");
-
-		final int DEFAULT_DIM = 75;
-		final int DEFAULT_POS = 150;
-
-		removeAutoCalibrationMessage();
-
-		showManualCalibrationRequestMessage();
-
-		if (!calibrationTarget.isPresent()) {
-			createCalibrationTarget(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_POS, DEFAULT_POS);
-		} else {
-			arenaCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
-		}
-	}
-
-	private void disableManualCalibration() {
-		removeCalibrationTargetIfPresent();
-
-		removeManualCalibrationRequestMessage();
-	}
-
-	public void createCalibrationTarget(double x, double y, double width, double height) {
-		RectangleRegion calibrationRectangle = new RectangleRegion(x, y, width, height);
-		calibrationRectangle.setFill(Color.PURPLE);
-		calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
-
-		Group calibrationGroup = new Group();
-		calibrationGroup.setOnMouseClicked((e) -> {
-			calibrationGroup.requestFocus();
-		});
-		calibrationGroup.getChildren().add(calibrationRectangle);
-
-		calibrationTarget = Optional.of(arenaCameraManager.getCanvasManager().addTarget(null, calibrationGroup, false));
-		calibrationTarget.get().setKeepInBounds(true);
-	}
-
-	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
-		removeCalibrationTargetIfPresent();
-
-		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
-
-		configureArenaCamera(getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
-
-		stopCalibration();
-	}
-
-	private void stopCalibration() {
-		isCalibrating = false;
-
-		arenaCameraManager.disableAutoCalibration();
-
-		TimerPool.cancelTimer(autoCalibrationFuture);
-
-		toggleArenaCalibrationMenuItemText();
-
-		removeFullScreenRequest();
-		removeAutoCalibrationMessage();
-		removeManualCalibrationRequestMessage();
-		removeCalibrationTargetIfPresent();
-
-		arenaController.calibrated();
-
-		arenaCameraManager.setCalibrating(false);
-
-		// We disable shot detection briefly because the pattern going away can
-		// cause false shots
-		// This statement applies to all the cam feeds rather than just the
-		// arena. I don't think that should
-		// be a problem?
-		disableShotDetectionForPeriod(400);
-	}
-
-	private void removeCalibrationTargetIfPresent() {
-		if (calibrationTarget.isPresent()) arenaCameraManager.getCanvasManager().removeTarget(calibrationTarget.get());
-	}
-
-	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
-
-		Bounds translatedToCanvasBounds;
-		if (bounds != null && !calibratedFromCanvas)
-			translatedToCanvasBounds = arenaCameraManager.getCanvasManager().translateCameraToCanvas(bounds);
-		else
-			translatedToCanvasBounds = bounds;
-
-		Bounds translatedToCameraBounds;
-		if (bounds != null && calibratedFromCanvas)
-			translatedToCameraBounds = arenaCameraManager.getCanvasManager().translateCanvasToCamera(bounds);
-		else
-			translatedToCameraBounds = bounds;
-
-		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, translatedToCanvasBounds);
-		configureArenaCamera(option);
-		arenaCameraManager.setProjectionBounds(translatedToCameraBounds);
-	}
-
-	private void configureArenaCamera(CalibrationOption option) {
-		arenaCameraManager.setCropFeedToProjection(CalibrationOption.CROP.equals(option));
-		arenaCameraManager.setLimitDetectProjection(CalibrationOption.ONLY_IN_BOUNDS.equals(option));
 	}
 
 	private void initDefaultBackgrounds() {
@@ -1243,14 +972,15 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 			config.getExercise().get().reset(knownTargets);
 		}
 
-		disableShotDetectionForPeriod(500);
+		disableShotDetection(500);
 	}
 
 	// Technically the period could be shorter than the previous call
 	// and we don't handle that right now. I'm not too worried about that
 	// because I don't think the periods are going to be vastly different
 	// This is only intended for very short disablement periods
-	public void disableShotDetectionForPeriod(int msPeriod) {
+	@Override
+	public void disableShotDetection(int msDuration) {
 		// Don't disable the cameras if they are already disabled (e.g. because
 		// a training protocol paused shot detection)
 		if (!camerasSupervisor.areDetecting()) return;
@@ -1258,14 +988,14 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 		camerasSupervisor.setDetectingAll(false);
 
 		Runnable restartDetection = () -> {
-			if (!isCalibrating) {
+			if (calibrationManager.isPresent() && !calibrationManager.get().isCalibrating()) {
 				camerasSupervisor.setDetectingAll(true);
 			} else {
 				logger.info("disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
 			}
 		};
 
-		TimerPool.schedule(restartDetection, msPeriod);
+		TimerPool.schedule(restartDetection, msDuration);
 	}
 
 	@FXML
@@ -1331,4 +1061,78 @@ public class ShootOFFController implements CameraConfigListener, TargetListener,
 		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
 
+	@Override
+	public void showMissingCameraError(Camera webcam) {
+		Platform.runLater(() -> {
+			Alert cameraAlert = new Alert(AlertType.ERROR);
+
+			Optional<String> cameraName = config.getWebcamsUserName(webcam);
+			String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
+			String message;
+			if (cameraName.isPresent()) {
+				message = String.format(messageFormat, cameraName.get());
+			} else {
+				message = String.format(messageFormat, webcam.getName());
+			}
+
+			cameraAlert.setTitle("Webcam Missing");
+			cameraAlert.setHeaderText("Cannot Communicate with Camera!");
+			cameraAlert.setResizable(true);
+			cameraAlert.setContentText(message);
+			cameraAlert.initOwner(getStage());
+			cameraAlert.show();
+		});
+	}
+
+	@Override
+	public void showFPSWarning(Camera webcam, double fps) {
+		Platform.runLater(() -> {
+			Alert cameraAlert = new Alert(AlertType.WARNING);
+
+			Optional<String> cameraName = config.getWebcamsUserName(webcam);
+			String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
+					+ " shots may be missed. You may be able to raise the FPS by closing other applications.";
+			String message;
+			if (cameraName.isPresent()) {
+				message = String.format(messageFormat, cameraName.get(), fps);
+			} else {
+				message = String.format(messageFormat, webcam.getName(), fps);
+			}
+
+			cameraAlert.setTitle("Webcam FPS Too Low");
+			cameraAlert.setHeaderText("Webcam FPS is too low!");
+			cameraAlert.setResizable(true);
+			cameraAlert.setContentText(message);
+			cameraAlert.initOwner(getStage());
+			cameraAlert.show();
+		});
+	}
+
+	@Override
+	public void showBrightnessWarning(Camera webcam) {
+		Platform.runLater(() -> {
+			Alert brightnessAlert = new Alert(AlertType.WARNING);
+
+			Optional<String> cameraName = config.getWebcamsUserName(webcam);
+			String messageFormat = "The camera %s is streaming frames that are very bright. "
+					+ " This will increase the odds of shots falsely being detected."
+					+ " For best results, please do any mix of the following:\n\n"
+					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness\n"
+					+ "-Remove any bright light sources in the camera's view\n"
+					+ "-Turn down your projector's brightness and contrast";
+			String message;
+			if (cameraName.isPresent()) {
+				message = String.format(messageFormat, cameraName.get());
+			} else {
+				message = String.format(messageFormat, webcam.getName());
+			}
+
+			brightnessAlert.setTitle("Conditions Very Bright");
+			brightnessAlert.setHeaderText("Webcam detected very bright conditions!");
+			brightnessAlert.setResizable(true);
+			brightnessAlert.setContentText(message);
+			brightnessAlert.initOwner(getStage());
+			brightnessAlert.show();
+		});
+	}
 }

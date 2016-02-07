@@ -1,0 +1,317 @@
+package com.shootoff.gui;
+
+import java.io.InputStream;
+import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.shootoff.camera.CameraManager;
+import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.targets.RectangleRegion;
+import com.shootoff.targets.io.TargetIO;
+import com.shootoff.util.TimerPool;
+
+import javafx.application.Platform;
+import javafx.geometry.Bounds;
+import javafx.scene.Group;
+import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
+
+public class CalibrationManager {
+	private static final int MAX_AUTO_CALIBRATION_TIME = 10 * 1000;
+	private static final Logger logger = LoggerFactory.getLogger(CalibrationManager.class);
+
+	private final CalibrationConfigurator calibrationConfigurator;
+	private final CameraManager calibratingCameraManager;
+	private final CanvasManager calibratingCanvasManager;
+	private final CalibrationListener calibrationListener;
+	private final ProjectorArenaController arenaController;
+
+	private ScheduledFuture<?> autoCalibrationFuture = null;
+
+	private Optional<Target> calibrationTarget = Optional.empty();
+
+	private AtomicBoolean isCalibrating = new AtomicBoolean(false);
+
+	public CalibrationManager(CalibrationConfigurator calibrationConfigurator, CameraManager calibratingCameraManager,
+			ProjectorArenaController arenaController) {
+		this.calibrationConfigurator = calibrationConfigurator;
+		this.calibratingCameraManager = calibratingCameraManager;
+		calibratingCanvasManager = calibratingCameraManager.getCanvasManager();
+		this.calibrationListener = (CalibrationListener) arenaController;
+		this.arenaController = arenaController;
+
+		arenaController.setFeedCanvasManager(calibratingCanvasManager);
+		calibratingCameraManager.setCalibrationManager(this);
+	}
+
+	public void enableCalibration() {
+		isCalibrating.set(true);
+
+		calibrationConfigurator.toggleCalibrating();
+		
+		// Sets calibrating and not detecting
+		calibratingCameraManager.setCalibrating(true);
+		calibratingCameraManager.setProjectionBounds(null);
+
+		if (arenaController.isFullScreen()) {
+			enableAutoCalibration();
+		} else {
+			showFullScreenRequest();
+		}
+	}
+
+	public void stopCalibration() {
+		isCalibrating.set(false);
+
+		if (calibrationTarget.isPresent())
+			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
+
+		calibratingCameraManager.disableAutoCalibration();
+
+		TimerPool.cancelTimer(autoCalibrationFuture);
+
+		calibrationConfigurator.toggleCalibrating();
+
+		removeFullScreenRequest();
+		removeAutoCalibrationMessage();
+		removeManualCalibrationRequestMessage();
+		removeCalibrationTargetIfPresent();
+
+		calibrationListener.calibrated();
+
+		calibratingCameraManager.setCalibrating(false);
+
+		// We disable shot detection briefly because the pattern going away can
+		// cause false shots
+		// This statement applies to all the cam feeds rather than just the
+		// arena. I don't think that should
+		// be a problem?
+		calibrationConfigurator.disableShotDetection(400);
+	}
+
+	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
+		removeCalibrationTargetIfPresent();
+
+		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
+
+		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
+		
+		if (isCalibrating()) stopCalibration();
+	}
+
+	public void configureArenaCamera(CalibrationOption option) {
+		calibratingCameraManager.setCropFeedToProjection(CalibrationOption.CROP.equals(option));
+		calibratingCameraManager.setLimitDetectProjection(CalibrationOption.ONLY_IN_BOUNDS.equals(option));
+	}
+	
+	public void arenaClosing() {
+		calibratingCameraManager.setProjectionBounds(null);
+	}
+
+	private void createCalibrationTarget(double x, double y, double width, double height) {
+		RectangleRegion calibrationRectangle = new RectangleRegion(x, y, width, height);
+		calibrationRectangle.setFill(Color.PURPLE);
+		calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
+
+		Group calibrationGroup = new Group();
+		calibrationGroup.setOnMouseClicked((e) -> {
+			calibrationGroup.requestFocus();
+		});
+		calibrationGroup.getChildren().add(calibrationRectangle);
+
+		calibrationTarget = Optional.of(calibratingCanvasManager.addTarget(null, calibrationGroup, false));
+		calibrationTarget.get().setKeepInBounds(true);
+	}
+
+	private void removeCalibrationTargetIfPresent() {
+		if (calibrationTarget.isPresent()) calibratingCanvasManager.removeTarget(calibrationTarget.get());
+	}
+
+	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
+		Bounds translatedToCanvasBounds;
+		if (bounds != null && !calibratedFromCanvas)
+			translatedToCanvasBounds = calibratingCanvasManager.translateCameraToCanvas(bounds);
+		else
+			translatedToCanvasBounds = bounds;
+
+		Bounds translatedToCameraBounds;
+		if (bounds != null && calibratedFromCanvas)
+			translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
+		else
+			translatedToCameraBounds = bounds;
+
+		calibratingCanvasManager.setProjectorArena(arenaController, translatedToCanvasBounds);
+		configureArenaCamera(option);
+		calibratingCameraManager.setProjectionBounds(translatedToCameraBounds);
+	}
+
+	private void enableManualCalibration() {
+		logger.trace("enableManualCalibration");
+
+		final int DEFAULT_DIM = 75;
+		final int DEFAULT_POS = 150;
+
+		removeAutoCalibrationMessage();
+
+		showManualCalibrationRequestMessage();
+
+		if (!calibrationTarget.isPresent()) {
+			createCalibrationTarget(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_POS, DEFAULT_POS);
+		} else {
+			calibratingCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
+		}
+	}
+
+	private void disableManualCalibration() {
+		removeCalibrationTargetIfPresent();
+
+		removeManualCalibrationRequestMessage();
+	}
+
+	private Label manualCalibrationRequestMessage = null;
+	private volatile boolean showingManualCalibrationRequestMessage = false;
+
+	private void showManualCalibrationRequestMessage() {
+		if (showingManualCalibrationRequestMessage) return;
+
+		showingManualCalibrationRequestMessage = true;
+		Platform.runLater(() -> {
+			manualCalibrationRequestMessage = calibratingCanvasManager
+					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
+		});
+	}
+
+	private void removeManualCalibrationRequestMessage() {
+		logger.trace("removeFullScreenRequest {}", manualCalibrationRequestMessage);
+
+		if (showingManualCalibrationRequestMessage) {
+			showingManualCalibrationRequestMessage = false;
+
+			Platform.runLater(() -> {
+				calibratingCanvasManager.removeDiagnosticMessage(manualCalibrationRequestMessage);
+				manualCalibrationRequestMessage = null;
+			});
+		}
+	}
+
+	private Label fullScreenRequestMessage = null;
+	private volatile boolean showingFullScreenRequestMessage = false;
+
+	private void showFullScreenRequest() {
+		if (showingFullScreenRequestMessage) return;
+
+		showingFullScreenRequestMessage = true;
+		Platform.runLater(() -> {
+			fullScreenRequestMessage = calibratingCanvasManager
+					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
+		});
+	}
+
+	private void removeFullScreenRequest() {
+		logger.trace("removeFullScreenRequest {}", fullScreenRequestMessage);
+
+		if (showingFullScreenRequestMessage) {
+			showingFullScreenRequestMessage = false;
+
+			Platform.runLater(() -> {
+				calibratingCanvasManager.removeDiagnosticMessage(fullScreenRequestMessage);
+				fullScreenRequestMessage = null;
+			});
+		}
+	}
+
+	private void enableAutoCalibration() {
+		logger.trace("enableAutoCalibration");
+
+		calibrationListener.startCalibration();
+		arenaController.setCalibrationMessageVisible(false);
+		arenaController.saveCurrentBackground();
+		setArenaBackground("pattern.png");
+
+		calibratingCameraManager.enableAutoCalibration(true);
+
+		showAutoCalibrationMessage();
+
+		TimerPool.cancelTimer(autoCalibrationFuture);
+
+		autoCalibrationFuture = TimerPool.schedule(() -> {
+			Platform.runLater(() -> {
+				if (isCalibrating.get()) {
+					calibratingCameraManager.disableAutoCalibration();
+					enableManualCalibration();
+				}
+			});
+		} , MAX_AUTO_CALIBRATION_TIME);
+	}
+
+	public void setArenaBackground(String resourceFilename) {
+		if (resourceFilename != null) {
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
+			LocatedImage img = new LocatedImage(is, resourceFilename);
+			arenaController.setBackground(img);
+		} else {
+			arenaController.setBackground(null);
+		}
+	}
+
+	private Label autoCalibrationMessage = null;
+	private volatile boolean showingAutoCalibrationMessage = false;
+
+	private void showAutoCalibrationMessage() {
+		logger.trace("showAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
+				showingAutoCalibrationMessage, autoCalibrationMessage);
+
+		if (showingAutoCalibrationMessage) return;
+
+		showingAutoCalibrationMessage = true;
+		Platform.runLater(() -> {
+			autoCalibrationMessage = calibratingCanvasManager.addDiagnosticMessage("Attempting autocalibration", 11000,
+					Color.CYAN);
+		});
+	}
+
+	private void removeAutoCalibrationMessage() {
+		logger.trace("removeAutoCalibrationMessage - showingAutoCalibrationMessage {} autoCalibrationMessage {}",
+				showingAutoCalibrationMessage, autoCalibrationMessage);
+
+		if (showingAutoCalibrationMessage) {
+			showingAutoCalibrationMessage = false;
+
+			Platform.runLater(() -> {
+				logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
+				calibratingCanvasManager.removeDiagnosticMessage(autoCalibrationMessage);
+				autoCalibrationMessage = null;
+			});
+
+		}
+	}
+
+	public void setFullScreenStatus(boolean fullScreen) {
+		logger.trace("setFullScreenStatus - {} {}", fullScreen, isCalibrating);
+
+		if (!isCalibrating.get()) {
+			enableCalibration();
+		} else if (!fullScreen) {
+			calibratingCameraManager.disableAutoCalibration();
+
+			removeCalibrationTargetIfPresent();
+
+			removeAutoCalibrationMessage();
+
+			disableManualCalibration();
+
+			showFullScreenRequest();
+		} else {
+			removeFullScreenRequest();
+			enableAutoCalibration();
+		}
+	}
+
+	public boolean isCalibrating() {
+		return isCalibrating.get();
+	}
+}

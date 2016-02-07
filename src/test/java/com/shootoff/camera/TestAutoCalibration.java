@@ -19,8 +19,10 @@ import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.gui.controller.ProjectorArenaController;
 
 public class TestAutoCalibration {
 	private AutoCalibrationManager acm;
@@ -59,7 +61,7 @@ public class TestAutoCalibration {
 
 		mockManager.setCameraManager(cameraManager);
 
-		cameraManager.setController(new MockShootOFFController());
+		cameraManager.setCalibrationManager(new CalibrationManager(new MockShootOFFController(), cameraManager, new ProjectorArenaController()));
 
 		cameraManager.enableAutoCalibration(false);
 
