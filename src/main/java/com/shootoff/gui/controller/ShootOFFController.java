@@ -381,7 +381,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		if (config.getWebcams().isEmpty()) {
 			Optional<Camera> defaultCam = Camera.getDefault();
-			
+
 			if (defaultCam.isPresent()) {
 				if (!addCameraTab("Default", defaultCam.get())) cameraLockFailure(defaultCam.get(), true);
 			} else {
@@ -876,12 +876,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
 
-
 		arenaController.startCalibration();
 		arenaController.setCalibrationMessageVisible(false);
 		arenaController.saveCurrentBackground();
 		setArenaBackground("pattern.png");
-		
 
 		arenaCameraManager.setController(this);
 		arenaCameraManager.enableAutoCalibration(true);
@@ -899,17 +897,13 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 			});
 		} , AUTO_CALIBRATION_TIME);
 	}
-	
-	public void setArenaBackground(String resourceFilename)
-	{
-		if (resourceFilename != null)
-		{
+
+	public void setArenaBackground(String resourceFilename) {
+		if (resourceFilename != null) {
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
 			LocatedImage img = new LocatedImage(is, resourceFilename);
 			arenaController.setBackground(img);
-		}
-		else
-		{
+		} else {
 			arenaController.setBackground(null);
 		}
 	}
@@ -1093,7 +1087,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
 		arenaController.getCanvasManager().clearTargets();
 	}
-	
+
 	@FXML
 	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
 		arenaController.setBackground(null);
@@ -1299,8 +1293,8 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void newTarget(File path) {
 		String targetPath = path.getPath();
 
-		String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1,
-				targetPath.lastIndexOf('.')).replace("_", " ");
+		String targetName = targetPath
+				.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
 
 		MenuItem addTargetItem = new MenuItem(targetName);
 		addTargetItem.setMnemonicParsing(false);
@@ -1336,5 +1330,5 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
-	
+
 }
