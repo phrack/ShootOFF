@@ -25,16 +25,16 @@ public class TestPlugin {
 	@Test
 	public void testStandardPlugin() throws ParserConfigurationException, SAXException, IOException {
 		Plugin p = new Plugin(pluginDir.resolve(Paths.get("ShotScore.jar")));
-		assertEquals("com.shootoff.plugins.ShotScore", p.getMainClass().getClass().getName());
-		assertEquals("Shot Score", p.getMainClass().getInfo().getName());
+		assertEquals("com.shootoff.plugins.ShotScore", p.getExercise().getClass().getName());
+		assertEquals("Shot Score", p.getExercise().getInfo().getName());
 		assertEquals(PluginType.STANDARD, p.getType());
 	}
 
 	@Test
 	public void testProjectorPlugin() throws ParserConfigurationException, SAXException, IOException {
 		Plugin p = new Plugin(pluginDir.resolve(Paths.get("SteelContest.jar")));
-		assertEquals("com.shootoff.plugins.SteelContest", p.getMainClass().getClass().getName());
-		assertEquals("Steel Contest", p.getMainClass().getInfo().getName());
+		assertEquals("com.shootoff.plugins.SteelContest", p.getExercise().getClass().getName());
+		assertEquals("Steel Contest", p.getExercise().getInfo().getName());
 		assertEquals(PluginType.PROJECTOR_ONLY, p.getType());
 	}
 

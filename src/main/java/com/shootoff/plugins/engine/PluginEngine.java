@@ -48,6 +48,11 @@ import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
 
+/**
+ * Watch for new plugin jars and manage plugin registration and deletion.
+ * 
+ * @author phrack
+ */
 public class PluginEngine implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(PluginEngine.class);
 	private final Path pluginDir;
@@ -58,7 +63,7 @@ public class PluginEngine implements Runnable {
 
 	private AtomicBoolean watching = new AtomicBoolean(false);
 
-	public PluginEngine(PluginListener pluginListener) throws IOException {
+	public PluginEngine(final PluginListener pluginListener) throws IOException {
 		if (pluginListener == null) {
 			throw new IllegalArgumentException("pluginListener cannot be null");
 		}
@@ -99,8 +104,8 @@ public class PluginEngine implements Runnable {
 		pluginListener.registerProjectorExercise(new SteelChallenge());
 	}
 
-	private boolean registerPlugin(Path jarPath) {
-		Plugin newPlugin;
+	private boolean registerPlugin(final Path jarPath) {
+		final Plugin newPlugin;
 
 		try {
 			newPlugin = new Plugin(jarPath);
@@ -111,9 +116,9 @@ public class PluginEngine implements Runnable {
 
 		if (plugins.add(newPlugin)) {
 			if (PluginType.STANDARD.equals(newPlugin.getType())) {
-				pluginListener.registerExercise(newPlugin.getMainClass());
+				pluginListener.registerExercise(newPlugin.getExercise());
 			} else if (PluginType.PROJECTOR_ONLY.equals(newPlugin.getType())) {
-				pluginListener.registerProjectorExercise(newPlugin.getMainClass());
+				pluginListener.registerProjectorExercise(newPlugin.getExercise());
 			}
 		}
 
@@ -136,11 +141,18 @@ public class PluginEngine implements Runnable {
 		return plugins;
 	}
 
+	/**
+	 * Start watching for plugin creation and deletion in shootoff.plugins. Plugin
+	 * jar creation or deletion leads to a plugin registration or unregistration.
+	 */
 	public void startWatching() {
 		watching.set(true);
 		new Thread(this, "Plugin Watcher").start();
 	}
 
+	/**
+	 * Stop watching for plugin creation and deletion in shootoff.plugins.
+	 */
 	public void stopWatching() {
 		watching.set(false);
 	}
@@ -160,27 +172,27 @@ public class PluginEngine implements Runnable {
 				return;
 			}
 
-			for (WatchEvent<?> event : key.pollEvents()) {
+			for (final WatchEvent<?> event : key.pollEvents()) {
 				if (StandardWatchEventKinds.OVERFLOW.equals(event.kind())) {
 					continue;
 				}
 
 				@SuppressWarnings("unchecked")
-				WatchEvent<Path> ev = (WatchEvent<Path>) event;
-				Path updatedFile = ev.context();
+				final WatchEvent<Path> ev = (WatchEvent<Path>) event;
+				final Path updatedFile = ev.context();
 
 				if (!jarMatcher.matches(updatedFile)) {
 					continue;
 				}
 
-				Path fqUpdatedFile = pluginDir.resolve(updatedFile);
+				final Path fqUpdatedFile = pluginDir.resolve(updatedFile);
 
 				if (StandardWatchEventKinds.ENTRY_CREATE.equals(event.kind())) {
 					if (!registerPlugin(fqUpdatedFile)) continue;
 				} else if (StandardWatchEventKinds.ENTRY_DELETE.equals(event.kind())) {
 					Optional<Plugin> deletedPlugin = Optional.empty();
 
-					for (Plugin p : plugins) {
+					for (final Plugin p : plugins) {
 						if (p.getJarPath().equals(fqUpdatedFile)) {
 							deletedPlugin = Optional.of(p);
 							break;
@@ -188,7 +200,7 @@ public class PluginEngine implements Runnable {
 					}
 
 					if (deletedPlugin.isPresent()) {
-						pluginListener.unregisterExercise(deletedPlugin.get().getMainClass());
+						pluginListener.unregisterExercise(deletedPlugin.get().getExercise());
 						plugins.remove(deletedPlugin.get());
 					}
 				} else {

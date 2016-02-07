@@ -20,6 +20,7 @@ package com.shootoff.plugins.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -43,50 +44,55 @@ import com.shootoff.plugins.TrainingExerciseBase;
 public class Plugin {
 	private static final Logger logger = LoggerFactory.getLogger(Plugin.class);
 
-	private URLClassLoader loader;
-	private final TrainingExercise mainClass;
+	private final URLClassLoader loader;
+	private final TrainingExercise exercise;
 	private final Path jarPath;
 	private final PluginType type;
 
 	public Plugin(Path jarPath) throws ParserConfigurationException, SAXException, IOException {
 		this.jarPath = jarPath;
 
-		AccessController.doPrivileged((PrivilegedAction<Void>) 
-			() -> {
-				try {
-					loader = new URLClassLoader(new URL[] { jarPath.toUri().toURL() }, Plugin.class.getClassLoader());
-				} catch (Exception e) {
-					logger.error("Malformed jarPath", e);
-				}
-				return null;
+		loader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> {
+			try {
+				return new URLClassLoader(new URL[] { jarPath.toUri().toURL() },
+						Thread.currentThread().getContextClassLoader());
+			} catch (MalformedURLException e) {
+				logger.error("Malformed jarPath", e);
+			}
+			return null;
 		});
-		
-		InputStream pluginSettings = loader.getResourceAsStream("shootoff.xml");
+
+		if (loader == null) {
+			throw new IllegalArgumentException(
+					String.format("The jarPath %s does not represent a valid ShootOFF plugin", jarPath));
+		}
+
+		final InputStream pluginSettings = loader.getResourceAsStream("shootoff.xml");
 
 		if (pluginSettings == null) {
 			throw new IllegalArgumentException(
 					String.format("The jarPath %s does not represent a valid ShootOFF plugin", jarPath));
 		}
 
-		SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-		PluginSettingsXMLHandler handler = new PluginSettingsXMLHandler();
+		final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+		final PluginSettingsXMLHandler handler = new PluginSettingsXMLHandler();
 		saxParser.parse(pluginSettings, handler);
 
-		if (handler.getMainClass() == null) {
+		if (handler.getExercise() == null) {
 			throw new IllegalArgumentException(
 					String.format("Could not fetch main class for newly discovered exercise at %s", jarPath));
 		}
 
-		mainClass = handler.getMainClass();
+		exercise = handler.getExercise();
 		type = handler.getType();
 	}
 
 	private class PluginSettingsXMLHandler extends DefaultHandler {
-		private TrainingExercise mainClass;
+		private TrainingExercise exercise;
 		private PluginType type;
 
-		public TrainingExercise getMainClass() {
-			return mainClass;
+		public TrainingExercise getExercise() {
+			return exercise;
 		}
 
 		public PluginType getType() {
@@ -97,8 +103,8 @@ public class Plugin {
 		public void startElement(String uri, String localName, String qName, Attributes attributes) {
 			switch (qName) {
 			case "shootoffExercise": {
-				String mainClassName = attributes.getValue("exerciseClass");
-				Class<?> exerciseClass;
+				final String mainClassName = attributes.getValue("exerciseClass");
+				final Class<?> exerciseClass;
 				try {
 					exerciseClass = loader.loadClass(mainClassName);
 				} catch (ClassNotFoundException e) {
@@ -107,13 +113,13 @@ public class Plugin {
 				}
 
 				// No superclass or not a known training exercise superclass
-				boolean isStandardExercise = exerciseClass.getSuperclass().getName()
+				final boolean isStandardExercise = exerciseClass.getSuperclass().getName()
 						.equals(TrainingExerciseBase.class.getName());
-				boolean isProjectorOnlyExercise = exerciseClass.getSuperclass().getName()
+				final boolean isProjectorOnlyExercise = exerciseClass.getSuperclass().getName()
 						.equals(ProjectorTrainingExerciseBase.class.getName());
 
 				if (exerciseClass.getSuperclass() == null || (!isStandardExercise && !isProjectorOnlyExercise)) {
-					String superclassName;
+					final String superclassName;
 					if (exerciseClass.getSuperclass() == null) {
 						superclassName = "null";
 					} else {
@@ -133,7 +139,7 @@ public class Plugin {
 				}
 
 				try {
-					mainClass = (TrainingExercise) exerciseClass.newInstance();
+					exercise = (TrainingExercise) exerciseClass.newInstance();
 				} catch (InstantiationException | IllegalAccessException e) {
 					logger.error("Error instantiating configured exerciseClass", e);
 				}
@@ -150,8 +156,8 @@ public class Plugin {
 		return loader;
 	}
 
-	public TrainingExercise getMainClass() {
-		return mainClass;
+	public TrainingExercise getExercise() {
+		return exercise;
 	}
 
 	public Path getJarPath() {
