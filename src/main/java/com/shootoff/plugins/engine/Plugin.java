@@ -69,7 +69,7 @@ public class Plugin {
 		}
 
 		SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-		PluginSettionsXMLHandler handler = new PluginSettionsXMLHandler();
+		PluginSettingsXMLHandler handler = new PluginSettingsXMLHandler();
 		saxParser.parse(pluginSettings, handler);
 
 		if (handler.getMainClass() == null) {
@@ -81,7 +81,7 @@ public class Plugin {
 		type = handler.getType();
 	}
 
-	private class PluginSettionsXMLHandler extends DefaultHandler {
+	private class PluginSettingsXMLHandler extends DefaultHandler {
 		private TrainingExercise mainClass;
 		private PluginType type;
 
