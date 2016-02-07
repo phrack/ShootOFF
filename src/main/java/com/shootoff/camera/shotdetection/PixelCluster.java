@@ -26,7 +26,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	// itself
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
-	public double getColorDifference(BufferedImage frame, double[][] colorDiffMovingAverage) {
+	public double getColorDifference(BufferedImage frame, int[][] colorDiffMovingAverage) {
 		final ArrayList<Pixel> visited = new ArrayList<Pixel>();
 
 		double diff = 0;
@@ -68,13 +68,13 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 		return diff - lumDiff;
 	}
 
-	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, double[][] colorDiffMovingAverage) {
+	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, int[][] colorDiffMovingAverage) {
 		final double colorDist = getColorDifference(frame, colorDiffMovingAverage);
 		
 		double colorThreshold = (frame.getHeight() * frame.getWidth() * COLOR_THRESHOLD_PER_PIXEL);
 
-		if (logger.isTraceEnabled())
-			logger.trace("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
+		if (logger.isDebugEnabled())
+			logger.debug("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
 		
 		
 

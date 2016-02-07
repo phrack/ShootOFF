@@ -133,6 +133,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		// This is noise on the table in the middle
 		optionalShots.add(new Shot(Color.GREEN, 268.3, 264.1, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 268.3, 264.1, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 295.2, 222.7, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 253.5, 192.0, 0, 2));
 		
