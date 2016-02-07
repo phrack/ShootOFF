@@ -27,6 +27,7 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.scene.Group;
 
@@ -47,7 +48,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("ShootDontShootExercise"));
 
-	private volatile boolean continueExercise = true;
+	private AtomicBoolean continueExercise = new AtomicBoolean(true);
 	private boolean testRun = false;
 	private ProjectorTrainingExerciseBase thisSuper;
 	private int missedTargets = 0;
@@ -102,7 +103,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private class NewRound implements Runnable {
 		@Override
 		public void run() {
-			if (!continueExercise) return;
+			if (!continueExercise.get()) return;
 
 			missedTargets += shootTargets.size();
 
@@ -128,7 +129,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 			thisSuper.clearShots();
 
-			if (continueExercise && !testRun)
+			if (continueExercise.get() && !testRun)
 				executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 		}
 	}
@@ -196,7 +197,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public void reset(List<Group> targets) {
-		continueExercise = false;
+		continueExercise.set(false);
 		executorService.shutdownNow();
 
 		missedTargets = 0;
@@ -214,7 +215,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 		super.showTextOnFeed("missed targets: 0\nbad hits: 0");
 
-		continueExercise = true;
+		continueExercise.set(true);
 
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 				new NamedThreadFactory("ShootDontShootExercise"));
@@ -223,7 +224,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public void destroy() {
-		continueExercise = false;
+		continueExercise.set(false);
 		executorService.shutdownNow();
 		super.destroy();
 	}
