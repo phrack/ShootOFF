@@ -77,7 +77,7 @@ public final class ShotDetectionManager {
 
 	// Individual pixel threshold
 	private final static  int EXCESSIVE_BRIGHTNESS_THRESHOLD = 245;
-	private final static  int MINIMUM_BRIGHTNESS_INCREASE = 25;
+	private final static  int MINIMUM_BRIGHTNESS_INCREASE = 30;
 
 	// Aggregate # of pixel threshold
 	private int BRIGHTNESS_WARNING_AVG_THRESHOLD = 100;
@@ -222,7 +222,7 @@ public final class ShotDetectionManager {
 				 (
 						(
 						 ((double)currentChroma/255.0 * Math.sin(currentHRadians)) +
-						 ((double)(movingAveragePeriod - 1) * (double)colorChromaMovingAverage[x][y]/255.0 * Math.sin((double)colorAngleMovingAverage[x][y]*(Math.PI/180)))
+						 ((double)(movingAveragePeriod - 1) * (double)colorChromaMovingAverage[x][y]/255.0 * Math.sin((double)colorAngleMovingAverage[x][y]*(Math.PI/90)))
 						)
 				 ) /
 				 (double)movingAveragePeriod
@@ -232,7 +232,7 @@ public final class ShotDetectionManager {
 				 (
 				  (
 				   ((double)currentChroma/255.0 * Math.cos(currentHRadians)) +
-				   ((double)(movingAveragePeriod - 1) * (double)colorChromaMovingAverage[x][y]/255.0 * Math.cos((double)colorAngleMovingAverage[x][y]*(Math.PI/180)))
+				   ((double)(movingAveragePeriod - 1) * (double)colorChromaMovingAverage[x][y]/255.0 * Math.cos((double)colorAngleMovingAverage[x][y]*(Math.PI/90)))
 				  )
 				 ) / 
 				 (double)movingAveragePeriod
@@ -246,7 +246,7 @@ public final class ShotDetectionManager {
 		colorChromaMovingAverage[x][y] = ((colorChromaMovingAverage[x][y] * (movingAveragePeriod - 1)) + currentChroma)
 				/ movingAveragePeriod;
 
-		/*if (x==140&&y==189)
+		/*if (x==442&&y==91)
 		{	
 			logger.debug("P1 {} {} {}", sin, cos, angle);
 			logger.debug("Pixel {} {} {} {} {} - {} - {} - {} - {} {}", currentH, currentS, currentV, currentLum, currentChroma, valueForThreshold, currentLum-valueForThreshold, angle, colorAngleMovingAverage[x][y], colorChromaMovingAverage[x][y]);

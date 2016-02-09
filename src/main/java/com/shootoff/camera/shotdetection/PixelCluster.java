@@ -72,12 +72,14 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 							int npLum = (int) workingFrame.get(ry,rx)[2];
 							double npChroma = (((double)npSaturation/255.0)*((double)npLum/255.0));
 							
-							double cAMARadians = colorAngleMovingAverage[rx][ry] * (Math.PI/180);
+							double cAMARadians = colorAngleMovingAverage[rx][ry] * (Math.PI/90);
 							
-							double sin = (((npChroma * Math.sin(npColor) * 3.0 + (double)colorChromaMovingAverage[rx][ry]/255.0 * Math.sin(cAMARadians * 1.0))) / 4.0);
-							double cos = (((npChroma * Math.cos(npColor) * 3.0 + (double)colorChromaMovingAverage[rx][ry]/255.0 * Math.cos(cAMARadians * 1.0))) / 4.0);
+							double sin = (((npChroma * Math.sin(npColor) * 1.0 - (double)colorChromaMovingAverage[rx][ry]/255.0 * Math.sin(cAMARadians * 1.0))) / 2.0);
+							double cos = (((npChroma * Math.cos(npColor) * 1.0 - (double)colorChromaMovingAverage[rx][ry]/255.0 * Math.cos(cAMARadians * 1.0))) / 2.0);
 
-							logger.warn("{} {} np {} {} {} {} - {} {} - {} {}", rx, ry, npColor, npSaturation, npLum, npChroma, colorChromaMovingAverage[rx][ry]/255.0, cAMARadians, sin, cos);
+							//logger.warn("{} {} np {} {} {} {} - {} {} - {} {}", rx, ry, npColor, npSaturation, npLum, npChroma, colorChromaMovingAverage[rx][ry]/255.0, cAMARadians, sin, cos);
+							//logger.warn("{} {} np {} {} - {} {}", rx, ry, workingFrame.get(ry, rx)[0], npChroma, colorAngleMovingAverage[rx][ry], colorChromaMovingAverage[rx][ry]/255.0);
+							
 							
 							avgSin += sin;
 							avgCos += cos;
