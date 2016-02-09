@@ -778,8 +778,16 @@ public class AutoCalibrationManager {
 
 		perspMat = Imgproc.getPerspectiveTransform(sourceCorners, destCorners);
 
+		int width = boundsRect.boundingRect().width;
+		int height = boundsRect.boundingRect().height;
+		
+		// Make them divisible by two for video recording purposes
+		
+		if ((width%2)==1) width++;
+		if ((height%2)==1) height++;
+		
 		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y,
-				boundsRect.boundingRect().width, boundsRect.boundingRect().height);
+				width, height);
 
 		warpInitialized = true;
 

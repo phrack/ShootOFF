@@ -56,7 +56,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 216.9, 71.4, 0, 2));
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.GREEN, 379.0, 258.5, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 386.0, 258, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
@@ -100,7 +100,8 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.GREEN, 366.8, 253.3, 0, 2));
-		optionalShots.add(new Shot(Color.GREEN, 390.44, 84.62, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 390.4, 84.6, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 370.6, 256.3, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
@@ -149,8 +150,6 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechBouncingTargetsNoBG() {
-		config.setIgnoreLaserColor(true);
-		config.setIgnoreLaserColorName("green");
 		
 		List<Shot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", 
 				Optional.empty(), mockManager, config, sectorStatuses);
@@ -160,8 +159,6 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	
 	@Test
 	public void testLogitechBouncingTargetsOutdoor() {
-		config.setIgnoreLaserColor(true);
-		config.setIgnoreLaserColorName("green");
 		
 		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", 
 				Optional.empty(), mockManager, config, sectorStatuses);

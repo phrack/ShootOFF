@@ -1,6 +1,26 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.shootoff.camera.arenamask;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.concurrent.Semaphore;
 
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.BufferUtils;
@@ -11,6 +31,14 @@ import org.opencv.core.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.ICodec;
+import com.xuggle.xuggler.IPixelFormat;
+import com.xuggle.xuggler.IVideoPicture;
+import com.xuggle.xuggler.video.ConverterFactory;
+import com.xuggle.xuggler.video.IConverter;
+
 public class ArenaMaskManager implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(ArenaMaskManager.class);
 
@@ -19,52 +47,91 @@ public class ArenaMaskManager implements Runnable {
 	private long delay = 0;
 	
 	private Mat mask = new Mat();
-	Size dsize = null;
+	private Size dsize = null;
 	
-	private final static int LUM_MA_LENGTH = 10;
+	private final static int LUM_MA_LENGTH = 2;
 	
-	double avgLums = 0;
+	private double avgLums = 0;
 	
+	public volatile Mask maskFromArena = null;
+	
+	public Semaphore sem = new Semaphore(1);
+	
+	public volatile boolean isStreaming = true;
 
 	@Override
 	public void run() {
-		while (true)
-		{
-			if (cBuffer.isEmpty()) try {
-				Thread.sleep(10);
+		logger.debug("Starting arenaMaskManager thread");
+		
+		//startRecordingStream(new File("testingArenaMask.mp4"));
+		
+		while (isStreaming)
+		{	
+			try {
+				sem.acquire();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				continue;
 			}
-			else
+			if (maskFromArena == null)
 			{
+				sem.release();
+				continue;
+			}
+			
+			//while (!cBuffer.isEmpty())
+			//{
 				
-				while (((Mask)cBuffer.get()).timestamp < System.currentTimeMillis()-(.5*delay))
+				//Mask nextMask = ((Mask)cBuffer.remove());
+				Mask nextMask = maskFromArena;
+				long curDelay = System.currentTimeMillis() - nextMask.timestamp;
+				
+				if (curDelay > delay)
 				{
-					
-					Mask nextMask = ((Mask)cBuffer.remove());
-					Mat nextMat = nextMask.getSplitMask(dsize);
-	
-					logger.warn("updatingMask {} {} {}", nextMask.timestamp, avgLums, nextMask.getAvgMaskLum());
-	
-					
-					for (int y = 0; y < nextMat.rows(); y++)
+					sem.release();
+					continue;
+				}
+				
+				
+				Mat nextMat = nextMask.getSplitMask(dsize);
+				
+				recordMask(nextMask);
+				
+				double nextMaskAvgLum = nextMask.getAvgMaskLum();
+				
+				maskFromArena = null;
+				
+				sem.release();
+									
+				//logger.debug("aMM {} - {}", cBuffer.size(), curDelay);
+
+				//logger.warn("updatingMask {} {} - {} {} {}", nextMat.cols(), nextMat.rows(), nextMask.timestamp, avgLums, nextMask.getAvgMaskLum());
+
+				
+				for (int y = 0; y < nextMat.rows(); y++)
+				{
+					for (int x = 0; x < nextMat.cols(); x++)
 					{
-						for (int x = 0; x < nextMat.cols(); x++)
-						{
-							double newLum = mask.get(y, x)[0] * (avgLums/(nextMask.getAvgMaskLum()));
-							
-							if ((x*y)%1000==0)
-								logger.warn("pixel {} {}", mask.get(y,x)[0], newLum);
-							
-							newLum = ((mask.get(y, x)[0] * (LUM_MA_LENGTH-1)) + nextMat.get(y,x)[0]) / LUM_MA_LENGTH;
-							
-							mask.put(y, x, newLum);
-						}
+						double[] curMask = mask.get(y,x);
+						
+						double newLum = nextMat.get(y,x)[0] * (avgLums/nextMaskAvgLum);
+						
+						
+						curMask[0] = ((curMask[0] * (LUM_MA_LENGTH-1)) + newLum) / LUM_MA_LENGTH;
+					
+						//if (x==320&&y==240)
+						//	logger.warn("pixel {} {} - {} {} {}", x, y, mask.get(y,x)[0], newLum, curMask[0]);
+
+						mask.put(y, x, curMask);
+						
+					
 					}
 				}
-			}			
+			//}		
+				
+
 		}
+		
+		stopRecordingStream();
 	}
 	
 	
@@ -75,23 +142,65 @@ public class ArenaMaskManager implements Runnable {
 		//this.delay = 150;
 	}
 	
-	public ArenaMaskManager(int width, int height)
+	public ArenaMaskManager()
 	{
-		mask = new Mat(height, width, CvType.CV_8UC1);
-		dsize = new Size(width, height);
 		cBuffer = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(70));
 		
 		
 	}
 	
-	public void start()
+	public void start(int width, int height)
 	{
+		mask = new Mat(height, width, CvType.CV_8UC1);
+		dsize = new Size(width, height);
+
 		(new Thread(this)).start();
 	}
 	
 	public Mat getMask()
 	{
 		return mask;
+	}
+	
+	
+	private boolean recordingStream = false;
+	private boolean isFirstStreamFrame = true;
+	private IMediaWriter videoWriterStream;
+	private long recordingStartTime;
+	private void recordMask(Mask mask)
+	{
+		if (recordingStream) {
+			BufferedImage image = ConverterFactory.convertToType(mask.bImage, BufferedImage.TYPE_3BYTE_BGR);
+			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+
+			IVideoPicture frame = converter.toPicture(image,
+					(System.currentTimeMillis() - recordingStartTime) * 1000);
+			frame.setKeyFrame(isFirstStreamFrame);
+			frame.setQuality(0);
+			isFirstStreamFrame = false;
+
+			videoWriterStream.encodeVideo(0, frame);
+		}
+	}
+	
+	public void startRecordingStream(File videoFile) {
+		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
+		
+		int width = (int)dsize.width;
+		int height = (int)dsize.height;
+			
+		
+		videoWriterStream = ToolFactory.makeWriter(videoFile.getName());
+		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, width, height);
+		recordingStartTime = System.currentTimeMillis();
+		isFirstStreamFrame = true;
+
+		recordingStream = true;
+	}
+
+	public void stopRecordingStream() {
+		recordingStream = false;
+		videoWriterStream.close();
 	}
 	
 	@SuppressWarnings("unchecked")

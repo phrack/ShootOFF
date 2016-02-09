@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
+import com.shootoff.camera.arenamask.Mask;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
@@ -486,27 +487,33 @@ public class ProjectorArenaController implements CalibrationListener {
 		    @Override
 		    public void run() {
 		    			    	
-                final CountDownLatch latch = new CountDownLatch(1);
+                //final CountDownLatch latch = new CountDownLatch(1);
                 Platform.runLater(new Runnable() {                          
                     @Override
                     public void run() {
+                    	try {
+							arenaMaskManager.sem.acquire();
+						} catch (InterruptedException e) {
+							return;
+						}
                         try{
-                        	bImage = getCanvasManager().getBufferedImage();
+                        	arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(), System.currentTimeMillis());
                         }finally{
-                            latch.countDown();
+                        	arenaMaskManager.sem.release();
                         }
                     }
                 });
-                try {
+                /*try {
 					latch.await();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}                      
-		        arenaMaskManager.insert(bImage, System.currentTimeMillis());
+				} */                     
+		        //arenaMaskManager.insert(bImage, System.currentTimeMillis());
 		    }
 		};
 
-		updateMaskTimer.schedule(newTask, 0, 3);
+		logger.debug("Scheduling updateMask"); 
+		updateMaskTimer.schedule(newTask, 0, 50);
 	}
 }

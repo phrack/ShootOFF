@@ -1,9 +1,29 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2015 phrack
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 package com.shootoff.camera.shotdetection;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,12 +46,13 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	// itself
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
-	public double getColorDifference(BufferedImage frame, int[][] colorDiffMovingAverage) {
+	public double getColorDifference(Mat workingFrame, int[][] colorAngleMovingAverage, int[][] colorChromaMovingAverage) {
 		final ArrayList<Pixel> visited = new ArrayList<Pixel>();
 
-		double diff = 0;
-		double lumDiff = 0;
-
+		double avgSin = 0;
+		double avgCos = 0;
+		int pixelCount = 0;
+		
 		for (Pixel pixel : this) {
 			if (pixel.getConnectedness() < MAXIMUM_CONNECTEDNESS) {
 				for (int h = -1; h <= 1; h++)
@@ -41,46 +62,63 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 						int rx = pixel.x + w;
 						int ry = pixel.y + h;
 
-						if (rx < 0 || ry < 0 || rx >= frame.getWidth() || ry >= frame.getHeight()) continue;
+						if (rx < 0 || ry < 0 || rx >= workingFrame.cols() || ry >= workingFrame.rows()) continue;
 
 						Pixel nearPoint = new Pixel(rx, ry);
 						if (!visited.contains(nearPoint) && !this.contains(nearPoint)) {
 
-							java.awt.Color npColor = new java.awt.Color(frame.getRGB(rx, ry));
+							double npColor = (workingFrame.get(ry, rx)[0] * (Math.PI/90.0));
+							int npSaturation = (int) workingFrame.get(ry,rx)[1];
+							int npLum = (int) workingFrame.get(ry,rx)[2];
+							double npChroma = (((double)npSaturation/255.0)*((double)npLum/255.0));
+							
+							double cAMARadians = colorAngleMovingAverage[rx][ry] * (Math.PI/180);
+							
+							double sin = (((npChroma * Math.sin(npColor) * 3.0 + (double)colorChromaMovingAverage[rx][ry]/255.0 * Math.sin(cAMARadians * 1.0))) / 4.0);
+							double cos = (((npChroma * Math.cos(npColor) * 3.0 + (double)colorChromaMovingAverage[rx][ry]/255.0 * Math.cos(cAMARadians * 1.0))) / 4.0);
 
-							double rcd = pixel.redColorDistance(npColor);
-							double gcd = pixel.greenColorDistance(npColor);
-							diff += (rcd - gcd);
-							lumDiff += colorDiffMovingAverage[rx][ry];
-
+							logger.warn("{} {} np {} {} {} {} - {} {} - {} {}", rx, ry, npColor, npSaturation, npLum, npChroma, colorChromaMovingAverage[rx][ry]/255.0, cAMARadians, sin, cos);
+							
+							avgSin += sin;
+							avgCos += cos;
+							pixelCount++;
+							
 							visited.add(nearPoint);
 
 							if (logger.isTraceEnabled())
-								logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, (rcd - gcd),
-									colorDiffMovingAverage[rx][ry]);
+								logger.trace("Visiting pixel {} {} - {} - {}", rx, ry, npColor,
+										cAMARadians, colorChromaMovingAverage[rx][ry]);
 						}
 					}
 			}
 		}
+		
+		double resultAngle = Math.atan2(avgSin/(double)pixelCount, avgCos/(double)pixelCount);
+		resultAngle = (resultAngle / Math.PI*180) + (resultAngle > 0 ? 0 : 360);
+		
+		logger.warn("Done visiting - {} - {} {} - {}", pixelCount, avgSin, avgCos, resultAngle);
 
-		logger.trace("Done visiting - {}", diff - lumDiff);
-
-		return diff - lumDiff;
+		//red
+		if (resultAngle < 70 || resultAngle > 240)
+			return -1;
+		//green
+		else
+			return 1;
 	}
 
-	public Optional<javafx.scene.paint.Color> getColorJavafx(BufferedImage frame, int[][] colorDiffMovingAverage) {
-		final double colorDist = getColorDifference(frame, colorDiffMovingAverage);
+	public Optional<javafx.scene.paint.Color> getColorJavafx(Mat workingFrame, int[][] colorDiffMovingAverage, int[][] colorChromaMovingAverage) {
+		final double colorDist = getColorDifference(workingFrame, colorDiffMovingAverage, colorChromaMovingAverage);
 		
-		double colorThreshold = (frame.getHeight() * frame.getWidth() * COLOR_THRESHOLD_PER_PIXEL);
+		double colorThreshold = (workingFrame.cols() * workingFrame.rows() * COLOR_THRESHOLD_PER_PIXEL);
 
-		if (logger.isDebugEnabled())
-			logger.debug("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
+		//if (logger.isDebugEnabled())
+			logger.warn("getcolorjavafx {} {} - {} - {}", centerPixelX, centerPixelY, colorDist, (colorDist < 0));
 		
 		
 
-		if (Math.abs(colorDist) < colorThreshold) {
-			return Optional.empty();
-		} else if (colorDist < 0) {
+		//if (Math.abs(colorDist) < colorThreshold) {
+		//	return Optional.empty();
+		if (colorDist < 0) {
 			return Optional.of(javafx.scene.paint.Color.RED);
 		} else {
 			return Optional.of(javafx.scene.paint.Color.GREEN);

@@ -1,3 +1,22 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 package com.shootoff.camera.arenamask;
 
 import java.awt.image.BufferedImage;
@@ -12,7 +31,7 @@ import org.opencv.imgproc.Imgproc;
 import com.shootoff.camera.Camera;
 
 public class Mask {
-	public final BufferedImage bImage;
+	public BufferedImage bImage;
 	public Mat mask;
 	public final long timestamp;
 	
@@ -32,7 +51,7 @@ public class Mask {
 		Mat src = Camera.bufferedImageToMat(bImage);	
 		Imgproc.resize(src, mask, targetSize);
 		
-		
+		bImage = Camera.matToBufferedImage(mask);
 		
 		int dilation_size = 5;
 		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*dilation_size + 1, 2*dilation_size+1));
@@ -60,6 +79,9 @@ public class Mask {
 		
 		Mat src = Camera.bufferedImageToMat(bImage);	
 		Imgproc.resize(src, mask, targetSize);
+		
+		bImage = Camera.matToBufferedImage(mask);
+		
 		Imgproc.cvtColor(mask, mask, Imgproc.COLOR_BGR2HSV);
 		
 		

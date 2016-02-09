@@ -108,9 +108,10 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 440.9, 350.7, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 373.5, 390.1, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 354.5, 387.6, 0, 2));
-		optionalShots.add(new Shot(Color.GREEN, 444.34, 330.75, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 444.3, 330.8, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 435.2, 391.5, 0, 2));
 
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
 	}
 	
 	@Test
@@ -127,7 +128,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 268.0, 181.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 330.1, 152.0, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 325.4, 162.5, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 261.7, 119.4, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 268.1, 119.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 328.7, 155.5, 0, 2));
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
