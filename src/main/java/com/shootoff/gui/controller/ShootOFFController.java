@@ -159,38 +159,7 @@ public class ShootOFFController
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_256x256.png")));
 
 		shootOFFStage.setOnCloseRequest((value) -> {
-			camerasSupervisor.closeAll();
-			pluginEngine.stopWatching();
-
-			if (config.getExercise().isPresent()) config.getExercise().get().destroy();
-
-			if (arenaController != null) {
-				arenaController.getCanvasManager().close();
-				arenaController.close();
-			}
-
-			for (Stage streamDebuggerStage : streamDebuggerStages) {
-				streamDebuggerStage.close();
-			}
-
-			if (config.getSessionRecorder().isPresent()) {
-				toggleSessionRecordingMenuItem.fire();
-			}
-
-			if (showSessionViewerMenuItem.isDisable()) {
-				sessionViewerStage.close();
-			}
-
-			TimerPool.close();
-			GlobalExecutorPool.getPool().shutdownNow();
-
-			if (!config.getVideoPlayers().isEmpty()) {
-				for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
-					videoPlayer.getStage().close();
-				}
-			}
-
-			if (!config.inDebugMode()) Main.forceClose(0);
+			close();
 		});
 
 		if (config.getWebcams().isEmpty()) {
@@ -313,6 +282,41 @@ public class ShootOFFController
 		shotTimerTable.getColumns().add(laserCol);
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+	}
+	
+	private void close() {
+		shootOFFStage.close();
+		camerasSupervisor.closeAll();
+		
+		if (config.getExercise().isPresent()) config.getExercise().get().destroy();
+
+		if (arenaController != null) {
+			arenaController.getCanvasManager().close();
+			arenaController.close();
+		}
+
+		for (Stage streamDebuggerStage : streamDebuggerStages) {
+			streamDebuggerStage.close();
+		}
+
+		if (config.getSessionRecorder().isPresent()) {
+			toggleSessionRecordingMenuItem.fire();
+		}
+
+		if (showSessionViewerMenuItem.isDisable()) {
+			sessionViewerStage.close();
+		}
+
+		TimerPool.close();
+		GlobalExecutorPool.getPool().shutdownNow();
+
+		if (!config.getVideoPlayers().isEmpty()) {
+			for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
+				videoPlayer.getStage().close();
+			}
+		}
+
+		if (!config.inDebugMode()) Main.forceClose(0);
 	}
 
 	@Override
@@ -904,8 +908,7 @@ public class ShootOFFController
 
 	@FXML
 	public void exitMenuClicked(ActionEvent event) {
-		camerasSupervisor.setStreamingAll(false);
-		shootOFFStage.close();
+		close();
 	}
 
 	@FXML
