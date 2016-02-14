@@ -35,7 +35,7 @@ public class ParIntervalController extends DelayedStartIntervalController {
 		parTextField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (!newValue.matches("[0-9]*\\.?[0-9]+")) {
+				if (!newValue.matches("^\\d*\\.?\\d*$")) {
 					parTextField.setText(oldValue);
 					parTextField.positionCaret(parTextField.getLength());
 				}
