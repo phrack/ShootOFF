@@ -145,9 +145,9 @@ public class PixelClusterManager {
 					
 					
 					final int connectedness = nextPixel.getConnectedness();
-					if (logger.isTraceEnabled()) {
+					/*if (logger.isTraceEnabled()) {
 						logger.trace("Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y, connectedness);
-					}
+					}*/
 					averageX += nextPixel.x * connectedness;
 					averageY += nextPixel.y * connectedness;
 
@@ -157,7 +157,7 @@ public class PixelClusterManager {
 				}
 
 			}
-			
+
 			int clustersize = cluster.size();
 
 			if (clustersize < shotDetectionManager.getMinimumShotDimension()) continue;

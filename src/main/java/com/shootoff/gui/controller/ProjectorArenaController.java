@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;

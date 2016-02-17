@@ -112,7 +112,6 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 432.6, 74.4, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 293.4, 79.0, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 131.5, 72.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 131.7, 174.8, 0, 2));
@@ -122,7 +121,11 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 289.7, 296.1, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 119.1, 287.5, 0, 2));
 		
-		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), false);
+		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(Color.GREEN, 432.6, 74.4, 0, 2));
+		optionalShots.add(new Shot(Color.RED, 432.6, 74.4, 0, 2));
+		
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 	
 	
@@ -135,13 +138,13 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 440.5, 90.0, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 290.7, 91.6, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 140.4, 94.4, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 129.3, 193.0, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 290.2, 191.7, 0, 2));
 
 		requiredShots.add(new Shot(Color.RED, 437.5, 299.0, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 137.4, 293.9, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(Color.RED, 129.3, 193.0, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 288.4, 299.2, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 448.7, 200.7, 0, 2));
 		

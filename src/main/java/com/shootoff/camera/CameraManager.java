@@ -33,7 +33,6 @@ import javafx.geometry.Bounds;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -620,6 +619,7 @@ public class CameraManager {
 		
 		private BufferedImage processFrame(BufferedImage currentFrame) {
 			frameCount++;
+		
 			
 			if (autoCalibrationEnabled) {
 				acm.processFrame(currentFrame);
