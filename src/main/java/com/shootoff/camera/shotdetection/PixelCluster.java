@@ -56,7 +56,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 			if (pixel.getConnectedness() < MAXIMUM_CONNECTEDNESS) {
 				for (int h = -1; h <= 1; h++)
 					for (int w = -1; w <= 1; w++) {
-						//if (h == 0 && w == 0) continue;
+						if (h == 0 && w == 0) continue;
 
 						int rx = pixel.x + w;
 						int ry = pixel.y + h;
@@ -65,8 +65,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 
 						Pixel nearPoint = new Pixel(rx, ry);
 						
-						// && !this.contains(nearPoint)
-						if (!visited.contains(nearPoint)) {
+						if (!visited.contains(nearPoint) && !this.contains(nearPoint)) {
 							
 							byte[] np = { 0, 0, 0 };
 							workingFrame.get(ry, rx, np);
