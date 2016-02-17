@@ -162,7 +162,7 @@ public class ParRandomShot extends ParForScore {
 
 	private void pickSubtarget() {
 		if (foundTarget) {
-			currentSubtarget = rng.nextInt(subtargets.size() - 1);
+			currentSubtarget = rng.nextInt(subtargets.size());
 		}
 	}
 
