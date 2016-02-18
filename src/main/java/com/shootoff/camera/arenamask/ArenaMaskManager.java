@@ -51,7 +51,7 @@ public class ArenaMaskManager implements Runnable {
 	
 	private final static int LUM_MA_LENGTH = 2;
 	
-	private double avgLums = 0;
+	private int avgLums = 0;
 	
 	public volatile Mask maskFromArena = null;
 	
@@ -92,11 +92,11 @@ public class ArenaMaskManager implements Runnable {
 				}
 				
 				
-				Mat nextMat = nextMask.getSplitMask(dsize);
+				Mat nextMat = nextMask.getLumMask(dsize);
 				
 				recordMask(nextMask);
 				
-				double nextMaskAvgLum = nextMask.getAvgMaskLum();
+				int nextMaskAvgLum = nextMask.getAvgMaskLum();
 				
 				maskFromArena = null;
 				
@@ -111,17 +111,21 @@ public class ArenaMaskManager implements Runnable {
 				{
 					for (int x = 0; x < nextMat.cols(); x++)
 					{
-						double[] curMask = mask.get(y,x);
+						byte[] maskpx = { 0 };
+						mask.get(y,x, maskpx);
 						
-						double newLum = nextMat.get(y,x)[0] * (avgLums/nextMaskAvgLum);
+						byte[] nextmatpx = { 0 };
+						nextMat.get(y, x, nextmatpx);
+						
+						int newLum = nextmatpx[0] * (avgLums/nextMaskAvgLum);
 						
 						
-						curMask[0] = ((curMask[0] * (LUM_MA_LENGTH-1)) + newLum) / LUM_MA_LENGTH;
+						maskpx[0] = (byte) ((byte)((maskpx[0] * (LUM_MA_LENGTH-1)) + newLum) / LUM_MA_LENGTH);
 					
 						//if (x==320&&y==240)
 						//	logger.warn("pixel {} {} - {} {} {}", x, y, mask.get(y,x)[0], newLum, curMask[0]);
 
-						mask.put(y, x, curMask);
+						mask.put(y, x, maskpx);
 						
 					
 					}
@@ -258,7 +262,7 @@ public class ArenaMaskManager implements Runnable {
 	}
 
 
-	public void updateAvgLums(double lumsMovingAverageAcrossFrame, long currentFrameTimestamp) {
+	public void updateAvgLums(int lumsMovingAverageAcrossFrame, long currentFrameTimestamp) {
 		avgLums = lumsMovingAverageAcrossFrame;
 	}
 

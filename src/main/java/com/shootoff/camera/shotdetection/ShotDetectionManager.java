@@ -154,11 +154,6 @@ public final class ShotDetectionManager {
 		int currentH = pixel[0] & 0xFF;
 		int currentS = pixel[1] & 0xFF;
 		int currentV = pixel[2] & 0xFF;
-		int currentChroma = 
-				(currentS * FMath.TWOFIFTYFIVE_TO_HALF +
-				currentV * FMath.TWOFIFTYFIVE_TO_HALF
-				);
-
 		
 		int currentLum = (255-currentS) * currentV;
 		

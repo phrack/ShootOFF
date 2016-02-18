@@ -633,7 +633,7 @@ public class CameraManager {
 				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(), (int) projectionBounds.get().getMaxY(),
 							(int) projectionBounds.get().getMinX(), (int) projectionBounds.get().getMaxX());
 				
-				curFrameMask = new Mat((int)projectionBounds.get().getHeight(), (int)projectionBounds.get().getWidth(), CvType.CV_8UC1);
+				//curFrameMask = new Mat((int)projectionBounds.get().getHeight(), (int)projectionBounds.get().getWidth(), CvType.CV_8UC1);
 				
 				if (recordingCalibratedArea) {
 					BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame), BufferedImage.TYPE_3BYTE_BGR);
@@ -659,18 +659,21 @@ public class CameraManager {
 				{
 					for (int x = 0; x < submatFrame.cols(); x++)
 					{
-						double[] px = submatFrame.get(y, x);
-
-						lumsCurrentAcrossFrame += px[2];
+						byte[] px = {0, 0, 0};
+						submatFrame.get(y, x, px);
+						int matS = px[1] & 0xFF;
+						int matV = px[2] & 0xFF;
 						
-						//if (px[2] < mask.get(y, x)[0]+25)
-						//{
-						if (px[2] > mask.get(y,x)[0])
+						int curLum = ((255-matS)*matV);
+
+						lumsCurrentAcrossFrame += curLum;
+						
+						if (curLum > mask.get(y,x)[0])
 						{
-							//px[2] = mask.get(y,x)[0];
+							px[2] = (byte) (.8*px[2]);
 						}
 							submatFrame.put(y,x,px);
-							curFrameMask.put(y, x, px[2]);
+							//curFrameMask.put(y, x, px[2]);
 						//}
 					}
 				}

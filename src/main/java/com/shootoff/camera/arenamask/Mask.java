@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -65,37 +66,43 @@ public class Mask {
 		return mask;
 	}
 	
-	private double avgMaskLum = 0;
-	public double getAvgMaskLum()
+	private int avgMaskLum = 0;
+	public int getAvgMaskLum()
 	{
 		return avgMaskLum;
 	}
 	
-	public Mat getSplitMask(Size targetSize)
+	public Mat getLumMask(Size targetSize)
 	{
 		// Indicates it is already initialized
-		if (mask.rows() > 0)
+		if (mask != null && mask.rows() > 0)
 			return mask;
 		
+		mask = new Mat((int)targetSize.height, (int)targetSize.width, CvType.CV_8UC1);
+		
 		Mat src = Camera.bufferedImageToMat(bImage);	
-		Imgproc.resize(src, mask, targetSize);
+		Imgproc.resize(src, src, targetSize);
 		
 		bImage = Camera.matToBufferedImage(mask);
 		
-		Imgproc.cvtColor(mask, mask, Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
 		
 		
-		List<Mat> maskchannels = new ArrayList<Mat>();
-		Core.split(mask, maskchannels );
-		
-		mask = maskchannels.get(2);
-		
-		
-		for (int y = 0; y < mask.rows(); y++)
+		for (int y = 0; y < src.rows(); y++)
 		{
-			for (int x = 0; x < mask.cols(); x++)
+			for (int x = 0; x < src.cols(); x++)
 			{
-				avgMaskLum += mask.get(y, x)[0];
+				byte[] px = {0, 0, 0};
+				src.get(y, x, px);
+				int pxS = px[1] & 0xFF;
+				int pxV = px[2] & 0xFF;
+				
+				int pxLum = ((255-pxS)*pxV);
+				
+				avgMaskLum += pxLum;
+				
+				byte[] dstLum = { (byte) pxLum };
+				mask.put(y, x, dstLum);
 			}
 		}
 		
