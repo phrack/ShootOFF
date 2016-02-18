@@ -1310,6 +1310,10 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		MenuItem addProjectorTargetItem = new MenuItem(targetName);
 		addProjectorTargetItem.setMnemonicParsing(false);
+		
+		addProjectorTargetItem.setOnAction((e) -> {
+			arenaController.getCanvasManager().addTarget(path);
+		});
 
 		MenuItem editTargetItem = new MenuItem(targetName);
 		editTargetItem.setMnemonicParsing(false);
