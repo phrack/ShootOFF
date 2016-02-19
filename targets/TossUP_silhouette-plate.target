@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="0.000000" y="0.000000" file="targets/silhouette-plate.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_1.wav)" />
+		<tag name="points" value="6" />
+		<tag name="name" value="TossUP_silhouette-plate.target" />
+	</image>
+</target>

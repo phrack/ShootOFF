@@ -39,4 +39,12 @@ public interface TargetRegion {
 	public Map<String, String> getAllTags();
 
 	public void setTags(Map<String, String> newTags);
+
+	public int getRegionImpactX();
+
+	public int getRegionImpactY();
+	
+	public void setRegionImpactX(int newImpact);
+	
+	public void setRegionImpactY(int newImpact);
 }

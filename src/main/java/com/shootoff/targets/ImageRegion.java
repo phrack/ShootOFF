@@ -58,6 +58,28 @@ public class ImageRegion extends ImageView implements TargetRegion {
 		}
 	}
 
+	private int regionImpactX = 0;
+	private int regionImpactY = 0;
+	
+	@Override
+	public void setRegionImpactX(int newImpactX){
+		this.regionImpactX = newImpactX;
+	}
+
+	@Override
+	public void setRegionImpactY(int newImpactY){
+		this.regionImpactY = newImpactY;
+	}
+
+	@Override
+	public int getRegionImpactX(){
+		return this.regionImpactX;
+	}
+	@Override
+	public int getRegionImpactY(){
+		return this.regionImpactY;
+	}
+
 	public boolean onFirstFrame() {
 		if (!animation.isPresent()) {
 			return true;

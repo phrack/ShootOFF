@@ -31,6 +31,27 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 
 		super(centerX, centerY, radiusX, radiusY);
 	}
+	private int regionImpactX = 0;
+	private int regionImpactY = 0;
+	
+	@Override
+	public void setRegionImpactX(int newImpactX){
+		this.regionImpactX = newImpactX;
+	}
+
+	@Override
+	public void setRegionImpactY(int newImpactY){
+		this.regionImpactY = newImpactY;
+	}
+
+	@Override
+	public int getRegionImpactX(){
+		return this.regionImpactX;
+	}
+	@Override
+	public int getRegionImpactY(){
+		return this.regionImpactY;
+	}
 
 	@Override
 	public void changeWidth(double widthDelta) {
@@ -67,4 +88,5 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 		tags.clear();
 		tags.putAll(newTags);
 	}
+
 }
