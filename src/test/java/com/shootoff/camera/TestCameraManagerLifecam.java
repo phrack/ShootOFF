@@ -108,9 +108,10 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 440.9, 350.7, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 373.5, 390.1, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 354.5, 387.6, 0, 2));
-		optionalShots.add(new Shot(Color.GREEN, 444.34, 330.75, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 444.3, 330.8, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 435.2, 391.5, 0, 2));
 
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
 	}
 	
 	@Test
@@ -119,15 +120,14 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 				Optional.empty(), mockManager, config, sectorStatuses);
 		
 		List<Shot> requiredShots = new ArrayList<Shot>();
+		requiredShots.add(new Shot(Color.GREEN, 261.9, 119.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 350.4, 275.5, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 332.6, 308.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 316.6, 284.6, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 266.8, 252.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 324.9, 223.4, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 268.0, 181.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 330.1, 152.0, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 325.4, 162.5, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 261.7, 119.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 328.7, 155.5, 0, 2));
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
@@ -136,7 +136,13 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 268.3, 264.1, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 295.2, 222.7, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 253.5, 192.0, 0, 2));
-		optionalShots.add(new Shot(Color.GREEN, 263.74, 125.41, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 268.0, 181.1, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 268.1, 119.4, 0, 2));
+		
+		// From the plate moving
+		optionalShots.add(new Shot(Color.GREEN, 311.2, 221.1, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 262.9, 123.8, 0, 2));
+		optionalShots.add(new Shot(Color.GREEN, 258.5, 181.8, 0, 2));
 		
 		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}

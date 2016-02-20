@@ -1,7 +1,5 @@
 package com.shootoff.camera;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -124,6 +122,10 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4", 
 				Optional.empty(), mockManager, config, sectorStatuses);
 
-		assertEquals(0, shots.size());
+		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(Color.RED, 113.8, 11.0, 0, 2));
+
+		
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
 	}
 }

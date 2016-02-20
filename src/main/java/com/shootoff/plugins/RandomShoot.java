@@ -31,6 +31,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.targets.TargetRegion;
 
 public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
@@ -204,11 +205,11 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
 		if (currentSubtargets.isEmpty()) return;
 
-		if (hitRegion.isPresent()) {
-			String subtargetValue = hitRegion.get().getTag("subtarget");
+		if (hit.isPresent()) {
+			String subtargetValue = hit.get().getHitRegion().getTag("subtarget");
 			if (subtargetValue != null && subtargetValue.equals(subtargets.get(currentSubtargets.peek()))) {
 				currentSubtargets.pop();
 			} else {

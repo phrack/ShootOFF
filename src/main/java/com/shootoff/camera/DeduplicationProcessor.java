@@ -30,7 +30,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 24576.0;
 	private double distanceThreshold;
 
-	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 8.0;
+	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 6.0;
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
 
 	private int frameThreshold;

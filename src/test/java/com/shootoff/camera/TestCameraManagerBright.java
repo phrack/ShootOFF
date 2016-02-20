@@ -36,9 +36,7 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 				sectorStatuses[y][x] = true;
 			}
 		}
-		
 	}
-	
 	
 	@Test
 	// BRIGHT

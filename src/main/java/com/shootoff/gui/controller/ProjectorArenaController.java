@@ -18,13 +18,11 @@
 
 package com.shootoff.gui.controller;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
@@ -32,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
+import com.shootoff.camera.arenamask.Mask;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
@@ -476,7 +475,6 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	@SuppressWarnings("unused") private ArenaMaskManager arenaMaskManager = null;
 	private Timer updateMaskTimer = null;
-	private BufferedImage bImage;
 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		this.arenaMaskManager = arenaMaskManager;
@@ -485,30 +483,38 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		updateMaskTimer = new Timer();
 		TimerTask newTask = new TimerTask() {
-			@Override
-			public void run() {
-
-				final CountDownLatch latch = new CountDownLatch(1);
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							bImage = getCanvasManager().getBufferedImage();
-						} finally {
-							latch.countDown();
+		    @Override
+		    public void run() {
+		    			    	
+                //final CountDownLatch latch = new CountDownLatch(1);
+                Platform.runLater(new Runnable() {                          
+                    @Override
+                    public void run() {
+                    	try {
+							arenaMaskManager.sem.acquire();
+						} catch (InterruptedException e) {
+							return;
 						}
-					}
-				});
-				try {
+                        try{
+                        	arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(), System.currentTimeMillis());
+                        }finally{
+                        	arenaMaskManager.sem.release();
+                        }
+                    }
+                });
+                /*try {
+
 					latch.await();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				arenaMaskManager.insert(bImage, System.currentTimeMillis());
-			}
+
+				} */                     
+		        //arenaMaskManager.insert(bImage, System.currentTimeMillis());
+		    }
 		};
 
-		updateMaskTimer.schedule(newTask, 0, 3);
+		logger.debug("Scheduling updateMask"); 
+		updateMaskTimer.schedule(newTask, 0, 50);
 	}
 }

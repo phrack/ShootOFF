@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.ParListener;
 import com.shootoff.targets.TargetRegion;
 
@@ -95,13 +96,14 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 	 * This method merges shotListener for TimedHolsterDrill and ShootForScore.
 	 */
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		super.shotListener(shot, hitRegion);
+	public void shotListener(Shot shot, Optional<Hit> hit) {
+		super.shotListener(shot, hit);
 
-		if (!hitRegion.isPresent() || !countScore) return;
+		if (!hit.isPresent() || !countScore) return;
 
-		if (hitRegion.get().tagExists("points")) {
-			setPoints(shot.getColor(), hitRegion.get().getTag("points"));
+		TargetRegion r = hit.get().getHitRegion();
+		if (r.tagExists("points")) {
+			setPoints(shot.getColor(), r.getTag("points"));
 		}
 	}
 

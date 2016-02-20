@@ -50,9 +50,13 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 431.7, 132.4, 0, 2));
-		optionalShots.add(new Shot(Color.RED, 633.0, 159.0, 0, 4));
 		
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
+		// Bad trigger pull gives this shot a long tail
+		// Different algorithms will have different ideas of where this shot is
+		optionalShots.add(new Shot(Color.RED, 633.0, 159.0, 0, 2));
+		optionalShots.add(new Shot(Color.RED, 626.0, 170.0, 0, 2));
+		
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
 	}
 	
 	@Test
@@ -158,7 +162,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 175, 191.5, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 229.5, 227.5, 0, 2));
 		
-		super.checkShots(collector, shots, requiredShots, optionalShots, false);
+		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
 	
 	@Test

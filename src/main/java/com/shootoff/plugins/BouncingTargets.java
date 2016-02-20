@@ -44,8 +44,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.Target;
-import com.shootoff.targets.TargetRegion;
 
 public class BouncingTargets extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private int shootCount = 4;
@@ -81,11 +81,11 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 		startExercise();
 	}
-	
+
 	private static void setThisSuper(ProjectorTrainingExerciseBase thisSuper) {
 		BouncingTargets.thisSuper = thisSuper;
 	}
-	
+
 	private static void setMaxVelocity(int maxVelocity) {
 		BouncingTargets.maxVelocity = maxVelocity;
 	}
@@ -298,10 +298,10 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (hitRegion.isPresent()) {
-			if (hitRegion.get().tagExists("subtarget")) {
-				switch (hitRegion.get().getTag("subtarget")) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
+		if (hit.isPresent()) {
+			if (hit.get().getHitRegion().tagExists("subtarget")) {
+				switch (hit.get().getHitRegion().getTag("subtarget")) {
 				case "shoot": {
 					score++;
 					super.showTextOnFeed(String.format("Score: %d", score));

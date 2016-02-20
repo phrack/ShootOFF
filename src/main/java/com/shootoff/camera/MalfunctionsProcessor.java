@@ -26,7 +26,7 @@ import com.shootoff.plugins.TrainingExerciseBase;
 
 public class MalfunctionsProcessor implements ShotProcessor {
 	private static boolean useTTS = true;
-	
+
 	private static final Random rand = new Random();
 	private final float prob;
 

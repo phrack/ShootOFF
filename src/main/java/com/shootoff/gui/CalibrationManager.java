@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -288,6 +289,10 @@ public class CalibrationManager {
 			});
 
 		}
+	}
+	
+	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
 
 	public void setFullScreenStatus(boolean fullScreen) {

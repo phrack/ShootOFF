@@ -24,7 +24,7 @@ import java.util.Optional;
 import javafx.scene.Group;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.targets.TargetRegion;
+import com.shootoff.gui.Hit;
 
 public interface TrainingExercise {
 	/**
@@ -49,11 +49,13 @@ public interface TrainingExercise {
 	 * 
 	 * @param shot
 	 *            the detect shot
-	 * @param hitRegion
-	 *            empty if no target was hit, otherwise set to the specific
-	 *            region that was hit
+	 * @param hit
+	 *            empty if no target was hit, otherwise contains the specific
+	 *            target and region in the target that was hit as well as shot
+	 *            coordinates adjusted to be relative to the top left corner of
+	 *            the region that was shot.
 	 */
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion);
+	public void shotListener(Shot shot, Optional<Hit> hit);
 
 	/**
 	 * Called when the reset button is hit or a reset target is shot. The

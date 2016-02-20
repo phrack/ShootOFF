@@ -33,7 +33,7 @@ import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
-import com.shootoff.targets.TargetRegion;
+import com.shootoff.gui.Hit;
 import com.shootoff.util.NamedThreadFactory;
 
 public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
@@ -78,7 +78,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hi) {
 		if (repeatExercise) {
 			setLength();
 		}
@@ -97,8 +97,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		pauseResumeButton.setText(PAUSE);
 		resetValues();
 		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory(
-				"TimedHolsterDrillExercise"));
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+				new NamedThreadFactory("TimedHolsterDrillExercise"));
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 

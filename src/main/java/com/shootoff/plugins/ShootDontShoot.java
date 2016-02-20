@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.scene.Group;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
@@ -173,18 +174,20 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (hitRegion.isPresent()) {
-			if (hitRegion.get().tagExists("subtarget")) {
-				switch (hitRegion.get().getTag("subtarget")) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
+		if (hit.isPresent()) {
+			TargetRegion r = hit.get().getHitRegion();
+
+			if (r.tagExists("subtarget")) {
+				switch (r.getTag("subtarget")) {
 				case "shoot": {
-					removeTarget(shootTargets, hitRegion.get());
+					removeTarget(shootTargets, r);
 					super.setShotTimerColumnText(TARGET_COL_NAME, "shoot");
 				}
 					break;
 
 				case "dont_shoot": {
-					removeTarget(dontShootTargets, hitRegion.get());
+					removeTarget(dontShootTargets, r);
 					badHits++;
 					super.setShotTimerColumnText(TARGET_COL_NAME, "dont_shoot");
 					TextToSpeech.say("Bad shoot!");
