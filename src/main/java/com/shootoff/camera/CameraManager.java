@@ -31,7 +31,6 @@ import java.util.concurrent.ScheduledFuture;
 
 import javafx.geometry.Bounds;
 
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
@@ -866,9 +865,6 @@ public class CameraManager {
 			});
 		} , DIAGNOSTIC_MESSAGE_DURATION);
 	}
-
-	private long frameDelay;
-	
 
 	private void fireAutoCalibration() {
 		acm.reset();

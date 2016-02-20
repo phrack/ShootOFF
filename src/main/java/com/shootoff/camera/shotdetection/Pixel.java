@@ -1,6 +1,5 @@
 package com.shootoff.camera.shotdetection;
 
-import java.awt.Color;
 import java.awt.Point;
 
 public class Pixel extends Point {

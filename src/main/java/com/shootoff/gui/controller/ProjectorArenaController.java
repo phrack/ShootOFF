@@ -18,7 +18,6 @@
 
 package com.shootoff.gui.controller;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
@@ -474,7 +473,6 @@ public class ProjectorArenaController implements CalibrationListener {
 	@SuppressWarnings("unused")
 	private ArenaMaskManager arenaMaskManager = null;
 	private Timer updateMaskTimer = null;
-	private BufferedImage bImage;
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		this.arenaMaskManager = arenaMaskManager;
 		
