@@ -93,7 +93,7 @@ public class CamerasSupervisor {
 		for (final CameraManager manager : managers) {
 			manager.close();
 		}
-		
+
 		allDetecting = false;
 	}
 

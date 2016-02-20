@@ -24,6 +24,12 @@ import org.slf4j.LoggerFactory;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
+/**
+ * This class encapsulates the operations to show a shot of a specific color and
+ * size on a canvas.
+ * 
+ * @author phrack
+ */
 public class Shot {
 	private static final Logger logger = LoggerFactory.getLogger(Shot.class);
 	private final Color color;
@@ -89,7 +95,7 @@ public class Shot {
 		if (logger.isTraceEnabled()) {
 			logger.trace("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
 		}
-		
+
 		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
 		marker.setFill(color);
 

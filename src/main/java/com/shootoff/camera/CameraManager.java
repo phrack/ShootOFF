@@ -76,12 +76,12 @@ public class CameraManager {
 	public static final int DEFAULT_FPS = 30;
 
 	private final static int DIAGNOSTIC_MESSAGE_DURATION = 1000; // ms
-	
+
 	private long lastVideoTimestamp = -1;
 	private long lastCameraTimestamp = -1;
 	private long lastFrameCount = 0;
 	private static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
-	
+
 	private final ShotDetectionManager shotDetectionManager;
 
 	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
@@ -116,8 +116,8 @@ public class CameraManager {
 
 	private int frameCount = 0;
 	private long currentFrameTimestamp = -1;
-	public long getCurrentFrameTimestamp()
-	{
+
+	public long getCurrentFrameTimestamp() {
 		return currentFrameTimestamp;
 	}
 
@@ -128,26 +128,26 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 
 	private ShootOFFController controller;
+
 	public ShootOFFController getController() {
 		return controller;
 	}
-	
+
 	public void setController(ShootOFFController controller) {
 		this.controller = controller;
 	}
-	
+
 	private final ArenaMaskManager arenaMaskManager = new ArenaMaskManager();
 
-
 	private final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
+
 	public DeduplicationProcessor getDeduplicationProcessor() {
 		return deduplicationProcessor;
 	}
 
 	public CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
-		((ch.qos.logback.classic.Logger)
-		logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-		
+		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+
 		this.webcam = Optional.of(webcam);
 		processingLock = null;
 		this.canvasManager = canvas;
@@ -158,22 +158,22 @@ public class CameraManager {
 		initDetector(new Detector());
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
-		
+
 	}
 
 	File videoFile;
+
 	protected CameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config,
 			boolean[][] sectorStatuses, Optional<Bounds> projectionBounds) {
-		((ch.qos.logback.classic.Logger)
-		logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-		
+		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+
 		this.webcam = Optional.empty();
 		this.processingLock = processingLock;
 		this.canvasManager = canvas;
 		this.config = config;
 
 		this.canvasManager.setCameraManager(this);
-		
+
 		setSectorStatuses(sectorStatuses);
 
 		if (projectionBounds.isPresent()) {
@@ -181,24 +181,21 @@ public class CameraManager {
 			setProjectionBounds(projectionBounds.get());
 		}
 
-
-
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 
 		this.videoFile = videoFile;
-		
 
 	}
-	public void processVideo()
-	{
+
+	public void processVideo() {
 		Detector detector = new Detector();
-		
+
 		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 		reader.addListener(detector);
-		
+
 		logger.trace("opening {}", videoFile.getAbsolutePath());
-		
+
 		while (reader.readPacket() == null)
 			do {} while (false);
 	}
@@ -221,7 +218,7 @@ public class CameraManager {
 	public boolean isSectorOn(int x, int y) {
 		return sectorStatuses[y][x];
 	}
-	
+
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
 		this.sectorStatuses = sectorStatuses;
 	}
@@ -251,9 +248,8 @@ public class CameraManager {
 	}
 
 	public void close() {
-		if (arenaMaskManager != null)
-			arenaMaskManager.isStreaming = false;
-		
+		if (arenaMaskManager != null) arenaMaskManager.isStreaming = false;
+
 		getCanvasManager().close();
 		setDetecting(false);
 		setStreaming(false);
@@ -261,7 +257,7 @@ public class CameraManager {
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		TimerPool.cancelTimer(motionDiagnosticFuture);
-		
+
 		if (recordingCalibratedArea) stopRecordingCalibratedArea();
 	}
 
@@ -431,30 +427,27 @@ public class CameraManager {
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
-	
-	
-	/*private Mat getArenaMask(Bounds bounds, long timestamp)
-	{
-		Size dsize = new Size(bounds.getWidth(),bounds.getHeight());
-		
-		return arenaMaskManager.getMaskForTimestamp(dsize, timestamp);
-	}
-	
-	public Mat getMaskForCurrentFrame()
-	{
-		long maskTime = getCurrentFrameTimestamp() - frameDelay;
-		
-		Mat mask = getArenaMask(projectionBounds.get(), maskTime);
-		
-		return mask;
-	}*/
-	
+	/*
+	 * private Mat getArenaMask(Bounds bounds, long timestamp) { Size dsize =
+	 * new Size(bounds.getWidth(),bounds.getHeight());
+	 * 
+	 * return arenaMaskManager.getMaskForTimestamp(dsize, timestamp); }
+	 * 
+	 * public Mat getMaskForCurrentFrame() { long maskTime =
+	 * getCurrentFrameTimestamp() - frameDelay;
+	 * 
+	 * Mat mask = getArenaMask(projectionBounds.get(), maskTime);
+	 * 
+	 * return mask; }
+	 */
+
 	public Mat curFrameMask = null;
-	
+
 	private IMediaWriter videoWriterCalibratedArea;
 	private long recordingCalibratedAreaStartTime;
 	private boolean isFirstCalibratedAreaFrame;
 	private boolean recordingCalibratedArea;
+
 	public void startRecordingCalibratedArea(File videoFile, int width, int height) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
 		videoWriterCalibratedArea = ToolFactory.makeWriter(videoFile.getName());
@@ -481,12 +474,14 @@ public class CameraManager {
 					webcam.get().open();
 
 					Dimension openDimension = webcam.get().getViewSize();
-					
-					if ((int)openDimension.getWidth() != getFeedWidth() || (int)openDimension.getHeight() != getFeedHeight())
-					{
-						logger.warn("Camera dimension differs from requested dimensions, requested {} {} actual {} {}", getFeedWidth(), getFeedHeight(), (int)openDimension.getWidth(), (int)openDimension.getHeight());
+
+					if ((int) openDimension.getWidth() != getFeedWidth()
+							|| (int) openDimension.getHeight() != getFeedHeight()) {
+						logger.warn("Camera dimension differs from requested dimensions, requested {} {} actual {} {}",
+								getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
+								(int) openDimension.getHeight());
 					}
-					
+
 					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 				}
 
@@ -501,18 +496,16 @@ public class CameraManager {
 		 */
 
 		private long initialSystemTimeAtVideoStart = -1;
-		
+
 		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
 			BufferedImage currentFrame = event.getImage();
-		
-			if (initialSystemTimeAtVideoStart == -1)
-				initialSystemTimeAtVideoStart = System.currentTimeMillis();
-			
+
+			if (initialSystemTimeAtVideoStart == -1) initialSystemTimeAtVideoStart = System.currentTimeMillis();
+
 			currentFrameTimestamp = (event.getTimeStamp() / 1000) + initialSystemTimeAtVideoStart;
-			
-			if (getFrameCount() == 0)
-			{
+
+			if (getFrameCount() == 0) {
 				setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
 				shotDetectionManager.reInitializeDimensions();
 			}
@@ -521,7 +514,6 @@ public class CameraManager {
 
 				double estimateFPS = (double) SECOND_IN_MICROSECONDS
 						/ (double) (event.getTimeStamp() - lastVideoTimestamp);
-				
 
 				setFPS(estimateFPS);
 			}
@@ -537,14 +529,13 @@ public class CameraManager {
 				processingLock.notifyAll();
 			}
 		}
-		
+
 		private void streamCameraFrames() {
 			while (isStreaming) {
 				if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
 				BufferedImage currentFrame = webcam.get().getImage();
 				currentFrameTimestamp = System.currentTimeMillis();
-				
 
 				if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 					// Camera appears to have closed
@@ -555,16 +546,13 @@ public class CameraManager {
 					logger.warn("Null frame from camera: {}", webcam.get().getName());
 					continue;
 				}
-				
 
-				if ((int)(getFrameCount() % getFPS()) == 0) {
+				if ((int) (getFrameCount() % getFPS()) == 0) {
 					estimateCameraFPS();
 				}
-				
 
 				currentFrame = processFrame(currentFrame);
-				if (currentFrame == null)
-					continue;
+				if (currentFrame == null) continue;
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();
@@ -602,24 +590,21 @@ public class CameraManager {
 
 					videoWriterStream.encodeVideo(0, frame);
 				}
-				
+
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					canvasManager.updateBackground(currentFrame, projectionBounds);
 				} else {
 					canvasManager.updateBackground(currentFrame, Optional.empty());
 				}
-				
-				
+
 			}
 		}
-		
 
 		private int lumsMaAcrossFrame = 0;
-		
+
 		private BufferedImage processFrame(BufferedImage currentFrame) {
 			frameCount++;
-		
-			
+
 			if (autoCalibrationEnabled) {
 				acm.processFrame(currentFrame);
 				return currentFrame;
@@ -627,15 +612,19 @@ public class CameraManager {
 
 			if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 				currentFrame = acm.undistortFrame(currentFrame);
-				
+
 				final Mat matFrame = Camera.bufferedImageToMat(currentFrame);
-				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(), (int) projectionBounds.get().getMaxY(),
-							(int) projectionBounds.get().getMinX(), (int) projectionBounds.get().getMaxX());
-				
-				//curFrameMask = new Mat((int)projectionBounds.get().getHeight(), (int)projectionBounds.get().getWidth(), CvType.CV_8UC1);
-				
+				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(),
+						(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
+						(int) projectionBounds.get().getMaxX());
+
+				// curFrameMask = new
+				// Mat((int)projectionBounds.get().getHeight(),
+				// (int)projectionBounds.get().getWidth(), CvType.CV_8UC1);
+
 				if (recordingCalibratedArea) {
-					BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame), BufferedImage.TYPE_3BYTE_BGR);
+					BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame),
+							BufferedImage.TYPE_3BYTE_BGR);
 					IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 					IVideoPicture frame = converter.toPicture(image,
@@ -646,78 +635,70 @@ public class CameraManager {
 
 					videoWriterCalibratedArea.encodeVideo(0, frame);
 				}
-				
+
 				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_BGR2HSV);
-				
-				//logger.debug("processFrame time {}", getCurrentFrameTimestamp());
-				
+
+				// logger.debug("processFrame time {}",
+				// getCurrentFrameTimestamp());
+
 				Mat mask = arenaMaskManager.getMask();
-				
+
 				int lumsCurrentAcrossFrame = 0;
-				for (int y = 0; y < submatFrame.rows(); y++)
-				{
-					for (int x = 0; x < submatFrame.cols(); x++)
-					{
-						byte[] px = {0, 0, 0};
+				for (int y = 0; y < submatFrame.rows(); y++) {
+					for (int x = 0; x < submatFrame.cols(); x++) {
+						byte[] px = { 0, 0, 0 };
 						submatFrame.get(y, x, px);
 						int matS = px[1] & 0xFF;
 						int matV = px[2] & 0xFF;
-						
-						int curLum = ((255-matS)*matV);
+
+						int curLum = ((255 - matS) * matV);
 
 						lumsCurrentAcrossFrame += curLum;
-						
-						if (curLum > mask.get(y,x)[0])
-						{
-							px[2] = (byte) (.8*px[2]);
+
+						if (curLum > mask.get(y, x)[0]) {
+							px[2] = (byte) (.8 * px[2]);
 						}
-							submatFrame.put(y,x,px);
-							//curFrameMask.put(y, x, px[2]);
-						//}
+						submatFrame.put(y, x, px);
+						// curFrameMask.put(y, x, px[2]);
+						// }
 					}
 				}
-				
+
 				lumsCurrentAcrossFrame /= submatFrame.rows() * submatFrame.cols();
 				lumsMaAcrossFrame = ((lumsMaAcrossFrame * 4) + lumsCurrentAcrossFrame) / 5;
-				
+
 				arenaMaskManager.updateAvgLums(lumsMaAcrossFrame, getCurrentFrameTimestamp());
 
-				
-				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);				
+				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);
 
-				//currentFrame = Camera.matToBufferedImage(matFrame);
-				
+				// currentFrame = Camera.matToBufferedImage(matFrame);
+
 				if (debuggerListener.isPresent()) {
 					debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
 				}
-				
+
 			}
 
 			Mat matFrame = Camera.bufferedImageToMat(currentFrame);
 			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
 			shotDetectionManager.processFrame(matFrame, isDetecting);
-						
+
 			return currentFrame;
 
 		}
-		
-		private void estimateCameraFPS()
-		{
+
+		private void estimateCameraFPS() {
 			if (lastCameraTimestamp > -1) {
 
-				double estimateFPS =  ((double) getFrameCount() - (double) lastFrameCount) / 
-							(
-								((double)System.currentTimeMillis() - (double)lastCameraTimestamp) /
-								1000.0
-							);
-				
-				
+				double estimateFPS = ((double) getFrameCount() - (double) lastFrameCount)
+						/ (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
+
 				setFPS(estimateFPS);
 				logger.trace("fps comparison estimate {} reported {}", estimateFPS, webcam.get().getFPS());
 			}
 			lastCameraTimestamp = System.currentTimeMillis();
 			lastFrameCount = getFrameCount();
-			
+
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateFeedData(getFPS(), Optional.empty());
 			}
@@ -728,7 +709,7 @@ public class CameraManager {
 			if (newFPS < 1.0) {
 				logger.debug("New FPS read from webcam is very low: {}", newFPS);
 			}
-			
+
 			// This just tells us if it's the first FPS estimate
 			if (getFrameCount() > DEFAULT_FPS)
 				webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
@@ -746,8 +727,6 @@ public class CameraManager {
 				showedFPSWarning = true;
 			}
 		}
-
-
 
 		private void showMissingCameraError() {
 			Platform.runLater(() -> {
@@ -794,7 +773,6 @@ public class CameraManager {
 			});
 		}
 	}
-
 
 	private Label brightnessDiagnosticWarning = null;
 
@@ -886,21 +864,22 @@ public class CameraManager {
 					(int) bounds.getWidth(), (int) bounds.getHeight());
 
 			cameraAutoCalibrated = true;
-			
+
 			Platform.runLater(() -> {
 
 				controller.calibrate(bounds, false);
-				
+
 			});
-			
+
 			controller.setArenaMaskManager(arenaMaskManager);
-			
-			arenaMaskManager.start((int)bounds.getWidth(), (int)bounds.getHeight());
-			
-			//if (!recordingStream)
-			//	startRecordingStream(new File("fullFrameStream.mp4"));
-			//if (!recordingCalibratedArea)
-			//	startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int)bounds.getWidth(), (int)bounds.getHeight());
+
+			arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
+
+			// if (!recordingStream)
+			// startRecordingStream(new File("fullFrameStream.mp4"));
+			// if (!recordingCalibratedArea)
+			// startRecordingCalibratedArea(new File("calibratedArea.mp4"),
+			// (int)bounds.getWidth(), (int)bounds.getHeight());
 
 		}
 
@@ -917,16 +896,13 @@ public class CameraManager {
 		autoCalibrationEnabled = false;
 	}
 
-	public void setArenaBackground(String resourceFilename)
-	{
-		if (controller == null)
-		{
+	public void setArenaBackground(String resourceFilename) {
+		if (controller == null) {
 			logger.error("setArenaBackground called when controller is null");
 			return;
 		}
-			
+
 		controller.setArenaBackground(resourceFilename);
 	}
-
 
 }
