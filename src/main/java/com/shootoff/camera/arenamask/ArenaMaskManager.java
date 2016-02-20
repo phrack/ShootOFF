@@ -58,12 +58,15 @@ public class ArenaMaskManager implements Runnable {
 	public Semaphore sem = new Semaphore(1);
 	
 	public volatile boolean isStreaming = true;
+	
+	private boolean recordMask = false;
 
 	@Override
 	public void run() {
 		logger.debug("Starting arenaMaskManager thread");
 		
-		//startRecordingStream(new File("testingArenaMask.mp4"));
+		if (recordMask)
+			startRecordingStream(new File("testingArenaMask.mp4"));
 		
 		while (isStreaming)
 		{	
@@ -78,10 +81,6 @@ public class ArenaMaskManager implements Runnable {
 				continue;
 			}
 			
-			//while (!cBuffer.isEmpty())
-			//{
-				
-				//Mask nextMask = ((Mask)cBuffer.remove());
 				Mask nextMask = maskFromArena;
 				long curDelay = System.currentTimeMillis() - nextMask.timestamp;
 				
@@ -94,7 +93,8 @@ public class ArenaMaskManager implements Runnable {
 				
 				Mat nextMat = nextMask.getLumMask(dsize);
 				
-				recordMask(nextMask);
+				if (recordMask)
+					recordMask(nextMask);
 				
 				int nextMaskAvgLum = nextMask.getAvgMaskLum();
 				
@@ -111,31 +111,29 @@ public class ArenaMaskManager implements Runnable {
 				{
 					for (int x = 0; x < nextMat.cols(); x++)
 					{
-						byte[] maskpx = { 0 };
+						int[] maskpx = { 0 };
 						mask.get(y,x, maskpx);
 						
-						byte[] nextmatpx = { 0 };
+						int[] nextmatpx = { 0 };
 						nextMat.get(y, x, nextmatpx);
 						
-						int newLum = nextmatpx[0] * (avgLums/nextMaskAvgLum);
+						int newLum = (int)((double)nextmatpx[0] * (double)((double)avgLums/(double)nextMaskAvgLum));
 						
 						
-						maskpx[0] = (byte) ((byte)((maskpx[0] * (LUM_MA_LENGTH-1)) + newLum) / LUM_MA_LENGTH);
+						maskpx[0] = (((maskpx[0] * (LUM_MA_LENGTH-1)) + newLum) / LUM_MA_LENGTH);
 					
-						//if (x==320&&y==240)
-						//	logger.warn("pixel {} {} - {} {} {}", x, y, mask.get(y,x)[0], newLum, curMask[0]);
+						if (x==200&&y==200)
+							logger.warn("pixel {} {} - {} {} - {} {} {} - {}", x, y, mask.get(y,x)[0], newLum, nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
 
 						mask.put(y, x, maskpx);
 						
 					
 					}
 				}
-			//}		
-				
-
 		}
 		
-		stopRecordingStream();
+		if (recordMask)
+			stopRecordingStream();
 	}
 	
 	
@@ -155,7 +153,7 @@ public class ArenaMaskManager implements Runnable {
 	
 	public void start(int width, int height)
 	{
-		mask = new Mat(height, width, CvType.CV_8UC1);
+		mask = new Mat(height, width, CvType.CV_32S);
 		dsize = new Size(width, height);
 
 		(new Thread(this)).start();
@@ -167,7 +165,7 @@ public class ArenaMaskManager implements Runnable {
 	}
 	
 	
-	private boolean recordingStream = false;
+	private boolean recordingStream = true;
 	private boolean isFirstStreamFrame = true;
 	private IMediaWriter videoWriterStream;
 	private long recordingStartTime;
@@ -212,55 +210,6 @@ public class ArenaMaskManager implements Runnable {
 	{
 		cBuffer.add(new Mask(bImage, timestamp));
 	}
-	
-	public synchronized Mat getMaskForTimestamp(Size dsize, long timestamp)
-	{
-		long delayedTimestamp = timestamp - delay;
-		
-		long peekTimestamp = peekTimestamp();
-
-		if (cBuffer.isEmpty())
-			return null;
-
-		
-		while (peekTimestamp < delayedTimestamp-3)
-		{
-			/*if ((delayedTimestamp%30)==0)
-			{
-				logger.warn("getArenaMask {} remove", peekTimestamp - delayedTimestamp);
-			}*/
-				
-			
-			if (cBuffer.isEmpty())
-				return null;
-			cBuffer.remove();
-			peekTimestamp = peekTimestamp();
-		}
-		
-		/*if (peekTimestamp > delayedTimestamp)
-		{
-			if ((delayedTimestamp%30)==0)
-			{
-				logger.warn("getArenaMask {} future", peekTimestamp - delayedTimestamp);
-			}
-			return null;
-		}*/
-		/*if ((delayedTimestamp%30)==0)
-		{
-			logger.warn("getArenaMask {} good", peekTimestamp - delayedTimestamp);
-		}*/
-		
-		return ((Mask)cBuffer.get()).getMask(dsize);
-	}
-	
-	private synchronized long peekTimestamp()
-	{
-		if (cBuffer.isEmpty())
-			return -1;
-		
-		return ((Mask)cBuffer.get()).timestamp;
-	}
-
 
 	public void updateAvgLums(int lumsMovingAverageAcrossFrame, long currentFrameTimestamp) {
 		avgLums = lumsMovingAverageAcrossFrame;

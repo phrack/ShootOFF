@@ -146,7 +146,7 @@ public final class ShotDetectionManager {
 
 
 	
-	private Optional<Pixel> updateFilter(byte[] pixel, int x, int y, boolean detectShots) {
+	private Optional<Pixel> updateFilter(byte[] pixel, int mask, int x, int y, boolean detectShots) {
 
 		
 		
@@ -167,9 +167,18 @@ public final class ShotDetectionManager {
 
 		}
 
-		
-		
 		int valueForThreshold = currentLum;
+		
+		if (x==200&&y==200)
+			logger.warn("{} {}", currentLum, mask);
+		
+		if (currentLum < mask*1.2)
+		{
+			valueForThreshold = 0;
+			byte[] col = {(byte)0, (byte)0, (byte)0};
+			drawOnCurrentFrame(x, y, col);
+		}
+		
 		
 		// TODO: Fix arena masking
 		/*if (cameraManager.curFrameMask != null)
@@ -177,6 +186,8 @@ public final class ShotDetectionManager {
 			valueForThreshold = cameraManager.curFrameMask.get(y,x)[0]; 
 			
 		}*/
+		
+		
 
 		
 		if (!detectShots) result = Optional.empty();
@@ -208,7 +219,7 @@ public final class ShotDetectionManager {
 	}
 
 	// This function ADJUSTS X AND Y FOR LIMITING DETECTION BOUNDS
-	private void drawOnCurrentFrame(int x, int y, double[] color) {
+	private void drawOnCurrentFrame(int x, int y, byte[] color) {
 		int drawX = x;
 		int drawY = y;
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
@@ -264,7 +275,7 @@ public final class ShotDetectionManager {
 	}
 
 
-	public void processFrame(Mat frame, boolean detectShots) {
+	public void processFrame(Mat frame, Mat mask, boolean detectShots) {
 		movingAveragePeriod = Math.max((int)(cameraManager.getFPS()/5.0),INIT_FRAME_COUNT);
 		
 		// This is the FULL, ORIGINAL FRAME passed from CameraManager
@@ -289,7 +300,7 @@ public final class ShotDetectionManager {
 		brightPixels.clear();
 
 
-		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame,
+		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame, mask,
 				(detectShots && filtersInitialized));
 		
 		int thresholdPixelsSize = thresholdPixels.size();
@@ -337,7 +348,7 @@ public final class ShotDetectionManager {
 			else if (isExcessiveMotion(thresholdPixelsSize)) {
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 				
-				double[] blue = {255, 0, 0};
+				byte[] blue = {(byte)100, (byte)255, (byte)255};
 				
 				for (Pixel pixel : thresholdPixels) {
 					drawOnCurrentFrame(pixel.x, pixel.y, blue);
@@ -348,7 +359,7 @@ public final class ShotDetectionManager {
 			{
 				// Make the feed pixels red so the user can easily see what the
 				// problem pixels are
-				double[] red = {0, 0, 255};
+				byte[] red = {0, (byte)255, (byte)255};
 				
 				for (Pixel pixel : brightPixels) {
 						drawOnCurrentFrame(pixel.x, pixel.y, red);
@@ -414,7 +425,7 @@ public final class ShotDetectionManager {
 		return false;
 	}
 
-	private List<Pixel> findThresholdPixelsAndUpdateFilter(Mat workingFrame, boolean detectShots) {
+	private List<Pixel> findThresholdPixelsAndUpdateFilter(Mat workingFrame, Mat mask, boolean detectShots) {
 		final int subWidth = workingFrame.cols() / SECTOR_COLUMNS;
 		final int subHeight = workingFrame.rows() / SECTOR_ROWS;
 
@@ -451,7 +462,13 @@ public final class ShotDetectionManager {
 						
 						byte[] pixelChannels = { workingFramePrimitive[(yOffset+x)*channels], workingFramePrimitive[(yOffset+x)*channels+1], workingFramePrimitive[(yOffset+x)*channels+2] };
 						
-						Optional<Pixel> pixel = updateFilter(pixelChannels, x, y, detectShots);
+						int[] maskInt = { 0 };
+						if (mask != null)
+						{
+							mask.get(y, x, maskInt);
+						}
+						
+						Optional<Pixel> pixel = updateFilter(pixelChannels, maskInt[0], x, y, detectShots);
 						
 						if (pixel.isPresent())
 								thresholdPixels.add(pixel.get());

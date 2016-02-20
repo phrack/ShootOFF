@@ -363,6 +363,16 @@ public class AutoCalibrationManager {
 
 		return frame;
 	}
+	
+	public Mat undistortFrame(Mat mat) {
+		if (!isCalibrated) {
+			logger.warn("undistortFrame called when isCalibrated is false");
+			return mat;
+		}
+
+		return warpPerspective(mat);
+	}
+
 
 	RotatedRect boundsRect;
 

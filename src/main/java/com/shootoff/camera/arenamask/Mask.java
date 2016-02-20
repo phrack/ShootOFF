@@ -28,42 +28,25 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Camera;
+import com.shootoff.camera.shotdetection.PixelCluster;
 
 public class Mask {
 	public BufferedImage bImage;
 	public Mat mask;
 	public final long timestamp;
 	
+	private static final Logger logger = LoggerFactory.getLogger(Mask.class);
+
+	
 	public Mask(BufferedImage bImage, long timestamp)
 	{
 		this.bImage = bImage;
 		this.timestamp = timestamp;
 		this.mask = new Mat();
-	}
-	
-	public Mat getMask(Size targetSize)
-	{
-		// Indicates it is already initialized
-		if (mask.rows() > 0)
-			return mask;
-		
-		Mat src = Camera.bufferedImageToMat(bImage);	
-		Imgproc.resize(src, mask, targetSize);
-		
-		bImage = Camera.matToBufferedImage(mask);
-		
-		int dilation_size = 5;
-		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*dilation_size + 1, 2*dilation_size+1));
-		Imgproc.dilate(mask, mask, kern);
-
-		Imgproc.blur(mask, mask, new Size(9,9));
-		
-		
-		//Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);	
-		
-		return mask;
 	}
 	
 	private int avgMaskLum = 0;
@@ -78,16 +61,16 @@ public class Mask {
 		if (mask != null && mask.rows() > 0)
 			return mask;
 		
-		mask = new Mat((int)targetSize.height, (int)targetSize.width, CvType.CV_8UC1);
+		mask = new Mat((int)targetSize.height, (int)targetSize.width, CvType.CV_32S);
 		
 		Mat src = Camera.bufferedImageToMat(bImage);	
 		Imgproc.resize(src, src, targetSize);
 		
-		bImage = Camera.matToBufferedImage(mask);
+		bImage = Camera.matToBufferedImage(src);
 		
 		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
 		
-		
+		long tmpAvgMaskLum = 0;
 		for (int y = 0; y < src.rows(); y++)
 		{
 			for (int x = 0; x < src.cols(); x++)
@@ -99,18 +82,22 @@ public class Mask {
 				
 				int pxLum = ((255-pxS)*pxV);
 				
-				avgMaskLum += pxLum;
+				tmpAvgMaskLum += pxLum;
 				
-				byte[] dstLum = { (byte) pxLum };
+				int[] dstLum = { pxLum };
+				
+				if (x==200&&y==200)
+					logger.warn("mask {} {} {}", pxS, pxV, dstLum);
+				
 				mask.put(y, x, dstLum);
 			}
 		}
 		
-		avgMaskLum /= mask.rows()*mask.cols();
+		avgMaskLum = (int)(tmpAvgMaskLum / (mask.rows()*mask.cols()));
 		
-		int dilation_size = 5;
+		/*int dilation_size = 5;
 		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*dilation_size + 1, 2*dilation_size+1));
-		Imgproc.dilate(mask, mask, kern);
+		Imgproc.dilate(mask, mask, kern);*/
 
 		Imgproc.blur(mask, mask, new Size(9,9));
 		

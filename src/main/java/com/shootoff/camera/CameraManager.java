@@ -433,28 +433,12 @@ public class CameraManager {
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
 	
-	
-	/*private Mat getArenaMask(Bounds bounds, long timestamp)
-	{
-		Size dsize = new Size(bounds.getWidth(),bounds.getHeight());
-		
-		return arenaMaskManager.getMaskForTimestamp(dsize, timestamp);
-	}
-	
-	public Mat getMaskForCurrentFrame()
-	{
-		long maskTime = getCurrentFrameTimestamp() - frameDelay;
-		
-		Mat mask = getArenaMask(projectionBounds.get(), maskTime);
-		
-		return mask;
-	}*/
-	
 	public Mat curFrameMask = null;
 	
+	private boolean recordCalibratedArea = false;
 	private IMediaWriter videoWriterCalibratedArea;
 	private long recordingCalibratedAreaStartTime;
-	private boolean isFirstCalibratedAreaFrame;
+	private boolean isFirstCalibratedAreaFrame;	
 	private boolean recordingCalibratedArea;
 	public void startRecordingCalibratedArea(File videoFile, int width, int height) {
 		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
@@ -625,17 +609,22 @@ public class CameraManager {
 				acm.processFrame(currentFrame);
 				return currentFrame;
 			}
+			
+			Mat matFrame = Camera.bufferedImageToMat(currentFrame);
+			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
+			
+			Mat mask = null;
 
 			if (cameraAutoCalibrated && projectionBounds.isPresent()) {
-				currentFrame = acm.undistortFrame(currentFrame);
+				matFrame = acm.undistortFrame(matFrame);
 				
-				final Mat matFrame = Camera.bufferedImageToMat(currentFrame);
 				Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(), (int) projectionBounds.get().getMaxY(),
 							(int) projectionBounds.get().getMinX(), (int) projectionBounds.get().getMaxX());
 				
 				//curFrameMask = new Mat((int)projectionBounds.get().getHeight(), (int)projectionBounds.get().getWidth(), CvType.CV_8UC1);
 				
 				if (recordingCalibratedArea) {
+					Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);
 					BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame), BufferedImage.TYPE_3BYTE_BGR);
 					IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
@@ -646,15 +635,14 @@ public class CameraManager {
 					isFirstCalibratedAreaFrame = false;
 
 					videoWriterCalibratedArea.encodeVideo(0, frame);
+					Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_BGR2HSV);
 				}
-				
-				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_BGR2HSV);
-				
+								
 				//logger.debug("processFrame time {}", getCurrentFrameTimestamp());
 				
-				Mat mask = arenaMaskManager.getMask();
+				mask = arenaMaskManager.getMask();
 				
-				int lumsCurrentAcrossFrame = 0;
+				long lumsCurrentAcrossFrame = 0;
 				for (int y = 0; y < submatFrame.rows(); y++)
 				{
 					for (int x = 0; x < submatFrame.cols(); x++)
@@ -668,25 +656,26 @@ public class CameraManager {
 
 						lumsCurrentAcrossFrame += curLum;
 						
-						if (curLum > mask.get(y,x)[0])
+						//byte diff = (byte) (mask.get(y,x)[0]/(255-matS));
+						//px[2] = (byte) (px[2] - diff);
+						
+						//if (x==50&&y==50)
+						//	logger.debug("{} {} - {} {} - {}", matS, matV, mask.get(y,x)[0], mask.get(y,x)[0]/(255-matS), diff);
+						
+						/*if (curLum > mask.get(y,x)[0]-5000)
 						{
 							px[2] = (byte) (.8*px[2]);
-						}
-							submatFrame.put(y,x,px);
-							//curFrameMask.put(y, x, px[2]);
-						//}
+						}*/
+						//submatFrame.put(y,x,px);
 					}
 				}
 				
 				lumsCurrentAcrossFrame /= submatFrame.rows() * submatFrame.cols();
-				lumsMaAcrossFrame = ((lumsMaAcrossFrame * 4) + lumsCurrentAcrossFrame) / 5;
+				lumsMaAcrossFrame = ((lumsMaAcrossFrame * 4) + (int)lumsCurrentAcrossFrame) / 5;
 				
 				arenaMaskManager.updateAvgLums(lumsMaAcrossFrame, getCurrentFrameTimestamp());
 
-				
-				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);				
-
-				//currentFrame = Camera.matToBufferedImage(matFrame);
+				logger.warn("{}", mask.get(200, 200)[0]);
 				
 				if (debuggerListener.isPresent()) {
 					debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
@@ -694,11 +683,11 @@ public class CameraManager {
 				
 			}
 
-			Mat matFrame = Camera.bufferedImageToMat(currentFrame);
-			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
-			shotDetectionManager.processFrame(matFrame, isDetecting);
+			shotDetectionManager.processFrame(matFrame, mask, isDetecting);
 						
-			return currentFrame;
+			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_HSV2BGR);
+
+			return Camera.matToBufferedImage(matFrame);
 
 		}
 		
@@ -903,8 +892,8 @@ public class CameraManager {
 			
 			//if (!recordingStream)
 			//	startRecordingStream(new File("fullFrameStream.mp4"));
-			//if (!recordingCalibratedArea)
-			//	startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int)bounds.getWidth(), (int)bounds.getHeight());
+			if (recordCalibratedArea && !recordingCalibratedArea)
+				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int)bounds.getWidth(), (int)bounds.getHeight());
 
 		}
 
