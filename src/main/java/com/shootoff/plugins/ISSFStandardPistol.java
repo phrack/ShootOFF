@@ -37,6 +37,7 @@ import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
+import com.shootoff.gui.Hit;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
 
@@ -204,13 +205,13 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
 		shotCount++;
 
 		int hitScore = 0;
 
-		if (hitRegion.isPresent()) {
-			TargetRegion r = hitRegion.get();
+		if (hit.isPresent()) {
+			TargetRegion r = hit.get().getHitRegion();
 
 			if (r.tagExists("points")) {
 				hitScore = Integer.parseInt(r.getTag("points"));

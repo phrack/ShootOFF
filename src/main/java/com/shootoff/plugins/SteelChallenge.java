@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.courses.Course;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
@@ -65,7 +66,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		for (Target t : course.getTargets()) {
 			targets.add(t.getTargetGroup());
 		}
-		
+
 		if (checkTargets(targets)) startRound();
 	}
 
@@ -84,12 +85,12 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 			if (hasStopTarget) break;
 		}
-		
+
 		if (!hasStopTarget) {
 			List<File> errorMessages = new ArrayList<File>();
 			errorMessages.add(new File("sounds/voice/shootoff-lay-out-own-course.wav"));
 			errorMessages.add(new File("sounds/voice/shootoff-add-stop-target.wav"));
-			
+
 			TrainingExerciseBase.playSounds(errorMessages);
 		}
 
@@ -163,27 +164,27 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
 		final long elapsedTime = System.currentTimeMillis() - startTime;
 		final String elapsedTimeSeconds;
-		
+
 		if (testing) {
 			elapsedTimeSeconds = "0.00";
 		} else {
 			elapsedTimeSeconds = String.format("%.2f", (double) elapsedTime / (double) 1000);
 		}
-		
+
 		super.setShotTimerColumnText(LENGTH_COL_NAME, elapsedTimeSeconds);
 
-		if (hitRegion.isPresent()) {
-			final TargetRegion r = hitRegion.get();
-			
+		if (hit.isPresent()) {
+			final TargetRegion r = hit.get().getHitRegion();
+
 			// Ignore tagless regions
 			if (r.getAllTags().size() == 0) {
 				super.setShotTimerColumnText(HIT_COL_NAME, "No");
 				return;
 			}
-			
+
 			super.setShotTimerColumnText(HIT_COL_NAME, "Yes");
 
 			final Iterator<Group> it = roundTargets.iterator();
@@ -199,9 +200,9 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 			if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
 				super.pauseShotDetection(true);
-				
+
 				String roundAnnouncement;
-				
+
 				if (roundTargets.size() > 0) {
 					roundAnnouncement = String.format("Your time was %s seconds. You missed %d targets!",
 							elapsedTimeSeconds, roundTargets.size());

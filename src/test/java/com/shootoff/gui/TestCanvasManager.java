@@ -51,14 +51,14 @@ public class TestCanvasManager {
 	
 	@Test
 	public void testCheckHitMiss() {
-		Optional<CanvasManager.Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
+		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
 		
 		assertFalse(h.isPresent());
 	}
 	
 	@Test
 	public void testCheckHitHit() {
-		Optional<CanvasManager.Hit> h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty());
+		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty());
 		
 		assertTrue(h.isPresent());	
 		assertTrue(ipscTarget.getTargetGroup().getChildren().contains(h.get().getHitRegion()));
@@ -67,7 +67,7 @@ public class TestCanvasManager {
 	
 	@Test
 	public void testAddShotMissHitMiss() {
-		Optional<CanvasManager.Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
+		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
 		
 		assertFalse(h.isPresent());
 		

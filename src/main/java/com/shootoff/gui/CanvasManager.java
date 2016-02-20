@@ -91,7 +91,7 @@ public class CanvasManager {
 	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<Label, ScheduledFuture<Void>>();
 	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
 	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
-	
+
 	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
@@ -201,7 +201,7 @@ public class CanvasManager {
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
 			diagnosticFutures.put(diagnosticLabel, chimeFuture);
 		}
-		
+
 		return diagnosticLabel;
 	}
 
@@ -312,13 +312,11 @@ public class CanvasManager {
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g2.drawImage(source, 0, 0, width, height, null);
 		g2.dispose();
-		
-		
+
 		return tmp;
 	}
-	
-	public BufferedImage getBufferedImage()
-	{
+
+	public BufferedImage getBufferedImage() {
 		BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
 		return projectedScene;
 	}
@@ -567,10 +565,7 @@ public class CanvasManager {
 		}
 
 		if (currentExercise.isPresent() && !processedShot) {
-			Optional<TargetRegion> hitRegion = Optional.empty();
-			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
-
-			currentExercise.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hit);
 		}
 	}
 
@@ -585,10 +580,7 @@ public class CanvasManager {
 		}
 
 		if (currentExercise.isPresent()) {
-			Optional<TargetRegion> hitRegion = Optional.empty();
-			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
-
-			currentExercise.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hit);
 			return true;
 		}
 
@@ -600,24 +592,6 @@ public class CanvasManager {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
 		});
-	}
-
-	protected static class Hit {
-		private final Target target;
-		private final TargetRegion hitRegion;
-
-		public Hit(Target target, TargetRegion hitRegion) {
-			this.target = target;
-			this.hitRegion = hitRegion;
-		}
-
-		public Target getTarget() {
-			return target;
-		}
-
-		public TargetRegion getHitRegion() {
-			return hitRegion;
-		}
 	}
 
 	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
@@ -635,6 +609,9 @@ public class CanvasManager {
 
 					Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
+					int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
+					int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+
 					if (nodeBounds.contains(shot.getX(), shot.getY())) {
 						// If we hit an image region on a transparent pixel,
 						// ignore it
@@ -646,13 +623,12 @@ public class CanvasManager {
 							// is transparent
 							Image currentImage = ((ImageRegion) region).getImage();
 
-							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
-							
 							if (adjustedX < 0 || adjustedY < 0) {
-								logger.debug("An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
-										+ " nodeBounds.getMin ({}, {})", adjustedX, adjustedY, shot.getX(), shot.getY(),
-										nodeBounds.getMaxX(), nodeBounds.getMinY());
+								logger.debug(
+										"An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
+												+ " nodeBounds.getMin ({}, {})",
+										adjustedX, adjustedY, shot.getX(), shot.getY(), nodeBounds.getMaxX(),
+										nodeBounds.getMinY());
 								return Optional.empty();
 							}
 
@@ -725,7 +701,7 @@ public class CanvasManager {
 									videoString);
 						}
 
-						return Optional.of(new Hit(target, (TargetRegion) node));
+						return Optional.of(new Hit(target, (TargetRegion) node, adjustedX, adjustedY));
 					}
 				}
 			}
@@ -818,7 +794,7 @@ public class CanvasManager {
 
 		targets.remove(target);
 	}
-	
+
 	public void clearTargets() {
 		for (Target t : new ArrayList<Target>(targets)) {
 			removeTarget(t);
