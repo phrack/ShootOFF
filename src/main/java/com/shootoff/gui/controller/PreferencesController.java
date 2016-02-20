@@ -82,6 +82,8 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 
 	public void setConfig(Configuration config, CameraConfigListener cameraConfigListener) throws IOException {
+		ImageCell.createImageCache(Camera.getWebcams());
+		
 		preferencesStage = (Stage) markerRadiusSlider.getScene().getWindow();
 
 		this.cameraConfigListener = cameraConfigListener;

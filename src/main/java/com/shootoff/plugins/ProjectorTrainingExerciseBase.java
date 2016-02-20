@@ -23,12 +23,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
@@ -39,6 +48,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaController arenaController;
 	private final List<Target> targets = new ArrayList<Target>();
+	private final Label exerciseLabel = new Label();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
@@ -54,6 +64,9 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaController = arenaController;
+		exerciseLabel.setTextFill(Color.WHITE);
+		Platform.runLater(
+				() -> arenaController.getCanvasManager().getCanvasGroup().getChildren().add(exerciseLabel));
 	}
 
 	// For unit tests
@@ -90,11 +103,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
 
-        if (newTarget.isPresent()) {
-            newTarget.get().setPosition(x, y);
-            targets.add(newTarget.get());
-           
-        }
+		if (newTarget.isPresent()) {
+			newTarget.get().setPosition(x, y);
+			targets.add(newTarget.get());
+
+		}
 
 		return newTarget;
 	}
@@ -112,6 +125,58 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		return arenaController.getHeight();
 	}
 
+	@Override
+	public void showTextOnFeed(String message) {
+		super.showTextOnFeed(message);
+		Platform.runLater(() -> exerciseLabel.setText(message));
+	}
+
+	/**
+	 * Show a message on all webcam feeds, but optionally do not show the
+	 * message on the arena itself.
+	 * 
+	 * @param message
+	 *            the message to show
+	 * @param showOnArena
+	 *            <tt>false</tt> if the message should not show on the arena
+	 */
+	public void showTextOnFeed(String message, boolean showOnArena) {
+		if (showOnArena) {
+			showTextOnFeed(message);
+		} else {
+			super.showTextOnFeed(message);
+		}
+	}
+
+	/**
+	 * Show a message on all webcam feeds and the arena, but customize the
+	 * location, font, and colors used to display the message.
+	 * 
+	 * @param message
+	 *            the message to show
+	 * @param x
+	 *            the x coordinate of the top left of the message
+	 * @param y
+	 *            the y coordinate of the top left of the message
+	 * @param backgroundColor
+	 *            the background color for the message
+	 * @param textColor
+	 *            the color of the letters in the message
+	 * @param font
+	 *            the font to use to display the message
+	 */
+	public void showTextOnFeed(String message, int x, int y, Color backgroundColor, Color textColor, Font font) {
+		showTextOnFeed(message);
+		Platform.runLater(() -> {
+			exerciseLabel.setLayoutX(x);
+			exerciseLabel.setLayoutY(y);
+			exerciseLabel.setBackground(
+					new Background(new BackgroundFill(backgroundColor, CornerRadii.EMPTY, Insets.EMPTY)));
+			exerciseLabel.setTextFill(textColor);
+			exerciseLabel.setFont(font);
+		});
+	}
+
 	/**
 	 * Returns the current instance of this class. This metehod exists so that
 	 * we can call methods in this class when in an internal class (e.g. to
@@ -123,13 +188,29 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		return this;
 	}
 
+	/**
+	 * Set the projector arena's background image
+	 * 
+	 * @param background
+	 *            a file on the filesystem or a resource to set as the projector
+	 *            arena's background.
+	 */
+	public void setArenaBackground(LocatedImage background) {
+		arenaController.setBackground(background);
+	}
+
 	@Override
 	public void destroy() {
 		for (Target target : targets)
 			arenaController.getCanvasManager().removeTarget(target);
 
+		Platform.runLater(() -> {
+			if (arenaController != null)
+				arenaController.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel);
+		});
+
 		targets.clear();
-		
+
 		super.destroy();
 	}
 }

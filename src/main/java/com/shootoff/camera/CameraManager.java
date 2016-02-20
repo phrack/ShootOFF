@@ -215,7 +215,13 @@ public class CameraManager {
 	}
 
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
-		this.sectorStatuses = sectorStatuses;
+		if (sectorStatuses == null) return;
+		
+		this.sectorStatuses = new boolean[sectorStatuses.length][sectorStatuses[0].length];
+		
+		for (int i = 0; i < sectorStatuses.length; i++) {
+			System.arraycopy(sectorStatuses[i], 0, this.sectorStatuses[i], 0, sectorStatuses[i].length);
+		}
 	}
 
 	public int getFeedWidth() {
@@ -546,8 +552,8 @@ public class CameraManager {
 					estimateCameraFPS();
 				}
 
-				currentFrame = processFrame(currentFrame);
 				if (currentFrame == null) continue;
+				currentFrame = processFrame(currentFrame);
 
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
 					Bounds b = projectionBounds.get();

@@ -432,7 +432,7 @@ public class ProjectorArenaController implements CalibrationListener {
 					}
 				}
 			});
-		} else if (!mouseEntered && showingCursorWarning) {
+		} else if (showingCursorWarning) {
 			mouseInWindow = false;
 
 			TimerPool.cancelTimer(mouseExitedFuture);
