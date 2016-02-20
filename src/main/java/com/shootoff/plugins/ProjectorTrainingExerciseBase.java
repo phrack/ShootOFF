@@ -65,6 +65,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		this.arenaController = arenaController;
 	}
 
+	public ProjectorArenaController getProjArenaController(){
+		return this.arenaController;
+	}
+	
+	
 	@Override
 	public void reset() {
 		camerasSupervisor.reset();

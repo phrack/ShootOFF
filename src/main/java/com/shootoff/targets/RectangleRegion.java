@@ -29,6 +29,27 @@ public class RectangleRegion extends Rectangle implements TargetRegion {
 	public RectangleRegion(double x, double y, double width, double height) {
 		super(x, y, width, height);
 	}
+	private int regionImpactX = 0;
+	private int regionImpactY = 0;
+	
+	@Override
+	public void setRegionImpactX(int newImpactX){
+		this.regionImpactX = newImpactX;
+	}
+
+	@Override
+	public void setRegionImpactY(int newImpactY){
+		this.regionImpactY = newImpactY;
+	}
+
+	@Override
+	public int getRegionImpactX(){
+		return this.regionImpactX;
+	}
+	@Override
+	public int getRegionImpactY(){
+		return this.regionImpactY;
+	}
 
 	@Override
 	public void changeWidth(double widthDelta) {

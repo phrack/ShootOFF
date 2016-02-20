@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<ellipse centerX="60.00000" centerY="60.000000" radiusX="90.000000" radiusY="136.000000" fill="black">
+		<tag name="subtarget" value="TossUP_Turkey_Silhouette.target" />
+		<tag name="opacity" value=".005" />
+		<tag name="visible" value="true"/>
+		<tag name="command" value="animate(TossUP_Turkey_Silhouette.target);play_sound(sounds/beep.wav);" />
+		<tag name="points" value="9" />
+	</ellipse>
+	<image x="0.000000" y="0.000000" file="targets/turkey.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_1.wav);" />
+		<tag name="name" value="TossUP_Turkey_Silhouette.target" />
+		<tag name="points" value="9" />
+	</image>
+</target>

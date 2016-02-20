@@ -50,7 +50,10 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.PolygonRegion;
+import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -73,6 +76,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
@@ -485,7 +489,7 @@ public class CanvasManager {
 	}
 
 	// For testing
-	protected List<Shot> getShots() {
+	public List<Shot> getShots() {
 		return shots;
 	}
 
@@ -634,11 +638,46 @@ public class CanvasManager {
 					Node node = targetGroup.getChildren().get(i);
 
 					Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
+					int adjustedX;
+					int adjustedY;
 
+					if (nodeBounds.contains(shot.getX(), shot.getY())) {
+
+						//where in the region did the shot hit?
+						adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
+						adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+
+						TargetRegion region = (TargetRegion) node;
+
+						switch (region.getType()) {
+						case IMAGE:
+							ImageRegion imageRegion = (ImageRegion)region;
+							imageRegion.setRegionImpactX(adjustedX);//(int)targetGroup.getScaleX()*adjustedX);
+							imageRegion.setRegionImpactY(adjustedY);//(int)targetGroup.getScaleY()*adjustedY);
+							break;
+
+						case ELLIPSE:
+							EllipseRegion ellipseRegion = (EllipseRegion)region;
+							ellipseRegion.setRegionImpactX(adjustedX);//(int) (shot.getX() - nodeBounds.getMinX()) - (int)(targetGroup.getScaleX()*ellipseRegion.getCenterX()) );//Double.parseDouble(ellipseRegion.getTag("centerX")) );//(nodeBounds.getMaxX()-shot.getX()) );
+							ellipseRegion.setRegionImpactY(adjustedY);//(int) (shot.getY() - nodeBounds.getMinY()) - (int)(targetGroup.getScaleY()*ellipseRegion.getCenterY()) );//Double.parseDouble(ellipseRegion.getTag("centerY")) );//(nodeBounds.getMaxY()-shot.getY()) );
+							break;
+
+						case POLYGON:
+							PolygonRegion polyRegion = (PolygonRegion)region;
+							polyRegion.setRegionImpactX(adjustedX);
+							polyRegion.setRegionImpactY(adjustedY);
+							break;
+
+						case RECTANGLE:
+							RectangleRegion rectRegion = (RectangleRegion)region;
+							rectRegion.setRegionImpactX(adjustedX);
+							rectRegion.setRegionImpactY(adjustedY);
+							break;
+						}
 					if (nodeBounds.contains(shot.getX(), shot.getY())) {
 						// If we hit an image region on a transparent pixel,
 						// ignore it
-						TargetRegion region = (TargetRegion) node;
+						//TargetRegion region = (TargetRegion) node;
 						if (region.getType() == RegionType.IMAGE) {
 							// The image you get from the image view is its
 							// original size. We need to resize it if it has
@@ -646,8 +685,8 @@ public class CanvasManager {
 							// is transparent
 							Image currentImage = ((ImageRegion) region).getImage();
 
-							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+							//int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
+							//int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
 							
 							if (adjustedX < 0 || adjustedY < 0) {
 								logger.debug("An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
@@ -726,10 +765,12 @@ public class CanvasManager {
 						}
 
 						return Optional.of(new Hit(target, (TargetRegion) node));
+					
 					}
 				}
 			}
 		}
+	}
 
 		logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", shot.getX(), shot.getY());
 
@@ -862,5 +903,38 @@ public class CanvasManager {
 				((Shape) region).setStroke(stroke);
 			}
 		}
+	}
+
+
+	public Label addProjectorMessage(String message, Color backgroundColor) {
+		final Label diagnosticLabel = new Label(message);
+		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor) + "; -fx-font-size: 30;");
+		diagnosticLabel.setContentDisplay(ContentDisplay.CENTER);
+		diagnosticLabel.setWrapText(true);
+		diagnosticLabel.setMaxWidth(config.getDisplayWidth());
+		//diagnosticLabel.setPrefWidth(1000);
+		//diagnosticLabel.setLayoutX(100.0);
+		//diagnosticLabel.setLayoutY(300.0);//relocate(100, 300);
+		diagnosticsVBox.getChildren().add(diagnosticLabel);
+		diagnosticsVBox.relocate(200, 700);
+		diagnosticsVBox.setVgrow(diagnosticLabel, Priority.ALWAYS);
+		return diagnosticLabel;
+	}
+
+	public void hideProjectorMessage (Label projectorLabel){
+		diagnosticsVBox.getChildren().get(diagnosticsVBox.getChildren().indexOf(projectorLabel)).setVisible(false);
+	}
+
+	public void showProjectorMessage (Label projectorLabel){
+		diagnosticsVBox.getChildren().get(diagnosticsVBox.getChildren().indexOf(projectorLabel)).setVisible(true);
+	}
+
+	public void removeProjectorMessage(Label diagnosticLabel) {
+		if (diagnosticFutures.containsKey(diagnosticLabel)) {
+			diagnosticFutures.get(diagnosticLabel).cancel(false);
+			diagnosticFutures.remove(diagnosticLabel);
+		}
+
+		diagnosticsVBox.getChildren().remove(diagnosticLabel);
 	}
 }
