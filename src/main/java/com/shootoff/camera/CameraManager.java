@@ -220,6 +220,10 @@ public class CameraManager {
 	}
 
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
+		if (sectorStatuses == null) return;
+		
+		this.sectorStatuses = new boolean[sectorStatuses.length][sectorStatuses[0].length];
+		
 		for (int i = 0; i < sectorStatuses.length; i++) {
 			System.arraycopy(sectorStatuses[i], 0, this.sectorStatuses[i], 0, sectorStatuses[i].length);
 		}

@@ -204,8 +204,10 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		for (Target target : targets)
 			arenaController.getCanvasManager().removeTarget(target);
 
-		Platform.runLater(
-				() -> arenaController.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel));
+		Platform.runLater(() -> {
+			if (arenaController != null)
+				arenaController.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel);
+		});
 
 		targets.clear();
 
