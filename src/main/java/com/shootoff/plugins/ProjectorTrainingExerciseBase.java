@@ -29,6 +29,7 @@ import javafx.scene.layout.GridPane;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
@@ -121,6 +122,17 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 */
 	public ProjectorTrainingExerciseBase getInstance() {
 		return this;
+	}
+
+	/**
+	 * Set the projector arena's background image
+	 * 
+	 * @param background
+	 *            a file on the filesystem or a resource to set as the projector
+	 *            arena's background.
+	 */
+	public void setArenaBackground(LocatedImage background) {
+		arenaController.setBackground(background);
 	}
 
 	@Override
