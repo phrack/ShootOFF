@@ -667,7 +667,7 @@ public class CameraManager {
 
 				arenaMaskManager.updateAvgLums(lumsMaAcrossFrame, getCurrentFrameTimestamp());
 
-				logger.warn("{}", mask.get(200, 200)[0]);
+				//logger.warn("{}", mask.get(200, 200)[0]);
 
 				if (debuggerListener.isPresent()) {
 					debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));

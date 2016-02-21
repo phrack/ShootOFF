@@ -113,8 +113,8 @@ public class ArenaMaskManager implements Runnable {
 
 					maskpx[0] = (((maskpx[0] * (LUM_MA_LENGTH - 1)) + newLum) / LUM_MA_LENGTH);
 
-					if (x == 200 && y == 200) logger.warn("pixel {} {} - {} {} - {} {} {} - {}", x, y,
-							mask.get(y, x)[0], newLum, nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
+					//if (x == 200 && y == 200) logger.warn("pixel {} {} - {} {} - {} {} {} - {}", x, y,
+					//		mask.get(y, x)[0], newLum, nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
 
 					mask.put(y, x, maskpx);
 

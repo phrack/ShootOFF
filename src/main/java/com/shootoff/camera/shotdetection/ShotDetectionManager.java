@@ -157,7 +157,7 @@ public final class ShotDetectionManager {
 
 		int valueForThreshold = currentLum;
 
-		if (x == 200 && y == 200) logger.warn("{} {}", currentLum, mask);
+		//if (x == 200 && y == 200) logger.warn("{} {}", currentLum, mask);
 
 		if (currentLum < mask * 1.2) {
 			valueForThreshold = 0;
