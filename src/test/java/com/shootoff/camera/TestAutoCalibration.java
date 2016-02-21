@@ -26,7 +26,7 @@ public class TestAutoCalibration {
 	private AutoCalibrationManager acm;
 
 	private Configuration config;
-	private MockCanvasManager mockManager;
+	private MockCanvasManager mockCanvasManager;
 	private boolean[][] sectorStatuses;
 
 	@Rule public ErrorCollector collector = new ErrorCollector();
@@ -39,7 +39,7 @@ public class TestAutoCalibration {
 
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
-		mockManager = new MockCanvasManager(config, true);
+		mockCanvasManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
 
 		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
@@ -53,11 +53,11 @@ public class TestAutoCalibration {
 		Object processingLock = new Object();
 		File videoFile = new File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
 
-		CameraManager cameraManager;
-		cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
+		MockCameraManager cameraManager;
+		cameraManager = new MockCameraManager(videoFile, processingLock, mockCanvasManager, config, sectorStatuses,
 				Optional.empty());
 
-		mockManager.setCameraManager(cameraManager);
+		mockCanvasManager.setCameraManager(cameraManager);
 
 		cameraManager.setController(new MockShootOFFController());
 

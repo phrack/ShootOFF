@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Camera;
-import com.shootoff.camera.shotdetection.PixelCluster;
 
 public class Mask {
 	public BufferedImage bImage;

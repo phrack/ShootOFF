@@ -120,7 +120,7 @@ public class ShotDetectionTestor {
 			Configuration config, boolean[][] sectorStatuses) {
 		Object processingLock = new Object();
 		File videoFile = new File(TestCameraManagerVeryBright.class.getResource(videoPath).getFile());
-		CameraManager cameraManager = new CameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
+		MockCameraManager cameraManager = new MockCameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
 				projectionBounds);
 
 		cameraManager.processVideo();
