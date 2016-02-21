@@ -79,8 +79,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateProjection() throws IOException {
-		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/calibrate-projection.png"));
+		BufferedImage testFrame = ImageIO
+				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
 
@@ -103,16 +103,16 @@ public class TestAutoCalibration {
 			}
 		}
 
-		BufferedImage compareFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/calibrate-projection-result.png"));
+		BufferedImage compareFrame = ImageIO.read(
+				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-result.png"));
 
 		assertEquals(true, compareImages(compareFrame, resultFrame));
 	}
 
 	@Test
 	public void testCalibrateProjection2() throws IOException {
-		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
+		BufferedImage testFrame = ImageIO
+				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
 
@@ -135,8 +135,8 @@ public class TestAutoCalibration {
 			}
 		}
 
-		BufferedImage compareFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/calibrate-projection-2-result.png"));
+		BufferedImage compareFrame = ImageIO.read(
+				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2-result.png"));
 
 		assertEquals(true, compareImages(compareFrame, resultFrame));
 
@@ -144,8 +144,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateProjectionCutoff() throws IOException {
-		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
+		BufferedImage testFrame = ImageIO.read(
+				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
 
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
 
@@ -166,8 +166,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateTightPatternCutOff() throws IOException {
-		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
+		BufferedImage testFrame = ImageIO.read(
+				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
 
@@ -177,8 +177,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateTightPattern() throws IOException {
-		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
+		BufferedImage testFrame = ImageIO
+				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
 
@@ -201,8 +201,8 @@ public class TestAutoCalibration {
 			}
 		}
 
-		BufferedImage compareFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/tight-calibration-pattern-result.png"));
+		BufferedImage compareFrame = ImageIO.read(
+				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-result.png"));
 
 		assertEquals(true, compareImages(compareFrame, resultFrame));
 
@@ -210,8 +210,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateTightPatternTurned() throws IOException {
-		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
-				.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
+		BufferedImage testFrame = ImageIO.read(
+				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
 
@@ -247,8 +247,8 @@ public class TestAutoCalibration {
 	}
 
 	/*
-	 * http://stackoverflow.com/questions/11006394/is-there-a-simple-way-to-compare
-	 * -bufferedimage-instances
+	 * http://stackoverflow.com/questions/11006394/is-there-a-simple-way-to-
+	 * compare -bufferedimage-instances
 	 */
 	public static boolean compareImages(BufferedImage imgA, BufferedImage imgB) {
 		// The images must be the same size.

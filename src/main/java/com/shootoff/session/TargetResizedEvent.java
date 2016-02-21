@@ -25,8 +25,7 @@ public class TargetResizedEvent implements Event {
 	private final double newWidth;
 	private final double newHeight;
 
-	public TargetResizedEvent(String cameraName, long timestamp,
-			int targetIndex, double newWidth, double newHeight) {
+	public TargetResizedEvent(String cameraName, long timestamp, int targetIndex, double newWidth, double newHeight) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.targetIndex = targetIndex;
@@ -63,7 +62,6 @@ public class TargetResizedEvent implements Event {
 
 	@Override
 	public String toString() {
-		return String
-				.format("target resized (%.2f, %.2f)", newWidth, newHeight);
+		return String.format("target resized (%.2f, %.2f)", newWidth, newHeight);
 	}
 }

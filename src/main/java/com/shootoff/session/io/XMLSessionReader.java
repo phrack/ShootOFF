@@ -50,8 +50,7 @@ import com.shootoff.session.TargetResizedEvent;
 import javafx.scene.paint.Color;
 
 public class XMLSessionReader {
-	private final Logger logger = LoggerFactory
-			.getLogger(XMLSessionReader.class);
+	private final Logger logger = LoggerFactory.getLogger(XMLSessionReader.class);
 
 	private final File sessionFile;
 
@@ -78,8 +77,7 @@ public class XMLSessionReader {
 				try {
 					xmlInput.close();
 				} catch (IOException e) {
-					logger.error(
-							"Error closing XML session opened for reading", e);
+					logger.error("Error closing XML session opened for reading", e);
 				}
 			}
 		}
@@ -95,8 +93,8 @@ public class XMLSessionReader {
 			return events;
 		}
 
-		public void startElement(String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+				throws SAXException {
 
 			switch (qName) {
 			case "camera":
@@ -113,21 +111,17 @@ public class XMLSessionReader {
 					c = Color.GREEN;
 				}
 
-				Shot shot = new Shot(c, Double.parseDouble(attributes
-						.getValue("x")), Double.parseDouble(attributes
-						.getValue("y")), Long.parseLong(attributes
-						.getValue("shotTimestamp")),
+				Shot shot = new Shot(c, Double.parseDouble(attributes.getValue("x")),
+						Double.parseDouble(attributes.getValue("y")),
+						Long.parseLong(attributes.getValue("shotTimestamp")),
 						Integer.parseInt(attributes.getValue("markerRadius")));
 
-				boolean isMalfunction = Boolean.parseBoolean(attributes
-						.getValue("isMalfunction"));
+				boolean isMalfunction = Boolean.parseBoolean(attributes.getValue("isMalfunction"));
 
-				boolean isReload = Boolean.parseBoolean(attributes
-						.getValue("isReload"));
+				boolean isReload = Boolean.parseBoolean(attributes.getValue("isReload"));
 
 				Optional<Integer> targetIndex;
-				int index = Integer
-						.parseInt(attributes.getValue("targetIndex"));
+				int index = Integer.parseInt(attributes.getValue("targetIndex"));
 				if (index == -1) {
 					targetIndex = Optional.empty();
 				} else {
@@ -142,67 +136,54 @@ public class XMLSessionReader {
 					hitRegionIndex = Optional.of(index);
 				}
 
-				Optional<String> videoString = Optional.ofNullable(attributes
-						.getValue("videos"));
+				Optional<String> videoString = Optional.ofNullable(attributes.getValue("videos"));
 
-				events.get(currentCameraName).add(
-						new ShotEvent(currentCameraName, Long
-								.parseLong(attributes.getValue("timestamp")),
-								shot, isMalfunction, isReload, targetIndex,
-								hitRegionIndex, videoString));
+				events.get(currentCameraName)
+						.add(new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot,
+								isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
 
 				break;
 
 			case "targetAdded":
-				events.get(currentCameraName).add(
-						new TargetAddedEvent(currentCameraName, Long
-								.parseLong(attributes.getValue("timestamp")),
-								attributes.getValue("name")));
+				events.get(currentCameraName).add(new TargetAddedEvent(currentCameraName,
+						Long.parseLong(attributes.getValue("timestamp")), attributes.getValue("name")));
 
 				break;
 
 			case "targetRemoved":
 				events.get(currentCameraName)
-						.add(new TargetRemovedEvent(currentCameraName, Long
-								.parseLong(attributes.getValue("timestamp")),
+						.add(new TargetRemovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
 								Integer.parseInt(attributes.getValue("index"))));
 
 				break;
 
 			case "targetResized":
-				events.get(currentCameraName).add(
-						new TargetResizedEvent(currentCameraName, Long
-								.parseLong(attributes.getValue("timestamp")),
+				events.get(currentCameraName)
+						.add(new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
 								Integer.parseInt(attributes.getValue("index")),
-								Double.parseDouble(attributes
-										.getValue("newWidth")), Double
-										.parseDouble(attributes
-												.getValue("newHeight"))));
+								Double.parseDouble(attributes.getValue("newWidth")),
+								Double.parseDouble(attributes.getValue("newHeight"))));
 
 				break;
 
 			case "targetMoved":
-				events.get(currentCameraName).add(
-						new TargetMovedEvent(currentCameraName, Long
-								.parseLong(attributes.getValue("timestamp")),
+				events.get(currentCameraName)
+						.add(new TargetMovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
 								Integer.parseInt(attributes.getValue("index")),
 								Integer.parseInt(attributes.getValue("newX")),
 								Integer.parseInt(attributes.getValue("newY"))));
 				break;
 
 			case "exerciseFeedMessage":
-				lastTimestamp = Long
-						.parseLong(attributes.getValue("timestamp"));
+				lastTimestamp = Long.parseLong(attributes.getValue("timestamp"));
 				exerciseFeedMessage = true;
 			}
 		}
 
-		public void characters(char ch[], int start, int length)
-				throws SAXException {
+		public void characters(char ch[], int start, int length) throws SAXException {
 			if (exerciseFeedMessage) {
 				events.get(currentCameraName).add(
-						new ExerciseFeedMessageEvent(currentCameraName,
-								lastTimestamp, new String(ch, start, length)));
+						new ExerciseFeedMessageEvent(currentCameraName, lastTimestamp, new String(ch, start, length)));
 
 				exerciseFeedMessage = false;
 			}

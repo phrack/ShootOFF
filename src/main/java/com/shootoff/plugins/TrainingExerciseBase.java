@@ -150,8 +150,8 @@ public class TrainingExerciseBase {
 	}
 
 	public void getDelayedStartInterval(final DelayedStartListener listener) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"com/shootoff/gui/DelayedStartInterval.fxml"));
+		final FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -176,8 +176,8 @@ public class TrainingExerciseBase {
 	 * @param listener
 	 */
 	public void getParInterval(final ParListener listener) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"com/shootoff/gui/ParInterval.fxml"));
+		final FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {

@@ -26,6 +26,6 @@ public interface CourseVisitor {
 	public void visitTarget(File targetFile, double x, double y, double width, double height);
 
 	public void visitResolution(double width, double height);
-	
+
 	public void visitEnd();
 }

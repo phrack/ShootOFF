@@ -157,8 +157,8 @@ public class Configuration {
 
 	}
 
-	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException,
-			ConfigurationException {
+	protected Configuration(InputStream configInputStream, String name, String[] args)
+			throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		parseCmdLine(args);
@@ -478,8 +478,8 @@ public class Configuration {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
 
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
@@ -821,8 +821,8 @@ public class Configuration {
 	}
 
 	public File getGreenLaserSound() {
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		return greenLaserSound;
 	}

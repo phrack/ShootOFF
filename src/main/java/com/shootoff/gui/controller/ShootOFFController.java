@@ -299,11 +299,11 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
-	
+
 	private void close() {
 		shootOFFStage.close();
 		camerasSupervisor.closeAll();
-		
+
 		if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
 		if (arenaController != null) {
@@ -1008,7 +1008,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 		removeCalibrationTargetIfPresent();
 
 		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
-		
+
 		configureArenaCamera(getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
 
 		stopCalibration();
@@ -1060,7 +1060,7 @@ public class ShootOFFController implements CameraConfigListener, TargetListener 
 
 		arenaCameraManager.getCanvasManager().setProjectorArena(arenaController, translatedToCanvasBounds);
 		configureArenaCamera(option);
-		
+
 		arenaCameraManager.setProjectionBounds(translatedToCameraBounds);
 	}
 
