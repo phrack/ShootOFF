@@ -35,7 +35,8 @@ public class SpriteAnimation extends Transition {
 
 	public SpriteAnimation(ImageView imageView, ImageFrame[] frames) {
 		this.imageView = imageView;
-		this.frames = frames;
+		this.frames = new ImageFrame[frames.length];
+		System.arraycopy(frames, 0, this.frames, 0, frames.length);
 		this.count = frames.length;
 		setInterpolator(Interpolator.LINEAR);
 	}

@@ -565,10 +565,7 @@ public class CanvasManager {
 		}
 
 		if (currentExercise.isPresent() && !processedShot) {
-			Optional<TargetRegion> hitRegion = Optional.empty();
-			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
-
-			currentExercise.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hit);
 		}
 	}
 
@@ -583,10 +580,7 @@ public class CanvasManager {
 		}
 
 		if (currentExercise.isPresent()) {
-			Optional<TargetRegion> hitRegion = Optional.empty();
-			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
-
-			currentExercise.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hit);
 			return true;
 		}
 
@@ -598,24 +592,6 @@ public class CanvasManager {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
 		});
-	}
-
-	protected static class Hit {
-		private final Target target;
-		private final TargetRegion hitRegion;
-
-		public Hit(Target target, TargetRegion hitRegion) {
-			this.target = target;
-			this.hitRegion = hitRegion;
-		}
-
-		public Target getTarget() {
-			return target;
-		}
-
-		public TargetRegion getHitRegion() {
-			return hitRegion;
-		}
 	}
 
 	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
@@ -633,6 +609,9 @@ public class CanvasManager {
 
 					Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
+					int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
+					int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+
 					if (nodeBounds.contains(shot.getX(), shot.getY())) {
 						// If we hit an image region on a transparent pixel,
 						// ignore it
@@ -643,9 +622,6 @@ public class CanvasManager {
 							// changed size to accurately determine if a pixel
 							// is transparent
 							Image currentImage = ((ImageRegion) region).getImage();
-
-							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
 
 							if (adjustedX < 0 || adjustedY < 0) {
 								logger.debug(
@@ -725,7 +701,7 @@ public class CanvasManager {
 									videoString);
 						}
 
-						return Optional.of(new Hit(target, (TargetRegion) node));
+						return Optional.of(new Hit(target, (TargetRegion) node, adjustedX, adjustedY));
 					}
 				}
 			}

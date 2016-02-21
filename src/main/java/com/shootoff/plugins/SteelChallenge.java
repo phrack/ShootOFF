@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.courses.Course;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
@@ -163,7 +164,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
 		final long elapsedTime = System.currentTimeMillis() - startTime;
 		final String elapsedTimeSeconds;
 
@@ -175,8 +176,8 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 		super.setShotTimerColumnText(LENGTH_COL_NAME, elapsedTimeSeconds);
 
-		if (hitRegion.isPresent()) {
-			final TargetRegion r = hitRegion.get();
+		if (hit.isPresent()) {
+			final TargetRegion r = hit.get().getHitRegion();
 
 			// Ignore tagless regions
 			if (r.getAllTags().size() == 0) {

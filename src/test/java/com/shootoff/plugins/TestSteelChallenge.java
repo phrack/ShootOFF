@@ -20,6 +20,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
@@ -38,8 +39,8 @@ public class TestSteelChallenge {
 	private SteelChallenge noTargetsSC;
 	private SteelChallenge targetsSC;
 	private Course course;
-	private TargetRegion nonStopRegion;
-	private TargetRegion stopRegion;
+	private Hit nonStopRegionHit;
+	private Hit stopRegionHit;
 
 	@Before
 	public void setUp() throws UnsupportedEncodingException, ConfigurationException {
@@ -82,9 +83,9 @@ public class TestSteelChallenge {
 				TargetRegion r = (TargetRegion) n;
 
 				if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
-					stopRegion = r;
-				} else if (r.getAllTags().size() > 0 && nonStopRegion == null) {
-					nonStopRegion = r;
+					stopRegionHit = new Hit(t, r, 0, 0);
+				} else if (r.getAllTags().size() > 0 && nonStopRegionHit == null) {
+					nonStopRegionHit = new Hit(t, r, 0, 0);
 				}
 			}
 		}
@@ -117,7 +118,7 @@ public class TestSteelChallenge {
 				stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
 
 		assertEquals(String
 				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
@@ -134,7 +135,7 @@ public class TestSteelChallenge {
 				stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
 
 		assertEquals(String
 				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
@@ -142,8 +143,8 @@ public class TestSteelChallenge {
 				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(nonStopRegion));
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(nonStopRegionHit));
+		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
 
 		assertEquals(String
 				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"

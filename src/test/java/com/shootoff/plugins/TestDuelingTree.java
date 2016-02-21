@@ -26,6 +26,8 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.Hit;
+import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -34,8 +36,8 @@ public class TestDuelingTree {
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
 	private List<Group> targets;
-	private List<TargetRegion> leftPaddles;
-	private List<TargetRegion> rightPaddles;
+	private List<Hit> leftPaddlesHits;
+	private List<Hit> rightPaddlesHits;
 	private DuelingTree dt;
 
 	@Before
@@ -53,18 +55,19 @@ public class TestDuelingTree {
 
 		targets = new ArrayList<Group>();
 		Group duelTree = TargetIO.loadTarget(new File("targets" + File.separator + "Duel_Tree.target")).get();
+		Target duelTreeTarget = new Target(duelTree, new ArrayList<Target>());
 		targets.add(duelTree);
 
-		leftPaddles = new ArrayList<TargetRegion>();
-		rightPaddles = new ArrayList<TargetRegion>();
+		leftPaddlesHits = new ArrayList<Hit>();
+		rightPaddlesHits = new ArrayList<Hit>();
 
 		for (Node node : duelTree.getChildren()) {
 			TargetRegion region = (TargetRegion) node;
 
 			if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("left_paddle")) {
-				leftPaddles.add(region);
+				leftPaddlesHits.add(new Hit(duelTreeTarget, region, 0, 0));
 			} else if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("right_paddle")) {
-				rightPaddles.add(region);
+				rightPaddlesHits.add(new Hit(duelTreeTarget, region, 0, 0));
 			}
 		}
 
@@ -116,8 +119,8 @@ public class TestDuelingTree {
 
 	@Test
 	public void testOneRoundsLeftWins() throws UnsupportedEncodingException {
-		for (TargetRegion leftPaddle : leftPaddles) {
-			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddle));
+		for (Hit leftPaddleHit : leftPaddlesHits) {
+			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
 		assertEquals(String.format("left score: 1%n") + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
@@ -131,14 +134,14 @@ public class TestDuelingTree {
 	@Test
 	public void testTwoSeparateRoundsEachSideWinsOnce() throws UnsupportedEncodingException {
 		// Let right shoot two paddles then have left come in for the win
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddles.get(0)));
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddles.get(1)));
+		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
+		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
 
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddles.get(0)));
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddles.get(1)));
+		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
+		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
 
-		for (TargetRegion leftPaddle : leftPaddles) {
-			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddle));
+		for (Hit leftPaddleHit : leftPaddlesHits) {
+			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
 		assertEquals(String.format("left score: 1%n") + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
@@ -150,8 +153,8 @@ public class TestDuelingTree {
 		stringOut.reset();
 
 		// Right pulls out the win with no competition
-		for (TargetRegion rightPaddle : rightPaddles) {
-			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddle));
+		for (Hit rightPaddleHit : rightPaddlesHits) {
+			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
 		}
 
 		assertEquals(String.format("left score: 0%n") + String.format("right score: 1%n"), stringOut.toString("UTF-8"));

@@ -28,7 +28,9 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
+import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -76,8 +78,10 @@ public class TestRandomShoot {
 	@Test
 	public void testFiveSmallTarget() throws IOException {
 		List<Group> targets = new ArrayList<Group>();
-		targets.add(
-				TargetIO.loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get());
+		Group bullseyeFiveGroup = TargetIO
+				.loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get();
+		Target bullseyeFiveTarget = new Target(bullseyeFiveGroup, new ArrayList<Target>());
+		targets.add(bullseyeFiveGroup);
 
 		RandomShoot rs = new RandomShoot(targets, rng);
 
@@ -116,8 +120,9 @@ public class TestRandomShoot {
 		}
 
 		int oldSize = rs.getCurrentSubtargets().size();
+		Hit expectedHit = new Hit(bullseyeFiveTarget, expectedRegion, 0, 0);
 
-		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(expectedRegion));
+		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
 
 		if (oldSize > 1) {
 			assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());

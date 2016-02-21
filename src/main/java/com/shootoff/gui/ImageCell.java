@@ -61,20 +61,6 @@ public class ImageCell extends TextFieldListCell<String> {
 
 		this.setConverter(new DefaultStringConverter());
 
-		for (Camera c : webcams) {
-			if (imageCache.containsKey(c)) continue;
-
-			cacheCamera(c);
-
-			new Thread(() -> {
-				Optional<Image> img = fetchWebcamImage(c);
-
-				if (img.isPresent()) {
-					imageCache.get(c).setImage(img.get());
-				}
-			} , "FetchImageCellWebcamImages").start();
-		}
-
 		this.editingProperty().addListener(new ChangeListener<Boolean>() {
 			@Override
 			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -108,6 +94,22 @@ public class ImageCell extends TextFieldListCell<String> {
 					setGraphic(webcamIV.get());
 				}
 			});
+		}
+	}
+	
+	public static void createImageCache(List<Camera> webcams) {
+		for (Camera c : webcams) {
+			if (imageCache.containsKey(c)) continue;
+
+			cacheCamera(c);
+
+			new Thread(() -> {
+				Optional<Image> img = fetchWebcamImage(c);
+
+				if (img.isPresent()) {
+					imageCache.get(c).setImage(img.get());
+				}
+			}, "FetchImageCellWebcamImages").start();
 		}
 	}
 
@@ -170,7 +172,7 @@ public class ImageCell extends TextFieldListCell<String> {
 		return webcamIV;
 	}
 
-	private Optional<Image> fetchWebcamImage(Camera webcam) {
+	private static Optional<Image> fetchWebcamImage(Camera webcam) {
 		boolean cameraOpened = false;
 
 		if (!webcam.isOpen()) {

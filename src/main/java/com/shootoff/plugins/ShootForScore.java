@@ -25,6 +25,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.targets.TargetRegion;
 
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
@@ -74,16 +75,17 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (!hitRegion.isPresent()) return;
+	public void shotListener(Shot shot, Optional<Hit> hit) {
+		if (!hit.isPresent()) return;
 
-		if (hitRegion.get().tagExists("points")) {
-			super.setShotTimerColumnText(POINTS_COL_NAME, hitRegion.get().getTag("points"));
+		TargetRegion r = hit.get().getHitRegion();
+		if (r.tagExists("points")) {
+			super.setShotTimerColumnText(POINTS_COL_NAME, r.getTag("points"));
 
 			if (shot.getColor().equals(Color.RED)) {
-				redScore += Integer.parseInt(hitRegion.get().getTag("points"));
+				redScore += Integer.parseInt(r.getTag("points"));
 			} else if (shot.getColor().equals(Color.GREEN)) {
-				greenScore += Integer.parseInt(hitRegion.get().getTag("points"));
+				greenScore += Integer.parseInt(r.getTag("points"));
 			}
 		}
 

@@ -395,7 +395,6 @@ public class TargetEditorController {
 		}
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	public void regionKeyPressed(KeyEvent event) {
 		Node selected = (Node) event.getTarget();
 		TargetRegion region = (TargetRegion) selected;
@@ -442,6 +441,9 @@ public class TargetEditorController {
 			} else {
 				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
 			}
+			break;
+
+		default:
 			break;
 		}
 

@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
@@ -90,8 +91,10 @@ public class TestShootDontShoot {
 		assertEquals(5, dontShootTargets.size());
 
 		// Shoot dont shoot target
-		sds.shotListener(null,
-				Optional.of((TargetRegion) dontShootTargets.get(0).getTargetGroup().getChildren().get(0)));
+		Hit dontShootHit = new Hit(dontShootTargets.get(0),
+				(TargetRegion) dontShootTargets.get(0).getTargetGroup().getChildren().get(0), 0, 0);
+
+		sds.shotListener(null, Optional.of(dontShootHit));
 
 		assertEquals("Bad shoot!", stringOut.toString("UTF-8").replace(String.format("%n"), ""));
 		stringOut.reset();
