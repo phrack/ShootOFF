@@ -89,7 +89,7 @@ public class Shot {
 		if (logger.isTraceEnabled()) {
 			logger.trace("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
 		}
-		
+
 		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
 		marker.setFill(color);
 

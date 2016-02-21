@@ -97,8 +97,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		pauseResumeButton.setText(PAUSE);
 		resetValues();
 		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory(
-				"TimedHolsterDrillExercise"));
+		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+				new NamedThreadFactory("TimedHolsterDrillExercise"));
 		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
 	}
 

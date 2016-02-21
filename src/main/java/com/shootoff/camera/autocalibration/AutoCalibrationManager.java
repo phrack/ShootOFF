@@ -255,11 +255,11 @@ public class AutoCalibrationManager {
 
 		if (boundingBox.getMinX() < 0 || boundingBox.getMinY() < 0
 				|| boundingBox.getWidth() > cameraManager.getFeedWidth()
-				|| boundingBox.getHeight() > cameraManager.getFeedHeight()) return Optional.empty();
+				|| boundingBox.getHeight() > cameraManager.getFeedHeight())
+			return Optional.empty();
 
-		if (logger.isDebugEnabled())
-			logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
-					boundingBox.getHeight());
+		if (logger.isDebugEnabled()) logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(),
+				boundingBox.getWidth(), boundingBox.getHeight());
 
 		Mat undistorted = warpPerspective(mat);
 
@@ -290,9 +290,8 @@ public class AutoCalibrationManager {
 		int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
 		int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
 
-		if (logger.isDebugEnabled())
-			logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX, secondSquareCenterY,
-					undistorted.get(secondSquareCenterY, secondSquareCenterX));
+		if (logger.isDebugEnabled()) logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX,
+				secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
 
 		return Optional.of(boundingBox);
 
@@ -309,12 +308,12 @@ public class AutoCalibrationManager {
 					(int) rCenter.x + 10);
 		}
 
-		Scalar rMeanColor = Core.mean(frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
-				(int) rCenter.x + 10));
-		Scalar gMeanColor = Core.mean(frame.submat((int) gCenter.y - 10, (int) gCenter.y + 10, (int) gCenter.x - 10,
-				(int) gCenter.x + 10));
-		Scalar bMeanColor = Core.mean(frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10,
-				(int) bCenter.x + 10));
+		Scalar rMeanColor = Core.mean(
+				frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10, (int) rCenter.x + 10));
+		Scalar gMeanColor = Core.mean(
+				frame.submat((int) gCenter.y - 10, (int) gCenter.y + 10, (int) gCenter.x - 10, (int) gCenter.x + 10));
+		Scalar bMeanColor = Core.mean(
+				frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10, (int) bCenter.x + 10));
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("rColor.png");
@@ -363,7 +362,7 @@ public class AutoCalibrationManager {
 
 		return frame;
 	}
-	
+
 	public Mat undistortFrame(Mat mat) {
 		if (!isCalibrated) {
 			logger.warn("undistortFrame called when isCalibrated is false");
@@ -372,7 +371,6 @@ public class AutoCalibrationManager {
 
 		return warpPerspective(mat);
 	}
-
 
 	RotatedRect boundsRect;
 
@@ -389,9 +387,8 @@ public class AutoCalibrationManager {
 		Mat unRotMat = getRotationMatrix(massCenterMatOfPoint2f(boardRect), boardBoxAngle);
 		MatOfPoint2f unRotatedRect = rotateRect(unRotMat, boardRect);
 
-		if (logger.isTraceEnabled())
-			logger.trace("center {} angle {} width {} height {}", boardBox.center, boardBoxAngle, boardBox.size.width,
-					boardBox.size.height);
+		if (logger.isTraceEnabled()) logger.trace("center {} angle {} width {} height {}", boardBox.center,
+				boardBoxAngle, boardBox.size.width, boardBox.size.height);
 
 		// This is the estimated projection area that has minimum angle (Not
 		// rotated)
@@ -401,10 +398,9 @@ public class AutoCalibrationManager {
 		// back to the cameramanager
 		boundsRect = Imgproc.minAreaRect(estimatedPatternSizeRect);
 
-		if (logger.isDebugEnabled())
-			logger.debug("boundsRect {} {} {} {}", boundsRect.boundingRect().x, boundsRect.boundingRect().y,
-					boundsRect.boundingRect().x + boundsRect.boundingRect().width, boundsRect.boundingRect().y
-							+ boundsRect.boundingRect().height);
+		if (logger.isDebugEnabled()) logger.debug("boundsRect {} {} {} {}", boundsRect.boundingRect().x,
+				boundsRect.boundingRect().y, boundsRect.boundingRect().x + boundsRect.boundingRect().width,
+				boundsRect.boundingRect().y + boundsRect.boundingRect().height);
 
 		// We now rotate the estimation back to the original angle to use for
 		// transformation source
@@ -422,44 +418,40 @@ public class AutoCalibrationManager {
 			Core.circle(traceMat, new Point(boardRect.get(3, 0)[0], boardRect.get(3, 0)[1]), 1, new Scalar(255, 0, 0),
 					-1);
 
-			Core.line(traceMat, new Point(unRotatedRect.get(0, 0)[0], unRotatedRect.get(0, 0)[1]), new Point(
-					unRotatedRect.get(1, 0)[0], unRotatedRect.get(1, 0)[1]), new Scalar(0, 255, 0));
-			Core.line(traceMat, new Point(unRotatedRect.get(1, 0)[0], unRotatedRect.get(1, 0)[1]), new Point(
-					unRotatedRect.get(2, 0)[0], unRotatedRect.get(2, 0)[1]), new Scalar(0, 255, 0));
-			Core.line(traceMat, new Point(unRotatedRect.get(3, 0)[0], unRotatedRect.get(3, 0)[1]), new Point(
-					unRotatedRect.get(2, 0)[0], unRotatedRect.get(2, 0)[1]), new Scalar(0, 255, 0));
-			Core.line(traceMat, new Point(unRotatedRect.get(3, 0)[0], unRotatedRect.get(3, 0)[1]), new Point(
-					unRotatedRect.get(0, 0)[0], unRotatedRect.get(0, 0)[1]), new Scalar(0, 255, 0));
+			Core.line(traceMat, new Point(unRotatedRect.get(0, 0)[0], unRotatedRect.get(0, 0)[1]),
+					new Point(unRotatedRect.get(1, 0)[0], unRotatedRect.get(1, 0)[1]), new Scalar(0, 255, 0));
+			Core.line(traceMat, new Point(unRotatedRect.get(1, 0)[0], unRotatedRect.get(1, 0)[1]),
+					new Point(unRotatedRect.get(2, 0)[0], unRotatedRect.get(2, 0)[1]), new Scalar(0, 255, 0));
+			Core.line(traceMat, new Point(unRotatedRect.get(3, 0)[0], unRotatedRect.get(3, 0)[1]),
+					new Point(unRotatedRect.get(2, 0)[0], unRotatedRect.get(2, 0)[1]), new Scalar(0, 255, 0));
+			Core.line(traceMat, new Point(unRotatedRect.get(3, 0)[0], unRotatedRect.get(3, 0)[1]),
+					new Point(unRotatedRect.get(0, 0)[0], unRotatedRect.get(0, 0)[1]), new Scalar(0, 255, 0));
 
-			Core.line(traceMat,
-					new Point(estimatedPatternSizeRect.get(0, 0)[0], estimatedPatternSizeRect.get(0, 0)[1]), new Point(
-							estimatedPatternSizeRect.get(1, 0)[0], estimatedPatternSizeRect.get(1, 0)[1]), new Scalar(
-							255, 255, 0));
-			Core.line(traceMat,
-					new Point(estimatedPatternSizeRect.get(1, 0)[0], estimatedPatternSizeRect.get(1, 0)[1]), new Point(
-							estimatedPatternSizeRect.get(2, 0)[0], estimatedPatternSizeRect.get(2, 0)[1]), new Scalar(
-							255, 255, 0));
-			Core.line(traceMat,
-					new Point(estimatedPatternSizeRect.get(3, 0)[0], estimatedPatternSizeRect.get(3, 0)[1]), new Point(
-							estimatedPatternSizeRect.get(2, 0)[0], estimatedPatternSizeRect.get(2, 0)[1]), new Scalar(
-							255, 255, 0));
-			Core.line(traceMat,
-					new Point(estimatedPatternSizeRect.get(3, 0)[0], estimatedPatternSizeRect.get(3, 0)[1]), new Point(
-							estimatedPatternSizeRect.get(0, 0)[0], estimatedPatternSizeRect.get(0, 0)[1]), new Scalar(
-							255, 255, 0));
+			Core.line(traceMat, new Point(estimatedPatternSizeRect.get(0, 0)[0], estimatedPatternSizeRect.get(0, 0)[1]),
+					new Point(estimatedPatternSizeRect.get(1, 0)[0], estimatedPatternSizeRect.get(1, 0)[1]),
+					new Scalar(255, 255, 0));
+			Core.line(traceMat, new Point(estimatedPatternSizeRect.get(1, 0)[0], estimatedPatternSizeRect.get(1, 0)[1]),
+					new Point(estimatedPatternSizeRect.get(2, 0)[0], estimatedPatternSizeRect.get(2, 0)[1]),
+					new Scalar(255, 255, 0));
+			Core.line(traceMat, new Point(estimatedPatternSizeRect.get(3, 0)[0], estimatedPatternSizeRect.get(3, 0)[1]),
+					new Point(estimatedPatternSizeRect.get(2, 0)[0], estimatedPatternSizeRect.get(2, 0)[1]),
+					new Scalar(255, 255, 0));
+			Core.line(traceMat, new Point(estimatedPatternSizeRect.get(3, 0)[0], estimatedPatternSizeRect.get(3, 0)[1]),
+					new Point(estimatedPatternSizeRect.get(0, 0)[0], estimatedPatternSizeRect.get(0, 0)[1]),
+					new Scalar(255, 255, 0));
 
 			Core.line(traceMat, new Point(rotatedPatternSizeRect.get(0, 0)[0], rotatedPatternSizeRect.get(0, 0)[1]),
-					new Point(rotatedPatternSizeRect.get(1, 0)[0], rotatedPatternSizeRect.get(1, 0)[1]), new Scalar(
-							255, 255, 0));
+					new Point(rotatedPatternSizeRect.get(1, 0)[0], rotatedPatternSizeRect.get(1, 0)[1]),
+					new Scalar(255, 255, 0));
 			Core.line(traceMat, new Point(rotatedPatternSizeRect.get(1, 0)[0], rotatedPatternSizeRect.get(1, 0)[1]),
-					new Point(rotatedPatternSizeRect.get(2, 0)[0], rotatedPatternSizeRect.get(2, 0)[1]), new Scalar(
-							255, 255, 0));
+					new Point(rotatedPatternSizeRect.get(2, 0)[0], rotatedPatternSizeRect.get(2, 0)[1]),
+					new Scalar(255, 255, 0));
 			Core.line(traceMat, new Point(rotatedPatternSizeRect.get(3, 0)[0], rotatedPatternSizeRect.get(3, 0)[1]),
-					new Point(rotatedPatternSizeRect.get(2, 0)[0], rotatedPatternSizeRect.get(2, 0)[1]), new Scalar(
-							255, 255, 0));
+					new Point(rotatedPatternSizeRect.get(2, 0)[0], rotatedPatternSizeRect.get(2, 0)[1]),
+					new Scalar(255, 255, 0));
 			Core.line(traceMat, new Point(rotatedPatternSizeRect.get(3, 0)[0], rotatedPatternSizeRect.get(3, 0)[1]),
-					new Point(rotatedPatternSizeRect.get(0, 0)[0], rotatedPatternSizeRect.get(0, 0)[1]), new Scalar(
-							255, 255, 0));
+					new Point(rotatedPatternSizeRect.get(0, 0)[0], rotatedPatternSizeRect.get(0, 0)[1]),
+					new Scalar(255, 255, 0));
 		}
 
 		return rotatedPatternSizeRect;
@@ -487,19 +479,19 @@ public class AutoCalibrationManager {
 
 		double topWidth = Math.sqrt(Math.pow(topRight.x - topLeft.x, 2) + Math.pow(topRight.y - topLeft.y, 2));
 		double leftHeight = Math.sqrt(Math.pow(bottomLeft.x - topLeft.x, 2) + Math.pow(bottomLeft.y - topLeft.y, 2));
-		double bottomWidth = Math.sqrt(Math.pow(bottomRight.x - bottomLeft.x, 2)
-				+ Math.pow(bottomRight.y - bottomLeft.y, 2));
-		double rightHeight = Math.sqrt(Math.pow(bottomRight.x - topRight.x, 2)
-				+ Math.pow(bottomRight.y - topRight.y, 2));
+		double bottomWidth = Math
+				.sqrt(Math.pow(bottomRight.x - bottomLeft.x, 2) + Math.pow(bottomRight.y - bottomLeft.y, 2));
+		double rightHeight = Math
+				.sqrt(Math.pow(bottomRight.x - topRight.x, 2) + Math.pow(bottomRight.y - topRight.y, 2));
 
 		if (logger.isTraceEnabled()) {
 			double angle = Math.atan((topRight.y - topLeft.y) / (topRight.x - topLeft.x)) * 180 / Math.PI;
 			double angle2 = Math.atan((bottomRight.y - bottomLeft.y) / (bottomRight.x - bottomLeft.x)) * 180 / Math.PI;
 
-			logger.trace("square size {} {} - angle {}", topWidth / (PATTERN_WIDTH - 1), leftHeight
-					/ (PATTERN_HEIGHT - 1), angle);
-			logger.trace("square size {} {} - angle {}", bottomWidth / (PATTERN_WIDTH - 1), rightHeight
-					/ (PATTERN_HEIGHT - 1), angle2);
+			logger.trace("square size {} {} - angle {}", topWidth / (PATTERN_WIDTH - 1),
+					leftHeight / (PATTERN_HEIGHT - 1), angle);
+			logger.trace("square size {} {} - angle {}", bottomWidth / (PATTERN_WIDTH - 1),
+					rightHeight / (PATTERN_HEIGHT - 1), angle2);
 		}
 
 		// Estimate the square widths, that is what we base the estimate of the
@@ -530,10 +522,10 @@ public class AutoCalibrationManager {
 		// double newBottomWidth = Math.sqrt(Math.pow(newBottomRight[0] -
 		// newBottomLeft[0],2) + Math.pow(newBottomRight[1] -
 		// newBottomLeft[1],2));
-		double newLeftHeight = Math.sqrt(Math.pow(newBottomLeft[0] - newTopLeft[0], 2)
-				+ Math.pow(newBottomLeft[1] - newTopLeft[1], 2));
-		double newRightHeight = Math.sqrt(Math.pow(newBottomRight[0] - newTopRight[0], 2)
-				+ Math.pow(newBottomRight[1] - newTopRight[1], 2));
+		double newLeftHeight = Math
+				.sqrt(Math.pow(newBottomLeft[0] - newTopLeft[0], 2) + Math.pow(newBottomLeft[1] - newTopLeft[1], 2));
+		double newRightHeight = Math.sqrt(
+				Math.pow(newBottomRight[0] - newTopRight[0], 2) + Math.pow(newBottomRight[1] - newTopRight[1], 2));
 
 		// The minimum dimension is always from the height because the pattern
 		// is shorter on that side
@@ -596,9 +588,8 @@ public class AutoCalibrationManager {
 			Highgui.imwrite(filename, grey);
 		}
 
-		if (logger.isDebugEnabled())
-			logger.debug("estimation {} {} {} {}", estimatedPatternRect.get(0, 0), estimatedPatternRect.get(1, 0),
-					estimatedPatternRect.get(2, 0), estimatedPatternRect.get(3, 0));
+		if (logger.isDebugEnabled()) logger.debug("estimation {} {} {} {}", estimatedPatternRect.get(0, 0),
+				estimatedPatternRect.get(1, 0), estimatedPatternRect.get(2, 0), estimatedPatternRect.get(3, 0));
 
 		// Easier to work off of Points
 		Point[] estimatedPoints = matOfPoint2fToPoints(estimatedPatternRect);
@@ -769,15 +760,12 @@ public class AutoCalibrationManager {
 		// | |
 		// 3rd-------4th
 		destCorners.put(0, 0, new double[] { boundsRect.boundingRect().x, boundsRect.boundingRect().y });
-		destCorners.put(1, 0,
-				new double[] { boundsRect.boundingRect().x + boundsRect.boundingRect().width,
-						boundsRect.boundingRect().y });
-		destCorners.put(2, 0,
-				new double[] { boundsRect.boundingRect().x,
-						boundsRect.boundingRect().y + boundsRect.boundingRect().height });
-		destCorners.put(3, 0,
-				new double[] { boundsRect.boundingRect().x + boundsRect.boundingRect().width,
-						boundsRect.boundingRect().y + boundsRect.boundingRect().height });
+		destCorners.put(1, 0, new double[] { boundsRect.boundingRect().x + boundsRect.boundingRect().width,
+				boundsRect.boundingRect().y });
+		destCorners.put(2, 0, new double[] { boundsRect.boundingRect().x,
+				boundsRect.boundingRect().y + boundsRect.boundingRect().height });
+		destCorners.put(3, 0, new double[] { boundsRect.boundingRect().x + boundsRect.boundingRect().width,
+				boundsRect.boundingRect().y + boundsRect.boundingRect().height });
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("initializeWarpPerspective {} {} {} {}", sourceCorners.get(0, 0), sourceCorners.get(1, 0),
@@ -790,37 +778,36 @@ public class AutoCalibrationManager {
 
 		int width = boundsRect.boundingRect().width;
 		int height = boundsRect.boundingRect().height;
-		
+
 		// Make them divisible by two for video recording purposes
-		
-		if ((width%2)==1) width++;
-		if ((height%2)==1) height++;
-		
-		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y,
-				width, height);
+
+		if ((width % 2) == 1) width++;
+		if ((height % 2) == 1) height++;
+
+		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y, width, height);
 
 		warpInitialized = true;
 
 		if (logger.isTraceEnabled()) {
 			Mat debugFrame = frame.clone();
 
-			Core.circle(debugFrame, new Point(sourceCorners.get(0, 0)[0], sourceCorners.get(0, 0)[1]), 1, new Scalar(
-					255, 0, 255), -1);
-			Core.circle(debugFrame, new Point(sourceCorners.get(1, 0)[0], sourceCorners.get(1, 0)[1]), 1, new Scalar(
-					255, 0, 255), -1);
-			Core.circle(debugFrame, new Point(sourceCorners.get(2, 0)[0], sourceCorners.get(2, 0)[1]), 1, new Scalar(
-					255, 0, 255), -1);
-			Core.circle(debugFrame, new Point(sourceCorners.get(3, 0)[0], sourceCorners.get(3, 0)[1]), 1, new Scalar(
-					255, 0, 255), -1);
+			Core.circle(debugFrame, new Point(sourceCorners.get(0, 0)[0], sourceCorners.get(0, 0)[1]), 1,
+					new Scalar(255, 0, 255), -1);
+			Core.circle(debugFrame, new Point(sourceCorners.get(1, 0)[0], sourceCorners.get(1, 0)[1]), 1,
+					new Scalar(255, 0, 255), -1);
+			Core.circle(debugFrame, new Point(sourceCorners.get(2, 0)[0], sourceCorners.get(2, 0)[1]), 1,
+					new Scalar(255, 0, 255), -1);
+			Core.circle(debugFrame, new Point(sourceCorners.get(3, 0)[0], sourceCorners.get(3, 0)[1]), 1,
+					new Scalar(255, 0, 255), -1);
 
-			Core.circle(debugFrame, new Point(destCorners.get(0, 0)[0], destCorners.get(0, 0)[1]), 1, new Scalar(255,
-					0, 0), -1);
-			Core.circle(debugFrame, new Point(destCorners.get(1, 0)[0], destCorners.get(1, 0)[1]), 1, new Scalar(255,
-					0, 0), -1);
-			Core.circle(debugFrame, new Point(destCorners.get(2, 0)[0], destCorners.get(2, 0)[1]), 1, new Scalar(255,
-					0, 0), -1);
-			Core.circle(debugFrame, new Point(destCorners.get(3, 0)[0], destCorners.get(3, 0)[1]), 1, new Scalar(255,
-					0, 0), -1);
+			Core.circle(debugFrame, new Point(destCorners.get(0, 0)[0], destCorners.get(0, 0)[1]), 1,
+					new Scalar(255, 0, 0), -1);
+			Core.circle(debugFrame, new Point(destCorners.get(1, 0)[0], destCorners.get(1, 0)[1]), 1,
+					new Scalar(255, 0, 0), -1);
+			Core.circle(debugFrame, new Point(destCorners.get(2, 0)[0], destCorners.get(2, 0)[1]), 1,
+					new Scalar(255, 0, 0), -1);
+			Core.circle(debugFrame, new Point(destCorners.get(3, 0)[0], destCorners.get(3, 0)[1]), 1,
+					new Scalar(255, 0, 0), -1);
 
 			Core.line(debugFrame, new Point(boundingBox.getMinX(), boundingBox.getMinY()),
 					new Point(boundingBox.getMaxX(), boundingBox.getMinY()), new Scalar(0, 255, 0));
@@ -904,10 +891,10 @@ public class AutoCalibrationManager {
 
 		Point topLeft = new Point(corners.get(0, 0)[0], corners.get(0, 0)[1]);
 		Point topRight = new Point(corners.get(PATTERN_WIDTH - 1, 0)[0], corners.get(PATTERN_WIDTH - 1, 0)[1]);
-		Point bottomRight = new Point(corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[0], corners.get(PATTERN_WIDTH
-				* PATTERN_HEIGHT - 1, 0)[1]);
-		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0], corners.get(PATTERN_WIDTH
-				* (PATTERN_HEIGHT - 1), 0)[1]);
+		Point bottomRight = new Point(corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[0],
+				corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[1]);
+		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0],
+				corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[1]);
 
 		result.put(0, 0, topLeft.x, topLeft.y, topRight.x, topRight.y, bottomRight.x, bottomRight.y, bottomLeft.x,
 				bottomLeft.y);
@@ -928,10 +915,10 @@ public class AutoCalibrationManager {
 					((row + 1) * PATTERN_WIDTH - 1) + col + 1);
 		}
 
-		Point topLeft = new Point(corners.get((row * PATTERN_WIDTH - 1) + col, 0)[0], corners.get(
-				(row * PATTERN_WIDTH - 1) + col, 0)[1]);
-		Point bottomRight = new Point(corners.get(((row + 1) * PATTERN_WIDTH - 1) + col + 1, 0)[0], corners.get(
-				((row + 1) * PATTERN_WIDTH - 1) + col + 1, 0)[1]);
+		Point topLeft = new Point(corners.get((row * PATTERN_WIDTH - 1) + col, 0)[0],
+				corners.get((row * PATTERN_WIDTH - 1) + col, 0)[1]);
+		Point bottomRight = new Point(corners.get(((row + 1) * PATTERN_WIDTH - 1) + col + 1, 0)[0],
+				corners.get(((row + 1) * PATTERN_WIDTH - 1) + col + 1, 0)[1]);
 
 		Point result = new Point((topLeft.x + bottomRight.x) / 2, (topLeft.y + bottomRight.y) / 2);
 

@@ -72,7 +72,7 @@ public class ImageCell extends TextFieldListCell<String> {
 				if (img.isPresent()) {
 					imageCache.get(c).setImage(img.get());
 				}
-			}, "FetchImageCellWebcamImages").start();
+			} , "FetchImageCellWebcamImages").start();
 		}
 
 		this.editingProperty().addListener(new ChangeListener<Boolean>() {

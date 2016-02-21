@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package com.shootoff.camera.arenamask;
 
 import java.awt.image.BufferedImage;
@@ -38,72 +37,67 @@ public class Mask {
 	public BufferedImage bImage;
 	public Mat mask;
 	public final long timestamp;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(Mask.class);
 
-	
-	public Mask(BufferedImage bImage, long timestamp)
-	{
+	public Mask(BufferedImage bImage, long timestamp) {
 		this.bImage = bImage;
 		this.timestamp = timestamp;
 		this.mask = new Mat();
 	}
-	
+
 	private int avgMaskLum = 0;
-	public int getAvgMaskLum()
-	{
+
+	public int getAvgMaskLum() {
 		return avgMaskLum;
 	}
-	
-	public Mat getLumMask(Size targetSize)
-	{
+
+	public Mat getLumMask(Size targetSize) {
 		// Indicates it is already initialized
-		if (mask != null && mask.rows() > 0)
-			return mask;
-		
-		mask = new Mat((int)targetSize.height, (int)targetSize.width, CvType.CV_32S);
-		
-		Mat src = Camera.bufferedImageToMat(bImage);	
+		if (mask != null && mask.rows() > 0) return mask;
+
+		mask = new Mat((int) targetSize.height, (int) targetSize.width, CvType.CV_32S);
+
+		Mat src = Camera.bufferedImageToMat(bImage);
 		Imgproc.resize(src, src, targetSize);
-		
+
 		bImage = Camera.matToBufferedImage(src);
-		
+
 		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
-		
+
 		long tmpAvgMaskLum = 0;
-		for (int y = 0; y < src.rows(); y++)
-		{
-			for (int x = 0; x < src.cols(); x++)
-			{
-				byte[] px = {0, 0, 0};
+		for (int y = 0; y < src.rows(); y++) {
+			for (int x = 0; x < src.cols(); x++) {
+				byte[] px = { 0, 0, 0 };
 				src.get(y, x, px);
 				int pxS = px[1] & 0xFF;
 				int pxV = px[2] & 0xFF;
-				
-				int pxLum = ((255-pxS)*pxV);
-				
+
+				int pxLum = ((255 - pxS) * pxV);
+
 				tmpAvgMaskLum += pxLum;
-				
+
 				int[] dstLum = { pxLum };
-				
-				if (x==200&&y==200)
-					logger.warn("mask {} {} {}", pxS, pxV, dstLum);
-				
+
+				if (x == 200 && y == 200) logger.warn("mask {} {} {}", pxS, pxV, dstLum);
+
 				mask.put(y, x, dstLum);
 			}
 		}
-		
-		avgMaskLum = (int)(tmpAvgMaskLum / (mask.rows()*mask.cols()));
-		
-		/*int dilation_size = 5;
-		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new  Size(2*dilation_size + 1, 2*dilation_size+1));
-		Imgproc.dilate(mask, mask, kern);*/
 
-		Imgproc.blur(mask, mask, new Size(9,9));
-		
-		
-		//Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);	
-		
+		avgMaskLum = (int) (tmpAvgMaskLum / (mask.rows() * mask.cols()));
+
+		/*
+		 * int dilation_size = 5; Mat kern =
+		 * Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new
+		 * Size(2*dilation_size + 1, 2*dilation_size+1)); Imgproc.dilate(mask,
+		 * mask, kern);
+		 */
+
+		Imgproc.blur(mask, mask, new Size(9, 9));
+
+		// Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);
+
 		return mask;
 	}
 }

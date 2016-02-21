@@ -26,8 +26,7 @@ import javafx.scene.shape.Ellipse;
 public class EllipseRegion extends Ellipse implements TargetRegion {
 	private final Map<String, String> tags = new HashMap<String, String>();
 
-	public EllipseRegion(double centerX, double centerY, double radiusX,
-			double radiusY) {
+	public EllipseRegion(double centerX, double centerY, double radiusX, double radiusY) {
 
 		super(centerX, centerY, radiusX, radiusY);
 	}

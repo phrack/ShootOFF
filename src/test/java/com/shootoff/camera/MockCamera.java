@@ -4,12 +4,12 @@ public class MockCamera extends Camera {
 	public MockCamera() {
 		super();
 	}
-	
+
 	@Override
 	public boolean isOpen() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean isImageNew() {
 		return false;

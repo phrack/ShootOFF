@@ -90,11 +90,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
 
-        if (newTarget.isPresent()) {
-            newTarget.get().setPosition(x, y);
-            targets.add(newTarget.get());
-           
-        }
+		if (newTarget.isPresent()) {
+			newTarget.get().setPosition(x, y);
+			targets.add(newTarget.get());
+
+		}
 
 		return newTarget;
 	}
@@ -129,7 +129,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			arenaController.getCanvasManager().removeTarget(target);
 
 		targets.clear();
-		
+
 		super.destroy();
 	}
 }

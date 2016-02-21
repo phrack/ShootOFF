@@ -53,8 +53,7 @@ public class SpriteAnimation extends Transition {
 	}
 
 	public void reset() {
-		if (this.getStatus() == Status.RUNNING)
-			this.stop();
+		if (this.getStatus() == Status.RUNNING) this.stop();
 
 		isReversed = false;
 		lastIndex = 0;

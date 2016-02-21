@@ -103,23 +103,24 @@ public class TestSteelChallenge {
 
 		noTargetsSC.init(new Course(new ArrayList<Target>()));
 
-		assertEquals(String.format(
-				"sounds/voice/shootoff-lay-out-own-course.wav%nsounds/voice/shootoff-add-stop-target.wav%n")
+		assertEquals(String
+				.format("sounds/voice/shootoff-lay-out-own-course.wav%nsounds/voice/shootoff-add-stop-target.wav%n")
 				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}
 
 	@Test
 	public void testMissAllTargets() throws UnsupportedEncodingException {
-		assertEquals(String.format(
-				"sounds/voice/shootoff-are-you-ready.wav%n" + "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n")
-				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
+		assertEquals(
+				String.format("sounds/voice/shootoff-are-you-ready.wav%n"
+						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n").replace('/', File.separatorChar),
+				stringOut.toString("UTF-8"));
 		stringOut.reset();
 
 		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
 
-		assertEquals(String.format(
-				"Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
+		assertEquals(String
+				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
 						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n", course.getTargets().size() - 1)
 				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
 		stringOut.reset();
@@ -127,15 +128,16 @@ public class TestSteelChallenge {
 
 	@Test
 	public void testMissAllThenThreeTargets() throws UnsupportedEncodingException {
-		assertEquals(String.format(
-				"sounds/voice/shootoff-are-you-ready.wav%n" + "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n")
-				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
+		assertEquals(
+				String.format("sounds/voice/shootoff-are-you-ready.wav%n"
+						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n").replace('/', File.separatorChar),
+				stringOut.toString("UTF-8"));
 		stringOut.reset();
 
 		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
 
-		assertEquals(String.format(
-				"Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
+		assertEquals(String
+				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
 						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n", course.getTargets().size() - 1)
 				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
 		stringOut.reset();
@@ -143,8 +145,8 @@ public class TestSteelChallenge {
 		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(nonStopRegion));
 		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegion));
 
-		assertEquals(String.format(
-				"Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
+		assertEquals(String
+				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
 						+ "sounds/voice/shootoff-standby.wav%nsounds/beep.wav%n", course.getTargets().size() - 2)
 				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
 		stringOut.reset();

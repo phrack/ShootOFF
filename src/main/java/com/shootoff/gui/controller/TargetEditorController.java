@@ -110,8 +110,8 @@ public class TargetEditorController {
 
 		this.targetListener = targetListener;
 
-		regionColorChoiceBox
-				.setItems(FXCollections.observableArrayList("black", "blue", "brown", "gray", "green", "orange", "red", "white"));
+		regionColorChoiceBox.setItems(
+				FXCollections.observableArrayList("black", "blue", "brown", "gray", "green", "orange", "red", "white"));
 
 		regionColorChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 			@Override

@@ -81,11 +81,11 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 		startExercise();
 	}
-	
+
 	private static void setThisSuper(ProjectorTrainingExerciseBase thisSuper) {
 		BouncingTargets.thisSuper = thisSuper;
 	}
-	
+
 	private static void setMaxVelocity(int maxVelocity) {
 		BouncingTargets.maxVelocity = maxVelocity;
 	}

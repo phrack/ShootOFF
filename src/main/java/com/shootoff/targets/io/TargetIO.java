@@ -55,7 +55,7 @@ public class TargetIO {
 		}
 
 		final URI baseURI = new File(System.getProperty("user.dir")).toURI();
-		
+
 		for (final Node node : regions) {
 			final TargetRegion region = (TargetRegion) node;
 
