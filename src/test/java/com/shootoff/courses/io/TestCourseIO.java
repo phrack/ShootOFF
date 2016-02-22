@@ -18,6 +18,7 @@ import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
+import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.io.TargetIO;
 
@@ -39,7 +40,7 @@ public class TestCourseIO {
 		System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 
 		Configuration config = new Configuration(new String[0]);
-		arenaController = new ProjectorArenaController();
+		MockProjectorArenaController arenaController = new MockProjectorArenaController();
 		arenaController.init(config, new MockCanvasManager(config));
 		backgroundURL = "/arena/backgrounds/indoor_range.gif";
 		backgroundIsResource = true;

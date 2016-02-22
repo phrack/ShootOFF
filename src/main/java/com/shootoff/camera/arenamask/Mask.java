@@ -75,7 +75,7 @@ public class Mask {
 
 				int[] dstLum = { pxLum };
 
-				if (x == 200 && y == 200) logger.warn("mask {} {} {}", pxS, pxV, dstLum);
+				//if (x == 200 && y == 200) logger.warn("mask {} {} {}", pxS, pxV, dstLum);
 
 				mask.put(y, x, dstLum);
 			}

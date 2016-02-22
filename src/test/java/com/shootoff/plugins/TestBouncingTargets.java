@@ -22,7 +22,7 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Group;
@@ -54,7 +54,7 @@ public class TestBouncingTargets {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		ProjectorArenaController pac = new ProjectorArenaController();
+		MockProjectorArenaController pac = new MockProjectorArenaController();
 		pac.init(config, new MockCanvasManager(config));
 
 		bt.init(config, cs, null, null, pac);

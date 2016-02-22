@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
@@ -91,7 +92,11 @@ public final class ShotDetectionManager {
 	// red
 	// without having complicated math every pixel
 	private boolean shouldShowBrightnessWarningBool = false;
+
 	private Mat currentFullFrame;
+	
+	private ArenaMaskManager arenaMaskManager = null;
+	private boolean usingArenaMask = false;
 
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config, CanvasManager canvasManager) {
 		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
@@ -159,7 +164,7 @@ public final class ShotDetectionManager {
 
 		//if (x == 200 && y == 200) logger.warn("{} {}", currentLum, mask);
 
-		if (currentLum < mask * 1.2) {
+		if (currentLum < mask*1.2) {
 			valueForThreshold = 0;
 			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
 			drawOnCurrentFrame(x, y, col);
@@ -248,7 +253,7 @@ public final class ShotDetectionManager {
 		return b;
 	}
 
-	public void processFrame(Mat frame, Mat mask, boolean detectShots) {
+	public void processFrame(Mat frame, boolean detectShots) {
 		movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 
 		// This is the FULL, ORIGINAL FRAME passed from CameraManager
@@ -270,7 +275,7 @@ public final class ShotDetectionManager {
 		// Must reset before every updateFilter loop
 		brightPixels.clear();
 
-		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame, mask,
+		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame, 
 				(detectShots && filtersInitialized));
 
 		int thresholdPixelsSize = thresholdPixels.size();
@@ -390,7 +395,7 @@ public final class ShotDetectionManager {
 		return false;
 	}
 
-	private List<Pixel> findThresholdPixelsAndUpdateFilter(Mat workingFrame, Mat mask, boolean detectShots) {
+	private List<Pixel> findThresholdPixelsAndUpdateFilter(Mat workingFrame, boolean detectShots) {
 		final int subWidth = workingFrame.cols() / SECTOR_COLUMNS;
 		final int subHeight = workingFrame.rows() / SECTOR_ROWS;
 
@@ -404,6 +409,13 @@ public final class ShotDetectionManager {
 		int size = (int) (workingFrame.total() * channels);
 		byte[] workingFramePrimitive = new byte[size];
 		workingFrame.get(0, 0, workingFramePrimitive);
+		
+		int[] maskPrimitive = new int[workingFrame.cols() * workingFrame.rows()];
+		if (usingArenaMask)
+		{
+			Mat mask = arenaMaskManager.getMask();
+			mask.get(0, 0, maskPrimitive);
+		}
 
 		// In this loop we accomplish both MovingAverage updates AND threshold
 		// pixel detection
@@ -427,9 +439,12 @@ public final class ShotDetectionManager {
 								workingFramePrimitive[(yOffset + x) * channels + 2] };
 
 						int[] maskInt = { 0 };
-						if (mask != null) {
-							mask.get(y, x, maskInt);
+
+						if (usingArenaMask) {
+							maskInt[0] = maskPrimitive[yOffset + x];
 						}
+						//if (x==200&&y==200)
+						//	logger.info("maskInt {} - {}", usingArenaMask, maskInt[0]);
 
 						Optional<Pixel> pixel = updateFilter(pixelChannels, maskInt[0], x, y, detectShots);
 
@@ -532,5 +547,14 @@ public final class ShotDetectionManager {
 			canvasManager.addShot(color.get(), x, y);
 		}
 
+	}
+
+	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+		setUsingArenaMask(true);
+		this.arenaMaskManager = arenaMaskManager;
+	}
+
+	private void setUsingArenaMask(boolean val) {
+		usingArenaMask  = val;
 	}
 }

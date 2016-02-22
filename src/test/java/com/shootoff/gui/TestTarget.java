@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
@@ -55,7 +55,7 @@ public class TestTarget {
 		canvasManager = new MockCanvasManager(config);
 		canvasManager.getCanvasGroup().getChildren().clear();
 
-		ProjectorArenaController arenaController = new ProjectorArenaController();
+		MockProjectorArenaController arenaController = new MockProjectorArenaController();
 		arenaController.init(config, canvasManager);
 
 		targets = new ArrayList<Target>();

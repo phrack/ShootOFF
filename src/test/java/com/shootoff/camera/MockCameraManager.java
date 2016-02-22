@@ -6,9 +6,11 @@ import java.util.Optional;
 
 import javafx.geometry.Bounds;
 
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.MockCanvasManager;
+import com.xuggle.mediatool.IMediaListener;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
@@ -59,6 +61,21 @@ public class MockCameraManager extends CameraManager {
 
 		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
 		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+		reader.addListener(detector);
+
+		logger.trace("opening {}", videoFile.getAbsolutePath());
+
+		while (reader.readPacket() == null)
+			do {} while (false);
+	}
+	
+	
+	public void processVideo(IMediaListener listener) {
+		Detector detector = new Detector();
+
+		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
+		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+		reader.addListener(listener);
 		reader.addListener(detector);
 
 		logger.trace("opening {}", videoFile.getAbsolutePath());
@@ -119,5 +136,14 @@ public class MockCameraManager extends CameraManager {
 	
 	public boolean isVideoProcessed() {
 		return processedVideo;
+	}
+	
+	public void setShotDetectionArenaMaskManager()
+	{
+		shotDetectionManager.setArenaMaskManager(arenaMaskManager);
+	}
+
+	protected ArenaMaskManager getArenaMaskManager() {
+		return arenaMaskManager;
 	}
 }

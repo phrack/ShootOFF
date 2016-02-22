@@ -46,7 +46,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -59,14 +58,15 @@ import javafx.stage.Stage;
 public class ProjectorArenaController implements CalibrationListener {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
-	private Stage arenaStage;
+	protected Stage arenaStage;
 	private Stage shootOFFStage;
-	@FXML private AnchorPane arenaAnchor;
+	@FXML
+	protected AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
 
-	private Configuration config;
-	private CanvasManager canvasManager;
+	protected Configuration config;
+	protected CanvasManager canvasManager;
 	private Label mouseOnArenaLabel = null;
 	private Optional<LocatedImage> background = Optional.empty();
 	private Optional<LocatedImage> savedBackground = Optional.empty();
@@ -76,17 +76,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	private ShootOFFController shootOFFController;
 
-	// Used for testing
-	public void init(Configuration config, CanvasManager canvasManager) {
-		this.config = config;
-		this.canvasManager = canvasManager;
 
-		arenaStage = new Stage();
-		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
-		Scene scene = new Scene(arenaAnchor, 500, 500);
-		arenaStage.setScene(scene);
-
-	}
 
 	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
@@ -470,9 +460,9 @@ public class ProjectorArenaController implements CalibrationListener {
 		});
 	}
 
-	@SuppressWarnings("unused") private ArenaMaskManager arenaMaskManager = null;
-	private Timer updateMaskTimer = null;
-	private BufferedImage bImage;
+	protected ArenaMaskManager arenaMaskManager = null;
+	protected Timer updateMaskTimer = null;
+	protected BufferedImage bImage;
 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		this.arenaMaskManager = arenaMaskManager;

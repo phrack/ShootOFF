@@ -530,11 +530,12 @@ public class CameraManager {
 		Mat matFrame = Camera.bufferedImageToMat(currentFrame);
 		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
 
-		Mat mask = null;
+		//Mat mask = null;
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
-			matFrame = acm.undistortFrame(matFrame);
-
+			if (acm != null)
+				matFrame = acm.undistortFrame(matFrame);
+			
 			Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(),
 					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
 					(int) projectionBounds.get().getMaxX());
@@ -562,9 +563,11 @@ public class CameraManager {
 			// logger.debug("processFrame time {}",
 			// getCurrentFrameTimestamp());
 
-			mask = arenaMaskManager.getMask();
+			//mask = arenaMaskManager.getMask();
 
 			long lumsCurrentAcrossFrame = 0;
+			long lumsMinimumAcrossFrame = 255*255;
+			long lumsMaximumAcrossFrame = 0;
 			for (int y = 0; y < submatFrame.rows(); y++) {
 				for (int x = 0; x < submatFrame.cols(); x++) {
 					byte[] px = { 0, 0, 0 };
@@ -575,6 +578,11 @@ public class CameraManager {
 					int curLum = ((255 - matS) * matV);
 
 					lumsCurrentAcrossFrame += curLum;
+					
+					if (curLum > lumsMaximumAcrossFrame)
+						lumsMaximumAcrossFrame = curLum;
+					else if (curLum < lumsMinimumAcrossFrame)
+						lumsMinimumAcrossFrame = curLum;
 
 					// byte diff = (byte) (mask.get(y,x)[0]/(255-matS));
 					// px[2] = (byte) (px[2] - diff);
@@ -594,9 +602,9 @@ public class CameraManager {
 			lumsCurrentAcrossFrame /= submatFrame.rows() * submatFrame.cols();
 			lumsMaAcrossFrame = ((lumsMaAcrossFrame * 4) + (int) lumsCurrentAcrossFrame) / 5;
 
-			arenaMaskManager.updateAvgLums(lumsMaAcrossFrame, getCurrentFrameTimestamp());
-
-			//logger.warn("{}", mask.get(200, 200)[0]);
+			//logger.info("updateAvgLums {} {} {} {}", lumsMaAcrossFrame, (int)lumsMaximumAcrossFrame, (int)lumsMinimumAcrossFrame, getCurrentFrameTimestamp());
+			
+			arenaMaskManager.updateAvgLums(lumsMaAcrossFrame, (int)lumsMaximumAcrossFrame, (int)lumsMinimumAcrossFrame, getCurrentFrameTimestamp());
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
@@ -604,7 +612,7 @@ public class CameraManager {
 
 		}
 
-		shotDetectionManager.processFrame(matFrame, mask, isDetecting);
+		shotDetectionManager.processFrame(matFrame, isDetecting);
 
 		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_HSV2BGR);
 
@@ -798,9 +806,12 @@ public class CameraManager {
 
 			controller.setArenaMaskManager(arenaMaskManager);
 
+			shotDetectionManager.setArenaMaskManager(arenaMaskManager);
+			
 			arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
+			
 
-			// if (!recordingStream)
+			//if (!recordingStream)
 			// startRecordingStream(new File("fullFrameStream.mp4"));
 			if (recordCalibratedArea && !recordingCalibratedArea)
 				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int) bounds.getWidth(),

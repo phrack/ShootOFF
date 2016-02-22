@@ -51,6 +51,9 @@ public class ArenaMaskManager implements Runnable {
 	private final static int LUM_MA_LENGTH = 2;
 
 	private int avgLums = 0;
+	private int minLums;
+	private int maxLums;
+
 
 	public volatile Mask maskFromArena = null;
 
@@ -85,44 +88,54 @@ public class ArenaMaskManager implements Runnable {
 				continue;
 			}
 
-			Mat nextMat = nextMask.getLumMask(dsize);
-
-			if (recordMask) recordMask(nextMask);
-
-			int nextMaskAvgLum = nextMask.getAvgMaskLum();
-
-			maskFromArena = null;
-
-			sem.release();
-
-			// logger.debug("aMM {} - {}", cBuffer.size(), curDelay);
-
-			// logger.warn("updatingMask {} {} - {} {} {}", nextMat.cols(),
-			// nextMat.rows(), nextMask.timestamp, avgLums,
-			// nextMask.getAvgMaskLum());
-
-			for (int y = 0; y < nextMat.rows(); y++) {
-				for (int x = 0; x < nextMat.cols(); x++) {
-					int[] maskpx = { 0 };
-					mask.get(y, x, maskpx);
-
-					int[] nextmatpx = { 0 };
-					nextMat.get(y, x, nextmatpx);
-
-					int newLum = (int) ((double) nextmatpx[0] * (double) ((double) avgLums / (double) nextMaskAvgLum));
-
-					maskpx[0] = (((maskpx[0] * (LUM_MA_LENGTH - 1)) + newLum) / LUM_MA_LENGTH);
-
-					//if (x == 200 && y == 200) logger.warn("pixel {} {} - {} {} - {} {} {} - {}", x, y,
-					//		mask.get(y, x)[0], newLum, nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
-
-					mask.put(y, x, maskpx);
-
-				}
-			}
+			handleMask(nextMask);
 		}
 
 		if (recordMask) stopRecordingStream();
+	}
+	
+	public void handleMask(Mask nextMask)
+	{
+		Mat nextMat = nextMask.getLumMask(dsize);
+
+		if (recordMask) recordMask(nextMask);
+
+		int nextMaskAvgLum = nextMask.getAvgMaskLum();
+
+		maskFromArena = null;
+
+		sem.release();
+
+		// logger.debug("aMM {} - {}", cBuffer.size(), curDelay);
+
+		/*logger.info("updatingMask {} {} - {} {} {}", nextMat.cols(),
+		 nextMat.rows(), nextMask.timestamp, avgLums,
+		 nextMask.getAvgMaskLum());*/
+
+		for (int y = 0; y < nextMat.rows(); y++) {
+			for (int x = 0; x < nextMat.cols(); x++) {
+				int[] maskpx = { 0 };
+				mask.get(y, x, maskpx);
+
+				int[] nextmatpx = { 0 };
+				nextMat.get(y, x, nextmatpx);
+
+				int newLum = (int) ((double) nextmatpx[0]  * ((double) avgLums / (double) nextMaskAvgLum));
+				int scaledValue = (int)(((double)(newLum - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
+				
+				//int normalized = (int) ((double)(Math.min(Math.max(nextmatpx[0], minLums), maxLums) - minLums) / (double)(maxLums - minLums));
+				//int newLum = (int) ((double) normalized * ((double) avgLums / (double) nextMaskAvgLum));
+
+				maskpx[0] = (((maskpx[0] * (LUM_MA_LENGTH - 1)) + scaledValue) / LUM_MA_LENGTH);
+
+				/*if (x == 200 && y == 200) logger.warn("pixel {} {} - min {} max {} - maskg {} newLum {} norm {} factor {} nmpx {} avgLums {} nmAvgLum {} mpx {}", x, y,
+						minLums, maxLums,
+						mask.get(y, x)[0], newLum, scaledValue, (double)(nextmatpx[0] - 0) / (double)(255*255 - 0), nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
+				 */
+				mask.put(y, x, maskpx);
+
+			}
+		}
 	}
 
 	public void setDelay(long delay) {
@@ -151,6 +164,7 @@ public class ArenaMaskManager implements Runnable {
 	private boolean isFirstStreamFrame = true;
 	private IMediaWriter videoWriterStream;
 	private long recordingStartTime;
+
 
 	private void recordMask(Mask mask) {
 		if (recordingStream) {
@@ -190,8 +204,10 @@ public class ArenaMaskManager implements Runnable {
 		cBuffer.add(new Mask(bImage, timestamp));
 	}
 
-	public void updateAvgLums(int lumsMovingAverageAcrossFrame, long currentFrameTimestamp) {
+	public void updateAvgLums(int lumsMovingAverageAcrossFrame, int lumsMaximumAcrossFrame, int lumsMinimumAcrossFrame, long currentFrameTimestamp) {
 		avgLums = lumsMovingAverageAcrossFrame;
+		minLums = lumsMinimumAcrossFrame;
+		maxLums = lumsMaximumAcrossFrame;
 	}
 
 }
