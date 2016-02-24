@@ -53,6 +53,10 @@ public class ArenaMaskManager implements Runnable {
 	private int avgLums = 0;
 	private int minLums;
 	private int maxLums;
+	
+	private int[][] lumsMovingAverage;
+	
+
 
 
 	public volatile Mask maskFromArena = null;
@@ -120,13 +124,17 @@ public class ArenaMaskManager implements Runnable {
 				int[] nextmatpx = { 0 };
 				nextMat.get(y, x, nextmatpx);
 
-				int newLum = (int) ((double) nextmatpx[0]  * ((double) avgLums / (double) nextMaskAvgLum));
-				int scaledValue = (int)(((double)(newLum - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
+				double scaler = (double) lumsMovingAverage[x][y] / (double) nextMaskAvgLum;
+				
+				//int newLum = (int) ((double) nextmatpx[0]  * ((double) lumsMovingAverage[x][y] / (double) nextMaskAvgLum));
+				int scaledValue = (int)(((double)(nextmatpx[0] - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
+				scaledValue *= scaler;
 				
 				//int normalized = (int) ((double)(Math.min(Math.max(nextmatpx[0], minLums), maxLums) - minLums) / (double)(maxLums - minLums));
 				//int newLum = (int) ((double) normalized * ((double) avgLums / (double) nextMaskAvgLum));
 
-				maskpx[0] = (((maskpx[0] * (LUM_MA_LENGTH - 1)) + scaledValue) / LUM_MA_LENGTH);
+				maskpx[0] = (((maskpx[0] * (3)) + 2*scaledValue) / 5);
+				//maskpx[0] = scaledValue;
 
 				/*if (x == 200 && y == 200) logger.warn("pixel {} {} - min {} max {} - maskg {} newLum {} norm {} factor {} nmpx {} avgLums {} nmAvgLum {} mpx {}", x, y,
 						minLums, maxLums,
@@ -208,6 +216,10 @@ public class ArenaMaskManager implements Runnable {
 		avgLums = lumsMovingAverageAcrossFrame;
 		minLums = lumsMinimumAcrossFrame;
 		maxLums = lumsMaximumAcrossFrame;
+	}
+	public void setLumsMovingAverage(int[][] lumsMovingAverage)
+	{
+		this.lumsMovingAverage = lumsMovingAverage;
 	}
 
 }

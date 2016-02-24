@@ -54,13 +54,14 @@ public class TestArenaMasking {
 	}
 
 	IMediaReader reader;
+	MockCameraManager cameraManager;
 	private List<Shot> arenaMaskingVideo(String videoPath, String maskPath, Bounds videoBounds) {
 		Object processingLock = new Object();
 
 		File videoFile = new File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
 		File maskFile = new File(TestCameraManagerLifecam.class.getResource(maskPath).getFile());
 
-		MockCameraManager cameraManager;
+		
 		cameraManager = new MockCameraManager(videoFile, processingLock, mockCanvasManager, config, sectorStatuses,
 				Optional.empty());
 
@@ -103,7 +104,9 @@ public class TestArenaMasking {
 		public void onVideoPicture(IVideoPictureEvent event) {
 			// We don't actually want this event, we just use this as 
 			// a trigger to read another frame on the mask video
-			reader.readPacket();
+			
+			while (cameraManager.currentFrameTimestamp>currentFrameTimestamp+10)
+				reader.readPacket();
 		}
 	}
 	
@@ -129,5 +132,14 @@ public class TestArenaMasking {
 		Bounds bounds = new BoundingBox(0, 0, 424, 320);
 		List<Shot> shots = arenaMaskingVideo("/arenamask/calibratedArea.mp4", "/arenamask/testingArenaMask.mp4",  bounds);
 		assertEquals(true, shots.isEmpty());
+	}
+	
+	@Test
+	public void testArenaMaskingBouncingTargets() throws IOException {
+		Bounds bounds = new BoundingBox(0, 0, 420, 316);
+		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated.mp4", "/arenamask/BouncingTargets-arena.mp4",  bounds);
+		
+		// Still working on this one.
+		assertEquals(false, shots.isEmpty());
 	}
 }

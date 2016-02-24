@@ -28,6 +28,7 @@ import java.util.Optional;
 
 import javafx.geometry.Bounds;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
@@ -164,19 +165,11 @@ public final class ShotDetectionManager {
 
 		//if (x == 200 && y == 200) logger.warn("{} {}", currentLum, mask);
 
-		if (currentLum < mask*1.2) {
+		if (mask != 0 && currentLum < mask*1.1) {
 			valueForThreshold = 0;
 			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
 			drawOnCurrentFrame(x, y, col);
 		}
-
-		// TODO: Fix arena masking
-		/*
-		 * if (cameraManager.curFrameMask != null) { valueForThreshold =
-		 * cameraManager.curFrameMask.get(y,x)[0];
-		 * 
-		 * }
-		 */
 
 		if (!detectShots)
 			result = Optional.empty();
@@ -413,6 +406,7 @@ public final class ShotDetectionManager {
 		int[] maskPrimitive = new int[workingFrame.cols() * workingFrame.rows()];
 		if (usingArenaMask)
 		{
+			arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
 			Mat mask = arenaMaskManager.getMask();
 			mask.get(0, 0, maskPrimitive);
 		}
@@ -534,6 +528,25 @@ public final class ShotDetectionManager {
 			File outputfile = new File(String.format("shot-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
 			filename = outputfile.toString();
 			Highgui.imwrite(filename, debugFrame);
+			
+			
+			if (usingArenaMask)
+			{
+				Mat mask = arenaMaskManager.getMask();
+				Mat maskGrayscale = new Mat(mask.rows(), mask.cols(), CvType.CV_8UC1);
+				for (int a = 0; a < mask.cols(); a++)
+				{
+					for (int b = 0; b < mask.rows(); b++)
+					{
+						maskGrayscale.put(b, a, (int)mask.get(b,a)[0]/255);
+					}
+				}
+				outputfile = new File(String.format("mask-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
+				filename = outputfile.toString();
+				Highgui.imwrite(filename, maskGrayscale);
+			}
+			
+			
 		}
 
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
