@@ -528,24 +528,19 @@ public class CameraManager {
 		}
 
 		Mat matFrame = Camera.bufferedImageToMat(currentFrame);
-		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
-
-		//Mat mask = null;
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 			if (acm != null)
+			{
+				// MUST BE IN BGR pixel format.
 				matFrame = acm.undistortFrame(matFrame);
+			}
 			
 			Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(),
 					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
 					(int) projectionBounds.get().getMaxX());
 
-			// curFrameMask = new
-			// Mat((int)projectionBounds.get().getHeight(),
-			// (int)projectionBounds.get().getWidth(), CvType.CV_8UC1);
-
 			if (recordingCalibratedArea) {
-				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_HSV2BGR);
 				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame),
 						BufferedImage.TYPE_3BYTE_BGR);
 				IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
@@ -557,13 +552,9 @@ public class CameraManager {
 				isFirstCalibratedAreaFrame = false;
 
 				videoWriterCalibratedArea.encodeVideo(0, frame);
-				Imgproc.cvtColor(submatFrame, submatFrame, Imgproc.COLOR_BGR2HSV);
 			}
 
-			// logger.debug("processFrame time {}",
-			// getCurrentFrameTimestamp());
-
-			//mask = arenaMaskManager.getMask();
+			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
 
 			long lumsCurrentAcrossFrame = 0;
 			long lumsMinimumAcrossFrame = 255*255;
@@ -584,18 +575,6 @@ public class CameraManager {
 					else if (curLum < lumsMinimumAcrossFrame)
 						lumsMinimumAcrossFrame = curLum;
 
-					// byte diff = (byte) (mask.get(y,x)[0]/(255-matS));
-					// px[2] = (byte) (px[2] - diff);
-
-					// if (x==50&&y==50)
-					// logger.debug("{} {} - {} {} - {}", matS, matV,
-					// mask.get(y,x)[0], mask.get(y,x)[0]/(255-matS), diff);
-
-					/*
-					 * if (curLum > mask.get(y,x)[0]-5000) { px[2] = (byte)
-					 * (.8*px[2]); }
-					 */
-					// submatFrame.put(y,x,px);
 				}
 			}
 
@@ -611,12 +590,17 @@ public class CameraManager {
 			}
 
 		}
+		else
+		{
+			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
+		}
 
 		shotDetectionManager.processFrame(matFrame, isDetecting);
 
 		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_HSV2BGR);
 
 		return Camera.matToBufferedImage(matFrame);
+		//return currentFrame;
 
 	}
 

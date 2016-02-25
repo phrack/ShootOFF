@@ -363,6 +363,7 @@ public class AutoCalibrationManager {
 		return frame;
 	}
 
+	// MUST BE IN BGR pixel format.
 	public Mat undistortFrame(Mat mat) {
 		if (!isCalibrated) {
 			logger.warn("undistortFrame called when isCalibrated is false");

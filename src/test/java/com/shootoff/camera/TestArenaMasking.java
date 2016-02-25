@@ -127,12 +127,12 @@ public class TestArenaMasking {
 		}
 	}
 
-	@Test
+	/*@Test
 	public void testArenaMasking() throws IOException {
 		Bounds bounds = new BoundingBox(0, 0, 424, 320);
 		List<Shot> shots = arenaMaskingVideo("/arenamask/calibratedArea.mp4", "/arenamask/testingArenaMask.mp4",  bounds);
 		assertEquals(true, shots.isEmpty());
-	}
+	}*/
 	
 	@Test
 	public void testArenaMaskingBouncingTargets() throws IOException {
