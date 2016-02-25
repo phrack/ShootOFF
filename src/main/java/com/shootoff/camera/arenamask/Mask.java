@@ -63,7 +63,7 @@ public class Mask {
 		
 
 		
-		int dilation_size = 6; 
+		int dilation_size = 2; 
 		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2*dilation_size + 1, 2*dilation_size+1));
 		 
 		Imgproc.dilate(src, src, kern);

@@ -825,6 +825,9 @@ public class CameraManager {
 		acm = new AutoCalibrationManager(this, calculateFrameDelay);
 		autoCalibrationEnabled = true;
 		cameraAutoCalibrated = false;
+		// Turns off using mask
+		shotDetectionManager.setArenaMaskManager(null);
+		
 		fireAutoCalibration();
 	}
 

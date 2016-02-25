@@ -165,10 +165,10 @@ public final class ShotDetectionManager {
 
 		//if (x == 200 && y == 200) logger.warn("{} {}", currentLum, mask);
 
-		if (mask != 0 && currentLum < mask*1.1) {
+		if (currentLum < mask) {
 			valueForThreshold = 0;
-			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
-			drawOnCurrentFrame(x, y, col);
+			//byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
+			//drawOnCurrentFrame(x, y, col);
 		}
 
 		if (!detectShots)
@@ -562,9 +562,16 @@ public final class ShotDetectionManager {
 	}
 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
-		setUsingArenaMask(true);
-		this.arenaMaskManager = arenaMaskManager;
-		arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
+		if (arenaMaskManager != null)
+		{
+			setUsingArenaMask(true);
+			this.arenaMaskManager = arenaMaskManager;
+			arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
+		}
+		else
+		{
+			setUsingArenaMask(false);
+		}
 	}
 
 	private void setUsingArenaMask(boolean val) {
