@@ -406,7 +406,6 @@ public final class ShotDetectionManager {
 		int[] maskPrimitive = new int[workingFrame.cols() * workingFrame.rows()];
 		if (usingArenaMask)
 		{
-			arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
 			Mat mask = arenaMaskManager.getMask();
 			mask.get(0, 0, maskPrimitive);
 		}
@@ -565,6 +564,7 @@ public final class ShotDetectionManager {
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		setUsingArenaMask(true);
 		this.arenaMaskManager = arenaMaskManager;
+		arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
 	}
 
 	private void setUsingArenaMask(boolean val) {
