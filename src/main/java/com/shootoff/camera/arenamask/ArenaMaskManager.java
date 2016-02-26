@@ -42,7 +42,6 @@ import com.xuggle.xuggler.video.IConverter;
 public class ArenaMaskManager implements Runnable {
 	private static final Logger logger = LoggerFactory.getLogger(ArenaMaskManager.class);
 
-	private Buffer cBuffer;
 	private long delay = 0;
 
 	private Mat mask = new Mat();
@@ -67,6 +66,12 @@ public class ArenaMaskManager implements Runnable {
 
 	private boolean recordMask = false;
 
+	public ArenaMaskManager() {
+		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
+
+	}
+
+	
 	@Override
 	public void run() {
 		logger.debug("Starting arenaMaskManager thread");
@@ -110,9 +115,7 @@ public class ArenaMaskManager implements Runnable {
 
 		sem.release();
 
-		// logger.debug("aMM {} - {}", cBuffer.size(), curDelay);
-
-		/*logger.info("updatingMask {} {} - {} {} {}", nextMat.cols(),
+		/*logger.warn("updatingMask {} {} - {} {} {}", nextMat.cols(),
 		 nextMat.rows(), nextMask.timestamp, avgLums,
 		 nextMask.getAvgMaskLum());*/
 
@@ -138,10 +141,11 @@ public class ArenaMaskManager implements Runnable {
 				//maskpx[0] = (((maskpx[0] * (3)) + 2*scaledValue) / 5);
 				maskpx[0] = scaledValue;
 
-				/*if (x == 200 && y == 200) logger.warn("pixel {} {} - min {} max {} - maskg {} newLum {} norm {} factor {} nmpx {} avgLums {} nmAvgLum {} mpx {}", x, y,
+				/*if (x == 200 && y == 200 && nextmatpx[0] > 0) logger.warn("pixel {} {} - min {} max {} - maskg {} scaledMaskAvgLum {} scaler {} scaledValue {} lumsMovingAverage[x][y] {} nmpx {} avgLums {} nmAvgLum {} mpx {}", x, y,
 						minLums, maxLums,
-						mask.get(y, x)[0], newLum, scaledValue, (double)(nextmatpx[0] - 0) / (double)(255*255 - 0), nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
+						mask.get(y, x)[0], scaledMaskAvgLum, scaler, scaledValue, lumsMovingAverage[x][y], nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
 				 */
+				
 				mask.put(y, x, maskpx);
 
 			}
@@ -150,14 +154,8 @@ public class ArenaMaskManager implements Runnable {
 
 	public void setDelay(long delay) {
 		this.delay = delay;
-
-		// this.delay = 150;
 	}
 
-	public ArenaMaskManager() {
-		cBuffer = BufferUtils.synchronizedBuffer(new CircularFifoBuffer(70));
-
-	}
 
 	public void start(int width, int height) {
 		mask = new Mat(height, width, CvType.CV_32S);
@@ -195,7 +193,6 @@ public class ArenaMaskManager implements Runnable {
 
 		int width = (int) dsize.width;
 		int height = (int) dsize.height;
-
 		videoWriterStream = ToolFactory.makeWriter(videoFile.getName());
 		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, width, height);
 		recordingStartTime = System.currentTimeMillis();
@@ -207,11 +204,6 @@ public class ArenaMaskManager implements Runnable {
 	public void stopRecordingStream() {
 		recordingStream = false;
 		videoWriterStream.close();
-	}
-
-	@SuppressWarnings("unchecked")
-	public synchronized void insert(BufferedImage bImage, long timestamp) {
-		cBuffer.add(new Mask(bImage, timestamp));
 	}
 
 	public void updateAvgLums(int lumsMovingAverageAcrossFrame, int lumsMaximumAcrossFrame, int lumsMinimumAcrossFrame, long currentFrameTimestamp) {

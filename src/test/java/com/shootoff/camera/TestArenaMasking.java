@@ -15,6 +15,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.arenamask.Mask;
@@ -29,7 +31,7 @@ import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
 public class TestArenaMasking {
-
+	private static final Logger logger = LoggerFactory.getLogger(TestArenaMasking.class);
 	private Configuration config;
 	private MockCanvasManager mockCanvasManager;
 	private boolean[][] sectorStatuses;
@@ -69,6 +71,8 @@ public class TestArenaMasking {
 		
 		arenaMaskManager = cameraManager.getArenaMaskManager();
 
+		arenaMaskManager.setDelay(200);
+		
 		cameraManager.setController(new MockShootOFFController());
 
 		cameraManager.cameraAutoCalibrated = true;
@@ -105,8 +109,11 @@ public class TestArenaMasking {
 			// We don't actually want this event, we just use this as 
 			// a trigger to read another frame on the mask video
 			
-			while (cameraManager.currentFrameTimestamp>currentFrameTimestamp+10)
-				reader.readPacket();
+			while (cameraManager.currentFrameTimestamp+200>currentFrameTimestamp)
+			{
+				if (reader.readPacket() == null)
+					break;
+			}
 		}
 	}
 	
@@ -127,19 +134,18 @@ public class TestArenaMasking {
 		}
 	}
 
-	/*@Test
-	public void testArenaMasking() throws IOException {
-		Bounds bounds = new BoundingBox(0, 0, 424, 320);
-		List<Shot> shots = arenaMaskingVideo("/arenamask/calibratedArea.mp4", "/arenamask/testingArenaMask.mp4",  bounds);
-		assertEquals(true, shots.isEmpty());
-	}*/
+	@Test
+	public void testArenaMaskingBouncingTargetsFourShots() throws IOException {
+		Bounds bounds = new BoundingBox(0, 0, 418, 314);
+		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated-2.mp4", "/arenamask/BouncingTargets-arena-2.mp4",  bounds);
+		assertEquals(false, shots.isEmpty());
+	}
 	
 	@Test
-	public void testArenaMaskingBouncingTargets() throws IOException {
-		Bounds bounds = new BoundingBox(0, 0, 420, 316);
+	public void testArenaMaskingBouncingTargetsNoShots() throws IOException {
+		Bounds bounds = new BoundingBox(0, 0, 410, 312);
 		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated.mp4", "/arenamask/BouncingTargets-arena.mp4",  bounds);
 		
-		// Still working on this one.
-		assertEquals(false, shots.isEmpty());
+		assertEquals(true, shots.isEmpty());
 	}
 }

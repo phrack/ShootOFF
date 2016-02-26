@@ -135,6 +135,9 @@ public final class ShotDetectionManager {
 		MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = (int) (frameSize * .000976);
 
 		MINIMUM_SHOT_DIMENSION = (int) (frameSize * .000025);
+		
+		if (usingArenaMask)
+			arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
 
 	}
 
@@ -163,12 +166,12 @@ public final class ShotDetectionManager {
 
 		int valueForThreshold = currentLum;
 
-		//if (x == 200 && y == 200) logger.warn("{} {}", currentLum, mask);
+		//if (x == 200 && y == 200) logger.warn("{} {} {}", lumsMovingAverage[x][y], currentLum, mask);
 
 		if (currentLum < mask) {
 			valueForThreshold = 0;
-			//byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
-			//drawOnCurrentFrame(x, y, col);
+			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
+			drawOnCurrentFrame(x, y, col);
 		}
 
 		if (!detectShots)
@@ -177,6 +180,7 @@ public final class ShotDetectionManager {
 			brightPixels.add(new Pixel(x, y));
 
 		}
+		
 
 		else if (pixelAboveThreshold(valueForThreshold, lumsMovingAverage[x][y])) result = Optional
 				.of(new Pixel(x, y, currentH, valueForThreshold, lumsMovingAverage[x][y], colorDistanceFromRed[x][y]));
