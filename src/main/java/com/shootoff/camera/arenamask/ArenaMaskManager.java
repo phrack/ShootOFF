@@ -115,10 +115,8 @@ public class ArenaMaskManager implements Runnable {
 
 		sem.release();
 
-		/*logger.warn("updatingMask {} {} - {} {} {}", nextMat.cols(),
-		 nextMat.rows(), nextMask.timestamp, avgLums,
-		 nextMask.getAvgMaskLum());*/
-
+		double scaledMaskAvgLum = (((double)(nextMaskAvgLum - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
+		
 		for (int y = 0; y < nextMat.rows(); y++) {
 			for (int x = 0; x < nextMat.cols(); x++) {
 				int[] maskpx = { 0 };
@@ -128,7 +126,6 @@ public class ArenaMaskManager implements Runnable {
 				nextMat.get(y, x, nextmatpx);
 
 				
-				double scaledMaskAvgLum = (((double)(nextMaskAvgLum - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
 				double scaler = (double) lumsMovingAverage[x][y] / scaledMaskAvgLum;
 				
 				//int newLum = (int) ((double) nextmatpx[0]  * ((double) lumsMovingAverage[x][y] / (double) nextMaskAvgLum));
@@ -138,9 +135,14 @@ public class ArenaMaskManager implements Runnable {
 				//int normalized = (int) ((double)(Math.min(Math.max(nextmatpx[0], minLums), maxLums) - minLums) / (double)(maxLums - minLums));
 				//int newLum = (int) ((double) normalized * ((double) avgLums / (double) nextMaskAvgLum));
 
-				//maskpx[0] = (((maskpx[0] * (3)) + 2*scaledValue) / 5);
+				//maskpx[0] = (((maskpx[0]) + scaledValue) / 2);
 				maskpx[0] = scaledValue;
-
+				
+				/*if (scaledValue > lumsMovingAverage[x][y])
+					maskpx[0] = scaledValue;
+				else
+					maskpx[0] = (int) (.95 * maskpx[0]);
+				 */
 				/*if (x == 200 && y == 200 && nextmatpx[0] > 0) logger.warn("pixel {} {} - min {} max {} - maskg {} scaledMaskAvgLum {} scaler {} scaledValue {} lumsMovingAverage[x][y] {} nmpx {} avgLums {} nmAvgLum {} mpx {}", x, y,
 						minLums, maxLums,
 						mask.get(y, x)[0], scaledMaskAvgLum, scaler, scaledValue, lumsMovingAverage[x][y], nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);

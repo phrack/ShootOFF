@@ -168,11 +168,13 @@ public final class ShotDetectionManager {
 
 		//if (x == 200 && y == 200) logger.warn("{} {} {}", lumsMovingAverage[x][y], currentLum, mask);
 
-		if (currentLum < mask*1.1) {
+		/*if (currentLum < mask*1.3) {
 			valueForThreshold = 0;
 			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
 			drawOnCurrentFrame(x, y, col);
-		}
+		}*/
+		
+		int threshold = Math.max(mask, lumsMovingAverage[x][y]);
 
 		if (!detectShots)
 			result = Optional.empty();
@@ -182,7 +184,7 @@ public final class ShotDetectionManager {
 		}
 		
 
-		else if (pixelAboveThreshold(valueForThreshold, lumsMovingAverage[x][y])) result = Optional
+		else if (pixelAboveThreshold(valueForThreshold, threshold)) result = Optional
 				.of(new Pixel(x, y, currentH, valueForThreshold, lumsMovingAverage[x][y], colorDistanceFromRed[x][y]));
 
 		int tempColorDistanceFromRed = (Math.min(currentH, Math.abs(180 - currentH)) * currentS * currentV);
