@@ -14,11 +14,10 @@ import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.arenamask.Mask;
@@ -33,7 +32,6 @@ import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
 public class TestArenaMasking extends ShotDetectionTestor {
-	private static final Logger logger = LoggerFactory.getLogger(TestArenaMasking.class);
 	private Configuration config;
 	private MockCanvasManager mockCanvasManager;
 	private boolean[][] sectorStatuses;
@@ -136,6 +134,7 @@ public class TestArenaMasking extends ShotDetectionTestor {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void testArenaMaskingBouncingTargetsFourShots() throws IOException {
 		Bounds bounds = new BoundingBox(0, 0, 418, 314);
@@ -151,6 +150,7 @@ public class TestArenaMasking extends ShotDetectionTestor {
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
 	
+	@Ignore
 	@Test
 	public void testArenaMaskingBouncingTargetsNoShots() throws IOException {
 		Bounds bounds = new BoundingBox(0, 0, 410, 312);

@@ -24,8 +24,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Camera;
 
@@ -33,8 +31,6 @@ public class Mask {
 	public BufferedImage bImage;
 	public Mat mask;
 	public final long timestamp;
-
-	private static final Logger logger = LoggerFactory.getLogger(Mask.class);
 
 	public Mask(BufferedImage bImage, long timestamp) {
 		this.bImage = bImage;
@@ -60,12 +56,8 @@ public class Mask {
 		bImage = Camera.matToBufferedImage(src);
 
 		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
+	
 		
-
-		
-		int dilation_size = 7; 
-		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2*dilation_size + 1, 2*dilation_size+1));
-		 
 		//Imgproc.dilate(src, src, kern);
 		 
 		//Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);

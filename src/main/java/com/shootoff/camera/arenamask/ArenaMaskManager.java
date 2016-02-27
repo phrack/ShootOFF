@@ -22,9 +22,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.Semaphore;
 
-import org.apache.commons.collections.Buffer;
-import org.apache.commons.collections.BufferUtils;
-import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -46,8 +43,6 @@ public class ArenaMaskManager implements Runnable {
 
 	private Mat mask = new Mat();
 	private Size dsize = null;
-
-	private final static int LUM_MA_LENGTH = 2;
 
 	private int avgLums = 0;
 	private int minLums;
