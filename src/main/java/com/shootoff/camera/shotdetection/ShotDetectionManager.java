@@ -168,7 +168,7 @@ public final class ShotDetectionManager {
 
 		//if (x == 200 && y == 200) logger.warn("{} {} {}", lumsMovingAverage[x][y], currentLum, mask);
 
-		if (currentLum < mask) {
+		if (currentLum < mask*1.1) {
 			valueForThreshold = 0;
 			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
 			drawOnCurrentFrame(x, y, col);

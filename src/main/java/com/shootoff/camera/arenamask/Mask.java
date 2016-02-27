@@ -63,10 +63,10 @@ public class Mask {
 		
 
 		
-		int dilation_size = 2; 
+		int dilation_size = 7; 
 		Mat kern = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(2*dilation_size + 1, 2*dilation_size+1));
 		 
-		Imgproc.dilate(src, src, kern);
+		//Imgproc.dilate(src, src, kern);
 		 
 		//Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);
 		

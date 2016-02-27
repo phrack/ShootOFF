@@ -516,9 +516,7 @@ public class CameraManager {
 
 		}
 	}
-
-	protected int lumsMaAcrossFrame = 0;
-
+	
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
 
@@ -556,35 +554,8 @@ public class CameraManager {
 
 			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
 
-			long lumsCurrentAcrossFrame = 0;
-			long lumsMinimumAcrossFrame = 255*255;
-			long lumsMaximumAcrossFrame = 0;
-			for (int y = 0; y < submatFrame.rows(); y++) {
-				for (int x = 0; x < submatFrame.cols(); x++) {
-					byte[] px = { 0, 0, 0 };
-					submatFrame.get(y, x, px);
-					int matS = px[1] & 0xFF;
-					int matV = px[2] & 0xFF;
-
-					int curLum = ((255 - matS) * matV);
-
-					lumsCurrentAcrossFrame += curLum;
-					
-					if (curLum > lumsMaximumAcrossFrame)
-						lumsMaximumAcrossFrame = curLum;
-					else if (curLum < lumsMinimumAcrossFrame)
-						lumsMinimumAcrossFrame = curLum;
-
-				}
-			}
-
-			lumsCurrentAcrossFrame /= submatFrame.rows() * submatFrame.cols();
-			lumsMaAcrossFrame = ((lumsMaAcrossFrame * 4) + (int) lumsCurrentAcrossFrame) / 5;
-
-			//logger.info("updateAvgLums {} {} {} {}", lumsMaAcrossFrame, (int)lumsMaximumAcrossFrame, (int)lumsMinimumAcrossFrame, getCurrentFrameTimestamp());
+			arenaMaskManager.updateAvgLums(submatFrame);
 			
-			arenaMaskManager.updateAvgLums(lumsMaAcrossFrame, (int)lumsMaximumAcrossFrame, (int)lumsMinimumAcrossFrame, getCurrentFrameTimestamp());
-
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
 			}

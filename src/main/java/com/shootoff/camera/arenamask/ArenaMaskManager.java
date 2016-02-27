@@ -206,14 +206,42 @@ public class ArenaMaskManager implements Runnable {
 		videoWriterStream.close();
 	}
 
-	public void updateAvgLums(int lumsMovingAverageAcrossFrame, int lumsMaximumAcrossFrame, int lumsMinimumAcrossFrame, long currentFrameTimestamp) {
-		avgLums = lumsMovingAverageAcrossFrame;
-		minLums = lumsMinimumAcrossFrame;
-		maxLums = lumsMaximumAcrossFrame;
-	}
 	public void setLumsMovingAverage(int[][] lumsMovingAverage)
 	{
 		this.lumsMovingAverage = lumsMovingAverage;
+	}
+
+
+	public void updateAvgLums(Mat frame) {
+		long lumsCurrentAcrossFrame = 0;
+		long lumsMinimumAcrossFrame = 255*255;
+		long lumsMaximumAcrossFrame = 0;
+		
+		for (int y = 0; y < frame.rows(); y++) {
+			for (int x = 0; x < frame.cols(); x++) {
+				byte[] px = { 0, 0, 0 };
+				frame.get(y, x, px);
+				int matS = px[1] & 0xFF;
+				int matV = px[2] & 0xFF;
+
+				int curLum = ((255 - matS) * matV);
+
+				lumsCurrentAcrossFrame += curLum;
+				
+
+				if (curLum > lumsMaximumAcrossFrame)
+					lumsMaximumAcrossFrame = curLum;
+				else if (curLum < lumsMinimumAcrossFrame)
+					lumsMinimumAcrossFrame = curLum;
+
+			}
+		}
+
+		lumsCurrentAcrossFrame /= frame.rows() * frame.cols();
+		minLums = (int) lumsMinimumAcrossFrame;
+		maxLums = (int) lumsMaximumAcrossFrame;
+		avgLums = ((avgLums * 4) + (int) lumsCurrentAcrossFrame) / 5;
+
 	}
 
 }

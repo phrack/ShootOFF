@@ -5,11 +5,13 @@ import static org.junit.Assert.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+import javafx.scene.paint.Color;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,7 +32,7 @@ import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
-public class TestArenaMasking {
+public class TestArenaMasking extends ShotDetectionTestor {
 	private static final Logger logger = LoggerFactory.getLogger(TestArenaMasking.class);
 	private Configuration config;
 	private MockCanvasManager mockCanvasManager;
@@ -138,7 +140,15 @@ public class TestArenaMasking {
 	public void testArenaMaskingBouncingTargetsFourShots() throws IOException {
 		Bounds bounds = new BoundingBox(0, 0, 418, 314);
 		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated-2.mp4", "/arenamask/BouncingTargets-arena-2.mp4",  bounds);
-		assertEquals(false, shots.isEmpty());
+
+		List<Shot> requiredShots = new ArrayList<Shot>();
+		requiredShots.add(new Shot(Color.GREEN, 189.8, 256.0, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 158.2, 266.9, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 152.6, 141.3, 0, 2));
+		requiredShots.add(new Shot(Color.GREEN, 256.8, 112.2, 0, 2));
+
+
+		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
 	
 	@Test
