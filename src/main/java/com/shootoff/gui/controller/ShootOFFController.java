@@ -130,6 +130,7 @@ public class ShootOFFController
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
+	private PluginEngine pluginEngine;
 	private static final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
@@ -143,6 +144,7 @@ public class ShootOFFController
 	public void init(Configuration config, PluginEngine pluginEngine) {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
+		this.pluginEngine = pluginEngine;
 
 		findTargets();
 		initDefaultBackgrounds();
@@ -287,6 +289,7 @@ public class ShootOFFController
 	private void close() {
 		shootOFFStage.close();
 		camerasSupervisor.closeAll();
+		pluginEngine.stopWatching();
 
 		if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
