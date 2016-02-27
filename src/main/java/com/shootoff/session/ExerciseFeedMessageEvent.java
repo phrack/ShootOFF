@@ -23,8 +23,7 @@ public class ExerciseFeedMessageEvent implements Event {
 	private final long timestamp;
 	private final String message;
 
-	public ExerciseFeedMessageEvent(String cameraName, long timestamp,
-			String message) {
+	public ExerciseFeedMessageEvent(String cameraName, long timestamp, String message) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.message = message;

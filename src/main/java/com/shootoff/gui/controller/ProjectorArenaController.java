@@ -59,14 +59,15 @@ import javafx.stage.Stage;
 public class ProjectorArenaController implements CalibrationListener {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
-	private Stage arenaStage;
+	protected Stage arenaStage;
 	private Stage shootOFFStage;
-	@FXML private AnchorPane arenaAnchor;
+	@FXML
+	protected AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
 
-	private Configuration config;
-	private CanvasManager canvasManager;
+	protected Configuration config;
+	protected CanvasManager canvasManager;
 	private Label mouseOnArenaLabel = null;
 	private Optional<LocatedImage> background = Optional.empty();
 	private Optional<LocatedImage> savedBackground = Optional.empty();
@@ -85,7 +86,6 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
 		Scene scene = new Scene(arenaAnchor, 500, 500);
 		arenaStage.setScene(scene);
-
 	}
 
 	public void init(Stage shootOFFStage, Configuration config,
@@ -432,7 +432,7 @@ public class ProjectorArenaController implements CalibrationListener {
 					}
 				}
 			});
-		} else if (showingCursorWarning) {
+		} else if (!mouseEntered && showingCursorWarning) {
 			mouseInWindow = false;
 
 			TimerPool.cancelTimer(mouseExitedFuture);
@@ -483,38 +483,36 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		updateMaskTimer = new Timer();
 		TimerTask newTask = new TimerTask() {
-		    @Override
-		    public void run() {
-		    			    	
-                //final CountDownLatch latch = new CountDownLatch(1);
-                Platform.runLater(new Runnable() {                          
-                    @Override
-                    public void run() {
-                    	try {
+			@Override
+			public void run() {
+
+				// final CountDownLatch latch = new CountDownLatch(1);
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
 							arenaMaskManager.sem.acquire();
 						} catch (InterruptedException e) {
 							return;
 						}
-                        try{
-                        	arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(), System.currentTimeMillis());
-                        }finally{
-                        	arenaMaskManager.sem.release();
-                        }
-                    }
-                });
-                /*try {
 
-					latch.await();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-
-				} */                     
-		        //arenaMaskManager.insert(bImage, System.currentTimeMillis());
-		    }
+						try {
+							arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
+									System.currentTimeMillis());
+						} finally {
+							arenaMaskManager.sem.release();
+						}
+					}
+				});
+				/*
+				 * try { latch.await(); } catch (InterruptedException e) { //
+				 * TODO Auto-generated catch block e.printStackTrace(); }
+				 */
+				// arenaMaskManager.insert(bImage, System.currentTimeMillis());
+			}
 		};
 
-		logger.debug("Scheduling updateMask"); 
+		logger.debug("Scheduling updateMask");
 		updateMaskTimer.schedule(newTask, 0, 50);
 	}
 }

@@ -18,13 +18,13 @@ import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.io.TargetIO;
 
 public class TestCourseIO {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private ProjectorArenaController arenaController;
+	private MockProjectorArenaController arenaController;
 	private String backgroundURL;
 	private boolean backgroundIsResource;
 	private String targetName;
@@ -39,7 +39,7 @@ public class TestCourseIO {
 		System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 
 		Configuration config = new Configuration(new String[0]);
-		arenaController = new ProjectorArenaController();
+		arenaController = new MockProjectorArenaController();
 		arenaController.init(config, new MockCanvasManager(config));
 		backgroundURL = "/arena/backgrounds/indoor_range.gif";
 		backgroundIsResource = true;
@@ -80,8 +80,9 @@ public class TestCourseIO {
 		assertEquals(targetY, targets.get(FIRST_TARGET_INDEX).getPosition().getY(), 1);
 		assertEquals(targetWidth, targets.get(FIRST_TARGET_INDEX).getDimension().getWidth(), 1);
 		assertEquals(targetHeight, targets.get(FIRST_TARGET_INDEX).getDimension().getHeight(), 1);
-		
-		// Default arena dimensions (this will fail if you change the dimensions in the fxml file for
+
+		// Default arena dimensions (this will fail if you change the dimensions
+		// in the fxml file for
 		// the arena)
 		assertTrue(course.get().getResolution().isPresent());
 		assertEquals(500, course.get().getResolution().get().getWidth(), 1);
@@ -98,20 +99,20 @@ public class TestCourseIO {
 
 		if (!tempXMLCourse.delete()) System.err.println("Failed to delete " + tempXMLCourse.getPath());
 	}
-	
+
 	@Test
 	public void testCourseDoesntExist() {
 		File XMLCourse = new File("does_not_exist.course");
 		Optional<Course> course = CourseIO.loadCourse(arenaController, XMLCourse);
-		
+
 		assertEquals(Optional.empty(), course);
 	}
-	
+
 	@Test
 	public void testUnknownCourseExtension() {
 		File XMLCourse = new File("does_not_exist.watisthis");
 		Optional<Course> course = CourseIO.loadCourse(arenaController, XMLCourse);
-		
+
 		assertEquals(Optional.empty(), course);
 	}
 }

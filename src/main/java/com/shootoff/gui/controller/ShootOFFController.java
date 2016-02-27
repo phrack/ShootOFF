@@ -283,11 +283,11 @@ public class ShootOFFController
 		shotTimerTable.setItems(shotEntries);
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
-	
+
 	private void close() {
 		shootOFFStage.close();
 		camerasSupervisor.closeAll();
-		
+
 		if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
 		if (arenaController != null) {

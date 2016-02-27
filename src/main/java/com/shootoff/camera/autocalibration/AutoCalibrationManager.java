@@ -363,6 +363,16 @@ public class AutoCalibrationManager {
 		return frame;
 	}
 
+	// MUST BE IN BGR pixel format.
+	public Mat undistortFrame(Mat mat) {
+		if (!isCalibrated) {
+			logger.warn("undistortFrame called when isCalibrated is false");
+			return mat;
+		}
+
+		return warpPerspective(mat);
+	}
+
 	RotatedRect boundsRect;
 
 	private MatOfPoint2f estimatePatternRect(Mat traceMat, MatOfPoint2f boardCorners) {
@@ -772,8 +782,8 @@ public class AutoCalibrationManager {
 
 		// Make them divisible by two for video recording purposes
 
-		if ((width & 1) == 1) width++;
-		if ((height & 1) == 1) height++;
+		if ((width % 2) == 1) width++;
+		if ((height % 2) == 1) height++;
 
 		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y, width, height);
 

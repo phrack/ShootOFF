@@ -52,9 +52,7 @@ public class TargetAddedEvent implements Event {
 
 	@Override
 	public String toString() {
-		String target = targetName.substring(
-				targetName.lastIndexOf(File.separator) + 1,
-				targetName.lastIndexOf('.'));
+		String target = targetName.substring(targetName.lastIndexOf(File.separator) + 1, targetName.lastIndexOf('.'));
 
 		return String.format("target added (%s)", target);
 	}

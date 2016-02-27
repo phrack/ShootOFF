@@ -12,14 +12,14 @@ import org.junit.Test;
 
 public class TestConfiguration {
 	Configuration defaultConfig;
-	
+
 	@Before
 	public void setUp() throws ConfigurationException, IOException {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		String[] emptyArgs = new String[0];
 		defaultConfig = new Configuration(emptyArgs);
 	}
-		
+
 	@Test
 	public void testConfirmDefaults() {
 		assertFalse(defaultConfig.isFirstRun());
@@ -29,9 +29,11 @@ public class TestConfiguration {
 		assertEquals(false, defaultConfig.ignoreLaserColor());
 		assertEquals("None", defaultConfig.getIgnoreLaserColorName());
 		assertEquals(false, defaultConfig.useRedLaserSound());
-		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "walther_ppq.wav", defaultConfig.getRedLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "walther_ppq.wav",
+				defaultConfig.getRedLaserSound().getPath());
 		assertEquals(false, defaultConfig.useGreenLaserSound());
-		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "walther_ppq.wav", defaultConfig.getGreenLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "walther_ppq.wav",
+				defaultConfig.getGreenLaserSound().getPath());
 		assertEquals(false, defaultConfig.useVirtualMagazine());
 		assertEquals(7, defaultConfig.getVirtualMagazineCapacity());
 		assertEquals(false, defaultConfig.useMalfunctions());
@@ -40,19 +42,19 @@ public class TestConfiguration {
 		assertFalse(defaultConfig.getArenaPosition().isPresent());
 		assertFalse(defaultConfig.isChimeMuted("Rare and worth hearing"));
 	}
-	
-	@Test(expected=ConfigurationException.class)
+
+	@Test(expected = ConfigurationException.class)
 	public void testMarkerRadiusBelowRange() throws ConfigurationException {
 		defaultConfig.setMarkerRadius(0);
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
 
-	@Test(expected=ConfigurationException.class)
+	@Test(expected = ConfigurationException.class)
 	public void testMarkerRadiusAboveRange() throws ConfigurationException {
 		defaultConfig.setMarkerRadius(21);
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
-	
+
 	@Test
 	public void testMarkerRadiusInRange() {
 		try {
@@ -66,19 +68,19 @@ public class TestConfiguration {
 			fail("Marker radius values are in range but got ConfigurationException");
 		}
 	}
-	
-	@Test(expected=ConfigurationException.class)
+
+	@Test(expected = ConfigurationException.class)
 	public void testIgnoreLaserColorInvalid() throws ConfigurationException {
 		defaultConfig.setIgnoreLaserColor(true);
 		defaultConfig.setIgnoreLaserColorName("purple");
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
 
 	@Test
 	public void testIgnoreLaserColorValid() {
 		try {
 			defaultConfig.setIgnoreLaserColor(true);
-			
+
 			defaultConfig.setIgnoreLaserColorName("red");
 			defaultConfig.validateConfiguration();
 			assertEquals(Color.RED, defaultConfig.getIgnoreLaserColor().get());
@@ -89,57 +91,57 @@ public class TestConfiguration {
 			fail("Ignore laser color values are correct but got ConfigurationException");
 		}
 	}
-	
-	@Test(expected=ConfigurationException.class)
+
+	@Test(expected = ConfigurationException.class)
 	public void testRedLaserSoundInvalid() throws ConfigurationException {
 		defaultConfig.setUseRedLaserSound(true);
 		defaultConfig.setRedLaserSound(new File("sounds/some_crazy_sound.wav"));
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
 
 	@Test
 	public void testRedLaserSoundValid() {
 		try {
 			defaultConfig.setUseRedLaserSound(true);
-			
+
 			defaultConfig.setRedLaserSound(new File("sounds/walther_ppq.wav"));
-			defaultConfig.validateConfiguration();	
+			defaultConfig.validateConfiguration();
 		} catch (ConfigurationException e) {
 			fail("Red laser sound values are correct but got ConfigurationException");
 		}
 	}
-	
-	@Test(expected=ConfigurationException.class)
+
+	@Test(expected = ConfigurationException.class)
 	public void testGreenLaserSoundInvalid() throws ConfigurationException {
 		defaultConfig.setUseGreenLaserSound(true);
 		defaultConfig.setGreenLaserSound(new File("sounds/some_crazy_sound.wav"));
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
 
 	@Test
 	public void testGreenLaserSoundValid() {
 		try {
 			defaultConfig.setUseGreenLaserSound(true);
-			
+
 			defaultConfig.setGreenLaserSound(new File("sounds/walther_ppq.wav"));
-			defaultConfig.validateConfiguration();	
+			defaultConfig.validateConfiguration();
 		} catch (ConfigurationException e) {
 			fail("Red laser sound values are correct but got ConfigurationException");
 		}
 	}
-	
-	@Test(expected=ConfigurationException.class)
+
+	@Test(expected = ConfigurationException.class)
 	public void testVirtualMagazineCapacityBelowRange() throws ConfigurationException {
 		defaultConfig.setVirtualMagazineCapacity(0);
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
 
-	@Test(expected=ConfigurationException.class)
+	@Test(expected = ConfigurationException.class)
 	public void testVirtualMagazineCapacityAboveRange() throws ConfigurationException {
 		defaultConfig.setVirtualMagazineCapacity(46);
-		defaultConfig.validateConfiguration();		
+		defaultConfig.validateConfiguration();
 	}
-	
+
 	@Test
 	public void testVirtualMagazineCapacityInRange() {
 		try {
@@ -153,37 +155,36 @@ public class TestConfiguration {
 			fail("Virtual magazine values are in range but got ConfigurationException");
 		}
 	}
-	
-	@Test(expected=ConfigurationException.class)
+
+	@Test(expected = ConfigurationException.class)
 	public void testMalfunctionsProbabilityBelowRange() throws ConfigurationException {
-		defaultConfig.setMalfunctionsProbability((float)0.09);
-		defaultConfig.validateConfiguration();		
+		defaultConfig.setMalfunctionsProbability((float) 0.09);
+		defaultConfig.validateConfiguration();
 	}
 
-	@Test(expected=ConfigurationException.class)
+	@Test(expected = ConfigurationException.class)
 	public void testMalfunctionsProbabilityAboveRange() throws ConfigurationException {
-		defaultConfig.setMalfunctionsProbability((float)99.91);
-		defaultConfig.validateConfiguration();		
+		defaultConfig.setMalfunctionsProbability((float) 99.91);
+		defaultConfig.validateConfiguration();
 	}
-	
+
 	@Test
 	public void testMalfunctionsProbabilityInRange() {
 		try {
-			defaultConfig.setMalfunctionsProbability((float)0.1);
+			defaultConfig.setMalfunctionsProbability((float) 0.1);
 			defaultConfig.validateConfiguration();
-			defaultConfig.setMalfunctionsProbability((float)50.5);
+			defaultConfig.setMalfunctionsProbability((float) 50.5);
 			defaultConfig.validateConfiguration();
-			defaultConfig.setMalfunctionsProbability((float)99.9);
+			defaultConfig.setMalfunctionsProbability((float) 99.9);
 			defaultConfig.validateConfiguration();
 		} catch (ConfigurationException e) {
 			fail("Malfunction probability values are in range but got ConfigurationException");
 		}
 	}
-	
+
 	@Test
 	public void testReadConfigFile() throws IOException, ConfigurationException {
-		Configuration config = new Configuration(
-				TestConfiguration.class.getResourceAsStream("/test.properties"),
+		Configuration config = new Configuration(TestConfiguration.class.getResourceAsStream("/test.properties"),
 				"test.properties");
 
 		assertTrue(config.isFirstRun());
@@ -192,9 +193,11 @@ public class TestConfiguration {
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
 		assertEquals(true, config.useRedLaserSound());
-		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "steel_sound_1.wav", config.getRedLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "steel_sound_1.wav",
+				config.getRedLaserSound().getPath());
 		assertEquals(false, config.useGreenLaserSound());
-		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "beep.wav", config.getGreenLaserSound().getPath());
+		assertEquals(System.getProperty("user.dir") + File.separator + "sounds" + File.separator + "beep.wav",
+				config.getGreenLaserSound().getPath());
 		assertEquals(true, config.useVirtualMagazine());
 		assertEquals(25, config.getVirtualMagazineCapacity());
 		assertEquals(true, config.useMalfunctions());
@@ -207,14 +210,12 @@ public class TestConfiguration {
 		assertTrue(config.isChimeMuted("annoying message2"));
 		assertFalse(config.isChimeMuted("Rare and worth hearing"));
 	}
-	
+
 	@Test
 	public void testReadConfigFileCmdLineOverride() throws IOException, ConfigurationException {
-		Configuration config = new Configuration(
-				TestConfiguration.class.getResourceAsStream("/test.properties"),
-				"test.properties",
-				new String[] {"-m", "6"});
-		
+		Configuration config = new Configuration(TestConfiguration.class.getResourceAsStream("/test.properties"),
+				"test.properties", new String[] { "-m", "6" });
+
 		assertEquals(6, config.getMarkerRadius());
 		assertEquals(true, config.ignoreLaserColor());
 		assertEquals("green", config.getIgnoreLaserColorName());
@@ -224,33 +225,11 @@ public class TestConfiguration {
 		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(false, config.inDebugMode());
 	}
-	
+
 	@Test
 	public void testReadCmdLineShort() throws IOException, ConfigurationException {
-		Configuration config = new Configuration(new String[]{
-				"-d", "-m", "4", "-c", "green",
-				"-u", "25", "-f", "43.15" 
-			});
-		
-		assertFalse(config.isFirstRun());
-		assertEquals(4, config.getMarkerRadius());
-		assertEquals(true, config.ignoreLaserColor());
-		assertEquals("green", config.getIgnoreLaserColorName());
-		assertEquals(true, config.useVirtualMagazine());
-		assertEquals(25, config.getVirtualMagazineCapacity());
-		assertEquals(true, config.useMalfunctions());
-		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
-		assertEquals(true, config.inDebugMode());
-	}
-	
-	@Test
-	public void testReadCmdLineLong() throws IOException, ConfigurationException {
-		Configuration config = new Configuration(new String[]{
-				"--debug", "--marker-radius", "4", 
-				"--ignore-laser-color", "green",
-				"--use-virtual-magazine", "25", 
-				"--use-malfunctions", "43.15" 
-			});				
+		Configuration config = new Configuration(
+				new String[] { "-d", "-m", "4", "-c", "green", "-u", "25", "-f", "43.15" });
 
 		assertFalse(config.isFirstRun());
 		assertEquals(4, config.getMarkerRadius());
@@ -262,30 +241,42 @@ public class TestConfiguration {
 		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
 		assertEquals(true, config.inDebugMode());
 	}
-	
+
+	@Test
+	public void testReadCmdLineLong() throws IOException, ConfigurationException {
+		Configuration config = new Configuration(new String[] { "--debug", "--marker-radius", "4",
+				"--ignore-laser-color", "green", "--use-virtual-magazine", "25", "--use-malfunctions", "43.15" });
+
+		assertFalse(config.isFirstRun());
+		assertEquals(4, config.getMarkerRadius());
+		assertEquals(true, config.ignoreLaserColor());
+		assertEquals("green", config.getIgnoreLaserColorName());
+		assertEquals(true, config.useVirtualMagazine());
+		assertEquals(25, config.getVirtualMagazineCapacity());
+		assertEquals(true, config.useMalfunctions());
+		assertEquals(43.15f, config.getMalfunctionsProbability(), 0.5);
+		assertEquals(true, config.inDebugMode());
+	}
+
 	@Test
 	public void testWriteConfigFile() throws IOException, ConfigurationException {
 		File props = new File("test_write.properties");
 		if (!props.createNewFile()) {
 			System.err.println("Can't create test config file: " + props.getPath());
 		}
-		
-		Configuration writtenConfig = new Configuration(props.getPath(), new String[]{
-				"--marker-radius", "4", 
-				"--ignore-laser-color", "green",
-				"--use-virtual-magazine", "25", 
-				"--use-malfunctions", "43.15" 
-			});
-		
+
+		Configuration writtenConfig = new Configuration(props.getPath(), new String[] { "--marker-radius", "4",
+				"--ignore-laser-color", "green", "--use-virtual-magazine", "25", "--use-malfunctions", "43.15" });
+
 		writtenConfig.muteMessageChime("annoying message");
 		writtenConfig.muteMessageChime("good message");
 		writtenConfig.muteMessageChime("bad message");
 		writtenConfig.unmuteMessageChime("good message");
-		
+
 		writtenConfig.writeConfigurationFile();
-		
+
 		Configuration readConfig = new Configuration(props.getPath());
-		
+
 		assertEquals(writtenConfig.getMarkerRadius(), readConfig.getMarkerRadius());
 		assertEquals(Color.GREEN, writtenConfig.getIgnoreLaserColor().get());
 		assertEquals(writtenConfig.getIgnoreLaserColorName(), readConfig.getIgnoreLaserColorName());
@@ -297,7 +288,7 @@ public class TestConfiguration {
 		assertTrue(readConfig.isChimeMuted("annoying message"));
 		assertTrue(readConfig.isChimeMuted("bad message"));
 		assertFalse(readConfig.isChimeMuted("good message"));
-		
+
 		if (!props.delete()) {
 			System.err.println("Can't delete test config file: " + props.getPath());
 		}

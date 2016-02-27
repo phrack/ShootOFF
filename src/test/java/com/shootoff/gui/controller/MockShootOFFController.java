@@ -1,5 +1,10 @@
 package com.shootoff.gui.controller;
 
-public class MockShootOFFController extends ShootOFFController {
+import com.shootoff.camera.arenamask.ArenaMaskManager;
 
+public class MockShootOFFController extends ShootOFFController {
+	@Override
+	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+
+	}
 }

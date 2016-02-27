@@ -24,7 +24,7 @@ import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Node;
@@ -60,7 +60,7 @@ public class TestSteelChallenge {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		ProjectorArenaController pacNoTargets = new ProjectorArenaController();
+		MockProjectorArenaController pacNoTargets = new MockProjectorArenaController();
 		pacNoTargets.init(config, new MockCanvasManager(config));
 
 		noTargetsSC.init(config, cs, null, null, pacNoTargets);
@@ -69,7 +69,7 @@ public class TestSteelChallenge {
 
 		targetsSC = new SteelChallenge();
 
-		ProjectorArenaController pac = new ProjectorArenaController();
+		MockProjectorArenaController pac = new MockProjectorArenaController();
 		pac.init(config, new MockCanvasManager(config));
 
 		Optional<Course> course = CourseIO.loadCourse(pac,

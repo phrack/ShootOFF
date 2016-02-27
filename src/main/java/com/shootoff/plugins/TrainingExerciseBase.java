@@ -20,6 +20,7 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -150,8 +151,8 @@ public class TrainingExerciseBase {
 	}
 
 	public void getDelayedStartInterval(final DelayedStartListener listener) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"com/shootoff/gui/DelayedStartInterval.fxml"));
+		final FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -176,8 +177,8 @@ public class TrainingExerciseBase {
 	 * @param listener
 	 */
 	public void getParInterval(final ParListener listener) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"com/shootoff/gui/ParInterval.fxml"));
+		final FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -337,6 +338,14 @@ public class TrainingExerciseBase {
 		playSound(soundFile, Optional.empty());
 	}
 
+	public static void playSound(InputStream is) {
+		try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(is)) {
+			playSound(audioInputStream, Optional.empty());
+		} catch (UnsupportedAudioFileException | IOException e) {
+			logger.error("Error reading sound stream to play", e);
+		}
+	}
+
 	private static void playSound(File soundFile, Optional<LineListener> listener) {
 		if (isSilenced) {
 			System.out.println(soundFile.getPath());
@@ -347,36 +356,34 @@ public class TrainingExerciseBase {
 			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
 		}
 
-		AudioInputStream audioInputStream = null;
-
-		try {
-			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+		try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile)) {
+			playSound(audioInputStream, listener);
 		} catch (UnsupportedAudioFileException | IOException e) {
 			logger.error(String.format("Error reading sound file to play: soundFile = %s", soundFile), e);
 		}
+	}
 
-		if (audioInputStream != null) {
-			AudioFormat format = audioInputStream.getFormat();
-			DataLine.Info info = new DataLine.Info(Clip.class, format);
+	private static void playSound(AudioInputStream audioInputStream, Optional<LineListener> listener) {
+		AudioFormat format = audioInputStream.getFormat();
+		DataLine.Info info = new DataLine.Info(Clip.class, format);
 
-			Clip clip = null;
+		Clip clip = null;
 
-			try {
-				clip = (Clip) AudioSystem.getLine(info);
-				clip.open(audioInputStream);
-				clip.start();
+		try {
+			clip = (Clip) AudioSystem.getLine(info);
+			clip.open(audioInputStream);
+			clip.start();
 
-				if (listener.isPresent()) {
-					clip.addLineListener(listener.get());
-				} else {
-					clip.addLineListener((e) -> {
-						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
-					});
-				}
-			} catch (LineUnavailableException | IOException e) {
-				if (clip != null) clip.close();
-				logger.error("Error playing sound clip", e);
+			if (listener.isPresent()) {
+				clip.addLineListener(listener.get());
+			} else {
+				clip.addLineListener((e) -> {
+					if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
+				});
 			}
+		} catch (LineUnavailableException | IOException e) {
+			if (clip != null) clip.close();
+			logger.error("Error playing sound clip", e);
 		}
 	}
 

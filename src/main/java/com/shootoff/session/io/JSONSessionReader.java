@@ -48,8 +48,7 @@ import com.shootoff.session.TargetResizedEvent;
 import javafx.scene.paint.Color;
 
 public class JSONSessionReader {
-	private final Logger logger = LoggerFactory
-			.getLogger(JSONSessionReader.class);
+	private final Logger logger = LoggerFactory.getLogger(JSONSessionReader.class);
 
 	private final File sessionFile;
 
@@ -62,8 +61,7 @@ public class JSONSessionReader {
 
 		try {
 			JSONObject session = (JSONObject) new JSONParser()
-					.parse(new InputStreamReader(new FileInputStream(
-							sessionFile), "UTF-8"));
+					.parse(new InputStreamReader(new FileInputStream(sessionFile), "UTF-8"));
 
 			JSONArray cameras = (JSONArray) session.get("cameras");
 			@SuppressWarnings("unchecked")
@@ -94,19 +92,15 @@ public class JSONSessionReader {
 							c = Color.GREEN;
 						}
 
-						Shot shot = new Shot(c, (double) event.get("x"),
-								(double) event.get("y"),
-								(Long) event.get("shotTimestamp"),
-								((Long) event.get("markerRadius")).intValue());
+						Shot shot = new Shot(c, (double) event.get("x"), (double) event.get("y"),
+								(Long) event.get("shotTimestamp"), ((Long) event.get("markerRadius")).intValue());
 
-						boolean isMalfunction = (boolean) event
-								.get("isMalfunction");
+						boolean isMalfunction = (boolean) event.get("isMalfunction");
 
 						boolean isReload = (boolean) event.get("isReload");
 
 						Optional<Integer> targetIndex;
-						int index = ((Long) event.get("targetIndex"))
-								.intValue();
+						int index = ((Long) event.get("targetIndex")).intValue();
 						if (index == -1) {
 							targetIndex = Optional.empty();
 						} else {
@@ -121,53 +115,39 @@ public class JSONSessionReader {
 							hitRegionIndex = Optional.of(index);
 						}
 
-						Optional<String> videoString = Optional
-								.ofNullable((String) event.get("videos"));
+						Optional<String> videoString = Optional.ofNullable((String) event.get("videos"));
 
-						events.get(cameraName).add(
-								new ShotEvent(cameraName, (Long) event
-										.get("timestamp"), shot, isMalfunction,
-										isReload, targetIndex, hitRegionIndex,
-										videoString));
+						events.get(cameraName).add(new ShotEvent(cameraName, (Long) event.get("timestamp"), shot,
+								isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
 						break;
 
 					case "targetAdded":
-						events.get(cameraName).add(
-								new TargetAddedEvent(cameraName, (Long) event
-										.get("timestamp"), (String) event
-										.get("name")));
+						events.get(cameraName).add(new TargetAddedEvent(cameraName, (Long) event.get("timestamp"),
+								(String) event.get("name")));
 						break;
 
 					case "targetRemoved":
-						events.get(cameraName).add(
-								new TargetRemovedEvent(cameraName, (Long) event
-										.get("timestamp"), ((Long) event
-										.get("index")).intValue()));
+						events.get(cameraName).add(new TargetRemovedEvent(cameraName, (Long) event.get("timestamp"),
+								((Long) event.get("index")).intValue()));
 						break;
 
 					case "targetResized":
-						events.get(cameraName).add(
-								new TargetResizedEvent(cameraName, (Long) event
-										.get("timestamp"), ((Long) event
-										.get("index")).intValue(),
-										(Double) event.get("newWidth"),
+						events.get(cameraName)
+								.add(new TargetResizedEvent(cameraName, (Long) event.get("timestamp"),
+										((Long) event.get("index")).intValue(), (Double) event.get("newWidth"),
 										(Double) event.get("newHeight")));
 						break;
 
 					case "targetMoved":
-						events.get(cameraName).add(
-								new TargetMovedEvent(cameraName, (Long) event
-										.get("timestamp"), ((Long) event
-										.get("index")).intValue(),
-										((Long) event.get("newX")).intValue(),
+						events.get(cameraName)
+								.add(new TargetMovedEvent(cameraName, (Long) event.get("timestamp"),
+										((Long) event.get("index")).intValue(), ((Long) event.get("newX")).intValue(),
 										((Long) event.get("newY")).intValue()));
 						break;
 
 					case "exerciseFeedMessage":
-						events.get(cameraName).add(
-								new ExerciseFeedMessageEvent(cameraName,
-										(Long) event.get("timestamp"),
-										(String) event.get("message")));
+						events.get(cameraName).add(new ExerciseFeedMessageEvent(cameraName,
+								(Long) event.get("timestamp"), (String) event.get("message")));
 						break;
 					}
 				}

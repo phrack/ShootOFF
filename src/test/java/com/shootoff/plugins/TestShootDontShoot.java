@@ -22,7 +22,7 @@ import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Target;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Group;
@@ -56,7 +56,7 @@ public class TestShootDontShoot {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		ProjectorArenaController pac = new ProjectorArenaController();
+		MockProjectorArenaController pac = new MockProjectorArenaController();
 		pac.init(config, new MockCanvasManager(config));
 
 		sds.init(config, cs, null, null, pac);

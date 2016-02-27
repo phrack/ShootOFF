@@ -38,10 +38,8 @@ public class ShotEvent implements Event {
 	private final Optional<String> videoString;
 	private final Map<String, File> videos = new HashMap<String, File>();
 
-	public ShotEvent(String cameraName, long timestamp, Shot shot,
-			boolean isMalfunction, boolean isReload,
-			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex,
-			Optional<String> videoString) {
+	public ShotEvent(String cameraName, long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
+			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.shot = shot;
@@ -114,7 +112,6 @@ public class ShotEvent implements Event {
 			colorName = "green";
 		}
 
-		return String.format("%s shot (%.2f, %.2f)", colorName, shot.getX(),
-				shot.getY());
+		return String.format("%s shot (%.2f, %.2f)", colorName, shot.getX(), shot.getY());
 	}
 }

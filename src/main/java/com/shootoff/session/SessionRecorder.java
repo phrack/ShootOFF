@@ -108,9 +108,8 @@ public class SessionRecorder {
 
 		long timestamp = System.currentTimeMillis() - startTime;
 
-		getCameraEvents(cameraName).add(
-				new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex, hitRegionIndex,
-						videoString));
+		getCameraEvents(cameraName).add(new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex,
+				hitRegionIndex, videoString));
 	}
 
 	public void recordTargetAdded(String cameraName, Target target) {
@@ -129,8 +128,8 @@ public class SessionRecorder {
 			targetName = target.getTargetFile().getPath().replace("targets" + File.separator, "");
 		}
 
-		getCameraEvents(cameraName).add(
-				new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
+		getCameraEvents(cameraName)
+				.add(new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
 	}
 
 	public void recordTargetRemoved(String cameraName, Target target) {
@@ -168,9 +167,8 @@ public class SessionRecorder {
 		// Remove all resize events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, target);
 
-		getCameraEvents(cameraName).add(
-				new TargetResizedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex(),
-						newWidth, newHeight));
+		getCameraEvents(cameraName).add(new TargetResizedEvent(cameraName, System.currentTimeMillis() - startTime,
+				target.getTargetIndex(), newWidth, newHeight));
 	}
 
 	public void recordTargetMoved(String cameraName, Target target, int newX, int newY) {
@@ -179,16 +177,15 @@ public class SessionRecorder {
 		// Remove all move events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_MOVED, target);
 
-		getCameraEvents(cameraName).add(
-				new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex(), newX,
-						newY));
+		getCameraEvents(cameraName).add(new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime,
+				target.getTargetIndex(), newX, newY));
 	}
 
 	public void recordExerciseFeedMessage(String message) {
 		// Add an event for this message to each camera
 		for (String cameraName : seenTargets.keySet()) {
-			getCameraEvents(cameraName).add(
-					new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
+			getCameraEvents(cameraName)
+					.add(new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
 		}
 	}
 }

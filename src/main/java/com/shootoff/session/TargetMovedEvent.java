@@ -25,8 +25,7 @@ public class TargetMovedEvent implements Event {
 	private final int newX;
 	private final int newY;
 
-	public TargetMovedEvent(String cameraName, long timestamp, int targetIndex,
-			int newX, int newY) {
+	public TargetMovedEvent(String cameraName, long timestamp, int targetIndex, int newX, int newY) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.targetIndex = targetIndex;

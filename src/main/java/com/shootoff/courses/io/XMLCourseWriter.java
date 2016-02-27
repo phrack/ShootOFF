@@ -47,7 +47,7 @@ public class XMLCourseWriter implements CourseVisitor {
 				String.format(Locale.US, "\t<target file=\"%s\" x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" />%n",
 						targetFile.getPath(), x, y, width, height));
 	}
-	
+
 	@Override
 	public void visitResolution(double width, double height) {
 		xmlBody.append(String.format("\t<resolution width=\"%f\" height=\"%f\" />%n", width, height));

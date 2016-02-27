@@ -122,7 +122,7 @@ public class Camera {
 			// to add an artificial timeout.
 			Thread t = new Thread(() -> ipcam.getResolution(), "GetIPcamResolution");
 			t.start();
-			final int ipcamTimeout = 3000;
+			final int ipcamTimeout = 6000;
 			try {
 				t.join(ipcamTimeout);
 			} catch (InterruptedException e) {
