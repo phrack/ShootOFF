@@ -65,7 +65,7 @@ public class ArenaMaskManager implements Runnable {
 
 	@Override
 	public void run() {
-		logger.debug("Starting arenaMaskManager thread");
+		if (logger.isDebugEnabled()) logger.debug("Starting arenaMaskManager thread");
 
 		if (recordMask) startRecordingStream(new File("testingArenaMask.mp4"));
 
@@ -81,7 +81,7 @@ public class ArenaMaskManager implements Runnable {
 			}
 
 			Mask nextMask = maskFromArena;
-			long curDelay = System.currentTimeMillis() - nextMask.timestamp;
+			long curDelay = System.currentTimeMillis() - nextMask.getTimestamp();
 
 			if (curDelay > delay) {
 				sem.release();
@@ -102,7 +102,6 @@ public class ArenaMaskManager implements Runnable {
 		int nextMaskAvgLum = nextMask.getAvgMaskLum();
 
 		maskFromArena = null;
-
 		sem.release();
 
 		double scaledMaskAvgLum = (((double) (nextMaskAvgLum - 0) / (double) (255 * 255 - 0))
@@ -147,7 +146,6 @@ public class ArenaMaskManager implements Runnable {
 				 */
 
 				mask.put(y, x, maskpx);
-
 			}
 		}
 	}
@@ -174,7 +172,7 @@ public class ArenaMaskManager implements Runnable {
 
 	private void recordMask(Mask mask) {
 		if (recordingStream) {
-			BufferedImage image = ConverterFactory.convertToType(mask.bImage, BufferedImage.TYPE_3BYTE_BGR);
+			BufferedImage image = ConverterFactory.convertToType(mask.getMaskImage(), BufferedImage.TYPE_3BYTE_BGR);
 			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 			IVideoPicture frame = converter.toPicture(image, (System.currentTimeMillis() - recordingStartTime) * 1000);
@@ -224,10 +222,11 @@ public class ArenaMaskManager implements Runnable {
 
 				lumsCurrentAcrossFrame += curLum;
 
-				if (curLum > lumsMaximumAcrossFrame)
+				if (curLum > lumsMaximumAcrossFrame) {
 					lumsMaximumAcrossFrame = curLum;
-				else if (curLum < lumsMinimumAcrossFrame) lumsMinimumAcrossFrame = curLum;
-
+				} else if (curLum < lumsMinimumAcrossFrame) {
+					lumsMinimumAcrossFrame = curLum;
+				}
 			}
 		}
 
@@ -235,7 +234,5 @@ public class ArenaMaskManager implements Runnable {
 		minLums = (int) lumsMinimumAcrossFrame;
 		maxLums = (int) lumsMaximumAcrossFrame;
 		avgLums = ((avgLums * 4) + (int) lumsCurrentAcrossFrame) / 5;
-
 	}
-
 }

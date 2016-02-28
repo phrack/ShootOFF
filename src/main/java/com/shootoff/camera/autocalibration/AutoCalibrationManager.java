@@ -50,12 +50,11 @@ import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 
 public class AutoCalibrationManager {
-
 	private static final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);
 
-	private final static int PATTERN_WIDTH = 9;
-	private final static int PATTERN_HEIGHT = 6;
-	private final static Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
+	private static final int PATTERN_WIDTH = 9;
+	private static final int PATTERN_HEIGHT = 6;
+	private static final Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
 	private Callback<Void, Void> callback;
 
@@ -63,24 +62,8 @@ public class AutoCalibrationManager {
 
 	private boolean calculateFrameDelay;
 
-	public void setCallback(Callback<Void, Void> callback) {
-		this.callback = callback;
-	}
-
-	public AutoCalibrationManager(CameraManager cameraManager, boolean calculateFrameDelay) {
-		// ((ch.qos.logback.classic.Logger)
-		// logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-
-		this.cameraManager = cameraManager;
-		this.calculateFrameDelay = calculateFrameDelay;
-	}
-
 	// Stores the transformation matrix
 	private Mat perspMat = null;
-
-	public Mat getPerspMat() {
-		return perspMat;
-	}
 
 	// Stores the bounding box we'll pass back to CameraManager
 	private Bounds boundingBox = null;
@@ -112,6 +95,19 @@ public class AutoCalibrationManager {
 	private Bounds boundsResult = null;
 	private long frameDelayResult;
 
+	public AutoCalibrationManager(final CameraManager cameraManager, final boolean calculateFrameDelay) {
+		this.cameraManager = cameraManager;
+		this.calculateFrameDelay = calculateFrameDelay;
+	}
+
+	public void setCallback(Callback<Void, Void> callback) {
+		this.callback = callback;
+	}
+
+	public Mat getPerspMat() {
+		return perspMat;
+	}
+
 	public Bounds getBoundsResult() {
 		if (boundsResult == null)
 			logger.error("getBoundsResult called when boundsResult==null, isCalibrated {}", isCalibrated);
@@ -130,7 +126,6 @@ public class AutoCalibrationManager {
 	}
 
 	public void processFrame(BufferedImage frame) {
-
 		if (boundsResult == null) {
 			Optional<Bounds> bounds = calibrateFrame(frame);
 
@@ -171,7 +166,6 @@ public class AutoCalibrationManager {
 			undistortFrame(frame);
 			mat = Camera.bufferedImageToMat(frame);
 		}
-		;
 
 		double[] pixel = getFrameDelayPixel(mat);
 
@@ -201,6 +195,7 @@ public class AutoCalibrationManager {
 
 			return Optional.of(cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange);
 		}
+
 		return Optional.empty();
 	}
 
@@ -294,7 +289,6 @@ public class AutoCalibrationManager {
 				secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
 
 		return Optional.of(boundingBox);
-
 	}
 
 	private void findColors(Mat frame, Mat warpedBoardCorners) {
@@ -344,10 +338,11 @@ public class AutoCalibrationManager {
 		// This is a fudge but I'm not trying to perfect resolution handling
 
 		// Must be odd numbers
-		if (width * height <= 480000)
+		if (width * height <= 480000) {
 			gaussianBlurSize = new Size(3, 3);
-		else
+		} else {
 			gaussianBlurSize = new Size(5, 5);
+		}
 	}
 
 	public BufferedImage undistortFrame(BufferedImage frame) {
@@ -376,7 +371,6 @@ public class AutoCalibrationManager {
 	RotatedRect boundsRect;
 
 	private MatOfPoint2f estimatePatternRect(Mat traceMat, MatOfPoint2f boardCorners) {
-
 		// Turn the chessboard into corners
 		MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
 
@@ -456,7 +450,6 @@ public class AutoCalibrationManager {
 		}
 
 		return rotatedPatternSizeRect;
-
 	}
 
 	/*
@@ -641,8 +634,6 @@ public class AutoCalibrationManager {
 			for (double[] line2 : verifiedLines) {
 				if (line1 == line2) continue;
 
-				// logger.trace("compare {} {}", line1, line2);
-
 				Optional<Point> intersection = computeIntersect(line1, line2);
 
 				if (intersection.isPresent()) possibleCorners.add(intersection.get());
@@ -743,7 +734,6 @@ public class AutoCalibrationManager {
 		result[3] = bot.get(0).x > bot.get(1).x ? bot.get(0) : bot.get(1);
 
 		return result;
-
 	}
 
 	/*
@@ -828,11 +818,8 @@ public class AutoCalibrationManager {
 
 	// initializeWarpPerspective MUST BE CALLED first
 	private Mat warpPerspective(final Mat frame) {
-
 		if (warpInitialized) {
-
 			Mat mat = new Mat();
-
 			Imgproc.warpPerspective(frame, mat, perspMat, frame.size(), Imgproc.INTER_LINEAR);
 
 			return mat;
@@ -842,26 +829,21 @@ public class AutoCalibrationManager {
 
 			return frame;
 		}
-
 	}
 
 	// initializeWarpPerspective MUST BE CALLED first
 	private Mat warpCorners(MatOfPoint2f imageCorners) {
+		Mat mat = null;
 
 		if (warpInitialized) {
-
-			Mat mat = new Mat();
-
+			mat = new Mat();
 			Core.transform(imageCorners, mat, perspMat);
-
-			return mat;
 		} else {
 			logger.warn("warpCorners called when warpInitialized is false - {} {} - {}", perspMat, boundingBox,
 					isCalibrated);
-
-			return null;
 		}
 
+		return mat;
 	}
 
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
@@ -939,10 +921,6 @@ public class AutoCalibrationManager {
 	}
 
 	private double euclideanDistance(Point pt1, Point pt2) {
-		// if (logger.isTraceEnabled())
-		// logger.trace("euclideanDistance {} {} - {}", pt1, pt2,
-		// Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2)));
-
 		return Math.sqrt(Math.pow(pt1.x - pt2.x, 2) + Math.pow(pt1.y - pt2.y, 2));
 	}
 
@@ -993,5 +971,4 @@ public class AutoCalibrationManager {
 		centroid.y = moments.get_m01() / moments.get_m00();
 		return centroid;
 	}
-
 }
