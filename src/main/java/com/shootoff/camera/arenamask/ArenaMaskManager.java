@@ -59,10 +59,6 @@ public class ArenaMaskManager implements Runnable {
 
 	private boolean recordMask = false;
 
-	public ArenaMaskManager() {
-		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-	}
-
 	@Override
 	public void run() {
 		if (logger.isDebugEnabled()) logger.debug("Starting arenaMaskManager thread");

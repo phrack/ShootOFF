@@ -493,12 +493,14 @@ public class CameraManager {
 				videoWriterStream.encodeVideo(0, frame);
 			}
 
-			if (cropFeedToProjection && projectionBounds.isPresent()) {
-				canvasManager.updateBackground(currentFrame, projectionBounds);
-			} else {
-				canvasManager.updateBackground(currentFrame, Optional.empty());
-			}
-
+			final BufferedImage frame = currentFrame;
+			Platform.runLater(() -> {
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					canvasManager.updateBackground(frame, projectionBounds);
+				} else {
+					canvasManager.updateBackground(frame, Optional.empty());
+				}
+			});
 		}
 	}
 
