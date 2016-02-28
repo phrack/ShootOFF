@@ -163,7 +163,6 @@ public final class ShotDetectionManager {
 			result = Optional.empty();
 		else if (pixelAboveExcessiveBrightnessThreshold(lumsMovingAverage[x][y])) {
 			brightPixels.add(new Pixel(x, y));
-
 		}
 
 		else if (pixelAboveThreshold(valueForThreshold, threshold)) result = Optional
@@ -200,7 +199,6 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean pixelAboveThreshold(int currentLum, int lumsMovingAverage) {
-
 		final int threshold = ((MAXIMUM_LUM_VALUE - lumsMovingAverage) / 4);
 		final int increase = (currentLum - lumsMovingAverage);
 
@@ -310,7 +308,6 @@ public final class ShotDetectionManager {
 					drawOnCurrentFrame(pixel.x, pixel.y, red);
 				}
 			}
-
 		}
 	}
 
@@ -361,9 +358,7 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean checkIfInitialized() {
-		if (cameraManager.getFrameCount() > INIT_FRAME_COUNT) return true;
-
-		return false;
+		return cameraManager.getFrameCount() > INIT_FRAME_COUNT;
 	}
 
 	private List<Pixel> findThresholdPixelsAndUpdateFilter(final Mat workingFrame, final boolean detectShots) {
@@ -390,7 +385,6 @@ public final class ShotDetectionManager {
 		// In this loop we accomplish both MovingAverage updates AND threshold
 		// pixel detection
 		Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
-
 			public void perform(Integer sector) {
 				int sectorX = (sector.intValue() % SECTOR_COLUMNS);
 				int sectorY = sector.intValue() / SECTOR_ROWS;
@@ -418,7 +412,6 @@ public final class ShotDetectionManager {
 
 						if (pixel.isPresent()) thresholdPixels.add(pixel.get());
 					}
-
 				}
 			}
 		});
@@ -476,7 +469,7 @@ public final class ShotDetectionManager {
 			return;
 		}
 
-		logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", x, y, color.get(),
+		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", x, y, color.get(),
 				cameraManager.getFrameCount());
 
 		if (config.isDebugShotsRecordToFiles()) {
@@ -505,16 +498,17 @@ public final class ShotDetectionManager {
 			if (usingArenaMask) {
 				Mat mask = arenaMaskManager.getMask();
 				Mat maskGrayscale = new Mat(mask.rows(), mask.cols(), CvType.CV_8UC1);
+				
 				for (int a = 0; a < mask.cols(); a++) {
 					for (int b = 0; b < mask.rows(); b++) {
 						maskGrayscale.put(b, a, mask.get(b, a)[0] / 255);
 					}
 				}
+				
 				outputfile = new File(String.format("mask-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
 				filename = outputfile.toString();
 				Highgui.imwrite(filename, maskGrayscale);
 			}
-
 		}
 
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
@@ -523,7 +517,6 @@ public final class ShotDetectionManager {
 			Bounds b = cameraManager.getProjectionBounds().get();
 
 			canvasManager.addShot(color.get(), x + b.getMinX(), y + b.getMinY());
-
 		} else {
 			canvasManager.addShot(color.get(), x, y);
 		}
