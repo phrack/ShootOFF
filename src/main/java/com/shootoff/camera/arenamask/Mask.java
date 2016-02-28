@@ -28,9 +28,9 @@ import org.opencv.imgproc.Imgproc;
 import com.shootoff.camera.Camera;
 
 public class Mask {
-	public BufferedImage bImage;
-	public Mat mask;
-	public final long timestamp;
+	private BufferedImage bImage;
+	private Mat mask;
+	private final long timestamp;
 
 	public Mask(BufferedImage bImage, long timestamp) {
 		this.bImage = bImage;
@@ -42,6 +42,14 @@ public class Mask {
 
 	public int getAvgMaskLum() {
 		return avgMaskLum;
+	}
+
+	public BufferedImage getMaskImage() {
+		return bImage;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
 	}
 
 	public Mat getLumMask(Size targetSize) {
@@ -57,10 +65,6 @@ public class Mask {
 
 		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
 
-		// Imgproc.dilate(src, src, kern);
-
-		// Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);
-
 		long tmpAvgMaskLum = 0;
 		for (int y = 0; y < src.rows(); y++) {
 			for (int x = 0; x < src.cols(); x++) {
@@ -75,16 +79,11 @@ public class Mask {
 
 				int[] dstLum = { pxLum };
 
-				// if (x == 200 && y == 200) logger.warn("mask {} {} {}", pxS,
-				// pxV, dstLum);
-
 				mask.put(y, x, dstLum);
 			}
 		}
 
 		avgMaskLum = (int) (tmpAvgMaskLum / (mask.rows() * mask.cols()));
-
-		// Imgproc.blur(mask, mask, new Size(9, 9));
 
 		return mask;
 	}
