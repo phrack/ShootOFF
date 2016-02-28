@@ -90,8 +90,7 @@ public final class ShotDetectionManager {
 	private int avgBrightPixels = -1;
 
 	// This is a short circuit for our pixel-color-changer to set the bad pixels
-	// red
-	// without having complicated math every pixel
+	// red without having complicated math every pixel
 	private boolean shouldShowBrightnessWarningBool = false;
 
 	private Mat currentFullFrame;
@@ -100,8 +99,6 @@ public final class ShotDetectionManager {
 	private boolean usingArenaMask = false;
 
 	public ShotDetectionManager(CameraManager cameraManager, Configuration config, CanvasManager canvasManager) {
-		//((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-
 		this.canvasManager = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;
@@ -137,7 +134,6 @@ public final class ShotDetectionManager {
 		MINIMUM_SHOT_DIMENSION = (int) (frameSize * .000025);
 
 		if (usingArenaMask) arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
-
 	}
 
 	public CameraManager getCameraManager() {
@@ -154,25 +150,13 @@ public final class ShotDetectionManager {
 		int currentLum = (255 - currentS) * currentV;
 
 		if (lumsMovingAverage[x][y] == -1) {
-
 			lumsMovingAverage[x][y] = currentLum;
-
 			colorDistanceFromRed[x][y] = (Math.min(currentH, Math.abs(180 - currentH)) * currentS * currentV);
 
 			return result;
-
 		}
 
 		int valueForThreshold = currentLum;
-
-		// if (x == 200 && y == 200) logger.warn("{} {} {}",
-		// lumsMovingAverage[x][y], currentLum, mask);
-
-		/*
-		 * if (currentLum < mask*1.3) { valueForThreshold = 0; byte[] col = {
-		 * (byte) 0, (byte) 0, (byte) 0 }; drawOnCurrentFrame(x, y, col); }
-		 */
-
 		int threshold = Math.max(mask, lumsMovingAverage[x][y]);
 
 		if (!detectShots)
@@ -195,18 +179,19 @@ public final class ShotDetectionManager {
 				+ tempColorDistanceFromRed) / movingAveragePeriod;
 
 		return result;
-
 	}
 
 	// This function ADJUSTS X AND Y FOR LIMITING DETECTION BOUNDS
 	private void drawOnCurrentFrame(int x, int y, byte[] color) {
 		int drawX = x;
 		int drawY = y;
+
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			drawX = (int) (cameraManager.getProjectionBounds().get().getMinX() + x);
 			drawY = (int) (cameraManager.getProjectionBounds().get().getMinY() + y);
 		}
+
 		currentFullFrame.put(drawY, drawX, color);
 	}
 
@@ -224,14 +209,7 @@ public final class ShotDetectionManager {
 
 		int dynamic_threshold = threshold + dynamic_increase;
 
-		if (increase < MINIMUM_BRIGHTNESS_INCREASE) return false;
-
-		if (increase < dynamic_threshold) return false;
-
-		/*
-		 * logger.debug("pixelAboveThreshold {} {} {} {} {}", currentLum,
-		 * lumsMovingAverage, threshold, increase, MINIMUM_BRIGHTNESS_INCREASE);
-		 */
+		if (increase < MINIMUM_BRIGHTNESS_INCREASE || increase < dynamic_threshold) return false;
 
 		return true;
 
@@ -243,9 +221,9 @@ public final class ShotDetectionManager {
 		boolean drawImageComplete = g.drawImage(source, 0, 0, null);
 
 		if (!drawImageComplete) {
-
 			if (logger.isErrorEnabled()) logger.error("deepCopy drawImageComplete false");
 		}
+
 		g.dispose();
 		return b;
 	}
@@ -351,31 +329,27 @@ public final class ShotDetectionManager {
 	}
 
 	private boolean isExcessiveMotion(int thresholdPixels) {
-
-		if (thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS || avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD)
-			return true;
-
-		return false;
+		return thresholdPixels > MOTION_WARNING_THRESHOLD_PIXELS || avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD;
 	}
 
 	private boolean shouldShowMotionWarning(int thresholdPixels) {
-
 		if (avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT) {
-			logger.trace("HIGH MOTION - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
+			if (logger.isTraceEnabled()) logger.trace("HIGH MOTION - avgThresholdPixels {} thresholdPixels {}",
+					avgThresholdPixels, thresholdPixels);
 
 			return true;
 		}
+
 		return false;
 	}
 
 	private boolean shouldShowBrightnessWarning() {
-
 		if (logger.isTraceEnabled()) logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount() > BRIGHTNESS_WARNING_FRAMECOUNT) {
-			logger.trace("HIGH BRIGHTNESS - avgBrightPixels {}", avgBrightPixels);
+			if (logger.isTraceEnabled()) logger.trace("HIGH BRIGHTNESS - avgBrightPixels {}", avgBrightPixels);
 
 			shouldShowBrightnessWarningBool = true;
 
@@ -392,7 +366,7 @@ public final class ShotDetectionManager {
 		return false;
 	}
 
-	private List<Pixel> findThresholdPixelsAndUpdateFilter(Mat workingFrame, boolean detectShots) {
+	private List<Pixel> findThresholdPixelsAndUpdateFilter(final Mat workingFrame, final boolean detectShots) {
 		final int subWidth = workingFrame.cols() / SECTOR_COLUMNS;
 		final int subHeight = workingFrame.rows() / SECTOR_ROWS;
 
@@ -439,9 +413,6 @@ public final class ShotDetectionManager {
 						if (usingArenaMask) {
 							maskInt[0] = maskPrimitive[yOffset + x];
 						}
-						// if (x==200&&y==200)
-						// logger.info("maskInt {} - {}", usingArenaMask,
-						// maskInt[0]);
 
 						Optional<Pixel> pixel = updateFilter(pixelChannels, maskInt[0], x, y, detectShots);
 
@@ -463,7 +434,6 @@ public final class ShotDetectionManager {
 			avgThresholdPixels = (((fps - 1) * avgThresholdPixels)
 					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / fps;
 		}
-
 	}
 
 	private void updateAvgBrightPixels(int brightPixels) {
@@ -477,10 +447,8 @@ public final class ShotDetectionManager {
 	}
 
 	public int getMinimumShotDimension() {
-		if (cameraManager.getMinimumShotDimension().isPresent()) {
-			return cameraManager.getMinimumShotDimension().get();
-		}
-		return MINIMUM_SHOT_DIMENSION;
+		return cameraManager.getMinimumShotDimension().isPresent() ? cameraManager.getMinimumShotDimension().get()
+				: MINIMUM_SHOT_DIMENSION;
 	}
 
 	private void addShot(Mat workingFrame, PixelCluster pc) {
@@ -490,20 +458,21 @@ public final class ShotDetectionManager {
 		double y = pc.centerPixelY;
 
 		if (!color.isPresent()) {
-			logger.debug("Processing Shot: Shot Rejected By Lack Of Color Density");
+			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By Lack Of Color Density");
 			return;
 		}
 
 		Shot shot = new Shot(color.get(), x, y, 0, cameraManager.getFrameCount(), config.getMarkerRadius());
 
 		if (!cameraManager.getDeduplicationProcessor().processShot(shot)) {
-			logger.debug("Processing Shot: Shot Rejected By {}",
+			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By {}",
 					cameraManager.getDeduplicationProcessor().getClass().getName());
 			return;
 		}
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
 				&& color.get().equals(config.getIgnoreLaserColor().get())) {
-			logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}", config.getIgnoreLaserColor().get());
+			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
+					config.getIgnoreLaserColor().get());
 			return;
 		}
 
@@ -561,7 +530,7 @@ public final class ShotDetectionManager {
 
 	}
 
-	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
+	public void setArenaMaskManager(final ArenaMaskManager arenaMaskManager) {
 		if (arenaMaskManager != null) {
 			setUsingArenaMask(true);
 			this.arenaMaskManager = arenaMaskManager;
@@ -571,7 +540,7 @@ public final class ShotDetectionManager {
 		}
 	}
 
-	private void setUsingArenaMask(boolean val) {
+	private void setUsingArenaMask(final boolean val) {
 		usingArenaMask = val;
 	}
 }
