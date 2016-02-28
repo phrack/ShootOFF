@@ -21,6 +21,7 @@ package com.shootoff.camera.arenamask;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -47,33 +48,28 @@ public class ArenaMaskManager implements Runnable {
 	private int avgLums = 0;
 	private int minLums;
 	private int maxLums;
-	
+
 	private int[][] lumsMovingAverage;
-	
-
-
 
 	public volatile Mask maskFromArena = null;
 
 	public Semaphore sem = new Semaphore(1);
 
-	public volatile boolean isStreaming = true;
+	public AtomicBoolean isStreaming = new AtomicBoolean(true);
 
 	private boolean recordMask = false;
 
 	public ArenaMaskManager() {
 		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-
 	}
 
-	
 	@Override
 	public void run() {
 		logger.debug("Starting arenaMaskManager thread");
 
 		if (recordMask) startRecordingStream(new File("testingArenaMask.mp4"));
 
-		while (isStreaming) {
+		while (isStreaming.get()) {
 			try {
 				sem.acquire();
 			} catch (InterruptedException e) {
@@ -97,9 +93,8 @@ public class ArenaMaskManager implements Runnable {
 
 		if (recordMask) stopRecordingStream();
 	}
-	
-	public void handleMask(Mask nextMask)
-	{
+
+	public void handleMask(Mask nextMask) {
 		Mat nextMat = nextMask.getLumMask(dsize);
 
 		if (recordMask) recordMask(nextMask);
@@ -110,8 +105,9 @@ public class ArenaMaskManager implements Runnable {
 
 		sem.release();
 
-		double scaledMaskAvgLum = (((double)(nextMaskAvgLum - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
-		
+		double scaledMaskAvgLum = (((double) (nextMaskAvgLum - 0) / (double) (255 * 255 - 0))
+				* (double) (maxLums - minLums) + minLums);
+
 		for (int y = 0; y < nextMat.rows(); y++) {
 			for (int x = 0; x < nextMat.cols(); x++) {
 				int[] maskpx = { 0 };
@@ -120,29 +116,36 @@ public class ArenaMaskManager implements Runnable {
 				int[] nextmatpx = { 0 };
 				nextMat.get(y, x, nextmatpx);
 
-				
 				double scaler = (double) lumsMovingAverage[x][y] / scaledMaskAvgLum;
-				
-				//int newLum = (int) ((double) nextmatpx[0]  * ((double) lumsMovingAverage[x][y] / (double) nextMaskAvgLum));
-				int scaledValue = (int)(((double)(nextmatpx[0] - 0) / (double)(255*255 - 0)) * (double)(maxLums - minLums) + minLums);
-				scaledValue *= scaler;
-				
-				//int normalized = (int) ((double)(Math.min(Math.max(nextmatpx[0], minLums), maxLums) - minLums) / (double)(maxLums - minLums));
-				//int newLum = (int) ((double) normalized * ((double) avgLums / (double) nextMaskAvgLum));
 
-				//maskpx[0] = (((maskpx[0]) + scaledValue) / 2);
+				// int newLum = (int) ((double) nextmatpx[0] * ((double)
+				// lumsMovingAverage[x][y] / (double) nextMaskAvgLum));
+				int scaledValue = (int) (((double) (nextmatpx[0] - 0) / (double) (255 * 255 - 0))
+						* (double) (maxLums - minLums) + minLums);
+				scaledValue *= scaler;
+
+				// int normalized = (int)
+				// ((double)(Math.min(Math.max(nextmatpx[0], minLums), maxLums)
+				// - minLums) / (double)(maxLums - minLums));
+				// int newLum = (int) ((double) normalized * ((double) avgLums /
+				// (double) nextMaskAvgLum));
+
+				// maskpx[0] = (((maskpx[0]) + scaledValue) / 2);
 				maskpx[0] = scaledValue;
-				
-				/*if (scaledValue > lumsMovingAverage[x][y])
-					maskpx[0] = scaledValue;
-				else
-					maskpx[0] = (int) (.95 * maskpx[0]);
+
+				/*
+				 * if (scaledValue > lumsMovingAverage[x][y]) maskpx[0] =
+				 * scaledValue; else maskpx[0] = (int) (.95 * maskpx[0]);
 				 */
-				/*if (x == 200 && y == 200 && nextmatpx[0] > 0) logger.warn("pixel {} {} - min {} max {} - maskg {} scaledMaskAvgLum {} scaler {} scaledValue {} lumsMovingAverage[x][y] {} nmpx {} avgLums {} nmAvgLum {} mpx {}", x, y,
-						minLums, maxLums,
-						mask.get(y, x)[0], scaledMaskAvgLum, scaler, scaledValue, lumsMovingAverage[x][y], nextmatpx[0], avgLums, nextMaskAvgLum, maskpx[0]);
+				/*
+				 * if (x == 200 && y == 200 && nextmatpx[0] > 0) logger.warn(
+				 * "pixel {} {} - min {} max {} - maskg {} scaledMaskAvgLum {} scaler {} scaledValue {} lumsMovingAverage[x][y] {} nmpx {} avgLums {} nmAvgLum {} mpx {}"
+				 * , x, y, minLums, maxLums, mask.get(y, x)[0],
+				 * scaledMaskAvgLum, scaler, scaledValue,
+				 * lumsMovingAverage[x][y], nextmatpx[0], avgLums,
+				 * nextMaskAvgLum, maskpx[0]);
 				 */
-				
+
 				mask.put(y, x, maskpx);
 
 			}
@@ -152,7 +155,6 @@ public class ArenaMaskManager implements Runnable {
 	public void setDelay(long delay) {
 		this.delay = delay;
 	}
-
 
 	public void start(int width, int height) {
 		mask = new Mat(height, width, CvType.CV_32S);
@@ -170,7 +172,6 @@ public class ArenaMaskManager implements Runnable {
 	private IMediaWriter videoWriterStream;
 	private long recordingStartTime;
 
-
 	private void recordMask(Mask mask) {
 		if (recordingStream) {
 			BufferedImage image = ConverterFactory.convertToType(mask.bImage, BufferedImage.TYPE_3BYTE_BGR);
@@ -186,7 +187,7 @@ public class ArenaMaskManager implements Runnable {
 	}
 
 	public void startRecordingStream(File videoFile) {
-		logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
+		if (logger.isDebugEnabled()) logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
 
 		int width = (int) dsize.width;
 		int height = (int) dsize.height;
@@ -203,17 +204,15 @@ public class ArenaMaskManager implements Runnable {
 		videoWriterStream.close();
 	}
 
-	public void setLumsMovingAverage(int[][] lumsMovingAverage)
-	{
+	public void setLumsMovingAverage(int[][] lumsMovingAverage) {
 		this.lumsMovingAverage = lumsMovingAverage;
 	}
 
-
 	public void updateAvgLums(Mat frame) {
 		long lumsCurrentAcrossFrame = 0;
-		long lumsMinimumAcrossFrame = 255*255;
+		long lumsMinimumAcrossFrame = 255 * 255;
 		long lumsMaximumAcrossFrame = 0;
-		
+
 		for (int y = 0; y < frame.rows(); y++) {
 			for (int x = 0; x < frame.cols(); x++) {
 				byte[] px = { 0, 0, 0 };
@@ -224,12 +223,10 @@ public class ArenaMaskManager implements Runnable {
 				int curLum = ((255 - matS) * matV);
 
 				lumsCurrentAcrossFrame += curLum;
-				
 
 				if (curLum > lumsMaximumAcrossFrame)
 					lumsMaximumAcrossFrame = curLum;
-				else if (curLum < lumsMinimumAcrossFrame)
-					lumsMinimumAcrossFrame = curLum;
+				else if (curLum < lumsMinimumAcrossFrame) lumsMinimumAcrossFrame = curLum;
 
 			}
 		}

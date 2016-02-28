@@ -95,7 +95,7 @@ public final class ShotDetectionManager {
 	private boolean shouldShowBrightnessWarningBool = false;
 
 	private Mat currentFullFrame;
-	
+
 	private ArenaMaskManager arenaMaskManager = null;
 	private boolean usingArenaMask = false;
 
@@ -135,9 +135,8 @@ public final class ShotDetectionManager {
 		MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = (int) (frameSize * .000976);
 
 		MINIMUM_SHOT_DIMENSION = (int) (frameSize * .000025);
-		
-		if (usingArenaMask)
-			arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
+
+		if (usingArenaMask) arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
 
 	}
 
@@ -166,14 +165,14 @@ public final class ShotDetectionManager {
 
 		int valueForThreshold = currentLum;
 
-		//if (x == 200 && y == 200) logger.warn("{} {} {}", lumsMovingAverage[x][y], currentLum, mask);
+		// if (x == 200 && y == 200) logger.warn("{} {} {}",
+		// lumsMovingAverage[x][y], currentLum, mask);
 
-		/*if (currentLum < mask*1.3) {
-			valueForThreshold = 0;
-			byte[] col = { (byte) 0, (byte) 0, (byte) 0 };
-			drawOnCurrentFrame(x, y, col);
-		}*/
-		
+		/*
+		 * if (currentLum < mask*1.3) { valueForThreshold = 0; byte[] col = {
+		 * (byte) 0, (byte) 0, (byte) 0 }; drawOnCurrentFrame(x, y, col); }
+		 */
+
 		int threshold = Math.max(mask, lumsMovingAverage[x][y]);
 
 		if (!detectShots)
@@ -182,7 +181,6 @@ public final class ShotDetectionManager {
 			brightPixels.add(new Pixel(x, y));
 
 		}
-		
 
 		else if (pixelAboveThreshold(valueForThreshold, threshold)) result = Optional
 				.of(new Pixel(x, y, currentH, valueForThreshold, lumsMovingAverage[x][y], colorDistanceFromRed[x][y]));
@@ -274,7 +272,7 @@ public final class ShotDetectionManager {
 		// Must reset before every updateFilter loop
 		brightPixels.clear();
 
-		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame, 
+		List<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame,
 				(detectShots && filtersInitialized));
 
 		int thresholdPixelsSize = thresholdPixels.size();
@@ -408,10 +406,9 @@ public final class ShotDetectionManager {
 		int size = (int) (workingFrame.total() * channels);
 		byte[] workingFramePrimitive = new byte[size];
 		workingFrame.get(0, 0, workingFramePrimitive);
-		
+
 		int[] maskPrimitive = new int[workingFrame.cols() * workingFrame.rows()];
-		if (usingArenaMask)
-		{
+		if (usingArenaMask) {
 			Mat mask = arenaMaskManager.getMask();
 			mask.get(0, 0, maskPrimitive);
 		}
@@ -442,8 +439,9 @@ public final class ShotDetectionManager {
 						if (usingArenaMask) {
 							maskInt[0] = maskPrimitive[yOffset + x];
 						}
-						//if (x==200&&y==200)
-						//	logger.info("maskInt {} - {}", usingArenaMask, maskInt[0]);
+						// if (x==200&&y==200)
+						// logger.info("maskInt {} - {}", usingArenaMask,
+						// maskInt[0]);
 
 						Optional<Pixel> pixel = updateFilter(pixelChannels, maskInt[0], x, y, detectShots);
 
@@ -530,28 +528,24 @@ public final class ShotDetectionManager {
 					debugFrame.put(p.y, p.x, redColor);
 				}
 			}
+
 			File outputfile = new File(String.format("shot-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
 			filename = outputfile.toString();
 			Highgui.imwrite(filename, debugFrame);
-			
-			
-			if (usingArenaMask)
-			{
+
+			if (usingArenaMask) {
 				Mat mask = arenaMaskManager.getMask();
 				Mat maskGrayscale = new Mat(mask.rows(), mask.cols(), CvType.CV_8UC1);
-				for (int a = 0; a < mask.cols(); a++)
-				{
-					for (int b = 0; b < mask.rows(); b++)
-					{
-						maskGrayscale.put(b, a, (int)mask.get(b,a)[0]/255);
+				for (int a = 0; a < mask.cols(); a++) {
+					for (int b = 0; b < mask.rows(); b++) {
+						maskGrayscale.put(b, a, mask.get(b, a)[0] / 255);
 					}
 				}
 				outputfile = new File(String.format("mask-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
 				filename = outputfile.toString();
 				Highgui.imwrite(filename, maskGrayscale);
 			}
-			
-			
+
 		}
 
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
@@ -568,19 +562,16 @@ public final class ShotDetectionManager {
 	}
 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
-		if (arenaMaskManager != null)
-		{
+		if (arenaMaskManager != null) {
 			setUsingArenaMask(true);
 			this.arenaMaskManager = arenaMaskManager;
 			arenaMaskManager.setLumsMovingAverage(lumsMovingAverage);
-		}
-		else
-		{
+		} else {
 			setUsingArenaMask(false);
 		}
 	}
 
 	private void setUsingArenaMask(boolean val) {
-		usingArenaMask  = val;
+		usingArenaMask = val;
 	}
 }

@@ -56,12 +56,10 @@ public class Mask {
 		bImage = Camera.matToBufferedImage(src);
 
 		Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
-	
-		
-		//Imgproc.dilate(src, src, kern);
-		 
-		//Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);
-		
+
+		// Imgproc.dilate(src, src, kern);
+
+		// Imgproc.GaussianBlur(mask, mask, new Size(11,11), 8.0);
 
 		long tmpAvgMaskLum = 0;
 		for (int y = 0; y < src.rows(); y++) {
@@ -77,7 +75,8 @@ public class Mask {
 
 				int[] dstLum = { pxLum };
 
-				//if (x == 200 && y == 200) logger.warn("mask {} {} {}", pxS, pxV, dstLum);
+				// if (x == 200 && y == 200) logger.warn("mask {} {} {}", pxS,
+				// pxV, dstLum);
 
 				mask.put(y, x, dstLum);
 			}
@@ -85,7 +84,7 @@ public class Mask {
 
 		avgMaskLum = (int) (tmpAvgMaskLum / (mask.rows() * mask.cols()));
 
-		//Imgproc.blur(mask, mask, new Size(9, 9));
+		// Imgproc.blur(mask, mask, new Size(9, 9));
 
 		return mask;
 	}

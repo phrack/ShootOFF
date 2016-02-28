@@ -3,23 +3,14 @@ package com.shootoff.camera.shotdetection;
 import java.awt.Point;
 
 public class Pixel extends Point {
-
 	private static final long serialVersionUID = 1L;
 
 	private int currentLum;
 	private int lumAverage;
 	private int color;
 	private int colorAverage;
-
-	public int getColorAverage() {
-		return colorAverage;
-	}
-
-	public void setColorAverage(int colorAverage) {
-		this.colorAverage = colorAverage;
-	}
-
-	private int connectedness = 0;
+	
+	private int connectedness;
 
 	public Pixel(int x, int y, int color, int currentLum, int lumAverage, int colorAverage) {
 		super(x, y);
@@ -29,15 +20,23 @@ public class Pixel extends Point {
 		this.colorAverage = colorAverage;
 	}
 
-	public Pixel(int x, int y) {
+	public Pixel(final int x, final int y) {
 		super(x, y);
+	}
+	
+	public int getColorAverage() {
+		return colorAverage;
+	}
+
+	public void setColorAverage(final int colorAverage) {
+		this.colorAverage = colorAverage;
 	}
 
 	public int getConnectedness() {
 		return connectedness;
 	}
 
-	public void setConnectedness(int connectedness) {
+	public void setConnectedness(final int connectedness) {
 		this.connectedness = connectedness;
 	}
 
@@ -45,7 +44,7 @@ public class Pixel extends Point {
 		return currentLum;
 	}
 
-	public void setCurrentLum(int currentLum) {
+	public void setCurrentLum(final int currentLum) {
 		this.currentLum = currentLum;
 	}
 
@@ -53,7 +52,7 @@ public class Pixel extends Point {
 		return lumAverage;
 	}
 
-	public void setLumAverage(int lumAverage) {
+	public void setLumAverage(final int lumAverage) {
 		this.lumAverage = lumAverage;
 	}
 
@@ -61,8 +60,7 @@ public class Pixel extends Point {
 		return color;
 	}
 
-	public void setColor(int color) {
+	public void setColor(final int color) {
 		this.color = color;
 	}
-
 }
