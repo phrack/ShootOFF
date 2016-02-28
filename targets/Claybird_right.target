@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<polygon fill="black">
+		<point x="7.000000" y="114.000000" />
+		<point x="38.000000" y="69.000000" />
+		<point x="92.000000" y="39.000000" />
+		<point x="39.000000" y="-1.000000" />
+		<point x="-10.000000" y="19.000000" />
+		<point x="-39.000000" y="51.000000" />
+		<tag name="opacity" value=".005" />
+		<tag name="command" value="animate(claybird_right.target);play_sound(sounds/sks.wav)" />
+	</polygon>
+	<ellipse centerX="50.00000" centerY="75.00000" radiusX="156.000000" radiusY="76.000000" fill="black">
+		<tag name="subtarget" value="outer4" />
+		<tag name="points" value="5" />
+		<tag name="opacity" value=".005" />
+		<tag name="command" value="animate(claybird_right.target);play_sound(sounds/sks.wav)" />
+	</ellipse>
+	<image x="0.000000" y="0.000000" file="targets/claybird_right.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_1.wav)" />
+		<tag name="name" value="claybird_right.target" />
+	</image>
+</target>
