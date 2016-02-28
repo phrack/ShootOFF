@@ -19,7 +19,6 @@
 package com.shootoff.camera.shotdetection;
 
 public class FMath {
-
 	public final static int FULL_SCALE = 1000000000;
 	public final static int HALF_SCALE = FULL_SCALE / 2;
 
@@ -27,5 +26,4 @@ public class FMath {
 	public final static int TWOFIFTYFIVE_TO_HALF = (HALF_SCALE / 255);
 
 	public final static int FULL_TO_TWOFIFTYFIVE = (FULL_SCALE / 255);
-
 }

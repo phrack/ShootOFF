@@ -782,8 +782,8 @@ public class AutoCalibrationManager {
 
 		// Make them divisible by two for video recording purposes
 
-		if ((width % 2) == 1) width++;
-		if ((height % 2) == 1) height++;
+		if ((width & 1) == 1) width++;
+		if ((height & 1) == 1) height++;
 
 		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y, width, height);
 
