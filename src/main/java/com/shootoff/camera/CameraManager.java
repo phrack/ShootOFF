@@ -124,7 +124,8 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 	
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
-	protected final ArenaMaskManager arenaMaskManager = new ArenaMaskManager();
+	// TODO: Re-enable mask manager when it is ready
+	protected final ArenaMaskManager arenaMaskManager = null; // = new ArenaMaskManager();
 
 	private CalibrationManager calibrationManager;
 
@@ -540,7 +541,8 @@ public class CameraManager {
 
 			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
 
-			arenaMaskManager.updateAvgLums(submatFrame);
+			// TODO: Re-enable mask manager when it is ready
+			// arenaMaskManager.updateAvgLums(submatFrame);
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
@@ -672,13 +674,13 @@ public class CameraManager {
 				calibrationManager.calibrate(bounds, false);
 			});
 
-			calibrationManager.setArenaMaskManager(arenaMaskManager);
+			// TODO: Re-enable mask manager when it is ready
+			// calibrationManager.setArenaMaskManager(arenaMaskManager);
 
-			shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-			arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
+			// shotDetectionManager.setArenaMaskManager(arenaMaskManager);
+			// arenaMaskManager.start((int) bounds.getWidth(), (int)
+			// bounds.getHeight());
 
-			// if (!recordingStream)
-			// startRecordingStream(new File("fullFrameStream.mp4"));
 			if (recordCalibratedArea && !recordingCalibratedArea)
 				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int) bounds.getWidth(),
 						(int) bounds.getHeight());
