@@ -18,9 +18,8 @@ import com.xuggle.mediatool.event.ICloseEvent;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
 public class MockCameraManager extends CameraManager {
-
 	public MockCameraManager() {
-		super(new MockCamera(), new MockCanvasManager(null), null);
+		super(new MockCamera(), null, new MockCanvasManager(null), null);
 		this.processingLock = null;
 	}
 

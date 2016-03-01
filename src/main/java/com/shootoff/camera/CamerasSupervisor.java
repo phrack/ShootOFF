@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ public class CamerasSupervisor {
 		this.config = config;
 	}
 
-	public CameraManager addCameraManager(Camera webcam, CanvasManager canvasManager) {
-		final CameraManager manager = new CameraManager(webcam, canvasManager, config);
+	public CameraManager addCameraManager(Camera webcam, CameraErrorView cameraErrorView, CanvasManager canvasManager) {
+		final CameraManager manager = new CameraManager(webcam, cameraErrorView, canvasManager, config);
 		managers.add(manager);
 		allDetecting = true;
 		return manager;

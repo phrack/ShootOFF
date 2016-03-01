@@ -41,9 +41,9 @@ import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DebuggerListener;
-import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -56,8 +56,6 @@ import com.xuggle.xuggler.video.IConverter;
 
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -82,6 +80,8 @@ public class CameraManager {
 	protected final ShotDetectionManager shotDetectionManager;
 
 	protected final Optional<Camera> webcam;
+	private final Optional<CameraErrorView> cameraErrorView;
+
 
 	protected final CanvasManager canvasManager;
 	protected final Configuration config;
@@ -122,29 +122,23 @@ public class CameraManager {
 	protected AutoCalibrationManager acm = null;
 	protected boolean autoCalibrationEnabled = false;
 	public boolean cameraAutoCalibrated = false;
-
-	protected ShootOFFController controller;
-
+	
+	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
 	protected final ArenaMaskManager arenaMaskManager = new ArenaMaskManager();
 
-	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
+	private CalibrationManager calibrationManager;
 
-	public ShootOFFController getController() {
-		return controller;
-	}
-
-	public void setController(ShootOFFController controller) {
-		this.controller = controller;
+	public void setCalibrationManager(CalibrationManager calibrationManager) {
+		this.calibrationManager = calibrationManager;
 	}
 
 	public DeduplicationProcessor getDeduplicationProcessor() {
 		return deduplicationProcessor;
 	}
 
-	public CameraManager(Camera webcam, CanvasManager canvas, Configuration config) {
-		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-
+	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
+		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
 		this.canvasManager = canvas;
 		this.config = config;
 
@@ -158,6 +152,7 @@ public class CameraManager {
 
 	protected CameraManager(CanvasManager canvas, Configuration config) {
 		this.webcam = Optional.empty();
+		this.cameraErrorView = Optional.empty();
 		this.canvasManager = canvas;
 		this.config = config;
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
@@ -446,7 +441,7 @@ public class CameraManager {
 
 			if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 				// Camera appears to have closed
-				showMissingCameraError();
+				if (cameraErrorView.isPresent()) cameraErrorView.get().showMissingCameraError(webcam.get());
 				return;
 			} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 				// Camera appears to be open but got a null frame
@@ -595,59 +590,14 @@ public class CameraManager {
 		deduplicationProcessor.setThresholdUsingFPS(getFPS());
 
 	}
-
+	
 	private void checkIfMinimumFPS() {
 		if (getFPS() < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 			logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
 					webcam.get().getName(), getFPS());
-			showFPSWarning(getFPS());
+			if (cameraErrorView.isPresent() && webcam.isPresent()) cameraErrorView.get().showFPSWarning(webcam.get(), getFPS());
 			showedFPSWarning = true;
 		}
-	}
-
-	private void showMissingCameraError() {
-		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.ERROR);
-
-			Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
-			String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
-			String message;
-			if (cameraName.isPresent()) {
-				message = String.format(messageFormat, cameraName.get());
-			} else {
-				message = String.format(messageFormat, webcam.get().getName());
-			}
-
-			cameraAlert.setTitle("Webcam Missing");
-			cameraAlert.setHeaderText("Cannot Communicate with Camera!");
-			cameraAlert.setResizable(true);
-			cameraAlert.setContentText(message);
-			if (controller != null) cameraAlert.initOwner(controller.getStage());
-			cameraAlert.show();
-		});
-	}
-
-	private void showFPSWarning(double fps) {
-		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.WARNING);
-
-			Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
-			String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
-					+ " shots may be missed. You may be able to raise the FPS by closing other applications.";
-			String message;
-			if (cameraName.isPresent()) {
-				message = String.format(messageFormat, cameraName.get(), fps);
-			} else {
-				message = String.format(messageFormat, webcam.get().getName(), fps);
-			}
-
-			cameraAlert.setTitle("Webcam FPS Too Low");
-			cameraAlert.setHeaderText("Webcam FPS is too low!");
-			cameraAlert.setResizable(true);
-			cameraAlert.setContentText(message);
-			if (controller != null) cameraAlert.initOwner(controller.getStage());
-			cameraAlert.show();
-		});
 	}
 
 	private Label brightnessDiagnosticWarning = null;
@@ -673,30 +623,7 @@ public class CameraManager {
 
 		if (!webcam.isPresent() || shownBrightnessWarning) return;
 		shownBrightnessWarning = true;
-		Platform.runLater(() -> {
-			Alert brightnessAlert = new Alert(AlertType.WARNING);
-
-			Optional<String> cameraName = config.getWebcamsUserName(webcam.get());
-			String messageFormat = "The camera %s is streaming frames that are very bright. "
-					+ " This will increase the odds of shots falsely being detected."
-					+ " For best results, please do any mix of the following:\n\n"
-					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness\n"
-					+ "-Remove any bright light sources in the camera's view\n"
-					+ "-Turn down your projector's brightness and contrast";
-			String message;
-			if (cameraName.isPresent()) {
-				message = String.format(messageFormat, cameraName.get());
-			} else {
-				message = String.format(messageFormat, webcam.get().getName());
-			}
-
-			brightnessAlert.setTitle("Conditions Very Bright");
-			brightnessAlert.setHeaderText("Webcam detected very bright conditions!");
-			brightnessAlert.setResizable(true);
-			brightnessAlert.setContentText(message);
-			if (controller != null) brightnessAlert.initOwner(controller.getStage());
-			brightnessAlert.show();
-		});
+		if (cameraErrorView.isPresent() && webcam.isPresent()) cameraErrorView.get().showBrightnessWarning(webcam.get());
 	}
 
 	private Label motionDiagnosticWarning = null;
@@ -733,7 +660,7 @@ public class CameraManager {
 	}
 
 	protected void autoCalibrateSuccess(Bounds bounds, long delay) {
-		if (autoCalibrationEnabled && controller != null) {
+		if (autoCalibrationEnabled && calibrationManager != null) {
 			autoCalibrationEnabled = false;
 
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
@@ -742,12 +669,11 @@ public class CameraManager {
 			cameraAutoCalibrated = true;
 
 			Platform.runLater(() -> {
-
-				controller.calibrate(bounds, false);
-
+				calibrationManager.calibrate(bounds, false);
 			});
 
-			controller.setArenaMaskManager(arenaMaskManager);
+			calibrationManager.setArenaMaskManager(arenaMaskManager);
+
 			shotDetectionManager.setArenaMaskManager(arenaMaskManager);
 			arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
 
@@ -774,12 +700,11 @@ public class CameraManager {
 	}
 
 	public void setArenaBackground(String resourceFilename) {
-		if (controller == null) {
+		if (calibrationManager == null) {
 			logger.error("setArenaBackground called when controller is null");
 			return;
 		}
 
-		controller.setArenaBackground(resourceFilename);
+		calibrationManager.setArenaBackground(resourceFilename);
 	}
-
 }

@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.Target;
@@ -43,7 +44,7 @@ public class SessionRecorder {
 	private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
 	private final Map<String, Set<Target>> seenTargets = new HashMap<String, Set<Target>>();
 
-	private volatile boolean ignoreTargetCheck = false;
+	private AtomicBoolean ignoreTargetCheck = new AtomicBoolean(false);
 
 	public SessionRecorder() {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
@@ -84,7 +85,7 @@ public class SessionRecorder {
 		}
 
 		if (!seenTargets.get(cameraName).contains(target)) {
-			ignoreTargetCheck = true;
+			ignoreTargetCheck.set(true);
 
 			recordTargetAdded(cameraName, target);
 			Point2D p = target.getPosition();
@@ -92,7 +93,7 @@ public class SessionRecorder {
 			Dimension2D d = target.getDimension();
 			recordTargetResized(cameraName, target, d.getWidth(), d.getHeight());
 
-			ignoreTargetCheck = false;
+			ignoreTargetCheck.set(false);
 		}
 	}
 
@@ -102,7 +103,7 @@ public class SessionRecorder {
 
 		if (target.isPresent()) {
 			targetIndex = Optional.of(target.get().getTargetIndex());
-			if (!ignoreTargetCheck) checkTarget(cameraName, target.get());
+			if (!ignoreTargetCheck.get()) checkTarget(cameraName, target.get());
 		}
 
 		long timestamp = System.currentTimeMillis() - startTime;
@@ -132,7 +133,7 @@ public class SessionRecorder {
 	}
 
 	public void recordTargetRemoved(String cameraName, Target target) {
-		if (!ignoreTargetCheck) checkTarget(cameraName, target);
+		if (!ignoreTargetCheck.get()) checkTarget(cameraName, target);
 
 		getCameraEvents(cameraName).add(
 				new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex()));
@@ -161,7 +162,7 @@ public class SessionRecorder {
 	}
 
 	public void recordTargetResized(String cameraName, Target target, double newWidth, double newHeight) {
-		if (!ignoreTargetCheck) checkTarget(cameraName, target);
+		if (!ignoreTargetCheck.get()) checkTarget(cameraName, target);
 
 		// Remove all resize events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, target);
@@ -171,7 +172,7 @@ public class SessionRecorder {
 	}
 
 	public void recordTargetMoved(String cameraName, Target target, int newX, int newY) {
-		if (!ignoreTargetCheck) checkTarget(cameraName, target);
+		if (!ignoreTargetCheck.get()) checkTarget(cameraName, target);
 
 		// Remove all move events immediately before this one
 		collapseTargetEvents(cameraName, EventType.TARGET_MOVED, target);

@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
+import com.shootoff.plugins.engine.PluginEngine;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 
@@ -564,7 +565,8 @@ public class Main extends Application {
 			else
 				primaryStage.setTitle("ShootOFF");
 			primaryStage.setScene(scene);
-			((ShootOFFController) loader.getController()).init(config);
+			ShootOFFController controller = (ShootOFFController) loader.getController();
+			controller.init(config, new PluginEngine(controller));
 			primaryStage.show();
 		} catch (IOException e) {
 			logger.error("Error loading ShootOFF FXML file", e);
@@ -639,6 +641,7 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exercises");
 
 			resourcesMetadataFile = new File(
 					System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
@@ -668,6 +671,7 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exercises");
 			runShootOFF();
 		}
 	}

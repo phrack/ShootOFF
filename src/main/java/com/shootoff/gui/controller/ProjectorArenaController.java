@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 package com.shootoff.gui.controller;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
@@ -36,6 +35,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
 import com.shootoff.gui.CalibrationListener;
+import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Target;
@@ -46,6 +46,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -74,32 +75,42 @@ public class ProjectorArenaController implements CalibrationListener {
 	private Screen originalArenaHomeScreen;
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
 
-	private ShootOFFController shootOFFController;
+	private CalibrationManager calibrationManager;
 
-
-
-	public void init(ShootOFFController shootOFFController, Configuration config, CamerasSupervisor camerasSupervisor) {
+	// Used for testing
+	public void init(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
+		this.canvasManager = canvasManager;
 
-		this.shootOFFController = shootOFFController;
+		arenaStage = new Stage();
+		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
+		Scene scene = new Scene(arenaAnchor, 500, 500);
+		arenaStage.setScene(scene);
+	}
 
-		shootOFFStage = shootOFFController.getStage();
+	public void init(Stage shootOFFStage, Configuration config,
+			CamerasSupervisor camerasSupervisor) {
+		this.config = config;
+		
+		this.shootOFFStage = shootOFFStage;
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
 
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
 
 		arenaAnchor.widthProperty().addListener((e) -> {
-
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
 		arenaAnchor.heightProperty().addListener((e) -> {
-
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
+	}
+	
+	public void setCalibrationManager(CalibrationManager calibrationManager) {
+		this.calibrationManager = calibrationManager;
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
@@ -368,7 +379,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setAlwaysOnTop(!arenaStage.isAlwaysOnTop());
 		arenaStage.setFullScreen(!arenaStage.isFullScreen());
 
-		shootOFFController.setFullScreenStatus(arenaStage.isFullScreen());
+		calibrationManager.setFullScreenStatus(arenaStage.isFullScreen());
 	}
 
 	public boolean isFullScreen() {
@@ -401,10 +412,10 @@ public class ProjectorArenaController implements CalibrationListener {
 	private CanvasManager feedCanvasManager;
 
 	private void cursorWarningToggle(boolean mouseEntered) {
-		if (feedCanvasManager == null || shootOFFController.isCalibrating()) return;
+		if (feedCanvasManager == null || calibrationManager.isCalibrating()) return;
 
 		// If everything is still the same, return
-		if (mouseEntered && showingCursorWarning && !shootOFFController.isCalibrating()) return;
+		if (mouseEntered && showingCursorWarning && !calibrationManager.isCalibrating()) return;
 
 		// If the mouse entered OR the mouse is in the window but we haven't
 		// been showing the warning, show the warning
@@ -412,7 +423,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			Platform.runLater(new Runnable() {
 				public void run() {
 					mouseInWindow = true;
-					if (!shootOFFController.isCalibrating() && arenaStage.isFullScreen()) {
+					if (!calibrationManager.isCalibrating() && arenaStage.isFullScreen()) {
 						showingCursorWarning = true;
 						mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage(
 								"Cursor On Arena: Shot Detection Disabled", 15000 /* ms */, Color.YELLOW);
@@ -433,7 +444,7 @@ public class ProjectorArenaController implements CalibrationListener {
 						showingCursorWarning = false;
 						mouseOnArenaLabel = null;
 					}
-					if (!shootOFFController.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
+					if (!calibrationManager.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
 				});
 			} , 100 /* ms */);
 		}
@@ -451,18 +462,19 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void setFeedCanvasManager(CanvasManager canvasManager) {
 		this.feedCanvasManager = canvasManager;
 
-		arenaStage.getScene().setOnMouseEntered((event) -> {
-			cursorWarningToggle(true);
-		});
-
-		arenaStage.getScene().setOnMouseExited((event) -> {
-			cursorWarningToggle(false);
-		});
+		if (arenaStage != null) {
+			arenaStage.getScene().setOnMouseEntered((event) -> {
+				cursorWarningToggle(true);
+			});
+	
+			arenaStage.getScene().setOnMouseExited((event) -> {
+				cursorWarningToggle(false);
+			});
+		}
 	}
 
-	protected ArenaMaskManager arenaMaskManager = null;
-	protected Timer updateMaskTimer = null;
-	protected BufferedImage bImage;
+	@SuppressWarnings("unused") private ArenaMaskManager arenaMaskManager = null;
+	private Timer updateMaskTimer = null;
 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		this.arenaMaskManager = arenaMaskManager;
@@ -483,6 +495,7 @@ public class ProjectorArenaController implements CalibrationListener {
 						} catch (InterruptedException e) {
 							return;
 						}
+
 						try {
 							arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
 									System.currentTimeMillis());

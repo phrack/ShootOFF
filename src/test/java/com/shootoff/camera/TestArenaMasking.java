@@ -25,7 +25,6 @@ import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.controller.MockShootOFFController;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
@@ -72,8 +71,6 @@ public class TestArenaMasking extends ShotDetectionTestor {
 		arenaMaskManager = cameraManager.getArenaMaskManager();
 
 		arenaMaskManager.setDelay(200);
-		
-		cameraManager.setController(new MockShootOFFController());
 
 		cameraManager.cameraAutoCalibrated = true;
 		

@@ -135,7 +135,6 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 295.2, 222.7, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 253.5, 192.0, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 268.0, 181.1, 0, 2));
-
 		optionalShots.add(new Shot(Color.GREEN, 268.1, 119.4, 0, 2));
 
 		// From the plate moving

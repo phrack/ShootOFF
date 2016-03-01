@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,9 +110,9 @@ public class XMLCourseReader {
 			return resolution;
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
-
 			switch (qName) {
 			case "background": {
 				boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
