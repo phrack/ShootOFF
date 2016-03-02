@@ -10,10 +10,15 @@ import java.nio.file.Paths;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.shootoff.gui.JavaFXThreadingRule;
+
 public class TestPlugin {
+	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	
 	private Path pluginDir;
 
 	@Before
