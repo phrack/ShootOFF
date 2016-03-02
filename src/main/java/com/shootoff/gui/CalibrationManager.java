@@ -35,7 +35,8 @@ public class CalibrationManager {
 
 	private Optional<Target> calibrationTarget = Optional.empty();
 
-	private AtomicBoolean isCalibrating = new AtomicBoolean(false);
+	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
+	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
 
 	public CalibrationManager(CalibrationConfigurator calibrationConfigurator, CameraManager calibratingCameraManager,
 			ProjectorArenaController arenaController) {
@@ -53,7 +54,7 @@ public class CalibrationManager {
 		isCalibrating.set(true);
 
 		calibrationConfigurator.toggleCalibrating();
-		
+
 		// Sets calibrating and not detecting
 		calibratingCameraManager.setCalibrating(true);
 		calibratingCameraManager.setProjectionBounds(null);
@@ -66,8 +67,6 @@ public class CalibrationManager {
 	}
 
 	public void stopCalibration() {
-		isCalibrating.set(false);
-
 		if (calibrationTarget.isPresent())
 			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
 
@@ -86,6 +85,9 @@ public class CalibrationManager {
 
 		calibratingCameraManager.setCalibrating(false);
 
+		isCalibrating.set(false);
+		isShowingPattern.set(false);
+
 		// We disable shot detection briefly because the pattern going away can
 		// cause false shots
 		// This statement applies to all the cam feeds rather than just the
@@ -100,7 +102,7 @@ public class CalibrationManager {
 		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
 
 		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
-		
+
 		if (isCalibrating()) stopCalibration();
 	}
 
@@ -108,7 +110,7 @@ public class CalibrationManager {
 		calibratingCameraManager.setCropFeedToProjection(CalibrationOption.CROP.equals(option));
 		calibratingCameraManager.setLimitDetectProjection(CalibrationOption.ONLY_IN_BOUNDS.equals(option));
 	}
-	
+
 	public void arenaClosing() {
 		calibratingCameraManager.setProjectionBounds(null);
 	}
@@ -181,8 +183,8 @@ public class CalibrationManager {
 
 		showingManualCalibrationRequestMessage = true;
 		Platform.runLater(() -> {
-			manualCalibrationRequestMessage = calibratingCanvasManager
-					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
+			manualCalibrationRequestMessage = calibratingCanvasManager.addDiagnosticMessage(
+					"Please manually calibrate the projection region", 20000, Color.ORANGE);
 		});
 	}
 
@@ -207,8 +209,8 @@ public class CalibrationManager {
 
 		showingFullScreenRequestMessage = true;
 		Platform.runLater(() -> {
-			fullScreenRequestMessage = calibratingCanvasManager
-					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
+			fullScreenRequestMessage = calibratingCanvasManager.addDiagnosticMessage(
+					"Please move the arena to your projector and hit F11", Color.YELLOW);
 		});
 	}
 
@@ -230,8 +232,12 @@ public class CalibrationManager {
 
 		calibrationListener.startCalibration();
 		arenaController.setCalibrationMessageVisible(false);
-		arenaController.saveCurrentBackground();
+		// We may already be calibrating if the user decided to move the arena
+		// to another screen while calibrating. If we save the background in
+		// that case we are saving the calibration pattern as the background.
+		if (!isShowingPattern.get()) arenaController.saveCurrentBackground();
 		setArenaBackground("pattern.png");
+		isShowingPattern.set(true);
 
 		calibratingCameraManager.enableAutoCalibration(true);
 
@@ -246,7 +252,7 @@ public class CalibrationManager {
 					enableManualCalibration();
 				}
 			});
-		} , MAX_AUTO_CALIBRATION_TIME);
+		}, MAX_AUTO_CALIBRATION_TIME);
 	}
 
 	public void setArenaBackground(String resourceFilename) {
@@ -290,7 +296,7 @@ public class CalibrationManager {
 
 		}
 	}
-	
+
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
