@@ -978,7 +978,7 @@ public class ShootOFFController
 			config.getExercise().get().reset(knownTargets);
 		}
 
-		disableShotDetection(500);
+		disableShotDetection(600);
 	}
 
 	// Technically the period could be shorter than the previous call

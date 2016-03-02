@@ -350,6 +350,8 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void canvasKeyPressed(KeyEvent event) throws Exception {
 		boolean macFullscreen = event.getCode() == KeyCode.F && event.isControlDown() && event.isShortcutDown();
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
+			toggleFullScreen();
+			
 			// Manually going full screen with an arena that was manually
 			// moved to another screen
 			Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
@@ -370,8 +372,6 @@ public class ProjectorArenaController implements CalibrationListener {
 					throw e;
 				}
 			}
-
-			toggleFullScreen();
 		}
 	}
 
