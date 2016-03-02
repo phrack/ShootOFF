@@ -67,6 +67,8 @@ public class CalibrationManager {
 	}
 
 	public void stopCalibration() {
+		isCalibrating.set(false);
+		
 		if (calibrationTarget.isPresent())
 			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
 
@@ -85,7 +87,6 @@ public class CalibrationManager {
 
 		calibratingCameraManager.setCalibrating(false);
 
-		isCalibrating.set(false);
 		isShowingPattern.set(false);
 
 		// We disable shot detection briefly because the pattern going away can
@@ -131,7 +132,10 @@ public class CalibrationManager {
 	}
 
 	private void removeCalibrationTargetIfPresent() {
-		if (calibrationTarget.isPresent()) calibratingCanvasManager.removeTarget(calibrationTarget.get());
+		if (calibrationTarget.isPresent()) {
+			calibratingCanvasManager.removeTarget(calibrationTarget.get());
+			calibrationTarget = Optional.empty();
+		}
 	}
 
 	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
