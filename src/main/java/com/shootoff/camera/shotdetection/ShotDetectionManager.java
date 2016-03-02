@@ -180,20 +180,6 @@ public final class ShotDetectionManager {
 		return result;
 	}
 
-	// This function ADJUSTS X AND Y FOR LIMITING DETECTION BOUNDS
-	private void drawOnFrame(Mat frame, int x, int y, byte[] color) {
-		int drawX = x;
-		int drawY = y;
-
-		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
-				&& cameraManager.getProjectionBounds().isPresent()) {
-			drawX = (int) (cameraManager.getProjectionBounds().get().getMinX() + x);
-			drawY = (int) (cameraManager.getProjectionBounds().get().getMinY() + y);
-		}
-
-		frame.put(drawY, drawX, color);
-	}
-
 	private boolean pixelAboveExcessiveBrightnessThreshold(int lumsMovingAverage) {
 		return lumsMovingAverage > EXCESSIVE_BRIGHTNESS_THRESHOLD;
 	}
@@ -286,7 +272,7 @@ public final class ShotDetectionManager {
 				byte[] blue = { (byte) 120, (byte) 255, (byte) 255 };
 
 				for (Pixel pixel : thresholdPixels) {
-					drawOnFrame(workingFrame, pixel.x, pixel.y, blue);
+					workingFrame.put(pixel.y,pixel.x,blue);
 				}
 			}
 
@@ -296,7 +282,7 @@ public final class ShotDetectionManager {
 				byte[] red = { 0, (byte) 255, (byte) 255 };
 
 				for (Pixel pixel : brightPixels) {
-					drawOnFrame(workingFrame, pixel.x, pixel.y, red);
+					workingFrame.put(pixel.y,pixel.x,red);
 				}
 			}
 		}
