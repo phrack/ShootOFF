@@ -64,9 +64,9 @@ public final class ShotDetectionManager {
 	private int movingAveragePeriod = INIT_FRAME_COUNT;
 
 	private final static int MOTION_WARNING_FRAMECOUNT = 30;
-	private int MOTION_WARNING_AVG_THRESHOLD = 100;
-	private int MOTION_WARNING_THRESHOLD_PIXELS = 600;
-	private int MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG = 600;
+	private int MOTION_WARNING_AVG_THRESHOLD;
+	private int MOTION_WARNING_THRESHOLD_PIXELS;
+	private int MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG;
 
 	// Individual pixel threshold
 	private final static int MAXIMUM_LUM_VALUE = 65025;
@@ -74,12 +74,12 @@ public final class ShotDetectionManager {
 	private final static int MINIMUM_BRIGHTNESS_INCREASE = (int) (.117 * MAXIMUM_LUM_VALUE);;
 
 	// Aggregate # of pixel threshold
-	private int BRIGHTNESS_WARNING_AVG_THRESHOLD = 100;
+	private int BRIGHTNESS_WARNING_AVG_THRESHOLD;
 	private final static int BRIGHTNESS_WARNING_FRAMECOUNT = 90;
 
-	private int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG = 300;
+	private int MAXIMUM_THRESHOLD_PIXELS_FOR_AVG;
 
-	private int MINIMUM_SHOT_DIMENSION = 6;
+	private int MINIMUM_SHOT_DIMENSION;
 
 	// This is updated for every bright pixel
 	ArrayList<Pixel> brightPixels = new ArrayList<Pixel>();
@@ -122,7 +122,7 @@ public final class ShotDetectionManager {
 
 		double frameSize = width * height;
 
-		MOTION_WARNING_AVG_THRESHOLD = (int) (frameSize * .000325);
+		MOTION_WARNING_AVG_THRESHOLD = (int) (frameSize * .000395);
 		MOTION_WARNING_THRESHOLD_PIXELS = (int) (frameSize * 0.00195);
 		MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG = (int) (frameSize * 0.00195);
 
