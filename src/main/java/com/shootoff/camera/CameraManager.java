@@ -557,8 +557,6 @@ public class CameraManager {
 		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_HSV2BGR);
 
 		return Camera.matToBufferedImage(matFrame);
-		// return currentFrame;
-
 	}
 
 	private void estimateCameraFPS() {

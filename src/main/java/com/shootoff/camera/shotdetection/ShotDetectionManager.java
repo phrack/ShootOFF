@@ -18,8 +18,6 @@
 
 package com.shootoff.camera.shotdetection;
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,12 +86,14 @@ public final class ShotDetectionManager {
 
 	// The average is then calculated here
 	private int avgBrightPixels = -1;
+	
+	// We keep track of how many pixels we filtered due to a dynamic threshold
+	// so that we keep them in the average of thresholded pixels.
+	private int dynamicallyThresholded = -1;
 
 	// This is a short circuit for our pixel-color-changer to set the bad pixels
 	// red without having complicated math every pixel
 	private boolean shouldShowBrightnessWarningBool = false;
-
-	private Mat currentFullFrame;
 
 	private ArenaMaskManager arenaMaskManager = null;
 	private boolean usingArenaMask = false;
@@ -181,7 +181,7 @@ public final class ShotDetectionManager {
 	}
 
 	// This function ADJUSTS X AND Y FOR LIMITING DETECTION BOUNDS
-	private void drawOnCurrentFrame(int x, int y, byte[] color) {
+	private void drawOnFrame(Mat frame, int x, int y, byte[] color) {
 		int drawX = x;
 		int drawY = y;
 
@@ -191,7 +191,7 @@ public final class ShotDetectionManager {
 			drawY = (int) (cameraManager.getProjectionBounds().get().getMinY() + y);
 		}
 
-		currentFullFrame.put(drawY, drawX, color);
+		frame.put(drawY, drawX, color);
 	}
 
 	private boolean pixelAboveExcessiveBrightnessThreshold(int lumsMovingAverage) {
@@ -202,35 +202,26 @@ public final class ShotDetectionManager {
 		final int threshold = ((MAXIMUM_LUM_VALUE - lumsMovingAverage) / 4);
 		final int increase = (currentLum - lumsMovingAverage);
 
-		int dynamic_increase = ((MAXIMUM_LUM_VALUE - threshold)
-				* (avgThresholdPixels / MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+		int dynamic_increase = (int)((MAXIMUM_LUM_VALUE - threshold)
+				* ((double)avgThresholdPixels / (double)MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
 
 		int dynamic_threshold = threshold + dynamic_increase;
 
-		if (increase < MINIMUM_BRIGHTNESS_INCREASE || increase < dynamic_threshold) return false;
-
+		if (increase < MINIMUM_BRIGHTNESS_INCREASE) return false;
+		if (increase < dynamic_threshold)
+			{
+				if (increase > threshold)
+					dynamicallyThresholded++;
+				return false;
+			}
+		
 		return true;
 
 	}
 
-	public BufferedImage deepCopy(BufferedImage source) {
-		BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
-		Graphics g = b.getGraphics();
-		boolean drawImageComplete = g.drawImage(source, 0, 0, null);
-
-		if (!drawImageComplete) {
-			if (logger.isErrorEnabled()) logger.error("deepCopy drawImageComplete false");
-		}
-
-		g.dispose();
-		return b;
-	}
-
 	public void processFrame(Mat frame, boolean detectShots) {
-		movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
-
-		// This is the FULL, ORIGINAL FRAME passed from CameraManager
-		currentFullFrame = frame;
+		if ((cameraManager.getFrameCount()%5)==0)
+			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 
 		Mat workingFrame = null;
 
@@ -292,10 +283,10 @@ public final class ShotDetectionManager {
 			else if (isExcessiveMotion(thresholdPixelsSize)) {
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
-				byte[] blue = { (byte) 100, (byte) 255, (byte) 255 };
+				byte[] blue = { (byte) 120, (byte) 255, (byte) 255 };
 
 				for (Pixel pixel : thresholdPixels) {
-					drawOnCurrentFrame(pixel.x, pixel.y, blue);
+					drawOnFrame(workingFrame, pixel.x, pixel.y, blue);
 				}
 			}
 
@@ -305,7 +296,7 @@ public final class ShotDetectionManager {
 				byte[] red = { 0, (byte) 255, (byte) 255 };
 
 				for (Pixel pixel : brightPixels) {
-					drawOnCurrentFrame(pixel.x, pixel.y, red);
+					drawOnFrame(workingFrame, pixel.x, pixel.y, red);
 				}
 			}
 		}
@@ -365,6 +356,8 @@ public final class ShotDetectionManager {
 		final int subWidth = workingFrame.cols() / SECTOR_COLUMNS;
 		final int subHeight = workingFrame.rows() / SECTOR_ROWS;
 
+		dynamicallyThresholded = 0;
+		
 		List<Pixel> thresholdPixels = Collections.synchronizedList(new ArrayList<Pixel>());
 
 		if (!cameraManager.isDetecting()) return thresholdPixels;
@@ -421,21 +414,21 @@ public final class ShotDetectionManager {
 
 	private void updateAvgThresholdPixels(int thresholdPixels) {
 		if (avgThresholdPixels == -1)
-			avgThresholdPixels = Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
+			avgThresholdPixels = Math.min(thresholdPixels+dynamicallyThresholded, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else {
-			int fps = (int) cameraManager.getFPS();
-			avgThresholdPixels = (((fps - 1) * avgThresholdPixels)
-					+ Math.min(thresholdPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / fps;
+
+			avgThresholdPixels = (((movingAveragePeriod - 1) * avgThresholdPixels)
+					+ Math.min(thresholdPixels+dynamicallyThresholded, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / movingAveragePeriod;
 		}
+		
 	}
 
 	private void updateAvgBrightPixels(int brightPixels) {
 		if (avgBrightPixels == -1)
 			avgBrightPixels = Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else {
-			int fps = (int) cameraManager.getFPS();
-			avgBrightPixels = (((fps - 1) * avgBrightPixels) + Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG))
-					/ fps;
+			avgBrightPixels = (((movingAveragePeriod - 1) * avgBrightPixels) + Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG))
+					/ movingAveragePeriod;
 		}
 	}
 
