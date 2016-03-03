@@ -82,11 +82,11 @@ public final class ShotDetectionManager {
 	private int MINIMUM_SHOT_DIMENSION;
 
 	// This is updated for every bright pixel
-	ArrayList<Pixel> brightPixels = new ArrayList<Pixel>();
+	List<Pixel> brightPixels = Collections.synchronizedList(new ArrayList<Pixel>());
 
 	// The average is then calculated here
 	private int avgBrightPixels = -1;
-	
+
 	// We keep track of how many pixels we filtered due to a dynamic threshold
 	// so that we keep them in the average of thresholded pixels.
 	private int dynamicallyThresholded = -1;
@@ -188,25 +188,23 @@ public final class ShotDetectionManager {
 		final int threshold = ((MAXIMUM_LUM_VALUE - lumsMovingAverage) / 4);
 		final int increase = (currentLum - lumsMovingAverage);
 
-		int dynamic_increase = (int)((MAXIMUM_LUM_VALUE - threshold)
-				* ((double)avgThresholdPixels / (double)MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
+		int dynamic_increase = (int) ((MAXIMUM_LUM_VALUE - threshold)
+				* ((double) avgThresholdPixels / (double) MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
 
 		int dynamic_threshold = threshold + dynamic_increase;
 
 		if (increase < MINIMUM_BRIGHTNESS_INCREASE) return false;
-		if (increase < dynamic_threshold)
-			{
-				if (increase > threshold)
-					dynamicallyThresholded++;
-				return false;
-			}
-		
+		if (increase < dynamic_threshold) {
+			if (increase > threshold) dynamicallyThresholded++;
+			return false;
+		}
+
 		return true;
 
 	}
 
 	public void processFrame(Mat frame, boolean detectShots) {
-		if ((cameraManager.getFrameCount()%5)==0)
+		if ((cameraManager.getFrameCount() % 5) == 0)
 			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 
 		Mat workingFrame = null;
@@ -272,7 +270,7 @@ public final class ShotDetectionManager {
 				byte[] blue = { (byte) 120, (byte) 255, (byte) 255 };
 
 				for (Pixel pixel : thresholdPixels) {
-					workingFrame.put(pixel.y,pixel.x,blue);
+					workingFrame.put(pixel.y, pixel.x, blue);
 				}
 			}
 
@@ -282,7 +280,7 @@ public final class ShotDetectionManager {
 				byte[] red = { 0, (byte) 255, (byte) 255 };
 
 				for (Pixel pixel : brightPixels) {
-					workingFrame.put(pixel.y,pixel.x,red);
+					workingFrame.put(pixel.y, pixel.x, red);
 				}
 			}
 		}
@@ -343,7 +341,7 @@ public final class ShotDetectionManager {
 		final int subHeight = workingFrame.rows() / SECTOR_ROWS;
 
 		dynamicallyThresholded = 0;
-		
+
 		List<Pixel> thresholdPixels = Collections.synchronizedList(new ArrayList<Pixel>());
 
 		if (!cameraManager.isDetecting()) return thresholdPixels;
@@ -400,21 +398,22 @@ public final class ShotDetectionManager {
 
 	private void updateAvgThresholdPixels(int thresholdPixels) {
 		if (avgThresholdPixels == -1)
-			avgThresholdPixels = Math.min(thresholdPixels+dynamicallyThresholded, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
+			avgThresholdPixels = Math.min(thresholdPixels + dynamicallyThresholded, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else {
 
 			avgThresholdPixels = (((movingAveragePeriod - 1) * avgThresholdPixels)
-					+ Math.min(thresholdPixels+dynamicallyThresholded, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG)) / movingAveragePeriod;
+					+ Math.min(thresholdPixels + dynamicallyThresholded, MAXIMUM_THRESHOLD_PIXELS_FOR_MOTION_AVG))
+					/ movingAveragePeriod;
 		}
-		
+
 	}
 
 	private void updateAvgBrightPixels(int brightPixels) {
 		if (avgBrightPixels == -1)
 			avgBrightPixels = Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG);
 		else {
-			avgBrightPixels = (((movingAveragePeriod - 1) * avgBrightPixels) + Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG))
-					/ movingAveragePeriod;
+			avgBrightPixels = (((movingAveragePeriod - 1) * avgBrightPixels)
+					+ Math.min(brightPixels, MAXIMUM_THRESHOLD_PIXELS_FOR_AVG)) / movingAveragePeriod;
 		}
 	}
 
@@ -448,8 +447,8 @@ public final class ShotDetectionManager {
 			return;
 		}
 
-		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", x, y, color.get(),
-				cameraManager.getFrameCount());
+		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", x, y,
+				color.get(), cameraManager.getFrameCount());
 
 		if (config.isDebugShotsRecordToFiles()) {
 			Mat debugFrame = new Mat();
@@ -477,13 +476,13 @@ public final class ShotDetectionManager {
 			if (usingArenaMask) {
 				Mat mask = arenaMaskManager.getMask();
 				Mat maskGrayscale = new Mat(mask.rows(), mask.cols(), CvType.CV_8UC1);
-				
+
 				for (int a = 0; a < mask.cols(); a++) {
 					for (int b = 0; b < mask.rows(); b++) {
 						maskGrayscale.put(b, a, mask.get(b, a)[0] / 255);
 					}
 				}
-				
+
 				outputfile = new File(String.format("mask-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
 				filename = outputfile.toString();
 				Highgui.imwrite(filename, maskGrayscale);
