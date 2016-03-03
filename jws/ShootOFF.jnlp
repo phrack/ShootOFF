@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="http://shootoffapp.com/jws/ShootOFF.jnlp">
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" codebase="http://shootoffapp.com/jws/" href="http://shootoffapp.com/jws/ShootOFF.jnlp">
   <information>
     <title>ShootOFF</title>
     <vendor>ShootOFF</vendor>
-    <description>Software to enhance laser dry fire training</description>
-    <icon href="icon_32x32.png" />
+    <description>A virtual shooting range to enhance laser dry fire training.</description>
+    <icon href="icon_32x32.png" width="32" height="32" />
     <offline-allowed/>
   <shortcut><desktop/></shortcut>
   </information>
   <resources>
     <j2se version="1.8+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="ShootOFF.jar" size="3672561" download="eager" />
-    <jar href="libs/ant-1.8.4.jar" size="2065768" download="eager" />
-    <jar href="libs/ant-launcher-1.8.4.jar" size="24736" download="eager" />
-    <jar href="libs/asm-4.0.jar" size="54305" download="eager" />
-    <jar href="libs/bridj-0.7.0.jar" size="973748" download="eager" />
+    <jar href="ShootOFF.jar" size="6083220" download="eager" />
+    <jar href="libs/ant-1.8.4.jar" size="2065772" download="eager" />
+    <jar href="libs/ant-launcher-1.8.4.jar" size="24733" download="eager" />
+    <jar href="libs/asm-4.0.jar" size="54307" download="eager" />
+    <jar href="libs/bridj-0.7.0.jar" size="973750" download="eager" />
     <jar href="libs/colt-1.2.0.jar" size="636941" download="eager" />
-    <jar href="libs/commons-cli-1.3.1.jar" size="61221" download="eager" />
-    <jar href="libs/commons-codec-1.9.jar" size="289973" download="eager" />
-    <jar href="libs/commons-collections-3.2.1.jar" size="628829" download="eager" />
-    <jar href="libs/commons-httpclient-3.1.jar" size="328723" download="eager" />
-    <jar href="libs/commons-io-2.2.jar" size="190935" download="eager" />
-    <jar href="libs/commons-lang-2.6.jar" size="304295" download="eager" />
-    <jar href="libs/commons-logging-1.2.jar" size="70742" download="eager" />
-    <jar href="libs/commons-vfs2-2.0.jar" size="451353" download="eager" />
+    <jar href="libs/commons-cli-1.3.1.jar" size="61226" download="eager" />
+    <jar href="libs/commons-codec-1.9.jar" size="289976" download="eager" />
+    <jar href="libs/commons-collections-3.2.1.jar" size="628828" download="eager" />
+    <jar href="libs/commons-httpclient-3.1.jar" size="328722" download="eager" />
+    <jar href="libs/commons-io-2.2.jar" size="190940" download="eager" />
+    <jar href="libs/commons-lang-2.6.jar" size="304298" download="eager" />
+    <jar href="libs/commons-logging-1.2.jar" size="70741" download="eager" />
+    <jar href="libs/commons-vfs2-2.0.jar" size="451358" download="eager" />
     <jar href="libs/concurrent-1.3.4.jar" size="217700" download="eager" />
-    <jar href="libs/core-1.3.1.jar" size="844246" download="eager" />
-    <jar href="libs/core-aop-support-1.3.1.jar" size="19937" download="eager" />
-    <jar href="libs/core-citation-1.3.1.jar" size="35755" download="eager" />
+    <jar href="libs/core-1.3.1.jar" size="844247" download="eager" />
+    <jar href="libs/core-aop-support-1.3.1.jar" size="19936" download="eager" />
+    <jar href="libs/core-citation-1.3.1.jar" size="35754" download="eager" />
     <jar href="libs/dx-1.7.jar" size="1052567" download="eager" />
-    <jar href="libs/emotionml-checker-java-1.1.jar" size="29690" download="eager" />
+    <jar href="libs/emotionml-checker-java-1.1.jar" size="29694" download="eager" />
     <jar href="libs/freetts-1.0.jar" size="299935" download="eager" />
-    <jar href="libs/freetts-en_us-1.0.jar" size="883228" download="eager" />
+    <jar href="libs/freetts-en_us-1.0.jar" size="883235" download="eager" />
     <jar href="libs/guava-18.0.jar" size="2414137" download="eager" />
-    <jar href="libs/hamcrest-core-1.1.jar" size="44094" download="eager" />
-    <jar href="libs/hsqldb-2.0.0.jar" size="1319714" download="eager" />
-    <jar href="libs/httpclient-4.5.1.jar" size="787957" download="eager" />
-    <jar href="libs/httpcore-4.4.3.jar" size="355026" download="eager" />
-    <jar href="libs/httpcore-nio-4.1.jar" size="217530" download="eager" />
-    <jar href="libs/httpmime-4.5.1.jar" size="49411" download="eager" />
-    <jar href="libs/jackson-core-2.5.0.jar" size="243234" download="eager" />
-    <jar href="libs/javassist-3.12.1.GA.jar" size="687825" download="eager" />
-    <jar href="libs/jbibtex-1.0.2.jar" size="86533" download="eager" />
-    <jar href="libs/json-simple-1.1.1.jar" size="30664" download="eager" />
-    <jar href="libs/jsoup-1.6.3.jar" size="302677" download="eager" />
+    <jar href="libs/hamcrest-core-1.1.jar" size="44089" download="eager" />
+    <jar href="libs/hsqldb-2.0.0.jar" size="1319716" download="eager" />
+    <jar href="libs/httpclient-4.5.2.jar" size="792042" download="eager" />
+    <jar href="libs/httpcore-4.4.4.jar" size="355163" download="eager" />
+    <jar href="libs/httpcore-nio-4.1.jar" size="217526" download="eager" />
+    <jar href="libs/httpmime-4.5.2.jar" size="49741" download="eager" />
+    <jar href="libs/jackson-core-2.5.0.jar" size="243229" download="eager" />
+    <jar href="libs/javassist-3.12.1.GA.jar" size="687821" download="eager" />
+    <jar href="libs/jbibtex-1.0.2.jar" size="86538" download="eager" />
+    <jar href="libs/json-simple-1.1.1.jar" size="30662" download="eager" />
+    <jar href="libs/jsoup-1.6.3.jar" size="302674" download="eager" />
     <jar href="libs/jtok-core-1.9.1.jar" size="99863" download="eager" />
-    <jar href="libs/jwnl-1.3.3.jar" size="190945" download="eager" />
-    <jar href="libs/kryo-2.21.jar" size="383665" download="eager" />
-    <jar href="libs/log4j-1.2.16.jar" size="514745" download="eager" />
-    <jar href="libs/logback-classic-1.1.3.jar" size="303790" download="eager" />
-    <jar href="libs/logback-core-1.1.3.jar" size="493995" download="eager" />
-    <jar href="libs/marytts-common-5.1.2.jar" size="176627" download="eager" />
+    <jar href="libs/jwnl-1.3.3.jar" size="190939" download="eager" />
+    <jar href="libs/kryo-2.21.jar" size="383659" download="eager" />
+    <jar href="libs/log4j-1.2.16.jar" size="514748" download="eager" />
+    <jar href="libs/logback-classic-1.1.6.jar" size="314810" download="eager" />
+    <jar href="libs/logback-core-1.1.6.jar" size="499987" download="eager" />
+    <jar href="libs/marytts-common-5.1.2.jar" size="176630" download="eager" />
     <jar href="libs/marytts-lang-en-5.1.2.jar" size="6954892" download="eager" />
-    <jar href="libs/marytts-runtime-5.1.2.jar" size="1121285" download="eager" />
+    <jar href="libs/marytts-runtime-5.1.2.jar" size="1121287" download="eager" />
     <jar href="libs/marytts-signalproc-5.1.2.jar" size="1375882" download="eager" />
-    <jar href="libs/maven-scm-api-1.4.jar" size="109368" download="eager" />
-    <jar href="libs/maven-scm-provider-svn-commons-1.4.jar" size="48224" download="eager" />
-    <jar href="libs/maven-scm-provider-svnexe-1.4.jar" size="79493" download="eager" />
-    <jar href="libs/minlog-1.2.jar" size="11033" download="eager" />
-    <jar href="libs/objenesis-1.2.jar" size="45429" download="eager" />
-    <jar href="libs/opencv-2.4.11-2.jar" size="26600312" download="eager" />
-    <jar href="libs/opennlp-maxent-3.0.3.jar" size="144959" download="eager" />
-    <jar href="libs/opennlp-tools-1.5.3.jar" size="878867" download="eager" />
-    <jar href="libs/plexus-utils-1.5.6.jar" size="267873" download="eager" />
-    <jar href="libs/raven-6.0.0.jar" size="90178" download="eager" />
-    <jar href="libs/raven-logback-6.0.0.jar" size="14064" download="eager" />
-    <jar href="libs/reflectasm-1.07-shaded.jar" size="73305" download="eager" />
-    <jar href="libs/regexp-1.3.jar" size="32370" download="eager" />
-    <jar href="libs/slf4j-api-1.7.9.jar" size="40833" download="eager" />
-    <jar href="libs/swing-layout-1.0.3.jar" size="68086" download="eager" />
-    <jar href="libs/trove4j-3.0.2.jar" size="2687917" download="eager" />
-    <jar href="libs/voice-cmu-slt-hsmm-5.1.2.jar" size="1250328" download="eager" />
-    <jar href="libs/webcam-capture-0.3.11.jar" size="432257" download="eager" />
-    <jar href="libs/webcam-capture-driver-ipcam-0.3.11.jar" size="42835" download="eager" />
-    <jar href="libs/xuggle-xuggler-5.4.jar" size="40350917" download="eager" />
+    <jar href="libs/maven-scm-api-1.4.jar" size="109373" download="eager" />
+    <jar href="libs/maven-scm-provider-svn-commons-1.4.jar" size="48222" download="eager" />
+    <jar href="libs/maven-scm-provider-svnexe-1.4.jar" size="79489" download="eager" />
+    <jar href="libs/minlog-1.2.jar" size="11031" download="eager" />
+    <jar href="libs/objenesis-1.2.jar" size="45428" download="eager" />
+    <jar href="libs/opencv-2.4.11-2.jar" size="26600315" download="eager" />
+    <jar href="libs/opennlp-maxent-3.0.3.jar" size="144958" download="eager" />
+    <jar href="libs/opennlp-tools-1.5.3.jar" size="878869" download="eager" />
+    <jar href="libs/plexus-utils-1.5.6.jar" size="267867" download="eager" />
+    <jar href="libs/raven-6.0.0.jar" size="90179" download="eager" />
+    <jar href="libs/raven-logback-6.0.0.jar" size="14069" download="eager" />
+    <jar href="libs/reflectasm-1.07-shaded.jar" size="73303" download="eager" />
+    <jar href="libs/regexp-1.3.jar" size="32368" download="eager" />
+    <jar href="libs/slf4j-api-1.7.18.jar" size="49861" download="eager" />
+    <jar href="libs/swing-layout-1.0.3.jar" size="68091" download="eager" />
+    <jar href="libs/trove4j-3.0.2.jar" size="2687913" download="eager" />
+    <jar href="libs/voice-cmu-slt-hsmm-5.1.2.jar" size="1250327" download="eager" />
+    <jar href="libs/webcam-capture-0.3.11.jar" size="432253" download="eager" />
+    <jar href="libs/webcam-capture-driver-ipcam-0.3.11.jar" size="42834" download="eager" />
+    <jar href="libs/xuggle-xuggler-5.4.jar" size="40350913" download="eager" />
   </resources>
 <security>
   <all-permissions/>
