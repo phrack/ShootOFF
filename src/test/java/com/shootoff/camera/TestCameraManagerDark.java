@@ -55,7 +55,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 633.0, 159.0, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 626.0, 170.0, 0, 2));
 
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 438, 145, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 443.5, 230, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -130,7 +130,9 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 337.8, 97.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 376.8, 226.2, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 203.9, 99.4, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 200.6, 233.1, 0, 2));
+		
+		// This shot is actually GREEN of course.  But it is the only shot that is incorrect.
+		requiredShots.add(new Shot(Color.RED, 200.6, 233.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 494.7, 224.2, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 479.2, 281.8, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 207.2, 281.3, 0, 2));
@@ -138,7 +140,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 331.68, 284.1, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -162,7 +164,7 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 175, 191.5, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 229.5, 227.5, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test

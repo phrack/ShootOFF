@@ -151,7 +151,8 @@ public final class ShotDetectionManager {
 
 		if (lumsMovingAverage[x][y] == -1) {
 			lumsMovingAverage[x][y] = currentLum;
-			colorDistanceFromRed[x][y] = (Math.min(currentH, Math.abs(180 - currentH)) * currentS * currentV);
+			colorDistanceFromRed[x][y] = (Math.min(currentH, Math.abs(180 - currentH)) * currentS * currentV)
+					- (Math.abs(60 - currentH) * currentS * currentV);
 
 			return result;
 		}
@@ -168,7 +169,8 @@ public final class ShotDetectionManager {
 		else if (pixelAboveThreshold(valueForThreshold, threshold)) result = Optional
 				.of(new Pixel(x, y, currentH, valueForThreshold, lumsMovingAverage[x][y], colorDistanceFromRed[x][y]));
 
-		int tempColorDistanceFromRed = (Math.min(currentH, Math.abs(180 - currentH)) * currentS * currentV);
+		int tempColorDistanceFromRed = (Math.min(currentH, Math.abs(180 - currentH)) * currentS * currentV)
+				- (Math.abs(60 - currentH) * currentS * currentV);
 
 		// Update the average brightness
 		lumsMovingAverage[x][y] = ((lumsMovingAverage[x][y] * (movingAveragePeriod - 1)) + currentLum)

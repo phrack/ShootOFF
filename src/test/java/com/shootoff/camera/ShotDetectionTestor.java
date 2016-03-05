@@ -119,7 +119,7 @@ public class ShotDetectionTestor {
 	protected List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds, MockCanvasManager mockManager,
 			Configuration config, boolean[][] sectorStatuses) {
 		Object processingLock = new Object();
-		File videoFile = new File(TestCameraManagerVeryBright.class.getResource(videoPath).getFile());
+		File videoFile = new File(ShotDetectionTestor.class.getResource(videoPath).getFile());
 		MockCameraManager cameraManager = new MockCameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
 				projectionBounds);
 

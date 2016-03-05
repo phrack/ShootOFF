@@ -61,7 +61,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 549, 382.5, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 531.4, 258.9, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 383.5, 375.5, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 539, 381, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 486.5, 268, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -123,6 +123,6 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 113.8, 11.0, 0, 2));
 
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
 	}
 }

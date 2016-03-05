@@ -16,7 +16,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
 
-public class TestCameraManagerHighRes extends ShotDetectionTestor {
+public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 	private Configuration config;
 	private MockCanvasManager mockManager;
 	private boolean[][] sectorStatuses;
@@ -39,19 +39,27 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 	}
 
 	@Test
-	// Shots are missed because shot detection has not been modified to support
-	// other resolutions
-	public void test1280x720Green() {
-		List<Shot> shots = findShots("/shotsearcher/highres-green.mp4", Optional.empty(), mockManager, config,
-				sectorStatuses);
+	// BRIGHT
+	public void testC920CloseRed_Greatone123x() {
+		List<Shot> shots = findShots("/shotsearcher/c920_close_red_laserlyte_greatone123x.mp4", Optional.empty(),
+				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.GREEN, 586.30, 395.44, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 532.16, 347.98, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 587.80, 396.73, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 325.0, 245.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 342.0, 247.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 333.0, 228.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 338.0, 229.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 328.0, 243.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 337.0, 233.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 346.0, 216.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 348.0, 230.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 346.0, 234.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 334.0, 235.0, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 338.0, 219.0, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 
 		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
+
 }

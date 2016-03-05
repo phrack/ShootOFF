@@ -34,7 +34,7 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 	public double centerPixelX;
 	public double centerPixelY;
 
-	private final static double CURRENT_COLOR_BIAS_MULTIPLIER = 1.043;
+	private final static double CURRENT_COLOR_BIAS_MULTIPLIER = .5;
 
 	// We ignore fully connected pixels because they are not on the edges
 	private final static int MAXIMUM_CONNECTEDNESS = 8;
@@ -92,26 +92,19 @@ public class PixelCluster extends java.util.ArrayList<Pixel> {
 			int npLum = np[2] & 0xFF;
 
 			if (npSaturation > avgSaturation) {
+				
+				int thisDFromRed = (Math.min(npColor, Math.abs(180 - npColor)) * npLum * npSaturation);
+				int thisDFromGreen = Math.abs(60-npColor) * npLum * npSaturation;
 
-				int currentCol = (int) (CURRENT_COLOR_BIAS_MULTIPLIER
-						* (Math.min(npColor, Math.abs(180 - npColor)) * npLum * npSaturation));
+				int currentCol = thisDFromRed - thisDFromGreen;
 
-				colorDistance += currentCol - colorDistanceFromRed[pixel.x][pixel.y];
+				colorDistance += currentCol - (int)(CURRENT_COLOR_BIAS_MULTIPLIER*colorDistanceFromRed[pixel.x][pixel.y]);
 
 				if (logger.isTraceEnabled()) {
 					tempColorDistance += currentCol;
 					avgColorDistance += colorDistanceFromRed[pixel.x][pixel.y];
 				}
 			}
-
-			// logger.trace("{} {} - pc {} - col {} sat {}>{} lum {} - {} {} {}
-			// - {}", pixel.x, pixel.y, pixelCount, npColor, npSaturation,
-			// avgSaturation, npLum, npSaturation>avgSaturation,
-			// 1.043*(Math.min(npColor,
-			// Math.abs(180-npColor))*npLum*npSaturation),
-			// colorDistanceFromRed[pixel.x][pixel.y], 1.043*(Math.min(npColor,
-			// Math.abs(180-npColor))*npLum*npSaturation) -
-			// colorDistanceFromRed[pixel.x][pixel.y]);
 
 		}
 

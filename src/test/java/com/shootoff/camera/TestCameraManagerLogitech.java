@@ -56,7 +56,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.GREEN, 386.0, 258, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 113.4, 214.6, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 409.8, 214.7, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 
 	@Test
@@ -119,10 +119,10 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 119.1, 287.5, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
-		optionalShots.add(new Shot(Color.GREEN, 432.6, 74.4, 0, 2));
+		optionalShots.add(new Shot(Color.RED, 432.6, 74.4, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 432.6, 74.4, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, false);
+		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
 
 	@Test
