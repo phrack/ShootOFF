@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.gui.controller.ProjectorArenaController;
@@ -21,7 +22,7 @@ import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
-public class CalibrationManager {
+public class CalibrationManager implements CameraCalibrationListener {
 	private static final int MAX_AUTO_CALIBRATION_TIME = 10 * 1000;
 	private static final Logger logger = LoggerFactory.getLogger(CalibrationManager.class);
 
@@ -42,7 +43,7 @@ public class CalibrationManager {
 			ProjectorArenaController arenaController) {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
-		calibratingCanvasManager = calibratingCameraManager.getCanvasManager();
+		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
 		this.calibrationListener = (CalibrationListener) arenaController;
 		this.arenaController = arenaController;
 
@@ -68,7 +69,7 @@ public class CalibrationManager {
 
 	public void stopCalibration() {
 		isCalibrating.set(false);
-		
+
 		if (calibrationTarget.isPresent())
 			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
 
@@ -97,6 +98,7 @@ public class CalibrationManager {
 		calibrationConfigurator.disableShotDetection(400);
 	}
 
+	@Override
 	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
 		removeCalibrationTargetIfPresent();
 
@@ -169,7 +171,7 @@ public class CalibrationManager {
 		if (!calibrationTarget.isPresent()) {
 			createCalibrationTarget(DEFAULT_DIM, DEFAULT_DIM, DEFAULT_POS, DEFAULT_POS);
 		} else {
-			calibratingCameraManager.getCanvasManager().addTarget(calibrationTarget.get());
+			calibratingCameraManager.getCameraView().addTarget(calibrationTarget.get());
 		}
 	}
 
@@ -187,8 +189,8 @@ public class CalibrationManager {
 
 		showingManualCalibrationRequestMessage = true;
 		Platform.runLater(() -> {
-			manualCalibrationRequestMessage = calibratingCanvasManager.addDiagnosticMessage(
-					"Please manually calibrate the projection region", 20000, Color.ORANGE);
+			manualCalibrationRequestMessage = calibratingCanvasManager
+					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
 		});
 	}
 
@@ -213,8 +215,8 @@ public class CalibrationManager {
 
 		showingFullScreenRequestMessage = true;
 		Platform.runLater(() -> {
-			fullScreenRequestMessage = calibratingCanvasManager.addDiagnosticMessage(
-					"Please move the arena to your projector and hit F11", Color.YELLOW);
+			fullScreenRequestMessage = calibratingCanvasManager
+					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
 		});
 	}
 
@@ -259,6 +261,7 @@ public class CalibrationManager {
 		}, MAX_AUTO_CALIBRATION_TIME);
 	}
 
+	@Override
 	public void setArenaBackground(String resourceFilename) {
 		if (resourceFilename != null) {
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);

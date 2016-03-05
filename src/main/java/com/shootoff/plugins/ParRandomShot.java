@@ -104,7 +104,7 @@ public class ParRandomShot extends ParForScore {
 
 	protected void resetValues() {
 		super.resetValues();
-		List<Group> targets = getCamerasSupervisor().getTargets();
+		List<Group> targets = super.getCurrentTargets();
 		fetchSubtargets(targets);
 	}
 

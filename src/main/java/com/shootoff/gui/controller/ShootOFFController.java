@@ -40,6 +40,7 @@ import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraErrorView;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
@@ -61,6 +62,7 @@ import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
+import com.shootoff.targets.TargetManager;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 
@@ -104,7 +106,7 @@ import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
 public class ShootOFFController
-		implements CameraConfigListener, CameraErrorView, TargetListener, PluginListener, CalibrationConfigurator {
+		implements CameraConfigListener, CameraErrorView, TargetListener, TargetManager, PluginListener, CalibrationConfigurator {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private Menu addTargetMenu;
@@ -221,7 +223,9 @@ public class ShootOFFController
 
 						// Move all selected shots to top the of their z-stack
 						// to ensure visibility
-						for (CanvasManager cm : camerasSupervisor.getCanvasManagers()) {
+						for (CameraView cv : camerasSupervisor.getCameraViews()) {
+							CanvasManager cm = (CanvasManager)cv;
+							
 							Shape marker = selected.getShot().getMarker();
 							if (cm.getCanvasGroup().getChildren()
 									.indexOf(marker) < cm.getCanvasGroup().getChildren().size() - 1) {
@@ -573,6 +577,17 @@ public class ShootOFFController
 			logger.error("Failed to find target files because a list of files could not be retrieved");
 		}
 	}
+	
+	@Override
+	public List<Group> getTargets() {
+		final List<Group> targets = new ArrayList<Group>();
+
+		for (final CameraManager manager : camerasSupervisor.getCameraManagers()) {
+			targets.addAll(((CanvasManager)manager.getCameraView()).getTargetGroups());
+		}
+
+		return targets;
+	}
 
 	@Override
 	public void registerExercise(TrainingExercise exercise) {
@@ -584,7 +599,7 @@ public class ShootOFFController
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 
 				List<Group> knownTargets = new ArrayList<Group>();
-				knownTargets.addAll(camerasSupervisor.getTargets());
+				knownTargets.addAll(getTargets());
 
 				if (arenaController != null) {
 					knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
@@ -921,13 +936,13 @@ public class ShootOFFController
 		if (hideTargetMenuItem.getText().equals("Hide Targets")) {
 			hideTargetMenuItem.setText("Show Targets");
 
-			for (Group target : camerasSupervisor.getTargets()) {
+			for (Group target : getTargets()) {
 				target.setVisible(false);
 			}
 		} else {
 			hideTargetMenuItem.setText("Hide Targets");
 
-			for (Group target : camerasSupervisor.getTargets()) {
+			for (Group target : getTargets()) {
 				target.setVisible(true);
 			}
 		}
@@ -969,7 +984,7 @@ public class ShootOFFController
 
 		if (config.getExercise().isPresent()) {
 			List<Group> knownTargets = new ArrayList<Group>();
-			knownTargets.addAll(camerasSupervisor.getTargets());
+			knownTargets.addAll(getTargets());
 
 			if (arenaController != null) {
 				knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
@@ -1036,7 +1051,7 @@ public class ShootOFFController
 		addTargetItem.setMnemonicParsing(false);
 
 		addTargetItem.setOnAction((e) -> {
-			camerasSupervisor.getCanvasManager(cameraTabPane.getSelectionModel().getSelectedIndex()).addTarget(path);
+			camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex()).addTarget(path);
 		});
 
 		MenuItem addProjectorTargetItem = new MenuItem(targetName);

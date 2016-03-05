@@ -109,7 +109,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.GREEN, 444.3, 330.8, 0, 2));
 		optionalShots.add(new Shot(Color.GREEN, 435.2, 391.5, 0, 2));
 
-		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, false);
+		super.checkShots(collector, shots, new ArrayList<Shot>(), optionalShots, true);
 	}
 
 	@Test

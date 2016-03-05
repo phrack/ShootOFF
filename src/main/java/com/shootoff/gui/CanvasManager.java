@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
@@ -77,7 +78,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
-public class CanvasManager {
+public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
@@ -150,10 +151,12 @@ public class CanvasManager {
 		});
 	}
 
+	@Override
 	public void close() {
 		diagnosticExecutorService.shutdownNow();
 	}
 
+	@Override
 	public void setCameraManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 	}
@@ -205,10 +208,12 @@ public class CanvasManager {
 		return diagnosticLabel;
 	}
 
+	@Override
 	public Label addDiagnosticMessage(String message, Color backgroundColor) {
 		return addDiagnosticMessage(message, DIAGNOSTIC_CHIME_DELAY, backgroundColor);
 	}
 
+	@Override
 	public void removeDiagnosticMessage(Label diagnosticLabel) {
 		if (diagnosticFutures.containsKey(diagnosticLabel)) {
 			diagnosticFutures.get(diagnosticLabel).cancel(false);
@@ -254,6 +259,7 @@ public class CanvasManager {
 		background.setFitHeight(height);
 	}
 
+	@Override
 	public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds) {
 		updateCanvasGroup();
 
@@ -363,6 +369,7 @@ public class CanvasManager {
 		return canvasGroup;
 	}
 
+	@Override
 	public void clearShots() {
 		Platform.runLater(() -> {
 			for (Shot shot : shots) {
@@ -380,6 +387,7 @@ public class CanvasManager {
 		});
 	}
 
+	@Override
 	public void reset() {
 		startTime = System.currentTimeMillis();
 
@@ -487,6 +495,7 @@ public class CanvasManager {
 		return shots;
 	}
 
+	@Override
 	public void addShot(Color color, double x, double y) {
 		addShot(color, x, y, false);
 	}
@@ -751,6 +760,7 @@ public class CanvasManager {
 		});
 	}
 
+	@Override
 	public Optional<Target> addTarget(File targetFile) {
 		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
 
@@ -774,6 +784,7 @@ public class CanvasManager {
 		return addTarget(newTarget);
 	}
 
+	@Override
 	public Target addTarget(Target newTarget) {
 		Platform.runLater(() -> {
 			canvasGroup.getChildren().add(newTarget.getTargetGroup());

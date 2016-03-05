@@ -20,8 +20,8 @@ package com.shootoff.gui.controller;
 
 import java.awt.image.BufferedImage;
 
+import com.shootoff.camera.CameraDebuggerListener;
 import com.shootoff.camera.CameraManager;
-import com.shootoff.gui.DebuggerListener;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -32,7 +32,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-public class StreamDebuggerController implements DebuggerListener {
+public class StreamDebuggerController implements CameraDebuggerListener {
 	private Stage streamDebuggerStage;
 	@FXML private ImageView thresholdImageView;
 	@FXML private Slider centerBorderSlider;

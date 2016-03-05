@@ -36,7 +36,7 @@ public class MockCameraManager extends CameraManager {
 		super(canvas, config);
 		
 		this.processingLock = processingLock;
-		this.canvasManager.setCameraManager(this);
+		this.cameraView.setCameraManager(this);
 
 		setSectorStatuses(sectorStatuses);
 

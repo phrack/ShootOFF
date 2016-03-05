@@ -41,9 +41,6 @@ import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
-import com.shootoff.gui.CalibrationManager;
-import com.shootoff.gui.CanvasManager;
-import com.shootoff.gui.DebuggerListener;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -82,8 +79,7 @@ public class CameraManager {
 	protected final Optional<Camera> webcam;
 	private final Optional<CameraErrorView> cameraErrorView;
 
-
-	protected final CanvasManager canvasManager;
+	protected final CameraView cameraView;
 	protected final Configuration config;
 	protected Optional<Bounds> projectionBounds = Optional.empty();
 
@@ -96,7 +92,7 @@ public class CameraManager {
 
 	protected Optional<Integer> minimumShotDimension = Optional.empty();
 
-	protected Optional<DebuggerListener> debuggerListener = Optional.empty();
+	protected Optional<CameraDebuggerListener> debuggerListener = Optional.empty();
 
 	protected boolean recordingStream = false;
 	protected boolean isFirstStreamFrame = true;
@@ -122,39 +118,39 @@ public class CameraManager {
 	protected AutoCalibrationManager acm = null;
 	protected boolean autoCalibrationEnabled = false;
 	public boolean cameraAutoCalibrated = false;
-	
+
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
 	// TODO: Re-enable mask manager when it is ready
-	protected final ArenaMaskManager arenaMaskManager = null; // = new ArenaMaskManager();
+	protected final ArenaMaskManager arenaMaskManager = null; // = new
+																// ArenaMaskManager();
 
-	private CalibrationManager calibrationManager;
+	private CameraCalibrationListener cameraCalibrationListener;
 
-	public void setCalibrationManager(CalibrationManager calibrationManager) {
-		this.calibrationManager = calibrationManager;
+	public void setCalibrationManager(CameraCalibrationListener calibrationManager) {
+		this.cameraCalibrationListener = calibrationManager;
 	}
 
 	public DeduplicationProcessor getDeduplicationProcessor() {
 		return deduplicationProcessor;
 	}
 
-	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CanvasManager canvas, Configuration config) {
+	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView canvas, Configuration config) {
 		this.webcam = Optional.of(webcam);
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
-		this.canvasManager = canvas;
+		this.cameraView = canvas;
 		this.config = config;
 
-		this.canvasManager.setCameraManager(this);
+		this.cameraView.setCameraManager(this);
 
 		initDetector(new Detector());
 
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
-
 	}
 
-	protected CameraManager(CanvasManager canvas, Configuration config) {
+	protected CameraManager(CameraView canvas, Configuration config) {
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
-		this.canvasManager = canvas;
+		this.cameraView = canvas;
 		this.config = config;
 		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
 	}
@@ -203,17 +199,17 @@ public class CameraManager {
 	}
 
 	public void clearShots() {
-		canvasManager.clearShots();
+		cameraView.clearShots();
 	}
 
 	public void reset() {
-		canvasManager.reset();
+		cameraView.reset();
 	}
 
 	public void close() {
 		if (arenaMaskManager != null) arenaMaskManager.isStreaming.set(false);
 
-		getCanvasManager().close();
+		getCameraView().close();
 		setDetecting(false);
 		setStreaming(false);
 		if (webcam.isPresent()) webcam.get().close();
@@ -348,8 +344,8 @@ public class CameraManager {
 		}
 	}
 
-	public CanvasManager getCanvasManager() {
-		return canvasManager;
+	public CameraView getCameraView() {
+		return cameraView;
 	}
 
 	public void setMinimumShotDimension(int minDim) {
@@ -361,11 +357,11 @@ public class CameraManager {
 		return minimumShotDimension;
 	}
 
-	public void setThresholdListener(DebuggerListener thresholdListener) {
+	public void setThresholdListener(CameraDebuggerListener thresholdListener) {
 		this.debuggerListener = Optional.ofNullable(thresholdListener);
 	}
 
-	public Optional<DebuggerListener> getDebuggerListener() {
+	public Optional<CameraDebuggerListener> getDebuggerListener() {
 		return debuggerListener;
 	}
 
@@ -497,9 +493,9 @@ public class CameraManager {
 			final BufferedImage frame = currentFrame;
 			Platform.runLater(() -> {
 				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					canvasManager.updateBackground(frame, projectionBounds);
+					cameraView.updateBackground(frame, projectionBounds);
 				} else {
-					canvasManager.updateBackground(frame, Optional.empty());
+					cameraView.updateBackground(frame, Optional.empty());
 				}
 			});
 		}
@@ -593,12 +589,13 @@ public class CameraManager {
 		deduplicationProcessor.setThresholdUsingFPS(getFPS());
 
 	}
-	
+
 	private void checkIfMinimumFPS() {
 		if (getFPS() < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 			logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection",
 					webcam.get().getName(), getFPS());
-			if (cameraErrorView.isPresent() && webcam.isPresent()) cameraErrorView.get().showFPSWarning(webcam.get(), getFPS());
+			if (cameraErrorView.isPresent() && webcam.isPresent())
+				cameraErrorView.get().showFPSWarning(webcam.get(), getFPS());
 			showedFPSWarning = true;
 		}
 	}
@@ -608,7 +605,7 @@ public class CameraManager {
 	public void showBrightnessWarning() {
 		if (!TimerPool.isWaiting(brightnessDiagnosticFuture)) {
 			Platform.runLater(() -> {
-				brightnessDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive brightness",
+				brightnessDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive brightness",
 						Color.RED);
 			});
 		} else {
@@ -618,7 +615,7 @@ public class CameraManager {
 		brightnessDiagnosticFuture = TimerPool.schedule(() -> {
 			Platform.runLater(() -> {
 				if (brightnessDiagnosticWarning != null) {
-					canvasManager.removeDiagnosticMessage(brightnessDiagnosticWarning);
+					cameraView.removeDiagnosticMessage(brightnessDiagnosticWarning);
 					brightnessDiagnosticWarning = null;
 				}
 			});
@@ -626,7 +623,8 @@ public class CameraManager {
 
 		if (!webcam.isPresent() || shownBrightnessWarning) return;
 		shownBrightnessWarning = true;
-		if (cameraErrorView.isPresent() && webcam.isPresent()) cameraErrorView.get().showBrightnessWarning(webcam.get());
+		if (cameraErrorView.isPresent() && webcam.isPresent())
+			cameraErrorView.get().showBrightnessWarning(webcam.get());
 	}
 
 	private Label motionDiagnosticWarning = null;
@@ -634,7 +632,7 @@ public class CameraManager {
 	public void showMotionWarning() {
 		if (!TimerPool.isWaiting(motionDiagnosticFuture)) {
 			Platform.runLater(() -> {
-				motionDiagnosticWarning = canvasManager.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
+				motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 			});
 		} else {
 			// Stop the existing timer and start a new one
@@ -643,7 +641,7 @@ public class CameraManager {
 		motionDiagnosticFuture = TimerPool.schedule(() -> {
 			Platform.runLater(() -> {
 				if (motionDiagnosticWarning != null) {
-					canvasManager.removeDiagnosticMessage(motionDiagnosticWarning);
+					cameraView.removeDiagnosticMessage(motionDiagnosticWarning);
 					motionDiagnosticWarning = null;
 				}
 			});
@@ -663,7 +661,7 @@ public class CameraManager {
 	}
 
 	protected void autoCalibrateSuccess(Bounds bounds, long delay) {
-		if (autoCalibrationEnabled && calibrationManager != null) {
+		if (autoCalibrationEnabled && cameraCalibrationListener != null) {
 			autoCalibrationEnabled = false;
 
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
@@ -672,7 +670,7 @@ public class CameraManager {
 			cameraAutoCalibrated = true;
 
 			Platform.runLater(() -> {
-				calibrationManager.calibrate(bounds, false);
+				cameraCalibrationListener.calibrate(bounds, false);
 			});
 
 			// TODO: Re-enable mask manager when it is ready
@@ -703,11 +701,11 @@ public class CameraManager {
 	}
 
 	public void setArenaBackground(String resourceFilename) {
-		if (calibrationManager == null) {
+		if (cameraCalibrationListener == null) {
 			logger.error("setArenaBackground called when controller is null");
 			return;
 		}
 
-		calibrationManager.setArenaBackground(resourceFilename);
+		cameraCalibrationListener.setArenaBackground(resourceFilename);
 	}
 }

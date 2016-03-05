@@ -20,35 +20,33 @@ package com.shootoff.camera;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javafx.scene.Group;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.shootoff.config.Configuration;
-import com.shootoff.gui.CanvasManager;
 
 public class CamerasSupervisor {
 	private final Configuration config;
 	private final List<CameraManager> managers = new ArrayList<CameraManager>();
 
-	private volatile boolean allDetecting = true;
+	private final AtomicBoolean allDetecting = new AtomicBoolean(true);
 
 	public CamerasSupervisor(Configuration config) {
 		this.config = config;
 	}
 
-	public CameraManager addCameraManager(Camera webcam, CameraErrorView cameraErrorView, CanvasManager canvasManager) {
-		final CameraManager manager = new CameraManager(webcam, cameraErrorView, canvasManager, config);
+	public CameraManager addCameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView cameraView) {
+		final CameraManager manager = new CameraManager(webcam, cameraErrorView, cameraView, config);
 		managers.add(manager);
-		allDetecting = true;
+		allDetecting.set(true);
 		return manager;
 	}
 
 	public void clearManagers() {
 		setStreamingAll(false);
 		setDetectingAll(false);
-		allDetecting = false;
+		allDetecting.set(false);
 
-		for (CameraManager manager : managers) {
+		for (final CameraManager manager : managers) {
 			manager.close();
 		}
 
@@ -56,7 +54,7 @@ public class CamerasSupervisor {
 	}
 
 	public void clearShots() {
-		for (CameraManager manager : managers) {
+		for (final CameraManager manager : managers) {
 			manager.clearShots();
 		}
 	}
@@ -78,7 +76,7 @@ public class CamerasSupervisor {
 	}
 
 	public void setDetectingAll(final boolean isDetecting) {
-		allDetecting = isDetecting;
+		allDetecting.set(isDetecting);
 
 		for (final CameraManager manager : managers) {
 			manager.setDetecting(isDetecting);
@@ -86,7 +84,7 @@ public class CamerasSupervisor {
 	}
 
 	public boolean areDetecting() {
-		return allDetecting;
+		return allDetecting.get();
 	}
 
 	public void closeAll() {
@@ -94,7 +92,7 @@ public class CamerasSupervisor {
 			manager.close();
 		}
 
-		allDetecting = false;
+		allDetecting.set(false);
 	}
 
 	public List<CameraManager> getCameraManagers() {
@@ -105,27 +103,17 @@ public class CamerasSupervisor {
 		return managers.get(index);
 	}
 
-	public List<CanvasManager> getCanvasManagers() {
-		final List<CanvasManager> canvasManagers = new ArrayList<CanvasManager>();
+	public List<CameraView> getCameraViews() {
+		final List<CameraView> canvasManagers = new ArrayList<CameraView>();
 
 		for (final CameraManager manager : managers) {
-			canvasManagers.add(manager.getCanvasManager());
+			canvasManagers.add(manager.getCameraView());
 		}
 
 		return canvasManagers;
 	}
 
-	public CanvasManager getCanvasManager(final int index) {
-		return managers.get(index).getCanvasManager();
-	}
-
-	public List<Group> getTargets() {
-		final List<Group> targets = new ArrayList<Group>();
-
-		for (final CameraManager manager : managers) {
-			targets.addAll(manager.getCanvasManager().getTargetGroups());
-		}
-
-		return targets;
+	public CameraView getCameraView(final int index) {
+		return managers.get(index).getCameraView();
 	}
 }
