@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
-import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
@@ -92,7 +91,7 @@ public class TrainingExerciseBase {
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 
-	private final static Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
+	private final static Map<CameraView, Label> exerciseLabels = new HashMap<CameraView, Label>();
 	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
 	private final static List<Button> exerciseButtons = new ArrayList<Button>();
 
@@ -119,12 +118,10 @@ public class TrainingExerciseBase {
 		this.shotTimerTable = shotEntryTable;
 
 		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
-			final CanvasManager cm = (CanvasManager) cv;
-
 			final Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
-			cm.getCanvasGroup().getChildren().add(exerciseLabel);
-			exerciseLabels.put(cm, exerciseLabel);
+			cv.addChild(exerciseLabel);
+			exerciseLabels.put(cv, exerciseLabel);
 		}
 	}
 
@@ -271,8 +268,9 @@ public class TrainingExerciseBase {
 		}
 
 		Platform.runLater(() -> {
-			for (Label exerciseLabel : exerciseLabels.values())
+			for (Label exerciseLabel : exerciseLabels.values()) {
 				exerciseLabel.setText(message);
+			}
 		});
 	}
 
@@ -383,7 +381,7 @@ public class TrainingExerciseBase {
 		final DataLine.Info info = new DataLine.Info(Clip.class, format);
 
 		Clip clip = null;
-		
+
 		try {
 			clip = (Clip) AudioSystem.getLine(info);
 			clip.open(audioInputStream);
@@ -454,15 +452,16 @@ public class TrainingExerciseBase {
 		}
 
 		if (shotTimerTable != null) {
-			for (final TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
+			for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 				shotTimerTable.getColumns().remove(column);
 			}
 		}
 
 		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
-			final CanvasManager cm = (CanvasManager) cv;
-			cm.getCanvasGroup().getChildren().remove(exerciseLabels.get(cm));
+			cv.removeChild(exerciseLabels.get(cv));
 		}
+
+		exerciseLabels.clear();
 
 		final Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
 
@@ -471,8 +470,6 @@ public class TrainingExerciseBase {
 			buttonsPane.getChildren().remove(exerciseButton);
 			itExerciseButtons.remove();
 		}
-
-		exerciseLabels.clear();
 
 		pauseShotDetection(false);
 	}

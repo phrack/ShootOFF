@@ -7,10 +7,13 @@ import java.util.Optional;
 import com.shootoff.gui.Target;
 
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
 public interface CameraView {
+	public boolean addChild(Node c);
+
 	public void addShot(Color color, double x, double y);
 
 	public Optional<Target> addTarget(File targetFile);
@@ -22,6 +25,8 @@ public interface CameraView {
 	public void clearShots();
 
 	public void close();
+
+	public boolean removeChild(Node c);
 
 	public void removeDiagnosticMessage(Label diagnosticLabel);
 

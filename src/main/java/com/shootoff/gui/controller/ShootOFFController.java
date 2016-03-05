@@ -606,9 +606,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 
 				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
+				config.setExercise(newExercise);
 				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
 				newExercise.init();
-				config.setExercise(newExercise);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

@@ -134,25 +134,25 @@ public class CameraManager {
 		return deduplicationProcessor;
 	}
 
-	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView canvas, Configuration config) {
+	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
 		this.webcam = Optional.of(webcam);
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
-		this.cameraView = canvas;
+		this.cameraView = view;
 		this.config = config;
 
 		this.cameraView.setCameraManager(this);
 
 		initDetector(new Detector());
 
-		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
+		this.shotDetectionManager = new ShotDetectionManager(this, config, view);
 	}
 
-	protected CameraManager(CameraView canvas, Configuration config) {
+	protected CameraManager(CameraView view, Configuration config) {
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
-		this.cameraView = canvas;
+		this.cameraView = view;
 		this.config = config;
-		this.shotDetectionManager = new ShotDetectionManager(this, config, canvas);
+		this.shotDetectionManager = new ShotDetectionManager(this, config, view);
 	}
 
 	private void initDetector(Detector detector) {

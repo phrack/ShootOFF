@@ -165,6 +165,16 @@ public class CanvasManager implements CameraView {
 		return cameraManager;
 	}
 
+	@Override
+	public boolean addChild(Node c) {
+		return getCanvasGroup().getChildren().add(c);
+	}
+
+	@Override
+	public boolean removeChild(Node c) {
+		return getCanvasGroup().getChildren().remove(c);
+	}
+
 	public Label addDiagnosticMessage(final String message, final long chimeDelay, final Color backgroundColor) {
 		final Label diagnosticLabel = new Label(message);
 		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));

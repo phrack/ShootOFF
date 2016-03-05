@@ -104,13 +104,13 @@ public class CamerasSupervisor {
 	}
 
 	public List<CameraView> getCameraViews() {
-		final List<CameraView> canvasManagers = new ArrayList<CameraView>();
+		final List<CameraView> cameraViews = new ArrayList<CameraView>();
 
 		for (final CameraManager manager : managers) {
-			canvasManagers.add(manager.getCameraView());
+			cameraViews.add(manager.getCameraView());
 		}
 
-		return canvasManagers;
+		return cameraViews;
 	}
 
 	public CameraView getCameraView(final int index) {
