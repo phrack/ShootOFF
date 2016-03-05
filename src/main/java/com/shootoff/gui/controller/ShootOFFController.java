@@ -105,8 +105,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
-public class ShootOFFController
-		implements CameraConfigListener, CameraErrorView, TargetListener, TargetManager, PluginListener, CalibrationConfigurator {
+public class ShootOFFController implements CameraConfigListener, CameraErrorView, TargetListener, TargetManager,
+		PluginListener, CalibrationConfigurator {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private Menu addTargetMenu;
@@ -224,8 +224,8 @@ public class ShootOFFController
 						// Move all selected shots to top the of their z-stack
 						// to ensure visibility
 						for (CameraView cv : camerasSupervisor.getCameraViews()) {
-							CanvasManager cm = (CanvasManager)cv;
-							
+							CanvasManager cm = (CanvasManager) cv;
+
 							Shape marker = selected.getShot().getMarker();
 							if (cm.getCanvasGroup().getChildren()
 									.indexOf(marker) < cm.getCanvasGroup().getChildren().size() - 1) {
@@ -577,13 +577,13 @@ public class ShootOFFController
 			logger.error("Failed to find target files because a list of files could not be retrieved");
 		}
 	}
-	
+
 	@Override
 	public List<Group> getTargets() {
 		final List<Group> targets = new ArrayList<Group>();
 
 		for (final CameraManager manager : camerasSupervisor.getCameraManagers()) {
-			targets.addAll(((CanvasManager)manager.getCameraView()).getTargetGroups());
+			targets.addAll(((CanvasManager) manager.getCameraView()).getTargetGroups());
 		}
 
 		return targets;
@@ -750,7 +750,7 @@ public class ShootOFFController
 			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
 			arenaController.setCalibrationManager(calibrationManager.get());
 			arenaController.getCanvasManager().setShowShots(false);
-			
+
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()
 						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
@@ -1009,7 +1009,8 @@ public class ShootOFFController
 		camerasSupervisor.setDetectingAll(false);
 
 		Runnable restartDetection = () -> {
-			if (calibrationManager.isPresent() && !calibrationManager.get().isCalibrating()) {
+			if (!calibrationManager.isPresent()
+					|| (calibrationManager.isPresent() && !calibrationManager.get().isCalibrating())) {
 				camerasSupervisor.setDetectingAll(true);
 			} else {
 				logger.info("disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
@@ -1056,7 +1057,7 @@ public class ShootOFFController
 
 		MenuItem addProjectorTargetItem = new MenuItem(targetName);
 		addProjectorTargetItem.setMnemonicParsing(false);
-		
+
 		addProjectorTargetItem.setOnAction((e) -> {
 			arenaController.getCanvasManager().addTarget(path);
 		});
