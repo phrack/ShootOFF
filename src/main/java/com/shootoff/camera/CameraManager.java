@@ -566,14 +566,17 @@ public class CameraManager {
 					/ (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
 
 			setFPS(estimateFPS);
-			logger.trace("fps comparison estimate {} reported {}", estimateFPS, webcam.get().getFPS());
+			if (logger.isTraceEnabled())
+				logger.trace("fps comparison estimate {} reported {}", estimateFPS, webcam.get().getFPS());
 		}
+
 		lastCameraTimestamp = System.currentTimeMillis();
 		lastFrameCount = getFrameCount();
 
 		if (debuggerListener.isPresent()) {
 			debuggerListener.get().updateFeedData(getFPS(), Optional.empty());
 		}
+
 		checkIfMinimumFPS();
 	}
 

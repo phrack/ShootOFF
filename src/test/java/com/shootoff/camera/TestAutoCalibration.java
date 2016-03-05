@@ -61,10 +61,9 @@ public class TestAutoCalibration {
 
 		mockCanvasManager.setCameraManager(cameraManager);
 
-		cameraManager.setCalibrationManager(new CalibrationManager(new MockShootOFFController(), cameraManager, new ProjectorArenaController()));
-
+		cameraManager.setCalibrationManager(
+				new CalibrationManager(new MockShootOFFController(), cameraManager, new ProjectorArenaController()));
 		cameraManager.enableAutoCalibration(false);
-
 		cameraManager.processVideo();
 
 		try {

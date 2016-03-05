@@ -36,10 +36,6 @@ public class MockCameraManager extends CameraManager {
 		super(canvas, config);
 		
 		this.processingLock = processingLock;
-		
-		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.DEBUG);
-
-
 		this.canvasManager.setCameraManager(this);
 
 		setSectorStatuses(sectorStatuses);
@@ -48,8 +44,6 @@ public class MockCameraManager extends CameraManager {
 			setLimitDetectProjection(true);
 			setProjectionBounds(projectionBounds.get());
 		}
-
-
 
 		this.videoFile = videoFile;
 
