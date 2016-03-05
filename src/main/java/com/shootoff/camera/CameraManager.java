@@ -574,7 +574,7 @@ public class CameraManager {
 		lastFrameCount = getFrameCount();
 
 		if (debuggerListener.isPresent()) {
-			debuggerListener.get().updateFeedData(getFPS(), Optional.empty());
+			debuggerListener.get().updateFeedData(getFPS());
 		}
 
 		checkIfMinimumFPS();
