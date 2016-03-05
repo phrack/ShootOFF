@@ -431,8 +431,10 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
-			shotTimerTable.getColumns().remove(column);
+		if (shotTimerTable != null) {
+			for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
+				shotTimerTable.getColumns().remove(column);
+			}
 		}
 
 		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {

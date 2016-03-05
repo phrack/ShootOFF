@@ -14,6 +14,7 @@ import org.junit.rules.ErrorCollector;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.plugins.TrainingExerciseBase;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -25,6 +26,7 @@ public class ShotDetectionTestor {
 	public static void setUpBaseClass() {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		Configuration.disableErrorReporting();
+		TrainingExerciseBase.silence(true);
 
 		nu.pattern.OpenCV.loadShared();
 	}
