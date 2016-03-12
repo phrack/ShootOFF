@@ -48,6 +48,14 @@ public class SpriteAnimation extends Transition {
 			return frames[frames.length - 1].getImage();
 		}
 	}
+	
+	public Image getFrame(int frameNumber) {
+	    return frames[frameNumber].getImage();
+	}
+
+	public void setFrame(int frameNumber) {
+	    imageView.setImage(getFrame(frameNumber));
+	}
 
 	public int getFrameCount() {
 		return frames.length;

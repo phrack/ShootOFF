@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="0" y="0" file="targets/invader1_trans.gif">
+		<tag name="points" value="5" />
+		<tag name="command" value="animate;play_sound(sounds/invaderkilled.wav)" />
+	</image>
+</target>
