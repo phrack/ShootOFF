@@ -37,6 +37,7 @@
           </Menu>
           <Menu fx:id="trainingMenu" mnemonicParsing="false" text="Training">
             <items>
+                  <MenuItem mnemonicParsing="false" onAction="#getExercisesMenuItemClicked" text="Get Exercises..." />
                   <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
                   <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
                   <SeparatorMenuItem mnemonicParsing="false" />

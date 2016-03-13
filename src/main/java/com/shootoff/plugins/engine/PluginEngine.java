@@ -137,7 +137,7 @@ public class PluginEngine implements Runnable {
 		}
 	}
 
-	protected Set<Plugin> getPlugins() {
+	public Set<Plugin> getPlugins() {
 		return plugins;
 	}
 

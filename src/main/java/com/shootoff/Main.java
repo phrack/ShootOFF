@@ -45,6 +45,7 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
 import com.shootoff.plugins.engine.PluginEngine;
+import com.shootoff.util.VersionChecker;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 
@@ -479,7 +480,7 @@ public class Main extends Application {
 		if (versionXML.isPresent()) {
 			Optional<String> stableVersion = parseField(versionXML.get(), "stableRelease", "version");
 
-			if (stableVersion.isPresent() && stableVersion.get().compareTo(version.get()) > 0) {
+			if (stableVersion.isPresent() && VersionChecker.compareVersions(stableVersion.get(), version.get()) > 0) {
 				Optional<String> downloadLink = parseField(versionXML.get(), "stableRelease", "download");
 
 				final String link;
@@ -676,6 +677,10 @@ public class Main extends Application {
 		}
 	}
 
+	public static Optional<String> getVersion() {
+		return version;
+	}
+ 	
 	public static void main(String[] args) {
 		// Check the comment at the top of the Camera class
 		// for more information about this hack

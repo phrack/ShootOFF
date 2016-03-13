@@ -133,6 +133,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
 	private PluginEngine pluginEngine;
+	private Stage pluginManagerStage = null;
 	private static final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
@@ -680,6 +681,29 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		preferencesStage.setScene(new Scene(loader.getRoot()));
 		preferencesStage.show();
 		((PreferencesController) loader.getController()).setConfig(config, this);
+	}
+	
+	@FXML
+	public void getExercisesMenuItemClicked(ActionEvent event) throws IOException {
+		if (pluginManagerStage == null) {
+			FXMLLoader loader = new FXMLLoader(
+					getClass().getClassLoader().getResource("com/shootoff/gui/PluginManager.fxml"));
+			loader.load();
+
+			pluginManagerStage = new Stage();
+
+			pluginManagerStage.initOwner(shootOFFStage);
+			pluginManagerStage.setTitle("Exercise Manager");
+			pluginManagerStage.setScene(new Scene(loader.getRoot()));
+			pluginManagerStage.show();
+			pluginManagerStage.setOnCloseRequest((e) -> {
+				pluginManagerStage = null;
+			});
+			((PluginManagerController) loader.getController()).init(pluginEngine);
+		} else {
+			pluginManagerStage.show();
+			pluginManagerStage.toFront();
+		}
 	}
 
 	@FXML
