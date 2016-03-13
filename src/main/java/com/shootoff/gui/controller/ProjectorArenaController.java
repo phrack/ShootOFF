@@ -486,7 +486,6 @@ public class ProjectorArenaController implements CalibrationListener {
 			@Override
 			public void run() {
 
-				// final CountDownLatch latch = new CountDownLatch(1);
 				Platform.runLater(new Runnable() {
 					@Override
 					public void run() {
@@ -504,11 +503,6 @@ public class ProjectorArenaController implements CalibrationListener {
 						}
 					}
 				});
-				/*
-				 * try { latch.await(); } catch (InterruptedException e) { //
-				 * TODO Auto-generated catch block e.printStackTrace(); }
-				 */
-				// arenaMaskManager.insert(bImage, System.currentTimeMillis());
 			}
 		};
 

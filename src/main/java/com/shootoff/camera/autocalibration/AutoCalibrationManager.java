@@ -137,6 +137,8 @@ public class AutoCalibrationManager {
 				boundsResult = bounds.get();
 
 				if (calculateFrameDelay) {
+					logger.debug("Checking frame delay");
+					
 					checkForFrameChange(frame);
 					frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
 					cameraManager.setArenaBackground(null);
@@ -183,20 +185,9 @@ public class AutoCalibrationManager {
 		tempMat.put(0, 0, patternLuminosity);
 		tempMat.put(0, 1, pixel);
 
-		// logger.debug("checkForFrameChange {}", pixel);
-
 		Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
 
-		// logger.debug("checkForFrameChange {} {}", tempMat.get(0,0),
-		// tempMat.get(0,1));
-
 		if (tempMat.get(0, 1)[2] < .9 * tempMat.get(0, 0)[2]) {
-			// logger.debug("checkForFrameChange {} {} - frameDelay {}",
-			// cameraManager.getCurrentFrameTimestamp(),
-			// frameTimestampBeforeFrameChange,
-			// cameraManager.getCurrentFrameTimestamp()-
-			// frameTimestampBeforeFrameChange);
-
 			return Optional.of(cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange);
 		}
 

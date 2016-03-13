@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
+import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -245,7 +246,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		setArenaBackground("pattern.png");
 		isShowingPattern.set(true);
 
-		calibratingCameraManager.enableAutoCalibration(true);
+		calibratingCameraManager.enableAutoCalibration(Configuration.USE_ARENA_MASK);
 
 		showAutoCalibrationMessage();
 

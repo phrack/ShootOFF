@@ -120,9 +120,7 @@ public class CameraManager {
 	public boolean cameraAutoCalibrated = false;
 
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
-	// TODO: Re-enable mask manager when it is ready
-	protected final ArenaMaskManager arenaMaskManager = null; // = new
-																// ArenaMaskManager();
+	protected final ArenaMaskManager arenaMaskManager;
 
 	private CameraCalibrationListener cameraCalibrationListener;
 
@@ -135,6 +133,12 @@ public class CameraManager {
 	}
 
 	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
+		if (Configuration.USE_ARENA_MASK) {
+			arenaMaskManager = new ArenaMaskManager();
+		} else {
+			arenaMaskManager = null;
+		}
+		
 		this.webcam = Optional.of(webcam);
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
 		this.cameraView = view;
@@ -148,6 +152,12 @@ public class CameraManager {
 	}
 
 	protected CameraManager(CameraView view, Configuration config) {
+		if (Configuration.USE_ARENA_MASK) {
+			arenaMaskManager = new ArenaMaskManager();
+		} else {
+			arenaMaskManager = null;
+		}
+		
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;
@@ -537,8 +547,7 @@ public class CameraManager {
 
 			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
 
-			// TODO: Re-enable mask manager when it is ready
-			// arenaMaskManager.updateAvgLums(submatFrame);
+			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrame);
 
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
@@ -673,12 +682,13 @@ public class CameraManager {
 				cameraCalibrationListener.calibrate(bounds, false);
 			});
 
-			// TODO: Re-enable mask manager when it is ready
-			// calibrationManager.setArenaMaskManager(arenaMaskManager);
-
-			// shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-			// arenaMaskManager.start((int) bounds.getWidth(), (int)
-			// bounds.getHeight());
+			if (Configuration.USE_ARENA_MASK) {
+				cameraCalibrationListener.setArenaMaskManager(arenaMaskManager);
+	
+				shotDetectionManager.setArenaMaskManager(arenaMaskManager);
+				arenaMaskManager.start((int) bounds.getWidth(), (int)
+				bounds.getHeight());
+			}
 
 			if (recordCalibratedArea && !recordingCalibratedArea)
 				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int) bounds.getWidth(),
