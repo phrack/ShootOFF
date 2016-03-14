@@ -41,6 +41,14 @@ public class SpriteAnimation extends Transition {
 		setInterpolator(Interpolator.LINEAR);
 	}
 
+	public Image getFrame(int frameNumber) {
+		return frames[frameNumber].getImage();
+	}
+
+	public void setCurrentFrame(int frameNumber) {
+		imageView.setImage(getFrame(frameNumber));
+	}
+
 	public Image getFirstFrame() {
 		if (!isReversed) {
 			return frames[0].getImage();
