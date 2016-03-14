@@ -183,7 +183,6 @@ public class Main extends Application {
 		StringBuilder metadataXML = new StringBuilder();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
-
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (metadataXML.length() > 0) metadataXML.append("\n");
@@ -260,8 +259,6 @@ public class Main extends Application {
 						totalDownloaded += count;
 						updateProgress(((double) totalDownloaded / (double) remoteFileLength) * 100, 100);
 					}
-
-					fileOutputStream.close();
 
 					updateProgress(100, 100);
 				} catch (IOException e) {
@@ -680,7 +677,7 @@ public class Main extends Application {
 	public static Optional<String> getVersion() {
 		return version;
 	}
- 	
+
 	public static void main(String[] args) {
 		// Check the comment at the top of the Camera class
 		// for more information about this hack

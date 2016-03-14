@@ -1,7 +1,10 @@
 package com.shootoff.gui.controller;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,6 +25,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.google.common.io.Files;
 import com.shootoff.Main;
 import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.engine.Plugin;
@@ -30,6 +34,7 @@ import com.shootoff.util.VersionChecker;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
@@ -39,6 +44,7 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 
@@ -59,42 +65,13 @@ public class PluginManagerController {
 		this.pluginEngine = pluginEngine;
 
 		final TableColumn<PluginMetadata, String> actionCol = new TableColumn<PluginMetadata, String>("Action");
-		actionCol.setMinWidth(80);
+		actionCol.setMinWidth(90);
 
 		actionCol
 				.setCellFactory(new Callback<TableColumn<PluginMetadata, String>, TableCell<PluginMetadata, String>>() {
 					@Override
 					public TableCell<PluginMetadata, String> call(TableColumn<PluginMetadata, String> p) {
-						return new TableCell<PluginMetadata, String>() {
-							@Override
-							protected void updateItem(String item, boolean empty) {
-								if (!empty) {
-									final int currentIndex = indexProperty().getValue() < 0 ? 0
-											: indexProperty().getValue();
-									final PluginMetadata metadata = p.getTableView().getItems().get(currentIndex);
-
-									final Button actionButton = new Button();
-
-									actionButton.setOnAction((e) -> {
-										if (metadata.findInstalledPlugin(pluginEngine.getPlugins()).isPresent()) {
-											// TODO: uninstall the plugin
-											actionButton.setText("Install");
-										} else {
-											// TODO: install the plugin
-											actionButton.setText("Uninstall");
-										}
-									});
-
-									if (metadata.findInstalledPlugin(pluginEngine.getPlugins()).isPresent()) {
-										actionButton.setText("Uninstall");
-									} else {
-										actionButton.setText("Install");
-									}
-
-									setGraphic(actionButton);
-								}
-							}
-						};
+						return new ActionTableCell(p);
 					}
 				});
 
@@ -155,6 +132,139 @@ public class PluginManagerController {
 					.handle(new WindowEvent(pluginManagerStage, WindowEvent.WINDOW_CLOSE_REQUEST));
 			pluginManagerStage.close();
 		}
+	}
+
+	private class ActionTableCell extends TableCell<PluginMetadata, String> {
+		private TableColumn<PluginMetadata, String> actionColumn;
+		private Optional<Task<Boolean>> downloadTask = Optional.empty();
+
+		public ActionTableCell(TableColumn<PluginMetadata, String> actionColumn) {
+			this.actionColumn = actionColumn;
+		}
+
+		@Override
+		protected void updateItem(String item, boolean empty) {
+			if (!empty) {
+				final int currentIndex = indexProperty().getValue() < 0 ? 0 : indexProperty().getValue();
+				final PluginMetadata metadata = actionColumn.getTableView().getItems().get(currentIndex);
+				final Button actionButton = new Button();
+
+				actionButton.setOnAction((e) -> {
+					if (downloadTask.isPresent()) {
+						downloadTask.get().cancel();
+						downloadTask = Optional.empty();
+					} else {
+						Optional<Plugin> installedPlugin = metadata.findInstalledPlugin(pluginEngine.getPlugins());
+
+						if (installedPlugin.isPresent()) {
+							if (uninstallPlugin(installedPlugin.get())) actionButton.setText("Install");
+						} else {
+							ProgressIndicator progress = new ProgressIndicator();
+							progress.setPrefHeight(actionButton.getHeight() - 2);
+							progress.setPrefWidth(actionButton.getHeight() - 2);
+							progress.setOnMouseClicked((event) -> actionButton.fire());
+
+							actionButton.setGraphic(progress);
+
+							downloadTask = installPlugin(metadata, () -> actionButton.setText("Uninstall"),
+									() -> actionButton.setGraphic(null));
+						}
+					}
+				});
+
+				if (metadata.findInstalledPlugin(pluginEngine.getPlugins()).isPresent()) {
+					actionButton.setText("Uninstall");
+				} else {
+					actionButton.setText("Install");
+				}
+
+				setGraphic(actionButton);
+			}
+		}
+	};
+
+	private Optional<Task<Boolean>> installPlugin(PluginMetadata metadata, Runnable successAction,
+			Runnable completionAction) {
+		HttpURLConnection connection = null;
+		InputStream stream = null;
+
+		try {
+			connection = (HttpURLConnection) new URL(metadata.getDownload()).openConnection();
+			stream = connection.getInputStream();
+		} catch (UnknownHostException e) {
+			logger.error("Could not connect to remote host " + e.getMessage() + " to download plugin.", e);
+			return Optional.empty();
+		} catch (IOException e) {
+			if (connection != null) connection.disconnect();
+
+			logger.error("Failed to get stream to download plugin.", e);
+			return Optional.empty();
+		}
+
+		final InputStream remoteStream = stream;
+		final HttpURLConnection con = connection;
+		final File downloadedFile = new File(String.format("%s%s%s-%s.jar", System.getProperty("shootoff.home"),
+				File.separator, metadata.getName().replaceAll("\\s", "_"), metadata.getCreator()));
+		Task<Boolean> downloadTask = new Task<Boolean>() {
+			@Override
+			public Boolean call() throws InterruptedException {
+				final BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
+
+				try (FileOutputStream fileOutputStream = new FileOutputStream(downloadedFile)) {
+					int count;
+					byte buffer[] = new byte[1024];
+
+					while (!isCancelled() && (count = bufferedInputStream.read(buffer, 0, buffer.length)) != -1) {
+						fileOutputStream.write(buffer, 0, count);
+					}
+				} catch (IOException e) {
+					logger.error("Failed to download plugin", e);
+					return false;
+				}
+
+				return true;
+			}
+		};
+
+		downloadTask.setOnCancelled((e) -> {
+			if (completionAction != null) completionAction.run();
+
+			con.disconnect();
+
+			if (!downloadedFile.delete()) {
+				logger.warn("Failed to delete {} from cancelled plugin download.", downloadedFile.getPath());
+			}
+		});
+
+		downloadTask.setOnSucceeded((e) -> {
+			if (completionAction != null) completionAction.run();
+			if (successAction != null) successAction.run();
+
+			con.disconnect();
+
+			File pluginFile = new File(
+					System.getProperty("shootoff.plugins") + File.separator + downloadedFile.getName());
+
+			try {
+				Files.move(downloadedFile, pluginFile);
+			} catch (Exception e1) {
+				logger.error("Failed to move {} to {} after downloading plugin.", downloadedFile.getPath(),
+						pluginFile.getPath());
+			}
+		});
+
+		new Thread(downloadTask).start();
+
+		return Optional.of(downloadTask);
+	}
+
+	private boolean uninstallPlugin(final Plugin plugin) {
+		if (!plugin.getJarPath().toFile().delete()) {
+			logger.error("Failed to uninstall {}", plugin.getJarPath().toString());
+			return false;
+		}
+
+		return true;
 	}
 
 	private Optional<String> getPluginMetadataXML(String metadataAddress) {
@@ -305,16 +415,19 @@ public class PluginManagerController {
 
 	private void processMetadata(Set<PluginMetadata> pluginMetadata) {
 		for (final PluginMetadata metadata : pluginMetadata) {
-			Optional<Plugin> installedPlugin = metadata.findInstalledPlugin(pluginEngine.getPlugins());
+			final Optional<Plugin> installedPlugin = metadata.findInstalledPlugin(pluginEngine.getPlugins());
 
 			if (isPluginCompatible(metadata.getMinShootOFFVersion(), metadata.getMaxShootOFFVersion())) {
 				if (installedPlugin.isPresent()
 						&& VersionChecker.compareVersions(installedPlugin.get().getExercise().getInfo().getVersion(),
 								metadata.getVersion()) < 0) {
-					// TODO: Plugin is already installed but the installed
-					// version is older than the current
-					// compatible version, so auto-update it
-				} else if (!installedPlugin.isPresent()) {
+					// Plugin is already installed but the installed version is
+					// older than the current compatible version, so auto-update
+					// it
+					if (uninstallPlugin(installedPlugin.get())) {
+						installPlugin(metadata, null, () -> pluginEntries.add(metadata));
+					}
+				} else {
 					pluginEntries.add(metadata);
 				}
 			}
