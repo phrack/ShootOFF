@@ -707,7 +707,7 @@ public class Main extends Application {
 							@Override
 							public FileVisitResult postVisitDirectory(final Path dir, final IOException e)
 									throws IOException {
-								Files.deleteIfExists(dir);
+								if (!Files.isSameFile(tempBinsDir.toPath(), dir)) Files.deleteIfExists(dir);
 								return super.postVisitDirectory(dir, e);
 							}
 
