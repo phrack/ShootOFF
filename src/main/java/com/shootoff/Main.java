@@ -29,7 +29,11 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
@@ -613,7 +617,7 @@ public class Main extends Application {
 		this.primaryStage = primaryStage;
 
 		String os = System.getProperty("os.name");
-		if (os != null && os.equals("Mac OS X") && Camera.getWebcams().isEmpty()) {
+		if (os != null && "Mac OS X".equals(os) && Camera.getWebcams().isEmpty()) {
 			closeNoCamera();
 		}
 
@@ -683,11 +687,47 @@ public class Main extends Application {
 		// for more information about this hack
 		String os = System.getProperty("os.name");
 
-		nu.pattern.OpenCV.loadShared();
+		if (os != null) {
+			if ("Mac OS X".equals(os)) {
+				Camera.getDefault();
+			} else if (os.startsWith("Windows")) {
+				// OpenPNP's OpenCV wrapper for Java does not properly clean up
+				// after itself on Windows, thus it can fill the drive with
+				// stale temporary files. This hack works around the problem
+				// by giving ShootOFF on Windows its own instance of a temp
+				// directory that we can safely purge of stale files at
+				// the start of each session.
+				System.setProperty("java.io.tmpdir", System.getProperty("user.dir") + File.separator + "temp_bins");
 
-		if (os != null && os.equals("Mac OS X")) {
-			Camera.getDefault();
+				final File tempBinsDir = new File(System.getProperty("java.io.tmpdir"));
+
+				if (tempBinsDir.exists()) {
+					try {
+						Files.walkFileTree(tempBinsDir.toPath(), new SimpleFileVisitor<Path>() {
+							@Override
+							public FileVisitResult postVisitDirectory(final Path dir, final IOException e)
+									throws IOException {
+								Files.deleteIfExists(dir);
+								return super.postVisitDirectory(dir, e);
+							}
+
+							@Override
+							public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
+									throws IOException {
+								Files.deleteIfExists(file);
+								return super.visitFile(file, attrs);
+							}
+						});
+					} catch (IOException e) {
+						logger.error("Failed walk temp_bins to delete old folders.");
+					}
+				} else if (!tempBinsDir.mkdir()) {
+					logger.error("Failed to create temporary directory to store ShootOFF binaries.");
+				}
+			}
 		}
+
+		nu.pattern.OpenCV.loadShared();
 
 		// Read ShootOFF's version number
 		Properties prop = new Properties();
