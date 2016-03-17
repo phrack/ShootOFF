@@ -45,6 +45,7 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -61,8 +62,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	protected Stage arenaStage;
 	private Stage shootOFFStage;
-	@FXML
-	protected AnchorPane arenaAnchor;
+	@FXML protected AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
 
@@ -74,6 +74,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	private Screen originalArenaHomeScreen;
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
+	private Point2D arenaScreenOrigin = new Point2D(0, 0);
 
 	private CalibrationManager calibrationManager;
 
@@ -88,10 +89,9 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setScene(scene);
 	}
 
-	public void init(Stage shootOFFStage, Configuration config,
-			CamerasSupervisor camerasSupervisor) {
+	public void init(Stage shootOFFStage, Configuration config, CamerasSupervisor camerasSupervisor) {
 		this.config = config;
-		
+
 		this.shootOFFStage = shootOFFStage;
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
 
@@ -108,7 +108,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
 	}
-	
+
 	public void setCalibrationManager(CalibrationManager calibrationManager) {
 		this.calibrationManager = calibrationManager;
 	}
@@ -238,6 +238,9 @@ public class ProjectorArenaController implements CalibrationListener {
 			detectedProjectorScreen = projector;
 
 			Platform.runLater(() -> toggleFullScreen());
+
+			Rectangle2D arenaScreenBounds = arenaHome.getBounds();
+			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
 		} else {
 			logger.debug("Did not find screen that is a likely projector");
 		}
@@ -257,6 +260,10 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	public double getHeight() {
 		return arenaAnchor.getHeight();
+	}
+
+	public Point2D getArenaScreenOrigin() {
+		return arenaScreenOrigin;
 	}
 
 	public CanvasManager getCanvasManager() {
@@ -351,12 +358,15 @@ public class ProjectorArenaController implements CalibrationListener {
 		boolean macFullscreen = event.getCode() == KeyCode.F && event.isControlDown() && event.isShortcutDown();
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
 			toggleFullScreen();
-			
+
 			// Manually going full screen with an arena that was manually
 			// moved to another screen
 			Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
 
 			if (!currentArenaScreen.isPresent()) return;
+
+			Rectangle2D arenaScreenBounds = currentArenaScreen.get().getBounds();
+			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
 
 			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
 					&& !originalArenaHomeScreen.equals(currentArenaScreen.get());
@@ -446,7 +456,7 @@ public class ProjectorArenaController implements CalibrationListener {
 					}
 					if (!calibrationManager.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
 				});
-			} , 100 /* ms */);
+			}, 100 /* ms */);
 		}
 	}
 
@@ -466,7 +476,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			arenaStage.getScene().setOnMouseEntered((event) -> {
 				cursorWarningToggle(true);
 			});
-	
+
 			arenaStage.getScene().setOnMouseExited((event) -> {
 				cursorWarningToggle(false);
 			});

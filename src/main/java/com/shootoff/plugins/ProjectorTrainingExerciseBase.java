@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
@@ -65,8 +66,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaController = arenaController;
 		exerciseLabel.setTextFill(Color.WHITE);
-		Platform.runLater(
-				() -> arenaController.getCanvasManager().getCanvasGroup().getChildren().add(exerciseLabel));
+		Platform.runLater(() -> arenaController.getCanvasManager().getCanvasGroup().getChildren().add(exerciseLabel));
 	}
 
 	// For unit tests
@@ -123,6 +123,10 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 	public double getArenaHeight() {
 		return arenaController.getHeight();
+	}
+
+	public Point2D getArenaScreenOrigin() {
+		return arenaController.getArenaScreenOrigin();
 	}
 
 	@Override
