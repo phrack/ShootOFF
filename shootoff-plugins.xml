@@ -3,8 +3,8 @@
      to learn about existing plugins. Do not add a plugin's data to this file unless you are
      ready to support it yourself.-->
 <plugins>
-  <plugin name="Pistol Isometrics" version="1.0" minShootOFFVersion="3.7" maxShootOFFVersion="4.0" 
-    creator="phrack" download="https://github.com/phrack/ShootOFF-Pistol-Isometrics/releases/download/v1.0-FINAL/ShootOFF-Pistol-Isometrics.jar" 
+  <plugin name="Pistol Isometrics" version="1.1" minShootOFFVersion="3.7" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Pistol-Isometrics/releases/download/v1.1-FINAL/ShootOFF-Pistol-Isometrics.jar" 
     description="Walk through a series of shoot and hold exercises to strenghten muscles activated when accurately shooting a firearm." />
   <plugin name="Shot to Click" version="1.0" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Shot-to-Click/releases/download/v1.0-FINAL/ShootOFF-Shot-to-Click.jar" 
