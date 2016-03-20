@@ -31,11 +31,11 @@ import java.util.Optional;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.slf4j.Logger;
@@ -351,8 +351,13 @@ public class TrainingExerciseBase {
 	}
 
 	public static void playSound(final InputStream is) {
-		try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(is)) {
-			playSound(audioInputStream, Optional.empty());
+		playSound(is, Optional.empty());
+	}
+
+	public static void playSound(final InputStream is, Optional<LineListener> listener) {
+		try {
+			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(is);
+			playSound(audioInputStream, listener);
 		} catch (UnsupportedAudioFileException | IOException e) {
 			logger.error("Error reading sound stream to play", e);
 		}
@@ -378,20 +383,21 @@ public class TrainingExerciseBase {
 
 	private static void playSound(AudioInputStream audioInputStream, Optional<LineListener> listener) {
 		final AudioFormat format = audioInputStream.getFormat();
-		final DataLine.Info info = new DataLine.Info(Clip.class, format);
+		final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
-		Clip clip = null;
+		SourceDataLine line = null;
 
 		try {
-			clip = (Clip) AudioSystem.getLine(info);
-			clip.open(audioInputStream);
-			clip.start();
+			line = (SourceDataLine) AudioSystem.getLine(info);
+
+			line.open(format);
+			line.start();
 
 			if (listener.isPresent()) {
-				clip.addLineListener(listener.get());
+				line.addLineListener(listener.get());
 			} else {
-				clip.addLineListener((e) -> {
-					if (e.getType().equals(LineEvent.Type.STOP)) {
+				line.addLineListener((e) -> {
+					if (LineEvent.Type.STOP.equals(e.getType())) {
 						e.getLine().close();
 						try {
 							audioInputStream.close();
@@ -401,8 +407,27 @@ public class TrainingExerciseBase {
 					}
 				});
 			}
-		} catch (LineUnavailableException | IOException e) {
-			if (clip != null) clip.close();
+
+			final SourceDataLine sourceLine = line;
+			new Thread(() -> {
+				int nBytesRead = 0;
+				byte[] abData = new byte[1024];
+				while (nBytesRead != -1) {
+					try {
+						nBytesRead = audioInputStream.read(abData, 0, abData.length);
+					} catch (IOException e) {
+						logger.error("Error playing sound clip", e);
+					}
+					if (nBytesRead >= 0) {
+						sourceLine.write(abData, 0, nBytesRead);
+					}
+				}
+
+				sourceLine.drain();
+				sourceLine.close();
+			}).start();
+		} catch (LineUnavailableException e) {
+			if (line != null) line.close();
 			logger.error("Error playing sound clip", e);
 		}
 	}
