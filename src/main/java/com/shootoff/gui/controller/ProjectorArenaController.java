@@ -94,7 +94,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		this.shootOFFStage = shootOFFStage;
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
-		
+
 		arenaStage.setFullScreenExitHint("");
 
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
@@ -119,17 +119,17 @@ public class ProjectorArenaController implements CalibrationListener {
 		ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
 
 		if (stageHomeScreens.isEmpty()) {
-			StringBuilder message = new StringBuilder(
-					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens: %n%n",
-							stage.getTitle(), stage.getX(), stage.getY()));
+			StringBuilder message = new StringBuilder(String.format(
+					"Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens: %n%n",
+					stage.getTitle(), stage.getX(), stage.getY()));
 
 			Iterator<Screen> it = Screen.getScreens().iterator();
 
 			while (it.hasNext()) {
 				Screen s = it.next();
 
-				message.append(String.format("(w = %f, h = %f, dpi = %f)", s.getBounds().getWidth(),
-						s.getBounds().getHeight(), s.getDpi()));
+				message.append(String.format("(w = %f, h = %f, dpi = %f)", s.getBounds().getWidth(), s.getBounds()
+						.getHeight(), s.getDpi()));
 
 				if (it.hasNext()) {
 					message.append("\n");
@@ -214,9 +214,8 @@ public class ProjectorArenaController implements CalibrationListener {
 				if (smallest == null) {
 					smallest = screen;
 				} else {
-					if (screen.getBounds().getHeight()
-							* screen.getBounds().getWidth() < smallest.getBounds().getHeight()
-									* smallest.getBounds().getWidth()) {
+					if (screen.getBounds().getHeight() * screen.getBounds().getWidth() < smallest.getBounds()
+							.getHeight() * smallest.getBounds().getWidth()) {
 						smallest = screen;
 					}
 				}
@@ -231,8 +230,8 @@ public class ProjectorArenaController implements CalibrationListener {
 			double newX = arenaHome.getVisualBounds().getMinX();
 			double newY = arenaHome.getVisualBounds().getMinY();
 
-			logger.debug("Found likely projector screen: resolution = {}x{}, newX = {}, newY = {}",
-					arenaHome.getBounds().getWidth(), arenaHome.getBounds().getHeight(), newX, newY);
+			logger.debug("Found likely projector screen: resolution = {}x{}, newX = {}, newY = {}", arenaHome
+					.getBounds().getWidth(), arenaHome.getBounds().getHeight(), newX, newY);
 
 			arenaStage.setX(newX + 10);
 			arenaStage.setY(newY + 10);
@@ -323,8 +322,9 @@ public class ProjectorArenaController implements CalibrationListener {
 		canvasManager.clearTargets();
 
 		boolean scaleCourse = course.getResolution().isPresent()
-				&& (Math.abs(course.getResolution().get().getWidth() - getWidth()) > .0001
-						|| Math.abs(course.getResolution().get().getHeight() - getHeight()) > .0001);
+				&& (Math.abs(course.getResolution().get().getWidth() - getWidth()) > .0001 || Math.abs(course
+						.getResolution().get().getHeight()
+						- getHeight()) > .0001);
 
 		double widthScaleFactor = 1;
 		double heightScaleFactor = 1;
@@ -508,8 +508,8 @@ public class ProjectorArenaController implements CalibrationListener {
 						}
 
 						try {
-							arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
-									System.currentTimeMillis());
+							arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(), System
+									.currentTimeMillis());
 						} finally {
 							arenaMaskManager.sem.release();
 						}

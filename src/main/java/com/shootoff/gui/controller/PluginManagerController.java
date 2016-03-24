@@ -36,6 +36,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -47,6 +48,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.text.Text;
 
 public class PluginManagerController {
 	private static final Logger logger = LoggerFactory.getLogger(PluginManagerController.class);
@@ -89,8 +91,28 @@ public class PluginManagerController {
 
 		final TableColumn<PluginMetadata, String> descriptionCol = new TableColumn<PluginMetadata, String>(
 				"Description");
-		descriptionCol.setMinWidth(290);
+		descriptionCol.prefWidthProperty().bind(
+				pluginsTableView.widthProperty().subtract(
+						actionCol.getWidth() + nameCol.getWidth() + versionCol.getWidth() + creatorCol.getWidth()));
 		descriptionCol.setCellValueFactory(new PropertyValueFactory<PluginMetadata, String>("Description"));
+		descriptionCol
+				.setCellFactory(new Callback<TableColumn<PluginMetadata, String>, TableCell<PluginMetadata, String>>() {
+					@Override
+					public TableCell<PluginMetadata, String> call(TableColumn<PluginMetadata, String> param) {
+						final TableCell<PluginMetadata, String> cell = new TableCell<PluginMetadata, String>() {
+							@Override
+							public void updateItem(String item, boolean empty) {
+								super.updateItem(item, empty);
+								if (!isEmpty()) {
+									final Text text = new Text(item.toString());
+									text.wrappingWidthProperty().bind(descriptionCol.widthProperty());
+									setGraphic(text);
+								}
+							}
+						};
+						return cell;
+					}
+				});
 
 		pluginsTableView.getColumns().add(actionCol);
 		pluginsTableView.getColumns().add(nameCol);
@@ -128,8 +150,8 @@ public class PluginManagerController {
 			metadataAlert.initOwner(pluginManagerStage);
 			metadataAlert.showAndWait();
 
-			pluginManagerStage.getOnCloseRequest()
-					.handle(new WindowEvent(pluginManagerStage, WindowEvent.WINDOW_CLOSE_REQUEST));
+			pluginManagerStage.getOnCloseRequest().handle(
+					new WindowEvent(pluginManagerStage, WindowEvent.WINDOW_CLOSE_REQUEST));
 			pluginManagerStage.close();
 		}
 	}
@@ -140,6 +162,7 @@ public class PluginManagerController {
 
 		public ActionTableCell(TableColumn<PluginMetadata, String> actionColumn) {
 			this.actionColumn = actionColumn;
+			this.setAlignment(Pos.CENTER);
 		}
 
 		@Override
@@ -242,8 +265,8 @@ public class PluginManagerController {
 
 			con.disconnect();
 
-			File pluginFile = new File(
-					System.getProperty("shootoff.plugins") + File.separator + downloadedFile.getName());
+			File pluginFile = new File(System.getProperty("shootoff.plugins") + File.separator
+					+ downloadedFile.getName());
 
 			try {
 				Files.move(downloadedFile, pluginFile);
@@ -323,8 +346,8 @@ public class PluginManagerController {
 	}
 
 	// For testing
-	protected boolean isPluginCompatible(final Optional<String> currentShootOFFVersion, final String minShootOFFVersion,
-			final String maxShootOFFVersion) {
+	protected boolean isPluginCompatible(final Optional<String> currentShootOFFVersion,
+			final String minShootOFFVersion, final String maxShootOFFVersion) {
 
 		return currentShootOFFVersion.isPresent()
 				&& VersionChecker.compareVersions(currentShootOFFVersion.get(), minShootOFFVersion) >= 0
@@ -399,15 +422,14 @@ public class PluginManagerController {
 			return pluginMetadata;
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes attributes)
-				throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
 			switch (qName) {
 			case "plugin":
 				pluginMetadata.add(new PluginMetadata(attributes.getValue("name"), attributes.getValue("version"),
 						attributes.getValue("minShootOFFVersion"), attributes.getValue("maxShootOFFVersion"),
-						attributes.getValue("creator"), attributes.getValue("download"),
-						attributes.getValue("description")));
+						attributes.getValue("creator"), attributes.getValue("download"), attributes
+								.getValue("description")));
 				break;
 			}
 		}
