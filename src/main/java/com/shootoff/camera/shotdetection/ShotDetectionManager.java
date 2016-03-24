@@ -364,9 +364,9 @@ public final class ShotDetectionManager {
 				final int startX = subWidth * sectorX;
 				final int startY = subHeight * sectorY;
 
-				for (Integer y = startY; y < startY + subHeight; y++) {
+				for (int y = startY; y < startY + subHeight; y++) {
 					final int yOffset = y * cols;
-					for (Integer x = startX; x < startX + subWidth; x++) {
+					for (int x = startX; x < startX + subWidth; x++) {
 						final int currentH = workingFramePrimitive[(yOffset + x) * channels] & 0xFF;
 						final int currentS = workingFramePrimitive[(yOffset + x) * channels + 1] & 0xFF;
 						final int currentV = workingFramePrimitive[(yOffset + x) * channels + 2] & 0xFF;
