@@ -83,7 +83,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 
 	public void setConfig(Configuration config, CameraConfigListener cameraConfigListener) throws IOException {
 		ImageCell.createImageCache(Camera.getWebcams());
-		
+
 		preferencesStage = (Stage) markerRadiusSlider.getScene().getWindow();
 
 		this.cameraConfigListener = cameraConfigListener;

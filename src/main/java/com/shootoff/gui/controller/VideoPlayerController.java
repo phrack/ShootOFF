@@ -174,7 +174,7 @@ public class VideoPlayerController implements PlaybackListener {
 					lastTimestamp = getDuration();
 					Platform.runLater(() -> listener.frameUpdated(getDuration()));
 				}
-			} , "PlayVideo").start();
+			}, "PlayVideo").start();
 		}
 
 		private void playFromBeginning() {

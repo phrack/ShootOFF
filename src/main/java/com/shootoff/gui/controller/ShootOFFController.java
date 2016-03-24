@@ -682,7 +682,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		preferencesStage.show();
 		((PreferencesController) loader.getController()).setConfig(config, this);
 	}
-	
+
 	@FXML
 	public void getExercisesMenuItemClicked(ActionEvent event) throws IOException {
 		if (pluginManagerStage == null) {

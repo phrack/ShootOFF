@@ -243,12 +243,11 @@ public class CanvasManager implements CameraView {
 			cameraAlert.setTitle("Internal Error");
 			cameraAlert.setHeaderText("Internal Error -- Likely Too Many false Shots");
 			cameraAlert.setResizable(true);
-			cameraAlert
-					.setContentText("An internal error due to JDK bug 8094135 occured in Java that will cause all "
-							+ "of your shots to be lost. This error is most likely to occur when you are getting a lot of false "
-							+ "shots due to poor lighting conditions and/or a poor camera setup. Please put the camera in front "
-							+ "of the shooter and turn off any bright lights in front of the camera that are the same height as "
-							+ "the shooter. If problems persist you may need to restart ShootOFF.");
+			cameraAlert.setContentText("An internal error due to JDK bug 8094135 occured in Java that will cause all "
+					+ "of your shots to be lost. This error is most likely to occur when you are getting a lot of false "
+					+ "shots due to poor lighting conditions and/or a poor camera setup. Please put the camera in front "
+					+ "of the shooter and turn off any bright lights in front of the camera that are the same height as "
+					+ "the shooter. If problems persist you may need to restart ShootOFF.");
 			cameraAlert.show();
 
 			shots.clear();
@@ -292,8 +291,8 @@ public class CanvasManager implements CameraView {
 			background.setX(0);
 			background.setY(0);
 
-			img = SwingFXUtils.toFXImage(
-					resize(frame, (int) config.getDisplayWidth(), (int) config.getDisplayHeight()), null);
+			img = SwingFXUtils.toFXImage(resize(frame, (int) config.getDisplayWidth(), (int) config.getDisplayHeight()),
+					null);
 		}
 
 		background.setImage(img);
@@ -339,7 +338,8 @@ public class CanvasManager implements CameraView {
 
 	public Bounds translateCameraToCanvas(Bounds bounds) {
 		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
-				&& config.getDisplayHeight() == cameraManager.getFeedHeight()) return bounds;
+				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return bounds;
 
 		double scaleX = (double) config.getDisplayWidth() / (double) cameraManager.getFeedWidth();
 		double scaleY = (double) config.getDisplayHeight() / (double) cameraManager.getFeedHeight();
@@ -357,7 +357,8 @@ public class CanvasManager implements CameraView {
 
 	public Bounds translateCanvasToCamera(Bounds bounds) {
 		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
-				&& config.getDisplayHeight() == cameraManager.getFeedHeight()) return bounds;
+				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return bounds;
 
 		double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
 		double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
@@ -490,11 +491,11 @@ public class CanvasManager implements CameraView {
 		Optional<String> videoString = createVideoString(shot);
 
 		if (rejectingProcessor instanceof MalfunctionsProcessor) {
-			config.getSessionRecorder().get()
-					.recordShot(cameraName, shot, true, false, Optional.empty(), Optional.empty(), videoString);
+			config.getSessionRecorder().get().recordShot(cameraName, shot, true, false, Optional.empty(),
+					Optional.empty(), videoString);
 		} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
-			config.getSessionRecorder().get()
-					.recordShot(cameraName, shot, false, true, Optional.empty(), Optional.empty(), videoString);
+			config.getSessionRecorder().get().recordShot(cameraName, shot, false, true, Optional.empty(),
+					Optional.empty(), videoString);
 		}
 	}
 
@@ -516,9 +517,8 @@ public class CanvasManager implements CameraView {
 
 		// If the shot didn't come from click to shoot (cameFromCanvas) and the
 		// resolution of the display and feed differ, translate shot coordinates
-		if (!cameFromCanvas
-				&& (config.getDisplayWidth() != cameraManager.getFeedWidth() || config.getDisplayHeight() != cameraManager
-						.getFeedHeight())) {
+		if (!cameFromCanvas && (config.getDisplayWidth() != cameraManager.getFeedWidth()
+				|| config.getDisplayHeight() != cameraManager.getFeedHeight())) {
 			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
 					cameraManager.getFeedHeight());
 		}
@@ -641,10 +641,8 @@ public class CanvasManager implements CameraView {
 				}
 
 				if (config.getSessionRecorder().isPresent()) {
-					config.getSessionRecorder()
-							.get()
-							.recordShot(cameraName, shot, false, false, Optional.of(target),
-									Optional.of(target.getTargetGroup().getChildren().indexOf(region)), videoString);
+					config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.of(target),
+							Optional.of(target.getTargetGroup().getChildren().indexOf(region)), videoString);
 				}
 
 				return hit;
@@ -654,8 +652,8 @@ public class CanvasManager implements CameraView {
 		logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", shot.getX(), shot.getY());
 
 		if (config.getSessionRecorder().isPresent()) {
-			config.getSessionRecorder().get()
-					.recordShot(cameraName, shot, false, false, Optional.empty(), Optional.empty(), videoString);
+			config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.empty(),
+					Optional.empty(), videoString);
 		}
 
 		return Optional.empty();
