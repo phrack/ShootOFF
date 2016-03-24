@@ -94,6 +94,8 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		this.shootOFFStage = shootOFFStage;
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
+		
+		arenaStage.setFullScreenExitHint("");
 
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
