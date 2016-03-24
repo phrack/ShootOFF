@@ -18,9 +18,10 @@
 
 package com.shootoff.camera.shotdetection;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
@@ -29,14 +30,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PixelClusterManager {
-
 	private static final Logger logger = LoggerFactory.getLogger(PixelClusterManager.class);
 
 	private int numberOfRegions = -1;
 
-	private Set<Pixel> points;
+	private final Set<Pixel> points;
 
-	HashMap<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
+	private final Map<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 
 	private ShotDetectionManager shotDetectionManager;
 
@@ -58,29 +58,29 @@ public class PixelClusterManager {
 	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
 
-	PixelClusterManager(Set<Pixel> p, ShotDetectionManager shotDetectionManager) {
+	protected PixelClusterManager(Set<Pixel> p, ShotDetectionManager shotDetectionManager) {
 		points = p;
 		this.shotDetectionManager = shotDetectionManager;
 	}
 
-	void clusterPixels() {
+	protected void clusterPixels() {
 		final Stack<Pixel> mustExamine = new Stack<Pixel>();
 
 		for (Pixel point : points) {
-
 			if (!pixelMapping.containsKey(point)) {
 				numberOfRegions++;
 				mustExamine.add(point);
 				pixelMapping.put(point, numberOfRegions);
 			}
+
 			if (numberOfRegions > EXCESSIVE_PIXEL_REGION_COUNT && points.size() > EXCESSIVE_PIXEL_CUTOFF) break;
 
 			while (mustExamine.size() > 0) {
-				Pixel thisPoint = mustExamine.pop();
+				final Pixel thisPoint = mustExamine.pop();
 
 				int connectedness = 0;
 
-				for (int h = -1; h <= 1; h++)
+				for (int h = -1; h <= 1; h++) {
 					for (int w = -1; w <= 1; w++) {
 						if (h == 0 && w == 0) continue;
 
@@ -91,29 +91,28 @@ public class PixelClusterManager {
 								|| ry >= shotDetectionManager.getCameraManager().getFeedHeight())
 							continue;
 
-						Pixel nearPoint = new Pixel(rx, ry);
+						final Pixel nearPoint = new Pixel(rx, ry);
 						if (points.contains(nearPoint)) {
 							if (!pixelMapping.containsKey(nearPoint)) {
-
 								mustExamine.push(nearPoint);
 								pixelMapping.put(nearPoint, numberOfRegions);
-
 							}
 
 							connectedness++;
 						}
 					}
+				}
+
 				thisPoint.setConnectedness(connectedness);
 			}
 		}
-
 	}
 
-	public ArrayList<PixelCluster> dumpClusters() {
-		ArrayList<PixelCluster> clusters = new ArrayList<PixelCluster>();
+	public Set<PixelCluster> dumpClusters() {
+		Set<PixelCluster> clusters = new HashSet<PixelCluster>();
 
 		for (int i = 0; i <= numberOfRegions; i++) {
-			PixelCluster cluster = new PixelCluster();
+			final PixelCluster cluster = new PixelCluster();
 
 			double averageX = 0;
 			double averageY = 0;
@@ -132,6 +131,7 @@ public class PixelClusterManager {
 					if (nextPixel.x < minX)
 						minX = nextPixel.x;
 					else if (nextPixel.x > maxX) maxX = nextPixel.x;
+
 					if (nextPixel.y < minY)
 						minY = nextPixel.y;
 					else if (nextPixel.y > maxY) maxY = nextPixel.y;
@@ -139,11 +139,7 @@ public class PixelClusterManager {
 					cluster.add(nextPixel);
 
 					final int connectedness = nextPixel.getConnectedness();
-					/*
-					 * if (logger.isTraceEnabled()) { logger.trace(
-					 * "Cluster {}: {} {} - {}", i, nextPixel.x, nextPixel.y,
-					 * connectedness); }
-					 */
+
 					averageX += nextPixel.x * connectedness;
 					averageY += nextPixel.y * connectedness;
 
@@ -151,10 +147,9 @@ public class PixelClusterManager {
 
 					it.remove();
 				}
-
 			}
 
-			int clustersize = cluster.size();
+			final int clustersize = cluster.size();
 
 			if (clustersize < shotDetectionManager.getMinimumShotDimension()) continue;
 

@@ -9,7 +9,7 @@ public class Pixel extends Point {
 	private int lumAverage;
 	private int color;
 	private int colorAverage;
-	
+
 	private int connectedness;
 
 	public Pixel(int x, int y, int color, int currentLum, int lumAverage, int colorAverage) {
@@ -23,7 +23,7 @@ public class Pixel extends Point {
 	public Pixel(final int x, final int y) {
 		super(x, y);
 	}
-	
+
 	public int getColorAverage() {
 		return colorAverage;
 	}

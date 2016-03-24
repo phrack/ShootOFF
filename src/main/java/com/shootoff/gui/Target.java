@@ -242,7 +242,7 @@ public class Target {
 			if (r.isPresent()) {
 				imageRegion = (ImageRegion) r.get();
 			} else {
-				System.err.format("Request to animate region named %s, but it " + "doesn't exist.", args.get(0));
+				logger.error("Request to animate region named {}, but it doesn't exist.", args.get(0));
 				return;
 			}
 		}
@@ -261,13 +261,13 @@ public class Target {
 				});
 			}
 		} else {
-			System.err.println("Request to animate region, but region does " + "not contain an animation.");
+			logger.error("Request to animate region, but region does not contain an animation.");
 		}
 	}
 
 	public void reverseAnimation(TargetRegion region) {
 		if (region.getType() != RegionType.IMAGE) {
-			System.err.println("A reversal was requested on a non-image region.");
+			logger.error("A reversal was requested on a non-image region.");
 			return;
 		}
 
@@ -284,7 +284,7 @@ public class Target {
 				animation.reverse();
 			}
 		} else {
-			System.err.println("A reversal was requested on an image region that isn't animated.");
+			logger.error("A reversal was requested on an image region that isn't animated.");
 		}
 	}
 
