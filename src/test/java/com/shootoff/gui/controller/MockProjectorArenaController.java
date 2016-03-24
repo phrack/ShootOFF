@@ -20,5 +20,5 @@ public class MockProjectorArenaController extends ProjectorArenaController {
 		arenaStage.setScene(scene);
 
 	}
-	
+
 }

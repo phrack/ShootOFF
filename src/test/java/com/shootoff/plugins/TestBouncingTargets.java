@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
@@ -25,6 +26,7 @@ import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.TargetRegion;
 
+import ch.qos.logback.classic.Logger;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
@@ -72,6 +74,9 @@ public class TestBouncingTargets {
 		TextToSpeech.silence(false);
 		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
+
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		rootLogger.detachAndStopAllAppenders();
 	}
 
 	@Test

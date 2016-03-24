@@ -355,6 +355,11 @@ public class TrainingExerciseBase {
 	}
 
 	public static void playSound(final InputStream is, Optional<LineListener> listener) {
+		if (isSilenced) {
+			System.out.println("Playing audio for modular exercise.");
+			return;
+		}
+
 		try {
 			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(is);
 			playSound(audioInputStream, listener);

@@ -96,6 +96,9 @@ public class TestSteelChallenge {
 		TextToSpeech.silence(false);
 		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
+
+		noTargetsSC.destroy();
+		targetsSC.destroy();
 	}
 
 	@Test

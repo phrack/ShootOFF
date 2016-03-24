@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
@@ -26,6 +27,7 @@ import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
+import ch.qos.logback.classic.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
@@ -84,6 +86,11 @@ public class TestISSFStandardPistol {
 		TextToSpeech.silence(false);
 		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
+
+		issfExercise.destroy();
+
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		rootLogger.detachAndStopAllAppenders();
 	}
 
 	private String getScoreString(int roundOne, int roundTwo, int roundThree, boolean roundOver, boolean gameOver) {

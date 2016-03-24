@@ -56,30 +56,30 @@ public class TestArenaMasking extends ShotDetectionTestor {
 
 	IMediaReader reader;
 	MockCameraManager cameraManager;
+
 	private List<Shot> arenaMaskingVideo(String videoPath, String maskPath, Bounds videoBounds) {
 		Object processingLock = new Object();
 
 		File videoFile = new File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
 		File maskFile = new File(TestCameraManagerLifecam.class.getResource(maskPath).getFile());
 
-		
 		cameraManager = new MockCameraManager(videoFile, processingLock, mockCanvasManager, config, sectorStatuses,
 				Optional.empty());
 
 		mockCanvasManager.setCameraManager(cameraManager);
-		
+
 		arenaMaskManager = cameraManager.getArenaMaskManager();
 
 		arenaMaskManager.setDelay(200);
 
 		cameraManager.cameraAutoCalibrated = true;
-		
+
 		cameraManager.setShotDetectionArenaMaskManager();
-		
+
 		cameraManager.setProjectionBounds(videoBounds);
-		
+
 		arenaMaskManager.start((int) videoBounds.getWidth(), (int) videoBounds.getHeight());
-		
+
 		reader = ToolFactory.makeReader(maskFile.getAbsolutePath());
 		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 		reader.addListener(new maskListener());
@@ -99,23 +99,22 @@ public class TestArenaMasking extends ShotDetectionTestor {
 
 		return mockCanvasManager.getShots();
 	}
-	
+
 	protected class cameraListener extends MediaListenerAdapter {
 		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
-			// We don't actually want this event, we just use this as 
+			// We don't actually want this event, we just use this as
 			// a trigger to read another frame on the mask video
-			
-			while (cameraManager.currentFrameTimestamp+200>currentFrameTimestamp)
-			{
-				if (reader.readPacket() == null)
-					break;
+
+			while (cameraManager.currentFrameTimestamp + 200 > currentFrameTimestamp) {
+				if (reader.readPacket() == null) break;
 			}
 		}
 	}
-	
+
 	protected long currentFrameTimestamp = -1;
 	private long initialSystemTimeAtVideoStart = -1;
+
 	protected class maskListener extends MediaListenerAdapter {
 		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
@@ -124,10 +123,9 @@ public class TestArenaMasking extends ShotDetectionTestor {
 			if (initialSystemTimeAtVideoStart == -1) initialSystemTimeAtVideoStart = System.currentTimeMillis();
 
 			currentFrameTimestamp = (event.getTimeStamp() / 1000) + initialSystemTimeAtVideoStart;
-			
-			arenaMaskManager.handleMask(new Mask(currentFrame,
-					currentFrameTimestamp));
-			
+
+			arenaMaskManager.handleMask(new Mask(currentFrame, currentFrameTimestamp));
+
 		}
 	}
 
@@ -135,7 +133,8 @@ public class TestArenaMasking extends ShotDetectionTestor {
 	@Test
 	public void testArenaMaskingBouncingTargetsFourShots() throws IOException {
 		Bounds bounds = new BoundingBox(0, 0, 418, 314);
-		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated-2.mp4", "/arenamask/BouncingTargets-arena-2.mp4",  bounds);
+		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated-2.mp4",
+				"/arenamask/BouncingTargets-arena-2.mp4", bounds);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 189.8, 256.0, 0, 2));
@@ -143,16 +142,16 @@ public class TestArenaMasking extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 152.6, 141.3, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 256.8, 112.2, 0, 2));
 
-
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
-	
+
 	@Ignore
 	@Test
 	public void testArenaMaskingBouncingTargetsNoShots() throws IOException {
 		Bounds bounds = new BoundingBox(0, 0, 410, 312);
-		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated.mp4", "/arenamask/BouncingTargets-arena.mp4",  bounds);
-		
+		List<Shot> shots = arenaMaskingVideo("/arenamask/BouncingTargets-calibrated.mp4",
+				"/arenamask/BouncingTargets-arena.mp4", bounds);
+
 		assertEquals(true, shots.isEmpty());
 	}
 }

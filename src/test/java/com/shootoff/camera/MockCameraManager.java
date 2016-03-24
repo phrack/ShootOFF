@@ -26,15 +26,15 @@ public class MockCameraManager extends CameraManager {
 	protected File videoFile;
 	protected long lastVideoTimestamp = -1;
 	protected static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
-	
+
 	protected final Object processingLock;
 	protected boolean processedVideo = false;
 
 	protected MockCameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config,
 			boolean[][] sectorStatuses, Optional<Bounds> projectionBounds) {
-		
+
 		super(canvas, config);
-		
+
 		this.processingLock = processingLock;
 		this.cameraView.setCameraManager(this);
 
@@ -61,8 +61,7 @@ public class MockCameraManager extends CameraManager {
 		while (reader.readPacket() == null)
 			do {} while (false);
 	}
-	
-	
+
 	public void processVideo(IMediaListener listener) {
 		Detector detector = new Detector();
 
@@ -76,13 +75,11 @@ public class MockCameraManager extends CameraManager {
 		while (reader.readPacket() == null)
 			do {} while (false);
 	}
-	
+
 	protected class Detector extends MediaListenerAdapter implements Runnable {
 
-
 		@Override
-		public void run() {
-		}
+		public void run() {}
 
 		/**
 		 * From the MediaListenerAdapter. This method is used to get a new frame
@@ -126,13 +123,12 @@ public class MockCameraManager extends CameraManager {
 		}
 
 	}
-	
+
 	public boolean isVideoProcessed() {
 		return processedVideo;
 	}
-	
-	public void setShotDetectionArenaMaskManager()
-	{
+
+	public void setShotDetectionArenaMaskManager() {
 		shotDetectionManager.setArenaMaskManager(arenaMaskManager);
 	}
 

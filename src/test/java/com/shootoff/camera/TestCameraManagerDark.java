@@ -130,8 +130,9 @@ public class TestCameraManagerDark extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 337.8, 97.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 376.8, 226.2, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 203.9, 99.4, 0, 2));
-		
-		// This shot is actually GREEN of course.  But it is the only shot that is incorrect.
+
+		// This shot is actually GREEN of course. But it is the only shot that
+		// is incorrect.
 		requiredShots.add(new Shot(Color.RED, 200.6, 233.1, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 494.7, 224.2, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 479.2, 281.8, 0, 2));

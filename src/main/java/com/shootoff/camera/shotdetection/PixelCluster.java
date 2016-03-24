@@ -43,15 +43,11 @@ public class PixelCluster extends HashSet<Pixel> {
 	// itself
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
-	public double getColorDifference(Mat workingFrame, int[][] colorDistanceFromRed) {
+	public double getColorDifference(final Mat workingFrame, final int[][] colorDistanceFromRed) {
 		final Set<Pixel> visited = new HashSet<Pixel>();
-		int colorDistance = 0;
-		int avgColorDistance = 0;
-		int tempColorDistance = 0;
-
 		int avgSaturation = 0;
 
-		for (Pixel pixel : this) {
+		for (final Pixel pixel : this) {
 			if (pixel.getConnectedness() < MAXIMUM_CONNECTEDNESS) {
 				for (int h = -1; h <= 1; h++) {
 					for (int w = -1; w <= 1; w++) {
@@ -67,7 +63,7 @@ public class PixelCluster extends HashSet<Pixel> {
 						if (!visited.contains(nearPoint) && !this.contains(nearPoint)) {
 							byte[] np = { 0, 0, 0 };
 							workingFrame.get(ry, rx, np);
-							int npSaturation = np[1] & 0xFF;
+							final int npSaturation = np[1] & 0xFF;
 
 							avgSaturation += npSaturation;
 
@@ -82,8 +78,12 @@ public class PixelCluster extends HashSet<Pixel> {
 		if (pixelCount == 0) return 0;
 
 		avgSaturation /= pixelCount;
+		
+		int colorDistance = 0;
+		int avgColorDistance = 0;
+		int tempColorDistance = 0;
 
-		for (Pixel pixel : visited) {
+		for (final Pixel pixel : visited) {
 			byte[] np = { 0, 0, 0 };
 
 			workingFrame.get(pixel.y, pixel.x, np);
@@ -92,7 +92,7 @@ public class PixelCluster extends HashSet<Pixel> {
 			final int npLum = np[2] & 0xFF;
 
 			if (npSaturation > avgSaturation) {
-				final int thisDFromRed = (Math.min(npColor, Math.abs(180 - npColor)) * npLum * npSaturation);
+				final int thisDFromRed = Math.min(npColor, Math.abs(180 - npColor)) * npLum * npSaturation;
 				final int thisDFromGreen = Math.abs(60 - npColor) * npLum * npSaturation;
 
 				final int currentCol = thisDFromRed - thisDFromGreen;
@@ -113,7 +113,7 @@ public class PixelCluster extends HashSet<Pixel> {
 		return colorDistance;
 	}
 
-	public Optional<javafx.scene.paint.Color> getColorJavafx(Mat workingFrame, int[][] colorDistanceFromRed) {
+	public Optional<javafx.scene.paint.Color> getColorJavafx(final Mat workingFrame, final int[][] colorDistanceFromRed) {
 		final double colorDist = getColorDifference(workingFrame, colorDistanceFromRed);
 
 		// Sometimes it's better to guess than to return nothing

@@ -20,13 +20,12 @@ public class TestPluginManagerController {
 				+ "    description=\"Walk through a series of shoot and hold exercises to strenghten muscles activated when accurately shooting a firearm.\" />'n"
 				+ "  <plugin name=\"Something Cool\" version=\"9.0\" minShootOFFVersion=\"4.0\" maxShootOFFVersion=\"5.0\"\n"
 				+ "    creator=\"someone\" download=\"https://example.com/plugin.jar\"\n"
-				+ "    description=\"This does something neat.\" />'n"
-				+ "</plugins>";
+				+ "    description=\"This does something neat.\" />'n" + "</plugins>";
 
 		Set<PluginMetadata> pluginMetadata = pmc.parsePluginMetadata(validXML);
-		
+
 		assertEquals(2, pluginMetadata.size());
-		
+
 		for (PluginMetadata pm : pluginMetadata) {
 			if ("phrack".equals(pm.getCreator())) {
 				assertEquals("Pistol Isometrics", pm.getName());
@@ -34,8 +33,12 @@ public class TestPluginManagerController {
 				assertEquals("3.7", pm.getMinShootOFFVersion());
 				assertEquals("4.0", pm.getMaxShootOFFVersion());
 				assertEquals("phrack", pm.getCreator());
-				assertEquals("https://github.com/phrack/ShootOFF-Pistol-Isometrics/releases/download/v1.0-FINAL/ShootOFF-Pistol-Isometrics.jar", pm.getDownload());
-				assertEquals("Walk through a series of shoot and hold exercises to strenghten muscles activated when accurately shooting a firearm.", pm.getDescription());
+				assertEquals(
+						"https://github.com/phrack/ShootOFF-Pistol-Isometrics/releases/download/v1.0-FINAL/ShootOFF-Pistol-Isometrics.jar",
+						pm.getDownload());
+				assertEquals(
+						"Walk through a series of shoot and hold exercises to strenghten muscles activated when accurately shooting a firearm.",
+						pm.getDescription());
 			} else {
 				assertEquals("Something Cool", pm.getName());
 				assertEquals("9.0", pm.getVersion());
@@ -47,29 +50,29 @@ public class TestPluginManagerController {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testGetPluginMetadataXMLEmptyXML() {
 		PluginManagerController pmc = new PluginManagerController();
-		
+
 		Set<PluginMetadata> pluginMetadata = pmc.parsePluginMetadata("");
-		
+
 		assertEquals(0, pluginMetadata.size());
 	}
-	
+
 	@Test
 	public void testIsPluginCompatibleTrue() {
 		PluginManagerController pmc = new PluginManagerController();
-		
+
 		assertTrue(pmc.isPluginCompatible(Optional.of("3.0"), "2.9", "3.1"));
 		assertTrue(pmc.isPluginCompatible(Optional.of("2.9"), "2.9", "3.1"));
 		assertTrue(pmc.isPluginCompatible(Optional.of("2.10"), "2.9", "3.1"));
 		assertTrue(pmc.isPluginCompatible(Optional.of("2.89"), "2.9", "3.1"));
 		assertTrue(pmc.isPluginCompatible(Optional.of("3.1"), "2.9", "3.1"));
-		
+
 		assertTrue(pmc.isPluginCompatible(Optional.of("3"), "2.9", "3.1"));
 	}
-	
+
 	@Test
 	public void testIsPluginCompatibleFalse() {
 		PluginManagerController pmc = new PluginManagerController();

@@ -12,7 +12,8 @@ public class Pixel extends Point {
 
 	private int connectedness;
 
-	public Pixel(int x, int y, int color, int currentLum, int lumAverage, int colorAverage) {
+	public Pixel(final int x, final int y, final int color, final int currentLum, final int lumAverage,
+			final int colorAverage) {
 		super(x, y);
 		this.color = color;
 		this.currentLum = currentLum;

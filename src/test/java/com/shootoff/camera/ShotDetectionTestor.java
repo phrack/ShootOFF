@@ -11,10 +11,13 @@ import javafx.geometry.Bounds;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.rules.ErrorCollector;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.plugins.TrainingExerciseBase;
+
+import ch.qos.logback.classic.Logger;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -29,6 +32,9 @@ public class ShotDetectionTestor {
 		TrainingExerciseBase.silence(true);
 
 		nu.pattern.OpenCV.loadShared();
+
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		rootLogger.detachAndStopAllAppenders();
 	}
 
 	public void checkShots(ErrorCollector collector, final List<Shot> actualShots, List<Shot> requiredShots,
@@ -122,8 +128,8 @@ public class ShotDetectionTestor {
 			Configuration config, boolean[][] sectorStatuses) {
 		Object processingLock = new Object();
 		File videoFile = new File(ShotDetectionTestor.class.getResource(videoPath).getFile());
-		MockCameraManager cameraManager = new MockCameraManager(videoFile, processingLock, mockManager, config, sectorStatuses,
-				projectionBounds);
+		MockCameraManager cameraManager = new MockCameraManager(videoFile, processingLock, mockManager, config,
+				sectorStatuses, projectionBounds);
 
 		cameraManager.processVideo();
 

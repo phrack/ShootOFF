@@ -67,7 +67,7 @@ public class GifAnimation extends SpriteAnimation {
 
 			NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
 
-			if (globalScreenDescriptor != null && globalScreenDescriptor.getLength() > 0) {
+			if (globalScreenDescriptor.getLength() > 0) {
 				IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
 
 				if (screenDescriptor != null) {

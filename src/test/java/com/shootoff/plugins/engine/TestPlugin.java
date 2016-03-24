@@ -18,7 +18,7 @@ import com.shootoff.gui.JavaFXThreadingRule;
 
 public class TestPlugin {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
-	
+
 	private Path pluginDir;
 
 	@Before

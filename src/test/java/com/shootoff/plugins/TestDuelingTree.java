@@ -21,6 +21,7 @@ import javafx.scene.paint.Color;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
@@ -30,6 +31,8 @@ import com.shootoff.gui.Hit;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+
+import ch.qos.logback.classic.Logger;
 
 public class TestDuelingTree {
 	private PrintStream originalOut;
@@ -93,6 +96,9 @@ public class TestDuelingTree {
 		TextToSpeech.silence(false);
 		TrainingExerciseBase.silence(false);
 		System.setOut(originalOut);
+
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		rootLogger.detachAndStopAllAppenders();
 	}
 
 	@Test

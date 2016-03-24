@@ -103,7 +103,7 @@ public class PluginManagerController {
 							public void updateItem(String item, boolean empty) {
 								super.updateItem(item, empty);
 								if (!isEmpty()) {
-									final Text text = new Text(item.toString());
+									final Text text = new Text(item);
 									text.wrappingWidthProperty().bind(descriptionCol.widthProperty());
 									setGraphic(text);
 								}

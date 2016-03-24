@@ -38,7 +38,7 @@ public class PixelClusterManager {
 
 	private final Map<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 
-	private ShotDetectionManager shotDetectionManager;
+	private final ShotDetectionManager shotDetectionManager;
 
 	private final static double MINIMUM_CONNECTEDNESS = 3.66f;
 	private final static double MAXIMUM_CONNECTEDNESS_SCALE = 6f;
@@ -66,7 +66,7 @@ public class PixelClusterManager {
 	protected void clusterPixels() {
 		final Stack<Pixel> mustExamine = new Stack<Pixel>();
 
-		for (Pixel point : points) {
+		for (final Pixel point : points) {
 			if (!pixelMapping.containsKey(point)) {
 				numberOfRegions++;
 				mustExamine.add(point);
@@ -84,8 +84,8 @@ public class PixelClusterManager {
 					for (int w = -1; w <= 1; w++) {
 						if (h == 0 && w == 0) continue;
 
-						int rx = thisPoint.x + w;
-						int ry = thisPoint.y + h;
+						final int rx = thisPoint.x + w;
+						final int ry = thisPoint.y + h;
 
 						if (rx < 0 || ry < 0 || rx >= shotDetectionManager.getCameraManager().getFeedWidth()
 								|| ry >= shotDetectionManager.getCameraManager().getFeedHeight())
@@ -109,7 +109,7 @@ public class PixelClusterManager {
 	}
 
 	public Set<PixelCluster> dumpClusters() {
-		Set<PixelCluster> clusters = new HashSet<PixelCluster>();
+		final Set<PixelCluster> clusters = new HashSet<PixelCluster>();
 
 		for (int i = 0; i <= numberOfRegions; i++) {
 			final PixelCluster cluster = new PixelCluster();
@@ -117,16 +117,16 @@ public class PixelClusterManager {
 			double averageX = 0;
 			double averageY = 0;
 
-			int minX = shotDetectionManager.getCameraManager().getFeedWidth(),
-					minY = shotDetectionManager.getCameraManager().getFeedHeight(), maxX = 0, maxY = 0;
+			int minX = shotDetectionManager.getCameraManager().getFeedWidth();
+			int minY = shotDetectionManager.getCameraManager().getFeedHeight(), maxX = 0, maxY = 0;
 
 			double avgconnectedness = 0;
 
 			Iterator<Entry<Pixel, Integer>> it = pixelMapping.entrySet().iterator();
 			while (it.hasNext()) {
-				HashMap.Entry<Pixel, Integer> next = (Entry<Pixel, Integer>) it.next();
+				final HashMap.Entry<Pixel, Integer> next = (Entry<Pixel, Integer>) it.next();
 				if (next.getValue() == i) {
-					Pixel nextPixel = next.getKey();
+					final Pixel nextPixel = next.getKey();
 
 					if (nextPixel.x < minX)
 						minX = nextPixel.x;
@@ -153,14 +153,14 @@ public class PixelClusterManager {
 
 			if (clustersize < shotDetectionManager.getMinimumShotDimension()) continue;
 
-			averageX = (averageX / avgconnectedness);
-			averageY = (averageY / avgconnectedness);
+			averageX = averageX / avgconnectedness;
+			averageY = averageY / avgconnectedness;
 
 			avgconnectedness = avgconnectedness / clustersize;
 
 			// We scale up the minimum in a linear scale as the cluster size
 			// increases. This is an approximate density
-			double scaled_minimum = Math.min(MINIMUM_CONNECTEDNESS
+			final double scaled_minimum = Math.min(MINIMUM_CONNECTEDNESS
 					+ ((clustersize - shotDetectionManager.getMinimumShotDimension()) * MINIMUM_CONNECTEDNESS_FACTOR),
 					MAXIMUM_CONNECTEDNESS_SCALE);
 
