@@ -98,7 +98,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @return the group that was loaded from the target file
 	 */
 	public Optional<Target> addTarget(File target, final double x, final double y) {
-		if (!target.isAbsolute())
+		if ('@' != target.toString().charAt(0) && !target.isAbsolute())
 			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
 
 		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);

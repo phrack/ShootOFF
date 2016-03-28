@@ -23,6 +23,8 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -710,7 +712,18 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public Optional<Target> addTarget(File targetFile) {
-		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
+		Optional<Group> targetGroup;
+
+		if ('@' == targetFile.toString().charAt(0)) {
+			try {
+				targetGroup = TargetIO.loadTarget(new FileInputStream(targetFile.toString().substring(1)));
+			} catch (FileNotFoundException e) {
+				targetGroup = Optional.empty();
+				logger.error("Error adding target from stream", e);
+			}
+		} else {
+			targetGroup = TargetIO.loadTarget(targetFile);
+		}
 
 		if (targetGroup.isPresent()) {
 			Optional<Target> target = Optional.of(addTarget(targetFile, targetGroup.get(), true));

@@ -19,6 +19,7 @@
 package com.shootoff.targets.io;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -119,6 +120,16 @@ public class TargetIO {
 			return Optional.empty();
 		}
 
+		return Optional.of(processVisualTags(regions));
+	}
+
+	public static Optional<Group> loadTarget(final InputStream targetStream) {
+		final List<Node> regions = new XMLTargetReader(targetStream).load();
+
+		return Optional.of(processVisualTags(regions));
+	}
+
+	private static Group processVisualTags(List<Node> regions) {
 		final Group targetGroup = new Group();
 		for (final Node node : regions) {
 			final TargetRegion region = (TargetRegion) node;
@@ -137,6 +148,6 @@ public class TargetIO {
 			targetGroup.getChildren().add(node);
 		}
 
-		return Optional.of(targetGroup);
+		return targetGroup;
 	}
 }
