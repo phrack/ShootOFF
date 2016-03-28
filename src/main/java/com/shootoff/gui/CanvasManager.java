@@ -21,7 +21,9 @@ package com.shootoff.gui;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -676,9 +678,8 @@ public class CanvasManager implements CameraView {
 
 			case "play_sound":
 				// If there is a second parameter, we should look to see
-				// if it's an
-				// image region that is down and if so, don't play the
-				// sound
+				// if it's an image region that is down and if so, don't
+				// play the sound
 				if (args.size() == 2) {
 					Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(),
 							args.get(1));
@@ -687,7 +688,21 @@ public class CanvasManager implements CameraView {
 					}
 				}
 
-				TrainingExerciseBase.playSound(args.get(0));
+				// If the string starts with an @ we are supposed to
+				// load the sound as a resource from the current exercises
+				// JAR file. This indicates that the target is from
+				// a modular exercise
+				String soundPath = args.get(0);
+				if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
+					InputStream is = config.getExercise().get().getClass().getResourceAsStream(soundPath.substring(1));
+					TrainingExerciseBase.playSound(new BufferedInputStream(is));
+				} else if ('@' != soundPath.charAt(0)) {
+					TrainingExerciseBase.playSound(soundPath);
+				} else {
+					logger.error("Can't play {} because it is a resource in an exercise but no exercise is loaded.",
+							soundPath);
+				}
+
 				break;
 			}
 		});
