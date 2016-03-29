@@ -463,7 +463,9 @@ public class Target {
 					targetGroup.setLayoutX(oldLayoutX);
 					targetGroup.setScaleX(oldScaleX);
 				}
-			} else if (top || bottom) {
+			} 
+			
+			if (top || bottom) {
 				double gap;
 
 				if (bottom) {
@@ -525,7 +527,15 @@ public class Target {
 			x = event.getX();
 			y = event.getY();
 
-			if (isTopZone(event)) {
+			if (isTopZone(event) && isLeftZone(event)) {
+				targetGroup.setCursor(Cursor.NW_RESIZE);
+			} else if (isTopZone(event) && isRightZone(event)) {
+				targetGroup.setCursor(Cursor.NE_RESIZE);
+			} else if (isBottomZone(event) && isLeftZone(event)) {
+				targetGroup.setCursor(Cursor.SW_RESIZE);
+			} else if (isBottomZone(event) && isRightZone(event)) {
+				targetGroup.setCursor(Cursor.SE_RESIZE);
+			} else if (isTopZone(event)) {
 				targetGroup.setCursor(Cursor.N_RESIZE);
 			} else if (isBottomZone(event)) {
 				targetGroup.setCursor(Cursor.S_RESIZE);
