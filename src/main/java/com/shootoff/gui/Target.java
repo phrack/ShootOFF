@@ -23,8 +23,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.SpriteAnimation;
@@ -58,7 +61,10 @@ import javafx.scene.shape.Shape;
  * @author phrack
  */
 public class Target {
-	private final Logger logger = LoggerFactory.getLogger(Target.class);
+	private static final Logger logger = LoggerFactory.getLogger(Target.class);
+
+	private static final double ANCHOR_WIDTH = 10;
+	private static final double ANCHOR_HEIGHT = ANCHOR_WIDTH;
 
 	protected static final int MOVEMENT_DELTA = 1;
 	protected static final int SCALE_DELTA = 1;
@@ -66,6 +72,7 @@ public class Target {
 
 	private final File targetFile;
 	private final Group targetGroup;
+	private final Set<Node> resizeAnchors = new HashSet<Node>();
 	private final Optional<Configuration> config;
 	private final Optional<CanvasManager> parent;
 	private final Optional<List<Target>> targets;
@@ -294,13 +301,7 @@ public class Target {
 	public void toggleSelected() {
 		isSelected = !isSelected;
 
-		Color stroke;
-
-		if (isSelected) {
-			stroke = TargetRegion.SELECTED_STROKE_COLOR;
-		} else {
-			stroke = TargetRegion.UNSELECTED_STROKE_COLOR;
-		}
+		Color stroke = isSelected ? TargetRegion.SELECTED_STROKE_COLOR : TargetRegion.UNSELECTED_STROKE_COLOR;
 
 		for (Node node : getTargetGroup().getChildren()) {
 			TargetRegion region = (TargetRegion) node;
@@ -308,10 +309,52 @@ public class Target {
 				((Shape) region).setStroke(stroke);
 			}
 		}
+
+		if (isSelected) {
+			addResizeAnchors();
+		} else {
+			getTargetGroup().getChildren().removeAll(resizeAnchors);
+			resizeAnchors.clear();
+		}
 	}
 
 	public boolean isSelected() {
 		return isSelected;
+	}
+
+	private void addResizeAnchors() {
+		final Bounds localBounds = getTargetGroup().getBoundsInLocal();
+		final double horizontalMiddle = localBounds.getMinX() + (localBounds.getWidth() / 2) - (ANCHOR_WIDTH / 2);
+		final double verticleMiddle = localBounds.getMinY() + (localBounds.getHeight() / 2) - (ANCHOR_HEIGHT / 2);
+
+		// Top left
+		addAnchor(localBounds.getMinX(), localBounds.getMinY());
+		// Top middle
+		addAnchor(horizontalMiddle, localBounds.getMinY());
+		// Top right
+		addAnchor(localBounds.getMaxX() - ANCHOR_WIDTH, localBounds.getMinY());
+		// Middle left
+		addAnchor(localBounds.getMinX(), verticleMiddle);
+		// Middle right
+		addAnchor(localBounds.getMaxX() - ANCHOR_WIDTH, verticleMiddle);
+		// Bottom left
+		addAnchor(localBounds.getMinX(), localBounds.getMaxY() - ANCHOR_HEIGHT);
+		// Bottom middle
+		addAnchor(horizontalMiddle, localBounds.getMaxY() - ANCHOR_HEIGHT);
+		// Bottom right
+		addAnchor(localBounds.getMaxX() - ANCHOR_WIDTH, localBounds.getMaxY() - ANCHOR_HEIGHT);
+	}
+
+	private RectangleRegion addAnchor(final double x, final double y) {
+		final RectangleRegion anchor = new RectangleRegion(x, y, ANCHOR_WIDTH, ANCHOR_HEIGHT);
+		((TargetRegion) anchor).getAllTags().put("ignoreHit", "true");
+		anchor.setFill(Color.GOLD);
+		anchor.setStroke(Color.BLACK);
+
+		getTargetGroup().getChildren().add(anchor);
+		resizeAnchors.add(anchor);
+
+		return anchor;
 	}
 
 	public Optional<Hit> isHit(Shot shot) {
