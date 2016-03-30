@@ -111,7 +111,7 @@ public class TestCanvasManager {
 
 		assertEquals(null, firstShape.getStroke());
 
-		cm.toggleTargetSelection(Optional.of(ipscTarget.getTargetGroup()));
+		cm.toggleTargetSelection(Optional.of(ipscTarget));
 
 		assertEquals(TargetRegion.SELECTED_STROKE_COLOR, firstShape.getStroke());
 

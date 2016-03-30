@@ -48,6 +48,8 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 
 /**
  * This class wraps a group that represents a target so that the target can be
@@ -70,6 +72,7 @@ public class Target {
 	private final boolean userDeletable;
 	private final String cameraName;
 	private boolean keepInBounds = false;
+	private boolean isSelected = false;
 	private boolean move;
 	private boolean resize;
 	private boolean top;
@@ -90,7 +93,7 @@ public class Target {
 		this.cameraName = parent.getCameraName();
 
 		targetGroup.setOnMouseClicked((event) -> {
-			parent.toggleTargetSelection(Optional.of(targetGroup));
+			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();
 		});
 
@@ -286,6 +289,29 @@ public class Target {
 		} else {
 			logger.error("A reversal was requested on an image region that isn't animated.");
 		}
+	}
+
+	public void toggleSelected() {
+		isSelected = !isSelected;
+
+		Color stroke;
+
+		if (isSelected) {
+			stroke = TargetRegion.SELECTED_STROKE_COLOR;
+		} else {
+			stroke = TargetRegion.UNSELECTED_STROKE_COLOR;
+		}
+
+		for (Node node : getTargetGroup().getChildren()) {
+			TargetRegion region = (TargetRegion) node;
+			if (region.getType() != RegionType.IMAGE) {
+				((Shape) region).setStroke(stroke);
+			}
+		}
+	}
+
+	public boolean isSelected() {
+		return isSelected;
 	}
 
 	public Optional<Hit> isHit(Shot shot) {

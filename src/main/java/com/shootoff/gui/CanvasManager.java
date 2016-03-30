@@ -79,7 +79,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -105,7 +104,7 @@ public class CanvasManager implements CameraView {
 
 	private ProgressIndicator progress;
 	private Optional<ContextMenu> contextMenu = Optional.empty();
-	private Optional<Group> selectedTarget = Optional.empty();
+	private Optional<Target> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
 	private boolean hadMalfunction = false;
@@ -786,29 +785,12 @@ public class CanvasManager implements CameraView {
 		return targetGroups;
 	}
 
-	protected void toggleTargetSelection(Optional<Group> newSelection) {
-		if (selectedTarget.isPresent()) setTargetSelection(selectedTarget.get(), false);
+	protected void toggleTargetSelection(Optional<Target> newSelection) {
+		if (selectedTarget.isPresent()) selectedTarget.get().toggleSelected();
 
 		if (newSelection.isPresent()) {
-			setTargetSelection(newSelection.get(), true);
+			newSelection.get().toggleSelected();
 			selectedTarget = newSelection;
-		}
-	}
-
-	private void setTargetSelection(Group target, boolean isSelected) {
-		Color stroke;
-
-		if (isSelected) {
-			stroke = TargetRegion.SELECTED_STROKE_COLOR;
-		} else {
-			stroke = TargetRegion.UNSELECTED_STROKE_COLOR;
-		}
-
-		for (Node node : target.getChildren()) {
-			TargetRegion region = (TargetRegion) node;
-			if (region.getType() != RegionType.IMAGE) {
-				((Shape) region).setStroke(stroke);
-			}
 		}
 	}
 }
