@@ -35,7 +35,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 	private ScheduledFuture<?> autoCalibrationFuture = null;
 
-	private Optional<Target> calibrationTarget = Optional.empty();
+	private Optional<TargetView> calibrationTarget = Optional.empty();
 
 	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
@@ -130,7 +130,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		});
 		calibrationGroup.getChildren().add(calibrationRectangle);
 
-		calibrationTarget = Optional.of(calibratingCanvasManager.addTarget(null, calibrationGroup, false));
+		calibrationTarget = Optional.of((TargetView) calibratingCanvasManager.addTarget(null, calibrationGroup, false));
 		calibrationTarget.get().setKeepInBounds(true);
 	}
 

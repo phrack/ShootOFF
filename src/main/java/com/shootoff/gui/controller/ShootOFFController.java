@@ -62,6 +62,7 @@ import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetManager;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
@@ -580,11 +581,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	}
 
 	@Override
-	public List<Group> getTargets() {
-		final List<Group> targets = new ArrayList<Group>();
+	public List<Target> getTargets() {
+		final List<Target> targets = new ArrayList<Target>();
 
 		for (final CameraManager manager : camerasSupervisor.getCameraManagers()) {
-			targets.addAll(((CanvasManager) manager.getCameraView()).getTargetGroups());
+			targets.addAll(((CanvasManager) manager.getCameraView()).getTargets());
 		}
 
 		return targets;
@@ -599,11 +600,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			try {
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 
-				List<Group> knownTargets = new ArrayList<Group>();
+				List<Target> knownTargets = new ArrayList<Target>();
 				knownTargets.addAll(getTargets());
 
 				if (arenaController != null) {
-					knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
+					knownTargets.addAll(arenaController.getCanvasManager().getTargets());
 				}
 
 				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
@@ -628,7 +629,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			try {
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
-						.newInstance(arenaController.getCanvasManager().getTargetGroups());
+						.newInstance(arenaController.getCanvasManager().getTargets());
 				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
 				newExercise.init();
 				config.setExercise(newExercise);
@@ -960,13 +961,13 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		if (hideTargetMenuItem.getText().equals("Hide Targets")) {
 			hideTargetMenuItem.setText("Show Targets");
 
-			for (Group target : getTargets()) {
+			for (Target target : getTargets()) {
 				target.setVisible(false);
 			}
 		} else {
 			hideTargetMenuItem.setText("Hide Targets");
 
-			for (Group target : getTargets()) {
+			for (Target target : getTargets()) {
 				target.setVisible(true);
 			}
 		}
@@ -1007,11 +1008,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		camerasSupervisor.reset();
 
 		if (config.getExercise().isPresent()) {
-			List<Group> knownTargets = new ArrayList<Group>();
+			List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
 			if (arenaController != null) {
-				knownTargets.addAll(arenaController.getCanvasManager().getTargetGroups());
+				knownTargets.addAll(arenaController.getCanvasManager().getTargets());
 			}
 
 			config.getExercise().get().reset(knownTargets);

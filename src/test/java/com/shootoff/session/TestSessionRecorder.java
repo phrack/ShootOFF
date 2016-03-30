@@ -13,7 +13,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -23,10 +23,10 @@ public class TestSessionRecorder {
 	private String cameraName;
 	private Shot shot;
 	private String targetName1;
-	private Target target1;
+	private TargetView target1;
 	private int targetIndex1;
 	private String targetName2;
-	private Target target2;
+	private TargetView target2;
 	private int hitRegionIndex;
 	private String exerciseMessage;
 
@@ -40,10 +40,10 @@ public class TestSessionRecorder {
 		shot = new Shot(Color.RED, 0, 0, 0, 2);
 
 		targetName1 = "bullseye.target";
-		target1 = new Target(new File(targetName1), new Group(), config, canvasManager, false);
+		target1 = new TargetView(new File(targetName1), new Group(), config, canvasManager, false);
 
 		targetName2 = "shoot_dont_shoot" + File.separator + " shoot.target";
-		target2 = new Target(new File(targetName2), new Group(), config, canvasManager, false);
+		target2 = new TargetView(new File(targetName2), new Group(), config, canvasManager, false);
 
 		canvasManager.addTarget(target1);
 		canvasManager.addTarget(target2);

@@ -32,12 +32,12 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
 
@@ -68,7 +68,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 
 	public ISSFStandardPistol() {}
 
-	public ISSFStandardPistol(List<Group> targets) {
+	public ISSFStandardPistol(List<Target> targets) {
 		super(targets);
 		thisSuper = super.getInstance();
 		setInitialValues();
@@ -246,7 +246,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		super.pauseShotDetection(true);
 
 		repeatExercise = false;

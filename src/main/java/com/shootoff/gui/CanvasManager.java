@@ -55,8 +55,10 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -104,7 +106,7 @@ public class CanvasManager implements CameraView {
 
 	private ProgressIndicator progress;
 	private Optional<ContextMenu> contextMenu = Optional.empty();
-	private Optional<Target> selectedTarget = Optional.empty();
+	private Optional<TargetView> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
 	private boolean hadMalfunction = false;
@@ -405,9 +407,7 @@ public class CanvasManager implements CameraView {
 
 		// Reset animations
 		for (Target target : targets) {
-			for (Node node : target.getTargetGroup().getChildren()) {
-				TargetRegion region = (TargetRegion) node;
-
+			for (TargetRegion region : target.getRegions()) {
 				if (region.getType() == RegionType.IMAGE) ((ImageRegion) region).reset();
 			}
 		}
@@ -645,7 +645,7 @@ public class CanvasManager implements CameraView {
 
 				if (config.getSessionRecorder().isPresent()) {
 					config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.of(target),
-							Optional.of(target.getTargetGroup().getChildren().indexOf(region)), videoString);
+							Optional.of(target.getRegions().indexOf(region)), videoString);
 				}
 
 				return hit;
@@ -663,7 +663,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	private void executeRegionCommands(Hit hit) {
-		Target.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
+		TargetView.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
 			switch (commandName) {
 			case "reset":
 				camerasSupervisor.reset();
@@ -682,7 +682,7 @@ public class CanvasManager implements CameraView {
 				// if it's an image region that is down and if so, don't
 				// play the sound
 				if (args.size() == 2) {
-					Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(),
+					Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets, hit.getHitRegion(),
 							args.get(1));
 					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
 						if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
@@ -738,8 +738,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
-
-		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable);
+		TargetView newTarget = new TargetView(targetFile, targetGroup, config, this, userDeletable);
 
 		return addTarget(newTarget);
 	}
@@ -747,7 +746,7 @@ public class CanvasManager implements CameraView {
 	@Override
 	public Target addTarget(Target newTarget) {
 		Platform.runLater(() -> {
-			canvasGroup.getChildren().add(newTarget.getTargetGroup());
+			canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
 		});
 		targets.add(newTarget);
 
@@ -756,7 +755,7 @@ public class CanvasManager implements CameraView {
 
 	public void removeTarget(Target target) {
 		Platform.runLater(() -> {
-			canvasGroup.getChildren().remove(target.getTargetGroup());
+			canvasGroup.getChildren().remove(((TargetView) target).getTargetGroup());
 		});
 
 		if (config.getSessionRecorder().isPresent()) {
@@ -776,16 +775,7 @@ public class CanvasManager implements CameraView {
 		return targets;
 	}
 
-	public List<Group> getTargetGroups() {
-		List<Group> targetGroups = new ArrayList<Group>();
-
-		for (Target target : targets)
-			targetGroups.add(target.getTargetGroup());
-
-		return targetGroups;
-	}
-
-	protected void toggleTargetSelection(Optional<Target> newSelection) {
+	protected void toggleTargetSelection(Optional<TargetView> newSelection) {
 		if (selectedTarget.isPresent()) selectedTarget.get().toggleSelected();
 
 		if (newSelection.isPresent()) {

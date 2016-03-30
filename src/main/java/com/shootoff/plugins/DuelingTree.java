@@ -26,11 +26,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.Group;
-import javafx.scene.Node;
-
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
 
@@ -53,7 +51,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 	public DuelingTree() {}
 
-	public DuelingTree(List<Group> targets) {
+	public DuelingTree(List<Target> targets) {
 		super(targets);
 		this.thisSuper = super.getInstance();
 		findTargets(targets);
@@ -69,17 +67,15 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 		super.showTextOnFeed("left score: 0\nright score: 0");
 	}
 
-	private boolean findTargets(List<Group> targets) {
+	private boolean findTargets(List<Target> targets) {
 		boolean foundTarget = false;
 
 		// Find the first target with directional subtargets and gets its
 		// regions
-		for (Group target : targets) {
+		for (Target target : targets) {
 			if (foundTarget) break;
 
-			for (Node node : target.getChildren()) {
-				TargetRegion region = (TargetRegion) node;
-
+			for (TargetRegion region : target.getRegions()) {
 				if (region.tagExists("subtarget")) {
 					if (region.getTag("subtarget").startsWith("left_paddle")) {
 						paddlesOnLeft.add(region);
@@ -165,7 +161,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		if (!isResetting) {
 			leftScore = 0;
 			rightScore = 0;

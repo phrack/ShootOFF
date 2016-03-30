@@ -26,7 +26,6 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Background;
@@ -40,9 +39,10 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.targets.Target;
 
 public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
@@ -55,7 +55,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	// to do a bunch of unnecessary setup
 	public ProjectorTrainingExerciseBase() {}
 
-	public ProjectorTrainingExerciseBase(List<Group> targets) {
+	public ProjectorTrainingExerciseBase(List<Target> targets) {
 		super(targets);
 	}
 
@@ -82,7 +82,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	public void reset() {
 		camerasSupervisor.reset();
 		if (config.getExercise().isPresent())
-			config.getExercise().get().reset(arenaController.getCanvasManager().getTargetGroups());
+			config.getExercise().get().reset(arenaController.getCanvasManager().getTargets());
 	}
 
 	/**
@@ -106,14 +106,13 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		if (newTarget.isPresent()) {
 			newTarget.get().setPosition(x, y);
 			targets.add(newTarget.get());
-
 		}
 
 		return newTarget;
 	}
 
 	public void removeTarget(Target target) {
-		arenaController.getCanvasManager().removeTarget(target);
+		arenaController.getCanvasManager().removeTarget((TargetView) target);
 		targets.remove(target);
 	}
 
@@ -206,7 +205,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	@Override
 	public void destroy() {
 		for (Target target : targets)
-			arenaController.getCanvasManager().removeTarget(target);
+			arenaController.getCanvasManager().removeTarget((TargetView) target);
 
 		Platform.runLater(() -> {
 			if (arenaController != null)

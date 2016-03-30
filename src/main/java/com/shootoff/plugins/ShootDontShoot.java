@@ -29,11 +29,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.scene.Group;
-
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
-import com.shootoff.gui.Target;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
 
@@ -61,7 +59,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	public ShootDontShoot() {}
 
-	public ShootDontShoot(List<Group> targets) {
+	public ShootDontShoot(List<Target> targets) {
 		super(targets);
 		this.thisSuper = super.getInstance();
 	}
@@ -72,7 +70,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	 * @param rng
 	 *            an rng with a known seed
 	 */
-	protected ShootDontShoot(List<Group> targets, Random rng, List<Target> shootTargets,
+	protected ShootDontShoot(List<Target> targets, Random rng, List<Target> shootTargets,
 			List<Target> dontShootTargets) {
 		this(targets);
 		this.rng = rng;
@@ -165,7 +163,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		while (it.hasNext()) {
 			Target target = it.next();
 
-			if (target.getTargetGroup().getChildren().contains(region)) {
+			if (target.hasRegion(region)) {
 				super.removeTarget(target);
 				it.remove();
 				return;
@@ -199,7 +197,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		continueExercise.set(false);
 		executorService.shutdownNow();
 

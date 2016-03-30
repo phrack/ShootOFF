@@ -17,8 +17,9 @@ import com.shootoff.courses.Course;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;
 
 public class TestCourseIO {
@@ -54,7 +55,7 @@ public class TestCourseIO {
 		arenaController.setBackground(img);
 
 		File targetFile = new File(targetName);
-		Target target = new Target(targetFile, TargetIO.loadTarget(targetFile).get(), config,
+		TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
 				new MockCanvasManager(config), false);
 		target.setPosition(targetX, targetY);
 		target.setDimensions(targetWidth, targetHeight);

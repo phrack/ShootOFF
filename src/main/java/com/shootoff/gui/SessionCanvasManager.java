@@ -37,6 +37,7 @@ import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -52,10 +53,11 @@ import javafx.stage.Stage;
 public class SessionCanvasManager {
 	private final Group canvas;
 	private final Label exerciseLabel = new Label();
-	private final Map<Event, Target> eventToContainer = new HashMap<Event, Target>();
+	private final Map<Event, TargetView> eventToContainer = new HashMap<Event, TargetView>();
 	private final Map<Event, Point2D> eventToPosition = new HashMap<Event, Point2D>();
 	private final Map<Event, String> eventToExerciseMessage = new HashMap<Event, String>();
 	private final Map<Event, Dimension2D> eventToDimension = new HashMap<Event, Dimension2D>();
+	private final List<TargetView> targetViews = new ArrayList<TargetView>();
 	private final List<Target> targets = new ArrayList<Target>();
 	private final Configuration config;
 
@@ -131,8 +133,9 @@ public class SessionCanvasManager {
 			}
 
 			TargetRemovedEvent tre = (TargetRemovedEvent) e;
-			eventToContainer.put(e, targets.get(tre.getTargetIndex()));
-			canvas.getChildren().remove(targets.get(tre.getTargetIndex()).getTargetGroup());
+			eventToContainer.put(e, targetViews.get(tre.getTargetIndex()));
+			canvas.getChildren().remove(targetViews.get(tre.getTargetIndex()).getTargetGroup());
+			targetViews.remove(tre.getTargetIndex());
 			targets.remove(tre.getTargetIndex());
 			break;
 
@@ -142,8 +145,8 @@ public class SessionCanvasManager {
 			}
 
 			TargetResizedEvent trre = (TargetResizedEvent) e;
-			eventToDimension.put(e, targets.get(trre.getTargetIndex()).getDimension());
-			targets.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
+			eventToDimension.put(e, targetViews.get(trre.getTargetIndex()).getDimension());
+			targetViews.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
 			break;
 
 		case TARGET_MOVED:
@@ -152,8 +155,8 @@ public class SessionCanvasManager {
 			}
 
 			TargetMovedEvent tme = (TargetMovedEvent) e;
-			eventToPosition.put(e, targets.get(tme.getTargetIndex()).getPosition());
-			targets.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
+			eventToPosition.put(e, targetViews.get(tme.getTargetIndex()).getPosition());
+			targetViews.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
@@ -187,6 +190,7 @@ public class SessionCanvasManager {
 
 		case TARGET_ADDED:
 			canvas.getChildren().remove(eventToContainer.get(e).getTargetGroup());
+			targetViews.remove(eventToContainer.get(e));
 			targets.remove(eventToContainer.get(e));
 			break;
 
@@ -196,8 +200,9 @@ public class SessionCanvasManager {
 			}
 
 			TargetRemovedEvent tre = (TargetRemovedEvent) e;
-			Target oldTarget = eventToContainer.get(e);
+			TargetView oldTarget = eventToContainer.get(e);
 			canvas.getChildren().add(oldTarget.getTargetGroup());
+			targetViews.add(tre.getTargetIndex(), oldTarget);
 			targets.add(tre.getTargetIndex(), oldTarget);
 			break;
 
@@ -208,7 +213,7 @@ public class SessionCanvasManager {
 
 			TargetResizedEvent trre = (TargetResizedEvent) e;
 			Dimension2D oldDimension = eventToDimension.get(e);
-			targets.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
+			targetViews.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
 			break;
 
 		case TARGET_MOVED:
@@ -218,7 +223,7 @@ public class SessionCanvasManager {
 
 			TargetMovedEvent tme = (TargetMovedEvent) e;
 			Point2D oldPosition = eventToPosition.get(e);
-			targets.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
+			targetViews.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
@@ -228,12 +233,12 @@ public class SessionCanvasManager {
 	}
 
 	private void animateTarget(ShotEvent se, boolean undo) {
-		Target target = targets.get(se.getTargetIndex().get());
+		TargetView target = targetViews.get(se.getTargetIndex().get());
 		TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren().get(se.getHitRegionIndex().get());
 
 		if (!region.tagExists("command")) return;
 
-		Target.parseCommandTag(region, (commands, commandName, args) -> {
+		TargetView.parseCommandTag(region, (commands, commandName, args) -> {
 			if (!undo) {
 				switch (commandName) {
 				case "animate":
@@ -266,7 +271,8 @@ public class SessionCanvasManager {
 						if (region.getType() == RegionType.IMAGE) {
 							((ImageRegion) region).reset();
 						} else {
-							Optional<TargetRegion> t = Target.getTargetRegionByName(targets, region, args.get(0));
+							Optional<TargetRegion> t = TargetView
+									.getTargetRegionByName(new ArrayList<Target>(targetViews), region, args.get(0));
 							if (t.isPresent()) ((ImageRegion) t.get()).reset();
 						}
 					}
@@ -281,8 +287,9 @@ public class SessionCanvasManager {
 
 		if (target.isPresent()) {
 			canvas.getChildren().add(target.get());
-			Target targetContainer = new Target(target.get(), targets);
+			TargetView targetContainer = new TargetView(target.get(), targets);
 			eventToContainer.put(e, targetContainer);
+			targetViews.add(targetContainer);
 			targets.add(targetContainer);
 		}
 	}

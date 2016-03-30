@@ -50,6 +50,7 @@ import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.DelayedStartIntervalController;
 import com.shootoff.gui.controller.ParIntervalController;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetManager;
 
 import javafx.application.Platform;
@@ -59,7 +60,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -83,7 +83,7 @@ public class TrainingExerciseBase {
 
 	private static boolean isSilenced = false;
 
-	@SuppressWarnings("unused") private List<Group> targets;
+	@SuppressWarnings("unused") private List<Target> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TargetManager targetManager;
@@ -99,7 +99,7 @@ public class TrainingExerciseBase {
 	// to do a bunch of unnecessary setup
 	public TrainingExerciseBase() {}
 
-	public TrainingExerciseBase(List<Group> targets) {
+	public TrainingExerciseBase(List<Target> targets) {
 		this.targets = targets;
 	}
 
@@ -298,8 +298,7 @@ public class TrainingExerciseBase {
 	/**
 	 * Get a list of all of the targets on every canvas manager
 	 */
-
-	public List<Group> getCurrentTargets() {
+	public List<Target> getCurrentTargets() {
 		return targetManager.getTargets();
 	}
 

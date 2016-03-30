@@ -23,8 +23,9 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.Hit;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -32,7 +33,7 @@ public class TestShootForScore {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
-	private List<Group> targets;
+	private List<Target> targets;
 	private Hit tenRegionHit;
 	private Hit fiveRegionHit;
 	private ShootForScore sfs;
@@ -45,11 +46,11 @@ public class TestShootForScore {
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 
-		targets = new ArrayList<Group>();
+		targets = new ArrayList<Target>();
 		Group bullseyeScore = TargetIO.loadTarget(new File("targets" + File.separator + "SimpleBullseye_score.target"))
 				.get();
-		Target bullseyeScoreTarget = new Target(bullseyeScore, new ArrayList<Target>());
-		targets.add(bullseyeScore);
+		TargetView bullseyeScoreTarget = new TargetView(bullseyeScore, new ArrayList<Target>());
+		targets.add(bullseyeScoreTarget);
 
 		for (Node node : bullseyeScore.getChildren()) {
 			TargetRegion region = (TargetRegion) node;

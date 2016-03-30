@@ -27,6 +27,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
@@ -134,13 +135,13 @@ public class TargetIO {
 		for (final Node node : regions) {
 			final TargetRegion region = (TargetRegion) node;
 
-			if (region.tagExists("visible") && region.getTag("visible").equalsIgnoreCase("false")) {
+			if (region.tagExists(TargetView.TAG_VISIBLE) && !Boolean.parseBoolean(region.getTag(TargetView.TAG_VISIBLE))) {
 				node.setVisible(false);
 			}
 
 			if (region.getType() != RegionType.IMAGE) {
-				if (region.tagExists("opacity")) {
-					node.setOpacity(Double.parseDouble(region.getTag("opacity")));
+				if (region.tagExists(TargetView.TAG_OPACITY)) {
+					node.setOpacity(Double.parseDouble(region.getTag(TargetView.TAG_OPACITY)));
 				} else {
 					node.setOpacity(DEFAULT_OPACITY);
 				}

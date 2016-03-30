@@ -19,6 +19,7 @@ import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -31,7 +32,7 @@ public class TestTarget {
 
 	private TargetRegion tr0, trPlateRackPlate, trPepperPopper;
 	private Configuration config;
-	private Target pepperPopper;
+	private TargetView pepperPopper;
 	private List<Target> targets;
 	private CanvasManager canvasManager;
 
@@ -59,22 +60,22 @@ public class TestTarget {
 		arenaController.init(config, canvasManager);
 
 		targets = new ArrayList<Target>();
-		pepperPopper = canvasManager
-				.addTarget(new Target(TargetIO.loadTarget(new File("targets/Pepper_Popper.target")).get(), targets));
+		pepperPopper = (TargetView) canvasManager.addTarget(
+				new TargetView(TargetIO.loadTarget(new File("targets/Pepper_Popper.target")).get(), targets));
 		targets.add(pepperPopper);
-		targets.add(new Target(TargetIO.loadTarget(new File("targets/Reset.target")).get(), targets));
+		targets.add(new TargetView(TargetIO.loadTarget(new File("targets/Reset.target")).get(), targets));
 	}
 
 	@Test
 	public void testParseCommandNoTags() {
-		Target.parseCommandTag(tr0, (commands, commandName, args) -> {
+		TargetView.parseCommandTag(tr0, (commands, commandName, args) -> {
 			assertEquals(0, commands.size());
 		});
 	}
 
 	@Test
 	public void testParseCommandTagDuelTree() {
-		Target.parseCommandTag(trPlateRackPlate, (commands, commandName, args) -> {
+		TargetView.parseCommandTag(trPlateRackPlate, (commands, commandName, args) -> {
 			assertEquals(3, commands.size());
 
 			switch (commandName) {
@@ -100,7 +101,7 @@ public class TestTarget {
 
 	@Test
 	public void testParseCommandTagPepperPopper() {
-		Target.parseCommandTag(trPepperPopper, (commands, commandName, args) -> {
+		TargetView.parseCommandTag(trPepperPopper, (commands, commandName, args) -> {
 			assertEquals(2, commands.size());
 
 			switch (commandName) {
@@ -124,22 +125,21 @@ public class TestTarget {
 
 	@Test
 	public void testGetTargetRegionByName() {
-		Optional<TargetRegion> r = Target.getTargetRegionByName(targets,
-				(TargetRegion) pepperPopper.getTargetGroup().getChildren().get(0), "pepper_popper");
+		Optional<TargetRegion> r = TargetView.getTargetRegionByName(targets,
+				(TargetRegion) pepperPopper.getRegions().get(0), "pepper_popper");
 
 		assertTrue(r.isPresent());
 		assertTrue(r.get().tagExists("name"));
 		assertEquals("pepper_popper", r.get().getTag("name"));
 
-		r = Target.getTargetRegionByName(targets, (TargetRegion) pepperPopper.getTargetGroup().getChildren().get(0),
-				"not present");
+		r = TargetView.getTargetRegionByName(targets, (TargetRegion) pepperPopper.getRegions().get(0), "not present");
 
 		assertFalse(r.isPresent());
 	}
 
 	@Test
 	public void testAnimateAndResetPepperPopper() {
-		TargetRegion r = (TargetRegion) pepperPopper.getTargetGroup().getChildren().get(0);
+		TargetRegion r = (TargetRegion) pepperPopper.getRegions().get(0);
 
 		assertEquals(RegionType.IMAGE, r.getType());
 
@@ -180,7 +180,7 @@ public class TestTarget {
 				"left", KeyCode.LEFT, false, false, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), leftArrowEvent);
 
-		assertEquals(oldX - Target.MOVEMENT_DELTA, pepperPopper.getPosition().getX(), .001);
+		assertEquals(oldX - TargetView.MOVEMENT_DELTA, pepperPopper.getPosition().getX(), .001);
 		assertEquals(oldY, pepperPopper.getPosition().getY(), .001);
 	}
 
@@ -193,7 +193,7 @@ public class TestTarget {
 				"right", KeyCode.RIGHT, false, false, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), rightArrowEvent);
 
-		assertEquals(oldX + Target.MOVEMENT_DELTA, pepperPopper.getPosition().getX(), .001);
+		assertEquals(oldX + TargetView.MOVEMENT_DELTA, pepperPopper.getPosition().getX(), .001);
 		assertEquals(oldY, pepperPopper.getPosition().getY(), .001);
 	}
 
@@ -207,7 +207,7 @@ public class TestTarget {
 		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
 
 		assertEquals(oldX, pepperPopper.getPosition().getX(), .001);
-		assertEquals(oldY - Target.MOVEMENT_DELTA, pepperPopper.getPosition().getY(), .001);
+		assertEquals(oldY - TargetView.MOVEMENT_DELTA, pepperPopper.getPosition().getY(), .001);
 	}
 
 	@Test
@@ -220,7 +220,7 @@ public class TestTarget {
 		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
 
 		assertEquals(oldX, pepperPopper.getPosition().getX(), .001);
-		assertEquals(oldY + Target.MOVEMENT_DELTA, pepperPopper.getPosition().getY(), .001);
+		assertEquals(oldY + TargetView.MOVEMENT_DELTA, pepperPopper.getPosition().getY(), .001);
 	}
 
 	@Test
@@ -232,7 +232,7 @@ public class TestTarget {
 				"left", KeyCode.LEFT, true, false, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), leftArrowEvent);
 
-		assertEquals(oldWidth + Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldWidth + TargetView.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight, pepperPopper.getDimension().getHeight(), .001);
 	}
 
@@ -245,7 +245,7 @@ public class TestTarget {
 				"right", KeyCode.RIGHT, true, false, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), rightArrowEvent);
 
-		assertEquals(oldWidth - Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldWidth - TargetView.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight, pepperPopper.getDimension().getHeight(), .001);
 	}
 
@@ -259,7 +259,7 @@ public class TestTarget {
 		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
 
 		assertEquals(oldWidth, pepperPopper.getDimension().getWidth(), .001);
-		assertEquals(oldHeight + Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+		assertEquals(oldHeight + TargetView.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 
 	@Test
@@ -272,7 +272,7 @@ public class TestTarget {
 		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
 
 		assertEquals(oldWidth, pepperPopper.getDimension().getWidth(), .001);
-		assertEquals(oldHeight - Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+		assertEquals(oldHeight - TargetView.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 
 	@Test
@@ -284,8 +284,8 @@ public class TestTarget {
 				KeyCode.UP, true, true, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
 
-		assertEquals(oldWidth + Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
-		assertEquals(oldHeight + Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+		assertEquals(oldWidth + TargetView.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight + TargetView.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 
 	@Test
@@ -297,7 +297,7 @@ public class TestTarget {
 				"down", KeyCode.DOWN, true, true, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
 
-		assertEquals(oldWidth - Target.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
-		assertEquals(oldHeight - Target.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
+		assertEquals(oldWidth - TargetView.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldHeight - TargetView.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 }

@@ -10,6 +10,7 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.Target;
 
 import javafx.collections.FXCollections;
 import javafx.embed.swing.JFXPanel;
@@ -73,7 +74,7 @@ public class MockCanvasManager extends CanvasManager {
 
 	@Override
 	public Target addTarget(Target newTarget) {
-		super.getCanvasGroup().getChildren().add(newTarget.getTargetGroup());
+		super.getCanvasGroup().getChildren().add(((TargetView) newTarget).getTargetGroup());
 		super.getTargets().add(newTarget);
 
 		return newTarget;

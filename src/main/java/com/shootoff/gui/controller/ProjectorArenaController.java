@@ -38,7 +38,8 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
+import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
@@ -338,20 +339,20 @@ public class ProjectorArenaController implements CalibrationListener {
 			if (scaleCourse) {
 				double newWidth = t.getDimension().getWidth() * widthScaleFactor;
 				double widthDelta = newWidth - t.getDimension().getWidth();
-				double newX = t.getTargetGroup().getBoundsInParent().getMinX() * widthScaleFactor;
-				double deltaX = newX - t.getTargetGroup().getBoundsInParent().getMinX() + (widthDelta / 2);
+				double newX = t.getBoundsInParent().getMinX() * widthScaleFactor;
+				double deltaX = newX - t.getBoundsInParent().getMinX() + (widthDelta / 2);
 
 				double newHeight = t.getDimension().getHeight() * heightScaleFactor;
 				double heightDelta = newHeight - t.getDimension().getHeight();
-				double newY = t.getTargetGroup().getBoundsInParent().getMinY() * heightScaleFactor;
-				double deltaY = newY - t.getTargetGroup().getBoundsInParent().getMinY() + (heightDelta / 2);
+				double newY = t.getBoundsInParent().getMinY() * heightScaleFactor;
+				double deltaY = newY - t.getBoundsInParent().getMinY() + (heightDelta / 2);
 
 				t.setPosition(t.getPosition().getX() + deltaX, t.getPosition().getY() + deltaY);
 
 				t.setDimensions(newWidth, newHeight);
 			}
 
-			canvasManager.addTarget(t);
+			canvasManager.addTarget((TargetView) t);
 		}
 	}
 
@@ -400,7 +401,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	public void setTargetsVisible(boolean visible) {
 		for (Target t : canvasManager.getTargets())
-			t.getTargetGroup().setVisible(visible);
+			t.setVisible(visible);
 	}
 
 	public void setCalibrationMessageVisible(boolean visible) {

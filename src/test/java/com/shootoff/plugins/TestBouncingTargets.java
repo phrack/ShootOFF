@@ -20,14 +20,15 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 import ch.qos.logback.classic.Logger;
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 public class TestBouncingTargets {
@@ -63,10 +64,14 @@ public class TestBouncingTargets {
 		bt.init(6, 5, 0);
 
 		shootRegionHit = new Hit(bt.getShootTargets().get(0).getTarget(),
-				(TargetRegion) bt.getShootTargets().get(0).getTarget().getTargetGroup().getChildren().get(0), 0, 0);
+				(TargetRegion) ((TargetView) bt.getShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
+						.get(0),
+				0, 0);
 
 		dontShootRegionHit = new Hit(bt.getDontShootTargets().get(0).getTarget(),
-				(TargetRegion) bt.getDontShootTargets().get(0).getTarget().getTargetGroup().getChildren().get(0), 0, 0);
+				(TargetRegion) ((TargetView) bt.getDontShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
+						.get(0),
+				0, 0);
 	}
 
 	@After
@@ -121,7 +126,7 @@ public class TestBouncingTargets {
 		assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.reset(new ArrayList<Group>());
+		bt.reset(new ArrayList<Target>());
 		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 0\nScore: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();

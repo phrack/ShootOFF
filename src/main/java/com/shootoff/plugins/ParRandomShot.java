@@ -25,11 +25,9 @@ import java.util.Optional;
 import java.util.Random;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
-
-import javafx.scene.Group;
-import javafx.scene.Node;
 
 /**
  * Merge of ParForScore and RandomShoot.
@@ -47,7 +45,7 @@ public class ParRandomShot extends ParForScore {
 
 	}
 
-	public ParRandomShot(List<Group> targets) {
+	public ParRandomShot(List<Target> targets) {
 		super(targets);
 		fetchSubtargets(targets);
 	}
@@ -104,7 +102,7 @@ public class ParRandomShot extends ParForScore {
 
 	protected void resetValues() {
 		super.resetValues();
-		List<Group> targets = super.getCurrentTargets();
+		List<Target> targets = super.getCurrentTargets();
 		fetchSubtargets(targets);
 	}
 
@@ -139,14 +137,12 @@ public class ParRandomShot extends ParForScore {
 	 * @param targets
 	 * @return
 	 */
-	private void fetchSubtargets(List<Group> targets) {
+	private void fetchSubtargets(List<Target> targets) {
 		subtargets.clear();
 
 		foundTarget = false;
-		for (Group target : targets) {
-			for (Node node : target.getChildren()) {
-				TargetRegion region = (TargetRegion) node;
-
+		for (Target target : targets) {
+			for (TargetRegion region : target.getRegions()) {
 				if (region.getAllTags().containsKey("subtarget")) {
 					subtargets.add(region.getTag("subtarget"));
 					foundTarget = true;

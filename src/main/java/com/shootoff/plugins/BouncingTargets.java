@@ -32,7 +32,6 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -44,8 +43,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
-import com.shootoff.gui.Target;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 
 public class BouncingTargets extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private int shootCount = 4;
@@ -63,7 +62,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 	public BouncingTargets() {}
 
-	public BouncingTargets(List<Group> targets) {
+	public BouncingTargets(List<Target> targets) {
 		super(targets);
 		setThisSuper(super.getInstance());
 	}
@@ -209,7 +208,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		}
 
 		private CollisionType checkCollision() {
-			final Bounds targetBounds = target.getTargetGroup().getBoundsInParent();
+			final Bounds targetBounds = target.getBoundsInParent();
 			List<BouncingTarget> collisionList;
 
 			if (shootTargets.contains(this)) {
@@ -221,7 +220,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			for (BouncingTarget b : collisionList) {
 				if (b.getTarget().equals(target)) continue;
 
-				final Bounds bBounds = b.getTarget().getTargetGroup().getBoundsInParent();
+				final Bounds bBounds = b.getTarget().getBoundsInParent();
 
 				if (targetBounds.intersects(bBounds)) {
 					final boolean atRight = targetBounds.getMaxX() > bBounds.getMinX()
@@ -249,7 +248,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		public void moveTarget() {
 			if (maxVelocity == 0) return;
 
-			Bounds b = target.getTargetGroup().getBoundsInParent();
+			Bounds b = target.getBoundsInParent();
 			Point2D p = target.getPosition();
 			Dimension2D d = target.getDimension();
 			CollisionType ct = checkCollision();
@@ -321,7 +320,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		targetAnimation.stop();
 
 		for (BouncingTarget b : shootTargets)

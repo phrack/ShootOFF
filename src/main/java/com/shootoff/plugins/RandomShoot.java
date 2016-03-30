@@ -27,11 +27,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
 
-import javafx.scene.Group;
-import javafx.scene.Node;
-
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
@@ -41,7 +39,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 
 	public RandomShoot() {}
 
-	public RandomShoot(List<Group> targets) {
+	public RandomShoot(List<Target> targets) {
 		super(targets);
 		if (fetchSubtargets(targets)) startRound();
 	}
@@ -52,7 +50,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	 * @param rng
 	 *            an rng with a known seed
 	 */
-	protected RandomShoot(List<Group> targets, Random rng) {
+	protected RandomShoot(List<Target> targets, Random rng) {
 		super(targets);
 		this.rng = rng;
 		if (fetchSubtargets(targets)) startRound();
@@ -94,14 +92,12 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	 *            a list of all targets known to this exercise
 	 * @return <tt>true</tt> if we found subtargets, <tt>false</tt> otherwise
 	 */
-	private boolean fetchSubtargets(List<Group> targets) {
+	private boolean fetchSubtargets(List<Target> targets) {
 		subtargets.clear();
 
 		boolean foundTarget = false;
-		for (Group target : targets) {
-			for (Node node : target.getChildren()) {
-				TargetRegion region = (TargetRegion) node;
-
+		for (Target target : targets) {
+			for (TargetRegion region : target.getRegions()) {
 				if (region.getAllTags().containsKey("subtarget")) {
 					subtargets.add(region.getTag("subtarget"));
 					foundTarget = true;
@@ -223,7 +219,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		if (fetchSubtargets(targets)) startRound();
 	}
 

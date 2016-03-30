@@ -33,9 +33,11 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.SpriteAnimation;
 
@@ -60,8 +62,8 @@ import javafx.scene.shape.Shape;
  * 
  * @author phrack
  */
-public class Target {
-	private static final Logger logger = LoggerFactory.getLogger(Target.class);
+public class TargetView implements com.shootoff.targets.Target {
+	private static final Logger logger = LoggerFactory.getLogger(TargetView.class);
 
 	private static final double ANCHOR_WIDTH = 10;
 	private static final double ANCHOR_HEIGHT = ANCHOR_WIDTH;
@@ -90,7 +92,8 @@ public class Target {
 	private double x;
 	private double y;
 
-	public Target(File targetFile, Group target, Configuration config, CanvasManager parent, boolean userDeletable) {
+	public TargetView(File targetFile, Group target, Configuration config, CanvasManager parent,
+			boolean userDeletable) {
 		this.targetFile = targetFile;
 		this.targetGroup = target;
 		this.config = Optional.of(config);
@@ -111,7 +114,7 @@ public class Target {
 		keyPressed();
 	}
 
-	public Target(Group target, List<Target> targets) {
+	public TargetView(Group target, List<Target> targets) {
 		this.targetFile = null;
 		this.targetGroup = target;
 		this.config = Optional.empty();
@@ -127,6 +130,7 @@ public class Target {
 		keyPressed();
 	}
 
+	@Override
 	public File getTargetFile() {
 		return targetFile;
 	}
@@ -135,6 +139,7 @@ public class Target {
 		return targetGroup;
 	}
 
+	@Override
 	public int getTargetIndex() {
 		if (parent.isPresent())
 			return parent.get().getTargets().indexOf(this);
@@ -142,6 +147,38 @@ public class Target {
 			return -1;
 	}
 
+	@Override
+	public void addTargetChild(Node child) {
+		getTargetGroup().getChildren().add(child);
+	}
+
+	@Override
+	public void removeTargetChild(Node child) {
+		getTargetGroup().getChildren().remove(child);
+	}
+
+	@Override
+	public List<TargetRegion> getRegions() {
+		final List<TargetRegion> regions = new ArrayList<TargetRegion>();
+
+		for (final Node n : getTargetGroup().getChildren()) {
+			if (n instanceof TargetRegion) regions.add((TargetRegion) n);
+		}
+
+		return regions;
+	}
+
+	@Override
+	public boolean hasRegion(TargetRegion region) {
+		return getTargetGroup().getChildren().contains(region);
+	}
+
+	@Override
+	public void setVisible(boolean isVisible) {
+		getTargetGroup().setVisible(isVisible);
+	}
+
+	@Override
 	public void setPosition(double x, double y) {
 		targetGroup.setLayoutX(x);
 		targetGroup.setLayoutY(y);
@@ -153,10 +190,12 @@ public class Target {
 
 	}
 
+	@Override
 	public Point2D getPosition() {
 		return new Point2D(targetGroup.getLayoutX(), targetGroup.getLayoutY());
 	}
 
+	@Override
 	public void setDimensions(double newWidth, double newHeight) {
 		double currentWidth = targetGroup.getBoundsInParent().getWidth();
 		double currentHeight = targetGroup.getBoundsInParent().getHeight();
@@ -172,8 +211,14 @@ public class Target {
 		}
 	}
 
+	@Override
 	public Dimension2D getDimension() {
 		return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), targetGroup.getBoundsInParent().getHeight());
+	}
+
+	@Override
+	public Bounds getBoundsInParent() {
+		return targetGroup.getBoundsInParent();
 	}
 
 	/**
@@ -217,9 +262,8 @@ public class Target {
 	protected static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region,
 			String name) {
 		for (Target target : targets) {
-			if (target.getTargetGroup().getChildren().contains(region)) {
-				for (Node node : target.getTargetGroup().getChildren()) {
-					TargetRegion r = (TargetRegion) node;
+			if (target.hasRegion(region)) {
+				for (TargetRegion r : target.getRegions()) {
 					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
 				}
 			}
@@ -228,6 +272,7 @@ public class Target {
 		return Optional.empty();
 	}
 
+	@Override
 	public void animate(TargetRegion region, List<String> args) {
 		ImageRegion imageRegion;
 
@@ -275,6 +320,7 @@ public class Target {
 		}
 	}
 
+	@Override
 	public void reverseAnimation(TargetRegion region) {
 		if (region.getType() != RegionType.IMAGE) {
 			logger.error("A reversal was requested on a non-image region.");
@@ -347,7 +393,7 @@ public class Target {
 
 	private RectangleRegion addAnchor(final double x, final double y) {
 		final RectangleRegion anchor = new RectangleRegion(x, y, ANCHOR_WIDTH, ANCHOR_HEIGHT);
-		((TargetRegion) anchor).getAllTags().put("ignoreHit", "true");
+		((TargetRegion) anchor).getAllTags().put(TargetView.TAG_IGNORE_HIT, "true");
 		anchor.setFill(Color.GOLD);
 		anchor.setStroke(Color.BLACK);
 
@@ -357,6 +403,7 @@ public class Target {
 		return anchor;
 	}
 
+	@Override
 	public Optional<Hit> isHit(Shot shot) {
 		if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {
 			// Target was hit, see if a specific region was hit
@@ -374,7 +421,9 @@ public class Target {
 					final TargetRegion region = (TargetRegion) node;
 
 					// Ignore regions where ignoreHit tag is true
-					if (region.tagExists("ignoreHit") && Boolean.parseBoolean(region.getTag("ignoreHit"))) continue;
+					if (region.tagExists(TargetView.TAG_IGNORE_HIT)
+							&& Boolean.parseBoolean(region.getTag(TargetView.TAG_IGNORE_HIT)))
+						continue;
 
 					if (region.getType() == RegionType.IMAGE) {
 						// The image you get from the image view is its

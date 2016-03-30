@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
-
-import com.shootoff.targets.TargetRegion;
+package com.shootoff.targets;
 
 /**
  * This class encapsulates the information for a shot that hit a target.

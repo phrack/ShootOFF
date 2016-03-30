@@ -27,13 +27,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.util.NamedThreadFactory;
 
 public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
@@ -54,7 +54,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 
 	public TimedHolsterDrill() {}
 
-	public TimedHolsterDrill(List<Group> targets) {
+	public TimedHolsterDrill(List<Target> targets) {
 		super(targets);
 	}
 
@@ -90,7 +90,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		repeatExercise = false;
 		pauseShotDetection(true);
 		executorService.shutdownNow();

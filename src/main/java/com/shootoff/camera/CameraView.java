@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
 
-import com.shootoff.gui.Target;
+import com.shootoff.targets.Target;
 
 import javafx.geometry.Bounds;
 import javafx.scene.Node;

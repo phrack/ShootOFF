@@ -38,8 +38,9 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import com.shootoff.courses.Course;
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;
 
 import javafx.application.Platform;
@@ -135,7 +136,7 @@ public class XMLCourseReader {
 				Optional<Group> targetNodes = TargetIO.loadTarget(targetFile);
 
 				if (targetNodes.isPresent()) {
-					Target t = new Target(targetFile, targetNodes.get(), arenaController.getConfiguration(),
+					TargetView t = new TargetView(targetFile, targetNodes.get(), arenaController.getConfiguration(),
 							arenaController.getCanvasManager(), true);
 
 					t.setPosition(Double.parseDouble(attributes.getValue("x")),

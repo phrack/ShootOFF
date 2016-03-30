@@ -20,10 +20,11 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -31,7 +32,6 @@ import ch.qos.logback.classic.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
 import javafx.scene.control.TableView;
 import javafx.scene.paint.Color;
 
@@ -41,7 +41,7 @@ public class TestISSFStandardPistol {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
-	private List<Group> targetGroups;
+	private List<Target> targets;
 	private ISSFStandardPistol issfExercise;
 	private Hit scoredRegionHit;
 	private int regionScore;
@@ -63,15 +63,13 @@ public class TestISSFStandardPistol {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		List<Target> targets = new ArrayList<Target>();
-		targetGroups = new ArrayList<Group>();
-		Target issfTarget = new Target(TargetIO.loadTarget(new File("targets/ISSF.target")).get(), targets);
+		targets = new ArrayList<Target>();
+		TargetView issfTarget = new TargetView(TargetIO.loadTarget(new File("targets/ISSF.target")).get(), targets);
 		targets.add(issfTarget);
-		targetGroups.add(issfTarget.getTargetGroup());
 		scoredRegionHit = new Hit(issfTarget, (TargetRegion) issfTarget.getTargetGroup().getChildren().get(0), 0, 0);
 		regionScore = Integer.parseInt(scoredRegionHit.getHitRegion().getTag("points"));
 
-		issfExercise = new ISSFStandardPistol(targetGroups);
+		issfExercise = new ISSFStandardPistol(targets);
 		TableView<ShotEntry> shotTimerTable = new TableView<ShotEntry>();
 		ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 		shotEntries
@@ -240,7 +238,7 @@ public class TestISSFStandardPistol {
 			stringOut.reset();
 		}
 
-		issfExercise.reset(targetGroups);
+		issfExercise.reset(targets);
 
 		issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 		// (regionScore * 5 * i) = last round's score

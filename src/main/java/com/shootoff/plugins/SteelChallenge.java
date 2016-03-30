@@ -1,3 +1,21 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.shootoff.plugins;
 
 import java.io.File;
@@ -13,13 +31,10 @@ import java.util.concurrent.TimeUnit;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.courses.Course;
-import com.shootoff.gui.Hit;
-import com.shootoff.gui.Target;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
-
-import javafx.scene.Group;
-import javafx.scene.Node;
 
 public class SteelChallenge extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private final static String LENGTH_COL_NAME = "Length";
@@ -32,15 +47,15 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("SteelChallengeExercise"));
 	private TrainingExerciseBase thisSuper;
-	private List<Group> targets;
-	private Set<Group> roundTargets;
+	private List<Target> targets;
+	private Set<Target> roundTargets;
 	private long startTime = 0;
 	private boolean repeatExercise = true;
 	private boolean testing = false;
 
 	public SteelChallenge() {}
 
-	public SteelChallenge(List<Group> targets) {
+	public SteelChallenge(List<Target> targets) {
 		super(targets);
 
 		thisSuper = super.getInstance();
@@ -62,21 +77,17 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		testing = true;
 		thisSuper = super.getInstance();
 
-		targets = new ArrayList<Group>();
-		for (Target t : course.getTargets()) {
-			targets.add(t.getTargetGroup());
-		}
+		targets = new ArrayList<Target>();
+		targets.addAll(course.getTargets());
 
 		if (checkTargets(targets)) startRound();
 	}
 
-	private boolean checkTargets(final List<Group> targets) {
+	private boolean checkTargets(final List<Target> targets) {
 		boolean hasStopTarget = false;
 
-		for (final Group t : targets) {
-			for (final Node node : t.getChildren()) {
-				final TargetRegion r = (TargetRegion) node;
-
+		for (final Target t : targets) {
+			for (final TargetRegion r : t.getRegions()) {
 				if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
 					hasStopTarget = true;
 					break;
@@ -100,7 +111,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	private void startRound() {
 		if (!repeatExercise) return;
 
-		this.roundTargets = new HashSet<Group>();
+		this.roundTargets = new HashSet<Target>();
 		this.roundTargets.addAll(targets);
 
 		if (testing) {
@@ -187,12 +198,12 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 			super.setShotTimerColumnText(HIT_COL_NAME, "Yes");
 
-			final Iterator<Group> it = roundTargets.iterator();
+			final Iterator<Target> it = roundTargets.iterator();
 
 			while (it.hasNext()) {
-				final Group g = it.next();
+				final Target t = it.next();
 
-				if (g.getChildren().contains(r)) {
+				if (t.hasRegion(r)) {
 					it.remove();
 					break;
 				}
@@ -224,7 +235,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		super.pauseShotDetection(true);
 
 		repeatExercise = false;

@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.courses.Course;
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.Target;
 import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.targets.Target;
 
 public class CourseIO {
 	private static final Logger logger = LoggerFactory.getLogger(CourseIO.class);

@@ -31,7 +31,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.gui.controller.MockShootOFFController;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
@@ -39,6 +39,7 @@ import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class TestTargetIO {
@@ -166,14 +167,14 @@ public class TestTargetIO {
 		MockProjectorArenaController pac = new MockProjectorArenaController();
 		pac.init(config, new MockCanvasManager(config));
 
-		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Group>());
+		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
 		pteb.init(config, cs, new MockShootOFFController(), pac);
 
 		Optional<Target> target = pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
 
 		assertTrue(target.isPresent());
 
-		Group targetGroup = target.get().getTargetGroup();
+		Group targetGroup = ((TargetView) target.get()).getTargetGroup();
 
 		assertEquals(4, targetGroup.getChildren().size());
 
