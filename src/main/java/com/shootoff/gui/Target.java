@@ -296,13 +296,17 @@ public class Target {
 
 				Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
-				int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-				int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+				final int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
+				final int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
 
 				if (nodeBounds.contains(shot.getX(), shot.getY())) {
 					// If we hit an image region on a transparent pixel,
 					// ignore it
-					TargetRegion region = (TargetRegion) node;
+					final TargetRegion region = (TargetRegion) node;
+
+					// Ignore regions where ignoreHit tag is true
+					if (region.tagExists("ignoreHit") && Boolean.parseBoolean(region.getTag("ignoreHit"))) continue;
+
 					if (region.getType() == RegionType.IMAGE) {
 						// The image you get from the image view is its
 						// original size. We need to resize it if it has
@@ -463,8 +467,8 @@ public class Target {
 					targetGroup.setLayoutX(oldLayoutX);
 					targetGroup.setScaleX(oldScaleX);
 				}
-			} 
-			
+			}
+
 			if (top || bottom) {
 				double gap;
 
