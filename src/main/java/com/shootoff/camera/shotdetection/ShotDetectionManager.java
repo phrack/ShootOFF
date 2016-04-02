@@ -181,12 +181,8 @@ public final class ShotDetectionManager {
 
 		if (increase < MINIMUM_BRIGHTNESS_INCREASE) return false;
 
-		final int threshold = (MAXIMUM_LUM_VALUE - lumsMovingAverage) >> 2; // >>
-																			// 2
-																			// equivalent
-																			// to
-																			// /
-																			// 4
+		// (var >> 2) equivalent to (var / 4)
+		final int threshold = (MAXIMUM_LUM_VALUE - lumsMovingAverage) >> 2;
 
 		final int dynamic_increase = (int) ((MAXIMUM_LUM_VALUE - threshold)
 				* ((double) avgThresholdPixels / (double) MAXIMUM_THRESHOLD_PIXELS_FOR_AVG));
