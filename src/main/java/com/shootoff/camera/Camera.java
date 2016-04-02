@@ -303,14 +303,10 @@ public class Camera {
 	}
 
 	public static BufferedImage matToBufferedImage(Mat matBGR) {
-		int width = matBGR.width(), height = matBGR.height(), channels = matBGR.channels();
-		byte[] sourcePixels = new byte[width * height * channels];
-		matBGR.get(0, 0, sourcePixels);
-
-		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
 		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		System.arraycopy(sourcePixels, 0, targetPixels, 0, sourcePixels.length);
-
+		matBGR.get(0, 0, targetPixels);
+		
 		return image;
 	}
 
