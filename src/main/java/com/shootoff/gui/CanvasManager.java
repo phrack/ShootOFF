@@ -212,7 +212,7 @@ public class CanvasManager implements CameraView {
 
 		diagnosticsVBox.getChildren().add(diagnosticLabel);
 
-		if (!config.isChimeMuted(message)) {
+		if (!config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
 			@SuppressWarnings("unchecked")
 			ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
