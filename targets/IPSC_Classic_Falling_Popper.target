@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="234.000000" y="28.000000" file="targets/ipsc_popper_falling.gif">
+		<tag name="command" value="animate;play_sound(sounds/steel_sound_2.wav)" />
+		<tag name="points" value="5" />
+	</image>
+</target>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <target>
-	<polygon fill="blue">
+	<polygon fill="brown">
 		<point x="169.000000" y="53.000000" />
 		<point x="269.000000" y="53.000000" />
 		<point x="366.000000" y="182.000000" />
@@ -9,10 +9,10 @@
 		<point x="169.000000" y="424.000000" />
 		<point x="73.000000" y="302.000000" />
 		<point x="71.000000" y="177.000000" />
-		<tag name="points" value="2" />
 		<tag name="subtarget" value="D" />
+		<tag name="points" value="2" />
 	</polygon>
-	<polygon fill="black">
+	<polygon fill="brown">
 		<point x="169.000000" y="53.000000" />
 		<point x="269.000000" y="53.000000" />
 		<point x="318.000000" y="177.000000" />
@@ -24,7 +24,7 @@
 		<tag name="subtarget" value="C" />
 		<tag name="points" value="4" />
 	</polygon>
-	<polygon fill="red">
+	<polygon fill="brown">
 		<point x="202.000000" y="69.000000" />
 		<point x="202.000000" y="68.000000" />
 		<point x="232.000000" y="68.000000" />
