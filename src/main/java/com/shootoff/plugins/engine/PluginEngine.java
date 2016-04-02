@@ -142,8 +142,9 @@ public class PluginEngine implements Runnable {
 	}
 
 	/**
-	 * Start watching for plugin creation and deletion in shootoff.plugins. Plugin
-	 * jar creation or deletion leads to a plugin registration or unregistration.
+	 * Start watching for plugin creation and deletion in shootoff.plugins.
+	 * Plugin jar creation or deletion leads to a plugin registration or
+	 * unregistration.
 	 */
 	public void startWatching() {
 		watching.set(true);

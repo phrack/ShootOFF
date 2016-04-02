@@ -172,8 +172,8 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			final Point2D arenaPosition = config.getArenaPosition().get();
 
-			final ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(), arenaPosition.getY(),
-					1, 1);
+			final ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(),
+					arenaPosition.getY(), 1, 1);
 
 			if (!screens.isEmpty()) {
 				arenaStage.setX(arenaPosition.getX());
