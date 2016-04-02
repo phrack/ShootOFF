@@ -357,10 +357,13 @@ public final class ShotDetectionManager {
 		final byte[] workingFramePrimitive = new byte[size];
 		workingFrame.get(0, 0, workingFramePrimitive);
 
-		final int[] maskPrimitive = new int[workingFrame.cols() * workingFrame.rows()];
+		final int[] maskPrimitive;
 		if (usingArenaMask) {
+			maskPrimitive = new int[workingFrame.cols() * workingFrame.rows()];
 			final Mat mask = arenaMaskManager.getMask();
 			mask.get(0, 0, maskPrimitive);
+		} else {
+			maskPrimitive = null;
 		}
 
 		// In this loop we accomplish both MovingAverage updates AND threshold
