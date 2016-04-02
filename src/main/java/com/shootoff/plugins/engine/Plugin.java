@@ -49,7 +49,7 @@ public class Plugin {
 	private final Path jarPath;
 	private final PluginType type;
 
-	public Plugin(Path jarPath) throws ParserConfigurationException, SAXException, IOException {
+	public Plugin(final Path jarPath) throws ParserConfigurationException, SAXException, IOException {
 		this.jarPath = jarPath;
 
 		loader = AccessController.doPrivileged((PrivilegedAction<URLClassLoader>) () -> {

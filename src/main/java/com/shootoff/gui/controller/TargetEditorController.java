@@ -116,9 +116,8 @@ public class TargetEditorController {
 		regionColorChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-
 				if (cursorRegion.isPresent()) {
-					TargetRegion selected = (TargetRegion) cursorRegion.get();
+					final TargetRegion selected = (TargetRegion) cursorRegion.get();
 
 					if (selected.getType() != RegionType.IMAGE) ((Shape) selected).setFill(createColor(newValue));
 				}
@@ -129,7 +128,7 @@ public class TargetEditorController {
 	public void init(Image backgroundImg, TargetListener targetListener, File targetFile) {
 		init(backgroundImg, targetListener);
 
-		Optional<Group> target = TargetIO.loadTarget(targetFile);
+		final Optional<Group> target = TargetIO.loadTarget(targetFile);
 
 		if (target.isPresent()) {
 			targetRegions.addAll(target.get().getChildren());
@@ -147,14 +146,14 @@ public class TargetEditorController {
 		}
 	}
 
-	private void toggleShapeControls(boolean enabled) {
+	private void toggleShapeControls(final boolean enabled) {
 		sendBackwardButton.setDisable(!enabled);
 		bringForwardButton.setDisable(!enabled);
 		tagsButton.setDisable(!enabled);
 		regionColorChoiceBox.setDisable(!enabled);
 	}
 
-	public static Color createColor(String name) {
+	public static Color createColor(final String name) {
 		switch (name) {
 		case "black":
 			return Color.BLACK;
@@ -177,22 +176,22 @@ public class TargetEditorController {
 		}
 	}
 
-	public static String getColorName(Color color) {
-		if (color == Color.BLACK) {
+	public static String getColorName(final Color color) {
+		if (Color.BLACK.equals(color)) {
 			return "black";
-		} else if (color == Color.BLUE) {
+		} else if (Color.BLUE.equals(color)) {
 			return "blue";
-		} else if (color == Color.SADDLEBROWN) {
+		} else if (Color.SADDLEBROWN.equals(color)) {
 			return "brown";
-		} else if (color == Color.GRAY) {
+		} else if (Color.GRAY.equals(color)) {
 			return "gray";
-		} else if (color == Color.GREEN) {
+		} else if (Color.GREEN.equals(color)) {
 			return "green";
-		} else if (color == Color.ORANGE) {
+		} else if (Color.ORANGE.equals(color)) {
 			return "orange";
-		} else if (color == Color.RED) {
+		} else if (Color.RED.equals(color)) {
 			return "red";
-		} else if (color == Color.WHITE) {
+		} else if (Color.WHITE.equals(color)) {
 			return "white";
 		} else {
 			return "cornsilk";
@@ -201,7 +200,7 @@ public class TargetEditorController {
 
 	@FXML
 	public void saveTarget(ActionEvent event) {
-		FileChooser fileChooser = new FileChooser();
+		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Target");
 		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "targets"));
 		fileChooser.getExtensionFilters()
@@ -213,7 +212,7 @@ public class TargetEditorController {
 			if (!path.endsWith(".target")) path += ".target";
 
 			targetFile = new File(path);
-			boolean isNewTarget = !targetFile.exists();
+			final boolean isNewTarget = !targetFile.exists();
 
 			TargetIO.saveTarget(targetRegions, targetFile);
 
@@ -229,7 +228,7 @@ public class TargetEditorController {
 
 		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
 
-		Node selected = cursorRegion.get();
+		final Node selected = cursorRegion.get();
 
 		lastMouseX = event.getX() - (selected.getLayoutBounds().getWidth() / 2);
 		lastMouseY = event.getY() - (selected.getLayoutBounds().getHeight() / 2);
@@ -257,7 +256,7 @@ public class TargetEditorController {
 
 		if (!cursorRegion.isPresent() || cursorButton.isSelected()) return;
 
-		Node selected = cursorRegion.get();
+		final Node selected = cursorRegion.get();
 		targetRegions.add(selected);
 		selected.setOnMouseClicked((e) -> {
 			regionClicked(e);
@@ -267,11 +266,11 @@ public class TargetEditorController {
 		});
 
 		if (((TargetRegion) selected).getType() == RegionType.IMAGE) {
-			ImageRegion droppedImage = (ImageRegion) selected;
+			final ImageRegion droppedImage = (ImageRegion) selected;
 
 			// If the new image region has an animation, play it once
 			if (droppedImage.getAnimation().isPresent()) {
-				SpriteAnimation animation = droppedImage.getAnimation().get();
+				final SpriteAnimation animation = droppedImage.getAnimation().get();
 				animation.setCycleCount(1);
 
 				animation.setOnFinished((e) -> {
@@ -321,10 +320,10 @@ public class TargetEditorController {
 
 		if (freeformEdge.isPresent()) canvasPane.getChildren().remove(freeformEdge.get());
 
-		double lastX = freeformPoints.get(freeformPoints.size() - 2);
-		double lastY = freeformPoints.get(freeformPoints.size() - 1);
+		final double lastX = freeformPoints.get(freeformPoints.size() - 2);
+		final double lastY = freeformPoints.get(freeformPoints.size() - 1);
 
-		Line tempEdge = new Line(lastX, lastY, event.getX(), event.getY());
+		final Line tempEdge = new Line(lastX, lastY, event.getX(), event.getY());
 		final double DASH_OFFSET = 5;
 
 		tempEdge.getStrokeDashArray().addAll(DASH_OFFSET, DASH_OFFSET);
@@ -335,13 +334,13 @@ public class TargetEditorController {
 	private void drawPolygon(MouseEvent event) {
 		final int VERTEX_RADIUS = 3;
 
-		Circle vertexDot = new Circle(event.getX(), event.getY(), VERTEX_RADIUS);
+		final Circle vertexDot = new Circle(event.getX(), event.getY(), VERTEX_RADIUS);
 		freeformShapes.add(vertexDot);
 		canvasPane.getChildren().add(vertexDot);
 
 		if (freeformPoints.size() > 0) {
-			double lastX = freeformPoints.get(freeformPoints.size() - 2);
-			double lastY = freeformPoints.get(freeformPoints.size() - 1);
+			final double lastX = freeformPoints.get(freeformPoints.size() - 2);
+			final double lastY = freeformPoints.get(freeformPoints.size() - 1);
 			Line edge = new Line(lastX, lastY, event.getX(), event.getY());
 
 			freeformShapes.push(edge);
@@ -360,11 +359,11 @@ public class TargetEditorController {
 		}
 
 		// Want to select the current region
-		Node selected = (Node) event.getTarget();
+		final Node selected = (Node) event.getTarget();
 		boolean tagEditorOpen = false;
 
 		if (cursorRegion.isPresent()) {
-			Node previous = cursorRegion.get();
+			final Node previous = cursorRegion.get();
 
 			// Unhighlight the old selection
 			if (!previous.equals(selected)) {
@@ -396,8 +395,8 @@ public class TargetEditorController {
 	}
 
 	public void regionKeyPressed(KeyEvent event) {
-		Node selected = (Node) event.getTarget();
-		TargetRegion region = (TargetRegion) selected;
+		final Node selected = (Node) event.getTarget();
+		final TargetRegion region = (TargetRegion) selected;
 
 		switch (event.getCode()) {
 		case DELETE:
@@ -457,7 +456,7 @@ public class TargetEditorController {
 		if (!cursorRegion.isPresent()) return;
 
 		// Remove shape that was never actually placed
-		Node selected = cursorRegion.get();
+		final Node selected = cursorRegion.get();
 		if (!targetRegions.contains(selected)) canvasPane.getChildren().remove(selected);
 
 		cursorRegion = Optional.empty();
@@ -465,12 +464,12 @@ public class TargetEditorController {
 
 	@FXML
 	public void openImage(ActionEvent event) {
-		FileChooser fileChooser = new FileChooser();
+		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Image");
 		fileChooser.getExtensionFilters().addAll(
 				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
 				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
-		File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
+		final File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
 
 		lastMouseX = 0;
 		lastMouseY = 0;
@@ -483,19 +482,19 @@ public class TargetEditorController {
 
 		if (imageFile != null) {
 			try {
-				int firstDot = imageFile.getName().indexOf('.') + 1;
-				String extension = imageFile.getName().substring(firstDot);
+				final int firstDot = imageFile.getName().indexOf('.') + 1;
+				final String extension = imageFile.getName().substring(firstDot);
 
 				switch (extension) {
 				case "gif":
-					ImageRegion newGIFRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
-					GifAnimation gif = new GifAnimation(newGIFRegion, imageFile);
+					final ImageRegion newGIFRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
+					final GifAnimation gif = new GifAnimation(newGIFRegion, imageFile);
 					newGIFRegion.setImage(gif.getFirstFrame());
 					if (gif.getFrameCount() > 0) newGIFRegion.setAnimation(gif);
 					imageRegion = Optional.of(newGIFRegion);
 					break;
 				case "png":
-					ImageRegion newPNGRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
+					final ImageRegion newPNGRegion = new ImageRegion(lastMouseX, lastMouseY, imageFile);
 					newPNGRegion.setImage(new Image(new FileInputStream(imageFile)));
 					imageRegion = Optional.of(newPNGRegion);
 					break;
@@ -524,8 +523,7 @@ public class TargetEditorController {
 		if (cursorRegion.isPresent() && !targetRegions.contains(cursorRegion.get())) {
 			canvasPane.getChildren().remove(cursorRegion.get());
 		} else if (cursorRegion.isPresent() && targetRegions.contains(cursorRegion.get())) {
-
-			TargetRegion selected = (TargetRegion) cursorRegion.get();
+			final TargetRegion selected = (TargetRegion) cursorRegion.get();
 
 			if (selected.getType() != RegionType.IMAGE)
 				((Shape) selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
@@ -635,10 +633,10 @@ public class TargetEditorController {
 		// New freeform polygon should not be on the cursor or
 		// adjusted (it can't be off the canvas)
 		if (!freeformButton.isSelected()) {
-			double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
+			final double leftX = lastMouseX - (newShape.getLayoutBounds().getWidth() / 2);
 			if (leftX < 0) newShape.setLayoutX(newShape.getLayoutX() + (leftX * -1));
 
-			double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
+			final double topY = lastMouseY - (newShape.getLayoutBounds().getHeight() / 2);
 			if (topY < 0) newShape.setLayoutY(newShape.getLayoutY() + (topY * -1));
 
 			cursorRegion = Optional.of(newShape);
@@ -648,8 +646,7 @@ public class TargetEditorController {
 	@FXML
 	public void startPolygon(ActionEvent event) {
 		if (cursorRegion.isPresent() && targetRegions.contains(cursorRegion.get())) {
-
-			TargetRegion selected = (TargetRegion) cursorRegion.get();
+			final TargetRegion selected = (TargetRegion) cursorRegion.get();
 
 			if (selected.getType() != RegionType.IMAGE)
 				((Shape) selected).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
@@ -664,9 +661,9 @@ public class TargetEditorController {
 		clearFreeformState(false);
 	}
 
-	private void clearFreeformState(boolean finishedDrawing) {
+	private void clearFreeformState(final boolean finishedDrawing) {
 		if (cursorRegion.isPresent() && !finishedDrawing) {
-			Node selected = cursorRegion.get();
+			final Node selected = cursorRegion.get();
 			if (!targetRegions.contains(selected)) canvasPane.getChildren().remove(selected);
 
 			cursorRegion = Optional.empty();
@@ -694,14 +691,14 @@ public class TargetEditorController {
 			// Get the index separately for the shapes list because the target
 			// region
 			// list has fewer items (e.g. no background)
-			ObservableList<Node> shapesList = canvasPane.getChildren();
+			final ObservableList<Node> shapesList = canvasPane.getChildren();
 			selectedIndex = shapesList.indexOf(cursorRegion.get());
 
 			// We have to do this dance instead of just calling
 			// Collections.swap otherwise we get an IllegalArgumentException
 			// from the Scene for duplicating a child node
-			Node topShape = shapesList.get(selectedIndex + 1);
-			Node bottomShape = shapesList.get(selectedIndex);
+			final Node topShape = shapesList.get(selectedIndex + 1);
+			final Node bottomShape = shapesList.get(selectedIndex);
 			shapesList.remove(selectedIndex + 1);
 			shapesList.remove(selectedIndex);
 			shapesList.add(selectedIndex, topShape);
@@ -718,11 +715,11 @@ public class TargetEditorController {
 		if (selectedIndex > 0) {
 			Collections.swap(targetRegions, selectedIndex - 1, selectedIndex);
 
-			ObservableList<Node> shapesList = canvasPane.getChildren();
+			final ObservableList<Node> shapesList = canvasPane.getChildren();
 			selectedIndex = shapesList.indexOf(cursorRegion.get());
 
-			Node topShape = shapesList.get(selectedIndex);
-			Node bottomShape = shapesList.get(selectedIndex - 1);
+			final Node topShape = shapesList.get(selectedIndex);
+			final Node bottomShape = shapesList.get(selectedIndex - 1);
 			shapesList.remove(selectedIndex);
 			shapesList.remove(selectedIndex - 1);
 			shapesList.add(selectedIndex - 1, topShape);
@@ -739,14 +736,14 @@ public class TargetEditorController {
 
 	private void toggleTagEditor() {
 		if (tagsButton.isSelected() && cursorRegion.isPresent()) {
-			TagEditorPanel editor = new TagEditorPanel(((TargetRegion) cursorRegion.get()).getAllTags());
+			final TagEditorPanel editor = new TagEditorPanel(((TargetRegion) cursorRegion.get()).getAllTags());
 			tagEditor = Optional.of(editor);
 			targetEditorPane.getChildren().add(editor);
 			editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
 			editor.setLayoutY(
 					tagsButton.getLayoutY() + tagsButton.getHeight() + tagsButton.getPadding().getBottom() + 2);
 		} else if (!tagsButton.isSelected() && tagEditor.isPresent()) {
-			TagEditorPanel editor = tagEditor.get();
+			final TagEditorPanel editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
 			if (cursorRegion.isPresent()) ((TargetRegion) cursorRegion.get()).setTags(editor.getTags());
 			tagEditor = Optional.empty();

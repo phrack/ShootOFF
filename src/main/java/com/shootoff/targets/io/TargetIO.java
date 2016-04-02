@@ -46,7 +46,7 @@ public class TargetIO {
 
 	public static final double DEFAULT_OPACITY = 0.5;
 
-	public static void saveTarget(List<Node> regions, File targetFile) {
+	public static void saveTarget(final List<Node> regions, final File targetFile) {
 		RegionVisitor visitor;
 
 		if (targetFile.getName().endsWith("target")) {
@@ -63,7 +63,7 @@ public class TargetIO {
 
 			switch (region.getType()) {
 			case IMAGE: {
-				ImageRegion img = (ImageRegion) node;
+				final ImageRegion img = (ImageRegion) node;
 
 				// Make image path relative to cwd so that image files can be
 				// found on different machines

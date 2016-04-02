@@ -86,7 +86,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		arenaStage = new Stage();
 		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
-		Scene scene = new Scene(arenaAnchor, 500, 500);
+		final Scene scene = new Scene(arenaAnchor, 500, 500);
 		arenaStage.setScene(scene);
 	}
 
@@ -117,14 +117,14 @@ public class ProjectorArenaController implements CalibrationListener {
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
-		ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
+		final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
 
 		if (stageHomeScreens.isEmpty()) {
-			StringBuilder message = new StringBuilder(
+			final StringBuilder message = new StringBuilder(
 					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens: %n%n",
 							stage.getTitle(), stage.getX(), stage.getY()));
 
-			Iterator<Screen> it = Screen.getScreens().iterator();
+			final Iterator<Screen> it = Screen.getScreens().iterator();
 
 			while (it.hasNext()) {
 				Screen s = it.next();
@@ -170,9 +170,9 @@ public class ProjectorArenaController implements CalibrationListener {
 		if (config.getArenaPosition().isPresent()) {
 			logger.debug("Projector has been manually placed previously");
 
-			Point2D arenaPosition = config.getArenaPosition().get();
+			final Point2D arenaPosition = config.getArenaPosition().get();
 
-			ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(), arenaPosition.getY(),
+			final ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(), arenaPosition.getY(),
 					1, 1);
 
 			if (!screens.isEmpty()) {
@@ -197,7 +197,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			if (!homeScreen.isPresent()) return;
 
-			Screen shootOFFScreen = homeScreen.get();
+			final Screen shootOFFScreen = homeScreen.get();
 
 			for (Screen screen : Screen.getScreens()) {
 				if (!screen.equals(shootOFFScreen)) {
@@ -314,7 +314,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		return config;
 	}
 
-	public void setCourse(Course course) {
+	public void setCourse(final Course course) {
 		if (course.getBackground().isPresent()) {
 			setBackground(course.getBackground().get());
 		} else {
@@ -337,15 +337,15 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		for (Target t : course.getTargets()) {
 			if (scaleCourse) {
-				double newWidth = t.getDimension().getWidth() * widthScaleFactor;
-				double widthDelta = newWidth - t.getDimension().getWidth();
-				double newX = t.getBoundsInParent().getMinX() * widthScaleFactor;
-				double deltaX = newX - t.getBoundsInParent().getMinX() + (widthDelta / 2);
+				final double newWidth = t.getDimension().getWidth() * widthScaleFactor;
+				final double widthDelta = newWidth - t.getDimension().getWidth();
+				final double newX = t.getBoundsInParent().getMinX() * widthScaleFactor;
+				final double deltaX = newX - t.getBoundsInParent().getMinX() + (widthDelta / 2);
 
-				double newHeight = t.getDimension().getHeight() * heightScaleFactor;
-				double heightDelta = newHeight - t.getDimension().getHeight();
-				double newY = t.getBoundsInParent().getMinY() * heightScaleFactor;
-				double deltaY = newY - t.getBoundsInParent().getMinY() + (heightDelta / 2);
+				final double newHeight = t.getDimension().getHeight() * heightScaleFactor;
+				final double heightDelta = newHeight - t.getDimension().getHeight();
+				final double newY = t.getBoundsInParent().getMinY() * heightScaleFactor;
+				final double deltaY = newY - t.getBoundsInParent().getMinY() + (heightDelta / 2);
 
 				t.setPosition(t.getPosition().getX() + deltaX, t.getPosition().getY() + deltaY);
 
@@ -364,16 +364,16 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			// Manually going full screen with an arena that was manually
 			// moved to another screen
-			Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
+			final Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
 
 			if (!currentArenaScreen.isPresent()) return;
 
-			Rectangle2D arenaScreenBounds = currentArenaScreen.get().getBounds();
+			final Rectangle2D arenaScreenBounds = currentArenaScreen.get().getBounds();
 			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
 
-			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
+			final boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
 					&& !originalArenaHomeScreen.equals(currentArenaScreen.get());
-			boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
+			final boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
 					&& !detectedProjectorScreen.equals(currentArenaScreen.get());
 
 			if (fullyManual || movedAfterAuto) {
@@ -399,12 +399,12 @@ public class ProjectorArenaController implements CalibrationListener {
 		return arenaStage.isFullScreen();
 	}
 
-	public void setTargetsVisible(boolean visible) {
+	public void setTargetsVisible(final boolean visible) {
 		for (Target t : canvasManager.getTargets())
 			t.setVisible(visible);
 	}
 
-	public void setCalibrationMessageVisible(boolean visible) {
+	public void setCalibrationMessageVisible(final boolean visible) {
 		calibrationLabel.setVisible(visible);
 	}
 
@@ -495,7 +495,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		if (updateMaskTimer != null) return;
 
 		updateMaskTimer = new Timer();
-		TimerTask newTask = new TimerTask() {
+		final TimerTask newTask = new TimerTask() {
 			@Override
 			public void run() {
 

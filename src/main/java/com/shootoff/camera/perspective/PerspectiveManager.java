@@ -21,8 +21,6 @@ package com.shootoff.camera.perspective;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.autocalibration.AutoCalibrationManager;
-
 import javafx.util.Pair;
 
 /*

@@ -44,7 +44,7 @@ public class Hit {
 	 *            the y coordinate of the shot adjusted to be relative to the
 	 *            hit region
 	 */
-	public Hit(Target target, TargetRegion hitRegion, int impactX, int impactY) {
+	public Hit(final Target target, final TargetRegion hitRegion, final int impactX, final int impactY) {
 		this.target = target;
 		this.hitRegion = hitRegion;
 		this.impactX = impactX;

@@ -59,7 +59,8 @@ import javafx.scene.shape.Shape;
 /**
  * This is contains the code required to display, resize, and move targets. It
  * also implements required functions like animating targets and determine if a
- * target was hit and where if it was hit.
+ * target was hit and where if it was hit. This class needs to be re-implemented
+ * to make ShootOFF work on platforms that don't support JavaFX.
  * 
  * @author phrack
  */

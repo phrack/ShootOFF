@@ -41,7 +41,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 
 	private Optional<SpriteAnimation> animation = Optional.empty();
 
-	public ImageRegion(double x, double y, File imageFile) {
+	public ImageRegion(final double x, final double y, final File imageFile) {
 		super();
 
 		this.setLayoutX(x);
@@ -67,7 +67,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 		return imageFile;
 	}
 
-	public void setAnimation(SpriteAnimation animation) {
+	public void setAnimation(final SpriteAnimation animation) {
 		this.animation = Optional.of(animation);
 	}
 
@@ -80,10 +80,10 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	}
 
 	@Override
-	public void changeWidth(double widthDelta) {}
+	public void changeWidth(final double widthDelta) {}
 
 	@Override
-	public void changeHeight(double heightDelta) {}
+	public void changeHeight(final double heightDelta) {}
 
 	@Override
 	public RegionType getType() {
@@ -91,12 +91,12 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	}
 
 	@Override
-	public boolean tagExists(String name) {
+	public boolean tagExists(final String name) {
 		return tags.containsKey(name);
 	}
 
 	@Override
-	public String getTag(String name) {
+	public String getTag(final String name) {
 		return tags.get(name);
 	}
 
@@ -106,7 +106,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	}
 
 	@Override
-	public void setTags(Map<String, String> newTags) {
+	public void setTags(final Map<String, String> newTags) {
 		tags.clear();
 		tags.putAll(newTags);
 	}

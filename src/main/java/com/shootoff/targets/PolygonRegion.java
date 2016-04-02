@@ -35,31 +35,31 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	}
 
 	@Override
-	public void changeWidth(double widthDelta) {
-		ObservableList<Double> points = this.getPoints();
-		List<Double> pointsX = new ArrayList<Double>();
+	public void changeWidth(final double widthDelta) {
+		final ObservableList<Double> points = this.getPoints();
+		final List<Double> pointsX = new ArrayList<Double>();
 
 		for (int i = 0; i < points.size(); i += 2) {
 			pointsX.add(points.get(i));
 		}
 
-		double width = Collections.max(pointsX);
-		double scaleFactor = (width + widthDelta) / width;
+		final double width = Collections.max(pointsX);
+		final double scaleFactor = (width + widthDelta) / width;
 
 		this.setScaleX(this.getScaleX() * scaleFactor);
 	}
 
 	@Override
-	public void changeHeight(double heightDelta) {
-		ObservableList<Double> points = this.getPoints();
-		List<Double> pointsY = new ArrayList<Double>();
+	public void changeHeight(final double heightDelta) {
+		final ObservableList<Double> points = this.getPoints();
+		final List<Double> pointsY = new ArrayList<Double>();
 
 		for (int i = 1; i < points.size(); i += 2) {
 			pointsY.add(points.get(i));
 		}
 
-		double height = Collections.max(pointsY);
-		double scaleFactor = (height + heightDelta) / height;
+		final double height = Collections.max(pointsY);
+		final double scaleFactor = (height + heightDelta) / height;
 
 		this.setScaleY(this.getScaleY() * scaleFactor);
 	}
@@ -70,12 +70,12 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	}
 
 	@Override
-	public boolean tagExists(String name) {
+	public boolean tagExists(final String name) {
 		return tags.containsKey(name);
 	}
 
 	@Override
-	public String getTag(String name) {
+	public String getTag(final String name) {
 		return tags.get(name);
 	}
 
@@ -85,7 +85,7 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	}
 
 	@Override
-	public void setTags(Map<String, String> newTags) {
+	public void setTags(final Map<String, String> newTags) {
 		tags.clear();
 		tags.putAll(newTags);
 	}

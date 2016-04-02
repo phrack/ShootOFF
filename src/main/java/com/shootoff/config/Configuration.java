@@ -143,9 +143,11 @@ public class Configuration {
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
-	
-	// TODO: This is used at the moment as a constant to determine if the (current incomplete)
-	// masking solution should be used. This setting will be unnecessary when the masking code
+
+	// TODO: This is used at the moment as a constant to determine if the
+	// (current incomplete)
+	// masking solution should be used. This setting will be unnecessary when
+	// the masking code
 	// is either complete or removed.
 	public static final boolean USE_ARENA_MASK = false;
 
@@ -200,8 +202,6 @@ public class Configuration {
 	}
 
 	private void readConfigurationFile() throws ConfigurationException, IOException {
-		Properties prop = new Properties();
-
 		InputStream inputStream;
 
 		if (configInput != null) {
@@ -213,6 +213,8 @@ public class Configuration {
 				throw new FileNotFoundException("Could not read configuration file " + configName);
 			}
 		}
+
+		final Properties prop = new Properties();
 
 		try {
 			prop.load(inputStream);
