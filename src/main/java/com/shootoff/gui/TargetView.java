@@ -57,8 +57,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 /**
- * This class wraps a group that represents a target so that the target can be
- * moved and resized using the mouse and individual regions can be animated.
+ * This is contains the code required to display, resize, and move targets. It
+ * also implements required functions like animating targets and determine if a
+ * target was hit and where if it was hit.
  * 
  * @author phrack
  */
