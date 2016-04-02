@@ -47,6 +47,10 @@ public final class ShotDetectionManager {
 	public static final int SECTOR_COLUMNS = 3;
 	public static final int SECTOR_ROWS = 3;
 
+	// These assume BGR format
+	private static final byte[] BLUE_MAT_PIXEL = { (byte) 255, (byte) 0, (byte) 0 };
+	private static final byte[] RED_MAT_PIXEL = { 0, (byte) 0, (byte) 255 };
+
 	private final CameraView cameraView;
 	private final CameraManager cameraManager;
 
@@ -195,10 +199,23 @@ public final class ShotDetectionManager {
 		}
 
 		return true;
-
 	}
 
-	public void processFrame(final Mat frame, final boolean detectShots) {
+	/**
+	 * Use and HSV copy of the current camera frame to detect shots and use a
+	 * BGR copy to draw bright pixels as red and high motion pixels as blue. The
+	 * BGR copy is what ShootOFF shows
+	 * 
+	 * @param frameHSV
+	 *            a hue, saturation, value copy of the current frame for shot
+	 *            detection
+	 * @param frameBGR
+	 *            a blue, green, red copy of the current frame for drawing
+	 *            bright/high motion pixels
+	 * @param detectShots
+	 *            whether or not to detect a shot
+	 */
+	public void processFrame(final Mat frameHSV, final Mat frameBGR, final boolean detectShots) {
 		if (cameraManager.getFrameCount() % 5 == 0)
 			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 
@@ -207,11 +224,11 @@ public final class ShotDetectionManager {
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			Bounds b = cameraManager.getProjectionBounds().get();
-			Mat subFrame = frame.submat((int) b.getMinY(), (int) b.getMaxY(), (int) b.getMinX(), (int) b.getMaxX());
+			Mat subFrame = frameHSV.submat((int) b.getMinY(), (int) b.getMaxY(), (int) b.getMinX(), (int) b.getMaxX());
 			workingFrame = subFrame;
 
 		} else {
-			workingFrame = frame;
+			workingFrame = frameHSV;
 
 		}
 
@@ -242,7 +259,6 @@ public final class ShotDetectionManager {
 
 			if (shouldShowBrightnessWarning()) {
 				cameraManager.showBrightnessWarning();
-
 			}
 
 			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
@@ -261,20 +277,16 @@ public final class ShotDetectionManager {
 			else if (isExcessiveMotion(thresholdPixelsSize)) {
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
-				final byte[] blue = { (byte) 120, (byte) 255, (byte) 255 };
-
 				for (final Pixel pixel : thresholdPixels) {
-					workingFrame.put(pixel.y, pixel.x, blue);
+					frameBGR.put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
 				}
 			}
 
 			if (shouldShowBrightnessWarningBool && !brightPixels.isEmpty()) {
 				// Make the feed pixels red so the user can easily see what the
 				// problem pixels are
-				final byte[] red = { 0, (byte) 255, (byte) 255 };
-
 				for (final Pixel pixel : brightPixels) {
-					workingFrame.put(pixel.y, pixel.x, red);
+					frameBGR.put(pixel.y, pixel.x, RED_MAT_PIXEL);
 				}
 			}
 		}

@@ -58,6 +58,13 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
+/**
+ * This class is responsible for fetching frames from its assigned camera and
+ * preprocessing them for shot detection. It also ensures the view showing the
+ * camera frames is aware of any new frames from the camera.
+ * 
+ * @author phrack and dmaul
+ */
 public class CameraManager {
 	protected static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
@@ -116,7 +123,7 @@ public class CameraManager {
 	private boolean showedFPSWarning = false;
 
 	protected AutoCalibrationManager acm = null;
-	protected boolean autoCalibrationEnabled = false;
+	protected boolean isAutoCalibrating = false;
 	public boolean cameraAutoCalibrated = false;
 
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
@@ -138,7 +145,7 @@ public class CameraManager {
 		} else {
 			arenaMaskManager = null;
 		}
-		
+
 		this.webcam = Optional.of(webcam);
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
 		this.cameraView = view;
@@ -157,7 +164,7 @@ public class CameraManager {
 		} else {
 			arenaMaskManager = null;
 		}
-		
+
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;
@@ -514,20 +521,21 @@ public class CameraManager {
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
 
-		if (autoCalibrationEnabled) {
+		if (isAutoCalibrating) {
 			acm.processFrame(currentFrame);
 			return currentFrame;
 		}
 
-		Mat matFrame = Camera.bufferedImageToMat(currentFrame);
+		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
+		Mat matFrameHSV = new Mat();
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 			if (acm != null) {
 				// MUST BE IN BGR pixel format.
-				matFrame = acm.undistortFrame(matFrame);
+				matFrameBGR = acm.undistortFrame(matFrameBGR);
 			}
 
-			Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(),
+			Mat submatFrame = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
 					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
 					(int) projectionBounds.get().getMaxX());
 
@@ -545,7 +553,7 @@ public class CameraManager {
 				videoWriterCalibratedArea.encodeVideo(0, frame);
 			}
 
-			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
+			if (isAutoCalibrating || isDetecting()) Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 
 			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrame);
 
@@ -554,14 +562,14 @@ public class CameraManager {
 			}
 
 		} else {
-			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
+			if (isAutoCalibrating || isDetecting()) Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 		}
 
-		shotDetectionManager.processFrame(matFrame, isDetecting.get());
+		shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
 
-		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_HSV2BGR);
-
-		return Camera.matToBufferedImage(matFrame);
+		// matFrameBGR is showing the colored pixels for brightness and motion,
+		// hence why we need to return the converted version
+		return Camera.matToBufferedImage(matFrameBGR);
 	}
 
 	private void estimateCameraFPS() {
@@ -670,8 +678,8 @@ public class CameraManager {
 	}
 
 	protected void autoCalibrateSuccess(Bounds bounds, long delay) {
-		if (autoCalibrationEnabled && cameraCalibrationListener != null) {
-			autoCalibrationEnabled = false;
+		if (isAutoCalibrating && cameraCalibrationListener != null) {
+			isAutoCalibrating = false;
 
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
 					(int) bounds.getWidth(), (int) bounds.getHeight());
@@ -684,10 +692,9 @@ public class CameraManager {
 
 			if (Configuration.USE_ARENA_MASK) {
 				cameraCalibrationListener.setArenaMaskManager(arenaMaskManager);
-	
+
 				shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-				arenaMaskManager.start((int) bounds.getWidth(), (int)
-				bounds.getHeight());
+				arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
 			}
 
 			if (recordCalibratedArea && !recordingCalibratedArea)
@@ -698,7 +705,7 @@ public class CameraManager {
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
 		acm = new AutoCalibrationManager(this, calculateFrameDelay);
-		autoCalibrationEnabled = true;
+		isAutoCalibrating = true;
 		cameraAutoCalibrated = false;
 		// Turns off using mask
 		shotDetectionManager.setArenaMaskManager(null);
@@ -707,7 +714,7 @@ public class CameraManager {
 	}
 
 	public void disableAutoCalibration() {
-		autoCalibrationEnabled = false;
+		isAutoCalibrating = false;
 	}
 
 	public void setArenaBackground(String resourceFilename) {

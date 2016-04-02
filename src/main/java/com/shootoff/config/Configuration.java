@@ -151,10 +151,9 @@ public class Configuration {
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 
 	// TODO: This is used at the moment as a constant to determine if the
-	// (current incomplete)
-	// masking solution should be used. This setting will be unnecessary when
-	// the masking code
-	// is either complete or removed.
+	// (current incomplete) masking solution should be used. This setting
+	// will be unnecessary when the masking code is either complete or
+	// removed.
 	public static final boolean USE_ARENA_MASK = false;
 
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
@@ -709,8 +708,7 @@ public class Configuration {
 			rootLogger.setLevel(Level.DEBUG);
 
 			// Ensure webcam-capture logger stays at info because it is quite
-			// noisy
-			// and doesn't output information we care about.
+			// noisy and doesn't output information we care about.
 			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
 		} else {

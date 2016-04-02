@@ -355,5 +355,4 @@ public class Camera {
 
 		return dst;
 	}
-
 }
