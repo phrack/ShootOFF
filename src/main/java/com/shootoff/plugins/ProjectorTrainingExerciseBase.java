@@ -44,6 +44,11 @@ import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
 
+/**
+ * The API for training exercises that only work on the projector arena.
+ * 
+ * @author phrack
+ */
 public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;

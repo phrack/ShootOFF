@@ -50,6 +50,13 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+/**
+ * A canvas to display events that were recorded by the session recorder to a
+ * user. This class is where events from a session are actually processed to
+ * display their outcomes to the user.
+ * 
+ * @author phrack
+ */
 public class SessionCanvasManager {
 	private final Group canvas;
 	private final Label exerciseLabel = new Label();

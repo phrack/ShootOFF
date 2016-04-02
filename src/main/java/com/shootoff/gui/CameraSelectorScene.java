@@ -51,6 +51,16 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Callback;
 
+/**
+ * Used to display a list of connected cameras to the user that are not
+ * currently being used by ShootOFF. More specifically, this GUI lets users add
+ * new cameras to be used for shot detection. Also used to allow users to
+ * register and de-register IP cameras via the GUI.
+ * 
+ * @see com.shootoff.camera.Camera
+ * 
+ * @author phrack
+ */
 public class CameraSelectorScene extends Stage {
 	private final Configuration config;
 	private final List<Camera> configuredCameras;

@@ -74,7 +74,9 @@ import javafx.util.Callback;
 
 /**
  * This class implements common training exercise operations. All training
- * exercises should extend it.
+ * exercises should extend it unless they are meant to be used solely on the
+ * projector arena. Projector arena exercises should extend
+ * {@link com.shootoff.plugins.ProjectorTrainingExerciseBase}.
  * 
  * @author phrack
  */
@@ -178,6 +180,7 @@ public class TrainingExerciseBase {
 	 * A copy of getDelayedStartInterval() plus setting the PAR time.
 	 * 
 	 * @param listener
+	 *            the object to notify when a par time is set.
 	 */
 	public void getParInterval(final ParListener listener) {
 		final FXMLLoader loader = new FXMLLoader(
@@ -297,6 +300,9 @@ public class TrainingExerciseBase {
 
 	/**
 	 * Get a list of all of the targets on every canvas manager
+	 * 
+	 * @return a list of all targets that ShootOFF will detect hits (only lists
+	 *         targets known at the time this method was called)
 	 */
 	public List<Target> getCurrentTargets() {
 		return targetManager.getTargets();
@@ -313,8 +319,18 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * Adds a button to the right of the reset button with caption <tt>text</tt>
-	 * and action handler <tt>eventHandler</tt>.
+	 * Adds a button to the right of the reset button on the main ShootOFF
+	 * window with caption <tt>text</tt> and action handler
+	 * <tt>eventHandler</tt>.
+	 * 
+	 * @param text
+	 *            the caption to display on the new button
+	 * 
+	 * @param eventHandler
+	 *            the event handler that performs actions when this new button
+	 *            is clicked
+	 * 
+	 * @return the new button that was added to the main ShootOFF window
 	 */
 	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
 		final Button exerciseButton = new Button(text);

@@ -11,6 +11,13 @@ import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 
+/**
+ * A potentially animated target that the user can shoot, reposition, and
+ * resize. This interface should be implemented by a class that implements the
+ * GUI code to allow users to see and interact with targets.
+ * 
+ * @author phrack
+ */
 public interface Target {
 	public static final String TAG_IGNORE_HIT = "ignoreHit";
 	public static final String TAG_OPACITY = "opacity";
@@ -26,6 +33,13 @@ public interface Target {
 
 	public List<TargetRegion> getRegions();
 
+	/**
+	 * Check whether or not this target contains a particular region.
+	 * 
+	 * @param region
+	 *            a region that may exist in this target
+	 * @return <tt>true</tt> if the target contains <tt>region</tt>
+	 */
 	public boolean hasRegion(TargetRegion region);
 
 	public void setVisible(boolean isVisible);

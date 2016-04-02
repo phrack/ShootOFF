@@ -70,6 +70,12 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 
+/**
+ * Used to parse, store, and update configuration data from a file and in memory
+ * at run time. All of ShootOFF's global settings are managed by this class.
+ * 
+ * @author phrack
+ */
 public class Configuration {
 	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
 	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";

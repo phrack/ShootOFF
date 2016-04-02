@@ -49,6 +49,13 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
 import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
 import com.xuggle.xuggler.video.ConverterFactory;
 
+/**
+ * A facade class to decouple webcam interaction implementation from webcam use
+ * throughout ShootOFF. This class should be re-written if a new webcam library
+ * is being used.
+ * 
+ * @author phrack
+ */
 public class Camera {
 	// These are used in a hack to get this code to work on Mac.
 	// On Mac several of the webcam-capture API's can only be
@@ -98,7 +105,7 @@ public class Camera {
 
 	public static Camera registerIpCamera(String cameraName, URL cameraURL, Optional<String> username,
 			Optional<String> password)
-					throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
+			throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
 		// These are here because webcam-capture wraps this exception in a
 		// WebcamException if the
 		// URL has a syntax issue. We don't want to use webcam-capture classes
@@ -239,7 +246,7 @@ public class Camera {
 		if (isMac) {
 			new Thread(() -> {
 				webcam.close();
-			} , "CloseMacOSXWebcam").start();
+			}, "CloseMacOSXWebcam").start();
 			return true;
 		} else {
 			return webcam.close();

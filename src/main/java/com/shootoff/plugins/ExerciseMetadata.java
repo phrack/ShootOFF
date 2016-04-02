@@ -18,6 +18,11 @@
 
 package com.shootoff.plugins;
 
+/**
+ * Data about what an exercise is and who wrote it.
+ * 
+ * @author phrack
+ */
 public class ExerciseMetadata {
 	private final String name;
 	private final String version;
