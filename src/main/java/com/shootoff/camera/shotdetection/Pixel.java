@@ -30,7 +30,7 @@ public class Pixel extends Point {
 
 	private int connectedness;
 
-	public Pixel(final int x, final int y, final int color, final int currentLum, final int lumAverage,
+	protected Pixel(final int x, final int y, final int color, final int currentLum, final int lumAverage,
 			final int colorAverage) {
 		super(x, y);
 		this.color = color;
@@ -81,5 +81,17 @@ public class Pixel extends Point {
 
 	public void setColor(final int color) {
 		this.color = color;
+	}
+
+	// We explicitly don't want to make use of extra data in this class
+	// when checking for object equality
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 }

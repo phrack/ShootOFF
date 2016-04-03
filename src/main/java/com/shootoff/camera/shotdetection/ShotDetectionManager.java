@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javafx.geometry.Bounds;
+import javafx.scene.paint.Color;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -294,8 +295,7 @@ public final class ShotDetectionManager {
 
 	private Set<PixelCluster> clusterPixels(final Set<Pixel> thresholdPixels) {
 		final PixelClusterManager pixelClusterManager = new PixelClusterManager(thresholdPixels, this);
-		pixelClusterManager.clusterPixels();
-		final Set<PixelCluster> clusters = pixelClusterManager.dumpClusters();
+		final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels();
 
 		return clusters;
 	}
@@ -426,7 +426,7 @@ public final class ShotDetectionManager {
 	}
 
 	private void addShot(Mat workingFrame, PixelCluster pc) {
-		final Optional<javafx.scene.paint.Color> color = pc.getColorJavafx(workingFrame, colorDistanceFromRed);
+		final Optional<Color> color = pc.getColor(workingFrame, colorDistanceFromRed);
 
 		if (!color.isPresent()) {
 			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By Lack Of Color Density");

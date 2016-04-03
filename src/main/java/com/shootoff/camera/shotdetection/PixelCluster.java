@@ -18,13 +18,17 @@
 
 package com.shootoff.camera.shotdetection;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javafx.scene.paint.Color;
 
 public class PixelCluster extends HashSet<Pixel> {
 	private static final Logger logger = LoggerFactory.getLogger(PixelCluster.class);
@@ -44,7 +48,7 @@ public class PixelCluster extends HashSet<Pixel> {
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
 	public double getColorDifference(final Mat workingFrame, final int[][] colorDistanceFromRed) {
-		final Set<Pixel> visited = new HashSet<Pixel>();
+		final Map<Pixel, byte[]> visited = new HashMap<Pixel, byte[]>();
 		int avgSaturation = 0;
 
 		for (final Pixel pixel : this) {
@@ -60,14 +64,14 @@ public class PixelCluster extends HashSet<Pixel> {
 
 						final Pixel nearPoint = new Pixel(rx, ry);
 
-						if (!visited.contains(nearPoint) && !this.contains(nearPoint)) {
+						if (!visited.containsKey(nearPoint) && !this.contains(nearPoint)) {
 							byte[] np = { 0, 0, 0 };
 							workingFrame.get(ry, rx, np);
 							final int npSaturation = np[1] & 0xFF;
 
 							avgSaturation += npSaturation;
 
-							visited.add(nearPoint);
+							visited.put(nearPoint, np);
 						}
 					}
 				}
@@ -78,25 +82,25 @@ public class PixelCluster extends HashSet<Pixel> {
 		if (pixelCount == 0) return 0;
 
 		avgSaturation /= pixelCount;
-		
+
 		int colorDistance = 0;
 		int avgColorDistance = 0;
 		int tempColorDistance = 0;
 
-		for (final Pixel pixel : visited) {
-			byte[] np = { 0, 0, 0 };
-
-			workingFrame.get(pixel.y, pixel.x, np);
-			final int npColor = np[0] & 0xFF;
+		for (final Entry<Pixel, byte[]> pixelEntry : visited.entrySet()) {
+			byte[] np = pixelEntry.getValue();
 			final int npSaturation = np[1] & 0xFF;
-			final int npLum = np[2] & 0xFF;
 
 			if (npSaturation > avgSaturation) {
+				final int npColor = np[0] & 0xFF;
+				final int npLum = np[2] & 0xFF;
+
 				final int thisDFromRed = Math.min(npColor, Math.abs(180 - npColor)) * npLum * npSaturation;
 				final int thisDFromGreen = Math.abs(60 - npColor) * npLum * npSaturation;
 
 				final int currentCol = thisDFromRed - thisDFromGreen;
 
+				final Pixel pixel = pixelEntry.getKey();
 				colorDistance += currentCol
 						- (int) (CURRENT_COLOR_BIAS_MULTIPLIER * colorDistanceFromRed[pixel.x][pixel.y]);
 
@@ -113,14 +117,13 @@ public class PixelCluster extends HashSet<Pixel> {
 		return colorDistance;
 	}
 
-	public Optional<javafx.scene.paint.Color> getColorJavafx(final Mat workingFrame, final int[][] colorDistanceFromRed) {
+	public Optional<Color> getColor(final Mat workingFrame, final int[][] colorDistanceFromRed) {
 		final double colorDist = getColorDifference(workingFrame, colorDistanceFromRed);
 
 		// Sometimes it's better to guess than to return nothing
 		if (colorDist < 0)
-			return Optional.of(javafx.scene.paint.Color.RED);
+			return Optional.of(Color.RED);
 		else
-			return Optional.of(javafx.scene.paint.Color.GREEN);
+			return Optional.of(Color.GREEN);
 	}
-
 }
