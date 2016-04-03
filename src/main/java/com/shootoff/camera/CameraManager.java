@@ -561,8 +561,7 @@ public class CameraManager {
 			}
 
 		} else {
-			if (isAutoCalibrating.get() || isDetecting())
-				Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
+			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 		}
 
 		shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
