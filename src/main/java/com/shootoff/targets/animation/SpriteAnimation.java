@@ -50,11 +50,7 @@ public class SpriteAnimation extends Transition {
 	}
 
 	public Image getFirstFrame() {
-		if (!isReversed) {
-			return frames[0].getImage();
-		} else {
-			return frames[frames.length - 1].getImage();
-		}
+		return isReversed ? frames[frames.length - 1].getImage() : frames[0].getImage();
 	}
 
 	public int getFrameCount() {

@@ -684,10 +684,7 @@ public class CameraManager {
 					(int) bounds.getWidth(), (int) bounds.getHeight());
 
 			cameraAutoCalibrated = true;
-
-			Platform.runLater(() -> {
-				cameraCalibrationListener.calibrate(bounds, false);
-			});
+			cameraCalibrationListener.calibrate(bounds, false);
 
 			if (Configuration.USE_ARENA_MASK) {
 				cameraCalibrationListener.setArenaMaskManager(arenaMaskManager);

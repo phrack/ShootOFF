@@ -56,11 +56,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	}
 
 	public boolean onFirstFrame() {
-		if (!animation.isPresent()) {
-			return true;
-		} else {
-			return this.getImage().equals(animation.get().getFirstFrame());
-		}
+		return animation.isPresent() ? this.getImage().equals(animation.get().getFirstFrame()) : true;
 	}
 
 	public File getImageFile() {

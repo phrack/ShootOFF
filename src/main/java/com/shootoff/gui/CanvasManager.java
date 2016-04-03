@@ -311,15 +311,13 @@ public class CanvasManager implements CameraView {
 
 	private void updateCanvasGroup() {
 		if (!canvasGroup.getChildren().contains(background)) {
-			Platform.runLater(() -> {
-				if (canvasGroup.getChildren().isEmpty()) {
-					canvasGroup.getChildren().add(background);
-				} else {
-					// Remove the wait spinner and replace it
-					// with the background
-					canvasGroup.getChildren().set(0, background);
-				}
-			});
+			if (canvasGroup.getChildren().isEmpty()) {
+				canvasGroup.getChildren().add(background);
+			} else {
+				// Remove the wait spinner and replace it
+				// with the background
+				canvasGroup.getChildren().set(0, background);
+			}
 		}
 	}
 

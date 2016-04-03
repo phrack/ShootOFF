@@ -433,18 +433,14 @@ public class ProjectorArenaController implements CalibrationListener {
 		// If the mouse entered OR the mouse is in the window but we haven't
 		// been showing the warning, show the warning
 		if (mouseEntered || (mouseInWindow && !showingCursorWarning)) {
-			Platform.runLater(new Runnable() {
-				public void run() {
-					mouseInWindow = true;
-					if (!calibrationManager.isCalibrating() && arenaStage.isFullScreen()) {
-						showingCursorWarning = true;
-						mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage(
-								"Cursor On Arena: Shot Detection Disabled", 15000 /* ms */, Color.YELLOW);
+			mouseInWindow = true;
+			if (!calibrationManager.isCalibrating() && arenaStage.isFullScreen()) {
+				showingCursorWarning = true;
+				mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
+						15000 /* ms */, Color.YELLOW);
 
-						feedCanvasManager.getCameraManager().setDetecting(false);
-					}
-				}
-			});
+				feedCanvasManager.getCameraManager().setDetecting(false);
+			}
 		} else if (showingCursorWarning) {
 			mouseInWindow = false;
 
@@ -498,22 +494,18 @@ public class ProjectorArenaController implements CalibrationListener {
 		final TimerTask newTask = new TimerTask() {
 			@Override
 			public void run() {
+				Platform.runLater(() -> {
+					try {
+						arenaMaskManager.sem.acquire();
+					} catch (InterruptedException e) {
+						return;
+					}
 
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							arenaMaskManager.sem.acquire();
-						} catch (InterruptedException e) {
-							return;
-						}
-
-						try {
-							arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
-									System.currentTimeMillis());
-						} finally {
-							arenaMaskManager.sem.release();
-						}
+					try {
+						arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
+								System.currentTimeMillis());
+					} finally {
+						arenaMaskManager.sem.release();
 					}
 				});
 			}
