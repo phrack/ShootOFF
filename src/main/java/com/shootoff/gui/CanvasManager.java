@@ -114,8 +114,8 @@ public class CanvasManager implements CameraView {
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
-	public CanvasManager(Group canvasGroup, Configuration config, Resetter resetter,
-			String cameraName, ObservableList<ShotEntry> shotEntries) {
+	public CanvasManager(Group canvasGroup, Configuration config, Resetter resetter, String cameraName,
+			ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
 		this.resetter = resetter;
@@ -384,7 +384,7 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public void clearShots() {
-		Platform.runLater(() -> {
+		Runnable clearShotsAction = () -> {
 			for (Shot shot : shots) {
 				canvasGroup.getChildren().remove(shot.getMarker());
 			}
@@ -397,7 +397,13 @@ public class CanvasManager implements CameraView {
 				jdk8094135Warning();
 			}
 			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
-		});
+		};
+
+		if (Platform.isFxApplicationThread()) {
+			clearShotsAction.run();
+		} else {
+			Platform.runLater(clearShotsAction);
+		}
 	}
 
 	@Override
@@ -744,18 +750,27 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public Target addTarget(Target newTarget) {
-		Platform.runLater(() -> {
-			canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
-		});
+		Runnable addTargetAction = () -> canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
+
+		if (Platform.isFxApplicationThread()) {
+			addTargetAction.run();
+		} else {
+			Platform.runLater(addTargetAction);
+		}
+
 		targets.add(newTarget);
 
 		return newTarget;
 	}
 
 	public void removeTarget(Target target) {
-		Platform.runLater(() -> {
-			canvasGroup.getChildren().remove(((TargetView) target).getTargetGroup());
-		});
+		Runnable removeTargetAction = () -> canvasGroup.getChildren().remove(((TargetView) target).getTargetGroup());
+
+		if (Platform.isFxApplicationThread()) {
+			removeTargetAction.run();
+		} else {
+			Platform.runLater(removeTargetAction);
+		}
 
 		if (config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordTargetRemoved(cameraName, target);
