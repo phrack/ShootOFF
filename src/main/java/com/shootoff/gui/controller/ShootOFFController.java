@@ -792,12 +792,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 				toggleProjectorMenus(true);
 				startArenaMenuItem.setDisable(false);
-
-				// We can't remove this until stopCalibration's runlaters finish
-				Platform.runLater(() -> {
-					arenaController.setFeedCanvasManager(null);
-					arenaController = null;
-				});
+				arenaController.setFeedCanvasManager(null);
+				arenaController = null;
 			});
 		}
 
