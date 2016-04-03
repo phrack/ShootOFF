@@ -67,7 +67,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 		return imageFile;
 	}
 
-	public void setAnimation(final SpriteAnimation animation) {
+	public void setAnimation(SpriteAnimation animation) {
 		this.animation = Optional.of(animation);
 	}
 
