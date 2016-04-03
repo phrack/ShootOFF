@@ -90,12 +90,12 @@ public class CameraManager {
 	protected final Configuration config;
 	protected Optional<Bounds> projectionBounds = Optional.empty();
 
-	protected AtomicBoolean isStreaming = new AtomicBoolean(true);
-	protected AtomicBoolean isDetecting = new AtomicBoolean(true);
-	protected AtomicBoolean isCalibrating = new AtomicBoolean(false);
-	protected boolean shownBrightnessWarning = false;
-	protected boolean cropFeedToProjection = false;
-	protected boolean limitDetectProjection = false;
+	private final AtomicBoolean isStreaming = new AtomicBoolean(true);
+	private final AtomicBoolean isDetecting = new AtomicBoolean(true);
+	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
+	private boolean shownBrightnessWarning = false;
+	private boolean cropFeedToProjection = false;
+	private boolean limitDetectProjection = false;
 
 	protected Optional<Integer> minimumShotDimension = Optional.empty();
 
@@ -122,9 +122,9 @@ public class CameraManager {
 	private double webcamFPS = DEFAULT_FPS;
 	private boolean showedFPSWarning = false;
 
-	protected AutoCalibrationManager acm = null;
-	protected boolean isAutoCalibrating = false;
-	public boolean cameraAutoCalibrated = false;
+	private AutoCalibrationManager acm = null;
+	private final AtomicBoolean isAutoCalibrating = new AtomicBoolean(false);
+	protected boolean cameraAutoCalibrated = false;
 
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
 	protected final ArenaMaskManager arenaMaskManager;
@@ -421,7 +421,6 @@ public class CameraManager {
 	}
 
 	protected class Detector extends MediaListenerAdapter implements Runnable {
-
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
@@ -521,13 +520,13 @@ public class CameraManager {
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
 
-		if (isAutoCalibrating) {
+		if (isAutoCalibrating.get()) {
 			acm.processFrame(currentFrame);
 			return currentFrame;
 		}
 
 		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
-		Mat matFrameHSV = new Mat();
+		final Mat matFrameHSV = new Mat();
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 			if (acm != null) {
@@ -553,7 +552,7 @@ public class CameraManager {
 				videoWriterCalibratedArea.encodeVideo(0, frame);
 			}
 
-			if (isAutoCalibrating || isDetecting()) Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
+			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 
 			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrame);
 
@@ -562,7 +561,8 @@ public class CameraManager {
 			}
 
 		} else {
-			if (isAutoCalibrating || isDetecting()) Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
+			if (isAutoCalibrating.get() || isDetecting())
+				Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 		}
 
 		shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
@@ -668,7 +668,6 @@ public class CameraManager {
 	private void fireAutoCalibration() {
 		acm.reset();
 		acm.setCallback(new Callback<Void, Void>() {
-
 			@Override
 			public Void call(Void param) {
 				autoCalibrateSuccess(acm.getBoundsResult(), acm.getFrameDelayResult());
@@ -678,8 +677,8 @@ public class CameraManager {
 	}
 
 	protected void autoCalibrateSuccess(Bounds bounds, long delay) {
-		if (isAutoCalibrating && cameraCalibrationListener != null) {
-			isAutoCalibrating = false;
+		if (isAutoCalibrating.get() && cameraCalibrationListener != null) {
+			isAutoCalibrating.set(false);
 
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
 					(int) bounds.getWidth(), (int) bounds.getHeight());
@@ -705,7 +704,7 @@ public class CameraManager {
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
 		acm = new AutoCalibrationManager(this, calculateFrameDelay);
-		isAutoCalibrating = true;
+		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
 		// Turns off using mask
 		shotDetectionManager.setArenaMaskManager(null);
@@ -714,7 +713,7 @@ public class CameraManager {
 	}
 
 	public void disableAutoCalibration() {
-		isAutoCalibrating = false;
+		isAutoCalibrating.set(false);
 	}
 
 	public void setArenaBackground(String resourceFilename) {
