@@ -91,11 +91,11 @@ public class XMLTargetReader {
 	}
 
 	private static class TargetXMLHandler extends DefaultHandler {
-		List<Node> regions = new ArrayList<Node>();
-		TargetRegion currentRegion;
-		List<Double> polygonPoints = null;
-		Color polygonFill = null;
-		Map<String, String> currentTags;
+		private final List<Node> regions = new ArrayList<Node>();
+		private TargetRegion currentRegion;
+		private List<Double> polygonPoints = null;
+		private Color polygonFill = null;
+		private Map<String, String> currentTags;
 
 		public List<Node> getRegions() {
 			return regions;
@@ -131,7 +131,7 @@ public class XMLTargetReader {
 					}
 
 					if (imageRegion.getAnimation().isPresent()) {
-						SpriteAnimation animation = imageRegion.getAnimation().get();
+						final SpriteAnimation animation = imageRegion.getAnimation().get();
 						animation.setCycleCount(1);
 
 						animation.setOnFinished((e) -> {
