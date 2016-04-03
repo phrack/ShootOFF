@@ -221,17 +221,17 @@ public final class ShotDetectionManager {
 			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 
 		Mat workingFrame = null;
-		
+
 		int yPixelOffset = 0;
 		int xPixelOffset = 0;
 
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			Bounds b = cameraManager.getProjectionBounds().get();
-			
+
 			yPixelOffset = (int) b.getMinY();
 			xPixelOffset = (int) b.getMinX();
-			
+
 			Mat subFrame = frameHSV.submat((int) b.getMinY(), (int) b.getMaxY(), (int) b.getMinX(), (int) b.getMaxX());
 			workingFrame = subFrame;
 		} else {
@@ -257,7 +257,7 @@ public final class ShotDetectionManager {
 		}
 
 		if (!filtersInitialized) filtersInitialized = checkIfInitialized();
-		
+
 		if (detectShots && filtersInitialized) {
 			updateAvgThresholdPixels(thresholdPixelsSize);
 
