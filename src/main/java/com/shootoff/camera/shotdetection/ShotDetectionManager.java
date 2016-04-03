@@ -221,16 +221,21 @@ public final class ShotDetectionManager {
 			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 
 		Mat workingFrame = null;
+		
+		int yPixelOffset = 0;
+		int xPixelOffset = 0;
 
 		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			Bounds b = cameraManager.getProjectionBounds().get();
+			
+			yPixelOffset = (int) b.getMinY();
+			xPixelOffset = (int) b.getMinX();
+			
 			Mat subFrame = frameHSV.submat((int) b.getMinY(), (int) b.getMaxY(), (int) b.getMinX(), (int) b.getMaxX());
 			workingFrame = subFrame;
-
 		} else {
 			workingFrame = frameHSV;
-
 		}
 
 		// Must reset before every updateFilter loop
@@ -252,7 +257,7 @@ public final class ShotDetectionManager {
 		}
 
 		if (!filtersInitialized) filtersInitialized = checkIfInitialized();
-
+		
 		if (detectShots && filtersInitialized) {
 			updateAvgThresholdPixels(thresholdPixelsSize);
 
@@ -279,7 +284,7 @@ public final class ShotDetectionManager {
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
 				for (final Pixel pixel : thresholdPixels) {
-					frameBGR.put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
+					frameBGR.put(pixel.y + yPixelOffset, pixel.x + xPixelOffset, BLUE_MAT_PIXEL);
 				}
 			}
 
@@ -287,7 +292,7 @@ public final class ShotDetectionManager {
 				// Make the feed pixels red so the user can easily see what the
 				// problem pixels are
 				for (final Pixel pixel : brightPixels) {
-					frameBGR.put(pixel.y, pixel.x, RED_MAT_PIXEL);
+					frameBGR.put(pixel.y + yPixelOffset, pixel.x + xPixelOffset, RED_MAT_PIXEL);
 				}
 			}
 		}
