@@ -51,7 +51,6 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -507,13 +506,11 @@ public class CameraManager {
 			}
 
 			final BufferedImage frame = currentFrame;
-			Platform.runLater(() -> {
-				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					cameraView.updateBackground(frame, projectionBounds);
-				} else {
-					cameraView.updateBackground(frame, Optional.empty());
-				}
-			});
+			if (cropFeedToProjection && projectionBounds.isPresent()) {
+				cameraView.updateBackground(frame, projectionBounds);
+			} else {
+				cameraView.updateBackground(frame, Optional.empty());
+			}
 		}
 	}
 
@@ -620,47 +617,38 @@ public class CameraManager {
 
 	public void showBrightnessWarning() {
 		if (!TimerPool.isWaiting(brightnessDiagnosticFuture)) {
-			Platform.runLater(() -> {
-				brightnessDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive brightness",
-						Color.RED);
-			});
+			brightnessDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive brightness", Color.RED);
 		} else {
 			// Stop the existing timer and start a new one
 			TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		}
 		brightnessDiagnosticFuture = TimerPool.schedule(() -> {
-			Platform.runLater(() -> {
-				if (brightnessDiagnosticWarning != null) {
-					cameraView.removeDiagnosticMessage(brightnessDiagnosticWarning);
-					brightnessDiagnosticWarning = null;
-				}
-			});
+			if (brightnessDiagnosticWarning != null) {
+				cameraView.removeDiagnosticMessage(brightnessDiagnosticWarning);
+				brightnessDiagnosticWarning = null;
+			}
 		}, DIAGNOSTIC_MESSAGE_DURATION);
 
-		if (!webcam.isPresent() || shownBrightnessWarning) return;
-		shownBrightnessWarning = true;
-		if (cameraErrorView.isPresent() && webcam.isPresent())
-			cameraErrorView.get().showBrightnessWarning(webcam.get());
+		if (webcam.isPresent() && !shownBrightnessWarning) {
+			shownBrightnessWarning = true;
+			if (cameraErrorView.isPresent()) cameraErrorView.get().showBrightnessWarning(webcam.get());
+		}
 	}
 
 	private Label motionDiagnosticWarning = null;
 
 	public void showMotionWarning() {
 		if (!TimerPool.isWaiting(motionDiagnosticFuture)) {
-			Platform.runLater(() -> {
-				motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
-			});
+			motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 		} else {
 			// Stop the existing timer and start a new one
 			TimerPool.cancelTimer(motionDiagnosticFuture);
 		}
 		motionDiagnosticFuture = TimerPool.schedule(() -> {
-			Platform.runLater(() -> {
-				if (motionDiagnosticWarning != null) {
-					cameraView.removeDiagnosticMessage(motionDiagnosticWarning);
-					motionDiagnosticWarning = null;
-				}
-			});
+			if (motionDiagnosticWarning != null) {
+				cameraView.removeDiagnosticMessage(motionDiagnosticWarning);
+				motionDiagnosticWarning = null;
+			}
 		}, DIAGNOSTIC_MESSAGE_DURATION);
 	}
 

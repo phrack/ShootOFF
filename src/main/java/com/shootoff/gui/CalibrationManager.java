@@ -207,10 +207,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingManualCalibrationRequestMessage) return;
 
 		showingManualCalibrationRequestMessage = true;
-		Platform.runLater(() -> {
-			manualCalibrationRequestMessage = calibratingCanvasManager
-					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
-		});
+		manualCalibrationRequestMessage = calibratingCanvasManager
+				.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
 	}
 
 	private void removeManualCalibrationRequestMessage() {
@@ -218,11 +216,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		if (showingManualCalibrationRequestMessage) {
 			showingManualCalibrationRequestMessage = false;
-
-			Platform.runLater(() -> {
-				calibratingCanvasManager.removeDiagnosticMessage(manualCalibrationRequestMessage);
-				manualCalibrationRequestMessage = null;
-			});
+			calibratingCanvasManager.removeDiagnosticMessage(manualCalibrationRequestMessage);
+			manualCalibrationRequestMessage = null;
 		}
 	}
 
@@ -233,10 +228,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingFullScreenRequestMessage) return;
 
 		showingFullScreenRequestMessage = true;
-		Platform.runLater(() -> {
-			fullScreenRequestMessage = calibratingCanvasManager
-					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
-		});
+		fullScreenRequestMessage = calibratingCanvasManager
+				.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
 	}
 
 	private void removeFullScreenRequest() {
@@ -245,10 +238,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingFullScreenRequestMessage) {
 			showingFullScreenRequestMessage = false;
 
-			Platform.runLater(() -> {
-				calibratingCanvasManager.removeDiagnosticMessage(fullScreenRequestMessage);
-				fullScreenRequestMessage = null;
-			});
+			calibratingCanvasManager.removeDiagnosticMessage(fullScreenRequestMessage);
+			fullScreenRequestMessage = null;
 		}
 	}
 
@@ -301,10 +292,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingAutoCalibrationMessage) return;
 
 		showingAutoCalibrationMessage = true;
-		Platform.runLater(() -> {
-			autoCalibrationMessage = calibratingCanvasManager.addDiagnosticMessage("Attempting autocalibration", 11000,
-					Color.CYAN);
-		});
+		autoCalibrationMessage = calibratingCanvasManager.addDiagnosticMessage("Attempting autocalibration", 11000,
+				Color.CYAN);
 	}
 
 	private void removeAutoCalibrationMessage() {
@@ -314,12 +303,9 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingAutoCalibrationMessage) {
 			showingAutoCalibrationMessage = false;
 
-			Platform.runLater(() -> {
-				logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
-				calibratingCanvasManager.removeDiagnosticMessage(autoCalibrationMessage);
-				autoCalibrationMessage = null;
-			});
-
+			if (logger.isTraceEnabled()) logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
+			calibratingCanvasManager.removeDiagnosticMessage(autoCalibrationMessage);
+			autoCalibrationMessage = null;
 		}
 	}
 

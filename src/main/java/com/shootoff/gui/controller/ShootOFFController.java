@@ -458,8 +458,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
-		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, this, webcamName,
-				shotEntries);
+		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, this, webcamName, shotEntries);
 		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, this, canvasManager);
 
 		if (config.getRecordingCameras().contains(webcam)) {
@@ -823,10 +822,18 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@Override
 	public void toggleCalibrating() {
-		if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate"))
-			toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
-		else
-			toggleArenaCalibrationMenuItem.setText("Calibrate");
+		final Runnable toggleCalibrationAction = () -> {
+			if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate"))
+				toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
+			else
+				toggleArenaCalibrationMenuItem.setText("Calibrate");
+		};
+
+		if (Platform.isFxApplicationThread()) {
+			toggleCalibrationAction.run();
+		} else {
+			Platform.runLater(toggleCalibrationAction);
+		}
 	}
 
 	@FXML

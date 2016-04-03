@@ -209,7 +209,7 @@ public class CanvasManager implements CameraView {
 			}
 		});
 
-		diagnosticsVBox.getChildren().add(diagnosticLabel);
+		Platform.runLater(() -> diagnosticsVBox.getChildren().add(diagnosticLabel));
 
 		if (!config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
 			@SuppressWarnings("unchecked")
@@ -233,7 +233,7 @@ public class CanvasManager implements CameraView {
 			diagnosticFutures.remove(diagnosticLabel);
 		}
 
-		diagnosticsVBox.getChildren().remove(diagnosticLabel);
+		Platform.runLater(() -> diagnosticsVBox.getChildren().remove(diagnosticLabel));
 	}
 
 	public static String colorToWebCode(Color color) {
@@ -299,14 +299,14 @@ public class CanvasManager implements CameraView {
 					null);
 		}
 
-		background.setImage(img);
+		Platform.runLater(() -> background.setImage(img));
 	}
 
 	public void updateBackground(Image img) {
 		updateCanvasGroup();
 		background.setX(0);
 		background.setY(0);
-		background.setImage(img);
+		Platform.runLater(() -> background.setImage(img));
 	}
 
 	private void updateCanvasGroup() {
@@ -316,7 +316,7 @@ public class CanvasManager implements CameraView {
 			} else {
 				// Remove the wait spinner and replace it
 				// with the background
-				canvasGroup.getChildren().set(0, background);
+				Platform.runLater(() -> canvasGroup.getChildren().set(0, background));
 			}
 		}
 	}
@@ -382,7 +382,7 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public void clearShots() {
-		Runnable clearShotsAction = () -> {
+		final Runnable clearShotsAction = () -> {
 			for (Shot shot : shots) {
 				canvasGroup.getChildren().remove(shot.getMarker());
 			}
@@ -748,7 +748,7 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public Target addTarget(Target newTarget) {
-		Runnable addTargetAction = () -> canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
+		final Runnable addTargetAction = () -> canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
 
 		if (Platform.isFxApplicationThread()) {
 			addTargetAction.run();
@@ -762,7 +762,8 @@ public class CanvasManager implements CameraView {
 	}
 
 	public void removeTarget(Target target) {
-		Runnable removeTargetAction = () -> canvasGroup.getChildren().remove(((TargetView) target).getTargetGroup());
+		final Runnable removeTargetAction = () -> canvasGroup.getChildren()
+				.remove(((TargetView) target).getTargetGroup());
 
 		if (Platform.isFxApplicationThread()) {
 			removeTargetAction.run();

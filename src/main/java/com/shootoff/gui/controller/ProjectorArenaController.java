@@ -447,14 +447,12 @@ public class ProjectorArenaController implements CalibrationListener {
 			TimerPool.cancelTimer(mouseExitedFuture);
 
 			mouseExitedFuture = TimerPool.schedule(() -> {
-				Platform.runLater(() -> {
-					if (showingCursorWarning) {
-						feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
-						showingCursorWarning = false;
-						mouseOnArenaLabel = null;
-					}
-					if (!calibrationManager.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
-				});
+				if (showingCursorWarning) {
+					feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
+					showingCursorWarning = false;
+					mouseOnArenaLabel = null;
+				}
+				if (!calibrationManager.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
 			}, 100 /* ms */);
 		}
 	}
