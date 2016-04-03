@@ -52,6 +52,7 @@ import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
+import com.shootoff.gui.Resetter;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
 import com.shootoff.gui.TargetListener;
@@ -107,7 +108,7 @@ import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
 public class ShootOFFController implements CameraConfigListener, CameraErrorView, TargetListener, TargetManager,
-		PluginListener, CalibrationConfigurator {
+		PluginListener, CalibrationConfigurator, Resetter {
 	private Stage shootOFFStage;
 	@FXML private MenuBar mainMenu;
 	@FXML private Menu addTargetMenu;
@@ -457,7 +458,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
-		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, camerasSupervisor, webcamName,
+		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, this, webcamName,
 				shotEntries);
 		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, this, canvasManager);
 
@@ -771,7 +772,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			arenaController = (ProjectorArenaController) loader.getController();
 			CameraManager calibratingCameraManager = camerasSupervisor
 					.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-			arenaController.init(this.getStage(), config, camerasSupervisor);
+			arenaController.init(this.getStage(), config, this);
 			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
 			arenaController.setCalibrationManager(calibrationManager.get());
 			arenaController.getCanvasManager().setShowShots(false);
@@ -1001,10 +1002,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@FXML
 	public void resetClicked(ActionEvent event) {
-		resetShotsAndTargets();
+		reset();
 	}
 
-	public void resetShotsAndTargets() {
+	@Override
+	public void reset() {
 		camerasSupervisor.reset();
 
 		if (config.getExercise().isPresent()) {

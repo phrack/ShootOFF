@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
@@ -97,7 +96,7 @@ public class CanvasManager implements CameraView {
 	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
 	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
 
-	protected final CamerasSupervisor camerasSupervisor;
+	private final Resetter resetter;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
@@ -115,11 +114,11 @@ public class CanvasManager implements CameraView {
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
-	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor,
+	public CanvasManager(Group canvasGroup, Configuration config, Resetter resetter,
 			String cameraName, ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
-		this.camerasSupervisor = camerasSupervisor;
+		this.resetter = resetter;
 		this.cameraName = cameraName;
 		this.shotEntries = shotEntries;
 		shots = Collections.synchronizedList(new ArrayList<Shot>());
@@ -666,7 +665,7 @@ public class CanvasManager implements CameraView {
 		TargetView.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
 			switch (commandName) {
 			case "reset":
-				camerasSupervisor.reset();
+				resetter.reset();
 				break;
 
 			case "animate":

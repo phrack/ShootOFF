@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.arenamask.Mask;
 import com.shootoff.config.Configuration;
@@ -38,6 +37,7 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
+import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetView;
 import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
@@ -90,7 +90,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		arenaStage.setScene(scene);
 	}
 
-	public void init(Stage shootOFFStage, Configuration config, CamerasSupervisor camerasSupervisor) {
+	public void init(Stage shootOFFStage, Configuration config, Resetter resetter) {
 		this.config = config;
 
 		this.shootOFFStage = shootOFFStage;
@@ -98,7 +98,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		arenaStage.setFullScreenExitHint("");
 
-		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
+		canvasManager = new CanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
 
 		arenaAnchor.widthProperty().addListener((e) -> {
