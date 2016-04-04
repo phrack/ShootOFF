@@ -107,6 +107,7 @@ public class TargetView implements com.shootoff.targets.Target {
 		targetGroup.setOnMouseClicked((event) -> {
 			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();
+			event.consume();
 		});
 
 		mousePressed();

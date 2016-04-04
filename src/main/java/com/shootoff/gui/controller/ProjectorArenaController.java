@@ -101,6 +101,10 @@ public class ProjectorArenaController implements CalibrationListener {
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
 
+		arenaAnchor.setOnMouseClicked((event) -> {
+			canvasManager.toggleTargetSelection(Optional.empty());
+		});
+
 		arenaAnchor.widthProperty().addListener((e) -> {
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});

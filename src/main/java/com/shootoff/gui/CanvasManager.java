@@ -125,8 +125,6 @@ public class CanvasManager implements CameraView {
 
 		this.background.setOnMouseClicked((event) -> {
 			toggleTargetSelection(Optional.empty());
-			selectedTarget = Optional.empty();
-			canvasGroup.requestFocus();
 		});
 
 		if (Platform.isFxApplicationThread()) {
@@ -788,12 +786,15 @@ public class CanvasManager implements CameraView {
 		return targets;
 	}
 
-	protected void toggleTargetSelection(Optional<TargetView> newSelection) {
+	public void toggleTargetSelection(Optional<TargetView> newSelection) {
 		if (selectedTarget.isPresent()) selectedTarget.get().toggleSelected();
 
 		if (newSelection.isPresent()) {
 			newSelection.get().toggleSelected();
 			selectedTarget = newSelection;
+		} else {
+			selectedTarget = Optional.empty();
+			canvasGroup.requestFocus();
 		}
 	}
 }
