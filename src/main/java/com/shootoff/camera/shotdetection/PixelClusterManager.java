@@ -33,8 +33,7 @@ public class PixelClusterManager {
 	
 	private final int feedWidth;
 	private final int feedHeight;
-	private final int minimumShotDimension;
-
+	
 	private final static double MINIMUM_CONNECTEDNESS = 3.66f;
 	private final static double MAXIMUM_CONNECTEDNESS_SCALE = 6f;
 
@@ -53,10 +52,9 @@ public class PixelClusterManager {
 	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
 
-	protected PixelClusterManager(ShotDetectionManager shotDetectionManager) {
-		feedWidth = shotDetectionManager.getCameraManager().getFeedWidth();
-		feedHeight = shotDetectionManager.getCameraManager().getFeedHeight();
-		minimumShotDimension = shotDetectionManager.getMinimumShotDimension();
+	protected PixelClusterManager(int feedWidth, int feedHeight) {
+		this.feedWidth = feedWidth;
+		this.feedHeight = feedHeight;
 	}
 
 	private int preprocessClusterablePixels(Set<Pixel> clusterablePixels, Map<Pixel, Integer> pixelMapping) {
@@ -106,7 +104,7 @@ public class PixelClusterManager {
 		return numberOfRegions;
 	}
 
-	public Set<PixelCluster> clusterPixels(Set<Pixel> clusterablePixels) {
+	public Set<PixelCluster> clusterPixels(Set<Pixel> clusterablePixels, int minimumShotDimension) {
 		final Map<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
 		
 		final int numberOfRegions = preprocessClusterablePixels(clusterablePixels, pixelMapping);

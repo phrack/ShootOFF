@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.geometry.Bounds;
 
 import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

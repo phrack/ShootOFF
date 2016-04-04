@@ -110,10 +110,10 @@ public final class ShotDetectionManager {
 		this.cameraView = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;
-
-		this.pixelClusterManager = new PixelClusterManager(this);
 		
 		initializeDimensions(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
+		
+		this.pixelClusterManager = new PixelClusterManager(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
 	}
 
 	public void reInitializeDimensions() {
@@ -254,7 +254,7 @@ public final class ShotDetectionManager {
 			}
 
 			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
-				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels);
+				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels, getMinimumShotDimension());
 
 				if (logger.isTraceEnabled()) {
 					logger.trace("thresholdPixels {}", thresholdPixelsSize);
