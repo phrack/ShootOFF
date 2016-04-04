@@ -30,13 +30,7 @@ import org.slf4j.LoggerFactory;
 
 public class PixelClusterManager {
 	private static final Logger logger = LoggerFactory.getLogger(PixelClusterManager.class);
-
-	private int numberOfRegions = -1;
-
-	private final Set<Pixel> clusterablePixels;
-
-	private final Map<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
-
+	
 	private final int feedWidth;
 	private final int feedHeight;
 	private final int minimumShotDimension;
@@ -59,15 +53,15 @@ public class PixelClusterManager {
 	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
 
-	protected PixelClusterManager(Set<Pixel> thresholdPixels, ShotDetectionManager shotDetectionManager) {
-		clusterablePixels = thresholdPixels;
+	protected PixelClusterManager(ShotDetectionManager shotDetectionManager) {
 		feedWidth = shotDetectionManager.getCameraManager().getFeedWidth();
 		feedHeight = shotDetectionManager.getCameraManager().getFeedHeight();
 		minimumShotDimension = shotDetectionManager.getMinimumShotDimension();
 	}
 
-	private void preprocessClusterablePixels() {
+	private int preprocessClusterablePixels(Set<Pixel> clusterablePixels, Map<Pixel, Integer> pixelMapping) {
 		final Stack<Pixel> mustExamine = new Stack<Pixel>();
+		int numberOfRegions = -1;
 
 		for (final Pixel pixel : clusterablePixels) {
 			if (!pixelMapping.containsKey(pixel)) {
@@ -108,10 +102,14 @@ public class PixelClusterManager {
 				thisPoint.setConnectedness(connectedness);
 			}
 		}
+		
+		return numberOfRegions;
 	}
 
-	public Set<PixelCluster> clusterPixels() {
-		preprocessClusterablePixels();
+	public Set<PixelCluster> clusterPixels(Set<Pixel> clusterablePixels) {
+		final Map<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
+		
+		final int numberOfRegions = preprocessClusterablePixels(clusterablePixels, pixelMapping);
 
 		final Set<PixelCluster> clusters = new HashSet<PixelCluster>();
 
@@ -149,8 +147,6 @@ public class PixelClusterManager {
 					avgconnectedness += connectedness;
 				}
 			}
-
-			pixelMapping.clear();
 
 			final int clustersize = cluster.size();
 
@@ -202,6 +198,7 @@ public class PixelClusterManager {
 		if (logger.isTraceEnabled())
 			logger.trace("---- Detected {} shots from {} regions ------", clusters.size(), numberOfRegions + 1);
 
+		
 		return clusters;
 	}
 }

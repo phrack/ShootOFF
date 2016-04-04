@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.geometry.Bounds;
 
 import org.opencv.core.Mat;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -524,6 +525,8 @@ public class CameraManager {
 
 		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
 		final Mat matFrameHSV = new Mat();
+		Mat submatFrameBGR = null;
+		Mat submatFrameHSV = null;
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 			if (acm != null) {
@@ -531,12 +534,13 @@ public class CameraManager {
 				matFrameBGR = acm.undistortFrame(matFrameBGR);
 			}
 
-			Mat submatFrame = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
+			submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
 					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
 					(int) projectionBounds.get().getMaxX());
+			
 
 			if (recordingCalibratedArea) {
-				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame),
+				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
 						BufferedImage.TYPE_3BYTE_BGR);
 				IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
@@ -551,17 +555,34 @@ public class CameraManager {
 
 			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 
-			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrame);
+			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrameBGR);
 
 			if (debuggerListener.isPresent()) {
-				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
+				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrameBGR));
 			}
 
 		} else {
 			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 		}
-
-		shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
+				
+		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection())
+				&& getProjectionBounds().isPresent()) {
+			
+			submatFrameHSV = matFrameHSV.submat((int) projectionBounds.get().getMinY(),
+				(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
+				(int) projectionBounds.get().getMaxX());
+			
+			if (submatFrameBGR == null)
+				submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
+						(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
+						(int) projectionBounds.get().getMaxX());
+			
+			shotDetectionManager.processFrame(submatFrameHSV, submatFrameBGR, isDetecting.get());
+		}
+		else
+		{
+			shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
+		}
 
 		// matFrameBGR is showing the colored pixels for brightness and motion,
 		// hence why we need to return the converted version

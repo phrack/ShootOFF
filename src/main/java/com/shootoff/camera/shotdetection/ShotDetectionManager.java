@@ -101,6 +101,9 @@ public final class ShotDetectionManager {
 
 	private ArenaMaskManager arenaMaskManager = null;
 	private boolean usingArenaMask = false;
+	
+	final PixelClusterManager pixelClusterManager;	
+
 
 	public ShotDetectionManager(final CameraManager cameraManager, final Configuration config,
 			final CameraView canvasManager) {
@@ -108,6 +111,8 @@ public final class ShotDetectionManager {
 		this.cameraManager = cameraManager;
 		this.config = config;
 
+		this.pixelClusterManager = new PixelClusterManager(this);
+		
 		initializeDimensions(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
 	}
 
@@ -217,31 +222,12 @@ public final class ShotDetectionManager {
 	 *            whether or not to detect a shot
 	 */
 	public void processFrame(final Mat frameHSV, final Mat frameBGR, final boolean detectShots) {
-		if (cameraManager.getFrameCount() % 5 == 0)
-			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
-
-		Mat workingFrame = null;
-
-		int yPixelOffset = 0;
-		int xPixelOffset = 0;
-
-		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
-				&& cameraManager.getProjectionBounds().isPresent()) {
-			Bounds b = cameraManager.getProjectionBounds().get();
-
-			yPixelOffset = (int) b.getMinY();
-			xPixelOffset = (int) b.getMinX();
-
-			Mat subFrame = frameHSV.submat((int) b.getMinY(), (int) b.getMaxY(), (int) b.getMinX(), (int) b.getMaxX());
-			workingFrame = subFrame;
-		} else {
-			workingFrame = frameHSV;
-		}
+		updateMovingAveragePeriod();
 
 		// Must reset before every updateFilter loop
 		brightPixels.clear();
 
-		final Set<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(workingFrame,
+		final Set<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(frameHSV,
 				(detectShots && filtersInitialized));
 
 		int thresholdPixelsSize = thresholdPixels.size();
@@ -268,14 +254,14 @@ public final class ShotDetectionManager {
 			}
 
 			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
-				final Set<PixelCluster> clusters = clusterPixels(thresholdPixels);
+				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels);
 
 				if (logger.isTraceEnabled()) {
 					logger.trace("thresholdPixels {}", thresholdPixelsSize);
 					logger.trace("clusters {}", clusters.size());
 				}
 
-				detectShots(workingFrame, clusters);
+				detectShots(frameHSV, clusters);
 			}
 
 			// Moved to after detectShots because otherwise we'll have changed
@@ -284,7 +270,7 @@ public final class ShotDetectionManager {
 				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
 
 				for (final Pixel pixel : thresholdPixels) {
-					frameBGR.put(pixel.y + yPixelOffset, pixel.x + xPixelOffset, BLUE_MAT_PIXEL);
+					frameBGR.put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
 				}
 			}
 
@@ -292,17 +278,15 @@ public final class ShotDetectionManager {
 				// Make the feed pixels red so the user can easily see what the
 				// problem pixels are
 				for (final Pixel pixel : brightPixels) {
-					frameBGR.put(pixel.y + yPixelOffset, pixel.x + xPixelOffset, RED_MAT_PIXEL);
+					frameBGR.put(pixel.y, pixel.x, RED_MAT_PIXEL);
 				}
 			}
 		}
 	}
 
-	private Set<PixelCluster> clusterPixels(final Set<Pixel> thresholdPixels) {
-		final PixelClusterManager pixelClusterManager = new PixelClusterManager(thresholdPixels, this);
-		final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels();
-
-		return clusters;
+	private void updateMovingAveragePeriod() {
+		if (cameraManager.getFrameCount() % 5 == 0)
+			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 	}
 
 	private void detectShots(final Mat workingFrame, final Set<PixelCluster> clusters) {
@@ -462,7 +446,7 @@ public final class ShotDetectionManager {
 			final Mat debugFrame = new Mat();
 			Imgproc.cvtColor(workingFrame, debugFrame, Imgproc.COLOR_HSV2BGR);
 
-			String filename = String.format("shot-%d-%d_orig.png", (int) pc.centerPixelX, (int) pc.centerPixelY);
+			String filename = String.format("shot-%d-%d-%d_orig.png", cameraManager.getFrameCount(), (int) pc.centerPixelX, (int) pc.centerPixelY);
 			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, debugFrame);
@@ -477,7 +461,7 @@ public final class ShotDetectionManager {
 				}
 			}
 
-			File outputfile = new File(String.format("shot-%d-%d.png", (int) pc.centerPixelX, (int) pc.centerPixelY));
+			File outputfile = new File(String.format("shot-%d-%d-%d.png", cameraManager.getFrameCount(), (int) pc.centerPixelX, (int) pc.centerPixelY));
 			filename = outputfile.toString();
 			Highgui.imwrite(filename, debugFrame);
 
