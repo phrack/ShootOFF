@@ -349,7 +349,7 @@ public class CanvasManager implements CameraView {
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
 
-		logger.debug("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+		logger.trace("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
 
 		return new BoundingBox(minX, minY, width, height);
@@ -368,7 +368,7 @@ public class CanvasManager implements CameraView {
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
 
-		logger.debug("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+		logger.trace("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
 
 		return new BoundingBox(minX, minY, width, height);

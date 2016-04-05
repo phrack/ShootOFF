@@ -121,9 +121,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
 		removeCalibrationTargetIfPresent();
 
+		if (!calibratedFromCanvas)
+			bounds = calibratingCanvasManager.translateCameraToCanvas(bounds);
 		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
 
-		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
+		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds);
 
 		if (isCalibrating()) stopCalibration();
 	}
@@ -159,20 +161,13 @@ public class CalibrationManager implements CameraCalibrationListener {
 		}
 	}
 
-	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
-		Bounds translatedToCanvasBounds;
-		if (bounds != null && !calibratedFromCanvas)
-			translatedToCanvasBounds = calibratingCanvasManager.translateCameraToCanvas(bounds);
-		else
-			translatedToCanvasBounds = bounds;
+	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
 
-		Bounds translatedToCameraBounds;
-		if (bounds != null && calibratedFromCanvas)
-			translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
-		else
-			translatedToCameraBounds = bounds;
 
-		calibratingCanvasManager.setProjectorArena(arenaController, translatedToCanvasBounds);
+		Bounds translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
+
+
+		calibratingCanvasManager.setProjectorArena(arenaController, bounds);
 		configureArenaCamera(option);
 		calibratingCameraManager.setProjectionBounds(translatedToCameraBounds);
 	}
