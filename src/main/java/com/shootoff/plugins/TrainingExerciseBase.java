@@ -155,6 +155,17 @@ public class TrainingExerciseBase {
 		return (Stage) shotTimerTable.getScene().getWindow();
 	}
 
+	/**
+	 * Shows a popup window that lets the user set the interval for a random
+	 * start delay in seconds. Notify interval points to a function that gets
+	 * the min and max values for the interval as parameters.
+	 * 
+	 * @param listener
+	 *            the object to notify when the user closes this window with a
+	 *            set value
+	 * 
+	 * @since 1.4
+	 */
 	public void getDelayedStartInterval(final DelayedStartListener listener) {
 		final FXMLLoader loader = new FXMLLoader(
 				TrainingExerciseBase.class.getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
@@ -213,6 +224,8 @@ public class TrainingExerciseBase {
 	 *            looked up
 	 * @param width
 	 *            the width of the new column
+	 * 
+	 * @since 1.3
 	 */
 	public void addShotTimerColumn(String name, int width) {
 		final TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
@@ -235,6 +248,8 @@ public class TrainingExerciseBase {
 	 *            the name of the column to insert the text into
 	 * @param value
 	 *            the text that should be inserted
+	 * 
+	 * @since 1.3
 	 */
 	public void setShotTimerColumnText(final String name, final String value) {
 		if (shotTimerTable != null) {
@@ -262,6 +277,8 @@ public class TrainingExerciseBase {
 	 * 
 	 * @param message
 	 *            the message to show on every webcam feed
+	 * 
+	 * @since 1.0
 	 */
 	public void showTextOnFeed(String message) {
 		if (config.inDebugMode()) System.out.println(message);
@@ -313,6 +330,8 @@ public class TrainingExerciseBase {
 	 * 
 	 * @param isPaused
 	 *            <tt>true</tt> to temporarily stop detecting shots
+	 * 
+	 * @since 1.4
 	 */
 	public void pauseShotDetection(final boolean isPaused) {
 		camerasSupervisor.setDetectingAll(!isPaused);
@@ -356,6 +375,8 @@ public class TrainingExerciseBase {
 	 * 
 	 * @param soundFilePath
 	 *            the audio file to play (e.g. "sounds/metal_clang.wav")
+	 * 
+	 * @since 1.1
 	 */
 	public static void playSound(final String soundFilePath) {
 		playSound(new File(soundFilePath));

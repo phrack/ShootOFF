@@ -101,6 +101,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 *            the top left y coordinate of the target
 	 * 
 	 * @return the group that was loaded from the target file
+	 * 
+	 * @since 2.1
 	 */
 	public Optional<Target> addTarget(File target, final double x, final double y) {
 		if ('@' != target.toString().charAt(0) && !target.isAbsolute())
@@ -121,14 +123,38 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		targets.remove(target);
 	}
 
+	/**
+	 * Get the width of the arena in pixels.
+	 * 
+	 * @return the arena's width in pixels
+	 * 
+	 * @since 2.1
+	 */
 	public double getArenaWidth() {
 		return arenaController.getWidth();
 	}
 
+	/**
+	 * Get the height of the arena in pixels.
+	 * 
+	 * @return the arena's height in pixels
+	 * 
+	 * @since 2.1
+	 */
 	public double getArenaHeight() {
 		return arenaController.getHeight();
 	}
 
+	/**
+	 * Get the coordinates of the origin for the display the arena is currently
+	 * located on. This is useful if you need to know what display the arena is
+	 * on.
+	 * 
+	 * @return the origin coordinates for the JavaFX screen the arena is located
+	 *         on, relative to other displays.
+	 * 
+	 * @since 3.8
+	 */
 	public Point2D getArenaScreenOrigin() {
 		return arenaController.getArenaScreenOrigin();
 	}
@@ -172,6 +198,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 *            the color of the letters in the message
 	 * @param font
 	 *            the font to use to display the message
+	 * 
+	 * @since 3.7
 	 */
 	public void showTextOnFeed(String message, int x, int y, Color backgroundColor, Color textColor, Font font) {
 		showTextOnFeed(message);
@@ -202,6 +230,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @param background
 	 *            a file on the filesystem or a resource to set as the projector
 	 *            arena's background.
+	 * 
+	 * @since 3.7
 	 */
 	public void setArenaBackground(LocatedImage background) {
 		arenaController.setBackground(background);
