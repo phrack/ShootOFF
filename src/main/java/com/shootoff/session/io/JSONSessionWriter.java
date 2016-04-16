@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.Shot;
 
 public class JSONSessionWriter implements EventVisitor {
-	private final Logger logger = LoggerFactory
-			.getLogger(JSONSessionWriter.class);
+	private final Logger logger = LoggerFactory.getLogger(JSONSessionWriter.class);
 
 	private final File sessionFile;
 	private final JSONArray cameras = new JSONArray();
@@ -63,9 +62,8 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitShot(long timestamp, Shot shot, boolean isMalfunction,
-			boolean isReload, Optional<Integer> targetIndex,
-			Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
+			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 
 		JSONObject event = new JSONObject();
 		event.put("type", "shot");
@@ -121,8 +119,7 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitTargetResize(long timestamp, int targetIndex,
-			double newWidth, double newHeight) {
+	public void visitTargetResize(long timestamp, int targetIndex, double newWidth, double newHeight) {
 		JSONObject event = new JSONObject();
 		event.put("type", "targetResized");
 		event.put("timestamp", timestamp);
@@ -135,8 +132,7 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitTargetMove(long timestamp, int targetIndex, int newX,
-			int newY) {
+	public void visitTargetMove(long timestamp, int targetIndex, int newX, int newY) {
 		JSONObject event = new JSONObject();
 		event.put("type", "targetMoved");
 		event.put("timestamp", timestamp);
@@ -167,16 +163,14 @@ public class JSONSessionWriter implements EventVisitor {
 		Writer file = null;
 
 		try {
-			file = new OutputStreamWriter(new FileOutputStream(sessionFile),
-					"UTF-8");
+			file = new OutputStreamWriter(new FileOutputStream(sessionFile), "UTF-8");
 			file.write(session.toJSONString());
 			file.flush();
 		} catch (IOException e) {
 			logger.error("Error writing JSON session", e);
 		} finally {
 			try {
-				if (file != null)
-					file.close();
+				if (file != null) file.close();
 			} catch (IOException e) {
 				logger.error("Error closing JSON session", e);
 			}

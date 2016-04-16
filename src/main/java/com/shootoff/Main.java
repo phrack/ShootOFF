@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,11 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
 import java.util.Optional;
 import java.util.Properties;
@@ -44,6 +48,8 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
+import com.shootoff.plugins.engine.PluginEngine;
+import com.shootoff.util.VersionChecker;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 
@@ -105,7 +111,7 @@ public class Main extends Application {
 	}
 
 	private Optional<String> parseField(String metadataXML, String tagName, String fieldName) {
-		String tag = "<" + tagName;		
+		String tag = "<" + tagName;
 		int tagStart = metadataXML.indexOf(tag);
 
 		if (tagStart == -1) {
@@ -181,7 +187,6 @@ public class Main extends Application {
 		StringBuilder metadataXML = new StringBuilder();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
-
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (metadataXML.length() > 0) metadataXML.append("\n");
@@ -259,8 +264,6 @@ public class Main extends Application {
 						updateProgress(((double) totalDownloaded / (double) remoteFileLength) * 100, 100);
 					}
 
-					fileOutputStream.close();
-
 					updateProgress(100, 100);
 				} catch (IOException e) {
 					logger.error("Failed to download writable resources file", e);
@@ -305,11 +308,10 @@ public class Main extends Application {
 			resourcesAlert.setTitle("Missing Resources");
 			resourcesAlert.setHeaderText("Missing Required Resources!");
 			resourcesAlert.setResizable(true);
-			resourcesAlert
-					.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
-							+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
-							+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
-							+ "the website.");
+			resourcesAlert.setContentText("ShootOFF could not acquire the necessary resources to run. Please ensure "
+					+ "you have a connection to the Internet and can connect to http://shootoffapp.com and try again.\n\n"
+					+ "If you cannot get the browser-launched version of ShootOFF to work, use the standlone version from "
+					+ "the website.");
 			resourcesAlert.showAndWait();
 		} else {
 			runShootOFF();
@@ -342,8 +344,8 @@ public class Main extends Application {
 						File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 						if (entry.isDirectory()) {
 							if (!f.exists() && !f.mkdir()) {
-								IOException e = new IOException("Failed to make directory while extracting JAR: "
-										+ entry.getName());
+								IOException e = new IOException(
+										"Failed to make directory while extracting JAR: " + entry.getName());
 								logger.error("Error making directory to extract writable JAR contents", e);
 								throw e;
 							}
@@ -479,7 +481,7 @@ public class Main extends Application {
 		if (versionXML.isPresent()) {
 			Optional<String> stableVersion = parseField(versionXML.get(), "stableRelease", "version");
 
-			if (stableVersion.isPresent() && stableVersion.get().compareTo(version.get()) > 0) {
+			if (stableVersion.isPresent() && VersionChecker.compareVersions(stableVersion.get(), version.get()) > 0) {
 				Optional<String> downloadLink = parseField(versionXML.get(), "stableRelease", "download");
 
 				final String link;
@@ -495,9 +497,9 @@ public class Main extends Application {
 				shootoffWelcome.setResizable(true);
 
 				FlowPane fp = new FlowPane();
-				Label lbl = new Label("The current stable release of ShootOFF is " + stableVersion.get()
-						+ ", but you are running " + version.get() + ". "
-						+ "You can download the current version of ShootOFF here:\n\n");
+				Label lbl = new Label(
+						"The current stable release of ShootOFF is " + stableVersion.get() + ", but you are running "
+								+ version.get() + ". " + "You can download the current version of ShootOFF here:\n\n");
 
 				Hyperlink lnk = new Hyperlink(link);
 
@@ -565,7 +567,8 @@ public class Main extends Application {
 			else
 				primaryStage.setTitle("ShootOFF");
 			primaryStage.setScene(scene);
-			((ShootOFFController) loader.getController()).init(config);
+			ShootOFFController controller = (ShootOFFController) loader.getController();
+			controller.init(config, new PluginEngine(controller));
 			primaryStage.show();
 		} catch (IOException e) {
 			logger.error("Error loading ShootOFF FXML file", e);
@@ -614,7 +617,7 @@ public class Main extends Application {
 		this.primaryStage = primaryStage;
 
 		String os = System.getProperty("os.name");
-		if (os != null && os.equals("Mac OS X") && Camera.getWebcams().isEmpty()) {
+		if (os != null && "Mac OS X".equals(os) && Camera.getWebcams().isEmpty()) {
 			closeNoCamera();
 		}
 
@@ -640,22 +643,23 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exercises");
 
-			resourcesMetadataFile = new File(System.getProperty("shootoff.home") + File.separator
-					+ RESOURCES_METADATA_NAME);
+			resourcesMetadataFile = new File(
+					System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
 			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
-			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(SHOOTOFF_DOMAIN + "jws/"
-					+ RESOURCES_METADATA_NAME);
+			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(
+					SHOOTOFF_DOMAIN + "jws/" + RESOURCES_METADATA_NAME);
 
 			if (!localRI.isPresent() && remoteRI.isPresent()) {
 				resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
 				downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 			} else if (localRI.isPresent() && remoteRI.isPresent()) {
 				if (!localRI.get().getVersion().equals(remoteRI.get().getVersion())) {
-					System.out.println(String.format("Local version: %s, Remote version: %s", localRI.get()
-							.getVersion(), remoteRI.get().getVersion()));
-					resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator
-							+ RESOURCES_JAR_NAME);
+					System.out.println(String.format("Local version: %s, Remote version: %s",
+							localRI.get().getVersion(), remoteRI.get().getVersion()));
+					resourcesJARFile = new File(
+							System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
 					downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 				} else {
 					runShootOFF();
@@ -669,8 +673,13 @@ public class Main extends Application {
 			}
 			System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 			System.setProperty("shootoff.courses", System.getProperty("shootoff.home") + File.separator + "courses");
+			System.setProperty("shootoff.plugins", System.getProperty("shootoff.home") + File.separator + "exercises");
 			runShootOFF();
 		}
+	}
+
+	public static Optional<String> getVersion() {
+		return version;
 	}
 
 	public static void main(String[] args) {
@@ -678,11 +687,47 @@ public class Main extends Application {
 		// for more information about this hack
 		String os = System.getProperty("os.name");
 
-		nu.pattern.OpenCV.loadShared();
+		if (os != null) {
+			if ("Mac OS X".equals(os)) {
+				Camera.getDefault();
+			} else if (os.startsWith("Windows")) {
+				// OpenPNP's OpenCV wrapper for Java does not properly clean up
+				// after itself on Windows, thus it can fill the drive with
+				// stale temporary files. This hack works around the problem
+				// by giving ShootOFF on Windows its own instance of a temp
+				// directory that we can safely purge of stale files at
+				// the start of each session.
+				System.setProperty("java.io.tmpdir", System.getProperty("user.dir") + File.separator + "temp_bins");
 
-		if (os != null && os.equals("Mac OS X")) {
-			Camera.getDefault();
+				final File tempBinsDir = new File(System.getProperty("java.io.tmpdir"));
+
+				if (tempBinsDir.exists()) {
+					try {
+						Files.walkFileTree(tempBinsDir.toPath(), new SimpleFileVisitor<Path>() {
+							@Override
+							public FileVisitResult postVisitDirectory(final Path dir, final IOException e)
+									throws IOException {
+								if (!Files.isSameFile(tempBinsDir.toPath(), dir)) Files.deleteIfExists(dir);
+								return super.postVisitDirectory(dir, e);
+							}
+
+							@Override
+							public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
+									throws IOException {
+								Files.deleteIfExists(file);
+								return super.visitFile(file, attrs);
+							}
+						});
+					} catch (IOException e) {
+						logger.error("Failed walk temp_bins to delete old folders.");
+					}
+				} else if (!tempBinsDir.mkdir()) {
+					logger.error("Failed to create temporary directory to store ShootOFF binaries.");
+				}
+			}
 		}
+
+		nu.pattern.OpenCV.loadShared();
 
 		// Read ShootOFF's version number
 		Properties prop = new Properties();

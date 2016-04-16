@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,7 @@ import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 
 public class SessionIO {
-	public static void saveSession(SessionRecorder sessionRecorder,
-			File sessionFile) {
+	public static void saveSession(SessionRecorder sessionRecorder, File sessionFile) {
 		EventVisitor visitor;
 
 		if (sessionFile.getName().endsWith("xml")) {
@@ -53,41 +52,34 @@ public class SessionIO {
 				switch (e.getType()) {
 				case SHOT:
 					ShotEvent se = (ShotEvent) e;
-					visitor.visitShot(se.getTimestamp(), se.getShot(),
-							se.isMalfunction(), se.isReload(),
-							se.getTargetIndex(), se.getHitRegionIndex(),
-							se.getVideoString());
+					visitor.visitShot(se.getTimestamp(), se.getShot(), se.isMalfunction(), se.isReload(),
+							se.getTargetIndex(), se.getHitRegionIndex(), se.getVideoString());
 					break;
 
 				case TARGET_ADDED:
 					TargetAddedEvent tae = (TargetAddedEvent) e;
-					visitor.visitTargetAdd(tae.getTimestamp(),
-							tae.getTargetName());
+					visitor.visitTargetAdd(tae.getTimestamp(), tae.getTargetName());
 					break;
 
 				case TARGET_REMOVED:
 					TargetRemovedEvent tre = (TargetRemovedEvent) e;
-					visitor.visitTargetRemove(tre.getTimestamp(),
-							tre.getTargetIndex());
+					visitor.visitTargetRemove(tre.getTimestamp(), tre.getTargetIndex());
 					break;
 
 				case TARGET_RESIZED:
 					TargetResizedEvent trre = (TargetResizedEvent) e;
-					visitor.visitTargetResize(trre.getTimestamp(),
-							trre.getTargetIndex(), trre.getNewWidth(),
+					visitor.visitTargetResize(trre.getTimestamp(), trre.getTargetIndex(), trre.getNewWidth(),
 							trre.getNewHeight());
 					break;
 
 				case TARGET_MOVED:
 					TargetMovedEvent tme = (TargetMovedEvent) e;
-					visitor.visitTargetMove(tme.getTimestamp(),
-							tme.getTargetIndex(), tme.getNewX(), tme.getNewY());
+					visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());
 					break;
 
 				case EXERCISE_FEED_MESSAGE:
 					ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
-					visitor.visitExerciseFeedMessage(pfme.getTimestamp(),
-							pfme.getMessage());
+					visitor.visitExerciseFeedMessage(pfme.getTimestamp(), pfme.getMessage());
 					break;
 				}
 			}

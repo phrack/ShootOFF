@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,7 @@ import javafx.scene.shape.Ellipse;
 public class EllipseRegion extends Ellipse implements TargetRegion {
 	private final Map<String, String> tags = new HashMap<String, String>();
 
-	public EllipseRegion(double centerX, double centerY, double radiusX,
-			double radiusY) {
+	public EllipseRegion(double centerX, double centerY, double radiusX, double radiusY) {
 
 		super(centerX, centerY, radiusX, radiusY);
 	}

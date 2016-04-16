@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,7 @@ public class TargetResizedEvent implements Event {
 	private final double newWidth;
 	private final double newHeight;
 
-	public TargetResizedEvent(String cameraName, long timestamp,
-			int targetIndex, double newWidth, double newHeight) {
+	public TargetResizedEvent(String cameraName, long timestamp, int targetIndex, double newWidth, double newHeight) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.targetIndex = targetIndex;
@@ -63,7 +62,6 @@ public class TargetResizedEvent implements Event {
 
 	@Override
 	public String toString() {
-		return String
-				.format("target resized (%.2f, %.2f)", newWidth, newHeight);
+		return String.format("target resized (%.2f, %.2f)", newWidth, newHeight);
 	}
 }

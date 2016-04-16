@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,8 +51,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class XMLTargetReader {
-	private static final Logger logger = LoggerFactory
-			.getLogger(XMLTargetReader.class);
+	private static final Logger logger = LoggerFactory.getLogger(XMLTargetReader.class);
 
 	private final File targetFile;
 
@@ -76,8 +75,7 @@ public class XMLTargetReader {
 				try {
 					xmlInput.close();
 				} catch (IOException e) {
-					logger.error("Error closing XMl target opened for reading",
-							e);
+					logger.error("Error closing XMl target opened for reading", e);
 				}
 			}
 		}
@@ -96,8 +94,8 @@ public class XMLTargetReader {
 			return regions;
 		}
 
-		public void startElement(String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+				throws SAXException {
 
 			switch (qName) {
 			case "image":
@@ -109,28 +107,24 @@ public class XMLTargetReader {
 				if (savedFile.isAbsolute()) {
 					imageFile = savedFile;
 				} else {
-					imageFile = new File(System.getProperty("shootoff.home")
-							+ File.separator + attributes.getValue("file"));
+					imageFile = new File(
+							System.getProperty("shootoff.home") + File.separator + attributes.getValue("file"));
 				}
 
-				ImageRegion imageRegion = new ImageRegion(
-						Double.parseDouble(attributes.getValue("x")),
+				ImageRegion imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")), imageFile);
 				try {
 					int firstDot = imageFile.getName().indexOf('.') + 1;
 					String extension = imageFile.getName().substring(firstDot);
 
 					if (extension.endsWith("gif")) {
-						GifAnimation gif = new GifAnimation(imageRegion,
-								imageRegion.getImageFile());
+						GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
 						imageRegion.setImage(gif.getFirstFrame());
-						if (gif.getFrameCount() > 1)
-							imageRegion.setAnimation(gif);
+						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
 					}
 
 					if (imageRegion.getAnimation().isPresent()) {
-						SpriteAnimation animation = imageRegion.getAnimation()
-								.get();
+						SpriteAnimation animation = imageRegion.getAnimation().get();
 						animation.setCycleCount(1);
 
 						animation.setOnFinished((e) -> {
@@ -149,43 +143,35 @@ public class XMLTargetReader {
 				break;
 			case "rectangle":
 				currentTags = new HashMap<String, String>();
-				currentRegion = new RectangleRegion(
-						Double.parseDouble(attributes.getValue("x")),
-						Double.parseDouble(attributes.getValue("y")),
-						Double.parseDouble(attributes.getValue("width")),
+				currentRegion = new RectangleRegion(Double.parseDouble(attributes.getValue("x")),
+						Double.parseDouble(attributes.getValue("y")), Double.parseDouble(attributes.getValue("width")),
 						Double.parseDouble(attributes.getValue("height")));
-				((Shape) currentRegion).setFill(TargetEditorController
-						.createColor(attributes.getValue("fill")));
+				((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
 				break;
 			case "ellipse":
 				currentTags = new HashMap<String, String>();
-				currentRegion = new EllipseRegion(Double.parseDouble(attributes
-						.getValue("centerX")), Double.parseDouble(attributes
-						.getValue("centerY")), Double.parseDouble(attributes
-						.getValue("radiusX")), Double.parseDouble(attributes
-						.getValue("radiusY")));
-				((Shape) currentRegion).setFill(TargetEditorController
-						.createColor(attributes.getValue("fill")));
+				currentRegion = new EllipseRegion(Double.parseDouble(attributes.getValue("centerX")),
+						Double.parseDouble(attributes.getValue("centerY")),
+						Double.parseDouble(attributes.getValue("radiusX")),
+						Double.parseDouble(attributes.getValue("radiusY")));
+				((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
 				break;
 			case "polygon":
 				currentTags = new HashMap<String, String>();
 				polygonPoints = new ArrayList<Double>();
-				polygonFill = TargetEditorController.createColor(attributes
-						.getValue("fill"));
+				polygonFill = TargetEditorController.createColor(attributes.getValue("fill"));
 				break;
 			case "point":
 				polygonPoints.add(Double.parseDouble(attributes.getValue("x")));
 				polygonPoints.add(Double.parseDouble(attributes.getValue("y")));
 				break;
 			case "tag":
-				currentTags.put(attributes.getValue("name"),
-						attributes.getValue("value"));
+				currentTags.put(attributes.getValue("name"), attributes.getValue("value"));
 				break;
 			}
 		}
 
-		public void endElement(String uri, String localName, String qName)
-				throws SAXException {
+		public void endElement(String uri, String localName, String qName) throws SAXException {
 			switch (qName) {
 			case "polygon":
 				double[] points = new double[polygonPoints.size()];

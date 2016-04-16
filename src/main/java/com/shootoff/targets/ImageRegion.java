@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class ImageRegion extends ImageView implements TargetRegion {
-	private static final Logger logger = LoggerFactory
-			.getLogger(ImageRegion.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
 
 	private final Map<String, String> tags = new HashMap<String, String>();
 	private final File imageFile;
@@ -52,9 +51,7 @@ public class ImageRegion extends ImageView implements TargetRegion {
 		try {
 			this.setImage(new Image(new FileInputStream(imageFile)));
 		} catch (IOException e) {
-			logger.error(
-					"Error reading image file to set image target region's picture",
-					e);
+			logger.error("Error reading image file to set image target region's picture", e);
 		}
 	}
 
@@ -79,17 +76,14 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	}
 
 	public void reset() {
-		if (animation.isPresent())
-			animation.get().reset();
+		if (animation.isPresent()) animation.get().reset();
 	}
 
 	@Override
-	public void changeWidth(double widthDelta) {
-	}
+	public void changeWidth(double widthDelta) {}
 
 	@Override
-	public void changeHeight(double heightDelta) {
-	}
+	public void changeHeight(double heightDelta) {}
 
 	@Override
 	public RegionType getType() {

@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -315,7 +315,7 @@ public class SessionViewerController {
 			}
 		}
 	}
-	
+
 	@FXML
 	public void nextButtonClicked(ActionEvent event) {
 		if (isPlaying) togglePlaybackButton.fire();
@@ -377,7 +377,8 @@ public class SessionViewerController {
 			togglePlaybackButton.setGraphic(new ImageView(new Image(
 					SessionViewerController.class.getResourceAsStream("/images/gnome_media_playback_pause.png"))));
 
-			executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE, new NamedThreadFactory("SessionPlayback"));
+			executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+					new NamedThreadFactory("SessionPlayback"));
 			executorService.schedule(new AdvanceSlider(), STEP_INTERVAL, TimeUnit.MILLISECONDS);
 		} else {
 			togglePlaybackButton.setGraphic(new ImageView(new Image(

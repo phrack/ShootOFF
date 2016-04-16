@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,10 @@
 
 package com.shootoff.camera;
 
-public enum LightingCondition {
-	VERY_BRIGHT, BRIGHT, DARK
+import java.awt.image.BufferedImage;
+
+public interface CameraDebuggerListener {
+	public void updateDebugView(BufferedImage thresholdImg);
+
+	public void updateFeedData(double fps);
 }

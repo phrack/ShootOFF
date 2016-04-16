@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,25 +31,26 @@ import java.util.Optional;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
-import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.DelayedStartIntervalController;
 import com.shootoff.gui.controller.ParIntervalController;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.targets.TargetManager;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -84,11 +86,12 @@ public class TrainingExerciseBase {
 	@SuppressWarnings("unused") private List<Group> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
+	private TargetManager targetManager;
 	private GridPane buttonsPane;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 
-	private final static Map<CanvasManager, Label> exerciseLabels = new HashMap<CanvasManager, Label>();
+	private final static Map<CameraView, Label> exerciseLabels = new HashMap<CameraView, Label>();
 	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
 	private final static List<Button> exerciseButtons = new ArrayList<Button>();
 
@@ -102,6 +105,7 @@ public class TrainingExerciseBase {
 
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
+		this.targetManager = (TargetManager) controller;
 	}
 
 	// This is only required for unit tests where we don't want to create a full
@@ -113,11 +117,11 @@ public class TrainingExerciseBase {
 		this.buttonsPane = buttonsPane;
 		this.shotTimerTable = shotEntryTable;
 
-		for (final CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
+		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
 			final Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
-			canvasManager.getCanvasGroup().getChildren().add(exerciseLabel);
-			exerciseLabels.put(canvasManager, exerciseLabel);
+			cv.addChild(exerciseLabel);
+			exerciseLabels.put(cv, exerciseLabel);
 		}
 	}
 
@@ -150,8 +154,8 @@ public class TrainingExerciseBase {
 	}
 
 	public void getDelayedStartInterval(final DelayedStartListener listener) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"com/shootoff/gui/DelayedStartInterval.fxml"));
+		final FXMLLoader loader = new FXMLLoader(
+				TrainingExerciseBase.class.getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -176,8 +180,8 @@ public class TrainingExerciseBase {
 	 * @param listener
 	 */
 	public void getParInterval(final ParListener listener) {
-		final FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(
-				"com/shootoff/gui/ParInterval.fxml"));
+		final FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
 		try {
 			loader.load();
 		} catch (IOException e) {
@@ -264,8 +268,9 @@ public class TrainingExerciseBase {
 		}
 
 		Platform.runLater(() -> {
-			for (Label exerciseLabel : exerciseLabels.values())
+			for (Label exerciseLabel : exerciseLabels.values()) {
 				exerciseLabel.setText(message);
+			}
 		});
 	}
 
@@ -287,7 +292,15 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		if (config.getExercise().isPresent()) config.getExercise().get().reset(camerasSupervisor.getTargets());
+		if (config.getExercise().isPresent()) config.getExercise().get().reset(targetManager.getTargets());
+	}
+
+	/**
+	 * Get a list of all of the targets on every canvas manager
+	 */
+
+	public List<Group> getCurrentTargets() {
+		return targetManager.getTargets();
 	}
 
 	/**
@@ -305,7 +318,7 @@ public class TrainingExerciseBase {
 	 * and action handler <tt>eventHandler</tt>.
 	 */
 	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
-		Button exerciseButton = new Button(text);
+		final Button exerciseButton = new Button(text);
 		exerciseButton.setOnAction(eventHandler);
 		GridPane.setMargin(exerciseButton, GridPane.getMargin(buttonsPane.getChildren().get(0)));
 		GridPane.setHalignment(exerciseButton, HPos.CENTER);
@@ -329,12 +342,30 @@ public class TrainingExerciseBase {
 	 * @param soundFilePath
 	 *            the audio file to play (e.g. "sounds/metal_clang.wav")
 	 */
-	public static void playSound(String soundFilePath) {
+	public static void playSound(final String soundFilePath) {
 		playSound(new File(soundFilePath));
 	}
 
-	public static void playSound(File soundFile) {
+	public static void playSound(final File soundFile) {
 		playSound(soundFile, Optional.empty());
+	}
+
+	public static void playSound(final InputStream is) {
+		playSound(is, Optional.empty());
+	}
+
+	public static void playSound(final InputStream is, Optional<LineListener> listener) {
+		if (isSilenced) {
+			System.out.println("Playing audio for modular exercise.");
+			return;
+		}
+
+		try {
+			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(is);
+			playSound(audioInputStream, listener);
+		} catch (UnsupportedAudioFileException | IOException e) {
+			logger.error("Error reading sound stream to play", e);
+		}
 	}
 
 	private static void playSound(File soundFile, Optional<LineListener> listener) {
@@ -347,36 +378,62 @@ public class TrainingExerciseBase {
 			soundFile = new File(System.getProperty("shootoff.home") + File.separator + soundFile.getPath());
 		}
 
-		AudioInputStream audioInputStream = null;
-
 		try {
-			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+			playSound(audioInputStream, listener);
 		} catch (UnsupportedAudioFileException | IOException e) {
 			logger.error(String.format("Error reading sound file to play: soundFile = %s", soundFile), e);
 		}
+	}
 
-		if (audioInputStream != null) {
-			AudioFormat format = audioInputStream.getFormat();
-			DataLine.Info info = new DataLine.Info(Clip.class, format);
+	private static void playSound(AudioInputStream audioInputStream, Optional<LineListener> listener) {
+		final AudioFormat format = audioInputStream.getFormat();
+		final DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
 
-			Clip clip = null;
+		SourceDataLine line = null;
 
-			try {
-				clip = (Clip) AudioSystem.getLine(info);
-				clip.open(audioInputStream);
-				clip.start();
+		try {
+			line = (SourceDataLine) AudioSystem.getLine(info);
 
-				if (listener.isPresent()) {
-					clip.addLineListener(listener.get());
-				} else {
-					clip.addLineListener((e) -> {
-						if (e.getType().equals(LineEvent.Type.STOP)) e.getLine().close();
-					});
-				}
-			} catch (LineUnavailableException | IOException e) {
-				if (clip != null) clip.close();
-				logger.error("Error playing sound clip", e);
+			line.open(format);
+			line.start();
+
+			if (listener.isPresent()) {
+				line.addLineListener(listener.get());
+			} else {
+				line.addLineListener((e) -> {
+					if (LineEvent.Type.STOP.equals(e.getType())) {
+						e.getLine().close();
+						try {
+							audioInputStream.close();
+						} catch (Exception e1) {
+							logger.error("Error closing audio input stream", e1);
+						}
+					}
+				});
 			}
+
+			final SourceDataLine sourceLine = line;
+			new Thread(() -> {
+				int nBytesRead = 0;
+				byte[] abData = new byte[1024];
+				while (nBytesRead != -1) {
+					try {
+						nBytesRead = audioInputStream.read(abData, 0, abData.length);
+					} catch (IOException e) {
+						logger.error("Error playing sound clip", e);
+					}
+					if (nBytesRead >= 0) {
+						sourceLine.write(abData, 0, nBytesRead);
+					}
+				}
+
+				sourceLine.drain();
+				sourceLine.close();
+			}).start();
+		} catch (LineUnavailableException e) {
+			if (line != null) line.close();
+			logger.error("Error playing sound clip", e);
 		}
 	}
 
@@ -384,7 +441,7 @@ public class TrainingExerciseBase {
 		if (isSilenced) {
 			soundFiles.forEach(System.out::println);
 		} else {
-			SoundQueue sq = new SoundQueue(soundFiles);
+			final SoundQueue sq = new SoundQueue(soundFiles);
 			sq.play();
 		}
 	}
@@ -403,7 +460,7 @@ public class TrainingExerciseBase {
 
 		@Override
 		public void update(final LineEvent event) {
-			if (event.getType().equals(LineEvent.Type.STOP)) {
+			if (LineEvent.Type.STOP.equals(event.getType())) {
 				event.getLine().close();
 
 				queueIndex++;
@@ -424,23 +481,25 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
-			shotTimerTable.getColumns().remove(column);
+		if (shotTimerTable != null) {
+			for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
+				shotTimerTable.getColumns().remove(column);
+			}
 		}
 
-		for (CanvasManager canvasManager : camerasSupervisor.getCanvasManagers()) {
-			canvasManager.getCanvasGroup().getChildren().remove(exerciseLabels.get(canvasManager));
-		}
-
-		Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
-
-		while (itExerciseButtons.hasNext()) {
-			Button exerciseButton = itExerciseButtons.next();
-			buttonsPane.getChildren().remove(exerciseButton);
-			itExerciseButtons.remove();
+		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
+			cv.removeChild(exerciseLabels.get(cv));
 		}
 
 		exerciseLabels.clear();
+
+		final Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
+
+		while (itExerciseButtons.hasNext()) {
+			final Button exerciseButton = itExerciseButtons.next();
+			buttonsPane.getChildren().remove(exerciseButton);
+			itExerciseButtons.remove();
+		}
 
 		pauseShotDetection(false);
 	}

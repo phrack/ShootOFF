@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public class XMLCourseWriter implements CourseVisitor {
 				String.format(Locale.US, "\t<target file=\"%s\" x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" />%n",
 						targetFile.getPath(), x, y, width, height));
 	}
-	
+
 	@Override
 	public void visitResolution(double width, double height) {
 		xmlBody.append(String.format("\t<resolution width=\"%f\" height=\"%f\" />%n", width, height));

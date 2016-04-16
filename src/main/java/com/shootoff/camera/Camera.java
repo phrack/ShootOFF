@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,7 +122,7 @@ public class Camera {
 			// to add an artificial timeout.
 			Thread t = new Thread(() -> ipcam.getResolution(), "GetIPcamResolution");
 			t.start();
-			final int ipcamTimeout = 3000;
+			final int ipcamTimeout = 6000;
 			try {
 				t.join(ipcamTimeout);
 			} catch (InterruptedException e) {
@@ -183,19 +183,19 @@ public class Camera {
 
 	public static Optional<Camera> getDefault() {
 		Camera defaultCam;
-		
+
 		if (isMac) {
 			defaultCam = new Camera(defaultWebcam);
 		} else {
 			final Webcam cam = Webcam.getDefault();
-			
+
 			if (cam == null) {
 				defaultCam = null;
 			} else {
 				defaultCam = new Camera(cam);
 			}
 		}
-		
+
 		return Optional.ofNullable(defaultCam);
 	}
 
@@ -239,7 +239,7 @@ public class Camera {
 		if (isMac) {
 			new Thread(() -> {
 				webcam.close();
-			}, "CloseMacOSXWebcam").start();
+			} , "CloseMacOSXWebcam").start();
 			return true;
 		} else {
 			return webcam.close();
@@ -315,28 +315,25 @@ public class Camera {
 
 		return mat;
 	}
-	
-	public static Mat colorTransfer(Mat source, Mat target)
-	{
+
+	public static Mat colorTransfer(Mat source, Mat target) {
 		Mat src = new Mat();
 		Mat dst = new Mat();
-		
+
 		Imgproc.cvtColor(source, src, Imgproc.COLOR_BGR2Lab);
 		Imgproc.cvtColor(target, dst, Imgproc.COLOR_BGR2Lab);
-		
+
 		ArrayList<Mat> src_channels = new ArrayList<Mat>();
 		ArrayList<Mat> dst_channels = new ArrayList<Mat>();
 		Core.split(src, src_channels);
 		Core.split(dst, dst_channels);
 
-
-		for (int i = 0; i < 3; i++)
-		{
+		for (int i = 0; i < 3; i++) {
 			MatOfDouble src_mean = new MatOfDouble(), src_std = new MatOfDouble();
 			MatOfDouble dst_mean = new MatOfDouble(), dst_std = new MatOfDouble();
 			Core.meanStdDev(src_channels.get(i), src_mean, src_std);
 			Core.meanStdDev(dst_channels.get(i), dst_mean, dst_std);
-			
+
 			dst_channels.get(i).convertTo(dst_channels.get(i), CvType.CV_64FC1);
 			Core.subtract(dst_channels.get(i), dst_mean, dst_channels.get(i));
 			Core.divide(dst_std, src_std, dst_std);
@@ -344,12 +341,12 @@ public class Camera {
 			Core.add(dst_channels.get(i), src_mean, dst_channels.get(i));
 			dst_channels.get(i).convertTo(dst_channels.get(i), CvType.CV_8UC1);
 		}
-		
+
 		Core.merge(dst_channels, dst);
-		
+
 		Imgproc.cvtColor(dst, dst, Imgproc.COLOR_Lab2BGR);
-		
+
 		return dst;
 	}
-	
+
 }

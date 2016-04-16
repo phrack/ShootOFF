@@ -52,6 +52,6 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
 	}
 }

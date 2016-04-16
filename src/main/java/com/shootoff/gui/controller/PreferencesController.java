@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,6 +82,8 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 
 	public void setConfig(Configuration config, CameraConfigListener cameraConfigListener) throws IOException {
+		ImageCell.createImageCache(Camera.getWebcams());
+
 		preferencesStage = (Stage) markerRadiusSlider.getScene().getWindow();
 
 		this.cameraConfigListener = cameraConfigListener;

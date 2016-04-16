@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
- Copyright (c) 2015 phrack. All rights reserved.
+ Copyright (C) 2016 phrack. All rights reserved.
  Use of this source code is governed by a BSD-style license that can be
  found in the LICENSE file.
 -->
@@ -37,6 +37,7 @@
           </Menu>
           <Menu fx:id="trainingMenu" mnemonicParsing="false" text="Training">
             <items>
+                  <MenuItem mnemonicParsing="false" onAction="#getExercisesMenuItemClicked" text="Get Exercises..." />
                   <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
                   <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
                   <SeparatorMenuItem mnemonicParsing="false" />

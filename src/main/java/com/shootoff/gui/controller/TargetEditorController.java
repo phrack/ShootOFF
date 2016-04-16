@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,8 +110,8 @@ public class TargetEditorController {
 
 		this.targetListener = targetListener;
 
-		regionColorChoiceBox
-				.setItems(FXCollections.observableArrayList("black", "blue", "brown", "gray", "green", "orange", "red", "white"));
+		regionColorChoiceBox.setItems(
+				FXCollections.observableArrayList("black", "blue", "brown", "gray", "green", "orange", "red", "white"));
 
 		regionColorChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
 			@Override
@@ -395,7 +395,6 @@ public class TargetEditorController {
 		}
 	}
 
-	@SuppressWarnings("incomplete-switch")
 	public void regionKeyPressed(KeyEvent event) {
 		Node selected = (Node) event.getTarget();
 		TargetRegion region = (TargetRegion) selected;
@@ -442,6 +441,9 @@ public class TargetEditorController {
 			} else {
 				selected.setLayoutY(selected.getLayoutY() + MOVEMENT_DELTA);
 			}
+			break;
+
+		default:
 			break;
 		}
 

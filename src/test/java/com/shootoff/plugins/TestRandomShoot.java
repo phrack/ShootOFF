@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 phrack. All rights reserved.
+ * Copyright (C) 2016 phrack. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
@@ -28,18 +28,20 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
+import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
 public class TestRandomShoot {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
-	
+
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
 	private Random rng;
-	
+
 	@Before
 	public void setUp() throws UnsupportedEncodingException {
 		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
@@ -49,7 +51,7 @@ public class TestRandomShoot {
 		System.setOut(stringOutStream);
 		rng = new Random(15); // Changing this seed will cause tests to fail
 	}
-	
+
 	@After
 	public void tearDown() {
 		TextToSpeech.silence(false);
@@ -60,62 +62,68 @@ public class TestRandomShoot {
 	@Test
 	public void testNoTarget() throws IOException {
 		List<Group> targets = new ArrayList<Group>();
-		
+
 		RandomShoot rs = new RandomShoot(targets, rng);
 
-		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"),
+				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
-		
+
 		rs.reset(targets);
-		
-		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"), stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+
+		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"),
+				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 	}
 
 	@Test
 	public void testFiveSmallTarget() throws IOException {
 		List<Group> targets = new ArrayList<Group>();
-		targets.add(TargetIO.loadTarget(new File("targets" + File.separator + 
-				"SimpleBullseye_five_small.target")).get());
-		
+		Group bullseyeFiveGroup = TargetIO
+				.loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get();
+		Target bullseyeFiveTarget = new Target(bullseyeFiveGroup, new ArrayList<Target>());
+		targets.add(bullseyeFiveGroup);
+
 		RandomShoot rs = new RandomShoot(targets, rng);
-		
+
 		// Make sure initial state makes sense
-		
+
 		assertEquals(5, rs.getSubtargets().size());
-		
+
 		assertTrue(rs.getSubtargets().contains("1"));
 		assertTrue(rs.getSubtargets().contains("2"));
 		assertTrue(rs.getSubtargets().contains("3"));
 		assertTrue(rs.getSubtargets().contains("4"));
 		assertTrue(rs.getSubtargets().contains("5"));
-		
+
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
-		
-		assertEquals("sounds/voice/shootoff-shoot.wav", stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n"))[0]);
+
+		assertEquals("sounds/voice/shootoff-shoot.wav",
+				stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n"))[0]);
 		stringOut.reset();
-		
+
 		// Simulate missing a shot
-		
+
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
-		
+
 		assertEquals(String.format("sounds/voice/shootoff-shoot.wav%nsounds/voice/shootoff-%s.wav%n", firstSubtarget),
 				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
 		stringOut.reset();
-		
+
 		// Simulate a hit
-		
+
 		TargetRegion expectedRegion = null;
-		
+
 		for (Node node : targets.get(0).getChildren()) {
-			expectedRegion = (TargetRegion)node;
-			
+			expectedRegion = (TargetRegion) node;
+
 			if (expectedRegion.getTag("subtarget").equals(firstSubtarget)) break;
 		}
-		
+
 		int oldSize = rs.getCurrentSubtargets().size();
-		
-		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(expectedRegion));
-		
+		Hit expectedHit = new Hit(bullseyeFiveTarget, expectedRegion, 0, 0);
+
+		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
+
 		if (oldSize > 1) {
 			assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());
 		} else {
@@ -123,28 +131,31 @@ public class TestRandomShoot {
 			assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + nextSubtarget));
 			stringOut.reset();
 		}
-	}	
-	
+	}
+
 	@Test
 	public void testNoSoundFilesForSubtargetNames() throws IOException {
 		List<Group> targets = new ArrayList<Group>();
-		targets.add(TargetIO.loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile())).get());
-		
+		targets.add(TargetIO
+				.loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile()))
+				.get());
+
 		RandomShoot rs = new RandomShoot(targets, rng);
-		
+
 		// Make sure initial state makes sense
-		
+
 		assertEquals(5, rs.getSubtargets().size());
-		
+
 		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
-		
-		assertEquals("shoot subtarget undefined_region_name_5 then undefined_region_name_3", stringOut.toString("UTF-8").replace(String.format("%n"), ""));
+
+		assertEquals("shoot subtarget undefined_region_name_5 then undefined_region_name_3",
+				stringOut.toString("UTF-8").replace(String.format("%n"), ""));
 		stringOut.reset();
-		
+
 		// Simulate missing a shot
-		
+
 		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
-		
+
 		assertEquals(String.format("shoot %s%n", firstSubtarget), stringOut.toString("UTF-8"));
 		stringOut.reset();
 	}

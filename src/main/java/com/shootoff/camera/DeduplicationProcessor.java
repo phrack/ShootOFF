@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,30 +24,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DeduplicationProcessor implements ShotProcessor {
+	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
+
 	private Optional<Shot> lastShot = Optional.empty();
 
 	// About 12.5 pixels at 640x480
 	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 24576.0;
 	private double distanceThreshold;
 
-	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 8.0;
+	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 6.0;
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
 
 	private int frameThreshold;
 
-	private CameraManager cameraManager;
+	private final CameraManager cameraManager;
 
 	public int getThreshold() {
 		return frameThreshold;
 	}
 
-	public void setThreshold(int ft) {
+	public void setThreshold(final int ft) {
 		frameThreshold = ft;
 	}
 
-	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
-
-	public DeduplicationProcessor(CameraManager cameraManager) {
+	public DeduplicationProcessor(final CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 
 		frameThreshold = DEDUPE_THRESHOLD_MINIMUM;
@@ -82,11 +82,10 @@ public class DeduplicationProcessor implements ShotProcessor {
 			if (shot.getFrame() - lastShot.get().getFrame() <= frameThreshold
 					&& euclideanDistance(lastShot.get(), shot) <= distanceThreshold) {
 
-				logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
+				if (logger.isTraceEnabled()) logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
 
 				return false;
 			}
-
 		}
 
 		if (updateLastShot) lastShot = Optional.of(shot);
@@ -94,16 +93,16 @@ public class DeduplicationProcessor implements ShotProcessor {
 		return true;
 	}
 
-	public double euclideanDistance(Shot shot1, Shot shot2) {
+	private double euclideanDistance(final Shot shot1, final Shot shot2) {
 		return Math.sqrt(Math.pow(shot1.getX() - shot2.getX(), 2) + Math.pow(shot1.getY() - shot2.getY(), 2));
 	}
 
 	@Override
-	public boolean processShot(Shot shot) {
+	public boolean processShot(final Shot shot) {
 		return processShot(shot, true);
 	}
 
-	public boolean processShotLookahead(Shot shot) {
+	public boolean processShotLookahead(final Shot shot) {
 		return processShot(shot, false);
 	}
 
@@ -112,14 +111,11 @@ public class DeduplicationProcessor implements ShotProcessor {
 		lastShot = Optional.empty();
 	}
 
-	public void setThresholdUsingFPS(double webcamFPS) {
-		int newThreshold = (int) (webcamFPS / DEDUPE_THRESHOLD_DIVISION_FACTOR);
+	public void setThresholdUsingFPS(final double webcamFPS) {
+		final int newThreshold = (int) Math.max(webcamFPS / DEDUPE_THRESHOLD_DIVISION_FACTOR, DEDUPE_THRESHOLD_MINIMUM);
 
-		newThreshold = Math.max(newThreshold, DEDUPE_THRESHOLD_MINIMUM);
-
-		logger.trace("setThresholdUsingFPS {} {}", webcamFPS, newThreshold);
+		if (logger.isTraceEnabled()) logger.trace("setThresholdUsingFPS {} {}", webcamFPS, newThreshold);
 
 		setThreshold(newThreshold);
-
 	}
 }

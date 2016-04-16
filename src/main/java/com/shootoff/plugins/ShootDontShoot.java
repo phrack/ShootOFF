@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,12 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.scene.Group;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.gui.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
@@ -47,7 +49,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("ShootDontShootExercise"));
 
-	private volatile boolean continueExercise = true;
+	private AtomicBoolean continueExercise = new AtomicBoolean(true);
 	private boolean testRun = false;
 	private ProjectorTrainingExerciseBase thisSuper;
 	private int missedTargets = 0;
@@ -102,7 +104,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private class NewRound implements Runnable {
 		@Override
 		public void run() {
-			if (!continueExercise) return;
+			if (!continueExercise.get()) return;
 
 			missedTargets += shootTargets.size();
 
@@ -128,7 +130,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 			thisSuper.clearShots();
 
-			if (continueExercise && !testRun)
+			if (continueExercise.get() && !testRun)
 				executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
 		}
 	}
@@ -172,18 +174,20 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
-		if (hitRegion.isPresent()) {
-			if (hitRegion.get().tagExists("subtarget")) {
-				switch (hitRegion.get().getTag("subtarget")) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
+		if (hit.isPresent()) {
+			TargetRegion r = hit.get().getHitRegion();
+
+			if (r.tagExists("subtarget")) {
+				switch (r.getTag("subtarget")) {
 				case "shoot": {
-					removeTarget(shootTargets, hitRegion.get());
+					removeTarget(shootTargets, r);
 					super.setShotTimerColumnText(TARGET_COL_NAME, "shoot");
 				}
 					break;
 
 				case "dont_shoot": {
-					removeTarget(dontShootTargets, hitRegion.get());
+					removeTarget(dontShootTargets, r);
 					badHits++;
 					super.setShotTimerColumnText(TARGET_COL_NAME, "dont_shoot");
 					TextToSpeech.say("Bad shoot!");
@@ -196,7 +200,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public void reset(List<Group> targets) {
-		continueExercise = false;
+		continueExercise.set(false);
 		executorService.shutdownNow();
 
 		missedTargets = 0;
@@ -214,7 +218,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 		super.showTextOnFeed("missed targets: 0\nbad hits: 0");
 
-		continueExercise = true;
+		continueExercise.set(true);
 
 		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 				new NamedThreadFactory("ShootDontShootExercise"));
@@ -223,7 +227,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public void destroy() {
-		continueExercise = false;
+		continueExercise.set(false);
 		executorService.shutdownNow();
 		super.destroy();
 	}

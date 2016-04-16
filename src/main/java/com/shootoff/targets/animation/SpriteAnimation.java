@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,18 @@ public class SpriteAnimation extends Transition {
 
 	public SpriteAnimation(ImageView imageView, ImageFrame[] frames) {
 		this.imageView = imageView;
-		this.frames = frames;
+		this.frames = new ImageFrame[frames.length];
+		System.arraycopy(frames, 0, this.frames, 0, frames.length);
 		this.count = frames.length;
 		setInterpolator(Interpolator.LINEAR);
+	}
+
+	public Image getFrame(int frameNumber) {
+		return frames[frameNumber].getImage();
+	}
+
+	public void setCurrentFrame(int frameNumber) {
+		imageView.setImage(getFrame(frameNumber));
 	}
 
 	public Image getFirstFrame() {
@@ -53,8 +62,7 @@ public class SpriteAnimation extends Transition {
 	}
 
 	public void reset() {
-		if (this.getStatus() == Status.RUNNING)
-			this.stop();
+		if (this.getStatus() == Status.RUNNING) this.stop();
 
 		isReversed = false;
 		lastIndex = 0;

@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
 
@@ -109,11 +110,11 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
 		if (!continueExercise) return;
 
-		if (hitRegion.isPresent()) {
-			TargetRegion r = hitRegion.get();
+		if (hit.isPresent()) {
+			TargetRegion r = hit.get().getHitRegion();
 
 			if (r.tagExists("subtarget") && (r.getTag("subtarget").startsWith("left_paddle")
 					|| r.getTag("subtarget").startsWith("right_paddle"))) {

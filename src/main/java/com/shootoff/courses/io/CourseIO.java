@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import com.shootoff.gui.controller.ProjectorArenaController;
 
 public class CourseIO {
 	private static final Logger logger = LoggerFactory.getLogger(CourseIO.class);
-	
+
 	public static void saveCourse(ProjectorArenaController arenaController, final File courseFile) {
 		CourseVisitor visitor;
 
@@ -53,7 +53,7 @@ public class CourseIO {
 			visitor.visitTarget(relativeTargetFile, t.getPosition().getX(), t.getPosition().getY(),
 					t.getDimension().getWidth(), t.getDimension().getHeight());
 		}
-		
+
 		visitor.visitResolution(arenaController.getWidth(), arenaController.getHeight());
 
 		visitor.visitEnd();

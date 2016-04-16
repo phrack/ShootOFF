@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XMLTargetWriter implements RegionVisitor {
-	private final Logger logger = LoggerFactory
-			.getLogger(XMLTargetWriter.class);
+	private final Logger logger = LoggerFactory.getLogger(XMLTargetWriter.class);
 
 	private final File targetFile;
 	private StringBuilder xmlBody = new StringBuilder();
@@ -41,19 +40,16 @@ public class XMLTargetWriter implements RegionVisitor {
 
 	private void addTags(Map<String, String> tags) {
 		for (Entry<String, String> entry : tags.entrySet()) {
-			xmlBody.append(String.format(Locale.US,
-					"\t\t<tag name=\"%s\" value=\"%s\" />%n", entry.getKey(),
+			xmlBody.append(String.format(Locale.US, "\t\t<tag name=\"%s\" value=\"%s\" />%n", entry.getKey(),
 					entry.getValue()));
 		}
 	}
 
 	@Override
-	public void visitImageRegion(double x, double y, File imageFile,
-			Map<String, String> tags) {
+	public void visitImageRegion(double x, double y, File imageFile, Map<String, String> tags) {
 
-		xmlBody.append(String.format(Locale.US,
-				"\t<image x=\"%f\" y=\"%f\" file=\"%s\">%n", x, y,
-				imageFile.getPath()));
+		xmlBody.append(
+				String.format(Locale.US, "\t<image x=\"%f\" y=\"%f\" file=\"%s\">%n", x, y, imageFile.getPath()));
 
 		addTags(tags);
 
@@ -61,12 +57,11 @@ public class XMLTargetWriter implements RegionVisitor {
 	}
 
 	@Override
-	public void visitRectangleRegion(double x, double y, double width,
-			double height, String fill, Map<String, String> tags) {
+	public void visitRectangleRegion(double x, double y, double width, double height, String fill,
+			Map<String, String> tags) {
 
 		xmlBody.append(String.format(Locale.US,
-				"\t<rectangle x=\"%f\" y=\"%f\" width=\"%f\" "
-						+ "height=\"%f\" fill=\"%s\">%n", x, y, width, height,
+				"\t<rectangle x=\"%f\" y=\"%f\" width=\"%f\" " + "height=\"%f\" fill=\"%s\">%n", x, y, width, height,
 				fill));
 
 		addTags(tags);
@@ -75,13 +70,12 @@ public class XMLTargetWriter implements RegionVisitor {
 	}
 
 	@Override
-	public void visitEllipse(double centerX, double centerY, double radiusX,
-			double radiusY, String fill, Map<String, String> tags) {
+	public void visitEllipse(double centerX, double centerY, double radiusX, double radiusY, String fill,
+			Map<String, String> tags) {
 
 		xmlBody.append(String.format(Locale.US,
-				"\t<ellipse centerX=\"%f\" centerY=\"%f\" radiusX=\"%f\" "
-						+ "radiusY=\"%f\" fill=\"%s\">%n", centerX, centerY,
-				radiusX, radiusY, fill));
+				"\t<ellipse centerX=\"%f\" centerY=\"%f\" radiusX=\"%f\" " + "radiusY=\"%f\" fill=\"%s\">%n", centerX,
+				centerY, radiusX, radiusY, fill));
 
 		addTags(tags);
 
@@ -89,15 +83,12 @@ public class XMLTargetWriter implements RegionVisitor {
 	}
 
 	@Override
-	public void visitPolygonRegion(Double[] points, String fill,
-			Map<String, String> tags) {
+	public void visitPolygonRegion(Double[] points, String fill, Map<String, String> tags) {
 
 		xmlBody.append(String.format("\t<polygon fill=\"%s\">%n", fill));
 
 		for (int i = 0; i < points.length - 1; i += 2) {
-			xmlBody.append(String.format(Locale.US,
-					"\t\t<point x=\"%f\" y=\"%f\" />%n", points[i],
-					points[i + 1]));
+			xmlBody.append(String.format(Locale.US, "\t\t<point x=\"%f\" y=\"%f\" />%n", points[i], points[i + 1]));
 		}
 
 		addTags(tags);

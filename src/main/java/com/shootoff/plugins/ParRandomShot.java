@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.Hit;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Group;
@@ -88,22 +89,22 @@ public class ParRandomShot extends ParForScore {
 	}
 
 	@Override
-	public void shotListener(Shot shot, Optional<TargetRegion> hitRegion) {
+	public void shotListener(Shot shot, Optional<Hit> hit) {
 		setLength();
 
-		if (!foundTarget || !hitRegion.isPresent() || !countScore) return;
+		if (!foundTarget || !hit.isPresent() || !countScore) return;
 
 		String subtarget = subtargets.get(currentSubtarget);
-		String hitTarget = getSubtarget(hitRegion);
+		String hitTarget = getSubtarget(Optional.of(hit.get().getHitRegion()));
 		if (subtarget.equals(hitTarget)) {
-			String points = getPoints(hitRegion);
+			String points = getPoints(Optional.of(hit.get().getHitRegion()));
 			setPoints(shot.getColor(), points);
 		}
 	}
 
 	protected void resetValues() {
 		super.resetValues();
-		List<Group> targets = getCamerasSupervisor().getTargets();
+		List<Group> targets = super.getCurrentTargets();
 		fetchSubtargets(targets);
 	}
 

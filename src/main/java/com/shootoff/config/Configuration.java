@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -143,6 +143,11 @@ public class Configuration {
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
+	
+	// TODO: This is used at the moment as a constant to determine if the (current incomplete)
+	// masking solution should be used. This setting will be unnecessary when the masking code
+	// is either complete or removed.
+	public static final boolean USE_ARENA_MASK = false;
 
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
@@ -157,8 +162,8 @@ public class Configuration {
 
 	}
 
-	protected Configuration(InputStream configInputStream, String name, String[] args) throws IOException,
-			ConfigurationException {
+	protected Configuration(InputStream configInputStream, String name, String[] args)
+			throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		parseCmdLine(args);
@@ -478,8 +483,8 @@ public class Configuration {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, redLaserSound.getPath()));
 		}
 
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		if (useGreenLaserSound && !greenLaserSound.exists()) {
 			throw new ConfigurationException(String.format(LASER_SOUND_MESSAGE, greenLaserSound.getPath()));
@@ -580,7 +585,7 @@ public class Configuration {
 			ipcamTimeoutAlert.setResizable(true);
 			ipcamTimeoutAlert.setContentText("Could not communicate with the IP at " + cameraURL
 					+ ". Please check the following:\n\n" + "-The IPCam URL is correct\n"
-					+ "-You are connected to the Internet (for external cameras)"
+					+ "-You are connected to the Internet (for external cameras)\n"
 					+ "-You are connected to the same network as the camera (for local cameras)");
 			ipcamTimeoutAlert.showAndWait();
 		}
@@ -821,8 +826,8 @@ public class Configuration {
 	}
 
 	public File getGreenLaserSound() {
-		if (!greenLaserSound.isAbsolute())
-			greenLaserSound = new File(System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
+		if (!greenLaserSound.isAbsolute()) greenLaserSound = new File(
+				System.getProperty("shootoff.home") + File.separator + greenLaserSound.getPath());
 
 		return greenLaserSound;
 	}

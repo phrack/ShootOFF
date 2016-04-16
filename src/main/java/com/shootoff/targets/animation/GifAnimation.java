@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,13 +43,11 @@ import org.w3c.dom.NodeList;
 public class GifAnimation extends SpriteAnimation {
 	private static ImageFrame[] frames;
 
-	public GifAnimation(ImageView imageView, File gifFile)
-			throws FileNotFoundException, IOException {
+	public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
 		super(imageView, readGif(new FileInputStream(gifFile)));
 
 		int delay = frames[0].getDelay();
-		if (delay < 1)
-			delay = SpriteAnimation.DEFAULT_DELAY;
+		if (delay < 1) delay = SpriteAnimation.DEFAULT_DELAY;
 
 		this.setCycleDuration(Duration.millis(delay));
 	}
@@ -61,27 +59,20 @@ public class GifAnimation extends SpriteAnimation {
 		int width = -1;
 		int height = -1;
 
-		ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName(
-				"gif").next();
+		ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName("gif").next();
 		reader.setInput(ImageIO.createImageInputStream(stream));
 		IIOMetadata metadata = reader.getStreamMetadata();
 		if (metadata != null) {
-			IIOMetadataNode globalRoot = (IIOMetadataNode) metadata
-					.getAsTree(metadata.getNativeMetadataFormatName());
+			IIOMetadataNode globalRoot = (IIOMetadataNode) metadata.getAsTree(metadata.getNativeMetadataFormatName());
 
-			NodeList globalScreenDescriptor = globalRoot
-					.getElementsByTagName("LogicalScreenDescriptor");
+			NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
 
-			if (globalScreenDescriptor != null
-					&& globalScreenDescriptor.getLength() > 0) {
-				IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor
-						.item(0);
+			if (globalScreenDescriptor.getLength() > 0) {
+				IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
 
 				if (screenDescriptor != null) {
-					width = Integer.parseInt(screenDescriptor
-							.getAttribute("logicalScreenWidth"));
-					height = Integer.parseInt(screenDescriptor
-							.getAttribute("logicalScreenHeight"));
+					width = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenWidth"));
+					height = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenHeight"));
 				}
 			}
 		}
@@ -102,10 +93,9 @@ public class GifAnimation extends SpriteAnimation {
 				height = image.getHeight();
 			}
 
-			IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(
-					frameIndex).getAsTree("javax_imageio_gif_image_1.0");
-			IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName(
-					"GraphicControlExtension").item(0);
+			IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex)
+					.getAsTree("javax_imageio_gif_image_1.0");
+			IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
 			int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
 			String disposal = gce.getAttribute("disposalMethod");
 
@@ -113,8 +103,7 @@ public class GifAnimation extends SpriteAnimation {
 			int y = 0;
 
 			if (master == null) {
-				master = new BufferedImage(width, height,
-						BufferedImage.TYPE_INT_ARGB);
+				master = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 				masterGraphics = master.createGraphics();
 				masterGraphics.setBackground(new Color(0, 0, 0, 0));
 			} else {
@@ -123,37 +112,32 @@ public class GifAnimation extends SpriteAnimation {
 					Node nodeItem = children.item(nodeIndex);
 					if (nodeItem.getNodeName().equals("ImageDescriptor")) {
 						NamedNodeMap map = nodeItem.getAttributes();
-						x = Integer.parseInt(map.getNamedItem(
-								"imageLeftPosition").getNodeValue());
-						y = Integer.parseInt(map.getNamedItem(
-								"imageTopPosition").getNodeValue());
+						x = Integer.parseInt(map.getNamedItem("imageLeftPosition").getNodeValue());
+						y = Integer.parseInt(map.getNamedItem("imageTopPosition").getNodeValue());
 					}
 				}
 			}
 			masterGraphics.drawImage(image, x, y, null);
 
-			BufferedImage copy = new BufferedImage(master.getColorModel(),
-					master.copyData(null), master.isAlphaPremultiplied(), null);
+			BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null),
+					master.isAlphaPremultiplied(), null);
 			frames.add(new ImageFrame(copy, delay, disposal));
 
 			if (disposal.equals("restoreToPrevious")) {
 				BufferedImage from = null;
 				for (int i = frameIndex - 1; i >= 0; i--) {
-					if (!frames.get(i).getDisposal()
-							.equals("restoreToPrevious")
-							|| frameIndex == 0) {
+					if (!frames.get(i).getDisposal().equals("restoreToPrevious") || frameIndex == 0) {
 						from = frames.get(i).getBufferedImage();
 						break;
 					}
 				}
 
-				master = new BufferedImage(from.getColorModel(),
-						from.copyData(null), from.isAlphaPremultiplied(), null);
+				master = new BufferedImage(from.getColorModel(), from.copyData(null), from.isAlphaPremultiplied(),
+						null);
 				masterGraphics = master.createGraphics();
 				masterGraphics.setBackground(new Color(0, 0, 0, 0));
 			} else if (disposal.equals("restoreToBackgroundColor")) {
-				masterGraphics.clearRect(x, y, image.getWidth(),
-						image.getHeight());
+				masterGraphics.clearRect(x, y, image.getWidth(), image.getHeight());
 			}
 		}
 		reader.dispose();

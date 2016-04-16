@@ -20,32 +20,30 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	private Configuration config;
 	private MockCanvasManager mockManager;
 	private boolean[][] sectorStatuses;
-	
-    @Rule
-    public ErrorCollector collector = new ErrorCollector();
-	
+
+	@Rule public ErrorCollector collector = new ErrorCollector();
+
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
 		mockManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
-		
+
 		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
 			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}
-		
+
 	}
-	
-	
+
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", 
-				Optional.empty(), mockManager, config, sectorStatuses);
-		
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty(),
+				mockManager, config, sectorStatuses);
+
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 176.5, 251.3, 0, 2));
 
@@ -53,16 +51,16 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 		optionalShots.add(new Shot(Color.RED, 236.5, 169.5, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 175, 191.5, 0, 2));
 		optionalShots.add(new Shot(Color.RED, 229.5, 227.5, 0, 2));
-		
-		super.checkShots(collector, shots, requiredShots, optionalShots, true);
-	}	
-	
+
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
+	}
+
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4", 
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
-		
+
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.RED, 473.6, 126.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 349.2, 130.5, 0, 2));
@@ -73,14 +71,14 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 469.8, 268.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 339.9, 291.8, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 201.5, 297.7, 0, 2));
-		
+
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
-	
+
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4", 
+		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -94,23 +92,22 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.GREEN, 476.2, 312.3, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 337.7, 274.4, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 219.0, 298.0, 0, 2));
-		
+
 		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
 	}
-	
+
 	@Test
 	// BRIGHT
 	public void testGreen45inch() {
-		List<Shot> shots = findShots("/shotsearcher/45in-green.mp4", 
-				Optional.empty(), mockManager, config, sectorStatuses);
+		List<Shot> shots = findShots("/shotsearcher/45in-green.mp4", Optional.empty(), mockManager, config,
+				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
 		requiredShots.add(new Shot(Color.GREEN, 334.0, 164.9, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 334.1, 166.5, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 332.4, 165.5, 0, 2));
 		requiredShots.add(new Shot(Color.GREEN, 325.0, 161.5, 0, 2));
-		
-		
-		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), true);
+
+		super.checkShots(collector, shots, requiredShots, new ArrayList<Shot>(), false);
 	}
 }

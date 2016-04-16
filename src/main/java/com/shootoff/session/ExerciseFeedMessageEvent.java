@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@ public class ExerciseFeedMessageEvent implements Event {
 	private final long timestamp;
 	private final String message;
 
-	public ExerciseFeedMessageEvent(String cameraName, long timestamp,
-			String message) {
+	public ExerciseFeedMessageEvent(String cameraName, long timestamp, String message) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
 		this.message = message;

@@ -1,6 +1,6 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
- * Copyright (C) 2015 phrack
+ * Copyright (C) 2016 phrack
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
@@ -60,7 +61,6 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -77,7 +77,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
-public class CanvasManager {
+public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
 	private final Group canvasGroup;
 	private final Configuration config;
@@ -91,7 +91,7 @@ public class CanvasManager {
 	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<Label, ScheduledFuture<Void>>();
 	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
 	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
-	
+
 	protected final CamerasSupervisor camerasSupervisor;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
@@ -150,16 +150,28 @@ public class CanvasManager {
 		});
 	}
 
+	@Override
 	public void close() {
 		diagnosticExecutorService.shutdownNow();
 	}
 
+	@Override
 	public void setCameraManager(CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
 	}
 
 	public CameraManager getCameraManager() {
 		return cameraManager;
+	}
+
+	@Override
+	public boolean addChild(Node c) {
+		return getCanvasGroup().getChildren().add(c);
+	}
+
+	@Override
+	public boolean removeChild(Node c) {
+		return getCanvasGroup().getChildren().remove(c);
 	}
 
 	public Label addDiagnosticMessage(final String message, final long chimeDelay, final Color backgroundColor) {
@@ -201,14 +213,16 @@ public class CanvasManager {
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
 			diagnosticFutures.put(diagnosticLabel, chimeFuture);
 		}
-		
+
 		return diagnosticLabel;
 	}
 
+	@Override
 	public Label addDiagnosticMessage(String message, Color backgroundColor) {
 		return addDiagnosticMessage(message, DIAGNOSTIC_CHIME_DELAY, backgroundColor);
 	}
 
+	@Override
 	public void removeDiagnosticMessage(Label diagnosticLabel) {
 		if (diagnosticFutures.containsKey(diagnosticLabel)) {
 			diagnosticFutures.get(diagnosticLabel).cancel(false);
@@ -254,6 +268,7 @@ public class CanvasManager {
 		background.setFitHeight(height);
 	}
 
+	@Override
 	public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds) {
 		updateCanvasGroup();
 
@@ -312,13 +327,11 @@ public class CanvasManager {
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g2.drawImage(source, 0, 0, width, height, null);
 		g2.dispose();
-		
-		
+
 		return tmp;
 	}
-	
-	public BufferedImage getBufferedImage()
-	{
+
+	public BufferedImage getBufferedImage() {
 		BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
 		return projectedScene;
 	}
@@ -365,6 +378,7 @@ public class CanvasManager {
 		return canvasGroup;
 	}
 
+	@Override
 	public void clearShots() {
 		Platform.runLater(() -> {
 			for (Shot shot : shots) {
@@ -382,6 +396,7 @@ public class CanvasManager {
 		});
 	}
 
+	@Override
 	public void reset() {
 		startTime = System.currentTimeMillis();
 
@@ -489,6 +504,7 @@ public class CanvasManager {
 		return shots;
 	}
 
+	@Override
 	public void addShot(Color color, double x, double y) {
 		addShot(color, x, y, false);
 	}
@@ -567,10 +583,7 @@ public class CanvasManager {
 		}
 
 		if (currentExercise.isPresent() && !processedShot) {
-			Optional<TargetRegion> hitRegion = Optional.empty();
-			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
-
-			currentExercise.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hit);
 		}
 	}
 
@@ -585,10 +598,7 @@ public class CanvasManager {
 		}
 
 		if (currentExercise.isPresent()) {
-			Optional<TargetRegion> hitRegion = Optional.empty();
-			if (hit.isPresent()) hitRegion = Optional.of(hit.get().getHitRegion());
-
-			currentExercise.get().shotListener(shot, hitRegion);
+			currentExercise.get().shotListener(shot, hit);
 			return true;
 		}
 
@@ -602,132 +612,40 @@ public class CanvasManager {
 		});
 	}
 
-	protected static class Hit {
-		private final Target target;
-		private final TargetRegion hitRegion;
-
-		public Hit(Target target, TargetRegion hitRegion) {
-			this.target = target;
-			this.hitRegion = hitRegion;
-		}
-
-		public Target getTarget() {
-			return target;
-		}
-
-		public TargetRegion getHitRegion() {
-			return hitRegion;
-		}
-	}
-
 	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
 		for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
 			Target target = li.previous();
-			Group targetGroup = target.getTargetGroup();
 
-			if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {
-				// Target was hit, see if a specific region was hit
-				for (int i = targetGroup.getChildren().size() - 1; i >= 0; i--) {
-					Node node = targetGroup.getChildren().get(i);
+			Optional<Hit> hit = target.isHit(shot);
 
-					Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
+			if (hit.isPresent()) {
+				TargetRegion region = hit.get().getHitRegion();
 
-					if (nodeBounds.contains(shot.getX(), shot.getY())) {
-						// If we hit an image region on a transparent pixel,
-						// ignore it
-						TargetRegion region = (TargetRegion) node;
-						if (region.getType() == RegionType.IMAGE) {
-							// The image you get from the image view is its
-							// original size. We need to resize it if it has
-							// changed size to accurately determine if a pixel
-							// is transparent
-							Image currentImage = ((ImageRegion) region).getImage();
+				if (config.inDebugMode()) {
+					Map<String, String> tags = region.getAllTags();
 
-							int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-							int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
-							
-							if (adjustedX < 0 || adjustedY < 0) {
-								logger.debug("An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
-										+ " nodeBounds.getMin ({}, {})", adjustedX, adjustedY, shot.getX(), shot.getY(),
-										nodeBounds.getMaxX(), nodeBounds.getMinY());
-								return Optional.empty();
-							}
-
-							if (Math.abs(currentImage.getWidth() - nodeBounds.getWidth()) > .0000001
-									|| Math.abs(currentImage.getHeight() - nodeBounds.getHeight()) > .0000001) {
-
-								BufferedImage bufferedOriginal = SwingFXUtils.fromFXImage(currentImage, null);
-
-								java.awt.Image tmp = bufferedOriginal.getScaledInstance((int) nodeBounds.getWidth(),
-										(int) nodeBounds.getHeight(), java.awt.Image.SCALE_SMOOTH);
-								BufferedImage bufferedResized = new BufferedImage((int) nodeBounds.getWidth(),
-										(int) nodeBounds.getHeight(), BufferedImage.TYPE_INT_ARGB);
-
-								Graphics2D g2d = bufferedResized.createGraphics();
-								g2d.drawImage(tmp, 0, 0, null);
-								g2d.dispose();
-
-								try {
-									if (adjustedX >= bufferedResized.getWidth()
-											|| adjustedY >= bufferedResized.getHeight()
-											|| bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
-										continue;
-									}
-								} catch (ArrayIndexOutOfBoundsException e) {
-									String message = String.format(
-											"Index out of bounds while trying to find adjusted coordinate (%d, %d) "
-													+ "from original (%.2f, %.2f) in adjusted BufferedImage for target %s "
-													+ "with width = %d, height = %d",
-											adjustedX, adjustedY, shot.getX(), shot.getY(),
-											target.getTargetFile().getPath(), bufferedResized.getWidth(),
-											bufferedResized.getHeight());
-									logger.error(message, e);
-									return Optional.empty();
-								}
-							} else {
-								if (adjustedX >= currentImage.getWidth() || adjustedY >= currentImage.getHeight()
-										|| currentImage.getPixelReader().getArgb(adjustedX, adjustedY) >> 24 == 0) {
-									continue;
-								}
-							}
-						} else {
-							// The shot is in the bounding box but make sure it
-							// is in the shape's
-							// fill otherwise we can get a shot detected where
-							// there isn't actually
-							// a region showing
-							Point2D localCoords = target.getTargetGroup().parentToLocal(shot.getX(), shot.getY());
-							if (!node.contains(localCoords)) continue;
-						}
-
-						if (config.inDebugMode()) {
-							Map<String, String> tags = region.getAllTags();
-
-							StringBuilder tagList = new StringBuilder();
-							for (Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
-								Entry<String, String> entry = it.next();
-								tagList.append(entry.getKey());
-								tagList.append(":");
-								tagList.append(entry.getValue());
-								if (it.hasNext()) tagList.append(", ");
-							}
-
-							logger.debug("Processing Shot: Found Hit Region For Shot ({}, {}), Type ({}), Tags ({})",
-									shot.getX(), shot.getY(), region.getType(), tagList.toString());
-						}
-
-						if (config.getSessionRecorder().isPresent()) {
-							config.getSessionRecorder().get().recordShot(cameraName, shot, false, false,
-									Optional.of(target), Optional.of(targetGroup.getChildren().indexOf(node)),
-									videoString);
-						}
-
-						return Optional.of(new Hit(target, (TargetRegion) node));
+					StringBuilder tagList = new StringBuilder();
+					for (Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
+						Entry<String, String> entry = it.next();
+						tagList.append(entry.getKey());
+						tagList.append(":");
+						tagList.append(entry.getValue());
+						if (it.hasNext()) tagList.append(", ");
 					}
+
+					logger.debug("Processing Shot: Found Hit Region For Shot ({}, {}), Type ({}), Tags ({})",
+							shot.getX(), shot.getY(), region.getType(), tagList.toString());
 				}
+
+				if (config.getSessionRecorder().isPresent()) {
+					config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.of(target),
+							Optional.of(target.getTargetGroup().getChildren().indexOf(region)), videoString);
+				}
+
+				return hit;
 			}
 		}
 
@@ -775,6 +693,7 @@ public class CanvasManager {
 		});
 	}
 
+	@Override
 	public Optional<Target> addTarget(File targetFile) {
 		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
 
@@ -798,6 +717,7 @@ public class CanvasManager {
 		return addTarget(newTarget);
 	}
 
+	@Override
 	public Target addTarget(Target newTarget) {
 		Platform.runLater(() -> {
 			canvasGroup.getChildren().add(newTarget.getTargetGroup());
@@ -818,7 +738,7 @@ public class CanvasManager {
 
 		targets.remove(target);
 	}
-	
+
 	public void clearTargets() {
 		for (Target t : new ArrayList<Target>(targets)) {
 			removeTarget(t);
