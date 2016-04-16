@@ -70,6 +70,12 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 
+/**
+ * Used to parse, store, and update configuration data from a file and in memory
+ * at run time. All of ShootOFF's global settings are managed by this class.
+ * 
+ * @author phrack
+ */
 public class Configuration {
 	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
 	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";
@@ -143,10 +149,11 @@ public class Configuration {
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
-	
-	// TODO: This is used at the moment as a constant to determine if the (current incomplete)
-	// masking solution should be used. This setting will be unnecessary when the masking code
-	// is either complete or removed.
+
+	// TODO: This is used at the moment as a constant to determine if the
+	// (current incomplete) masking solution should be used. This setting
+	// will be unnecessary when the masking code is either complete or
+	// removed.
 	public static final boolean USE_ARENA_MASK = false;
 
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
@@ -200,8 +207,6 @@ public class Configuration {
 	}
 
 	private void readConfigurationFile() throws ConfigurationException, IOException {
-		Properties prop = new Properties();
-
 		InputStream inputStream;
 
 		if (configInput != null) {
@@ -213,6 +218,8 @@ public class Configuration {
 				throw new FileNotFoundException("Could not read configuration file " + configName);
 			}
 		}
+
+		final Properties prop = new Properties();
 
 		try {
 			prop.load(inputStream);
@@ -701,8 +708,7 @@ public class Configuration {
 			rootLogger.setLevel(Level.DEBUG);
 
 			// Ensure webcam-capture logger stays at info because it is quite
-			// noisy
-			// and doesn't output information we care about.
+			// noisy and doesn't output information we care about.
 			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
 		} else {

@@ -103,10 +103,10 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 226.5, 180.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 251, 377.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 537, 383.5, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 505, 167.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 272, 278.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 375.5, 200.5, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 403, 363, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 505, 167.5, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.RED, 486.5, 268, 0, 2));

@@ -26,18 +26,17 @@ import javafx.scene.shape.Ellipse;
 public class EllipseRegion extends Ellipse implements TargetRegion {
 	private final Map<String, String> tags = new HashMap<String, String>();
 
-	public EllipseRegion(double centerX, double centerY, double radiusX, double radiusY) {
-
+	public EllipseRegion(final double centerX, final double centerY, final double radiusX, final double radiusY) {
 		super(centerX, centerY, radiusX, radiusY);
 	}
 
 	@Override
-	public void changeWidth(double widthDelta) {
+	public void changeWidth(final double widthDelta) {
 		this.setRadiusX(this.getRadiusX() + widthDelta);
 	}
 
 	@Override
-	public void changeHeight(double heightDelta) {
+	public void changeHeight(final double heightDelta) {
 		this.setRadiusY(this.getRadiusY() + heightDelta);
 	}
 
@@ -47,12 +46,12 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 	}
 
 	@Override
-	public boolean tagExists(String name) {
+	public boolean tagExists(final String name) {
 		return tags.containsKey(name);
 	}
 
 	@Override
-	public String getTag(String name) {
+	public String getTag(final String name) {
 		return tags.get(name);
 	}
 
@@ -62,7 +61,7 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 	}
 
 	@Override
-	public void setTags(Map<String, String> newTags) {
+	public void setTags(final Map<String, String> newTags) {
 		tags.clear();
 		tags.putAll(newTags);
 	}

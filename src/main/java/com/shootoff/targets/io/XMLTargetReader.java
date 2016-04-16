@@ -20,6 +20,7 @@ package com.shootoff.targets.io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -53,27 +54,33 @@ import javafx.scene.shape.Shape;
 public class XMLTargetReader {
 	private static final Logger logger = LoggerFactory.getLogger(XMLTargetReader.class);
 
-	private final File targetFile;
+	private InputStream targetStream;
 
 	public XMLTargetReader(File targetFile) {
-		this.targetFile = targetFile;
+		try {
+			targetStream = new FileInputStream(targetFile);
+		} catch (FileNotFoundException e) {
+			logger.error("Problem initializing target reader from file", e);
+		}
+	}
+
+	public XMLTargetReader(InputStream targetStream) {
+		this.targetStream = targetStream;
 	}
 
 	public List<Node> load() {
-		InputStream xmlInput = null;
 		try {
-			xmlInput = new FileInputStream(targetFile);
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			TargetXMLHandler handler = new TargetXMLHandler();
-			saxParser.parse(xmlInput, handler);
+			saxParser.parse(targetStream, handler);
 
 			return handler.getRegions();
 		} catch (IOException | ParserConfigurationException | SAXException e) {
 			logger.error("Error reading XML target", e);
 		} finally {
-			if (xmlInput != null) {
+			if (targetStream != null) {
 				try {
-					xmlInput.close();
+					targetStream.close();
 				} catch (IOException e) {
 					logger.error("Error closing XMl target opened for reading", e);
 				}
@@ -84,11 +91,11 @@ public class XMLTargetReader {
 	}
 
 	private static class TargetXMLHandler extends DefaultHandler {
-		List<Node> regions = new ArrayList<Node>();
-		TargetRegion currentRegion;
-		List<Double> polygonPoints = null;
-		Color polygonFill = null;
-		Map<String, String> currentTags;
+		private final List<Node> regions = new ArrayList<Node>();
+		private TargetRegion currentRegion;
+		private List<Double> polygonPoints = null;
+		private Color polygonFill = null;
+		private Map<String, String> currentTags;
 
 		public List<Node> getRegions() {
 			return regions;
@@ -124,7 +131,7 @@ public class XMLTargetReader {
 					}
 
 					if (imageRegion.getAnimation().isPresent()) {
-						SpriteAnimation animation = imageRegion.getAnimation().get();
+						final SpriteAnimation animation = imageRegion.getAnimation().get();
 						animation.setCycleCount(1);
 
 						animation.setOnFinished((e) -> {

@@ -27,8 +27,9 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.Hit;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -38,7 +39,7 @@ public class TestDuelingTree {
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
-	private List<Group> targets;
+	private List<Target> targets;
 	private List<Hit> leftPaddlesHits;
 	private List<Hit> rightPaddlesHits;
 	private DuelingTree dt;
@@ -56,10 +57,10 @@ public class TestDuelingTree {
 		originalOut = System.out;
 		System.setOut(stringOutStream);
 
-		targets = new ArrayList<Group>();
+		targets = new ArrayList<Target>();
 		Group duelTree = TargetIO.loadTarget(new File("targets" + File.separator + "Duel_Tree.target")).get();
-		Target duelTreeTarget = new Target(duelTree, new ArrayList<Target>());
-		targets.add(duelTree);
+		TargetView duelTreeTarget = new TargetView(duelTree, new ArrayList<Target>());
+		targets.add(duelTreeTarget);
 
 		leftPaddlesHits = new ArrayList<Hit>();
 		rightPaddlesHits = new ArrayList<Hit>();
@@ -103,7 +104,7 @@ public class TestDuelingTree {
 
 	@Test
 	public void testNoTarget() throws IOException, ConfigurationException {
-		List<Group> targets = new ArrayList<Group>();
+		List<Target> targets = new ArrayList<Target>();
 		Configuration config = new Configuration(new String[0]);
 		config.setDebugMode(true);
 

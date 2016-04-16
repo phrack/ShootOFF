@@ -15,6 +15,9 @@ import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.collections.FXCollections;
@@ -40,7 +43,7 @@ public class TestCanvasManager {
 
 		config = new Configuration(new String[0]);
 		CamerasSupervisor cs = new CamerasSupervisor(config);
-		cm = new CanvasManager(new Group(), config, cs, "test", shotEntries);
+		cm = new CanvasManager(new Group(), config, new MockShootOFFController(), "test", shotEntries);
 		CameraManager cameraManager = cs.addCameraManager(new MockCamera(), null, cm);
 		cs.setDetectingAll(false);
 		cm.setCameraManager(cameraManager);
@@ -61,7 +64,7 @@ public class TestCanvasManager {
 		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty());
 
 		assertTrue(h.isPresent());
-		assertTrue(ipscTarget.getTargetGroup().getChildren().contains(h.get().getHitRegion()));
+		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
 		assertEquals(ipscTarget, h.get().getTarget());
 	}
 
@@ -74,7 +77,7 @@ public class TestCanvasManager {
 		h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty());
 
 		assertTrue(h.isPresent());
-		assertTrue(ipscTarget.getTargetGroup().getChildren().contains(h.get().getHitRegion()));
+		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
 		assertEquals(ipscTarget, h.get().getTarget());
 
 		h = cm.checkHit(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
@@ -101,17 +104,17 @@ public class TestCanvasManager {
 
 	@Test
 	public void testGetTargetGroups() {
-		assertEquals(1, cm.getTargetGroups().size());
-		assertTrue(cm.getTargetGroups().contains(ipscTarget.getTargetGroup()));
+		assertEquals(1, cm.getTargets().size());
+		assertTrue(cm.getTargets().contains(ipscTarget));
 	}
 
 	@Test
 	public void testTargetSelection() {
-		Shape firstShape = (Shape) ipscTarget.getTargetGroup().getChildren().get(0);
+		Shape firstShape = (Shape) ipscTarget.getRegions().get(0);
 
 		assertEquals(null, firstShape.getStroke());
 
-		cm.toggleTargetSelection(Optional.of(ipscTarget.getTargetGroup()));
+		cm.toggleTargetSelection(Optional.of((TargetView) ipscTarget));
 
 		assertEquals(TargetRegion.SELECTED_STROKE_COLOR, firstShape.getStroke());
 

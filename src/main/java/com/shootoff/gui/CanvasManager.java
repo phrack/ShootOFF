@@ -21,7 +21,11 @@ package com.shootoff.gui;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
@@ -51,8 +54,10 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -75,7 +80,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -92,7 +96,7 @@ public class CanvasManager implements CameraView {
 	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
 	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
 
-	protected final CamerasSupervisor camerasSupervisor;
+	private final Resetter resetter;
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
@@ -101,7 +105,7 @@ public class CanvasManager implements CameraView {
 
 	private ProgressIndicator progress;
 	private Optional<ContextMenu> contextMenu = Optional.empty();
-	private Optional<Group> selectedTarget = Optional.empty();
+	private Optional<TargetView> selectedTarget = Optional.empty();
 	private long startTime = 0;
 	private boolean showShots = true;
 	private boolean hadMalfunction = false;
@@ -110,19 +114,17 @@ public class CanvasManager implements CameraView {
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
-	public CanvasManager(Group canvasGroup, Configuration config, CamerasSupervisor camerasSupervisor,
-			String cameraName, ObservableList<ShotEntry> shotEntries) {
+	public CanvasManager(Group canvasGroup, Configuration config, Resetter resetter, String cameraName,
+			ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
 		this.config = config;
-		this.camerasSupervisor = camerasSupervisor;
+		this.resetter = resetter;
 		this.cameraName = cameraName;
 		this.shotEntries = shotEntries;
 		shots = Collections.synchronizedList(new ArrayList<Shot>());
 
 		this.background.setOnMouseClicked((event) -> {
 			toggleTargetSelection(Optional.empty());
-			selectedTarget = Optional.empty();
-			canvasGroup.requestFocus();
 		});
 
 		if (Platform.isFxApplicationThread()) {
@@ -205,9 +207,9 @@ public class CanvasManager implements CameraView {
 			}
 		});
 
-		diagnosticsVBox.getChildren().add(diagnosticLabel);
+		Platform.runLater(() -> diagnosticsVBox.getChildren().add(diagnosticLabel));
 
-		if (!config.isChimeMuted(message)) {
+		if (!config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
 			@SuppressWarnings("unchecked")
 			ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
@@ -229,7 +231,7 @@ public class CanvasManager implements CameraView {
 			diagnosticFutures.remove(diagnosticLabel);
 		}
 
-		diagnosticsVBox.getChildren().remove(diagnosticLabel);
+		Platform.runLater(() -> diagnosticsVBox.getChildren().remove(diagnosticLabel));
 	}
 
 	public static String colorToWebCode(Color color) {
@@ -295,27 +297,25 @@ public class CanvasManager implements CameraView {
 					null);
 		}
 
-		background.setImage(img);
+		Platform.runLater(() -> background.setImage(img));
 	}
 
 	public void updateBackground(Image img) {
 		updateCanvasGroup();
 		background.setX(0);
 		background.setY(0);
-		background.setImage(img);
+		Platform.runLater(() -> background.setImage(img));
 	}
 
 	private void updateCanvasGroup() {
 		if (!canvasGroup.getChildren().contains(background)) {
-			Platform.runLater(() -> {
-				if (canvasGroup.getChildren().isEmpty()) {
-					canvasGroup.getChildren().add(background);
-				} else {
-					// Remove the wait spinner and replace it
-					// with the background
-					canvasGroup.getChildren().set(0, background);
-				}
-			});
+			if (canvasGroup.getChildren().isEmpty()) {
+				canvasGroup.getChildren().add(background);
+			} else {
+				// Remove the wait spinner and replace it
+				// with the background
+				Platform.runLater(() -> canvasGroup.getChildren().set(0, background));
+			}
 		}
 	}
 
@@ -349,7 +349,7 @@ public class CanvasManager implements CameraView {
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
 
-		logger.debug("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+		logger.trace("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
 
 		return new BoundingBox(minX, minY, width, height);
@@ -368,7 +368,7 @@ public class CanvasManager implements CameraView {
 		double width = (bounds.getWidth() * scaleX);
 		double height = (bounds.getHeight() * scaleY);
 
-		logger.debug("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+		logger.trace("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
 
 		return new BoundingBox(minX, minY, width, height);
@@ -380,7 +380,7 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public void clearShots() {
-		Platform.runLater(() -> {
+		final Runnable clearShotsAction = () -> {
 			for (Shot shot : shots) {
 				canvasGroup.getChildren().remove(shot.getMarker());
 			}
@@ -393,7 +393,13 @@ public class CanvasManager implements CameraView {
 				jdk8094135Warning();
 			}
 			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
-		});
+		};
+
+		if (Platform.isFxApplicationThread()) {
+			clearShotsAction.run();
+		} else {
+			Platform.runLater(clearShotsAction);
+		}
 	}
 
 	@Override
@@ -402,9 +408,7 @@ public class CanvasManager implements CameraView {
 
 		// Reset animations
 		for (Target target : targets) {
-			for (Node node : target.getTargetGroup().getChildren()) {
-				TargetRegion region = (TargetRegion) node;
-
+			for (TargetRegion region : target.getRegions()) {
 				if (region.getType() == RegionType.IMAGE) ((ImageRegion) region).reset();
 			}
 		}
@@ -642,7 +646,7 @@ public class CanvasManager implements CameraView {
 
 				if (config.getSessionRecorder().isPresent()) {
 					config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.of(target),
-							Optional.of(target.getTargetGroup().getChildren().indexOf(region)), videoString);
+							Optional.of(target.getRegions().indexOf(region)), videoString);
 				}
 
 				return hit;
@@ -660,10 +664,10 @@ public class CanvasManager implements CameraView {
 	}
 
 	private void executeRegionCommands(Hit hit) {
-		Target.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
+		TargetView.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
 			switch (commandName) {
 			case "reset":
-				camerasSupervisor.reset();
+				resetter.reset();
 				break;
 
 			case "animate":
@@ -676,18 +680,31 @@ public class CanvasManager implements CameraView {
 
 			case "play_sound":
 				// If there is a second parameter, we should look to see
-				// if it's an
-				// image region that is down and if so, don't play the
-				// sound
+				// if it's an image region that is down and if so, don't
+				// play the sound
 				if (args.size() == 2) {
-					Optional<TargetRegion> namedRegion = Target.getTargetRegionByName(targets, hit.getHitRegion(),
+					Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets, hit.getHitRegion(),
 							args.get(1));
 					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
 						if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
 					}
 				}
 
-				TrainingExerciseBase.playSound(args.get(0));
+				// If the string starts with an @ we are supposed to
+				// load the sound as a resource from the current exercises
+				// JAR file. This indicates that the target is from
+				// a modular exercise
+				String soundPath = args.get(0);
+				if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
+					InputStream is = config.getExercise().get().getClass().getResourceAsStream(soundPath.substring(1));
+					TrainingExerciseBase.playSound(new BufferedInputStream(is));
+				} else if ('@' != soundPath.charAt(0)) {
+					TrainingExerciseBase.playSound(soundPath);
+				} else {
+					logger.error("Can't play {} because it is a resource in an exercise but no exercise is loaded.",
+							soundPath);
+				}
+
 				break;
 			}
 		});
@@ -695,7 +712,18 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public Optional<Target> addTarget(File targetFile) {
-		Optional<Group> targetGroup = TargetIO.loadTarget(targetFile);
+		Optional<Group> targetGroup;
+
+		if ('@' == targetFile.toString().charAt(0)) {
+			try {
+				targetGroup = TargetIO.loadTarget(new FileInputStream(targetFile.toString().substring(1)));
+			} catch (FileNotFoundException e) {
+				targetGroup = Optional.empty();
+				logger.error("Error adding target from stream", e);
+			}
+		} else {
+			targetGroup = TargetIO.loadTarget(targetFile);
+		}
 
 		if (targetGroup.isPresent()) {
 			Optional<Target> target = Optional.of(addTarget(targetFile, targetGroup.get(), true));
@@ -711,26 +739,35 @@ public class CanvasManager implements CameraView {
 	}
 
 	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
-
-		Target newTarget = new Target(targetFile, targetGroup, config, this, userDeletable);
+		TargetView newTarget = new TargetView(targetFile, targetGroup, config, this, userDeletable);
 
 		return addTarget(newTarget);
 	}
 
 	@Override
 	public Target addTarget(Target newTarget) {
-		Platform.runLater(() -> {
-			canvasGroup.getChildren().add(newTarget.getTargetGroup());
-		});
+		final Runnable addTargetAction = () -> canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
+
+		if (Platform.isFxApplicationThread()) {
+			addTargetAction.run();
+		} else {
+			Platform.runLater(addTargetAction);
+		}
+
 		targets.add(newTarget);
 
 		return newTarget;
 	}
 
 	public void removeTarget(Target target) {
-		Platform.runLater(() -> {
-			canvasGroup.getChildren().remove(target.getTargetGroup());
-		});
+		final Runnable removeTargetAction = () -> canvasGroup.getChildren()
+				.remove(((TargetView) target).getTargetGroup());
+
+		if (Platform.isFxApplicationThread()) {
+			removeTargetAction.run();
+		} else {
+			Platform.runLater(removeTargetAction);
+		}
 
 		if (config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordTargetRemoved(cameraName, target);
@@ -749,38 +786,15 @@ public class CanvasManager implements CameraView {
 		return targets;
 	}
 
-	public List<Group> getTargetGroups() {
-		List<Group> targetGroups = new ArrayList<Group>();
-
-		for (Target target : targets)
-			targetGroups.add(target.getTargetGroup());
-
-		return targetGroups;
-	}
-
-	protected void toggleTargetSelection(Optional<Group> newSelection) {
-		if (selectedTarget.isPresent()) setTargetSelection(selectedTarget.get(), false);
+	public void toggleTargetSelection(Optional<TargetView> newSelection) {
+		if (selectedTarget.isPresent()) selectedTarget.get().toggleSelected();
 
 		if (newSelection.isPresent()) {
-			setTargetSelection(newSelection.get(), true);
+			newSelection.get().toggleSelected();
 			selectedTarget = newSelection;
-		}
-	}
-
-	private void setTargetSelection(Group target, boolean isSelected) {
-		Color stroke;
-
-		if (isSelected) {
-			stroke = TargetRegion.SELECTED_STROKE_COLOR;
 		} else {
-			stroke = TargetRegion.UNSELECTED_STROKE_COLOR;
-		}
-
-		for (Node node : target.getChildren()) {
-			TargetRegion region = (TargetRegion) node;
-			if (region.getType() != RegionType.IMAGE) {
-				((Shape) region).setStroke(stroke);
-			}
+			selectedTarget = Optional.empty();
+			canvasGroup.requestFocus();
 		}
 	}
 }

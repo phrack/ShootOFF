@@ -9,6 +9,8 @@ package com.shootoff.targets.io;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,21 +21,36 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
+import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.JavaFXThreadingRule;
+import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.gui.TargetView;
+import com.shootoff.gui.controller.MockProjectorArenaController;
+import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class TestTargetIO {
+	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+
 	private List<Node> regions = new ArrayList<Node>();
 	private ImageRegion img;
 	private RectangleRegion rec;
 	private EllipseRegion ell;
 	private PolygonRegion pol;
+	private File tempXMLTarget;
 
 	@Before
 	public void setUp() {
@@ -66,21 +83,17 @@ public class TestTargetIO {
 		regions.add(rec);
 		regions.add(ell);
 		regions.add(pol);
+
+		tempXMLTarget = new File("temp.target");
+		TargetIO.saveTarget(regions, tempXMLTarget);
 	}
 
-	@Test
-	public void testXMLSerialization() {
-		File tempXMLTarget = new File("temp.target");
-		TargetIO.saveTarget(regions, tempXMLTarget);
+	@After
+	public void tearDown() {
+		if (!tempXMLTarget.delete()) System.err.println("Failed to delete " + tempXMLTarget.getPath());
+	}
 
-		Optional<Group> target = TargetIO.loadTarget(tempXMLTarget);
-
-		assertTrue(target.isPresent());
-
-		Group targetGroup = target.get();
-
-		assertEquals(4, targetGroup.getChildren().size());
-
+	private void checkTarget(Group targetGroup) {
 		for (Node node : targetGroup.getChildren()) {
 			TargetRegion region = (TargetRegion) node;
 
@@ -117,7 +130,54 @@ public class TestTargetIO {
 				break;
 			}
 		}
+	}
 
-		if (!tempXMLTarget.delete()) System.err.println("Failed to delete " + tempXMLTarget.getPath());
+	@Test
+	public void testXMLSerializationFile() {
+		Optional<Group> target = TargetIO.loadTarget(tempXMLTarget);
+
+		assertTrue(target.isPresent());
+
+		Group targetGroup = target.get();
+
+		assertEquals(4, targetGroup.getChildren().size());
+
+		checkTarget(targetGroup);
+	}
+
+	@Test
+	public void testXMLSerializationStream() throws FileNotFoundException {
+		Optional<Group> target = TargetIO.loadTarget(new FileInputStream(tempXMLTarget));
+
+		assertTrue(target.isPresent());
+
+		Group targetGroup = target.get();
+
+		assertEquals(4, targetGroup.getChildren().size());
+
+		checkTarget(targetGroup);
+	}
+
+	@Test
+	public void testXMLSerializationExerciseStream() throws FileNotFoundException, ConfigurationException {
+		Configuration config = new Configuration(new String[0]);
+
+		CamerasSupervisor cs = new CamerasSupervisor(config);
+
+		MockProjectorArenaController pac = new MockProjectorArenaController();
+		pac.init(config, new MockCanvasManager(config));
+
+		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
+		pteb.init(config, cs, new MockShootOFFController(), pac);
+
+		Optional<Target> target = pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
+
+		assertTrue(target.isPresent());
+
+		Group targetGroup = ((TargetView) target.get()).getTargetGroup();
+
+		assertEquals(4, targetGroup.getChildren().size());
+
+		checkTarget(targetGroup);
 	}
 }

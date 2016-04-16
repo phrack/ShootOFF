@@ -19,15 +19,15 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 import ch.qos.logback.classic.Logger;
-import javafx.scene.Group;
 
 public class TestShootDontShoot {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -52,7 +52,7 @@ public class TestShootDontShoot {
 
 		shootTargets = new ArrayList<Target>();
 		dontShootTargets = new ArrayList<Target>();
-		sds = new ShootDontShoot(new ArrayList<Group>(), rng, shootTargets, dontShootTargets);
+		sds = new ShootDontShoot(new ArrayList<Target>(), rng, shootTargets, dontShootTargets);
 		Configuration config = new Configuration(new String[0]);
 		config.setDebugMode(true);
 
@@ -80,7 +80,8 @@ public class TestShootDontShoot {
 
 		assertEquals(4, shootTargets.size());
 
-		sds.removeTarget(shootTargets, (TargetRegion) shootTargets.get(0).getTargetGroup().getChildren().get(0));
+		sds.removeTarget(shootTargets,
+				(TargetRegion) ((TargetView) shootTargets.get(0)).getTargetGroup().getChildren().get(0));
 
 		assertEquals(3, shootTargets.size());
 	}
@@ -97,7 +98,7 @@ public class TestShootDontShoot {
 
 		// Shoot dont shoot target
 		Hit dontShootHit = new Hit(dontShootTargets.get(0),
-				(TargetRegion) dontShootTargets.get(0).getTargetGroup().getChildren().get(0), 0, 0);
+				(TargetRegion) ((TargetView) dontShootTargets.get(0)).getTargetGroup().getChildren().get(0), 0, 0);
 
 		sds.shotListener(null, Optional.of(dontShootHit));
 

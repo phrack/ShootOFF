@@ -13,7 +13,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.SessionRecorder;
@@ -53,7 +53,7 @@ public class TestSessionIO {
 
 		Configuration config = new Configuration(new String[0]);
 		MockCanvasManager canvasManager = new MockCanvasManager(config);
-		Target target = new Target(new File(targetName), new Group(), config, canvasManager, false);
+		TargetView target = new TargetView(new File(targetName), new Group(), config, canvasManager, false);
 		canvasManager.addTarget(target);
 
 		hitRegionIndex = 0;

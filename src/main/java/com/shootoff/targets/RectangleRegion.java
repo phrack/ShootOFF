@@ -26,17 +26,17 @@ import javafx.scene.shape.Rectangle;
 public class RectangleRegion extends Rectangle implements TargetRegion {
 	private final Map<String, String> tags = new HashMap<String, String>();
 
-	public RectangleRegion(double x, double y, double width, double height) {
+	public RectangleRegion(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);
 	}
 
 	@Override
-	public void changeWidth(double widthDelta) {
+	public void changeWidth(final double widthDelta) {
 		this.setWidth(this.getWidth() + widthDelta);
 	}
 
 	@Override
-	public void changeHeight(double heightDelta) {
+	public void changeHeight(final double heightDelta) {
 		this.setHeight(this.getHeight() + heightDelta);
 	}
 
@@ -46,12 +46,12 @@ public class RectangleRegion extends Rectangle implements TargetRegion {
 	}
 
 	@Override
-	public boolean tagExists(String name) {
+	public boolean tagExists(final String name) {
 		return tags.containsKey(name);
 	}
 
 	@Override
-	public String getTag(String name) {
+	public String getTag(final String name) {
 		return tags.get(name);
 	}
 
@@ -61,7 +61,7 @@ public class RectangleRegion extends Rectangle implements TargetRegion {
 	}
 
 	@Override
-	public void setTags(Map<String, String> newTags) {
+	public void setTags(final Map<String, String> newTags) {
 		tags.clear();
 		tags.putAll(newTags);
 	}

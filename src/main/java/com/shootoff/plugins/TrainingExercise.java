@@ -21,10 +21,9 @@ package com.shootoff.plugins;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.scene.Group;
-
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 
 public interface TrainingExercise {
 	/**
@@ -64,7 +63,7 @@ public interface TrainingExercise {
 	 * @param targets
 	 *            a list of all of the targets currently added to webcam feeds
 	 */
-	public void reset(List<Group> targets);
+	public void reset(List<Target> targets);
 
 	/**
 	 * Called when a training exercise is being unloaded by the framework. This

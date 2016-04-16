@@ -37,6 +37,7 @@ import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -49,30 +50,38 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+/**
+ * A canvas to display events that were recorded by the session recorder to a
+ * user. This class is where events from a session are actually processed to
+ * display their outcomes to the user.
+ * 
+ * @author phrack
+ */
 public class SessionCanvasManager {
 	private final Group canvas;
 	private final Label exerciseLabel = new Label();
-	private final Map<Event, Target> eventToContainer = new HashMap<Event, Target>();
+	private final Map<Event, TargetView> eventToContainer = new HashMap<Event, TargetView>();
 	private final Map<Event, Point2D> eventToPosition = new HashMap<Event, Point2D>();
 	private final Map<Event, String> eventToExerciseMessage = new HashMap<Event, String>();
 	private final Map<Event, Dimension2D> eventToDimension = new HashMap<Event, Dimension2D>();
+	private final List<TargetView> targetViews = new ArrayList<TargetView>();
 	private final List<Target> targets = new ArrayList<Target>();
 	private final Configuration config;
 
-	public SessionCanvasManager(Group canvas, Configuration config) {
+	public SessionCanvasManager(final Group canvas, final Configuration config) {
 		this.canvas = canvas;
 		this.config = config;
 		canvas.getChildren().add(exerciseLabel);
 	}
 
-	public void doEvent(Event e) {
+	public void doEvent(final Event e) {
 		switch (e.getType()) {
 		case SHOT:
 			if (!(e instanceof ShotEvent)) {
 				throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
 			}
 
-			ShotEvent se = (ShotEvent) e;
+			final ShotEvent se = (ShotEvent) e;
 			canvas.getChildren().add(se.getShot().getMarker());
 
 			if (se.isMalfunction()) {
@@ -130,9 +139,10 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
 			}
 
-			TargetRemovedEvent tre = (TargetRemovedEvent) e;
-			eventToContainer.put(e, targets.get(tre.getTargetIndex()));
-			canvas.getChildren().remove(targets.get(tre.getTargetIndex()).getTargetGroup());
+			final TargetRemovedEvent tre = (TargetRemovedEvent) e;
+			eventToContainer.put(e, targetViews.get(tre.getTargetIndex()));
+			canvas.getChildren().remove(targetViews.get(tre.getTargetIndex()).getTargetGroup());
+			targetViews.remove(tre.getTargetIndex());
 			targets.remove(tre.getTargetIndex());
 			break;
 
@@ -141,9 +151,9 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
 			}
 
-			TargetResizedEvent trre = (TargetResizedEvent) e;
-			eventToDimension.put(e, targets.get(trre.getTargetIndex()).getDimension());
-			targets.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
+			final TargetResizedEvent trre = (TargetResizedEvent) e;
+			eventToDimension.put(e, targetViews.get(trre.getTargetIndex()).getDimension());
+			targetViews.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
 			break;
 
 		case TARGET_MOVED:
@@ -151,9 +161,9 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
 			}
 
-			TargetMovedEvent tme = (TargetMovedEvent) e;
-			eventToPosition.put(e, targets.get(tme.getTargetIndex()).getPosition());
-			targets.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
+			final TargetMovedEvent tme = (TargetMovedEvent) e;
+			eventToPosition.put(e, targetViews.get(tme.getTargetIndex()).getPosition());
+			targetViews.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
@@ -162,7 +172,7 @@ public class SessionCanvasManager {
 						"Expected type ExerciseFeedMessageEvent but got type " + e.getClass().getName());
 			}
 
-			ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
+			final ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
 			eventToExerciseMessage.put(e, exerciseLabel.getText());
 			exerciseLabel.setText(pfme.getMessage());
 			break;
@@ -176,7 +186,7 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
 			}
 
-			ShotEvent se = (ShotEvent) e;
+			final ShotEvent se = (ShotEvent) e;
 			canvas.getChildren().remove(se.getShot().getMarker());
 
 			if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
@@ -187,6 +197,7 @@ public class SessionCanvasManager {
 
 		case TARGET_ADDED:
 			canvas.getChildren().remove(eventToContainer.get(e).getTargetGroup());
+			targetViews.remove(eventToContainer.get(e));
 			targets.remove(eventToContainer.get(e));
 			break;
 
@@ -195,9 +206,10 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
 			}
 
-			TargetRemovedEvent tre = (TargetRemovedEvent) e;
-			Target oldTarget = eventToContainer.get(e);
+			final TargetRemovedEvent tre = (TargetRemovedEvent) e;
+			final TargetView oldTarget = eventToContainer.get(e);
 			canvas.getChildren().add(oldTarget.getTargetGroup());
+			targetViews.add(tre.getTargetIndex(), oldTarget);
 			targets.add(tre.getTargetIndex(), oldTarget);
 			break;
 
@@ -206,9 +218,9 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
 			}
 
-			TargetResizedEvent trre = (TargetResizedEvent) e;
-			Dimension2D oldDimension = eventToDimension.get(e);
-			targets.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
+			final TargetResizedEvent trre = (TargetResizedEvent) e;
+			final Dimension2D oldDimension = eventToDimension.get(e);
+			targetViews.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
 			break;
 
 		case TARGET_MOVED:
@@ -216,9 +228,9 @@ public class SessionCanvasManager {
 				throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
 			}
 
-			TargetMovedEvent tme = (TargetMovedEvent) e;
-			Point2D oldPosition = eventToPosition.get(e);
-			targets.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
+			final TargetMovedEvent tme = (TargetMovedEvent) e;
+			final Point2D oldPosition = eventToPosition.get(e);
+			targetViews.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
 			break;
 
 		case EXERCISE_FEED_MESSAGE:
@@ -228,12 +240,13 @@ public class SessionCanvasManager {
 	}
 
 	private void animateTarget(ShotEvent se, boolean undo) {
-		Target target = targets.get(se.getTargetIndex().get());
-		TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren().get(se.getHitRegionIndex().get());
+		final TargetView target = targetViews.get(se.getTargetIndex().get());
+		final TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren()
+				.get(se.getHitRegionIndex().get());
 
 		if (!region.tagExists("command")) return;
 
-		Target.parseCommandTag(region, (commands, commandName, args) -> {
+		TargetView.parseCommandTag(region, (commands, commandName, args) -> {
 			if (!undo) {
 				switch (commandName) {
 				case "animate":
@@ -246,8 +259,7 @@ public class SessionCanvasManager {
 				}
 			} else {
 				// If we are undoing a reverse animation we should just play it
-				// like
-				// normal
+				// like normal
 				if (commands.contains("reverse")) {
 					switch (commandName) {
 					case "animate":
@@ -260,13 +272,13 @@ public class SessionCanvasManager {
 					}
 				} else {
 					// If we are undoing a non-reverse animation we need to
-					// reset
-					// the animated region
-					if (commandName.equals("animate")) {
+					// reset the animated region
+					if ("animate".equals(commandName)) {
 						if (region.getType() == RegionType.IMAGE) {
 							((ImageRegion) region).reset();
 						} else {
-							Optional<TargetRegion> t = Target.getTargetRegionByName(targets, region, args.get(0));
+							final Optional<TargetRegion> t = TargetView
+									.getTargetRegionByName(new ArrayList<Target>(targetViews), region, args.get(0));
 							if (t.isPresent()) ((ImageRegion) t.get()).reset();
 						}
 					}
@@ -275,14 +287,15 @@ public class SessionCanvasManager {
 		});
 	}
 
-	private void addTarget(TargetAddedEvent e) {
-		Optional<Group> target = TargetIO.loadTarget(
+	private void addTarget(final TargetAddedEvent e) {
+		final Optional<Group> target = TargetIO.loadTarget(
 				new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
 
 		if (target.isPresent()) {
 			canvas.getChildren().add(target.get());
-			Target targetContainer = new Target(target.get(), targets);
+			final TargetView targetContainer = new TargetView(target.get(), targets);
 			eventToContainer.put(e, targetContainer);
+			targetViews.add(targetContainer);
 			targets.add(targetContainer);
 		}
 	}

@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.arenamask.Mask;
 import com.shootoff.config.Configuration;
@@ -38,7 +37,9 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.Resetter;
+import com.shootoff.gui.TargetView;
+import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
@@ -85,11 +86,11 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		arenaStage = new Stage();
 		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
-		Scene scene = new Scene(arenaAnchor, 500, 500);
+		final Scene scene = new Scene(arenaAnchor, 500, 500);
 		arenaStage.setScene(scene);
 	}
 
-	public void init(Stage shootOFFStage, Configuration config, CamerasSupervisor camerasSupervisor) {
+	public void init(Stage shootOFFStage, Configuration config, Resetter resetter) {
 		this.config = config;
 
 		this.shootOFFStage = shootOFFStage;
@@ -97,8 +98,12 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		arenaStage.setFullScreenExitHint("");
 
-		canvasManager = new CanvasManager(arenaCanvasGroup, config, camerasSupervisor, "arena", null);
+		canvasManager = new CanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
+
+		arenaAnchor.setOnMouseClicked((event) -> {
+			canvasManager.toggleTargetSelection(Optional.empty());
+		});
 
 		arenaAnchor.widthProperty().addListener((e) -> {
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
@@ -116,14 +121,14 @@ public class ProjectorArenaController implements CalibrationListener {
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
-		ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
+		final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
 
 		if (stageHomeScreens.isEmpty()) {
-			StringBuilder message = new StringBuilder(
+			final StringBuilder message = new StringBuilder(
 					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens: %n%n",
 							stage.getTitle(), stage.getX(), stage.getY()));
 
-			Iterator<Screen> it = Screen.getScreens().iterator();
+			final Iterator<Screen> it = Screen.getScreens().iterator();
 
 			while (it.hasNext()) {
 				Screen s = it.next();
@@ -169,10 +174,10 @@ public class ProjectorArenaController implements CalibrationListener {
 		if (config.getArenaPosition().isPresent()) {
 			logger.debug("Projector has been manually placed previously");
 
-			Point2D arenaPosition = config.getArenaPosition().get();
+			final Point2D arenaPosition = config.getArenaPosition().get();
 
-			ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(), arenaPosition.getY(),
-					1, 1);
+			final ObservableList<Screen> screens = Screen.getScreensForRectangle(arenaPosition.getX(),
+					arenaPosition.getY(), 1, 1);
 
 			if (!screens.isEmpty()) {
 				arenaStage.setX(arenaPosition.getX());
@@ -196,7 +201,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			if (!homeScreen.isPresent()) return;
 
-			Screen shootOFFScreen = homeScreen.get();
+			final Screen shootOFFScreen = homeScreen.get();
 
 			for (Screen screen : Screen.getScreens()) {
 				if (!screen.equals(shootOFFScreen)) {
@@ -313,7 +318,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		return config;
 	}
 
-	public void setCourse(Course course) {
+	public void setCourse(final Course course) {
 		if (course.getBackground().isPresent()) {
 			setBackground(course.getBackground().get());
 		} else {
@@ -336,22 +341,22 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		for (Target t : course.getTargets()) {
 			if (scaleCourse) {
-				double newWidth = t.getDimension().getWidth() * widthScaleFactor;
-				double widthDelta = newWidth - t.getDimension().getWidth();
-				double newX = t.getTargetGroup().getBoundsInParent().getMinX() * widthScaleFactor;
-				double deltaX = newX - t.getTargetGroup().getBoundsInParent().getMinX() + (widthDelta / 2);
+				final double newWidth = t.getDimension().getWidth() * widthScaleFactor;
+				final double widthDelta = newWidth - t.getDimension().getWidth();
+				final double newX = t.getBoundsInParent().getMinX() * widthScaleFactor;
+				final double deltaX = newX - t.getBoundsInParent().getMinX() + (widthDelta / 2);
 
-				double newHeight = t.getDimension().getHeight() * heightScaleFactor;
-				double heightDelta = newHeight - t.getDimension().getHeight();
-				double newY = t.getTargetGroup().getBoundsInParent().getMinY() * heightScaleFactor;
-				double deltaY = newY - t.getTargetGroup().getBoundsInParent().getMinY() + (heightDelta / 2);
+				final double newHeight = t.getDimension().getHeight() * heightScaleFactor;
+				final double heightDelta = newHeight - t.getDimension().getHeight();
+				final double newY = t.getBoundsInParent().getMinY() * heightScaleFactor;
+				final double deltaY = newY - t.getBoundsInParent().getMinY() + (heightDelta / 2);
 
 				t.setPosition(t.getPosition().getX() + deltaX, t.getPosition().getY() + deltaY);
 
 				t.setDimensions(newWidth, newHeight);
 			}
 
-			canvasManager.addTarget(t);
+			canvasManager.addTarget((TargetView) t);
 		}
 	}
 
@@ -363,16 +368,16 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			// Manually going full screen with an arena that was manually
 			// moved to another screen
-			Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
+			final Optional<Screen> currentArenaScreen = getStageHomeScreen(arenaStage);
 
 			if (!currentArenaScreen.isPresent()) return;
 
-			Rectangle2D arenaScreenBounds = currentArenaScreen.get().getBounds();
+			final Rectangle2D arenaScreenBounds = currentArenaScreen.get().getBounds();
 			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
 
-			boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
+			final boolean fullyManual = !detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
 					&& !originalArenaHomeScreen.equals(currentArenaScreen.get());
-			boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
+			final boolean movedAfterAuto = detectedProjectorScreen.isPresent() && !arenaStage.isFullScreen()
 					&& !detectedProjectorScreen.equals(currentArenaScreen.get());
 
 			if (fullyManual || movedAfterAuto) {
@@ -398,12 +403,12 @@ public class ProjectorArenaController implements CalibrationListener {
 		return arenaStage.isFullScreen();
 	}
 
-	public void setTargetsVisible(boolean visible) {
+	public void setTargetsVisible(final boolean visible) {
 		for (Target t : canvasManager.getTargets())
-			t.getTargetGroup().setVisible(visible);
+			t.setVisible(visible);
 	}
 
-	public void setCalibrationMessageVisible(boolean visible) {
+	public void setCalibrationMessageVisible(final boolean visible) {
 		calibrationLabel.setVisible(visible);
 	}
 
@@ -432,32 +437,37 @@ public class ProjectorArenaController implements CalibrationListener {
 		// If the mouse entered OR the mouse is in the window but we haven't
 		// been showing the warning, show the warning
 		if (mouseEntered || (mouseInWindow && !showingCursorWarning)) {
-			Platform.runLater(new Runnable() {
-				public void run() {
-					mouseInWindow = true;
-					if (!calibrationManager.isCalibrating() && arenaStage.isFullScreen()) {
-						showingCursorWarning = true;
-						mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage(
-								"Cursor On Arena: Shot Detection Disabled", 15000 /* ms */, Color.YELLOW);
+			mouseInWindow = true;
+			if (!calibrationManager.isCalibrating() && arenaStage.isFullScreen()) {
+				showingCursorWarning = true;
+				mouseOnArenaLabel = feedCanvasManager.addDiagnosticMessage("Cursor On Arena: Shot Detection Disabled",
+						15000 /* ms */, Color.YELLOW);
 
-						feedCanvasManager.getCameraManager().setDetecting(false);
-					}
-				}
-			});
+				feedCanvasManager.getCameraManager().setDetecting(false);
+			}
 		} else if (showingCursorWarning) {
 			mouseInWindow = false;
 
 			TimerPool.cancelTimer(mouseExitedFuture);
 
 			mouseExitedFuture = TimerPool.schedule(() -> {
-				Platform.runLater(() -> {
-					if (showingCursorWarning) {
-						feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
-						showingCursorWarning = false;
-						mouseOnArenaLabel = null;
+				if (showingCursorWarning) {
+					feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
+					showingCursorWarning = false;
+					mouseOnArenaLabel = null;
+				}
+
+				if (!calibrationManager.isCalibrating()) {
+					// Delay restarting shot detection to minimize chance of
+					// false shots being detected when the mouse moves
+					try {
+						Thread.sleep(500 /* ms */);
+					} catch (Exception e) {
+						logger.error("Exception thrown when re-enabling shot detection due to mouse leaving arena", e);
 					}
-					if (!calibrationManager.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
-				});
+
+					feedCanvasManager.getCameraManager().setDetecting(true);
+				}
 			}, 100 /* ms */);
 		}
 	}
@@ -481,6 +491,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			arenaStage.getScene().setOnMouseExited((event) -> {
 				cursorWarningToggle(false);
+				this.canvasManager.toggleTargetSelection(Optional.empty());
 			});
 		}
 	}
@@ -494,25 +505,21 @@ public class ProjectorArenaController implements CalibrationListener {
 		if (updateMaskTimer != null) return;
 
 		updateMaskTimer = new Timer();
-		TimerTask newTask = new TimerTask() {
+		final TimerTask newTask = new TimerTask() {
 			@Override
 			public void run() {
+				Platform.runLater(() -> {
+					try {
+						arenaMaskManager.sem.acquire();
+					} catch (InterruptedException e) {
+						return;
+					}
 
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							arenaMaskManager.sem.acquire();
-						} catch (InterruptedException e) {
-							return;
-						}
-
-						try {
-							arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
-									System.currentTimeMillis());
-						} finally {
-							arenaMaskManager.sem.release();
-						}
+					try {
+						arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
+								System.currentTimeMillis());
+					} finally {
+						arenaMaskManager.sem.release();
 					}
 				});
 			}

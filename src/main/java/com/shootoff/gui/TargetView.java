@@ -23,16 +23,21 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
+import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.RegionType;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.SpriteAnimation;
 
@@ -48,15 +53,22 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 
 /**
- * This class wraps a group that represents a target so that the target can be
- * moved and resized using the mouse and individual regions can be animated.
+ * This is contains the code required to display, resize, and move targets. It
+ * also implements required functions like animating targets and determine if a
+ * target was hit and where if it was hit. This class needs to be re-implemented
+ * to make ShootOFF work on platforms that don't support JavaFX.
  * 
  * @author phrack
  */
-public class Target {
-	private final Logger logger = LoggerFactory.getLogger(Target.class);
+public class TargetView implements com.shootoff.targets.Target {
+	private static final Logger logger = LoggerFactory.getLogger(TargetView.class);
+
+	private static final double ANCHOR_WIDTH = 10;
+	private static final double ANCHOR_HEIGHT = ANCHOR_WIDTH;
 
 	protected static final int MOVEMENT_DELTA = 1;
 	protected static final int SCALE_DELTA = 1;
@@ -64,12 +76,14 @@ public class Target {
 
 	private final File targetFile;
 	private final Group targetGroup;
+	private final Set<Node> resizeAnchors = new HashSet<Node>();
 	private final Optional<Configuration> config;
 	private final Optional<CanvasManager> parent;
 	private final Optional<List<Target>> targets;
 	private final boolean userDeletable;
 	private final String cameraName;
 	private boolean keepInBounds = false;
+	private boolean isSelected = false;
 	private boolean move;
 	private boolean resize;
 	private boolean top;
@@ -80,7 +94,8 @@ public class Target {
 	private double x;
 	private double y;
 
-	public Target(File targetFile, Group target, Configuration config, CanvasManager parent, boolean userDeletable) {
+	public TargetView(File targetFile, Group target, Configuration config, CanvasManager parent,
+			boolean userDeletable) {
 		this.targetFile = targetFile;
 		this.targetGroup = target;
 		this.config = Optional.of(config);
@@ -90,8 +105,9 @@ public class Target {
 		this.cameraName = parent.getCameraName();
 
 		targetGroup.setOnMouseClicked((event) -> {
-			parent.toggleTargetSelection(Optional.of(targetGroup));
+			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();
+			event.consume();
 		});
 
 		mousePressed();
@@ -101,7 +117,7 @@ public class Target {
 		keyPressed();
 	}
 
-	public Target(Group target, List<Target> targets) {
+	public TargetView(Group target, List<Target> targets) {
 		this.targetFile = null;
 		this.targetGroup = target;
 		this.config = Optional.empty();
@@ -117,6 +133,7 @@ public class Target {
 		keyPressed();
 	}
 
+	@Override
 	public File getTargetFile() {
 		return targetFile;
 	}
@@ -125,6 +142,7 @@ public class Target {
 		return targetGroup;
 	}
 
+	@Override
 	public int getTargetIndex() {
 		if (parent.isPresent())
 			return parent.get().getTargets().indexOf(this);
@@ -132,6 +150,38 @@ public class Target {
 			return -1;
 	}
 
+	@Override
+	public void addTargetChild(Node child) {
+		getTargetGroup().getChildren().add(child);
+	}
+
+	@Override
+	public void removeTargetChild(Node child) {
+		getTargetGroup().getChildren().remove(child);
+	}
+
+	@Override
+	public List<TargetRegion> getRegions() {
+		final List<TargetRegion> regions = new ArrayList<TargetRegion>();
+
+		for (final Node n : getTargetGroup().getChildren()) {
+			if (n instanceof TargetRegion) regions.add((TargetRegion) n);
+		}
+
+		return regions;
+	}
+
+	@Override
+	public boolean hasRegion(TargetRegion region) {
+		return getTargetGroup().getChildren().contains(region);
+	}
+
+	@Override
+	public void setVisible(boolean isVisible) {
+		getTargetGroup().setVisible(isVisible);
+	}
+
+	@Override
 	public void setPosition(double x, double y) {
 		targetGroup.setLayoutX(x);
 		targetGroup.setLayoutY(y);
@@ -143,10 +193,12 @@ public class Target {
 
 	}
 
+	@Override
 	public Point2D getPosition() {
 		return new Point2D(targetGroup.getLayoutX(), targetGroup.getLayoutY());
 	}
 
+	@Override
 	public void setDimensions(double newWidth, double newHeight) {
 		double currentWidth = targetGroup.getBoundsInParent().getWidth();
 		double currentHeight = targetGroup.getBoundsInParent().getHeight();
@@ -162,8 +214,14 @@ public class Target {
 		}
 	}
 
+	@Override
 	public Dimension2D getDimension() {
 		return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), targetGroup.getBoundsInParent().getHeight());
+	}
+
+	@Override
+	public Bounds getBoundsInParent() {
+		return targetGroup.getBoundsInParent();
 	}
 
 	/**
@@ -207,9 +265,8 @@ public class Target {
 	protected static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region,
 			String name) {
 		for (Target target : targets) {
-			if (target.getTargetGroup().getChildren().contains(region)) {
-				for (Node node : target.getTargetGroup().getChildren()) {
-					TargetRegion r = (TargetRegion) node;
+			if (target.hasRegion(region)) {
+				for (TargetRegion r : target.getRegions()) {
 					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
 				}
 			}
@@ -218,6 +275,7 @@ public class Target {
 		return Optional.empty();
 	}
 
+	@Override
 	public void animate(TargetRegion region, List<String> args) {
 		ImageRegion imageRegion;
 
@@ -265,6 +323,7 @@ public class Target {
 		}
 	}
 
+	@Override
 	public void reverseAnimation(TargetRegion region) {
 		if (region.getType() != RegionType.IMAGE) {
 			logger.error("A reversal was requested on a non-image region.");
@@ -288,6 +347,66 @@ public class Target {
 		}
 	}
 
+	public void toggleSelected() {
+		isSelected = !isSelected;
+
+		Color stroke = isSelected ? TargetRegion.SELECTED_STROKE_COLOR : TargetRegion.UNSELECTED_STROKE_COLOR;
+
+		for (Node node : getTargetGroup().getChildren()) {
+			TargetRegion region = (TargetRegion) node;
+			if (region.getType() != RegionType.IMAGE) {
+				((Shape) region).setStroke(stroke);
+			}
+		}
+
+		if (isSelected) {
+			addResizeAnchors();
+		} else {
+			getTargetGroup().getChildren().removeAll(resizeAnchors);
+			resizeAnchors.clear();
+		}
+	}
+
+	public boolean isSelected() {
+		return isSelected;
+	}
+
+	private void addResizeAnchors() {
+		final Bounds localBounds = getTargetGroup().getBoundsInLocal();
+		final double horizontalMiddle = localBounds.getMinX() + (localBounds.getWidth() / 2) - (ANCHOR_WIDTH / 2);
+		final double verticleMiddle = localBounds.getMinY() + (localBounds.getHeight() / 2) - (ANCHOR_HEIGHT / 2);
+
+		// Top left
+		addAnchor(localBounds.getMinX(), localBounds.getMinY());
+		// Top middle
+		addAnchor(horizontalMiddle, localBounds.getMinY());
+		// Top right
+		addAnchor(localBounds.getMaxX() - ANCHOR_WIDTH, localBounds.getMinY());
+		// Middle left
+		addAnchor(localBounds.getMinX(), verticleMiddle);
+		// Middle right
+		addAnchor(localBounds.getMaxX() - ANCHOR_WIDTH, verticleMiddle);
+		// Bottom left
+		addAnchor(localBounds.getMinX(), localBounds.getMaxY() - ANCHOR_HEIGHT);
+		// Bottom middle
+		addAnchor(horizontalMiddle, localBounds.getMaxY() - ANCHOR_HEIGHT);
+		// Bottom right
+		addAnchor(localBounds.getMaxX() - ANCHOR_WIDTH, localBounds.getMaxY() - ANCHOR_HEIGHT);
+	}
+
+	private RectangleRegion addAnchor(final double x, final double y) {
+		final RectangleRegion anchor = new RectangleRegion(x, y, ANCHOR_WIDTH, ANCHOR_HEIGHT);
+		((TargetRegion) anchor).getAllTags().put(TargetView.TAG_IGNORE_HIT, "true");
+		anchor.setFill(Color.GOLD);
+		anchor.setStroke(Color.BLACK);
+
+		getTargetGroup().getChildren().add(anchor);
+		resizeAnchors.add(anchor);
+
+		return anchor;
+	}
+
+	@Override
 	public Optional<Hit> isHit(Shot shot) {
 		if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {
 			// Target was hit, see if a specific region was hit
@@ -296,13 +415,19 @@ public class Target {
 
 				Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
-				int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-				int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+				final int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
+				final int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
 
 				if (nodeBounds.contains(shot.getX(), shot.getY())) {
 					// If we hit an image region on a transparent pixel,
 					// ignore it
-					TargetRegion region = (TargetRegion) node;
+					final TargetRegion region = (TargetRegion) node;
+
+					// Ignore regions where ignoreHit tag is true
+					if (region.tagExists(TargetView.TAG_IGNORE_HIT)
+							&& Boolean.parseBoolean(region.getTag(TargetView.TAG_IGNORE_HIT)))
+						continue;
+
 					if (region.getType() == RegionType.IMAGE) {
 						// The image you get from the image view is its
 						// original size. We need to resize it if it has
@@ -463,7 +588,9 @@ public class Target {
 					targetGroup.setLayoutX(oldLayoutX);
 					targetGroup.setScaleX(oldScaleX);
 				}
-			} else if (top || bottom) {
+			}
+
+			if (top || bottom) {
 				double gap;
 
 				if (bottom) {
@@ -525,7 +652,15 @@ public class Target {
 			x = event.getX();
 			y = event.getY();
 
-			if (isTopZone(event)) {
+			if (isTopZone(event) && isLeftZone(event)) {
+				targetGroup.setCursor(Cursor.NW_RESIZE);
+			} else if (isTopZone(event) && isRightZone(event)) {
+				targetGroup.setCursor(Cursor.NE_RESIZE);
+			} else if (isBottomZone(event) && isLeftZone(event)) {
+				targetGroup.setCursor(Cursor.SW_RESIZE);
+			} else if (isBottomZone(event) && isRightZone(event)) {
+				targetGroup.setCursor(Cursor.SE_RESIZE);
+			} else if (isTopZone(event)) {
 				targetGroup.setCursor(Cursor.N_RESIZE);
 			} else if (isBottomZone(event)) {
 				targetGroup.setCursor(Cursor.S_RESIZE);

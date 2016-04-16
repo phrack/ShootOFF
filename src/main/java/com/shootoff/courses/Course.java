@@ -24,7 +24,7 @@ import java.util.Optional;
 import javafx.geometry.Dimension2D;
 
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.Target;
+import com.shootoff.targets.Target;
 
 public class Course {
 	private final Optional<LocatedImage> background;

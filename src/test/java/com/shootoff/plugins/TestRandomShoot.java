@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Random;
 
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 import org.junit.After;
@@ -28,9 +27,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 
@@ -61,7 +61,7 @@ public class TestRandomShoot {
 
 	@Test
 	public void testNoTarget() throws IOException {
-		List<Group> targets = new ArrayList<Group>();
+		List<Target> targets = new ArrayList<Target>();
 
 		RandomShoot rs = new RandomShoot(targets, rng);
 
@@ -77,11 +77,11 @@ public class TestRandomShoot {
 
 	@Test
 	public void testFiveSmallTarget() throws IOException {
-		List<Group> targets = new ArrayList<Group>();
+		List<Target> targets = new ArrayList<Target>();
 		Group bullseyeFiveGroup = TargetIO
 				.loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get();
-		Target bullseyeFiveTarget = new Target(bullseyeFiveGroup, new ArrayList<Target>());
-		targets.add(bullseyeFiveGroup);
+		TargetView bullseyeFiveTarget = new TargetView(bullseyeFiveGroup, new ArrayList<Target>());
+		targets.add(bullseyeFiveTarget);
 
 		RandomShoot rs = new RandomShoot(targets, rng);
 
@@ -113,8 +113,8 @@ public class TestRandomShoot {
 
 		TargetRegion expectedRegion = null;
 
-		for (Node node : targets.get(0).getChildren()) {
-			expectedRegion = (TargetRegion) node;
+		for (TargetRegion r : targets.get(0).getRegions()) {
+			expectedRegion = r;
 
 			if (expectedRegion.getTag("subtarget").equals(firstSubtarget)) break;
 		}
@@ -135,10 +135,11 @@ public class TestRandomShoot {
 
 	@Test
 	public void testNoSoundFilesForSubtargetNames() throws IOException {
-		List<Group> targets = new ArrayList<Group>();
-		targets.add(TargetIO
+		List<Target> targets = new ArrayList<Target>();
+		TargetView missingSoundTarget = new TargetView(TargetIO
 				.loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile()))
-				.get());
+				.get(), targets);
+		targets.add(missingSoundTarget);
 
 		RandomShoot rs = new RandomShoot(targets, rng);
 

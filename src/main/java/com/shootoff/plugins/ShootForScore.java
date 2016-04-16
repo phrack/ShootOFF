@@ -21,11 +21,11 @@ package com.shootoff.plugins;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.Hit;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
@@ -37,7 +37,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 
 	public ShootForScore() {}
 
-	public ShootForScore(List<Group> targets) {
+	public ShootForScore(List<Target> targets) {
 		super(targets);
 	}
 
@@ -107,7 +107,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 	}
 
 	@Override
-	public void reset(List<Group> targets) {
+	public void reset(List<Target> targets) {
 		redScore = 0;
 		greenScore = 0;
 		super.showTextOnFeed("score: 0");

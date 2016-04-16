@@ -1,3 +1,21 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.shootoff.gui;
 
 import java.io.InputStream;
@@ -35,7 +53,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 	private ScheduledFuture<?> autoCalibrationFuture = null;
 
-	private Optional<Target> calibrationTarget = Optional.empty();
+	private Optional<TargetView> calibrationTarget = Optional.empty();
 
 	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
@@ -103,9 +121,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
 		removeCalibrationTargetIfPresent();
 
+		if (!calibratedFromCanvas)
+			bounds = calibratingCanvasManager.translateCameraToCanvas(bounds);
 		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
 
-		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds, calibratedFromCanvas);
+		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds);
 
 		if (isCalibrating()) stopCalibration();
 	}
@@ -130,7 +150,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		});
 		calibrationGroup.getChildren().add(calibrationRectangle);
 
-		calibrationTarget = Optional.of(calibratingCanvasManager.addTarget(null, calibrationGroup, false));
+		calibrationTarget = Optional.of((TargetView) calibratingCanvasManager.addTarget(null, calibrationGroup, false));
 		calibrationTarget.get().setKeepInBounds(true);
 	}
 
@@ -141,20 +161,13 @@ public class CalibrationManager implements CameraCalibrationListener {
 		}
 	}
 
-	private void configureArenaCamera(CalibrationOption option, Bounds bounds, boolean calibratedFromCanvas) {
-		Bounds translatedToCanvasBounds;
-		if (bounds != null && !calibratedFromCanvas)
-			translatedToCanvasBounds = calibratingCanvasManager.translateCameraToCanvas(bounds);
-		else
-			translatedToCanvasBounds = bounds;
+	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
 
-		Bounds translatedToCameraBounds;
-		if (bounds != null && calibratedFromCanvas)
-			translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
-		else
-			translatedToCameraBounds = bounds;
 
-		calibratingCanvasManager.setProjectorArena(arenaController, translatedToCanvasBounds);
+		Bounds translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
+
+
+		calibratingCanvasManager.setProjectorArena(arenaController, bounds);
 		configureArenaCamera(option);
 		calibratingCameraManager.setProjectionBounds(translatedToCameraBounds);
 	}
@@ -189,10 +202,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingManualCalibrationRequestMessage) return;
 
 		showingManualCalibrationRequestMessage = true;
-		Platform.runLater(() -> {
-			manualCalibrationRequestMessage = calibratingCanvasManager
-					.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
-		});
+		manualCalibrationRequestMessage = calibratingCanvasManager
+				.addDiagnosticMessage("Please manually calibrate the projection region", 20000, Color.ORANGE);
 	}
 
 	private void removeManualCalibrationRequestMessage() {
@@ -200,11 +211,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		if (showingManualCalibrationRequestMessage) {
 			showingManualCalibrationRequestMessage = false;
-
-			Platform.runLater(() -> {
-				calibratingCanvasManager.removeDiagnosticMessage(manualCalibrationRequestMessage);
-				manualCalibrationRequestMessage = null;
-			});
+			calibratingCanvasManager.removeDiagnosticMessage(manualCalibrationRequestMessage);
+			manualCalibrationRequestMessage = null;
 		}
 	}
 
@@ -215,10 +223,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingFullScreenRequestMessage) return;
 
 		showingFullScreenRequestMessage = true;
-		Platform.runLater(() -> {
-			fullScreenRequestMessage = calibratingCanvasManager
-					.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
-		});
+		fullScreenRequestMessage = calibratingCanvasManager
+				.addDiagnosticMessage("Please move the arena to your projector and hit F11", Color.YELLOW);
 	}
 
 	private void removeFullScreenRequest() {
@@ -227,10 +233,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingFullScreenRequestMessage) {
 			showingFullScreenRequestMessage = false;
 
-			Platform.runLater(() -> {
-				calibratingCanvasManager.removeDiagnosticMessage(fullScreenRequestMessage);
-				fullScreenRequestMessage = null;
-			});
+			calibratingCanvasManager.removeDiagnosticMessage(fullScreenRequestMessage);
+			fullScreenRequestMessage = null;
 		}
 	}
 
@@ -283,10 +287,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingAutoCalibrationMessage) return;
 
 		showingAutoCalibrationMessage = true;
-		Platform.runLater(() -> {
-			autoCalibrationMessage = calibratingCanvasManager.addDiagnosticMessage("Attempting autocalibration", 11000,
-					Color.CYAN);
-		});
+		autoCalibrationMessage = calibratingCanvasManager.addDiagnosticMessage("Attempting autocalibration", 11000,
+				Color.CYAN);
 	}
 
 	private void removeAutoCalibrationMessage() {
@@ -296,12 +298,9 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (showingAutoCalibrationMessage) {
 			showingAutoCalibrationMessage = false;
 
-			Platform.runLater(() -> {
-				logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
-				calibratingCanvasManager.removeDiagnosticMessage(autoCalibrationMessage);
-				autoCalibrationMessage = null;
-			});
-
+			if (logger.isTraceEnabled()) logger.trace("removeAutoCalibrationMessage {} ", autoCalibrationMessage);
+			calibratingCanvasManager.removeDiagnosticMessage(autoCalibrationMessage);
+			autoCalibrationMessage = null;
 		}
 	}
 

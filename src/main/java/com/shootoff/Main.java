@@ -77,21 +77,21 @@ public class Main extends Application {
 	public static final String SHOOTOFF_DOMAIN = "http://shootoffapp.com/";
 
 	private boolean isJWS = false;
-	private final String RESOURCES_METADATA_NAME = "shootoff-writable-resources.xml";
-	private final String RESOURCES_JAR_NAME = "shootoff-writable-resources.jar";
+	private static final String RESOURCES_METADATA_NAME = "shootoff-writable-resources.xml";
+	private static final String RESOURCES_JAR_NAME = "shootoff-writable-resources.jar";
 	private File resourcesMetadataFile;
 	private File resourcesJARFile;
 	private Stage primaryStage;
 
-	private final String VERSION_METADATA_NAME = "shootoff-version.xml";
+	private static final String VERSION_METADATA_NAME = "shootoff-version.xml";
 	private static Optional<String> version = Optional.empty();
 
 	protected static class ResourcesInfo {
-		private String version;
-		private long fileSize;
-		private String xml;
+		private final String version;
+		private final long fileSize;
+		private final String xml;
 
-		public ResourcesInfo(String version, long fileSize, String xml) {
+		public ResourcesInfo(final String version, final long fileSize, final String xml) {
 			this.version = version;
 			this.fileSize = fileSize;
 			this.xml = xml;
@@ -111,11 +111,11 @@ public class Main extends Application {
 	}
 
 	private Optional<String> parseField(String metadataXML, String tagName, String fieldName) {
-		String tag = "<" + tagName;
+		final String tag = "<" + tagName;
 		int tagStart = metadataXML.indexOf(tag);
 
 		if (tagStart == -1) {
-			logger.error("Couldn't parse " + tag + " tag from metadata");
+			if (logger.isErrorEnabled()) logger.error("Couldn't parse " + tag + " tag from metadata");
 			if (isJWS) tryRunningShootOFF();
 			return Optional.empty();
 		}
@@ -133,14 +133,14 @@ public class Main extends Application {
 
 		dataStart += fieldName.length();
 
-		int dataEnd = metadataXML.indexOf("\"", dataStart);
+		final int dataEnd = metadataXML.indexOf("\"", dataStart);
 
 		return Optional.of(metadataXML.substring(dataStart, dataEnd));
 	}
 
-	protected Optional<ResourcesInfo> deserializeMetadataXML(String metadataXML) {
-		Optional<String> version = parseField(metadataXML, "resources", "version");
-		Optional<String> fileSize = parseField(metadataXML, "resources", "fileSize");
+	protected Optional<ResourcesInfo> deserializeMetadataXML(final String metadataXML) {
+		final Optional<String> version = parseField(metadataXML, "resources", "version");
+		final Optional<String> fileSize = parseField(metadataXML, "resources", "fileSize");
 
 		if (version.isPresent() && fileSize.isPresent()) {
 			return Optional.of(new ResourcesInfo(version.get(), Long.parseLong(fileSize.get()), metadataXML));
@@ -149,14 +149,14 @@ public class Main extends Application {
 		return Optional.empty();
 	}
 
-	private Optional<ResourcesInfo> getWebstartResourcesInfo(File metadataFile) {
+	private Optional<ResourcesInfo> getWebstartResourcesInfo(final File metadataFile) {
 		if (!metadataFile.exists()) {
 			logger.error("Local metadata file unavailable");
 			return Optional.empty();
 		}
 
 		try {
-			String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()), "UTF-8");
+			final String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()), "UTF-8");
 			return deserializeMetadataXML(metadataXML);
 		} catch (IOException e) {
 			logger.error("Error reading metadata XML for JNLP", e);
@@ -165,7 +165,7 @@ public class Main extends Application {
 		return Optional.empty();
 	}
 
-	private Optional<ResourcesInfo> getWebstartResourcesInfo(String metadataAddress) {
+	private Optional<ResourcesInfo> getWebstartResourcesInfo(final String metadataAddress) {
 		HttpURLConnection connection = null;
 		InputStream stream = null;
 
@@ -173,7 +173,9 @@ public class Main extends Application {
 			connection = (HttpURLConnection) new URL(metadataAddress).openConnection();
 			stream = connection.getInputStream();
 		} catch (UnknownHostException e) {
-			logger.error("Could not connect to remote host " + e.getMessage() + " to download writable resources.", e);
+			if (logger.isErrorEnabled())
+				logger.error("Could not connect to remote host " + e.getMessage() + " to download writable resources.",
+						e);
 			tryRunningShootOFF();
 			return Optional.empty();
 		} catch (IOException e) {
@@ -247,7 +249,7 @@ public class Main extends Application {
 		}
 
 		final InputStream remoteStream = stream;
-		Task<Boolean> task = new Task<Boolean>() {
+		final Task<Boolean> task = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws InterruptedException {
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
@@ -286,7 +288,7 @@ public class Main extends Application {
 					out.print(ri.getXML());
 					out.close();
 				} catch (IOException e) {
-					logger.error("Could't update metadata file: " + e.getMessage(), e);
+					if (logger.isErrorEnabled()) logger.error("Could't update metadata file: " + e.getMessage(), e);
 				}
 
 				extractWebstartResources();
@@ -319,7 +321,7 @@ public class Main extends Application {
 	}
 
 	private void extractWebstartResources() {
-		Task<Boolean> task = new Task<Boolean>() {
+		final Task<Boolean> task = new Task<Boolean>() {
 			@Override
 			protected Boolean call() throws Exception {
 				JarFile jar = null;
@@ -415,11 +417,11 @@ public class Main extends Application {
 
 			pb.prefWidthProperty().bind(hb.widthProperty().subtract(hb.getSpacing() * 6));
 
-			BorderPane bp = new BorderPane();
+			final BorderPane bp = new BorderPane();
 			bp.setTop(messageLabel);
 			bp.setBottom(hb);
 
-			Scene scene = new Scene(bp);
+			final Scene scene = new Scene(bp);
 
 			stage.setScene(scene);
 			stage.show();
@@ -433,11 +435,11 @@ public class Main extends Application {
 		}
 	}
 
-	public static void forceClose(int status) {
+	public static void forceClose(final int status) {
 		System.exit(status);
 	}
 
-	private Optional<String> getVersionXML(String versionAddress) {
+	private Optional<String> getVersionXML(final String versionAddress) {
 		HttpURLConnection connection = null;
 		InputStream stream = null;
 
@@ -476,13 +478,13 @@ public class Main extends Application {
 	}
 
 	public void checkVersion() {
-		Optional<String> versionXML = getVersionXML(SHOOTOFF_DOMAIN + VERSION_METADATA_NAME);
+		final Optional<String> versionXML = getVersionXML(SHOOTOFF_DOMAIN + VERSION_METADATA_NAME);
 
 		if (versionXML.isPresent()) {
-			Optional<String> stableVersion = parseField(versionXML.get(), "stableRelease", "version");
+			final Optional<String> stableVersion = parseField(versionXML.get(), "stableRelease", "version");
 
 			if (stableVersion.isPresent() && VersionChecker.compareVersions(stableVersion.get(), version.get()) > 0) {
-				Optional<String> downloadLink = parseField(versionXML.get(), "stableRelease", "download");
+				final Optional<String> downloadLink = parseField(versionXML.get(), "stableRelease", "download");
 
 				final String link;
 
@@ -491,17 +493,17 @@ public class Main extends Application {
 				else
 					link = SHOOTOFF_DOMAIN;
 
-				Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
+				final Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
 				shootoffWelcome.setTitle("ShootOFF Updated");
 				shootoffWelcome.setHeaderText("This version of ShootOFF is outdated!");
 				shootoffWelcome.setResizable(true);
 
-				FlowPane fp = new FlowPane();
-				Label lbl = new Label(
+				final FlowPane fp = new FlowPane();
+				final Label lbl = new Label(
 						"The current stable release of ShootOFF is " + stableVersion.get() + ", but you are running "
 								+ version.get() + ". " + "You can download the current version of ShootOFF here:\n\n");
 
-				Hyperlink lnk = new Hyperlink(link);
+				final Hyperlink lnk = new Hyperlink(link);
 
 				lnk.setOnAction((event) -> {
 					HostServicesDelegate hostServices = HostServicesFactory.getInstance(this);
@@ -523,7 +525,7 @@ public class Main extends Application {
 	}
 
 	public void runShootOFF() {
-		String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
+		final String[] args = getParameters().getRaw().toArray(new String[getParameters().getRaw().size()]);
 		Configuration config;
 		try {
 			config = new Configuration(System.getProperty("shootoff.home") + File.separator + "shootoff.properties",
@@ -557,17 +559,17 @@ public class Main extends Application {
 		}
 
 		try {
-			FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
+			final FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
 			loader.load();
 
-			Scene scene = new Scene(loader.getRoot());
+			final Scene scene = new Scene(loader.getRoot());
 
 			if (version.isPresent())
 				primaryStage.setTitle("ShootOFF " + version.get());
 			else
 				primaryStage.setTitle("ShootOFF");
 			primaryStage.setScene(scene);
-			ShootOFFController controller = (ShootOFFController) loader.getController();
+			final ShootOFFController controller = (ShootOFFController) loader.getController();
 			controller.init(config, new PluginEngine(controller));
 			primaryStage.show();
 		} catch (IOException e) {
@@ -577,13 +579,13 @@ public class Main extends Application {
 	}
 
 	private boolean showFirstRunMessage() {
-		Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
+		final Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
 		shootoffWelcome.setTitle("Welcome to ShootOFF");
 		shootoffWelcome.setHeaderText("Please Ensure Your Firearm is Unloaded!");
 		shootoffWelcome.setResizable(true);
 
-		FlowPane fp = new FlowPane();
-		Label lbl = new Label("Thank you for choosing ShootOFF for your training needs.\n"
+		final FlowPane fp = new FlowPane();
+		final Label lbl = new Label("Thank you for choosing ShootOFF for your training needs.\n"
 				+ "Please be careful to ensure your firearm is not loaded\n"
 				+ "every time you use ShootOFF. We are not liable for any\n"
 				+ "negligent discharges that may result from your use of this\n" + "software.\n\n"
@@ -591,7 +593,7 @@ public class Main extends Application {
 				+ "help us detect and fix common problems. We do not include any\n"
 				+ "personal information in these reports, but you may uncheck\n"
 				+ "the box below if you do not want to support this effort.\n\n");
-		CheckBox useErrorReporting = new CheckBox("Allow ShootOFF to Send Error Reports");
+		final CheckBox useErrorReporting = new CheckBox("Allow ShootOFF to Send Error Reports");
 		useErrorReporting.setSelected(true);
 
 		fp.getChildren().addAll(lbl, useErrorReporting);
@@ -603,7 +605,7 @@ public class Main extends Application {
 	}
 
 	public static void closeNoCamera() {
-		Alert cameraAlert = new Alert(AlertType.ERROR);
+		final Alert cameraAlert = new Alert(AlertType.ERROR);
 		cameraAlert.setTitle("No Webcams");
 		cameraAlert.setHeaderText("No Webcams Found!");
 		cameraAlert.setResizable(true);
@@ -616,7 +618,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 
-		String os = System.getProperty("os.name");
+		final String os = System.getProperty("os.name");
 		if (os != null && "Mac OS X".equals(os) && Camera.getWebcams().isEmpty()) {
 			closeNoCamera();
 		}
@@ -625,17 +627,15 @@ public class Main extends Application {
 			isJWS = true;
 			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
 
-			if (!shootoffHome.exists()) {
-				if (!shootoffHome.mkdirs()) {
-					Alert homeAlert = new Alert(AlertType.ERROR);
-					homeAlert.setTitle("No ShootOFF Home");
-					homeAlert.setHeaderText("Missing ShootOFF's Home Directory!");
-					homeAlert.setResizable(true);
-					homeAlert.setContentText("ShootOFF's home directory " + shootoffHome.getPath() + " "
-							+ "does not exist and could not be created. Now closing...");
-					homeAlert.showAndWait();
-					return;
-				}
+			if (!shootoffHome.exists() && !shootoffHome.mkdirs()) {
+				final Alert homeAlert = new Alert(AlertType.ERROR);
+				homeAlert.setTitle("No ShootOFF Home");
+				homeAlert.setHeaderText("Missing ShootOFF's Home Directory!");
+				homeAlert.setResizable(true);
+				homeAlert.setContentText("ShootOFF's home directory " + shootoffHome.getPath() + " "
+						+ "does not exist and could not be created. Now closing...");
+				homeAlert.showAndWait();
+				return;
 			}
 
 			if (System.getProperty("shootoff.home") == null) {
@@ -647,25 +647,25 @@ public class Main extends Application {
 
 			resourcesMetadataFile = new File(
 					System.getProperty("shootoff.home") + File.separator + RESOURCES_METADATA_NAME);
-			Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
-			Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(
+			final Optional<ResourcesInfo> localRI = getWebstartResourcesInfo(resourcesMetadataFile);
+			final Optional<ResourcesInfo> remoteRI = getWebstartResourcesInfo(
 					SHOOTOFF_DOMAIN + "jws/" + RESOURCES_METADATA_NAME);
 
 			if (!localRI.isPresent() && remoteRI.isPresent()) {
 				resourcesJARFile = new File(System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
 				downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
 			} else if (localRI.isPresent() && remoteRI.isPresent()) {
-				if (!localRI.get().getVersion().equals(remoteRI.get().getVersion())) {
+				if (localRI.get().getVersion().equals(remoteRI.get().getVersion())) {
+					runShootOFF();
+				} else {
 					System.out.println(String.format("Local version: %s, Remote version: %s",
 							localRI.get().getVersion(), remoteRI.get().getVersion()));
 					resourcesJARFile = new File(
 							System.getProperty("shootoff.home") + File.separator + RESOURCES_JAR_NAME);
 					downloadWebstartResources(remoteRI.get(), "http://shootoffapp.com/jws/" + RESOURCES_JAR_NAME);
-				} else {
-					runShootOFF();
 				}
 			} else {
-				System.err.println("Could not locate local or remote resources metadata");
+				logger.error("Could not locate local or remote resources metadata");
 			}
 		} else {
 			if (System.getProperty("shootoff.home") == null) {
@@ -685,7 +685,7 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		// Check the comment at the top of the Camera class
 		// for more information about this hack
-		String os = System.getProperty("os.name");
+		final String os = System.getProperty("os.name");
 
 		if (os != null) {
 			if ("Mac OS X".equals(os)) {
@@ -730,23 +730,13 @@ public class Main extends Application {
 		nu.pattern.OpenCV.loadShared();
 
 		// Read ShootOFF's version number
-		Properties prop = new Properties();
+		final Properties prop = new Properties();
 
-		InputStream inputStream = Main.class.getResourceAsStream("/version.properties");
-
-		if (inputStream != null) {
-			try {
-				prop.load(inputStream);
-				version = Optional.of(prop.getProperty("version"));
-			} catch (IOException ioe) {
-				logger.error("Couldn't read version properties", ioe);
-			} finally {
-				try {
-					inputStream.close();
-				} catch (IOException ioe) {
-					logger.error("Error closing version properties", ioe);
-				}
-			}
+		try (InputStream inputStream = Main.class.getResourceAsStream("/version.properties")) {
+			prop.load(inputStream);
+			version = Optional.of(prop.getProperty("version"));
+		} catch (IOException ioe) {
+			logger.error("Couldn't read version properties", ioe);
 		}
 
 		launch(args);

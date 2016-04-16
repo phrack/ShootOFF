@@ -7,6 +7,7 @@ env:
 branches:
   only:
   - master
+script: travis_wait 45 gradle check
 before_script:
   - gradle --version
   # Have ssh trust our deployment server

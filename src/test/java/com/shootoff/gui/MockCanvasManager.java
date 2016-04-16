@@ -6,10 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.targets.Target;
 
 import javafx.collections.FXCollections;
 import javafx.embed.swing.JFXPanel;
@@ -26,7 +27,7 @@ public class MockCanvasManager extends CanvasManager {
 	private long startTime = 0;
 
 	public MockCanvasManager(Configuration config) {
-		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()),
+		super(new Group(), config, new MockShootOFFController(), String.format("%d", System.nanoTime()),
 				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
@@ -35,7 +36,7 @@ public class MockCanvasManager extends CanvasManager {
 	}
 
 	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
-		super(new Group(), config, new CamerasSupervisor(config), String.format("%d", System.nanoTime()),
+		super(new Group(), config, new MockShootOFFController(), String.format("%d", System.nanoTime()),
 				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
@@ -73,7 +74,7 @@ public class MockCanvasManager extends CanvasManager {
 
 	@Override
 	public Target addTarget(Target newTarget) {
-		super.getCanvasGroup().getChildren().add(newTarget.getTargetGroup());
+		super.getCanvasGroup().getChildren().add(((TargetView) newTarget).getTargetGroup());
 		super.getTargets().add(newTarget);
 
 		return newTarget;

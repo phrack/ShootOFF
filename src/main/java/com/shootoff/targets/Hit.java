@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
-
-import com.shootoff.targets.TargetRegion;
+package com.shootoff.targets;
 
 /**
  * This class encapsulates the information for a shot that hit a target.
@@ -46,7 +44,7 @@ public class Hit {
 	 *            the y coordinate of the shot adjusted to be relative to the
 	 *            hit region
 	 */
-	public Hit(Target target, TargetRegion hitRegion, int impactX, int impactY) {
+	public Hit(final Target target, final TargetRegion hitRegion, final int impactX, final int impactY) {
 		this.target = target;
 		this.hitRegion = hitRegion;
 		this.impactX = impactX;

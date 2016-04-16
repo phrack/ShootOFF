@@ -19,6 +19,7 @@
 package com.shootoff.targets.io;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
@@ -44,7 +46,7 @@ public class TargetIO {
 
 	public static final double DEFAULT_OPACITY = 0.5;
 
-	public static void saveTarget(List<Node> regions, File targetFile) {
+	public static void saveTarget(final List<Node> regions, final File targetFile) {
 		RegionVisitor visitor;
 
 		if (targetFile.getName().endsWith("target")) {
@@ -61,7 +63,7 @@ public class TargetIO {
 
 			switch (region.getType()) {
 			case IMAGE: {
-				ImageRegion img = (ImageRegion) node;
+				final ImageRegion img = (ImageRegion) node;
 
 				// Make image path relative to cwd so that image files can be
 				// found on different machines
@@ -119,17 +121,27 @@ public class TargetIO {
 			return Optional.empty();
 		}
 
+		return Optional.of(processVisualTags(regions));
+	}
+
+	public static Optional<Group> loadTarget(final InputStream targetStream) {
+		final List<Node> regions = new XMLTargetReader(targetStream).load();
+
+		return Optional.of(processVisualTags(regions));
+	}
+
+	private static Group processVisualTags(List<Node> regions) {
 		final Group targetGroup = new Group();
 		for (final Node node : regions) {
 			final TargetRegion region = (TargetRegion) node;
 
-			if (region.tagExists("visible") && region.getTag("visible").equalsIgnoreCase("false")) {
+			if (region.tagExists(TargetView.TAG_VISIBLE) && !Boolean.parseBoolean(region.getTag(TargetView.TAG_VISIBLE))) {
 				node.setVisible(false);
 			}
 
 			if (region.getType() != RegionType.IMAGE) {
-				if (region.tagExists("opacity")) {
-					node.setOpacity(Double.parseDouble(region.getTag("opacity")));
+				if (region.tagExists(TargetView.TAG_OPACITY)) {
+					node.setOpacity(Double.parseDouble(region.getTag(TargetView.TAG_OPACITY)));
 				} else {
 					node.setOpacity(DEFAULT_OPACITY);
 				}
@@ -137,6 +149,6 @@ public class TargetIO {
 			targetGroup.getChildren().add(node);
 		}
 
-		return Optional.of(targetGroup);
+		return targetGroup;
 	}
 }

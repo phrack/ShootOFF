@@ -96,7 +96,7 @@ public class ImageCell extends TextFieldListCell<String> {
 			});
 		}
 	}
-	
+
 	public static void createImageCache(List<Camera> webcams) {
 		for (Camera c : webcams) {
 			if (imageCache.containsKey(c)) continue;

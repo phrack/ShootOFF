@@ -26,7 +26,6 @@ import java.util.Optional;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Background;
@@ -40,10 +39,16 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.targets.Target;
 
+/**
+ * The API for training exercises that only work on the projector arena.
+ * 
+ * @author phrack
+ */
 public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
@@ -55,7 +60,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	// to do a bunch of unnecessary setup
 	public ProjectorTrainingExerciseBase() {}
 
-	public ProjectorTrainingExerciseBase(List<Group> targets) {
+	public ProjectorTrainingExerciseBase(List<Target> targets) {
 		super(targets);
 	}
 
@@ -82,7 +87,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	public void reset() {
 		camerasSupervisor.reset();
 		if (config.getExercise().isPresent())
-			config.getExercise().get().reset(arenaController.getCanvasManager().getTargetGroups());
+			config.getExercise().get().reset(arenaController.getCanvasManager().getTargets());
 	}
 
 	/**
@@ -96,9 +101,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 *            the top left y coordinate of the target
 	 * 
 	 * @return the group that was loaded from the target file
+	 * 
+	 * @since 2.1
 	 */
 	public Optional<Target> addTarget(File target, final double x, final double y) {
-		if (!target.isAbsolute())
+		if ('@' != target.toString().charAt(0) && !target.isAbsolute())
 			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
 
 		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
@@ -106,25 +113,48 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		if (newTarget.isPresent()) {
 			newTarget.get().setPosition(x, y);
 			targets.add(newTarget.get());
-
 		}
 
 		return newTarget;
 	}
 
 	public void removeTarget(Target target) {
-		arenaController.getCanvasManager().removeTarget(target);
+		arenaController.getCanvasManager().removeTarget((TargetView) target);
 		targets.remove(target);
 	}
 
+	/**
+	 * Get the width of the arena in pixels.
+	 * 
+	 * @return the arena's width in pixels
+	 * 
+	 * @since 2.1
+	 */
 	public double getArenaWidth() {
 		return arenaController.getWidth();
 	}
 
+	/**
+	 * Get the height of the arena in pixels.
+	 * 
+	 * @return the arena's height in pixels
+	 * 
+	 * @since 2.1
+	 */
 	public double getArenaHeight() {
 		return arenaController.getHeight();
 	}
 
+	/**
+	 * Get the coordinates of the origin for the display the arena is currently
+	 * located on. This is useful if you need to know what display the arena is
+	 * on.
+	 * 
+	 * @return the origin coordinates for the JavaFX screen the arena is located
+	 *         on, relative to other displays.
+	 * 
+	 * @since 3.8
+	 */
 	public Point2D getArenaScreenOrigin() {
 		return arenaController.getArenaScreenOrigin();
 	}
@@ -168,6 +198,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 *            the color of the letters in the message
 	 * @param font
 	 *            the font to use to display the message
+	 * 
+	 * @since 3.7
 	 */
 	public void showTextOnFeed(String message, int x, int y, Color backgroundColor, Color textColor, Font font) {
 		showTextOnFeed(message);
@@ -198,6 +230,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @param background
 	 *            a file on the filesystem or a resource to set as the projector
 	 *            arena's background.
+	 * 
+	 * @since 3.7
 	 */
 	public void setArenaBackground(LocatedImage background) {
 		arenaController.setBackground(background);
@@ -206,7 +240,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	@Override
 	public void destroy() {
 		for (Target target : targets)
-			arenaController.getCanvasManager().removeTarget(target);
+			arenaController.getCanvasManager().removeTarget((TargetView) target);
 
 		Platform.runLater(() -> {
 			if (arenaController != null)

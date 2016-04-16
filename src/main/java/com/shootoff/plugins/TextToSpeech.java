@@ -31,6 +31,13 @@ import marytts.exceptions.MaryConfigurationException;
 import marytts.exceptions.SynthesisException;
 import marytts.util.data.audio.AudioPlayer;
 
+/**
+ * This facade class implements text-to-speech operations for dynamic audio
+ * output. This class should be re-written if the text-to-speech library is
+ * swapped for an alternative.
+ * 
+ * @author phrack
+ */
 public final class TextToSpeech {
 	private static final Logger logger = LoggerFactory.getLogger(TextToSpeech.class);
 

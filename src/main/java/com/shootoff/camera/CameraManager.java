@@ -51,13 +51,19 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
+/**
+ * This class is responsible for fetching frames from its assigned camera and
+ * preprocessing them for shot detection. It also ensures the view showing the
+ * camera frames is aware of any new frames from the camera.
+ * 
+ * @author phrack and dmaul
+ */
 public class CameraManager {
 	protected static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
@@ -83,12 +89,12 @@ public class CameraManager {
 	protected final Configuration config;
 	protected Optional<Bounds> projectionBounds = Optional.empty();
 
-	protected AtomicBoolean isStreaming = new AtomicBoolean(true);
-	protected AtomicBoolean isDetecting = new AtomicBoolean(true);
-	protected AtomicBoolean isCalibrating = new AtomicBoolean(false);
-	protected boolean shownBrightnessWarning = false;
-	protected boolean cropFeedToProjection = false;
-	protected boolean limitDetectProjection = false;
+	private final AtomicBoolean isStreaming = new AtomicBoolean(true);
+	private final AtomicBoolean isDetecting = new AtomicBoolean(true);
+	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
+	private boolean shownBrightnessWarning = false;
+	private boolean cropFeedToProjection = false;
+	private boolean limitDetectProjection = false;
 
 	protected Optional<Integer> minimumShotDimension = Optional.empty();
 
@@ -115,9 +121,9 @@ public class CameraManager {
 	private double webcamFPS = DEFAULT_FPS;
 	private boolean showedFPSWarning = false;
 
-	protected AutoCalibrationManager acm = null;
-	protected boolean autoCalibrationEnabled = false;
-	public boolean cameraAutoCalibrated = false;
+	private AutoCalibrationManager acm = null;
+	private final AtomicBoolean isAutoCalibrating = new AtomicBoolean(false);
+	protected boolean cameraAutoCalibrated = false;
 
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
 	protected final ArenaMaskManager arenaMaskManager;
@@ -138,7 +144,7 @@ public class CameraManager {
 		} else {
 			arenaMaskManager = null;
 		}
-		
+
 		this.webcam = Optional.of(webcam);
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
 		this.cameraView = view;
@@ -157,7 +163,7 @@ public class CameraManager {
 		} else {
 			arenaMaskManager = null;
 		}
-		
+
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;
@@ -414,7 +420,6 @@ public class CameraManager {
 	}
 
 	protected class Detector extends MediaListenerAdapter implements Runnable {
-
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
@@ -501,38 +506,40 @@ public class CameraManager {
 			}
 
 			final BufferedImage frame = currentFrame;
-			Platform.runLater(() -> {
-				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					cameraView.updateBackground(frame, projectionBounds);
-				} else {
-					cameraView.updateBackground(frame, Optional.empty());
-				}
-			});
+			if (cropFeedToProjection && projectionBounds.isPresent()) {
+				cameraView.updateBackground(frame, projectionBounds);
+			} else {
+				cameraView.updateBackground(frame, Optional.empty());
+			}
 		}
 	}
 
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
 
-		if (autoCalibrationEnabled) {
+		if (isAutoCalibrating.get()) {
 			acm.processFrame(currentFrame);
 			return currentFrame;
 		}
 
-		Mat matFrame = Camera.bufferedImageToMat(currentFrame);
+		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
+		final Mat matFrameHSV = new Mat();
+		Mat submatFrameBGR = null;
+		Mat submatFrameHSV = null;
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 			if (acm != null) {
 				// MUST BE IN BGR pixel format.
-				matFrame = acm.undistortFrame(matFrame);
+				matFrameBGR = acm.undistortFrame(matFrameBGR);
 			}
 
-			Mat submatFrame = matFrame.submat((int) projectionBounds.get().getMinY(),
+			submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
 					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
 					(int) projectionBounds.get().getMaxX());
+			
 
 			if (recordingCalibratedArea) {
-				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrame),
+				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
 						BufferedImage.TYPE_3BYTE_BGR);
 				IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
@@ -545,23 +552,40 @@ public class CameraManager {
 				videoWriterCalibratedArea.encodeVideo(0, frame);
 			}
 
-			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
+			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 
-			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrame);
+			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrameBGR);
 
 			if (debuggerListener.isPresent()) {
-				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrame));
+				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrameBGR));
 			}
 
 		} else {
-			Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_BGR2HSV);
+			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
+		}
+				
+		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection())
+				&& getProjectionBounds().isPresent()) {
+			
+			submatFrameHSV = matFrameHSV.submat((int) projectionBounds.get().getMinY(),
+				(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
+				(int) projectionBounds.get().getMaxX());
+			
+			if (submatFrameBGR == null)
+				submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
+						(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
+						(int) projectionBounds.get().getMaxX());
+			
+			shotDetectionManager.processFrame(submatFrameHSV, submatFrameBGR, isDetecting.get());
+		}
+		else
+		{
+			shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
 		}
 
-		shotDetectionManager.processFrame(matFrame, isDetecting.get());
-
-		Imgproc.cvtColor(matFrame, matFrame, Imgproc.COLOR_HSV2BGR);
-
-		return Camera.matToBufferedImage(matFrame);
+		// matFrameBGR is showing the colored pixels for brightness and motion,
+		// hence why we need to return the converted version
+		return Camera.matToBufferedImage(matFrameBGR);
 	}
 
 	private void estimateCameraFPS() {
@@ -613,54 +637,44 @@ public class CameraManager {
 
 	public void showBrightnessWarning() {
 		if (!TimerPool.isWaiting(brightnessDiagnosticFuture)) {
-			Platform.runLater(() -> {
-				brightnessDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive brightness",
-						Color.RED);
-			});
+			brightnessDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive brightness", Color.RED);
 		} else {
 			// Stop the existing timer and start a new one
 			TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		}
 		brightnessDiagnosticFuture = TimerPool.schedule(() -> {
-			Platform.runLater(() -> {
-				if (brightnessDiagnosticWarning != null) {
-					cameraView.removeDiagnosticMessage(brightnessDiagnosticWarning);
-					brightnessDiagnosticWarning = null;
-				}
-			});
+			if (brightnessDiagnosticWarning != null) {
+				cameraView.removeDiagnosticMessage(brightnessDiagnosticWarning);
+				brightnessDiagnosticWarning = null;
+			}
 		}, DIAGNOSTIC_MESSAGE_DURATION);
 
-		if (!webcam.isPresent() || shownBrightnessWarning) return;
-		shownBrightnessWarning = true;
-		if (cameraErrorView.isPresent() && webcam.isPresent())
-			cameraErrorView.get().showBrightnessWarning(webcam.get());
+		if (webcam.isPresent() && !shownBrightnessWarning) {
+			shownBrightnessWarning = true;
+			if (cameraErrorView.isPresent()) cameraErrorView.get().showBrightnessWarning(webcam.get());
+		}
 	}
 
 	private Label motionDiagnosticWarning = null;
 
 	public void showMotionWarning() {
 		if (!TimerPool.isWaiting(motionDiagnosticFuture)) {
-			Platform.runLater(() -> {
-				motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
-			});
+			motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
 		} else {
 			// Stop the existing timer and start a new one
 			TimerPool.cancelTimer(motionDiagnosticFuture);
 		}
 		motionDiagnosticFuture = TimerPool.schedule(() -> {
-			Platform.runLater(() -> {
-				if (motionDiagnosticWarning != null) {
-					cameraView.removeDiagnosticMessage(motionDiagnosticWarning);
-					motionDiagnosticWarning = null;
-				}
-			});
+			if (motionDiagnosticWarning != null) {
+				cameraView.removeDiagnosticMessage(motionDiagnosticWarning);
+				motionDiagnosticWarning = null;
+			}
 		}, DIAGNOSTIC_MESSAGE_DURATION);
 	}
 
 	private void fireAutoCalibration() {
 		acm.reset();
 		acm.setCallback(new Callback<Void, Void>() {
-
 			@Override
 			public Void call(Void param) {
 				autoCalibrateSuccess(acm.getBoundsResult(), acm.getFrameDelayResult());
@@ -670,24 +684,20 @@ public class CameraManager {
 	}
 
 	protected void autoCalibrateSuccess(Bounds bounds, long delay) {
-		if (autoCalibrationEnabled && cameraCalibrationListener != null) {
-			autoCalibrationEnabled = false;
+		if (isAutoCalibrating.get() && cameraCalibrationListener != null) {
+			isAutoCalibrating.set(false);
 
 			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) bounds.getMinX(), (int) bounds.getMinY(),
 					(int) bounds.getWidth(), (int) bounds.getHeight());
 
 			cameraAutoCalibrated = true;
-
-			Platform.runLater(() -> {
-				cameraCalibrationListener.calibrate(bounds, false);
-			});
+			cameraCalibrationListener.calibrate(bounds, false);
 
 			if (Configuration.USE_ARENA_MASK) {
 				cameraCalibrationListener.setArenaMaskManager(arenaMaskManager);
-	
+
 				shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-				arenaMaskManager.start((int) bounds.getWidth(), (int)
-				bounds.getHeight());
+				arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
 			}
 
 			if (recordCalibratedArea && !recordingCalibratedArea)
@@ -698,7 +708,7 @@ public class CameraManager {
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
 		acm = new AutoCalibrationManager(this, calculateFrameDelay);
-		autoCalibrationEnabled = true;
+		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
 		// Turns off using mask
 		shotDetectionManager.setArenaMaskManager(null);
@@ -707,7 +717,7 @@ public class CameraManager {
 	}
 
 	public void disableAutoCalibration() {
-		autoCalibrationEnabled = false;
+		isAutoCalibrating.set(false);
 	}
 
 	public void setArenaBackground(String resourceFilename) {

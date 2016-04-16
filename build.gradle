@@ -6,7 +6,7 @@ import org.ajoberstar.grgit.Credentials
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
             url  "http://repo.jenkins-ci.org/releases/" 
         }
@@ -58,13 +58,9 @@ def keyAlias = 'cscert'
 def tsaURL = 'http://timestamp.comodoca.com/rfc3161'
 
 repositories {
-    mavenCentral()
-    // Next 2 are used for tts
+    jcenter()
     maven {
         url  "http://dl.bintray.com/marytts/marytts" 
-    }
-    maven {
-        url  "http://dl.bintray.com/dfki-lt/maven" 
     }
     maven {
         url  "http://xuggle.googlecode.com/svn/trunk/repo/share/java/" 

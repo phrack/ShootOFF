@@ -244,8 +244,8 @@ public class SessionViewerController {
 	}
 
 	private List<File> findSessions() {
-		File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
-		List<File> sessions = new ArrayList<File>();
+		final File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
+		final List<File> sessions = new ArrayList<File>();
 
 		if (!sessionsFolder.exists()) {
 			logger.debug("No sessions folder available");

@@ -50,7 +50,7 @@ public class XMLCourseWriter implements CourseVisitor {
 
 	@Override
 	public void visitResolution(double width, double height) {
-		xmlBody.append(String.format("\t<resolution width=\"%f\" height=\"%f\" />%n", width, height));
+		xmlBody.append(String.format(Locale.US, "\t<resolution width=\"%f\" height=\"%f\" />%n", width, height));
 	}
 
 	@Override

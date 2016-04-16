@@ -20,11 +20,12 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
-import com.shootoff.gui.Hit;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.Target;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Node;
@@ -79,7 +80,7 @@ public class TestSteelChallenge {
 		this.course = course.get();
 
 		for (Target t : course.get().getTargets()) {
-			for (Node n : t.getTargetGroup().getChildren()) {
+			for (Node n : ((TargetView) t).getTargetGroup().getChildren()) {
 				TargetRegion r = (TargetRegion) n;
 
 				if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
