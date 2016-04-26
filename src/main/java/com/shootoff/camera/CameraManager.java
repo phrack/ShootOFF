@@ -39,8 +39,12 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.TargetView;
+import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.targets.io.TargetIO;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -56,6 +60,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import javafx.util.Pair;
 
 /**
  * This class is responsible for fetching frames from its assigned camera and
@@ -129,6 +134,12 @@ public class CameraManager {
 	protected final ArenaMaskManager arenaMaskManager;
 
 	private CameraCalibrationListener cameraCalibrationListener;
+	
+	private PerspectiveManager perspectiveManager = new PerspectiveManager();
+	public PerspectiveManager getPerspectiveManager()
+	{
+		return perspectiveManager;
+	}
 
 	public void setCalibrationManager(CameraCalibrationListener calibrationManager) {
 		this.cameraCalibrationListener = calibrationManager;
@@ -206,12 +217,18 @@ public class CameraManager {
 		return feedHeight;
 	}
 
-	// This exists for future improvements. It doesn't handle
+	// It doesn't handle
 	// potential side effects of modifying the feed resolution
 	// on the fly.
 	public void setFeedResolution(int width, int height) {
 		feedWidth = width;
 		feedHeight = height;
+		
+		perspectiveManager.setCameraFeedSize(width, height);
+		
+		// Should come from config
+		perspectiveManager.setCameraDistance(3406);
+		perspectiveManager.setShooterDistance(3406);
 	}
 
 	public void clearShots() {
@@ -263,6 +280,29 @@ public class CameraManager {
 
 	public void setProjectionBounds(final Bounds projectionBounds) {
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
+		if (projectionBounds != null)
+		{
+			perspectiveManager.setPatternSize((int)projectionBounds.getWidth(), (int)projectionBounds.getHeight());
+		
+		}		
+		
+	}
+	
+	public void pmTest(ProjectorArenaController pac)
+	{
+		perspectiveManager.calculateUnknown();
+		
+		Pair<Double, Double> size = perspectiveManager.calculateObjectSize(610, 610, 3406, 3406*2);
+		
+		File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
+		TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
+				pac.getCanvasManager(), false);
+		target.setPosition(50, 50);
+		target.setDimensions(size.getKey(), size.getValue());
+
+		pac.getCanvasManager().addTarget(target);
+		
+		
 	}
 
 	public void setCropFeedToProjection(final boolean cropFeed) {
@@ -434,9 +474,21 @@ public class CameraManager {
 						logger.warn("Camera dimension differs from requested dimensions, requested {} {} actual {} {}",
 								getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
 								(int) openDimension.getHeight());
+						
+						setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
+						shotDetectionManager.reInitializeDimensions();
+					}
+					else
+					{
+						setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 					}
 
-					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
+				}
+				
+				// For testing purposes, does nothing if done inappropriately.
+				if (webcam.get().getWebcam().getName().contains("C270"))
+				{
+					perspectiveManager.setCameraParams(PerspectiveManager.C270_FOCAL_LENGTH, PerspectiveManager.C270_SENSOR_WIDTH, PerspectiveManager.C270_SENSOR_HEIGHT);
 				}
 
 				streamCameraFrames();
@@ -446,6 +498,7 @@ public class CameraManager {
 
 	private void streamCameraFrames() {
 		while (isStreaming.get()) {
+			
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
 			BufferedImage currentFrame = webcam.get().getImage();
@@ -504,6 +557,7 @@ public class CameraManager {
 
 				videoWriterStream.encodeVideo(0, frame);
 			}
+			
 
 			final BufferedImage frame = currentFrame;
 			if (cropFeedToProjection && projectionBounds.isPresent()) {
