@@ -464,7 +464,18 @@ public class ProjectorArenaController implements CalibrationListener {
 					showingCursorWarning = false;
 					mouseOnArenaLabel = null;
 				}
-				if (!calibrationManager.isCalibrating()) feedCanvasManager.getCameraManager().setDetecting(true);
+
+				if (!calibrationManager.isCalibrating()) {
+					// Delay restarting shot detection to minimize chance of
+					// false shots being detected when the mouse moves
+					try {
+						Thread.sleep(500 /* ms */);
+					} catch (Exception e) {
+						logger.error("Exception thrown when re-enabling shot detection due to mouse leaving arena", e);
+					}
+
+					feedCanvasManager.getCameraManager().setDetecting(true);
+				}
 			}, 100 /* ms */);
 		}
 	}
@@ -496,6 +507,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			arenaStage.getScene().setOnMouseExited((event) -> {
 				cursorWarningToggle(false);
+				this.canvasManager.toggleTargetSelection(Optional.empty());
 			});
 		}
 	}
