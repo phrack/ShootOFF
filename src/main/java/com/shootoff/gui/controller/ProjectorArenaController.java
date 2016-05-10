@@ -77,6 +77,9 @@ public class ProjectorArenaController implements CalibrationListener {
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
 	private Point2D arenaScreenOrigin = new Point2D(0, 0);
 
+
+	private Screen arenaHome;
+	
 	private CalibrationManager calibrationManager;
 
 	// Used for testing
@@ -231,7 +234,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 
 		if (projector.isPresent()) {
-			Screen arenaHome = projector.get();
+			arenaHome = projector.get();
 
 			double newX = arenaHome.getVisualBounds().getMinX();
 			double newY = arenaHome.getVisualBounds().getMinY();
@@ -248,6 +251,8 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			Rectangle2D arenaScreenBounds = arenaHome.getBounds();
 			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
+			
+
 		} else {
 			logger.debug("Did not find screen that is a likely projector");
 		}
@@ -372,6 +377,8 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			if (!currentArenaScreen.isPresent()) return;
 
+			arenaHome = currentArenaScreen.get();
+
 			final Rectangle2D arenaScreenBounds = currentArenaScreen.get().getBounds();
 			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
 
@@ -389,6 +396,7 @@ public class ProjectorArenaController implements CalibrationListener {
 					throw e;
 				}
 			}
+			
 		}
 	}
 
@@ -472,6 +480,8 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 	}
 
+	private boolean pmTest = false;
+	
 	@Override
 	public void calibrated() {
 		setCalibrationMessageVisible(false);
@@ -479,6 +489,12 @@ public class ProjectorArenaController implements CalibrationListener {
 		restoreCurrentBackground();
 
 		cursorWarningToggle(false);
+		
+		feedCanvasManager.getCameraManager().getPerspectiveManager().setProjectorResolution((int)arenaStage.getWidth(), (int)arenaStage.getHeight());
+		
+		if (pmTest)
+			feedCanvasManager.getCameraManager().pmTest(this);
+		
 	}
 
 	public void setFeedCanvasManager(CanvasManager canvasManager) {
@@ -498,6 +514,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	@SuppressWarnings("unused") private ArenaMaskManager arenaMaskManager = null;
 	private Timer updateMaskTimer = null;
+
 
 	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
 		this.arenaMaskManager = arenaMaskManager;

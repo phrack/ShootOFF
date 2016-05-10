@@ -43,6 +43,7 @@ public class PerspectiveManager {
 	public final static double C270_FOCAL_LENGTH = 4.0;
 	public final static double C270_SENSOR_WIDTH = 3.58;
 	public final static double C270_SENSOR_HEIGHT = 2.02;
+
 	
 	// All in millimeters
 	private double focalLength = -1;
@@ -62,6 +63,9 @@ public class PerspectiveManager {
 	private int patternHeight = -1;
 	private int patternWidth = -1;
 	
+	private int projectorResHeight = -1;
+	private int projectorResWidth = -1;
+	
 	public PerspectiveManager()
 	{
 		
@@ -69,28 +73,34 @@ public class PerspectiveManager {
 	
 	public void setCameraParams(double focalLength, double sensorWidth, double sensorHeight)
 	{
+		logger.trace("camera params fl {} sw {} sh {}", focalLength, sensorWidth, sensorHeight);
+		
 		this.focalLength = focalLength;
 		this.sensorHeight = sensorHeight;
 		this.sensorWidth = sensorWidth;
 	}
 	
-	/* The width and height of the projector arena in the camera feed */
+	/* The real world width and height of the projector arena in the camera feed (in mm) */
 	public void setProjectionSize(int width, int height)
 	{
+		logger.trace("projection w {} h {}", width, height);
+		
 		this.projectionHeight = height;
 		this.projectionWidth = width;
 	}
 	
-	/* The camera feed width and height */
+	/* The camera feed width and height (in px) */
 	public void setCameraFeedSize(int width, int height)
 	{
+		logger.trace("camera feed w {} h {}", width, height);
 		this.cameraHeight = height;
 		this.cameraWidth = width;
 	}
 	
-	/* The pattern feed width and height */
+	/* The pattern feed width and height (in px) */
 	public void setPatternSize(int width, int height)
 	{
+		logger.trace("pattern res w {} h {}", width, height);
 		this.patternHeight = height;
 		this.patternWidth = width;
 	}
@@ -100,13 +110,25 @@ public class PerspectiveManager {
 	/* Distance (in mm) camera to screen */
 	public void setCameraDistance(int cameraDistance)
 	{
+		logger.trace("cameraDistance {}", cameraDistance);
 		this.cameraDistance = cameraDistance;
 	}
 	
 	/* Distance (in mm) camera to shooter */
 	public void setShooterDistance(int shooterDistance)
 	{
+		logger.trace("shooterDistance {}", shooterDistance);
 		this.shooterDistance = shooterDistance;
+	}
+	
+	/* The resolution of the screen the arena is projected on
+	 * Due to DPI scaling this might not correspond to the projector's
+	 * resolution, but it is easier to think of that way */
+	public void setProjectorResolution(int width, int height)
+	{
+		logger.trace("projector res w {} h {}", width, height);
+		this.projectorResWidth = width;
+		this.projectorResHeight = height;
 	}
 	
 	public int getProjectionWidth()
@@ -121,13 +143,14 @@ public class PerspectiveManager {
 	public void calculateUnknown()
 	{
 		
-		double wValues[] = { focalLength, patternWidth, cameraWidth, projectionWidth, sensorWidth };
+		double wValues[] = { focalLength, patternWidth, cameraWidth, projectionWidth, sensorWidth, cameraDistance, projectorResWidth };
 		
 		boolean foundUnknown = false;
 		for (int i = 0; i < wValues.length; i++)
 		{
 			if (wValues[i] == -1)
 			{
+				logger.trace("Unknown: {}", i);
 				if (foundUnknown)
 				{
 					logger.error("More than one unknown");
@@ -145,13 +168,21 @@ public class PerspectiveManager {
 		
 		if (projectionWidth == -1)
 		{
-			projectionWidth = (int) ((focalLength * patternWidth * cameraWidth) / (cameraDistance * sensorWidth)); 
-			projectionHeight = (int) ((focalLength * patternHeight * cameraHeight) / (cameraDistance * sensorHeight)); 
+			projectionWidth = (int) (((double)cameraDistance * (double)patternWidth * sensorWidth) / (focalLength * (double)cameraWidth)); 
+			projectionHeight = (int) (((double)cameraDistance * (double)patternHeight * sensorHeight) / (focalLength * (double)cameraHeight));
+
+			logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth, sensorWidth, focalLength, cameraWidth);
 			
-			pxPerMMwide = ((double)cameraWidth / (double)projectionWidth) * (1/sensorWidth);
-			pxPerMMhigh = ((double)cameraHeight / (double)projectionHeight) * (1/sensorHeight);
 			
-			logger.debug("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
+			pxPerMMwide = ((double)projectorResWidth / (double)projectionWidth);
+			pxPerMMhigh = ((double)projectorResHeight / (double)projectionHeight);
+			
+			logger.trace("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
+		}
+		else
+		{
+			logger.error("Unknown not supported");
+			return;
 		}
 	}
 	
@@ -163,9 +194,12 @@ public class PerspectiveManager {
 			logger.error("projectionWidth or projectionHeight or shooterDistance unknown");
 			return new Pair<Double, Double>(-1.0, -1.0);
 		}
-				
-		double distRatio = realDistance / desiredDistance;
-		distRatio *= shooterDistance / desiredDistance;
+	
+		// Make it appropriate size for the shooter
+		double distRatio = realDistance / shooterDistance;
+		
+		// Make it appropriate size for the desired distance
+		distRatio *= cameraDistance / desiredDistance;
 		
 		double adjWidthmm = realWidth * distRatio;
 		double adjHeightmm = realHeight * distRatio;
@@ -173,8 +207,8 @@ public class PerspectiveManager {
 		double adjWidthpx = adjWidthmm * pxPerMMwide;
 		double adjHeightpx = adjHeightmm * pxPerMMhigh;
 		
-		logger.debug("dD/rD {} sD/dD {} dR {} - adjmm {} {} adjpx {} {}", desiredDistance/realDistance, shooterDistance/desiredDistance, distRatio,
-												adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
+		logger.trace("rD {} dD {} sD {} dR {} - adjmm {} {} adjpx {} {}", realDistance, desiredDistance, shooterDistance, distRatio,
+				adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
 		
 		return new Pair<Double, Double>(adjWidthpx, adjHeightpx);
 	}

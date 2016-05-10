@@ -253,15 +253,22 @@ public class CalibrationManager implements CameraCalibrationListener {
 		calibratingCameraManager.enableAutoCalibration(Configuration.USE_ARENA_MASK);
 
 		showAutoCalibrationMessage();
+		
+		launchAutoCalibrationTimer();
+	}
 
+	private void launchAutoCalibrationTimer() {
 		TimerPool.cancelTimer(autoCalibrationFuture);
 
 		autoCalibrationFuture = TimerPool.schedule(() -> {
 			Platform.runLater(() -> {
-				if (isCalibrating.get()) {
+				if (isCalibrating.get() && isFullScreen) {
 					calibratingCameraManager.disableAutoCalibration();
 					enableManualCalibration();
 				}
+				// Keep waiting
+				else if (!isFullScreen)
+					launchAutoCalibrationTimer();
 			});
 		}, MAX_AUTO_CALIBRATION_TIME);
 	}
@@ -308,7 +315,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 		arenaController.setArenaMaskManager(arenaMaskManager);
 	}
 
+	private boolean isFullScreen = false;
+	
 	public void setFullScreenStatus(boolean fullScreen) {
+		this.isFullScreen = fullScreen;
+		
 		logger.trace("setFullScreenStatus - {} {}", fullScreen, isCalibrating);
 
 		if (!isCalibrating.get()) {
@@ -325,7 +336,13 @@ public class CalibrationManager implements CameraCalibrationListener {
 			showFullScreenRequest();
 		} else {
 			removeFullScreenRequest();
-			enableAutoCalibration();
+			// Delay slightly to prevent #444 bug
+			TimerPool.schedule(() -> {
+				Platform.runLater(() -> {
+					if (isCalibrating.get())
+						enableAutoCalibration();
+				});
+			}, 100);
 		}
 	}
 
