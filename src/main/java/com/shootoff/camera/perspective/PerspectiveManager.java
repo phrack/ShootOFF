@@ -174,16 +174,25 @@ public class PerspectiveManager {
 			logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth, sensorWidth, focalLength, cameraWidth);
 			
 			
-			pxPerMMwide = ((double)projectorResWidth / (double)projectionWidth);
-			pxPerMMhigh = ((double)projectorResHeight / (double)projectionHeight);
-			
-			logger.trace("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
+
+		}
+		else if (sensorWidth == -1)
+		{
+			sensorWidth = ((projectionWidth * focalLength * (double)cameraWidth) / ((double)cameraDistance * (double)patternWidth)); 
+			sensorHeight = ((projectionHeight * focalLength * (double)cameraHeight) / ((double)cameraDistance * (double)patternHeight)); 
+
+			logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth, sensorWidth, focalLength, cameraWidth);
 		}
 		else
 		{
 			logger.error("Unknown not supported");
 			return;
 		}
+		
+		pxPerMMwide = ((double)projectorResWidth / (double)projectionWidth);
+		pxPerMMhigh = ((double)projectorResHeight / (double)projectionHeight);
+		
+		logger.trace("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
 	}
 	
 	// Parameters in mm, return in px

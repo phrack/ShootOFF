@@ -48,8 +48,28 @@ public class TestPerspectiveManager {
 		assertEquals(87.7, pair.getKey(), 1);
 		assertEquals(59.1, pair.getValue(), 1);
 		
+	
+	}
+	
+	@Test
+	public void testTwo() throws ConfigurationException {
+		PerspectiveManager pm = new PerspectiveManager();
 		
-
-
+		pm.setCameraParams(4, 3.125, 2.32);
+		pm.setCameraFeedSize(640, 480);
+		pm.setPatternSize(422, 316);
+		pm.setCameraDistance(3406);
+		pm.setShooterDistance(3406);
+		pm.setProjectorResolution(1024, 768);
+		
+		pm.calculateUnknown();
+		
+		assertEquals(1753.0,pm.getProjectionWidth(), 1);
+		assertEquals(1299.0,pm.getProjectionHeight(), 1);
+		
+		Pair<Double, Double> pair = pm.calculateObjectSize(300, 200, 3406, 3406);
+		
+		assertEquals(175.3, pair.getKey(), 1);
+		assertEquals(118.2, pair.getValue(), 1);
 	}
 }
