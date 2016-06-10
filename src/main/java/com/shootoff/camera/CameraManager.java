@@ -292,7 +292,7 @@ public class CameraManager {
 	{
 		perspectiveManager.calculateUnknown();
 		
-		Pair<Double, Double> size = perspectiveManager.calculateObjectSize(610, 610, 3406, 3406*2);
+		Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216, 3406, 3406);
 		
 		File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
 		TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,

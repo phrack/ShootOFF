@@ -72,4 +72,58 @@ public class TestPerspectiveManager {
 		assertEquals(175.3, pair.getKey(), 1);
 		assertEquals(118.2, pair.getValue(), 1);
 	}
+	
+	
+	@Test
+	public void testThree() throws ConfigurationException {
+		PerspectiveManager pm = new PerspectiveManager();
+		
+		pm.setProjectionSize(1753, 1299);
+		pm.setCameraFeedSize(640, 480);
+		pm.setPatternSize(422, 316);
+		pm.setCameraDistance(3406);
+		pm.setShooterDistance(3406);
+		pm.setProjectorResolution(1024, 768);
+		
+		pm.calculateUnknown();
+		
+		assertEquals(1,pm.getFocalLength(), 1);
+		assertEquals(.781, pm.getSensorWidth(), .1);
+		assertEquals(.579, pm.getSensorHeight(), .1);
+		
+		Pair<Double, Double> pair = pm.calculateObjectSize(300, 200, 3406, 3406);
+		
+		assertEquals(175.3, pair.getKey(), 1);
+		assertEquals(118.2, pair.getValue(), 1);
+	}
+	
+	
+	
+	@Test
+	public void testFour() throws ConfigurationException {
+		PerspectiveManager pm = new PerspectiveManager();
+		
+		//spm.setProjectionSize(1753, 1299);
+		
+	
+		
+		pm.setCameraFeedSize(640, 480);
+		pm.setPatternSize(422, 316);
+		pm.setCameraDistance(3406);
+		pm.setShooterDistance(3406);
+		pm.setProjectorResolution(1024, 768);
+		
+		pm.setProjectionSizeFromLetterPaperPixels(67, 53);
+		
+		pm.calculateUnknown();
+		
+		assertEquals(1,pm.getFocalLength(), 1);
+		assertEquals(.781, pm.getSensorWidth(), .1);
+		assertEquals(.579, pm.getSensorHeight(), .1);
+		
+		Pair<Double, Double> pair = pm.calculateObjectSize(279, 216, 3406, 3406);
+		
+		assertEquals(162.6, pair.getKey(), 1);
+		assertEquals(128.9, pair.getValue(), 1);
+	}
 }

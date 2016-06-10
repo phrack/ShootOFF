@@ -43,6 +43,9 @@ public class PerspectiveManager {
 	public final static double C270_FOCAL_LENGTH = 4.0;
 	public final static double C270_SENSOR_WIDTH = 3.58;
 	public final static double C270_SENSOR_HEIGHT = 2.02;
+	
+	private final static int US_LETTER_WIDTH_MM = 279;
+	private final static int US_LETTER_HEIGHT_MM = 216;
 
 	
 	// All in millimeters
@@ -88,6 +91,30 @@ public class PerspectiveManager {
 		this.projectionHeight = height;
 		this.projectionWidth = width;
 	}
+	
+	/* Specify (or find with OpenCV) the number of camera pixels that are represent
+	 *  a U.S. standard letter, which is 8.5 x 11 inches or 216 x 279mm
+	 *  We assume that the paper is placed sideways! We could probably adjust for this though */
+	public void setProjectionSizeFromLetterPaperPixels(int lwidth, int lheight)
+	{
+		logger.trace("letter w {} h {}", lwidth, lheight);
+		
+		if (cameraWidth == -1 || patternWidth == -1)
+		{
+			logger.error("Missing cameraWidth or patternWidth for US Letter calculation");
+			return;
+		}
+		
+		// Calculate the size of the whole camera feed using the size of the letter
+		double cameraFeedWidthMM = ((double)cameraWidth / (double)lwidth) * US_LETTER_WIDTH_MM;
+		double cameraFeedHeightMM = ((double)cameraHeight / (double)lheight) * US_LETTER_HEIGHT_MM;
+		
+		// Set the projection width/height in mm
+		projectionWidth = (int) (cameraFeedWidthMM * ((double)patternWidth / (double)cameraWidth));
+		projectionHeight = (int) (cameraFeedHeightMM * ((double)patternHeight / (double)cameraHeight));
+	}
+	
+	
 	
 	/* The camera feed width and height (in px) */
 	public void setCameraFeedSize(int width, int height)
@@ -140,27 +167,46 @@ public class PerspectiveManager {
 		return projectionHeight;
 	}
 	
+	public double getFocalLength()
+	{
+		return focalLength;
+	}
+	
+	public double getSensorWidth()
+	{
+		return sensorWidth;
+	}
+	public double getSensorHeight()
+	{
+		return sensorHeight;
+	}
+	
 	public void calculateUnknown()
 	{
 		
+		int unknownCount = 0;
+			
+			
 		double wValues[] = { focalLength, patternWidth, cameraWidth, projectionWidth, sensorWidth, cameraDistance, projectorResWidth };
 		
-		boolean foundUnknown = false;
 		for (int i = 0; i < wValues.length; i++)
 		{
 			if (wValues[i] == -1)
 			{
 				logger.trace("Unknown: {}", i);
-				if (foundUnknown)
-				{
-					logger.error("More than one unknown");
-					return;
-				}
-				foundUnknown = true;
+				unknownCount++;
+				
+
 			}
 		}
 		
-		if (!foundUnknown)
+		// We're okay with two unknowns if they're these two.
+		if (unknownCount > 1 && (focalLength != -1 && sensorWidth != -1))
+		{
+			logger.error("More than one unknown");
+			return;
+		}	
+		else if (unknownCount == 0)
 		{
 			logger.error("No unknown found");
 			return;
@@ -178,6 +224,10 @@ public class PerspectiveManager {
 		}
 		else if (sensorWidth == -1)
 		{
+			// Fix focalLength at 1 since we do not know it and we can only calculate 1 unknown
+			if (focalLength == -1)
+				focalLength = 1;
+			
 			sensorWidth = ((projectionWidth * focalLength * (double)cameraWidth) / ((double)cameraDistance * (double)patternWidth)); 
 			sensorHeight = ((projectionHeight * focalLength * (double)cameraHeight) / ((double)cameraDistance * (double)patternHeight)); 
 
