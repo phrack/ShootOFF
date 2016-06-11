@@ -60,9 +60,6 @@ def tsaURL = 'http://timestamp.comodoca.com/rfc3161'
 repositories {
     jcenter()
     maven {
-        url  "http://dl.bintray.com/marytts/marytts" 
-    }
-    maven {
         url  "http://xuggle.googlecode.com/svn/trunk/repo/share/java/" 
     }
 }

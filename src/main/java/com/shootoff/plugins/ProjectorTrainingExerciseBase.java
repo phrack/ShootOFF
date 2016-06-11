@@ -37,6 +37,8 @@ import javafx.scene.text.Font;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
+import com.shootoff.courses.Course;
+import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.TargetView;
@@ -235,6 +237,21 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 */
 	public void setArenaBackground(LocatedImage background) {
 		arenaController.setBackground(background);
+	}
+
+	/**
+	 * Remove all targets on the arena and replace them with the course specified
+	 * in the file <code>courseFile</code>.
+	 * 
+	 * @param courseFile a file specifying the course to use
+	 * @return a list of the targets loaded from <code>courseFile</code>
+	 * 
+	 * @since 3.8
+	 */
+	public List<Target> setCourse(File courseFile) {
+		Optional<Course> newCourse = CourseIO.loadCourse(arenaController, courseFile);
+		arenaController.setCourse(newCourse.get());
+		return newCourse.get().getTargets();
 	}
 
 	@Override
