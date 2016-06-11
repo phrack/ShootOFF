@@ -2,14 +2,35 @@ package com.shootoff.camera;
 
 import static org.junit.Assert.*;
 
-import org.junit.Test;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Optional;
 
+import javax.imageio.ImageIO;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ErrorCollector;
+
+import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
+import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.MockCanvasManager;
 
 import javafx.util.Pair;
 
 public class TestPerspectiveManager {
+	
+	private AutoCalibrationManager acm;
+
+	@Before
+	public void setUp() throws ConfigurationException {
+		nu.pattern.OpenCV.loadShared();
+
+		acm = new AutoCalibrationManager(new MockCameraManager(), false);
+	}
 
 	@Test
 	public void testOne() throws ConfigurationException {
@@ -103,10 +124,6 @@ public class TestPerspectiveManager {
 	public void testFour() throws ConfigurationException {
 		PerspectiveManager pm = new PerspectiveManager();
 		
-		//spm.setProjectionSize(1753, 1299);
-		
-	
-		
 		pm.setCameraFeedSize(640, 480);
 		pm.setPatternSize(422, 316);
 		pm.setCameraDistance(3406);
@@ -121,9 +138,43 @@ public class TestPerspectiveManager {
 		assertEquals(.781, pm.getSensorWidth(), .1);
 		assertEquals(.579, pm.getSensorHeight(), .1);
 		
-		Pair<Double, Double> pair = pm.calculateObjectSize(279, 216, 3406, 3406);
+		Pair<Double, Double> pair = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
 		
 		assertEquals(162.6, pair.getKey(), 1);
 		assertEquals(128.9, pair.getValue(), 1);
 	}
+	
+	
+	@Test
+	public void testPaperPattern() throws IOException {
+		BufferedImage testFrame = ImageIO
+				.read(TestAutoCalibration.class.getResourceAsStream("/perspective/c270_pattern_new.png"));
+
+		Optional<Pair<Integer,Integer>> paperDimensions = acm.findPaperPattern(Camera.bufferedImageToMat(testFrame));
+
+		assertTrue(paperDimensions.isPresent());
+		
+		PerspectiveManager pm = new PerspectiveManager();
+		
+		pm.setCameraParams(PerspectiveManager.C270_FOCAL_LENGTH, PerspectiveManager.C270_SENSOR_WIDTH, PerspectiveManager.C270_SENSOR_HEIGHT);
+		
+		pm.setCameraFeedSize(1280, 720);
+		pm.setPatternSize(698, 544);
+
+		pm.setProjectorResolution(1024, 768);
+		
+		pm.setProjectionSizeFromLetterPaperPixels(paperDimensions.get().getKey(), paperDimensions.get().getValue());
+		
+		pm.calculateUnknown();
+		
+		assertEquals(3498, pm.getCameraDistance());
+		
+		pm.setShooterDistance(pm.getCameraDistance());
+		
+		Pair<Double, Double> pair = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
+		
+		assertEquals(170.25, pair.getKey(), 1);
+		assertEquals(124.3, pair.getValue(), 1);
+	}
+
 }

@@ -156,7 +156,10 @@ public class CameraManager {
 			arenaMaskManager = null;
 		}
 
-		this.webcam = Optional.of(webcam);
+		if (webcam != null)
+			this.webcam = Optional.of(webcam);
+		else
+			this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
 		this.cameraView = view;
 		this.config = config;
@@ -227,7 +230,6 @@ public class CameraManager {
 		perspectiveManager.setCameraFeedSize(width, height);
 		
 		// Should come from config
-		perspectiveManager.setCameraDistance(3406);
 		perspectiveManager.setShooterDistance(3406);
 	}
 
@@ -290,9 +292,32 @@ public class CameraManager {
 	
 	public void pmTest(ProjectorArenaController pac)
 	{
-		perspectiveManager.calculateUnknown();
+		// If no pattern to work with, and no camera parameters to work with, we can't calculate both
+		// So we guess (for now) that the camera distance is 3580mm
+		if (!acm.getPaperDimensions().isPresent() || !perspectiveManager.isCameraParamsKnown())
+		{
+				perspectiveManager.setCameraDistance(3580);
+		}
+		else if (perspectiveManager.isCameraParamsKnown())
+		{
+			perspectiveManager.setCameraDistance(-1);
+		}
+		if (acm.getPaperDimensions().isPresent())
+		{
+			
+			perspectiveManager.setProjectionSizeFromLetterPaperPixels(acm.getPaperDimensions().get().getKey(), acm.getPaperDimensions().get().getValue());
+		}
 		
-		Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216, 3406, 3406);
+
+		
+		perspectiveManager.calculateUnknown();
+
+		logger.debug("Distance {}", perspectiveManager.getCameraDistance());
+		
+		perspectiveManager.setShooterDistance(perspectiveManager.getCameraDistance());
+
+		
+		Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216, perspectiveManager.getCameraDistance(), perspectiveManager.getCameraDistance());
 		
 		File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
 		TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
@@ -761,7 +786,9 @@ public class CameraManager {
 	}
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
-		acm = new AutoCalibrationManager(this, calculateFrameDelay);
+		
+		if (acm == null)
+			acm = new AutoCalibrationManager(this, calculateFrameDelay);
 		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
 		// Turns off using mask

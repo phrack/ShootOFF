@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javafx.geometry.Bounds;
+import javafx.util.Pair;
 
 import javax.imageio.ImageIO;
 
@@ -83,7 +84,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -115,7 +116,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -148,7 +149,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -159,7 +160,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -170,7 +171,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -181,7 +182,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -214,7 +215,7 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(testFrame);
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -246,7 +247,7 @@ public class TestAutoCalibration {
 		Boolean result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
 		assertEquals(true, result);
 	}
-
+	
 	/*
 	 * http://stackoverflow.com/questions/11006394/is-there-a-simple-way-to-
 	 * compare -bufferedimage-instances

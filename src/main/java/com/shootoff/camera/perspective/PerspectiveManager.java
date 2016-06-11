@@ -40,6 +40,7 @@ public class PerspectiveManager {
 	private static final Logger logger = LoggerFactory.getLogger(PerspectiveManager.class);
 	
 	// Should be put in a resource file
+	// !!!! THESE NUMBERS ARE ONLY GOOD FOR 1280x720 !!!!
 	public final static double C270_FOCAL_LENGTH = 4.0;
 	public final static double C270_SENSOR_WIDTH = 3.58;
 	public final static double C270_SENSOR_HEIGHT = 2.02;
@@ -148,6 +149,14 @@ public class PerspectiveManager {
 		this.shooterDistance = shooterDistance;
 	}
 	
+	public int getCameraDistance() {
+		return cameraDistance;
+	}
+
+	public int getShooterDistance() {
+		return shooterDistance;
+	}
+
 	/* The resolution of the screen the arena is projected on
 	 * Due to DPI scaling this might not correspond to the projector's
 	 * resolution, but it is easier to think of that way */
@@ -200,11 +209,15 @@ public class PerspectiveManager {
 			}
 		}
 		
-		// We're okay with two unknowns if they're these two.
-		if (unknownCount > 1 && (focalLength != -1 && sensorWidth != -1))
+		
+		if (unknownCount > 1)
 		{
-			logger.error("More than one unknown");
-			return;
+			// We're okay with two unknowns if they're these two.
+			if (!(focalLength == -1 && sensorWidth == -1 && unknownCount == 2))
+			{
+				logger.error("More than one unknown");
+				return;
+			}
 		}	
 		else if (unknownCount == 0)
 		{
@@ -231,8 +244,18 @@ public class PerspectiveManager {
 			sensorWidth = ((projectionWidth * focalLength * (double)cameraWidth) / ((double)cameraDistance * (double)patternWidth)); 
 			sensorHeight = ((projectionHeight * focalLength * (double)cameraHeight) / ((double)cameraDistance * (double)patternHeight)); 
 
-			logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth, sensorWidth, focalLength, cameraWidth);
+			logger.trace("({} *  {} * {}) / ({} * {})", projectionWidth, focalLength, cameraWidth, cameraDistance, patternWidth);
+			
+			logger.trace("New camera params: focalLength {} sensorWidth {} sensorHeight {}", focalLength, sensorWidth, sensorHeight);
 		}
+		else if (cameraDistance == -1)
+		{
+			cameraDistance = (int) (((double)projectionHeight * focalLength * (double)cameraHeight) / ((double)patternHeight * sensorHeight));
+
+			logger.debug("({} * {} * {}) / ({} *  {})", projectionHeight, focalLength, cameraHeight, patternHeight, sensorHeight);
+			
+		}
+		
 		else
 		{
 			logger.error("Unknown not supported");
@@ -270,6 +293,12 @@ public class PerspectiveManager {
 				adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
 		
 		return new Pair<Double, Double>(adjWidthpx, adjHeightpx);
+	}
+
+	public boolean isCameraParamsKnown() {
+		if (sensorWidth == -1 && focalLength == -1)
+			return false;
+		return true;
 	}
 	
 

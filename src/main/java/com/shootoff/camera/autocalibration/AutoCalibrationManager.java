@@ -29,6 +29,7 @@ import java.util.Set;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.util.Callback;
+import javafx.util.Pair;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
@@ -36,6 +37,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -98,6 +100,17 @@ public class AutoCalibrationManager {
 	private long frameDelayResult;
 
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
+	
+	/* Paper Pattern */
+	private Optional<Pair<Integer,Integer>> paperDimensions = Optional.empty();
+
+	public Optional<Pair<Integer, Integer>> getPaperDimensions() {
+		return paperDimensions;
+	}
+
+	public void setPaperDimensions(Optional<Pair<Integer, Integer>> paperDimensions) {
+		this.paperDimensions = paperDimensions;
+	}
 
 	public AutoCalibrationManager(final CameraManager cameraManager, final boolean calculateFrameDelay) {
 		this.cameraManager = cameraManager;
@@ -127,11 +140,24 @@ public class AutoCalibrationManager {
 		isCalibrated = false;
 		warpInitialized = false;
 		boundsResult = null;
+		
+		paperDimensions = Optional.empty();
 	}
 
 	public void processFrame(final BufferedImage frame) {
 		if (boundsResult == null) {
-			Optional<Bounds> bounds = calibrateFrame(frame);
+			
+			Mat mat;
+			
+			synchronized (frame) {
+				mat = Camera.bufferedImageToMat(frame);
+			}
+			
+			if (!paperDimensions.isPresent())
+				paperDimensions = findPaperPattern(mat);
+			
+			Optional<Bounds> bounds = calibrateFrame(mat);
+			
 
 			if (bounds.isPresent()) {
 				boundsResult = bounds.get();
@@ -204,12 +230,7 @@ public class AutoCalibrationManager {
 		return mat.get(secondSquareCenterY, secondSquareCenterX);
 	}
 
-	public Optional<Bounds> calibrateFrame(BufferedImage frame) {
-		Mat mat;
-
-		synchronized (frame) {
-			mat = Camera.bufferedImageToMat(frame);
-		}
+	public Optional<Bounds> calibrateFrame(Mat mat) {
 
 		// For debugging
 		Mat traceMat = null;
@@ -217,7 +238,7 @@ public class AutoCalibrationManager {
 			traceMat = mat.clone();
 		}
 
-		initializeSize(frame.getWidth(), frame.getHeight());
+		initializeSize(mat.cols(), mat.rows());
 
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
@@ -270,21 +291,110 @@ public class AutoCalibrationManager {
 		}
 
 		Mat warpedBoardCorners = warpCorners(boardCorners.get());
-		findColors(undistorted, warpedBoardCorners);
+
 
 		isCalibrated = true;
 
-		final double squareHeight = boundingBox.getHeight() / (double) (PATTERN_HEIGHT + 1);
-		final double squareWidth = boundingBox.getWidth() / (double) (PATTERN_WIDTH + 1);
+		if (calculateFrameDelay) { 
+			findColors(undistorted, warpedBoardCorners);
+			
+			final double squareHeight = boundingBox.getHeight() / (double) (PATTERN_HEIGHT + 1);
+			final double squareWidth = boundingBox.getWidth() / (double) (PATTERN_WIDTH + 1);
 
-		int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
-		int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
+			int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
+			int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
+			
+			if (logger.isDebugEnabled()) logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX,
+					secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
 
-		if (logger.isDebugEnabled()) logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX,
-				secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
-
+		}
+		
 		return Optional.of(boundingBox);
 	}
+	
+	/* Perspective pattern discovery
+	 * 
+	 *  Works similar to arena calibration but does not
+	 *  try to identify the outline of the projection area 
+	 *  We are only concerned with size, not alignment or angle */
+	public Optional<Pair<Integer,Integer>> findPaperPattern(Mat mat) {
+
+
+		// For debugging
+		Mat traceMat = null;
+		if (logger.isTraceEnabled()) {
+			traceMat = mat.clone();
+		}
+
+		initializeSize(mat.cols(), mat.rows());
+
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
+
+		if (!boardCorners.isPresent()) return Optional.empty();
+
+		// Step 2: Estimate the pattern corners
+		final BoundingBox box = getPaperPatternDimensions(mat, boardCorners.get());
+		
+
+		// OpenCV gives us the checkerboard corners, not the outside dimension
+		// So this estimates where the outside corner would be, plus a fudge factor for the edge of the paper
+		Integer width = (int) ((double)box.getWidth() * ((double)(PATTERN_WIDTH+1)/(double)(PATTERN_WIDTH-1)) * 1.07);
+		Integer height = (int) ((double)box.getHeight() * ((double)(PATTERN_HEIGHT+1)/(double)(PATTERN_HEIGHT-1)) * 1.07);
+
+		
+		final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
+		if (width > PAPER_PATTERN_SIZE_THRESHOLD * mat.cols() || height > PAPER_PATTERN_SIZE_THRESHOLD * mat.rows())
+		{
+			logger.trace("Pattern too big to be paper, must be projection, setting blank {}x{}", width, height);
+			Mat tempMat = mat.clone();
+			tempMat.submat((int)box.getMinY(), (int)box.getMinY()+(int)box.getHeight(), (int)box.getMinX(), (int)box.getMinX()+(int)box.getWidth()).setTo(new Scalar(0, 0, 0));
+
+			
+			return findPaperPattern(tempMat);
+			
+			
+		}
+		
+		logger.trace("pattern width {} height {}", box.getWidth(), box.getHeight());
+			
+		logger.trace("paper width {} height {}", width, height);
+		
+		//TODO: Make this happen in the original Mat even if we're here recursively.
+		mat.submat((int)box.getMinY(), (int)box.getMinY()+(int)box.getHeight(), (int)box.getMinX(),  (int)box.getMinX()+(int)box.getWidth()).setTo(new Scalar(0, 0, 0));
+		
+		return Optional.of(new Pair<Integer,Integer>(width, height));
+	}
+	
+	
+	private BoundingBox getPaperPatternDimensions(Mat traceMat, MatOfPoint2f boardCorners) {
+		// Turn the chessboard into corners
+		final MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
+
+		
+		final Point topLeft = new Point(boardRect.get(0, 0)[0], boardRect.get(0, 0)[1]);
+		final Point topRight = new Point(boardRect.get(1, 0)[0], boardRect.get(1, 0)[1]);
+		final Point bottomRight = new Point(boardRect.get(2, 0)[0], boardRect.get(2, 0)[1]);
+		final Point bottomLeft = new Point(boardRect.get(3, 0)[0], boardRect.get(3, 0)[1]);
+		
+		logger.trace("Paper Corners {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
+		
+		final double topWidth = Math.sqrt(Math.pow(topRight.x - topLeft.x, 2) + Math.pow(topRight.y - topLeft.y, 2));
+		final double leftHeight = Math
+				.sqrt(Math.pow(bottomLeft.x - topLeft.x, 2) + Math.pow(bottomLeft.y - topLeft.y, 2));
+		final double bottomWidth = Math
+				.sqrt(Math.pow(bottomRight.x - bottomLeft.x, 2) + Math.pow(bottomRight.y - bottomLeft.y, 2));
+		final double rightHeight = Math
+				.sqrt(Math.pow(bottomRight.x - topRight.x, 2) + Math.pow(bottomRight.y - topRight.y, 2));
+		
+		final int width = (int) ((topWidth+bottomWidth)/2);
+		final int height = (int) ((leftHeight+rightHeight)/2);
+		
+		return new BoundingBox(topLeft.x, topLeft.y, width, height);
+	}
+
+	
+	
 
 	private void findColors(Mat frame, Mat warpedBoardCorners) {
 		final Point rCenter = findChessBoardSquareCenter(warpedBoardCorners, 2, 3);
@@ -378,9 +488,6 @@ public class AutoCalibrationManager {
 		final Mat unRotMat = getRotationMatrix(massCenterMatOfPoint2f(boardRect), boardBoxAngle);
 		final MatOfPoint2f unRotatedRect = rotateRect(unRotMat, boardRect);
 
-		if (logger.isTraceEnabled()) logger.trace("center {} angle {} width {} height {}", boardBox.center,
-				boardBoxAngle, boardBox.size.width, boardBox.size.height);
-
 		// This is the estimated projection area that has minimum angle (Not
 		// rotated)
 		final MatOfPoint2f estimatedPatternSizeRect = estimateFullPatternSize(unRotatedRect);
@@ -389,10 +496,6 @@ public class AutoCalibrationManager {
 		// back to the cameramanager
 		boundsRect = Imgproc.minAreaRect(estimatedPatternSizeRect);
 
-		if (logger.isDebugEnabled()) logger.debug("boundsRect {} {} {} {}", boundsRect.boundingRect().x,
-				boundsRect.boundingRect().y, boundsRect.boundingRect().x + boundsRect.boundingRect().width,
-				boundsRect.boundingRect().y + boundsRect.boundingRect().height);
-
 		// We now rotate the estimation back to the original angle to use for
 		// transformation source
 		final Mat rotMat = getRotationMatrix(massCenterMatOfPoint2f(estimatedPatternSizeRect), -boardBoxAngle);
@@ -400,6 +503,13 @@ public class AutoCalibrationManager {
 		final MatOfPoint2f rotatedPatternSizeRect = rotateRect(rotMat, estimatedPatternSizeRect);
 
 		if (logger.isTraceEnabled()) {
+			 logger.trace("center {} angle {} width {} height {}", boardBox.center,
+						boardBoxAngle, boardBox.size.width, boardBox.size.height);
+			
+			 logger.debug("boundsRect {} {} {} {}", boundsRect.boundingRect().x,
+						boundsRect.boundingRect().y, boundsRect.boundingRect().x + boundsRect.boundingRect().width,
+						boundsRect.boundingRect().y + boundsRect.boundingRect().height);
+			
 			Core.circle(traceMat, new Point(boardRect.get(0, 0)[0], boardRect.get(0, 0)[1]), 1, new Scalar(255, 0, 0),
 					-1);
 			Core.circle(traceMat, new Point(boardRect.get(1, 0)[0], boardRect.get(1, 0)[1]), 1, new Scalar(255, 0, 0),
@@ -463,7 +573,7 @@ public class AutoCalibrationManager {
 		final Point bottomRight = new Point(rect.get(2, 0)[0], rect.get(2, 0)[1]);
 		final Point bottomLeft = new Point(rect.get(3, 0)[0], rect.get(3, 0)[1]);
 
-		logger.trace("points {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
+
 
 		// We need the heights and widths to estimate the square sizes
 
@@ -476,6 +586,8 @@ public class AutoCalibrationManager {
 				.sqrt(Math.pow(bottomRight.x - topRight.x, 2) + Math.pow(bottomRight.y - topRight.y, 2));
 
 		if (logger.isTraceEnabled()) {
+			logger.trace("points {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
+			
 			double angle = Math.atan((topRight.y - topLeft.y) / (topRight.x - topLeft.x)) * 180 / Math.PI;
 			double angle2 = Math.atan((bottomRight.y - bottomLeft.y) / (bottomRight.x - bottomLeft.x)) * 180 / Math.PI;
 
@@ -558,9 +670,6 @@ public class AutoCalibrationManager {
 		// distance from pattern
 		final int toleranceThreshold = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 2.0);
 
-		if (logger.isTraceEnabled())
-			logger.trace("tolerance threshold {} minimumDimension {}", toleranceThreshold, minimumDimension);
-
 		// Grey scale conversion.
 		final Mat grey = new Mat();
 		Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
@@ -572,6 +681,8 @@ public class AutoCalibrationManager {
 		Imgproc.GaussianBlur(grey, grey, gaussianBlurSize, GAUSSIANBLUR_SIGMA);
 
 		if (logger.isTraceEnabled()) {
+			logger.trace("tolerance threshold {} minimumDimension {}", toleranceThreshold, minimumDimension);
+			
 			String filename = String.format("calibrate-undist-grey-lines.png");
 			File file = new File(filename);
 			filename = file.toString();
@@ -846,6 +957,9 @@ public class AutoCalibrationManager {
 
 		boolean found = Calib3d.findChessboardCorners(grayImage, boardSize, imageCorners,
 				Calib3d.CALIB_CB_NORMALIZE_IMAGE + Calib3d.CALIB_CB_ADAPTIVE_THRESH);
+		
+		logger.trace("found {}", found);
+		
 		if (found) {
 			// optimization
 			Imgproc.cornerSubPix(grayImage, imageCorners, new Size(5, 5), new Size(-1, -1), term);
@@ -879,12 +993,7 @@ public class AutoCalibrationManager {
 			return null;
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("findChessBoardSquareColor {}", corners.size());
 
-			logger.trace("findChessBoardSquareColor {} {}", (row * PATTERN_WIDTH - 1) + col,
-					((row + 1) * PATTERN_WIDTH - 1) + col + 1);
-		}
 
 		final Point topLeft = new Point(corners.get((row * PATTERN_WIDTH - 1) + col, 0)[0],
 				corners.get((row * PATTERN_WIDTH - 1) + col, 0)[1]);
@@ -893,7 +1002,13 @@ public class AutoCalibrationManager {
 
 		final Point result = new Point((topLeft.x + bottomRight.x) / 2, (topLeft.y + bottomRight.y) / 2);
 
-		if (logger.isTraceEnabled()) logger.warn("findChessBoardSquareColor {} {} {}", topLeft, bottomRight, result);
+		if (logger.isTraceEnabled()) {
+			logger.trace("findChessBoardSquareColor {}", corners.size());
+
+			logger.trace("findChessBoardSquareColor {} {}", (row * PATTERN_WIDTH - 1) + col,
+					((row + 1) * PATTERN_WIDTH - 1) + col + 1);
+			logger.trace("findChessBoardSquareColor {} {} {}", topLeft, bottomRight, result);
+		}
 
 		return result;
 	}
