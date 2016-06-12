@@ -9,15 +9,11 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ErrorCollector;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
-import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.MockCanvasManager;
 
 import javafx.util.Pair;
 

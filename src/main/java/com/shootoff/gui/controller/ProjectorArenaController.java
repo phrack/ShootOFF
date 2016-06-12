@@ -21,15 +21,11 @@ package com.shootoff.gui.controller;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.arenamask.ArenaMaskManager;
-import com.shootoff.camera.arenamask.Mask;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
@@ -285,7 +281,6 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void close() {
 		arenaStage.close();
 		TimerPool.cancelTimer(mouseExitedFuture);
-		if (updateMaskTimer != null) updateMaskTimer.cancel();
 	}
 
 	public void setBackground(LocatedImage img) {
@@ -510,39 +505,5 @@ public class ProjectorArenaController implements CalibrationListener {
 				this.canvasManager.toggleTargetSelection(Optional.empty());
 			});
 		}
-	}
-
-	@SuppressWarnings("unused") private ArenaMaskManager arenaMaskManager = null;
-	private Timer updateMaskTimer = null;
-
-
-	public void setArenaMaskManager(ArenaMaskManager arenaMaskManager) {
-		this.arenaMaskManager = arenaMaskManager;
-
-		if (updateMaskTimer != null) return;
-
-		updateMaskTimer = new Timer();
-		final TimerTask newTask = new TimerTask() {
-			@Override
-			public void run() {
-				Platform.runLater(() -> {
-					try {
-						arenaMaskManager.sem.acquire();
-					} catch (InterruptedException e) {
-						return;
-					}
-
-					try {
-						arenaMaskManager.maskFromArena = new Mask(getCanvasManager().getBufferedImage(),
-								System.currentTimeMillis());
-					} finally {
-						arenaMaskManager.sem.release();
-					}
-				});
-			}
-		};
-
-		logger.debug("Scheduling updateMask");
-		updateMaskTimer.schedule(newTask, 0, 50);
 	}
 }

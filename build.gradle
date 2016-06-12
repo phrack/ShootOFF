@@ -59,6 +59,12 @@ def tsaURL = 'http://timestamp.comodoca.com/rfc3161'
 
 repositories {
     jcenter()
+    // This repository is directly included even though we use jcenter
+    // because it makes it easier to get the smallest set of marytts that
+    // meets our needs without missing the freetts dependency
+    maven {
+        url  "http://dl.bintray.com/marytts/marytts/" 
+    }
     maven {
         url  "http://xuggle.googlecode.com/svn/trunk/repo/share/java/" 
     }

@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javafx.geometry.Bounds;
-import javafx.util.Pair;
 
 import javax.imageio.ImageIO;
 
@@ -17,12 +16,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
-import com.shootoff.camera.shotdetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.gui.controller.ProjectorArenaController;
 
 public class TestAutoCalibration {
@@ -43,10 +42,10 @@ public class TestAutoCalibration {
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
 		mockCanvasManager = new MockCanvasManager(config, true);
-		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
+		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
-		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
+		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}
@@ -63,7 +62,7 @@ public class TestAutoCalibration {
 		mockCanvasManager.setCameraManager(cameraManager);
 
 		cameraManager.setCalibrationManager(
-				new CalibrationManager(new MockShootOFFController(), cameraManager, new ProjectorArenaController()));
+				new CalibrationManager(new ShootOFFController(), cameraManager, new ProjectorArenaController()));
 		cameraManager.enableAutoCalibration(false);
 		cameraManager.processVideo();
 

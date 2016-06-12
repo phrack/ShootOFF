@@ -33,14 +33,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.geometry.Bounds;
 
 import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
-import com.shootoff.camera.shotdetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ProjectorArenaController;
@@ -85,7 +83,7 @@ public class CameraManager {
 	private long lastCameraTimestamp = -1;
 	private long lastFrameCount = 0;
 
-	protected final ShotDetectionManager shotDetectionManager;
+	protected final ShotDetector shotDetector;
 
 	protected final Optional<Camera> webcam;
 	private final Optional<CameraErrorView> cameraErrorView;
@@ -131,13 +129,12 @@ public class CameraManager {
 	protected boolean cameraAutoCalibrated = false;
 
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
-	protected final ArenaMaskManager arenaMaskManager;
 
 	private CameraCalibrationListener cameraCalibrationListener;
-	
+
 	private PerspectiveManager perspectiveManager = new PerspectiveManager();
-	public PerspectiveManager getPerspectiveManager()
-	{
+
+	public PerspectiveManager getPerspectiveManager() {
 		return perspectiveManager;
 	}
 
@@ -150,12 +147,6 @@ public class CameraManager {
 	}
 
 	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
-		if (Configuration.USE_ARENA_MASK) {
-			arenaMaskManager = new ArenaMaskManager();
-		} else {
-			arenaMaskManager = null;
-		}
-
 		if (webcam != null)
 			this.webcam = Optional.of(webcam);
 		else
@@ -168,29 +159,23 @@ public class CameraManager {
 
 		initDetector(new Detector());
 
-		this.shotDetectionManager = new ShotDetectionManager(this, config, view);
+		this.shotDetector = new JavaShotDetector(this, config, view);
 	}
 
 	protected CameraManager(CameraView view, Configuration config) {
-		if (Configuration.USE_ARENA_MASK) {
-			arenaMaskManager = new ArenaMaskManager();
-		} else {
-			arenaMaskManager = null;
-		}
-
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;
 		this.config = config;
-		this.shotDetectionManager = new ShotDetectionManager(this, config, view);
+		this.shotDetector = new JavaShotDetector(this, config, view);
 	}
 
 	private void initDetector(Detector detector) {
-		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
+		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
 		// Turn on all shot sectors by default
-		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
+		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}
@@ -220,15 +205,14 @@ public class CameraManager {
 		return feedHeight;
 	}
 
-	// It doesn't handle
-	// potential side effects of modifying the feed resolution
+	// It doesn't handle potential side effects of modifying the feed resolution
 	// on the fly.
 	public void setFeedResolution(int width, int height) {
 		feedWidth = width;
 		feedHeight = height;
-		
+
 		perspectiveManager.setCameraFeedSize(width, height);
-		
+
 		// Should come from config
 		perspectiveManager.setShooterDistance(3406);
 	}
@@ -242,8 +226,6 @@ public class CameraManager {
 	}
 
 	public void close() {
-		if (arenaMaskManager != null) arenaMaskManager.isStreaming.set(false);
-
 		getCameraView().close();
 		setDetecting(false);
 		setStreaming(false);
@@ -282,53 +264,51 @@ public class CameraManager {
 
 	public void setProjectionBounds(final Bounds projectionBounds) {
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
-		if (projectionBounds != null)
-		{
-			perspectiveManager.setPatternSize((int)projectionBounds.getWidth(), (int)projectionBounds.getHeight());
-		
-		}		
-		
-	}
-	
-	public void pmTest(ProjectorArenaController pac)
-	{
-		// If no pattern to work with, and no camera parameters to work with, we can't calculate both
-		// So we guess (for now) that the camera distance is 3565mm
-		if (!acm.getPaperDimensions().isPresent() || !perspectiveManager.isCameraParamsKnown())
-		{
-				perspectiveManager.setCameraDistance(3565);
+		if (projectionBounds != null) {
+			perspectiveManager.setPatternSize((int) projectionBounds.getWidth(), (int) projectionBounds.getHeight());
+
 		}
-		else if (perspectiveManager.isCameraParamsKnown())
-		{
+
+	}
+
+	public void pmTest(ProjectorArenaController pac) {
+		// If no pattern to work with, and no camera parameters to work with, we
+		// can't calculate both
+		// So we guess (for now) that the camera distance is 3580mm
+		if (!acm.getPaperDimensions().isPresent() || !perspectiveManager.isCameraParamsKnown()) {
+			perspectiveManager.setCameraDistance(3580);
+		} else if (perspectiveManager.isCameraParamsKnown()) {
 			perspectiveManager.setCameraDistance(-1);
 		}
-		if (acm.getPaperDimensions().isPresent())
-		{
-			
-			perspectiveManager.setProjectionSizeFromLetterPaperPixels(acm.getPaperDimensions().get().getKey(), acm.getPaperDimensions().get().getValue());
+		if (acm.getPaperDimensions().isPresent()) {
+
+			perspectiveManager.setProjectionSizeFromLetterPaperPixels(acm.getPaperDimensions().get().getKey(),
+					acm.getPaperDimensions().get().getValue());
 		}
-		
-		if (acm.getPaperDimensions().isPresent() || (perspectiveManager.isCameraParamsKnown() && perspectiveManager.getCameraDistance() > 0))
+
+		if (acm.getPaperDimensions().isPresent() || 
+      (perspectiveManager.isCameraParamsKnown() && perspectiveManager.getCameraDistance() > 0))
 		{
-			
-			perspectiveManager.calculateUnknown();
-	
-			logger.debug("Distance {}", perspectiveManager.getCameraDistance());
-			
-			perspectiveManager.setShooterDistance(perspectiveManager.getCameraDistance());
-	
-			
-			Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216, perspectiveManager.getCameraDistance(), perspectiveManager.getCameraDistance());
-			
-			File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
-			TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
-					pac.getCanvasManager(), false);
-			target.setPosition(50, 50);
-			target.setDimensions(size.getKey(), size.getValue());
-	
-			pac.getCanvasManager().addTarget(target);
-			
-		}
+
+      perspectiveManager.calculateUnknown();
+
+      logger.debug("Distance {}", perspectiveManager.getCameraDistance());
+
+      perspectiveManager.setShooterDistance(perspectiveManager.getCameraDistance());
+
+      Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216,
+          perspectiveManager.getCameraDistance(), perspectiveManager.getCameraDistance());
+
+      File targetFile = new File(
+          System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
+      TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
+          pac.getCanvasManager(), false);
+      target.setPosition(50, 50);
+      target.setDimensions(size.getKey(), size.getValue());
+
+      pac.getCanvasManager().addTarget(target);
+
+    }
 	}
 
 	public void setCropFeedToProjection(final boolean cropFeed) {
@@ -500,22 +480,20 @@ public class CameraManager {
 						logger.warn("Camera dimension differs from requested dimensions, requested {} {} actual {} {}",
 								getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
 								(int) openDimension.getHeight());
-						
+
 						setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
-						shotDetectionManager.reInitializeDimensions();
-					}
-					else
-					{
+						shotDetector.setFrameSize((int) openDimension.getWidth(), (int) openDimension.getHeight());
+					} else {
 						setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 					}
 
 				}
-				
+
 				// For testing purposes, does nothing if done inappropriately.
-				if (webcam.get().getName().contains("C270"))
-				{
+				if (webcam.get().getName().contains("C270")) {
 					if (getFeedWidth() == 1280 && getFeedHeight() == 720)
-						perspectiveManager.setCameraParams(PerspectiveManager.C270_FOCAL_LENGTH, PerspectiveManager.C270_SENSOR_WIDTH, PerspectiveManager.C270_SENSOR_HEIGHT);
+              perspectiveManager.setCameraParams(PerspectiveManager.C270_FOCAL_LENGTH,
+                PerspectiveManager.C270_SENSOR_WIDTH, PerspectiveManager.C270_SENSOR_HEIGHT);
 				}
 
 				streamCameraFrames();
@@ -525,7 +503,7 @@ public class CameraManager {
 
 	private void streamCameraFrames() {
 		while (isStreaming.get()) {
-			
+
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
 			BufferedImage currentFrame = webcam.get().getImage();
@@ -584,7 +562,6 @@ public class CameraManager {
 
 				videoWriterStream.encodeVideo(0, frame);
 			}
-			
 
 			final BufferedImage frame = currentFrame;
 			if (cropFeedToProjection && projectionBounds.isPresent()) {
@@ -604,9 +581,7 @@ public class CameraManager {
 		}
 
 		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
-		final Mat matFrameHSV = new Mat();
 		Mat submatFrameBGR = null;
-		Mat submatFrameHSV = null;
 
 		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
 			if (acm != null) {
@@ -617,7 +592,6 @@ public class CameraManager {
 			submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
 					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
 					(int) projectionBounds.get().getMaxX());
-			
 
 			if (recordingCalibratedArea) {
 				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
@@ -633,35 +607,20 @@ public class CameraManager {
 				videoWriterCalibratedArea.encodeVideo(0, frame);
 			}
 
-			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
-
-			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrameBGR);
-
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrameBGR));
 			}
+		}
 
+		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && getProjectionBounds().isPresent()) {
+
+			if (submatFrameBGR == null) submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
+					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
+					(int) projectionBounds.get().getMaxX());
+
+			shotDetector.processFrame(submatFrameBGR, isDetecting.get());
 		} else {
-			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
-		}
-				
-		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection())
-				&& getProjectionBounds().isPresent()) {
-			
-			submatFrameHSV = matFrameHSV.submat((int) projectionBounds.get().getMinY(),
-				(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
-				(int) projectionBounds.get().getMaxX());
-			
-			if (submatFrameBGR == null)
-				submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
-						(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
-						(int) projectionBounds.get().getMaxX());
-			
-			shotDetectionManager.processFrame(submatFrameHSV, submatFrameBGR, isDetecting.get());
-		}
-		else
-		{
-			shotDetectionManager.processFrame(matFrameHSV, matFrameBGR, isDetecting.get());
+			shotDetector.processFrame(matFrameBGR, isDetecting.get());
 		}
 
 		// matFrameBGR is showing the colored pixels for brightness and motion,
@@ -774,13 +733,6 @@ public class CameraManager {
 			cameraAutoCalibrated = true;
 			cameraCalibrationListener.calibrate(bounds, false);
 
-			if (Configuration.USE_ARENA_MASK) {
-				cameraCalibrationListener.setArenaMaskManager(arenaMaskManager);
-
-				shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-				arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
-			}
-
 			if (recordCalibratedArea && !recordingCalibratedArea)
 				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int) bounds.getWidth(),
 						(int) bounds.getHeight());
@@ -788,13 +740,10 @@ public class CameraManager {
 	}
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
-		
-		if (acm == null)
-			acm = new AutoCalibrationManager(this, calculateFrameDelay);
+
+		if (acm == null) acm = new AutoCalibrationManager(this, calculateFrameDelay);
 		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
-		// Turns off using mask
-		shotDetectionManager.setArenaMaskManager(null);
 
 		fireAutoCalibration();
 	}
