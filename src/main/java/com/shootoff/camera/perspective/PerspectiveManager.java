@@ -250,10 +250,13 @@ public class PerspectiveManager {
 		}
 		else if (cameraDistance == -1)
 		{
-			cameraDistance = (int) (((double)projectionHeight * focalLength * (double)cameraHeight) / ((double)patternHeight * sensorHeight));
+			final int cameraDistanceH = (int) (((double)projectionHeight * focalLength * (double)cameraHeight) / ((double)patternHeight * sensorHeight));
+			final int cameraDistanceW = (int) (((double)projectionWidth * focalLength * (double)cameraWidth) / ((double)patternWidth * sensorWidth));
 
-			logger.debug("({} * {} * {}) / ({} *  {})", projectionHeight, focalLength, cameraHeight, patternHeight, sensorHeight);
+			logger.trace("{} = ({} * {} * {}) / ({} *  {})", cameraDistanceH, projectionHeight, focalLength, cameraHeight, patternHeight, sensorHeight);
+			logger.trace("{} = ({} * {} * {}) / ({} *  {})", cameraDistanceW, projectionWidth, focalLength, cameraWidth, patternWidth, sensorWidth);
 			
+			cameraDistance = (cameraDistanceH + cameraDistanceW)/2;
 		}
 		
 		else

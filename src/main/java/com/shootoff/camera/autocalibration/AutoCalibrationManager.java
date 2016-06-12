@@ -339,8 +339,9 @@ public class AutoCalibrationManager {
 
 		// OpenCV gives us the checkerboard corners, not the outside dimension
 		// So this estimates where the outside corner would be, plus a fudge factor for the edge of the paper
-		Integer width = (int) ((double)box.getWidth() * ((double)(PATTERN_WIDTH+1)/(double)(PATTERN_WIDTH-1)) * 1.07);
-		Integer height = (int) ((double)box.getHeight() * ((double)(PATTERN_HEIGHT+1)/(double)(PATTERN_HEIGHT-1)) * 1.07);
+		// Printer margins are usually a quarter inch on each edge
+		Integer width = (int) ((double)box.getWidth() * ((double)(PATTERN_WIDTH+1)/(double)(PATTERN_WIDTH-1)) * 1.048);
+		Integer height = (int) ((double)box.getHeight() * ((double)(PATTERN_HEIGHT+1)/(double)(PATTERN_HEIGHT-1)) * 1.063);
 
 		
 		final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
@@ -387,8 +388,8 @@ public class AutoCalibrationManager {
 		final double rightHeight = Math
 				.sqrt(Math.pow(bottomRight.x - topRight.x, 2) + Math.pow(bottomRight.y - topRight.y, 2));
 		
-		final int width = (int) ((topWidth+bottomWidth)/2);
-		final int height = (int) ((leftHeight+rightHeight)/2);
+		final double width = ((topWidth+bottomWidth)/2);
+		final double height = ((leftHeight+rightHeight)/2);
 		
 		return new BoundingBox(topLeft.x, topLeft.y, width, height);
 	}

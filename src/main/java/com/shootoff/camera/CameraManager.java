@@ -293,10 +293,10 @@ public class CameraManager {
 	public void pmTest(ProjectorArenaController pac)
 	{
 		// If no pattern to work with, and no camera parameters to work with, we can't calculate both
-		// So we guess (for now) that the camera distance is 3580mm
+		// So we guess (for now) that the camera distance is 3565mm
 		if (!acm.getPaperDimensions().isPresent() || !perspectiveManager.isCameraParamsKnown())
 		{
-				perspectiveManager.setCameraDistance(3580);
+				perspectiveManager.setCameraDistance(3565);
 		}
 		else if (perspectiveManager.isCameraParamsKnown())
 		{
@@ -308,26 +308,27 @@ public class CameraManager {
 			perspectiveManager.setProjectionSizeFromLetterPaperPixels(acm.getPaperDimensions().get().getKey(), acm.getPaperDimensions().get().getValue());
 		}
 		
-
-		
-		perspectiveManager.calculateUnknown();
-
-		logger.debug("Distance {}", perspectiveManager.getCameraDistance());
-		
-		perspectiveManager.setShooterDistance(perspectiveManager.getCameraDistance());
-
-		
-		Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216, perspectiveManager.getCameraDistance(), perspectiveManager.getCameraDistance());
-		
-		File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
-		TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
-				pac.getCanvasManager(), false);
-		target.setPosition(50, 50);
-		target.setDimensions(size.getKey(), size.getValue());
-
-		pac.getCanvasManager().addTarget(target);
-		
-		
+		if (acm.getPaperDimensions().isPresent() || (perspectiveManager.isCameraParamsKnown() && perspectiveManager.getCameraDistance() > 0))
+		{
+			
+			perspectiveManager.calculateUnknown();
+	
+			logger.debug("Distance {}", perspectiveManager.getCameraDistance());
+			
+			perspectiveManager.setShooterDistance(perspectiveManager.getCameraDistance());
+	
+			
+			Pair<Double, Double> size = perspectiveManager.calculateObjectSize(279, 216, perspectiveManager.getCameraDistance(), perspectiveManager.getCameraDistance());
+			
+			File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/" + "SimpleBullseye_score.target");
+			TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
+					pac.getCanvasManager(), false);
+			target.setPosition(50, 50);
+			target.setDimensions(size.getKey(), size.getValue());
+	
+			pac.getCanvasManager().addTarget(target);
+			
+		}
 	}
 
 	public void setCropFeedToProjection(final boolean cropFeed) {
@@ -511,9 +512,10 @@ public class CameraManager {
 				}
 				
 				// For testing purposes, does nothing if done inappropriately.
-				if (webcam.get().getWebcam().getName().contains("C270"))
+				if (webcam.get().getName().contains("C270"))
 				{
-					perspectiveManager.setCameraParams(PerspectiveManager.C270_FOCAL_LENGTH, PerspectiveManager.C270_SENSOR_WIDTH, PerspectiveManager.C270_SENSOR_HEIGHT);
+					if (getFeedWidth() == 1280 && getFeedHeight() == 720)
+						perspectiveManager.setCameraParams(PerspectiveManager.C270_FOCAL_LENGTH, PerspectiveManager.C270_SENSOR_WIDTH, PerspectiveManager.C270_SENSOR_HEIGHT);
 				}
 
 				streamCameraFrames();

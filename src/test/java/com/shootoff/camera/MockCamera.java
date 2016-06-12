@@ -14,4 +14,10 @@ public class MockCamera extends Camera {
 	public boolean isImageNew() {
 		return false;
 	}
+	
+	@Override
+	public String getName()
+	{
+		return "MockCamera";
+	}
 }

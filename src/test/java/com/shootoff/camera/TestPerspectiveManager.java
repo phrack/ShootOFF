@@ -121,13 +121,13 @@ public class TestPerspectiveManager {
 	
 	
 	@Test
-	public void testFour() throws ConfigurationException {
+	public void testPaperPixelsCalcParams() throws ConfigurationException {
 		PerspectiveManager pm = new PerspectiveManager();
 		
 		pm.setCameraFeedSize(640, 480);
 		pm.setPatternSize(422, 316);
-		pm.setCameraDistance(3406);
-		pm.setShooterDistance(3406);
+		pm.setCameraDistance(3498);
+		pm.setShooterDistance(3498);
 		pm.setProjectorResolution(1024, 768);
 		
 		pm.setProjectionSizeFromLetterPaperPixels(67, 53);
@@ -135,8 +135,8 @@ public class TestPerspectiveManager {
 		pm.calculateUnknown();
 		
 		assertEquals(1,pm.getFocalLength(), 1);
-		assertEquals(.781, pm.getSensorWidth(), .1);
-		assertEquals(.579, pm.getSensorHeight(), .1);
+		assertEquals(.761, pm.getSensorWidth(), .01);
+		assertEquals(.559, pm.getSensorHeight(), .01);
 		
 		Pair<Double, Double> pair = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
 		
@@ -173,8 +173,14 @@ public class TestPerspectiveManager {
 		
 		Pair<Double, Double> pair = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
 		
-		assertEquals(170.25, pair.getKey(), 1);
+		assertEquals(167.26, pair.getKey(), 1);
 		assertEquals(124.3, pair.getValue(), 1);
+		
+		pm.setCameraDistance(-1);
+		
+		pm.calculateUnknown();
+		
+		assertEquals(3498, pm.getCameraDistance());
 	}
 
 }
