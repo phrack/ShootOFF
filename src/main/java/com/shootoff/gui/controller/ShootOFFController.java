@@ -80,6 +80,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
@@ -1051,17 +1052,27 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@FXML
 	public void saveFeedClicked(ActionEvent event) {
-		FileChooser fileChooser = new FileChooser();
+		final AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+		final RenderedImage renderedImage = SwingFXUtils.fromFXImage(tabAnchor.snapshot(new SnapshotParameters(), null),
+				null);
+
+		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save Feed Image");
 		fileChooser.getExtensionFilters().addAll(
 				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
 				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
-		File feedFile = fileChooser.showSaveDialog(shootOFFStage);
+		final File feedFile = fileChooser.showSaveDialog(shootOFFStage);
 
 		if (feedFile != null) {
 			String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
-			File imageFile = new File(feedFile.getPath() + "." + extension);
-			RenderedImage renderedImage = SwingFXUtils.fromFXImage(shootOFFStage.getScene().snapshot(null), null);
+			File imageFile;
+
+			if (feedFile.getPath().endsWith(extension)) {
+				imageFile = feedFile;
+			} else {
+				imageFile = new File(feedFile.getPath() + "." + extension);
+			}
+
 			try {
 				ImageIO.write(renderedImage, extension, imageFile);
 			} catch (IOException e) {
