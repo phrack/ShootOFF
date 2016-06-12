@@ -38,10 +38,11 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public final class ShotDetectionManager {
-	private static final Logger logger = LoggerFactory.getLogger(ShotDetectionManager.class);
+public final class JavaShotDetector implements ShotDetector {
+	private static final Logger logger = LoggerFactory.getLogger(JavaShotDetector.class);
 
 	public static final int SECTOR_COLUMNS = 3;
 	public static final int SECTOR_ROWS = 3;
@@ -97,25 +98,21 @@ public final class ShotDetectionManager {
 	// red without having complicated math every pixel
 	private boolean shouldShowBrightnessWarningBool = false;
 
-	final PixelClusterManager pixelClusterManager;	
+	final PixelClusterManager pixelClusterManager;
 
-
-	public ShotDetectionManager(final CameraManager cameraManager, final Configuration config,
+	public JavaShotDetector(final CameraManager cameraManager, final Configuration config,
 			final CameraView canvasManager) {
 		this.cameraView = canvasManager;
 		this.cameraManager = cameraManager;
 		this.config = config;
-		
-		initializeDimensions(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
-		
+
+		setFrameSize(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
+
 		this.pixelClusterManager = new PixelClusterManager(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
 	}
 
-	public void reInitializeDimensions() {
-		initializeDimensions(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
-	}
-
-	private void initializeDimensions(final int width, final int height) {
+	@Override
+	public void setFrameSize(final int width, final int height) {
 		lumsMovingAverage = new int[width][height];
 		colorDistanceFromRed = new int[width][height];
 
@@ -206,19 +203,27 @@ public final class ShotDetectionManager {
 	 * BGR copy is what ShootOFF shows
 	 * 
 	 * @param frameHSV
-	 *            a hue, saturation, value copy of the current frame for shot
-	 *            detection
+	 * 
 	 * @param frameBGR
 	 *            a blue, green, red copy of the current frame for drawing
 	 *            bright/high motion pixels
 	 * @param detectShots
 	 *            whether or not to detect a shot
 	 */
-	public void processFrame(final Mat frameHSV, final Mat frameBGR, final boolean detectShots) {
+	@Override
+	public void processFrame(final Mat frameBGR, final boolean detectShots) {
 		updateMovingAveragePeriod();
 
 		// Must reset before every updateFilter loop
 		brightPixels.clear();
+
+		// Create a hue, saturation, value copy of the current frame used to
+		// detect
+		// the shots. The BGR version is just used by this implementation to
+		// show
+		// the user where bright/high motion pixels are
+		final Mat frameHSV = new Mat();
+		Imgproc.cvtColor(frameBGR, frameHSV, Imgproc.COLOR_BGR2HSV);
 
 		final Set<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(frameHSV,
 				(detectShots && filtersInitialized));
@@ -247,7 +252,8 @@ public final class ShotDetectionManager {
 			}
 
 			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
-				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels, getMinimumShotDimension());
+				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels,
+						getMinimumShotDimension());
 
 				if (logger.isTraceEnabled()) {
 					logger.trace("thresholdPixels {}", thresholdPixelsSize);
@@ -424,7 +430,8 @@ public final class ShotDetectionManager {
 			final Mat debugFrame = new Mat();
 			Imgproc.cvtColor(workingFrame, debugFrame, Imgproc.COLOR_HSV2BGR);
 
-			String filename = String.format("shot-%d-%d-%d_orig.png", cameraManager.getFrameCount(), (int) pc.centerPixelX, (int) pc.centerPixelY);
+			String filename = String.format("shot-%d-%d-%d_orig.png", cameraManager.getFrameCount(),
+					(int) pc.centerPixelX, (int) pc.centerPixelY);
 			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, debugFrame);
@@ -439,7 +446,8 @@ public final class ShotDetectionManager {
 				}
 			}
 
-			File outputfile = new File(String.format("shot-%d-%d-%d.png", cameraManager.getFrameCount(), (int) pc.centerPixelX, (int) pc.centerPixelY));
+			File outputfile = new File(String.format("shot-%d-%d-%d.png", cameraManager.getFrameCount(),
+					(int) pc.centerPixelX, (int) pc.centerPixelY));
 			filename = outputfile.toString();
 			Highgui.imwrite(filename, debugFrame);
 		}

@@ -98,7 +98,7 @@ public class MockCameraManager extends CameraManager {
 
 			if (getFrameCount() == 0) {
 				setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
-				shotDetectionManager.reInitializeDimensions();
+				shotDetector.setFrameSize(currentFrame.getWidth(), currentFrame.getHeight());
 			}
 
 			if (lastVideoTimestamp > -1 && (getFrameCount() % 5) == 0) {

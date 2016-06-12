@@ -11,7 +11,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
-import com.shootoff.camera.shotdetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
@@ -28,10 +28,10 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
 		mockManager = new MockCanvasManager(config, true);
-		sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
+		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
-		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
+		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = true;
 			}
 		}

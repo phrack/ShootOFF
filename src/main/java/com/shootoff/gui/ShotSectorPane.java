@@ -19,7 +19,7 @@
 package com.shootoff.gui;
 
 import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.shotdetection.ShotDetectionManager;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -32,10 +32,10 @@ public class ShotSectorPane extends BorderPane {
 
 	public ShotSectorPane(Pane parent, CameraManager cameraManager) {
 		GridPane checkboxGrid = new GridPane();
-		sectors = new CheckBox[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
+		sectors = new CheckBox[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
-		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
+		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
 				CheckBox sector = new CheckBox();
 				sectors[y][x] = sector;
 				sector.setSelected(cameraManager.isSectorOn(x, y));
@@ -61,10 +61,10 @@ public class ShotSectorPane extends BorderPane {
 	}
 
 	private boolean[][] getSectorStatuses() {
-		boolean[][] sectorStatuses = new boolean[ShotDetectionManager.SECTOR_ROWS][ShotDetectionManager.SECTOR_COLUMNS];
+		boolean[][] sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
-		for (int x = 0; x < ShotDetectionManager.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < ShotDetectionManager.SECTOR_ROWS; y++) {
+		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
 				sectorStatuses[y][x] = sectors[y][x].isSelected();
 			}
 		}
