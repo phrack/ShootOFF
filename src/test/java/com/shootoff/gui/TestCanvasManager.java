@@ -15,7 +15,7 @@ import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
@@ -43,7 +43,7 @@ public class TestCanvasManager {
 
 		config = new Configuration(new String[0]);
 		CamerasSupervisor cs = new CamerasSupervisor(config);
-		cm = new CanvasManager(new Group(), config, new MockShootOFFController(), "test", shotEntries);
+		cm = new CanvasManager(new Group(), config, new ShootOFFController(), "test", shotEntries);
 		CameraManager cameraManager = cs.addCameraManager(new MockCamera(), null, cm);
 		cs.setDetectingAll(false);
 		cm.setCameraManager(cameraManager);

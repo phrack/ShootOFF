@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javafx.geometry.Bounds;
 
-import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.MockCanvasManager;
@@ -126,13 +125,5 @@ public class MockCameraManager extends CameraManager {
 
 	public boolean isVideoProcessed() {
 		return processedVideo;
-	}
-
-	public void setShotDetectionArenaMaskManager() {
-		shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-	}
-
-	protected ArenaMaskManager getArenaMaskManager() {
-		return arenaMaskManager;
 	}
 }

@@ -37,7 +37,6 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.arenamask.ArenaMaskManager;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.camera.shotdetection.ShotDetectionManager;
@@ -131,7 +130,6 @@ public class CameraManager {
 	protected boolean cameraAutoCalibrated = false;
 
 	protected final DeduplicationProcessor deduplicationProcessor = new DeduplicationProcessor(this);
-	protected final ArenaMaskManager arenaMaskManager;
 
 	private CameraCalibrationListener cameraCalibrationListener;
 	
@@ -150,12 +148,6 @@ public class CameraManager {
 	}
 
 	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
-		if (Configuration.USE_ARENA_MASK) {
-			arenaMaskManager = new ArenaMaskManager();
-		} else {
-			arenaMaskManager = null;
-		}
-
 		if (webcam != null)
 			this.webcam = Optional.of(webcam);
 		else
@@ -172,12 +164,6 @@ public class CameraManager {
 	}
 
 	protected CameraManager(CameraView view, Configuration config) {
-		if (Configuration.USE_ARENA_MASK) {
-			arenaMaskManager = new ArenaMaskManager();
-		} else {
-			arenaMaskManager = null;
-		}
-
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;
@@ -242,8 +228,6 @@ public class CameraManager {
 	}
 
 	public void close() {
-		if (arenaMaskManager != null) arenaMaskManager.isStreaming.set(false);
-
 		getCameraView().close();
 		setDetecting(false);
 		setStreaming(false);
@@ -633,8 +617,6 @@ public class CameraManager {
 
 			Imgproc.cvtColor(matFrameBGR, matFrameHSV, Imgproc.COLOR_BGR2HSV);
 
-			if (Configuration.USE_ARENA_MASK) arenaMaskManager.updateAvgLums(submatFrameBGR);
-
 			if (debuggerListener.isPresent()) {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrameBGR));
 			}
@@ -772,13 +754,6 @@ public class CameraManager {
 			cameraAutoCalibrated = true;
 			cameraCalibrationListener.calibrate(bounds, false);
 
-			if (Configuration.USE_ARENA_MASK) {
-				cameraCalibrationListener.setArenaMaskManager(arenaMaskManager);
-
-				shotDetectionManager.setArenaMaskManager(arenaMaskManager);
-				arenaMaskManager.start((int) bounds.getWidth(), (int) bounds.getHeight());
-			}
-
 			if (recordCalibratedArea && !recordingCalibratedArea)
 				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int) bounds.getWidth(),
 						(int) bounds.getHeight());
@@ -791,8 +766,6 @@ public class CameraManager {
 			acm = new AutoCalibrationManager(this, calculateFrameDelay);
 		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
-		// Turns off using mask
-		shotDetectionManager.setArenaMaskManager(null);
 
 		fireAutoCalibration();
 	}

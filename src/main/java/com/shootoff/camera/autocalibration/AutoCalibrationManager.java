@@ -37,7 +37,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -318,13 +317,6 @@ public class AutoCalibrationManager {
 	 *  try to identify the outline of the projection area 
 	 *  We are only concerned with size, not alignment or angle */
 	public Optional<Pair<Integer,Integer>> findPaperPattern(Mat mat) {
-
-
-		// For debugging
-		Mat traceMat = null;
-		if (logger.isTraceEnabled()) {
-			traceMat = mat.clone();
-		}
 
 		initializeSize(mat.cols(), mat.rows());
 

@@ -33,7 +33,7 @@ import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
-import com.shootoff.gui.controller.MockShootOFFController;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
@@ -168,7 +168,7 @@ public class TestTargetIO {
 		pac.init(config, new MockCanvasManager(config));
 
 		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
-		pteb.init(config, cs, new MockShootOFFController(), pac);
+		pteb.init(config, cs, new ShootOFFController(), pac);
 
 		Optional<Target> target = pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
 
