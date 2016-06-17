@@ -34,6 +34,7 @@ import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
@@ -50,6 +51,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	private int shootCount = 4;
 	private int dontShootCount = 1;
 	private static int maxVelocity = 10;
+	private boolean removeShootTargets = false;
 
 	private static final List<BouncingTarget> shootTargets = new ArrayList<BouncingTarget>();
 	private static final List<BouncingTarget> dontShootTargets = new ArrayList<BouncingTarget>();
@@ -144,16 +146,21 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		maxVelocityComboBox.getSelectionModel().select(DEFAULT_MAX_VELOCITY - 1);
 		bouncingTargetsPane.add(new Label("Max Target Speed:"), 0, 2);
 		bouncingTargetsPane.add(maxVelocityComboBox, 1, 2);
+		
+		final CheckBox removeTargets = new CheckBox();
+		bouncingTargetsPane.add(new Label("Remove Hit Shoot Targets:"), 0, 3);
+		bouncingTargetsPane.add(removeTargets, 1, 3);
 
 		final Button okButton = new Button("OK");
 		okButton.setDefaultButton(true);
-		bouncingTargetsPane.add(okButton, 1, 3);
+		bouncingTargetsPane.add(okButton, 1, 4);
 
 		okButton.setOnAction((e) -> {
 			shootCount = Integer.parseInt(shootTargetsComboBox.getSelectionModel().getSelectedItem());
 			dontShootCount = Integer.parseInt(dontShootTargetsComboBox.getSelectionModel().getSelectedItem());
 			BouncingTargets.maxVelocity = Integer.parseInt(maxVelocityComboBox.getSelectionModel().getSelectedItem());
-
+			removeShootTargets = removeTargets.isSelected();
+			
 			bouncingTargetsStage.close();
 		});
 
@@ -304,23 +311,39 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 				case "shoot": {
 					score++;
 					super.showTextOnFeed(String.format("Score: %d", score));
+					
+					if (removeShootTargets) {
+						super.removeTarget(hit.get().getTarget());
+						
+						if (score == shootTargets.size()) {
+							super.playSound("sounds/beep.wav");
+							TextToSpeech.say(String.format("Your score was %d", score));
+							stopExercise();
+							startExercise();
+						}
+					}
 				}
 					break;
 
 				case "dont_shoot": {
 					super.playSound("sounds/beep.wav");
 					TextToSpeech.say(String.format("Your score was %d", score));
-					score = 0;
-					super.showTextOnFeed("Score: 0");
+					
+					if (removeShootTargets) {
+						stopExercise();
+						startExercise();
+					} else {
+						score = 0;
+						super.showTextOnFeed("Score: 0");
+					}
 				}
 					break;
 				}
 			}
 		}
 	}
-
-	@Override
-	public void reset(List<Target> targets) {
+	
+	private void stopExercise() {
 		targetAnimation.stop();
 
 		for (BouncingTarget b : shootTargets)
@@ -330,14 +353,19 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			super.removeTarget(b.getTarget());
 		dontShootTargets.clear();
 
+		score = 0;
+		super.showTextOnFeed("Score: 0");
+	}
+
+	@Override
+	public void reset(List<Target> targets) {
+		stopExercise();
+		
 		if (!testing) collectSettings();
 
 		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
 		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
 
 		targetAnimation.play();
-
-		score = 0;
-		super.showTextOnFeed("Score: 0");
 	}
 }
