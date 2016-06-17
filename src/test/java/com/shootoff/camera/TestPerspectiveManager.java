@@ -10,6 +10,8 @@ import javax.imageio.ImageIO;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
@@ -146,7 +148,14 @@ public class TestPerspectiveManager {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/perspective/c270_pattern_new.png"));
 
-		Optional<Pair<Integer,Integer>> paperDimensions = acm.findPaperPattern(Camera.bufferedImageToMat(testFrame));
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+		
+		Optional<Pair<Integer,Integer>> paperDimensions = acm.findPaperPattern(boardCorners.get(), Camera.bufferedImageToMat(testFrame), null);
 
 		assertTrue(paperDimensions.isPresent());
 		

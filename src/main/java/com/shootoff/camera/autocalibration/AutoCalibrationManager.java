@@ -152,10 +152,16 @@ public class AutoCalibrationManager {
 				mat = Camera.bufferedImageToMat(frame);
 			}
 			
-			if (!paperDimensions.isPresent())
-				paperDimensions = findPaperPattern(mat);
+			// Step 1: Find the chessboard corners
+			final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
+
+			if (!boardCorners.isPresent())
+				return;
 			
-			Optional<Bounds> bounds = calibrateFrame(mat);
+			if (!paperDimensions.isPresent())
+				paperDimensions = findPaperPattern(boardCorners.get(), mat, null);
+			
+			Optional<Bounds> bounds = calibrateFrame(boardCorners.get(), mat);
 			
 
 			if (bounds.isPresent()) {
@@ -229,7 +235,7 @@ public class AutoCalibrationManager {
 		return mat.get(secondSquareCenterY, secondSquareCenterX);
 	}
 
-	public Optional<Bounds> calibrateFrame(Mat mat) {
+	public Optional<Bounds> calibrateFrame(MatOfPoint2f boardCorners, Mat mat) {
 
 		// For debugging
 		Mat traceMat = null;
@@ -239,13 +245,9 @@ public class AutoCalibrationManager {
 
 		initializeSize(mat.cols(), mat.rows());
 
-		// Step 1: Find the chessboard corners
-		final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
-
-		if (!boardCorners.isPresent()) return Optional.empty();
 
 		// Step 2: Estimate the pattern corners
-		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardCorners.get());
+		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardCorners);
 
 		// Step 3: Use Hough Lines to find the actual corners
 		final Optional<MatOfPoint2f> idealCorners = findIdealCorners(mat, estimatedPatternRect);
@@ -289,7 +291,7 @@ public class AutoCalibrationManager {
 			Highgui.imwrite(filename, undistortedCropped);
 		}
 
-		Mat warpedBoardCorners = warpCorners(boardCorners.get());
+		Mat warpedBoardCorners = warpCorners(boardCorners);
 
 
 		isCalibrated = true;
@@ -315,18 +317,26 @@ public class AutoCalibrationManager {
 	 * 
 	 *  Works similar to arena calibration but does not
 	 *  try to identify the outline of the projection area 
-	 *  We are only concerned with size, not alignment or angle */
-	public Optional<Pair<Integer,Integer>> findPaperPattern(Mat mat) {
+	 *  We are only concerned with size, not alignment or angle
+	 *  
+	 *  This function blanks out the pattern that it discovers
+	 *  in the Mat it is provided.  This is so that the pattern
+	 *  is not discovered by future pattern discovery, e.g.
+	 *  auto-calibration
+	 *  
+	 *  workingMat should be null for all external callers
+	 *  unless there is some need to work off a different Mat
+	 *  than is having patterns blanked out by this function */
+	public Optional<Pair<Integer,Integer>> findPaperPattern(MatOfPoint2f boardCorners, Mat mat, Mat workingMat) {
 
-		initializeSize(mat.cols(), mat.rows());
-
-		// Step 1: Find the chessboard corners
-		final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
-
-		if (!boardCorners.isPresent()) return Optional.empty();
+		if (workingMat == null)
+			workingMat = mat.clone();
+		
+		
+		initializeSize(workingMat.cols(), workingMat.rows());
 
 		// Step 2: Estimate the pattern corners
-		final BoundingBox box = getPaperPatternDimensions(mat, boardCorners.get());
+		final BoundingBox box = getPaperPatternDimensions(workingMat, boardCorners);
 		
 
 		// OpenCV gives us the checkerboard corners, not the outside dimension
@@ -337,14 +347,17 @@ public class AutoCalibrationManager {
 
 		
 		final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
-		if (width > PAPER_PATTERN_SIZE_THRESHOLD * mat.cols() || height > PAPER_PATTERN_SIZE_THRESHOLD * mat.rows())
+		if (width > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.cols() || height > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.rows())
 		{
-			logger.trace("Pattern too big to be paper, must be projection, setting blank {}x{}", width, height);
-			Mat tempMat = mat.clone();
-			tempMat.submat((int)box.getMinY(), (int)box.getMinY()+(int)box.getHeight(), (int)box.getMinX(), (int)box.getMinX()+(int)box.getWidth()).setTo(new Scalar(0, 0, 0));
-
+			logger.trace("Pattern too big to be paper, must be projection, setting blank {}x{}", box.getWidth(), box.getHeight());
+			workingMat.submat((int)box.getMinY(), (int)box.getMaxY(), (int)box.getMinX(),  (int)box.getMaxX()).setTo(new Scalar(0, 0, 0));
 			
-			return findPaperPattern(tempMat);
+			final Optional<MatOfPoint2f> boardCornersNew = findChessboard(workingMat);
+
+			if (!boardCornersNew.isPresent())
+				return Optional.empty();
+			
+			return findPaperPattern(boardCornersNew.get(), mat, workingMat);
 			
 			
 		}
@@ -353,8 +366,30 @@ public class AutoCalibrationManager {
 			
 		logger.trace("paper width {} height {}", width, height);
 		
-		//TODO: Make this happen in the original Mat even if we're here recursively.
-		mat.submat((int)box.getMinY(), (int)box.getMinY()+(int)box.getHeight(), (int)box.getMinX(),  (int)box.getMinX()+(int)box.getWidth()).setTo(new Scalar(0, 0, 0));
+		if (logger.isTraceEnabled()) {
+			int widthOffset = (width - (int)box.getWidth())/2;
+			int heightOffset = (height - (int)box.getHeight())/2;
+			
+			logger.trace("offset width {} height {}", widthOffset, heightOffset);
+			
+			Mat fullpattern = workingMat.submat((int)box.getMinY()-heightOffset, (int)box.getMinY()-heightOffset+height, (int)box.getMinX()-widthOffset, (int)box.getMinX()-widthOffset+width);
+			
+			String filename = String.format("full-box.png");
+			File file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, fullpattern);
+			
+
+			Mat cropped = workingMat.submat((int) box.getMinY(), (int) box.getMaxY(),
+					(int) box.getMinX(), (int) box.getMaxX());
+
+			filename = String.format("pattern-box.png");
+			file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, cropped);
+		}
+		
+		mat.submat((int)box.getMinY(), (int)box.getMaxY(), (int)box.getMinX(),  (int)box.getMaxX()).setTo(new Scalar(0, 0, 0));
 		
 		return Optional.of(new Pair<Integer,Integer>(width, height));
 	}
@@ -941,7 +976,7 @@ public class AutoCalibrationManager {
 		return mat;
 	}
 
-	private Optional<MatOfPoint2f> findChessboard(Mat mat) {
+	public Optional<MatOfPoint2f> findChessboard(Mat mat) {
 		Mat grayImage = new Mat();
 
 		Imgproc.cvtColor(mat, grayImage, Imgproc.COLOR_BGR2GRAY);

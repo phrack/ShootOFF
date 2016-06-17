@@ -15,6 +15,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
@@ -83,7 +86,16 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -115,7 +127,17 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
+
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -148,7 +170,15 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
 
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -159,7 +189,15 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
 
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -170,7 +208,15 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
 
 		assertEquals(false, calibrationBounds.isPresent());
 
@@ -181,7 +227,15 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
@@ -214,7 +268,15 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 
-		Optional<Bounds> calibrationBounds = acm.calibrateFrame(Camera.bufferedImageToMat(testFrame));
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), Camera.bufferedImageToMat(testFrame));
 
 		assertTrue(calibrationBounds.isPresent());
 
