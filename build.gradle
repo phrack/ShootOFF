@@ -66,7 +66,7 @@ repositories {
         url  "http://dl.bintray.com/marytts/marytts/" 
     }
     maven {
-        url  "http://xuggle.googlecode.com/svn/trunk/repo/share/java/" 
+        url "https://dl.bintray.com/phrack/maven/"
     }
 }
 
@@ -103,7 +103,7 @@ dependencies {
     compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.1.+'
 
     // xuggle for recording and playing back video
-    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.+'
+    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
 
     // JSON
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1+'
