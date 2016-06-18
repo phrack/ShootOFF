@@ -139,9 +139,9 @@ public class PerspectiveManager {
 	}
 
 	private boolean setCameraParameters(final String cameraName) {
-		for (String supportedName : cameraParameters.keySet()) {
-			if (cameraName.contains(supportedName)) {
-				CameraParameters cp = cameraParameters.get(supportedName);
+		for (Map.Entry<String, CameraParameters> entry : cameraParameters.entrySet()) {
+			if (cameraName.contains(entry.getKey())) {
+				CameraParameters cp = entry.getValue();
 				focalLength = cp.getFocalLength();
 				sensorWidth = cp.getSensorWidth();
 				sensorHeight = cp.getSensorHeight();
