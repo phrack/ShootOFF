@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -35,6 +36,7 @@ import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
+import javafx.geometry.Dimension2D;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
@@ -52,6 +54,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private ScheduledFuture<?> autoCalibrationFuture = null;
 
 	private Optional<TargetView> calibrationTarget = Optional.empty();
+	private Optional<Dimension2D> perspectivePaperDims = Optional.empty();
 
 	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
@@ -88,7 +91,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		isCalibrating.set(false);
 
 		if (calibrationTarget.isPresent())
-			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), true);
+			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), Optional.empty(), true);
 
 		calibratingCameraManager.disableAutoCalibration();
 
@@ -101,7 +104,38 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeManualCalibrationRequestMessage();
 		removeCalibrationTargetIfPresent();
 
-		calibrationListener.calibrated();
+		PerspectiveManager pm = null;
+		if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName())
+				&& calibratingCameraManager.getFeedWidth() == 1280 && calibratingCameraManager.getFeedHeight() == 720) {
+			if (perspectivePaperDims.isPresent()) {
+				pm = new PerspectiveManager(calibratingCameraManager.getName(),
+						calibratingCameraManager.getProjectionBounds().get(),
+						new Dimension2D(calibratingCameraManager.getFeedWidth(),
+								calibratingCameraManager.getFeedHeight()),
+						perspectivePaperDims.get());
+			} else {
+				pm = new PerspectiveManager(calibratingCameraManager.getName(),
+						calibratingCameraManager.getProjectionBounds().get());
+
+				pm.setCameraFeedSize(calibratingCameraManager.getFeedWidth(), calibratingCameraManager.getFeedHeight());
+			}
+
+			// Should come from config
+			pm.setShooterDistance(3406);
+
+			// If no pattern to work with, and no camera parameters to work
+			// with, we
+			// can't calculate both
+			// So we guess (for now) that the camera distance is 3580mm
+			if (!perspectivePaperDims.isPresent() && !pm.isCameraParamsKnown()) {
+				// TODO: Prompt the user to enter a distance
+				pm.setCameraDistance(3580);
+			} else if (pm.isCameraParamsKnown()) {
+				pm.setCameraDistance(-1);
+			}
+		}
+
+		calibrationListener.calibrated(Optional.ofNullable(pm));
 
 		calibratingCameraManager.setCalibrating(false);
 
@@ -116,14 +150,16 @@ public class CalibrationManager implements CameraCalibrationListener {
 	}
 
 	@Override
-	public void calibrate(Bounds bounds, boolean calibratedFromCanvas) {
+	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims,
+			boolean calibratedFromCanvas) {
 		removeCalibrationTargetIfPresent();
 
-		if (!calibratedFromCanvas)
-			bounds = calibratingCanvasManager.translateCameraToCanvas(bounds);
-		createCalibrationTarget(bounds.getMinX(), bounds.getMinY(), bounds.getWidth(), bounds.getHeight());
+		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);
+		createCalibrationTarget(arenaBounds.getMinX(), arenaBounds.getMinY(), arenaBounds.getWidth(),
+				arenaBounds.getHeight());
 
-		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), bounds);
+		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), arenaBounds);
+		this.perspectivePaperDims = perspectivePaperDims;
 
 		if (isCalibrating()) stopCalibration();
 	}
@@ -160,10 +196,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	}
 
 	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
-
-
 		Bounds translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
-
 
 		calibratingCanvasManager.setProjectorArena(arenaController, bounds);
 		configureArenaCamera(option);
@@ -249,7 +282,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		isShowingPattern.set(true);
 
 		showAutoCalibrationMessage();
-		
+
 		launchAutoCalibrationTimer();
 	}
 
@@ -263,8 +296,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 					enableManualCalibration();
 				}
 				// Keep waiting
-				else if (!isFullScreen)
-					launchAutoCalibrationTimer();
+				else if (!isFullScreen) launchAutoCalibrationTimer();
 			});
 		}, MAX_AUTO_CALIBRATION_TIME);
 	}
@@ -308,10 +340,10 @@ public class CalibrationManager implements CameraCalibrationListener {
 	}
 
 	private boolean isFullScreen = false;
-	
+
 	public void setFullScreenStatus(boolean fullScreen) {
 		this.isFullScreen = fullScreen;
-		
+
 		logger.trace("setFullScreenStatus - {} {}", fullScreen, isCalibrating);
 
 		if (!isCalibrating.get()) {
@@ -331,8 +363,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 			// Delay slightly to prevent #444 bug
 			TimerPool.schedule(() -> {
 				Platform.runLater(() -> {
-					if (isCalibrating.get())
-						enableAutoCalibration();
+					if (isCalibrating.get()) enableAutoCalibration();
 				});
 			}, 100);
 		}

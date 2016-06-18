@@ -18,6 +18,7 @@
 
 package com.shootoff.gui.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
@@ -36,11 +38,13 @@ import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetView;
 import com.shootoff.targets.Target;
+import com.shootoff.targets.io.TargetIO;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
@@ -72,11 +76,41 @@ public class ProjectorArenaController implements CalibrationListener {
 	private Screen originalArenaHomeScreen;
 	private Optional<Screen> detectedProjectorScreen = Optional.empty();
 	private Point2D arenaScreenOrigin = new Point2D(0, 0);
-
-
 	private Screen arenaHome;
-	
+
 	private CalibrationManager calibrationManager;
+	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
+
+	// This is temporary as we test perspective code
+	private void pmTest(ProjectorArenaController pac) {
+		if (perspectiveManager.isPresent()) {
+			PerspectiveManager pm = perspectiveManager.get();
+
+			if (pm.isCameraParamsKnown() && pm.getCameraDistance() > 0) {
+
+				pm.calculateUnknown();
+
+				logger.debug("Distance {}", pm.getCameraDistance());
+
+				pm.setShooterDistance(pm.getCameraDistance());
+
+				Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(279, 216, pm.getCameraDistance(),
+						pm.getCameraDistance());
+
+				File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/"
+						+ "SimpleBullseye_score.target");
+				TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
+						pac.getCanvasManager(), false);
+				target.setPosition(50, 50);
+				if (targetDimensions.isPresent()) {
+					Dimension2D dims = targetDimensions.get();
+					target.setDimensions(dims.getWidth(), dims.getHeight());
+				}
+
+				pac.getCanvasManager().addTarget(target);
+			}
+		}
+	}
 
 	// Used for testing
 	public void init(Configuration config, CanvasManager canvasManager) {
@@ -247,7 +281,6 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			Rectangle2D arenaScreenBounds = arenaHome.getBounds();
 			arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
-			
 
 		} else {
 			logger.debug("Did not find screen that is a likely projector");
@@ -391,7 +424,7 @@ public class ProjectorArenaController implements CalibrationListener {
 					throw e;
 				}
 			}
-			
+
 		}
 	}
 
@@ -476,20 +509,21 @@ public class ProjectorArenaController implements CalibrationListener {
 	}
 
 	private boolean pmTest = false;
-	
+
 	@Override
-	public void calibrated() {
+	public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
 		setCalibrationMessageVisible(false);
 		setTargetsVisible(true);
 		restoreCurrentBackground();
 
 		cursorWarningToggle(false);
-		
-		feedCanvasManager.getCameraManager().getPerspectiveManager().setProjectorResolution((int)arenaStage.getWidth(), (int)arenaStage.getHeight());
-		
-		if (pmTest)
-			feedCanvasManager.getCameraManager().pmTest(this);
-		
+
+		this.perspectiveManager = perspectiveManager;
+		if (perspectiveManager.isPresent())
+			perspectiveManager.get().setProjectorResolution((int) arenaStage.getWidth(), (int) arenaStage.getHeight());
+
+		if (pmTest) pmTest(this);
+
 	}
 
 	public void setFeedCanvasManager(CanvasManager canvasManager) {

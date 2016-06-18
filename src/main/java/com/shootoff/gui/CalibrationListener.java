@@ -18,8 +18,12 @@
 
 package com.shootoff.gui;
 
+import java.util.Optional;
+
+import com.shootoff.camera.perspective.PerspectiveManager;
+
 public interface CalibrationListener {
 	public void startCalibration();
 
-	public void calibrated();
+	public void calibrated(Optional<PerspectiveManager> perspectiveManager);
 }
