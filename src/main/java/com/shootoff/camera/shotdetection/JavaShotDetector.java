@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 
 import org.opencv.core.Mat;
@@ -41,7 +40,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public final class JavaShotDetector implements ShotDetector {
+public final class JavaShotDetector extends ShotDetector {
 	private static final Logger logger = LoggerFactory.getLogger(JavaShotDetector.class);
 
 	public static final int SECTOR_COLUMNS = 3;
@@ -51,7 +50,6 @@ public final class JavaShotDetector implements ShotDetector {
 	private static final byte[] BLUE_MAT_PIXEL = { (byte) 255, (byte) 0, (byte) 0 };
 	private static final byte[] RED_MAT_PIXEL = { 0, (byte) 0, (byte) 255 };
 
-	private final CameraView cameraView;
 	private final CameraManager cameraManager;
 
 	private final Configuration config;
@@ -101,8 +99,9 @@ public final class JavaShotDetector implements ShotDetector {
 	final PixelClusterManager pixelClusterManager;
 
 	public JavaShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView canvasManager) {
-		this.cameraView = canvasManager;
+			final CameraView cameraView) {
+		super(cameraManager, config, cameraView);
+
 		this.cameraManager = cameraManager;
 		this.config = config;
 
@@ -411,22 +410,7 @@ public final class JavaShotDetector implements ShotDetector {
 
 		final Shot shot = new Shot(color.get(), x, y, 0, cameraManager.getFrameCount(), config.getMarkerRadius());
 
-		if (!cameraManager.getDeduplicationProcessor().processShot(shot)) {
-			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By {}",
-					cameraManager.getDeduplicationProcessor().getClass().getName());
-			return;
-		}
-		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
-				&& color.get().equals(config.getIgnoreLaserColor().get())) {
-			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
-					config.getIgnoreLaserColor().get());
-			return;
-		}
-
-		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", x, y,
-				color.get(), cameraManager.getFrameCount());
-
-		if (config.isDebugShotsRecordToFiles()) {
+		if (super.addShot(shot) && config.isDebugShotsRecordToFiles()) {
 			final Mat debugFrame = new Mat();
 			Imgproc.cvtColor(workingFrame, debugFrame, Imgproc.COLOR_HSV2BGR);
 
@@ -451,16 +435,5 @@ public final class JavaShotDetector implements ShotDetector {
 			filename = outputfile.toString();
 			Highgui.imwrite(filename, debugFrame);
 		}
-
-		if ((cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
-				&& cameraManager.getProjectionBounds().isPresent()) {
-
-			final Bounds b = cameraManager.getProjectionBounds().get();
-
-			cameraView.addShot(color.get(), x + b.getMinX(), y + b.getMinY());
-		} else {
-			cameraView.addShot(color.get(), x, y);
-		}
-
 	}
 }

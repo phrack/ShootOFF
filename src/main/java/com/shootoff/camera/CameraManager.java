@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
+import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
@@ -147,11 +148,20 @@ public class CameraManager {
 
 		this.cameraView.setCameraManager(this);
 
-		initDetector(new Detector());
+		initDetector(new VideoStreamer());
+		
+		if (NativeShotDetector.loadNativeShotDetector()) {
+			logger.debug("Using native shot detection");
 
-		this.shotDetector = new JavaShotDetector(this, config, view);
+			this.shotDetector = new NativeShotDetector(this, config, view);
+		} else {
+			logger.debug("Native shot detection is not supported on this system, falling back to Java detector");
+
+			this.shotDetector = new JavaShotDetector(this, config, view);
+		}
 	}
 
+	// For testing with videos
 	protected CameraManager(CameraView view, Configuration config) {
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
@@ -159,7 +169,7 @@ public class CameraManager {
 		this.config = config;
 		this.shotDetector = new JavaShotDetector(this, config, view);
 	}
-	
+
 	public String getName() {
 		if (webcam.isPresent()) {
 			return webcam.get().getName();
@@ -168,7 +178,7 @@ public class CameraManager {
 		}
 	}
 
-	private void initDetector(Detector detector) {
+	private void initDetector(VideoStreamer detector) {
 		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
 		// Turn on all shot sectors by default
@@ -414,7 +424,7 @@ public class CameraManager {
 		videoWriterCalibratedArea.close();
 	}
 
-	protected class Detector extends MediaListenerAdapter implements Runnable {
+	protected class VideoStreamer extends MediaListenerAdapter implements Runnable {
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
