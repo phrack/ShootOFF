@@ -280,6 +280,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (!isShowingPattern.get()) arenaController.saveCurrentBackground();
 		setArenaBackground("pattern.png");
 		isShowingPattern.set(true);
+		
+		calibratingCameraManager.enableAutoCalibration(false);
 
 		showAutoCalibrationMessage();
 
