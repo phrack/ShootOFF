@@ -160,7 +160,9 @@ public class AutoCalibrationManager {
 			if (!paperDimensions.isPresent())
 			{
 				paperDimensions = findPaperPattern(boardCorners.get(), mat, null);
-				logger.debug("Found paper dimensions {}", paperDimensions.get());
+				
+				if (paperDimensions.isPresent())
+					logger.debug("Found paper dimensions {}", paperDimensions.get());
 			}
 
 			Optional<Bounds> bounds = calibrateFrame(boardCorners.get(), mat);

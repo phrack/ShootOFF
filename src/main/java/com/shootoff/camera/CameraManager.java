@@ -527,7 +527,7 @@ public class CameraManager {
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
 		
-		if (isAutoCalibrating.get()) {
+		if (isAutoCalibrating.get() && ((getFrameCount() % Math.min(getFPS(), 10)) == 0)) {
 			
 			acm.processFrame(currentFrame);
 			return currentFrame;

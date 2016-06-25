@@ -100,15 +100,15 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(419, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(313, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(32, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(318, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 
 		assertEquals(false, acm.getPerspMat() == null);
 
-		double[][] expectedMatrix = { { 1.03, 0.02, -10.27 }, { -0.00, 1.04, -2.44 }, { 0.00, 0.00, 1.00 } };
+		double[][] expectedMatrix = { { 1.03, 0.02, -11.20 }, { -0.00, 1.04, -7.04 }, { 0.00, 0.00, 1.00 } };
 
 		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
 			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
@@ -142,15 +142,15 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(37, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(418, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(312, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(34, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(316, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 
 		assertEquals(false, acm.getPerspMat() == null);
 
-		double[][] expectedMatrix = { { 1.04, 0.03, -14.97 }, { -0.00, 1.04, -3.05 }, { 0.00, 0.00, 1.00 } };
+		double[][] expectedMatrix = { { 1.04, 0.03, -15.58 }, { -0.00, 1.04, -6.44 }, { 0.00, 0.00, 1.00 } };
 
 		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
 			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
@@ -241,14 +241,14 @@ public class TestAutoCalibration {
 
 		assertEquals(45, calibrationBounds.get().getMinX(), 1.0);
 		assertEquals(25, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(569, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(572, calibrationBounds.get().getWidth(), 1.0);
 		assertEquals(431, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 
 		assertEquals(false, acm.getPerspMat() == null);
 
-		double[][] expectedMatrix = { { 1.00, 0.00, -0.08 }, { 0.00, 1.00, -0.12 }, { 0.00, 0.00, 1.00 } };
+		double[][] expectedMatrix = { { 1.00, 0.00, -1.66 }, { 0.00, 1.00, -1.39 }, { 0.00, 0.00, 1.00 } };
 
 		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
 			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
@@ -283,13 +283,13 @@ public class TestAutoCalibration {
 		assertEquals(116, calibrationBounds.get().getMinX(), 1.0);
 		assertEquals(88, calibrationBounds.get().getMinY(), 1.0);
 		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(296, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(298, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 
 		assertEquals(false, acm.getPerspMat() == null);
 
-		double[][] expectedMatrix = { { 0.88, -0.34, 89.04 }, { 0.24, 0.80, -55.49 }, { -0.00, -0.00, 1.00 } };
+		double[][] expectedMatrix = { { 0.88, -0.34, 89.04 }, { 0.24, 0.80, -55.97 }, { -0.00, -0.00, 1.00 } };
 
 		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
 			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
