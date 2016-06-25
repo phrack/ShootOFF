@@ -18,7 +18,9 @@
 
 package com.shootoff.camera.perspective;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +48,7 @@ public class PerspectiveManager {
 	private final static int US_LETTER_HEIGHT_MM = 216;
 
 	// Key = camera name
-	private static final Map<String, CameraParameters> cameraParameters = new HashMap<>();
+	private static final List<CameraParameters> cameraParameters = new ArrayList<CameraParameters>();
 
 	// All in millimeters
 	private double focalLength = -1;
@@ -70,16 +72,18 @@ public class PerspectiveManager {
 	private int projectorResWidth = -1;
 
 	private static class CameraParameters {
+		private final String cameraName;
 		private final double focalLength;
 		private final double sensorWidth;
 		private final double sensorHeight;
 		private final Dimension2D validDims;
 
-		public CameraParameters(double focalLength, double sensorWidth, double sensorHeight, Dimension2D validDims) {
+		public CameraParameters(String cameraName, double focalLength, double sensorWidth, double sensorHeight, Dimension2D validDims) {
 			this.focalLength = focalLength;
 			this.sensorWidth = sensorWidth;
 			this.sensorHeight = sensorHeight;
 			this.validDims = validDims;
+			this.cameraName = cameraName;
 		}
 
 		public double getFocalLength() {
@@ -94,6 +98,11 @@ public class PerspectiveManager {
 			return sensorHeight;
 		}
 		
+		public String getName()
+		{
+			return cameraName;
+		}
+		
 		public Dimension2D getValidDimensions()
 		{
 			return validDims;
@@ -103,10 +112,10 @@ public class PerspectiveManager {
 	// TODO: Implement a way to load these values from a file
 	// so that they can be easily tweaked/added to
 	static {
-		cameraParameters.put("C270", new CameraParameters(4.0, 3.58, 2.02, new Dimension2D(1280, 720)));
-		cameraParameters.put("C270", new CameraParameters(4.0, 3.127, 2.260, new Dimension2D(640, 480)));
-		cameraParameters.put("C270", new CameraParameters(4.0, 3.580, 2.636, new Dimension2D(800, 600)));
-		cameraParameters.put("C920", new CameraParameters(3.67, 4.80, 3.60, new Dimension2D(1280, 720)));
+		cameraParameters.add(new CameraParameters("C270", 4.0, 3.58, 2.02, new Dimension2D(1280, 720)));
+		cameraParameters.add(new CameraParameters("C270", 4.0, 3.127, 2.260, new Dimension2D(640, 480)));
+		cameraParameters.add(new CameraParameters("C270", 4.0, 3.580, 2.636, new Dimension2D(800, 600)));
+		cameraParameters.add(new CameraParameters("C920", 3.67, 4.80, 3.60, new Dimension2D(1280, 720)));
 	}
 
 	// For testing
@@ -161,10 +170,9 @@ public class PerspectiveManager {
 	}
 
 	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
-		for (Map.Entry<String, CameraParameters> entry : cameraParameters.entrySet()) {
-			if (cameraName.contains(entry.getKey()) && entry.getValue().getValidDimensions().getWidth() == desiredResolution.getWidth() && 
-					entry.getValue().getValidDimensions().getHeight() == desiredResolution.getHeight()) {
-				logger.debug("Camera matches known config: {} - resolution {}", entry.getKey(), entry.getValue().getValidDimensions());
+		for (CameraParameters cam : cameraParameters) {
+			if (cameraName.contains(cam.getName()) && cam.getValidDimensions().getWidth() == desiredResolution.getWidth() && 
+					cam.getValidDimensions().getHeight() == desiredResolution.getHeight()) {
 				return true;
 			}
 		}
@@ -173,13 +181,12 @@ public class PerspectiveManager {
 	}
 
 	private boolean setCameraParameters(final String cameraName, Dimension2D desiredResolution) {
-		for (Map.Entry<String, CameraParameters> entry : cameraParameters.entrySet()) {
-			if (cameraName.contains(entry.getKey()) && entry.getValue().getValidDimensions().getWidth() == desiredResolution.getWidth() && 
-					entry.getValue().getValidDimensions().getHeight() == desiredResolution.getHeight()) {
-				CameraParameters cp = entry.getValue();
-				focalLength = cp.getFocalLength();
-				sensorWidth = cp.getSensorWidth();
-				sensorHeight = cp.getSensorHeight();
+		for (CameraParameters cam : cameraParameters) {
+			if (cameraName.contains(cam.getName()) && cam.getValidDimensions().getWidth() == desiredResolution.getWidth() && 
+					cam.getValidDimensions().getHeight() == desiredResolution.getHeight()) {
+				focalLength = cam.getFocalLength();
+				sensorWidth = cam.getSensorWidth();
+				sensorHeight = cam.getSensorHeight();
 
 				return true;
 			}

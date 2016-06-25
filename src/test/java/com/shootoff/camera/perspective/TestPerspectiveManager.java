@@ -35,6 +35,8 @@ public class TestPerspectiveManager {
 
 	@Test
 	public void testOne() throws ConfigurationException {
+		assertTrue(PerspectiveManager.isCameraSupported("C270", new Dimension2D(1280, 720)));
+		
 		PerspectiveManager pm = new PerspectiveManager("C270", new Dimension2D(1280, 720), new BoundingBox(0, 0, 736, 544));
 
 		pm.setCameraFeedSize(1280, 720);
@@ -104,9 +106,9 @@ public class TestPerspectiveManager {
 
 		pm.calculateUnknown();
 
-		assertEquals(1, pm.getFocalLength(), 1);
-		assertEquals(.781, pm.getSensorWidth(), .1);
-		assertEquals(.579, pm.getSensorHeight(), .1);
+		assertEquals(4, pm.getFocalLength(), 1);
+		assertEquals(3.122, pm.getSensorWidth(), .01);
+		assertEquals(2.317, pm.getSensorHeight(), .01);
 
 		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406, 3406);
 
@@ -124,9 +126,9 @@ public class TestPerspectiveManager {
 
 		pm.calculateUnknown();
 
-		assertEquals(1, pm.getFocalLength(), 1);
-		assertEquals(.761, pm.getSensorWidth(), .01);
-		assertEquals(.559, pm.getSensorHeight(), .01);
+		assertEquals(4, pm.getFocalLength(), 1);
+		assertEquals(3.047, pm.getSensorWidth(), .01);
+		assertEquals(2.235, pm.getSensorHeight(), .01);
 
 		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
 
@@ -155,9 +157,7 @@ public class TestPerspectiveManager {
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
 				new Dimension2D(1280, 720), new Dimension2D(1024, 768), paperDimensions.get());
 
-		pm.calculateUnknown();
-
-		assertEquals(3503, pm.getCameraDistance());
+		assertEquals(3481, pm.getCameraDistance());
 
 		pm.setShooterDistance(pm.getCameraDistance());
 
@@ -165,13 +165,13 @@ public class TestPerspectiveManager {
 
 		assertTrue(dims.isPresent());
 		assertEquals(168.75, dims.get().getWidth(), 1);
-		assertEquals(122.88, dims.get().getHeight(), 1);
+		assertEquals(123.98, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(3503, pm.getCameraDistance());
+		assertEquals(3481, pm.getCameraDistance());
 	}
 
 	
@@ -195,9 +195,7 @@ public class TestPerspectiveManager {
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
 				new Dimension2D(1280, 720), new Dimension2D(1024, 768), paperDimensions.get());
 
-		pm.calculateUnknown();
-
-		assertEquals(6937, pm.getCameraDistance());
+		assertEquals(6864, pm.getCameraDistance());
 
 		pm.setShooterDistance(pm.getCameraDistance());
 
@@ -205,13 +203,13 @@ public class TestPerspectiveManager {
 
 		assertTrue(dims.isPresent());
 		assertEquals(85.10, dims.get().getWidth(), 1);
-		assertEquals(62.13, dims.get().getHeight(), 1);
+		assertEquals(63.24, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(6937, pm.getCameraDistance());
+		assertEquals(6864, pm.getCameraDistance());
 	}
 	
 }
