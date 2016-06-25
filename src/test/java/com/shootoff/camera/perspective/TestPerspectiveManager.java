@@ -118,9 +118,8 @@ public class TestPerspectiveManager {
 	@Test
 	public void testPaperPixelsCalcParams() throws ConfigurationException {
 		PerspectiveManager pm = new PerspectiveManager(new BoundingBox(0, 0, 422, 316), new Dimension2D(640, 480),
-				new Dimension2D(67, 53));
+				new Dimension2D(67, 53), 3498);
 
-		pm.setCameraDistance(3498);
 		pm.setShooterDistance(3498);
 		pm.setProjectorResolution(1024, 768);
 
@@ -161,21 +160,63 @@ public class TestPerspectiveManager {
 
 		pm.calculateUnknown();
 
-		assertEquals(3498, pm.getCameraDistance());
+		assertEquals(3503, pm.getCameraDistance());
 
 		pm.setShooterDistance(pm.getCameraDistance());
 
 		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
-		assertEquals(167.26, dims.get().getWidth(), 1);
-		assertEquals(124.3, dims.get().getHeight(), 1);
+		assertEquals(168.75, dims.get().getWidth(), 1);
+		assertEquals(122.88, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(3498, pm.getCameraDistance());
+		assertEquals(3503, pm.getCameraDistance());
 	}
 
+	
+	@Test
+	public void testPaperPatternSmall() throws IOException {
+		BufferedImage testFrame = ImageIO
+				.read(TestAutoCalibration.class.getResourceAsStream("/perspective/c270_pattern_new_small.png"));
+
+		Mat mat = Camera.bufferedImageToMat(testFrame);
+
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		Optional<Dimension2D> paperDimensions = acm.findPaperPattern(boardCorners.get(),
+				Camera.bufferedImageToMat(testFrame), null);
+
+		assertTrue(paperDimensions.isPresent());
+
+		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
+				new Dimension2D(1280, 720), paperDimensions.get());
+
+		pm.setProjectorResolution(1024, 768);
+
+		pm.calculateUnknown();
+
+		assertEquals(6937, pm.getCameraDistance());
+
+		pm.setShooterDistance(pm.getCameraDistance());
+
+		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
+
+		assertTrue(dims.isPresent());
+		assertEquals(85.10, dims.get().getWidth(), 1);
+		assertEquals(62.13, dims.get().getHeight(), 1);
+
+		pm.setCameraDistance(-1);
+
+		pm.calculateUnknown();
+
+		assertEquals(6937, pm.getCameraDistance());
+	}
+	
 }

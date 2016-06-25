@@ -19,11 +19,14 @@
 package com.shootoff.camera.perspective;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
@@ -72,11 +75,13 @@ public class PerspectiveManager {
 		private final double focalLength;
 		private final double sensorWidth;
 		private final double sensorHeight;
+		private final Dimension2D validDims;
 
-		public CameraParameters(double focalLength, double sensorWidth, double sensorHeight) {
+		public CameraParameters(double focalLength, double sensorWidth, double sensorHeight, Dimension2D validDims) {
 			this.focalLength = focalLength;
 			this.sensorWidth = sensorWidth;
 			this.sensorHeight = sensorHeight;
+			this.validDims = validDims;
 		}
 
 		public double getFocalLength() {
@@ -90,14 +95,18 @@ public class PerspectiveManager {
 		public double getSensorHeight() {
 			return sensorHeight;
 		}
+		
+		public Dimension2D getValidDimensions()
+		{
+			return validDims;
+		}
 	}
 
 	// TODO: Implement a way to load these values from a file
 	// so that they can be easily tweaked/added to
 	static {
-		// !!!! THESE NUMBERS ARE ONLY GOOD FOR 1280x720 !!!!
-		cameraParameters.put("C270", new CameraParameters(4.0, 3.58, 2.02));
-		cameraParameters.put("C920", new CameraParameters(3.67, 4.80, 3.60));
+		cameraParameters.put("C270", new CameraParameters(4.0, 3.58, 2.02, new Dimension2D(1280, 720)));
+		cameraParameters.put("C920", new CameraParameters(3.67, 4.80, 3.60, new Dimension2D(1280, 720)));
 	}
 
 	// For testing
@@ -108,12 +117,27 @@ public class PerspectiveManager {
 		this.patternHeight = (int) arenaBounds.getHeight();
 	}
 
-	// For testing
-	protected PerspectiveManager(Bounds arenaBounds,  Dimension2D feedDims, Dimension2D paperBounds) {
+	public PerspectiveManager(Bounds arenaBounds,  Dimension2D feedDims, Dimension2D paperBounds, int cameraDistance) {
 		this(arenaBounds);
 		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
+		this.setCameraDistance(cameraDistance);
+		
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
+		
+		// Camera parameters are unknown
+		calculateUnknown();
 	}
+	
+	public PerspectiveManager(String cameraName, Bounds arenaBounds,  Dimension2D feedDims, int cameraDistance) {
+		this(cameraName, arenaBounds);
+		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
+		this.setCameraDistance(cameraDistance);
+		
+		// Pattern distance is unknown
+		calculateUnknown();
+	}
+	
+	
 	
 	public PerspectiveManager(String cameraName, Bounds arenaBounds) {
 		this(arenaBounds);
@@ -128,13 +152,20 @@ public class PerspectiveManager {
 		this(cameraName, arenaBounds);
 		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
+		
+		// Camera distance is unknown
+		calculateUnknown();
 	}
 
-	public static boolean isCameraSupported(final String cameraName) {
-		for (String supportedName : cameraParameters.keySet()) {
-			if (cameraName.contains(supportedName)) return true;
+	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
+		Iterator<Entry<String, CameraParameters>> it = cameraParameters.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, CameraParameters> supportedCamera = it.next();
+			CameraParameters camParams = (CameraParameters) supportedCamera.getValue();
+			if (cameraName.contains(supportedCamera.getKey()) && camParams.getValidDimensions() == desiredResolution)
+				return true;
+			it.remove();
 		}
-
 		return false;
 	}
 
@@ -193,9 +224,18 @@ public class PerspectiveManager {
 		final double cameraFeedWidthMM = ((double) cameraWidth / letterDims.getWidth()) * US_LETTER_WIDTH_MM;
 		final double cameraFeedHeightMM = ((double) cameraHeight / letterDims.getHeight()) * US_LETTER_HEIGHT_MM;
 
+		logger.trace("{} = ({} / {}) * {}", cameraFeedWidthMM, cameraWidth, letterDims.getWidth(), US_LETTER_WIDTH_MM);
+		logger.trace("{} = ({} / {}) * {}", cameraFeedHeightMM, cameraHeight, letterDims.getHeight(), US_LETTER_HEIGHT_MM);
+
+		
+		
 		// Set the projection width/height in mm
 		projectionWidth = (int) (cameraFeedWidthMM * ((double) patternWidth / (double) cameraWidth));
 		projectionHeight = (int) (cameraFeedHeightMM * ((double) patternHeight / (double) cameraHeight));
+		
+		logger.trace("{} = ({} / {}) * {}", projectionWidth, cameraFeedWidthMM, patternWidth, cameraWidth); 
+		logger.trace("{} = ({} / {}) * {}", projectionHeight, cameraFeedHeightMM, patternHeight, cameraHeight); 
+
 	}
 
 	/* The camera feed width and height (in px) */

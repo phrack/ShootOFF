@@ -98,7 +98,7 @@ public class AutoCalibrationManager {
 	private Bounds boundsResult = null;
 	private long frameDelayResult;
 
-	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 30, 0.1);
+	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 60, 0.0001);
 
 	/* Paper Pattern */
 	private Optional<Dimension2D> paperDimensions = Optional.empty();
@@ -145,7 +145,7 @@ public class AutoCalibrationManager {
 
 	public void processFrame(final BufferedImage frame) {
 		if (boundsResult == null) {
-
+			
 			Mat mat;
 
 			synchronized (frame) {
@@ -157,7 +157,11 @@ public class AutoCalibrationManager {
 
 			if (!boardCorners.isPresent()) return;
 
-			if (!paperDimensions.isPresent()) paperDimensions = findPaperPattern(boardCorners.get(), mat, null);
+			if (!paperDimensions.isPresent())
+			{
+				paperDimensions = findPaperPattern(boardCorners.get(), mat, null);
+				logger.debug("Found paper dimensions {}", paperDimensions.get());
+			}
 
 			Optional<Bounds> bounds = calibrateFrame(boardCorners.get(), mat);
 
@@ -366,13 +370,36 @@ public class AutoCalibrationManager {
 			int heightOffset = (height - (int) box.getHeight()) / 2;
 
 			logger.trace("offset width {} height {}", widthOffset, heightOffset);
+			
+			Mat fullpattern = workingMat.clone();
+			
+			Point topLeft = new Point(boardCorners.get(0, 0)[0], boardCorners.get(0, 0)[1]);
+			Point topRight = new Point(boardCorners.get(PATTERN_WIDTH - 1, 0)[0], boardCorners.get(PATTERN_WIDTH - 1, 0)[1]);
+			Point bottomRight = new Point(boardCorners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[0],
+					boardCorners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[1]);
+			Point bottomLeft = new Point(boardCorners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0],
+					boardCorners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[1]);
+			
+			Core.circle(fullpattern, topLeft, 1, new Scalar(255, 0, 0),
+					-1);
+			Core.circle(fullpattern, topRight, 1, new Scalar(255, 0, 0),
+					-1);
+			Core.circle(fullpattern, bottomRight, 1, new Scalar(255, 0, 0),
+					-1);
+			Core.circle(fullpattern, bottomLeft, 1, new Scalar(255, 0, 0),
+					-1);
+			
+			String filename = String.format("marked-box.png");
+			File file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, fullpattern);
 
-			Mat fullpattern = workingMat.submat((int) box.getMinY() - heightOffset,
+			fullpattern = fullpattern.submat((int) box.getMinY() - heightOffset,
 					(int) box.getMinY() - heightOffset + height, (int) box.getMinX() - widthOffset,
 					(int) box.getMinX() - widthOffset + width);
 
-			String filename = String.format("full-box.png");
-			File file = new File(filename);
+			filename = String.format("full-box.png");
+			file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, fullpattern);
 
@@ -980,7 +1007,7 @@ public class AutoCalibrationManager {
 
 		if (found) {
 			// optimization
-			Imgproc.cornerSubPix(grayImage, imageCorners, new Size(5, 5), new Size(-1, -1), term);
+			Imgproc.cornerSubPix(grayImage, imageCorners, new Size(1, 1), new Size(-1, -1), term);
 
 			return Optional.of(imageCorners);
 		}

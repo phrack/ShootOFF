@@ -105,35 +105,49 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeCalibrationTargetIfPresent();
 
 		PerspectiveManager pm = null;
-		if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName())
-				&& calibratingCameraManager.getFeedWidth() == 1280 && calibratingCameraManager.getFeedHeight() == 720) {
+		
+		Dimension2D feedDim = new Dimension2D(calibratingCameraManager.getFeedWidth(),calibratingCameraManager.getFeedHeight());
+
+		
+		if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName(), feedDim)) {
 			if (perspectivePaperDims.isPresent()) {
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
 						calibratingCameraManager.getProjectionBounds().get(),
-						new Dimension2D(calibratingCameraManager.getFeedWidth(),
-								calibratingCameraManager.getFeedHeight()),
+						feedDim,
 						perspectivePaperDims.get());
 			} else {
+				// TODO: Prompt the user to enter a distance
+
+				
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
-						calibratingCameraManager.getProjectionBounds().get());
-
-				pm.setCameraFeedSize(calibratingCameraManager.getFeedWidth(), calibratingCameraManager.getFeedHeight());
+						calibratingCameraManager.getProjectionBounds().get(), 
+						feedDim, 3580);
 			}
-
+			
+			
 			// Should come from config
 			pm.setShooterDistance(3406);
 
-			// If no pattern to work with, and no camera parameters to work
-			// with, we
-			// can't calculate both
-			// So we guess (for now) that the camera distance is 3580mm
-			if (!perspectivePaperDims.isPresent() && !pm.isCameraParamsKnown()) {
+		}
+		else
+		{
+			if (perspectivePaperDims.isPresent()) {
 				// TODO: Prompt the user to enter a distance
-				pm.setCameraDistance(3580);
-			} else if (pm.isCameraParamsKnown()) {
-				pm.setCameraDistance(-1);
+				
+				pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(),
+						feedDim,
+						perspectivePaperDims.get(), 3580);
+				
+				
+				// Should come from config
+				pm.setShooterDistance(3406);
+								
+			} else {
+				logger.debug("Camera not supported for perspective {} or feed resolution", calibratingCameraManager.getName());
+			
 			}
 		}
+
 
 		calibrationListener.calibrated(Optional.ofNullable(pm));
 
@@ -159,6 +173,9 @@ public class CalibrationManager implements CameraCalibrationListener {
 				arenaBounds.getHeight());
 
 		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), arenaBounds);
+		
+		logger.debug("calibrate {} {} {}", arenaBounds, perspectivePaperDims, calibratedFromCanvas);
+		
 		this.perspectivePaperDims = perspectivePaperDims;
 
 		if (isCalibrating()) stopCalibration();

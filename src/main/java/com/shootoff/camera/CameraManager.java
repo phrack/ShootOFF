@@ -66,8 +66,8 @@ import javafx.util.Callback;
  */
 public class CameraManager {
 	protected static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
-	public static final int DEFAULT_FEED_WIDTH = 640;
-	public static final int DEFAULT_FEED_HEIGHT = 480;
+	public static final int DEFAULT_FEED_WIDTH = 1280;
+	public static final int DEFAULT_FEED_HEIGHT = 720;
 
 	protected int feedWidth = DEFAULT_FEED_WIDTH;
 	protected int feedHeight = DEFAULT_FEED_HEIGHT;
@@ -471,7 +471,7 @@ public class CameraManager {
 				continue;
 			}
 
-			if ((int) (getFrameCount() % getFPS()) == 0) {
+			if ((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) {
 				estimateCameraFPS();
 			}
 
@@ -526,8 +526,9 @@ public class CameraManager {
 
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
-
+		
 		if (isAutoCalibrating.get()) {
+			
 			acm.processFrame(currentFrame);
 			return currentFrame;
 		}
