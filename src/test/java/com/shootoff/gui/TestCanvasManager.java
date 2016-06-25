@@ -135,9 +135,11 @@ public class TestCanvasManager {
 	@Test
 	public void testDisplayResolutionTranslationLarger() {
 		config.setDisplayResolution(800, 600);
+		cm.getCameraManager().setFeedResolution(640, 480);
 
+		
 		assertEquals(0, cm.getShots().size());
-
+		
 		cm.addShot(Color.RED, 640, 480);
 
 		assertEquals(1, cm.getShots().size());
@@ -149,6 +151,7 @@ public class TestCanvasManager {
 	@Test
 	public void testDisplayResolutionTranslationSmaller() {
 		config.setDisplayResolution(320, 240);
+		cm.getCameraManager().setFeedResolution(640, 480);
 
 		assertEquals(0, cm.getShots().size());
 

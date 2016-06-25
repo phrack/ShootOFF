@@ -66,8 +66,8 @@ import javafx.util.Callback;
  */
 public class CameraManager {
 	protected static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
-	public static final int DEFAULT_FEED_WIDTH = 1280;
-	public static final int DEFAULT_FEED_HEIGHT = 720;
+	public static final int DEFAULT_FEED_WIDTH = 640;
+	public static final int DEFAULT_FEED_HEIGHT = 480;
 
 	protected int feedWidth = DEFAULT_FEED_WIDTH;
 	protected int feedHeight = DEFAULT_FEED_HEIGHT;
