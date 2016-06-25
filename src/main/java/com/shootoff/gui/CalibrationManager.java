@@ -114,18 +114,19 @@ public class CalibrationManager implements CameraCalibrationListener {
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
 						calibratingCameraManager.getProjectionBounds().get(),
 						feedDim,
+						arenaController.getArenaStageResolution(),
 						perspectivePaperDims.get());
+				pm.setProjectorResolution(arenaController.getArenaStageResolution());
 			} else {
 				// TODO: Prompt the user to enter a distance
 
 				
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
 						calibratingCameraManager.getProjectionBounds().get(), 
-						feedDim, 3580);
+						feedDim, arenaController.getArenaStageResolution(), 3479);
 			}
 			
-			
-			// Should come from config
+			// TODO: Should come from the user
 			pm.setShooterDistance(3406);
 
 		}
@@ -133,13 +134,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 		{
 			if (perspectivePaperDims.isPresent()) {
 				// TODO: Prompt the user to enter a distance
-				
 				pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(),
 						feedDim,
-						perspectivePaperDims.get(), 3580);
-				
-				
-				// Should come from config
+						perspectivePaperDims.get(), arenaController.getArenaStageResolution(), 3479);
+								
+				// TODO: Should come from the user
 				pm.setShooterDistance(3406);
 								
 			} else {
@@ -169,8 +168,9 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeCalibrationTargetIfPresent();
 
 		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);
-		createCalibrationTarget(arenaBounds.getMinX(), arenaBounds.getMinY(), arenaBounds.getWidth(),
-				arenaBounds.getHeight());
+		
+		//createCalibrationTarget(arenaBounds.getMinX(), arenaBounds.getMinY(), arenaBounds.getWidth(),
+		//		arenaBounds.getHeight());
 
 		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), arenaBounds);
 		

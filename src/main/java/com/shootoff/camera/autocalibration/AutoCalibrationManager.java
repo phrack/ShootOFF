@@ -342,15 +342,15 @@ public class AutoCalibrationManager {
 		// So this estimates where the outside corner would be, plus a fudge
 		// factor for the edge of the paper
 		// Printer margins are usually a quarter inch on each edge
-		Integer width = (int) ((double) box.getWidth() * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
+		double width = ((double) box.getWidth() * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
 				* 1.048);
-		Integer height = (int) ((double) box.getHeight()
+		double height = ((double) box.getHeight()
 				* ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * 1.063);
 
 		final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
 		if (width > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.cols()
 				|| height > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.rows()) {
-			logger.trace("Pattern too big to be paper, must be projection, setting blank {}x{}", box.getWidth(),
+			logger.trace("Pattern too big to be paper, must be projection, setting blank {} x {}", box.getWidth(),
 					box.getHeight());
 			workingMat.submat((int) box.getMinY(), (int) box.getMaxY(), (int) box.getMinX(), (int) box.getMaxX())
 					.setTo(new Scalar(0, 0, 0));
@@ -368,8 +368,8 @@ public class AutoCalibrationManager {
 		logger.trace("paper width {} height {}", width, height);
 
 		if (logger.isTraceEnabled()) {
-			int widthOffset = (width - (int) box.getWidth()) / 2;
-			int heightOffset = (height - (int) box.getHeight()) / 2;
+			int widthOffset = ((int)width - (int)box.getWidth()) / 2;
+			int heightOffset = ((int)height - (int)box.getHeight()) / 2;
 
 			logger.trace("offset width {} height {}", widthOffset, heightOffset);
 			
@@ -397,8 +397,8 @@ public class AutoCalibrationManager {
 			Highgui.imwrite(filename, fullpattern);
 
 			fullpattern = fullpattern.submat((int) box.getMinY() - heightOffset,
-					(int) box.getMinY() - heightOffset + height, (int) box.getMinX() - widthOffset,
-					(int) box.getMinX() - widthOffset + width);
+					(int) box.getMinY() - heightOffset + (int)height, (int) box.getMinX() - widthOffset,
+					(int) box.getMinX() - widthOffset + (int)width);
 
 			filename = String.format("full-box.png");
 			file = new File(filename);

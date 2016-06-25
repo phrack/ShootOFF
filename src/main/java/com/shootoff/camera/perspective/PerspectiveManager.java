@@ -19,9 +19,7 @@
 package com.shootoff.camera.perspective;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -106,6 +104,8 @@ public class PerspectiveManager {
 	// so that they can be easily tweaked/added to
 	static {
 		cameraParameters.put("C270", new CameraParameters(4.0, 3.58, 2.02, new Dimension2D(1280, 720)));
+		cameraParameters.put("C270", new CameraParameters(4.0, 3.127, 2.260, new Dimension2D(640, 480)));
+		cameraParameters.put("C270", new CameraParameters(4.0, 3.580, 2.636, new Dimension2D(800, 600)));
 		cameraParameters.put("C920", new CameraParameters(3.67, 4.80, 3.60, new Dimension2D(1280, 720)));
 	}
 
@@ -117,10 +117,11 @@ public class PerspectiveManager {
 		this.patternHeight = (int) arenaBounds.getHeight();
 	}
 
-	public PerspectiveManager(Bounds arenaBounds,  Dimension2D feedDims, Dimension2D paperBounds, int cameraDistance) {
+	public PerspectiveManager(Bounds arenaBounds,  Dimension2D feedDims, Dimension2D paperBounds, Dimension2D projectorRes, int cameraDistance) {
 		this(arenaBounds);
 		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
 		this.setCameraDistance(cameraDistance);
+		this.setProjectorResolution(projectorRes);
 		
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
 		
@@ -128,50 +129,53 @@ public class PerspectiveManager {
 		calculateUnknown();
 	}
 	
-	public PerspectiveManager(String cameraName, Bounds arenaBounds,  Dimension2D feedDims, int cameraDistance) {
-		this(cameraName, arenaBounds);
-		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
+	public PerspectiveManager(String cameraName, Bounds arenaBounds,  Dimension2D feedDims, Dimension2D projectorRes, int cameraDistance) {
+		this(cameraName, feedDims, arenaBounds);
 		this.setCameraDistance(cameraDistance);
+		this.setProjectorResolution(projectorRes);
 		
-		// Pattern distance is unknown
+		// Pattern size is unknown
 		calculateUnknown();
 	}
 	
 	
 	
-	public PerspectiveManager(String cameraName, Bounds arenaBounds) {
+	public PerspectiveManager(String cameraName, Dimension2D resolution, Bounds arenaBounds) {
 		this(arenaBounds);
 		
-		if (!setCameraParameters(cameraName)) {
+		if (!setCameraParameters(cameraName, resolution)) {
 			throw new UnsupportedCameraException(cameraName + " does not support target perspectives because"
 					+ " its focal length and sensor parameters are unknown.");
 		}
+		
+		setCameraFeedSize(resolution);
 	}
 	
-	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D paperBounds) {
-		this(cameraName, arenaBounds);
-		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
+	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes, Dimension2D paperBounds) {
+		this(cameraName, feedDims, arenaBounds);
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
+		this.setProjectorResolution(projectorRes);
 		
 		// Camera distance is unknown
 		calculateUnknown();
 	}
 
 	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
-		Iterator<Entry<String, CameraParameters>> it = cameraParameters.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<String, CameraParameters> supportedCamera = it.next();
-			CameraParameters camParams = (CameraParameters) supportedCamera.getValue();
-			if (cameraName.contains(supportedCamera.getKey()) && camParams.getValidDimensions() == desiredResolution)
+		for (Map.Entry<String, CameraParameters> entry : cameraParameters.entrySet()) {
+			if (cameraName.contains(entry.getKey()) && entry.getValue().getValidDimensions().getWidth() == desiredResolution.getWidth() && 
+					entry.getValue().getValidDimensions().getHeight() == desiredResolution.getHeight()) {
+				logger.debug("Camera matches known config: {} - resolution {}", entry.getKey(), entry.getValue().getValidDimensions());
 				return true;
-			it.remove();
+			}
 		}
+
 		return false;
 	}
 
-	private boolean setCameraParameters(final String cameraName) {
+	private boolean setCameraParameters(final String cameraName, Dimension2D desiredResolution) {
 		for (Map.Entry<String, CameraParameters> entry : cameraParameters.entrySet()) {
-			if (cameraName.contains(entry.getKey())) {
+			if (cameraName.contains(entry.getKey()) && entry.getValue().getValidDimensions().getWidth() == desiredResolution.getWidth() && 
+					entry.getValue().getValidDimensions().getHeight() == desiredResolution.getHeight()) {
 				CameraParameters cp = entry.getValue();
 				focalLength = cp.getFocalLength();
 				sensorWidth = cp.getSensorWidth();
@@ -244,6 +248,10 @@ public class PerspectiveManager {
 		this.cameraHeight = height;
 		this.cameraWidth = width;
 	}
+	private void setCameraFeedSize(Dimension2D resolution) {
+		setCameraFeedSize((int)resolution.getWidth(), (int)resolution.getHeight());
+	}
+
 
 	/* Distance (in mm) camera to screen */
 	public void setCameraDistance(int cameraDistance) {
@@ -275,6 +283,11 @@ public class PerspectiveManager {
 		this.projectorResWidth = width;
 		this.projectorResHeight = height;
 	}
+	
+	public void setProjectorResolution(Dimension2D dims)
+	{
+		setProjectorResolution((int)dims.getWidth(), (int)dims.getHeight());
+	}
 
 	public int getProjectionWidth() {
 		return projectionWidth;
@@ -296,7 +309,8 @@ public class PerspectiveManager {
 		return sensorHeight;
 	}
 
-	public void calculateUnknown() {
+	protected
+	void calculateUnknown() {
 		int unknownCount = 0;
 
 		final double wValues[] = { focalLength, patternWidth, cameraWidth, projectionWidth, sensorWidth, cameraDistance,
@@ -330,9 +344,10 @@ public class PerspectiveManager {
 					sensorWidth, focalLength, cameraWidth);
 
 		} else if (sensorWidth == -1) {
-			// Fix focalLength at 1 since we do not know it and we can only
+			// Fix focalLength at 4 since we do not know it and we can only
 			// calculate 1 unknown
-			if (focalLength == -1) focalLength = 1;
+			// 4 is an arbitrary selection
+			if (focalLength == -1) focalLength = 4;
 
 			sensorWidth = ((projectionWidth * focalLength * (double) cameraWidth)
 					/ ((double) cameraDistance * (double) patternWidth));
@@ -342,9 +357,10 @@ public class PerspectiveManager {
 			if (logger.isTraceEnabled()) {
 				logger.trace("({} *  {} * {}) / ({} * {})", projectionWidth, focalLength, cameraWidth, cameraDistance,
 						patternWidth);
-				logger.trace("New camera params: focalLength {} sensorWidth {} sensorHeight {}", focalLength,
-						sensorWidth, sensorHeight);
 			}
+			logger.info("New camera params: focalLength {} sensorWidth {} sensorHeight {} width {} height {}", focalLength,
+					sensorWidth, sensorHeight, cameraWidth, cameraHeight);
+
 		} else if (cameraDistance == -1) {
 			final int cameraDistanceH = (int) (((double) projectionHeight * focalLength * (double) cameraHeight)
 					/ ((double) patternHeight * sensorHeight));
@@ -376,8 +392,8 @@ public class PerspectiveManager {
 	// Parameters in mm, return in px
 	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, double realDistance,
 			double desiredDistance) {
-		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1) {
-			logger.error("projectionWidth or projectionHeight or shooterDistance unknown");
+		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || cameraDistance == -1 || pxPerMMhigh == -1) {
+			logger.error("projectionWidth, projectionHeight, shooterDistance, pxPerMMhigh, or cameraDistance unknown");
 			return Optional.empty();
 		}
 
@@ -397,6 +413,14 @@ public class PerspectiveManager {
 				desiredDistance, shooterDistance, distRatio, adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
 
 		return Optional.of(new Dimension2D(adjWidthpx, adjHeightpx));
+	}
+	
+	public boolean isInitialized()
+	{
+		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || cameraDistance == -1 || pxPerMMhigh == -1) {
+			return false;
+		}
+		return true;
 	}
 
 	public boolean isCameraParamsKnown() {

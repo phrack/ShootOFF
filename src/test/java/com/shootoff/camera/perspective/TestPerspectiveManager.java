@@ -35,7 +35,7 @@ public class TestPerspectiveManager {
 
 	@Test
 	public void testOne() throws ConfigurationException {
-		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 736, 544));
+		PerspectiveManager pm = new PerspectiveManager("C270", new Dimension2D(1280, 720), new BoundingBox(0, 0, 736, 544));
 
 		pm.setCameraFeedSize(1280, 720);
 		pm.setCameraDistance(3406);
@@ -118,10 +118,9 @@ public class TestPerspectiveManager {
 	@Test
 	public void testPaperPixelsCalcParams() throws ConfigurationException {
 		PerspectiveManager pm = new PerspectiveManager(new BoundingBox(0, 0, 422, 316), new Dimension2D(640, 480),
-				new Dimension2D(67, 53), 3498);
+				new Dimension2D(67, 53), new Dimension2D(1024, 768), 3498);
 
 		pm.setShooterDistance(3498);
-		pm.setProjectorResolution(1024, 768);
 
 		pm.calculateUnknown();
 
@@ -154,9 +153,7 @@ public class TestPerspectiveManager {
 		assertTrue(paperDimensions.isPresent());
 
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
-				new Dimension2D(1280, 720), paperDimensions.get());
-
-		pm.setProjectorResolution(1024, 768);
+				new Dimension2D(1280, 720), new Dimension2D(1024, 768), paperDimensions.get());
 
 		pm.calculateUnknown();
 
@@ -196,9 +193,7 @@ public class TestPerspectiveManager {
 		assertTrue(paperDimensions.isPresent());
 
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
-				new Dimension2D(1280, 720), paperDimensions.get());
-
-		pm.setProjectorResolution(1024, 768);
+				new Dimension2D(1280, 720), new Dimension2D(1024, 768), paperDimensions.get());
 
 		pm.calculateUnknown();
 

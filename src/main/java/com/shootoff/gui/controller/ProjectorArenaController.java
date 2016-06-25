@@ -86,11 +86,9 @@ public class ProjectorArenaController implements CalibrationListener {
 		if (perspectiveManager.isPresent()) {
 			PerspectiveManager pm = perspectiveManager.get();
 
-			if (pm.isCameraParamsKnown() && pm.getCameraDistance() > 0) {
+			if (pm.isInitialized()) {
 
-				pm.calculateUnknown();
-
-				logger.debug("Distance {}", pm.getCameraDistance());
+				logger.trace("Distance {}", pm.getCameraDistance());
 
 				pm.setShooterDistance(pm.getCameraDistance());
 
@@ -301,6 +299,11 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	public double getHeight() {
 		return arenaAnchor.getHeight();
+	}
+	
+	public Dimension2D getArenaStageResolution()
+	{
+		return new Dimension2D(arenaStage.getWidth(), arenaStage.getHeight());
 	}
 
 	public Point2D getArenaScreenOrigin() {
@@ -519,8 +522,6 @@ public class ProjectorArenaController implements CalibrationListener {
 		cursorWarningToggle(false);
 
 		this.perspectiveManager = perspectiveManager;
-		if (perspectiveManager.isPresent())
-			perspectiveManager.get().setProjectorResolution((int) arenaStage.getWidth(), (int) arenaStage.getHeight());
 
 		if (pmTest) pmTest(this);
 

@@ -677,8 +677,8 @@ public class CameraManager {
 		if (isAutoCalibrating.get() && cameraCalibrationListener != null) {
 			isAutoCalibrating.set(false);
 
-			logger.debug("autoCalibrateSuccess {} {} {} {}", (int) arenaBounds.getMinX(), (int) arenaBounds.getMinY(),
-					(int) arenaBounds.getWidth(), (int) arenaBounds.getHeight());
+			logger.debug("autoCalibrateSuccess {} {} {} {} paper {}", (int) arenaBounds.getMinX(), (int) arenaBounds.getMinY(),
+					(int) arenaBounds.getWidth(), (int) arenaBounds.getHeight(), paperDims.isPresent());
 
 			cameraAutoCalibrated = true;
 			cameraCalibrationListener.calibrate(arenaBounds, paperDims, false);
