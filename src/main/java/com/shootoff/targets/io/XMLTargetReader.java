@@ -20,7 +20,6 @@ package com.shootoff.targets.io;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -58,9 +57,9 @@ public class XMLTargetReader implements TargetReader {
 	private final Map<String, String> targetTags = new HashMap<>();
 
 	public XMLTargetReader(File targetFile) {
-		try {
-			load(new FileInputStream(targetFile));
-		} catch (FileNotFoundException e) {
+		try (InputStream is = new FileInputStream(targetFile)){
+			load(is);
+		} catch (IOException e) {
 			logger.error("Problem initializing target reader from file", e);
 		}
 	}

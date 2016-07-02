@@ -44,6 +44,8 @@ public class PerspectiveManager {
 	private final static int US_LETTER_WIDTH_MM = 279;
 	private final static int US_LETTER_HEIGHT_MM = 216;
 
+	private String calibratedCameraName;
+
 	// Key = camera name
 	private static final List<CameraParameters> cameraParameters = new ArrayList<CameraParameters>();
 
@@ -123,30 +125,23 @@ public class PerspectiveManager {
 	}
 
 	public PerspectiveManager(Bounds arenaBounds, Dimension2D feedDims, Dimension2D paperBounds,
-			Dimension2D projectorRes, int cameraDistance) {
+			Dimension2D projectorRes) {
 		this(arenaBounds);
 		setCameraFeedSize((int) feedDims.getWidth(), (int) feedDims.getHeight());
-		this.setCameraDistance(cameraDistance);
 		this.setProjectorResolution(projectorRes);
 
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
-
-		// Camera parameters are unknown
-		calculateUnknown();
 	}
 
-	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes,
-			int cameraDistance) {
+	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes) {
 		this(cameraName, feedDims, arenaBounds);
-		this.setCameraDistance(cameraDistance);
 		this.setProjectorResolution(projectorRes);
-
-		// Pattern size is unknown
-		calculateUnknown();
 	}
 
 	public PerspectiveManager(String cameraName, Dimension2D resolution, Bounds arenaBounds) {
 		this(arenaBounds);
+
+		calibratedCameraName = cameraName;
 
 		if (!setCameraParameters(cameraName, resolution)) {
 			throw new UnsupportedCameraException(cameraName + " does not support target perspectives because"
@@ -156,8 +151,8 @@ public class PerspectiveManager {
 		setCameraFeedSize(resolution);
 	}
 
-	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes,
-			Dimension2D paperBounds) {
+	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D paperBounds,
+			Dimension2D projectorRes) {
 		this(cameraName, feedDims, arenaBounds);
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
 		this.setProjectorResolution(projectorRes);
@@ -169,8 +164,8 @@ public class PerspectiveManager {
 	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
 		for (CameraParameters cam : cameraParameters) {
 			if (cameraName.contains(cam.getName())
-					&& cam.getValidDimensions().getWidth() == desiredResolution.getWidth()
-					&& cam.getValidDimensions().getHeight() == desiredResolution.getHeight()) {
+					&& Math.abs(cam.getValidDimensions().getWidth() - desiredResolution.getWidth()) < .001
+					&& Math.abs(cam.getValidDimensions().getHeight() - desiredResolution.getHeight()) < .001) {
 				return true;
 			}
 		}
@@ -181,8 +176,8 @@ public class PerspectiveManager {
 	private boolean setCameraParameters(final String cameraName, Dimension2D desiredResolution) {
 		for (CameraParameters cam : cameraParameters) {
 			if (cameraName.contains(cam.getName())
-					&& cam.getValidDimensions().getWidth() == desiredResolution.getWidth()
-					&& cam.getValidDimensions().getHeight() == desiredResolution.getHeight()) {
+					&& Math.abs(cam.getValidDimensions().getWidth() - desiredResolution.getWidth()) < .001
+					&& Math.abs(cam.getValidDimensions().getHeight() - desiredResolution.getHeight()) < .001) {
 				focalLength = cam.getFocalLength();
 				sensorWidth = cam.getSensorWidth();
 				sensorHeight = cam.getSensorHeight();
@@ -206,9 +201,11 @@ public class PerspectiveManager {
 
 	/*
 	 * The real world width and height of the projector arena in the camera feed
-	 * (in mm)
+	 * (in mm) -- currently only used for testing. Could ask the user to set
+	 * this manually, but this is enough of a pain that for now we just ask them
+	 * to calibrate with paper
 	 */
-	public void setProjectionSize(int width, int height) {
+	protected void setProjectionSize(int width, int height) {
 		if (logger.isTraceEnabled()) logger.trace("projection w {} h {}", width, height);
 
 		this.projectionHeight = height;
@@ -266,12 +263,18 @@ public class PerspectiveManager {
 	public void setCameraDistance(int cameraDistance) {
 		if (logger.isTraceEnabled()) logger.trace("cameraDistance {}", cameraDistance);
 		this.cameraDistance = cameraDistance;
+
+		calculateUnknown();
 	}
 
 	/* Distance (in mm) camera to shooter */
 	public void setShooterDistance(int shooterDistance) {
 		if (logger.isTraceEnabled()) logger.trace("shooterDistance {}", shooterDistance);
 		this.shooterDistance = shooterDistance;
+	}
+
+	public String getCalibratedCameraName() {
+		return calibratedCameraName;
 	}
 
 	public int getCameraDistance() {
@@ -433,6 +436,6 @@ public class PerspectiveManager {
 	}
 
 	public boolean isCameraParamsKnown() {
-		return sensorWidth == -1 && focalLength == -1;
+		return !(sensorWidth == -1 && focalLength == -1);
 	}
 }

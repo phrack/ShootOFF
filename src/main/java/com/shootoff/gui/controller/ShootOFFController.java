@@ -1099,7 +1099,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		addProjectorTargetItem.setMnemonicParsing(false);
 
 		addProjectorTargetItem.setOnAction((e) -> {
-			arenaController.getCanvasManager().addTarget(path);
+			Optional<Target> target = arenaController.getCanvasManager().addTarget(path);
+			if (target.isPresent()) arenaController.targetAdded(target.get());
 		});
 
 		MenuItem editTargetItem = new MenuItem(targetName);
@@ -1178,9 +1179,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			Optional<String> cameraName = config.getWebcamsUserName(webcam);
 			String messageFormat = "The camera %s is streaming frames that are very bright. "
 					+ " This will increase the odds of shots falsely being detected."
-					+ " For best results, please do any mix of the following:\n\n"
-					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness\n"
-					+ "-Remove any bright light sources in the camera's view\n"
+					+ " For best results, please do any mix of the following:%n%n"
+					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness%n"
+					+ "-Remove any bright light sources in the camera's view%n"
 					+ "-Turn down your projector's brightness and contrast";
 			String message;
 			if (cameraName.isPresent()) {

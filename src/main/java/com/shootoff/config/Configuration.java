@@ -81,7 +81,7 @@ public class Configuration {
 	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
 	private static final String WEBCAMS_PROP = "shootoff.webcams";
-	private static final String RECORDING_WEBCAMS_PROP = "shootoff.webcams.recording";
+	private static final String RECORDING_WEBCAMS_PROP = WEBCAMS_PROP + ".recording";
 	private static final String MARKER_RADIUS_PROP = "shootoff.markerradius";
 	private static final String IGNORE_LASER_COLOR_PROP = "shootoff.ignorelasercolor";
 	private static final String USE_RED_LASER_SOUND_PROP = "shootoff.redlasersound.use";
@@ -95,6 +95,7 @@ public class Configuration {
 	private static final String ARENA_POSITION_X_PROP = "shootoff.arena.x";
 	private static final String ARENA_POSITION_Y_PROP = "shootoff.arena.y";
 	private static final String MUTED_CHIME_MESSAGES = "shootoff.diagnosticmessages.chime.muted";
+	private static final String PERSPECTIVE_WEBCAM_DISTANCES = WEBCAMS_PROP + ".distances";
 
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
@@ -116,9 +117,9 @@ public class Configuration {
 
 	private boolean isFirstRun = false;
 	private boolean useErrorReporting = true;
-	private Map<String, URL> ipcams = new HashMap<String, URL>();
-	private Map<String, String> ipcamCredentials = new HashMap<String, String>();
-	private Map<String, Camera> webcams = new HashMap<String, Camera>();
+	private Map<String, URL> ipcams = new HashMap<>();
+	private Map<String, String> ipcamCredentials = new HashMap<>();
+	private Map<String, Camera> webcams = new HashMap<>();
 	private int markerRadius = 4;
 	private boolean ignoreLaserColor = false;
 	private String ignoreLaserColorName = "None";
@@ -131,13 +132,14 @@ public class Configuration {
 	private boolean useMalfunctions = false;
 	private float malfunctionsProbability = (float) 10.0;
 	private boolean debugMode = false;
-	private Set<Camera> recordingCameras = new HashSet<Camera>();
-	private Set<CameraManager> recordingManagers = new HashSet<CameraManager>();
-	private Set<VideoPlayerController> videoPlayers = new HashSet<VideoPlayerController>();
+	private Set<Camera> recordingCameras = new HashSet<>();
+	private Set<CameraManager> recordingManagers = new HashSet<>();
+	private Set<VideoPlayerController> videoPlayers = new HashSet<>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
+	private Map<String, Integer> cameraDistances = new HashMap<>();
 	private Set<String> messagesChimeMuted = new HashSet<String>();
 
 	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
@@ -327,6 +329,13 @@ public class Configuration {
 					Double.parseDouble(prop.getProperty(ARENA_POSITION_Y_PROP)));
 		}
 
+		if (prop.containsKey(PERSPECTIVE_WEBCAM_DISTANCES)) {
+			for (String distanceString : prop.getProperty(PERSPECTIVE_WEBCAM_DISTANCES).split(",")) {
+				String[] distanceComponents = distanceString.split("\\|");
+				cameraDistances.put(distanceComponents[0], Integer.parseInt(distanceComponents[1]));
+			}
+		}
+
 		if (prop.containsKey(MUTED_CHIME_MESSAGES)) {
 			for (String message : prop.getProperty(MUTED_CHIME_MESSAGES).split("\\|")) {
 				muteMessageChime(message);
@@ -354,9 +363,9 @@ public class Configuration {
 			return false;
 		}
 
-		Properties prop = new Properties();
+		final Properties prop = new Properties();
 
-		StringBuilder ipcamList = new StringBuilder();
+		final StringBuilder ipcamList = new StringBuilder();
 		for (Entry<String, URL> entry : ipcams.entrySet()) {
 			if (ipcamList.length() > 0) ipcamList.append(",");
 			ipcamList.append(entry.getKey());
@@ -369,7 +378,7 @@ public class Configuration {
 			}
 		}
 
-		StringBuilder webcamList = new StringBuilder();
+		final StringBuilder webcamList = new StringBuilder();
 		for (Entry<String, Camera> entry : webcams.entrySet()) {
 			if (webcamList.length() > 0) webcamList.append(",");
 			webcamList.append(entry.getKey());
@@ -377,16 +386,24 @@ public class Configuration {
 			webcamList.append(entry.getValue().getName());
 		}
 
-		StringBuilder recordingWebcamList = new StringBuilder();
+		final StringBuilder recordingWebcamList = new StringBuilder();
 		for (Camera c : recordingCameras) {
 			if (recordingWebcamList.length() > 0) recordingWebcamList.append(",");
 			recordingWebcamList.append(c.getName());
 		}
 
-		StringBuilder mutedChimeMessages = new StringBuilder();
+		final StringBuilder mutedChimeMessages = new StringBuilder();
 		for (String m : messagesChimeMuted) {
 			if (mutedChimeMessages.length() > 0) mutedChimeMessages.append("|");
 			mutedChimeMessages.append(m);
+		}
+
+		final StringBuilder cameraDistancesList = new StringBuilder();
+		for (Entry<String, Integer> distanceEntry : cameraDistances.entrySet()) {
+			if (cameraDistancesList.length() > 0) cameraDistancesList.append(",");
+			cameraDistancesList.append(distanceEntry.getKey());
+			cameraDistancesList.append("|");
+			cameraDistancesList.append(distanceEntry.getValue());
 		}
 
 		prop.setProperty(FIRST_RUN_PROP, String.valueOf(isFirstRun));
@@ -412,6 +429,8 @@ public class Configuration {
 			prop.setProperty(ARENA_POSITION_X_PROP, String.valueOf(arenaPosition.getX()));
 			prop.setProperty(ARENA_POSITION_Y_PROP, String.valueOf(arenaPosition.getY()));
 		}
+
+		prop.setProperty(PERSPECTIVE_WEBCAM_DISTANCES, cameraDistancesList.toString());
 
 		OutputStream outputStream = new FileOutputStream(configName);
 
@@ -772,6 +791,10 @@ public class Configuration {
 		arenaPosition = Optional.of(new Point2D(x, y));
 	}
 
+	public void setCameraDistance(String webcamName, int distance) {
+		cameraDistances.put(webcamName, distance);
+	}
+
 	public Map<String, URL> getRegistedIpCams() {
 		return ipcams;
 	}
@@ -880,6 +903,10 @@ public class Configuration {
 
 	public Optional<Point2D> getArenaPosition() {
 		return arenaPosition;
+	}
+
+	public Optional<Integer> getCameraDistance(String cameraName) {
+		return Optional.ofNullable(cameraDistances.get(cameraName));
 	}
 
 	public boolean isChimeMuted(String message) {

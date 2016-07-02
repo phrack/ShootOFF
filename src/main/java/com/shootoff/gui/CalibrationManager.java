@@ -113,33 +113,19 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName(), feedDim)) {
 			if (perspectivePaperDims.isPresent()) {
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
-						calibratingCameraManager.getProjectionBounds().get(), feedDim,
-						arenaController.getArenaStageResolution(), perspectivePaperDims.get());
-				pm.setProjectorResolution(arenaController.getArenaStageResolution());
+						calibratingCameraManager.getProjectionBounds().get(), feedDim, perspectivePaperDims.get(),
+						arenaController.getArenaStageResolution());
 			} else {
-				// TODO: Prompt the user to enter a distance
-
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
 						calibratingCameraManager.getProjectionBounds().get(), feedDim,
-						arenaController.getArenaStageResolution(), 3479);
+						arenaController.getArenaStageResolution());
 			}
-
-			// TODO: Should come from the user
-			pm.setShooterDistance(3406);
-
 		} else {
 			if (perspectivePaperDims.isPresent()) {
-				// TODO: Prompt the user to enter a distance
 				pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(), feedDim,
-						perspectivePaperDims.get(), arenaController.getArenaStageResolution(), 3479);
-
-				// TODO: Should come from the user
-				pm.setShooterDistance(3406);
-
+						perspectivePaperDims.get(), arenaController.getArenaStageResolution());
 			} else {
-				logger.debug("Camera not supported for perspective {} or feed resolution",
-						calibratingCameraManager.getName());
-
+				logger.debug("Too many perspective parameters are unknown to create a perspective manager.");
 			}
 		}
 

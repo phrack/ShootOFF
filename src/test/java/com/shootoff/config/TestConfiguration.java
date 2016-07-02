@@ -209,6 +209,11 @@ public class TestConfiguration {
 		assertTrue(config.isChimeMuted("Test message1"));
 		assertTrue(config.isChimeMuted("annoying message2"));
 		assertFalse(config.isChimeMuted("Rare and worth hearing"));
+		assertTrue(config.getCameraDistance("Camera1").isPresent());
+		assertEquals(100, config.getCameraDistance("Camera1").get().intValue());
+		assertTrue(config.getCameraDistance("Camera 2 Name").isPresent());
+		assertEquals(13, config.getCameraDistance("Camera 2 Name").get().intValue());
+		assertFalse(config.getCameraDistance("Unheard of Camera").isPresent());
 	}
 
 	@Test
@@ -272,6 +277,8 @@ public class TestConfiguration {
 		writtenConfig.muteMessageChime("good message");
 		writtenConfig.muteMessageChime("bad message");
 		writtenConfig.unmuteMessageChime("good message");
+		writtenConfig.setCameraDistance("Camera1", 100);
+		writtenConfig.setCameraDistance("Camera2", 509);
 
 		writtenConfig.writeConfigurationFile();
 
@@ -288,6 +295,8 @@ public class TestConfiguration {
 		assertTrue(readConfig.isChimeMuted("annoying message"));
 		assertTrue(readConfig.isChimeMuted("bad message"));
 		assertFalse(readConfig.isChimeMuted("good message"));
+		assertEquals(writtenConfig.getCameraDistance("Camera1"), readConfig.getCameraDistance("Camera1"));
+		assertEquals(writtenConfig.getCameraDistance("Camera2"), readConfig.getCameraDistance("Camera2"));
 
 		if (!props.delete()) {
 			System.err.println("Can't delete test config file: " + props.getPath());

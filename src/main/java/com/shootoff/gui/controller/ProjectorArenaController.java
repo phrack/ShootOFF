@@ -36,26 +36,32 @@ import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
+import com.shootoff.gui.TargetDistancePane;
 import com.shootoff.gui.TargetView;
 import com.shootoff.targets.Target;
-import com.shootoff.targets.io.TargetIO;
-import com.shootoff.targets.io.TargetIO.TargetComponents;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -81,38 +87,6 @@ public class ProjectorArenaController implements CalibrationListener {
 
 	private CalibrationManager calibrationManager;
 	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
-
-	// This is temporary as we test perspective code
-	private void pmTest(ProjectorArenaController pac) {
-		if (perspectiveManager.isPresent()) {
-			PerspectiveManager pm = perspectiveManager.get();
-
-			if (pm.isInitialized()) {
-
-				logger.trace("Distance {}", pm.getCameraDistance());
-
-				pm.setShooterDistance(pm.getCameraDistance());
-
-				Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(279, 216, pm.getCameraDistance(),
-						pm.getCameraDistance());
-
-				File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/"
-						+ "SimpleBullseye_score.target");
-
-				Optional<TargetComponents> tc = TargetIO.loadTarget(targetFile);
-
-				TargetView target = new TargetView(targetFile, tc.get().getTargetGroup(), tc.get().getTargetTags(),
-						config, pac.getCanvasManager(), false);
-				target.setPosition(50, 50);
-				if (targetDimensions.isPresent()) {
-					Dimension2D dims = targetDimensions.get();
-					target.setDimensions(dims.getWidth(), dims.getHeight());
-				}
-
-				pac.getCanvasManager().addTarget(target);
-			}
-		}
-	}
 
 	// Used for testing
 	public void init(Configuration config, CanvasManager canvasManager) {
@@ -514,8 +488,6 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 	}
 
-	private boolean pmTest = false;
-
 	@Override
 	public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
 		setCalibrationMessageVisible(false);
@@ -526,8 +498,14 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		this.perspectiveManager = perspectiveManager;
 
-		if (pmTest) pmTest(this);
-
+		// Now that we've calibrated and have a new perspective manager,
+		// go through all current arena targets and try to resize them
+		// to their default real world heights
+		if (perspectiveManager.isPresent()) {
+			for (Target t : canvasManager.getTargets()) {
+				resizeTargetToDefaultPerspective(t);
+			}
+		}
 	}
 
 	public void setFeedCanvasManager(CanvasManager canvasManager) {
@@ -543,5 +521,114 @@ public class ProjectorArenaController implements CalibrationListener {
 				this.canvasManager.toggleTargetSelection(Optional.empty());
 			});
 		}
+	}
+
+	public void targetAdded(Target target) {
+		resizeTargetToDefaultPerspective(target);
+
+		if (!(target instanceof TargetView)) throw new AssertionError(
+				"Target is no longer an instance of TargetView. This code path was not upgraded at some point.");
+
+		final TargetView tv = (TargetView) target;
+		final EventHandler<? super MouseEvent> mouseClickedHandler = tv.getTargetGroup().getOnMouseClicked();
+
+		tv.getTargetGroup().setOnMouseClicked((event) -> {
+			if (MouseButton.SECONDARY.equals(event.getButton())) {
+				final MenuItem setDistanceMenuItem = new MenuItem("Set Target Distance");
+
+				setDistanceMenuItem.setOnAction((e) -> {
+					if (perspectiveManager.isPresent()) {
+						showTargetResizeDialog(target, event);
+					} else {
+						showRecalibrationMessage();
+					}
+				});
+
+				final ContextMenu menu = new ContextMenu(setDistanceMenuItem);
+				menu.show(tv.getTargetGroup(), event.getScreenX(), event.getScreenY());
+			}
+
+			if (mouseClickedHandler != null) mouseClickedHandler.handle(event);
+		});
+	}
+
+	private void showTargetResizeDialog(Target target, MouseEvent event) {
+		PerspectiveManager pm = perspectiveManager.get();
+
+		TargetDistancePane distanceSettingsPane = new TargetDistancePane(target, pm, config);
+
+		final Stage distanceSettingsStage = new Stage();
+		final Scene scene = new Scene(distanceSettingsPane);
+		distanceSettingsStage.initOwner(arenaStage);
+		distanceSettingsStage.initModality(Modality.WINDOW_MODAL);
+		distanceSettingsStage.setTitle("Target Distance Settings");
+		distanceSettingsStage.setScene(scene);
+		distanceSettingsStage.setX(event.getScreenX());
+		distanceSettingsStage.setY(event.getScreenY());
+		distanceSettingsStage.showAndWait();
+
+		if (!distanceSettingsPane.userCancelled()) {
+			int currentWidth = distanceSettingsPane.getCurrentTargetWidth();
+			int currentHeight = distanceSettingsPane.getCurrentTargetHeight();
+			int currentDistance = distanceSettingsPane.getCurrentTargetDistance();
+			int newDistance = distanceSettingsPane.getNewTargetDistance();
+
+			if (logger.isTraceEnabled()) {
+				logger.trace(
+						"New target settings from distance settings pane: current width = {}, "
+								+ "current height = {}, current distance = {}, new distance = {}",
+						currentWidth, currentHeight, currentDistance, newDistance);
+			}
+
+			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(currentWidth, currentHeight,
+					currentDistance, newDistance);
+
+			if (targetDimensions.isPresent()) {
+				Dimension2D d = targetDimensions.get();
+				target.setDimensions(d.getWidth(), d.getHeight());
+			}
+		}
+	}
+
+	private void resizeTargetToDefaultPerspective(Target target) {
+		if (perspectiveManager.isPresent() && target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)
+				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)
+				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_DISTANCE)) {
+
+			PerspectiveManager pm = perspectiveManager.get();
+
+			pm.setShooterDistance(pm.getCameraDistance());
+
+			if (pm.isInitialized()) {
+				int width = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
+				int height = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
+				int distance = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_DISTANCE));
+
+				Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, distance, distance);
+
+				if (targetDimensions.isPresent()) {
+					Dimension2D d = targetDimensions.get();
+					target.setDimensions(d.getWidth(), d.getHeight());
+				}
+			}
+		}
+	}
+
+	private void showRecalibrationMessage() {
+		Alert recalibrationAlert = new Alert(AlertType.ERROR);
+
+		String message = "Data required to set a target's distance is missing and there is no way "
+				+ "to determine the correct values unless you recalibrate the arena with the perspective "
+				+ "calibration pattern.\n\nPlease print out this file and tape it to your wall or "
+				+ "projector screen in view of the camera pointed at your projection:\n\n"
+				+ System.getProperty("shootoff.home") + File.separator + "targets" + File.separator
+				+ "PerspectiveCalibrationPattern.pdf\n\nThen hit Projector -> Start Calibrating.";
+
+		recalibrationAlert.setTitle("Missing Perspective Data");
+		recalibrationAlert.setHeaderText("Critical Distance Data Missing!");
+		recalibrationAlert.setResizable(true);
+		recalibrationAlert.setContentText(message);
+		recalibrationAlert.initOwner(arenaStage);
+		recalibrationAlert.showAndWait();
 	}
 }
