@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<target>
+<target defaultPerceivedWidth="450" defaultPerceivedHeight="750" defaultDistance="10000">
 	<polygon fill="gray">
 		<point x="293.000000" y="63.000000" />
 		<point x="430.000000" y="63.000000" />
