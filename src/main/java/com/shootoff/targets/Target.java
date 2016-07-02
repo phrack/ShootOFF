@@ -2,6 +2,7 @@ package com.shootoff.targets;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
@@ -59,4 +60,10 @@ public interface Target {
 	public void reverseAnimation(TargetRegion region);
 
 	public Optional<Hit> isHit(Shot shot);
+
+	public boolean tagExists(String name);
+
+	public String getTag(String name);
+
+	public Map<String, String> getAllTags();
 }

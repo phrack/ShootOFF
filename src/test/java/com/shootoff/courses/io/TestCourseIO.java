@@ -21,6 +21,7 @@ import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 public class TestCourseIO {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -55,7 +56,8 @@ public class TestCourseIO {
 		arenaController.setBackground(img);
 
 		File targetFile = new File(targetName);
-		TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
+		TargetComponents tc = TargetIO.loadTarget(targetFile).get();
+		TargetView target = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(), config,
 				new MockCanvasManager(config), false);
 		target.setPosition(targetX, targetY);
 		target.setDimensions(targetWidth, targetHeight);

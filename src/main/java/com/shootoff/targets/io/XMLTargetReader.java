@@ -51,30 +51,44 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
-public class XMLTargetReader {
+public class XMLTargetReader implements TargetReader {
 	private static final Logger logger = LoggerFactory.getLogger(XMLTargetReader.class);
 
-	private InputStream targetStream;
+	private final List<Node> targetNodes = new ArrayList<>();
+	private final Map<String, String> targetTags = new HashMap<>();
 
 	public XMLTargetReader(File targetFile) {
 		try {
-			targetStream = new FileInputStream(targetFile);
+			load(new FileInputStream(targetFile));
 		} catch (FileNotFoundException e) {
 			logger.error("Problem initializing target reader from file", e);
 		}
 	}
 
 	public XMLTargetReader(InputStream targetStream) {
-		this.targetStream = targetStream;
+		load(targetStream);
 	}
 
-	public List<Node> load() {
+	@Override
+	public List<Node> getTargetNodes() {
+		return targetNodes;
+	}
+
+	@Override
+	public Map<String, String> getTargetTags() {
+		return targetTags;
+	}
+
+	private void load(InputStream targetStream) {
 		try {
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			TargetXMLHandler handler = new TargetXMLHandler();
 			saxParser.parse(targetStream, handler);
 
-			return handler.getRegions();
+			targetNodes.addAll(handler.getRegions());
+			targetTags.putAll(handler.getTags());
+
+			return;
 		} catch (IOException | ParserConfigurationException | SAXException e) {
 			logger.error("Error reading XML target", e);
 		} finally {
@@ -86,11 +100,10 @@ public class XMLTargetReader {
 				}
 			}
 		}
-
-		return new ArrayList<Node>();
 	}
 
 	private static class TargetXMLHandler extends DefaultHandler {
+		private final Map<String, String> targetTags = new HashMap<>();
 		private final List<Node> regions = new ArrayList<Node>();
 		private TargetRegion currentRegion;
 		private List<Double> polygonPoints = null;
@@ -101,10 +114,25 @@ public class XMLTargetReader {
 			return regions;
 		}
 
+		public Map<String, String> getTags() {
+			return targetTags;
+		}
+
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 
 			switch (qName) {
+			case "target":
+				if (attributes.getLength() > 0) {
+					for (int i = 0; i < attributes.getLength(); i++) {
+						String key = attributes.getQName(i);
+						String value = attributes.getValue(key);
+						targetTags.put(key, value);
+					}
+				}
+
+				break;
+
 			case "image":
 				currentTags = new HashMap<String, String>();
 

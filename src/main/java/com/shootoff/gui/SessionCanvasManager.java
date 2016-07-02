@@ -40,6 +40,7 @@ import com.shootoff.targets.RegionType;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
@@ -288,12 +289,14 @@ public class SessionCanvasManager {
 	}
 
 	private void addTarget(final TargetAddedEvent e) {
-		final Optional<Group> target = TargetIO.loadTarget(
+		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(
 				new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
 
-		if (target.isPresent()) {
-			canvas.getChildren().add(target.get());
-			final TargetView targetContainer = new TargetView(target.get(), targets);
+		if (targetComponents.isPresent()) {
+			TargetComponents tc = targetComponents.get();
+			
+			canvas.getChildren().add(tc.getTargetGroup());
+			final TargetView targetContainer = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
 			eventToContainer.put(e, targetContainer);
 			targetViews.add(targetContainer);
 			targets.add(targetContainer);

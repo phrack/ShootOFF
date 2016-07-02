@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
@@ -32,6 +31,7 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import ch.qos.logback.classic.Logger;
 
@@ -58,14 +58,14 @@ public class TestDuelingTree {
 		System.setOut(stringOutStream);
 
 		targets = new ArrayList<Target>();
-		Group duelTree = TargetIO.loadTarget(new File("targets" + File.separator + "Duel_Tree.target")).get();
-		TargetView duelTreeTarget = new TargetView(duelTree, new ArrayList<Target>());
+		TargetComponents tc = TargetIO.loadTarget(new File("targets" + File.separator + "Duel_Tree.target")).get();
+		TargetView duelTreeTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), new ArrayList<Target>());
 		targets.add(duelTreeTarget);
 
 		leftPaddlesHits = new ArrayList<Hit>();
 		rightPaddlesHits = new ArrayList<Hit>();
 
-		for (Node node : duelTree.getChildren()) {
+		for (Node node : tc.getTargetGroup().getChildren()) {
 			TargetRegion region = (TargetRegion) node;
 
 			if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("left_paddle")) {

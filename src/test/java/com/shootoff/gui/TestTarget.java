@@ -22,6 +22,7 @@ import com.shootoff.targets.RegionType;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.event.Event;
 import javafx.scene.input.KeyCode;
@@ -60,10 +61,12 @@ public class TestTarget {
 		arenaController.init(config, canvasManager);
 
 		targets = new ArrayList<Target>();
+		TargetComponents popperComponents = TargetIO.loadTarget(new File("targets/Pepper_Popper.target")).get();
 		pepperPopper = (TargetView) canvasManager.addTarget(
-				new TargetView(TargetIO.loadTarget(new File("targets/Pepper_Popper.target")).get(), targets));
+				new TargetView(popperComponents.getTargetGroup(), popperComponents.getTargetTags(), targets));
 		targets.add(pepperPopper);
-		targets.add(new TargetView(TargetIO.loadTarget(new File("targets/Reset.target")).get(), targets));
+		TargetComponents resetComponents = TargetIO.loadTarget(new File("targets/Reset.target")).get();
+		targets.add(new TargetView(resetComponents.getTargetGroup(), resetComponents.getTargetTags(), targets));
 	}
 
 	@Test

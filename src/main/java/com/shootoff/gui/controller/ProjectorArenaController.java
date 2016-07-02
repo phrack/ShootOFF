@@ -39,6 +39,7 @@ import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetView;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
@@ -97,8 +98,11 @@ public class ProjectorArenaController implements CalibrationListener {
 
 				File targetFile = new File(System.getProperty("shootoff.home") + File.separator + "targets/"
 						+ "SimpleBullseye_score.target");
-				TargetView target = new TargetView(targetFile, TargetIO.loadTarget(targetFile).get(), config,
-						pac.getCanvasManager(), false);
+
+				Optional<TargetComponents> tc = TargetIO.loadTarget(targetFile);
+
+				TargetView target = new TargetView(targetFile, tc.get().getTargetGroup(), tc.get().getTargetTags(),
+						config, pac.getCanvasManager(), false);
 				target.setPosition(50, 50);
 				if (targetDimensions.isPresent()) {
 					Dimension2D dims = targetDimensions.get();
@@ -300,9 +304,8 @@ public class ProjectorArenaController implements CalibrationListener {
 	public double getHeight() {
 		return arenaAnchor.getHeight();
 	}
-	
-	public Dimension2D getArenaStageResolution()
-	{
+
+	public Dimension2D getArenaStageResolution() {
 		return new Dimension2D(arenaStage.getWidth(), arenaStage.getHeight());
 	}
 

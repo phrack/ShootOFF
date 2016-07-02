@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -76,6 +77,7 @@ public class TargetView implements com.shootoff.targets.Target {
 
 	private final File targetFile;
 	private final Group targetGroup;
+	private final Map<String, String> targetTags;
 	private final Set<Node> resizeAnchors = new HashSet<Node>();
 	private final Optional<Configuration> config;
 	private final Optional<CanvasManager> parent;
@@ -94,10 +96,11 @@ public class TargetView implements com.shootoff.targets.Target {
 	private double x;
 	private double y;
 
-	public TargetView(File targetFile, Group target, Configuration config, CanvasManager parent,
-			boolean userDeletable) {
+	public TargetView(File targetFile, Group target, Map<String, String> targetTags, Configuration config,
+			CanvasManager parent, boolean userDeletable) {
 		this.targetFile = targetFile;
 		this.targetGroup = target;
+		this.targetTags = targetTags;
 		this.config = Optional.of(config);
 		this.parent = Optional.of(parent);
 		this.targets = Optional.empty();
@@ -117,9 +120,11 @@ public class TargetView implements com.shootoff.targets.Target {
 		keyPressed();
 	}
 
-	public TargetView(Group target, List<Target> targets) {
+	// Used by the session viewer and for testing
+	public TargetView(Group target, Map<String, String> targetTags, List<Target> targets) {
 		this.targetFile = null;
 		this.targetGroup = target;
+		this.targetTags = targetTags;
 		this.config = Optional.empty();
 		this.parent = Optional.empty();
 		this.targets = Optional.of(targets);
@@ -858,5 +863,20 @@ public class TargetView implements com.shootoff.targets.Target {
 
 	private boolean isInResizeZone(MouseEvent event) {
 		return isTopZone(event) || isBottomZone(event) || isLeftZone(event) || isRightZone(event);
+	}
+
+	@Override
+	public boolean tagExists(String name) {
+		return targetTags.containsKey(name);
+	}
+
+	@Override
+	public String getTag(String name) {
+		return targetTags.get(name);
+	}
+
+	@Override
+	public Map<String, String> getAllTags() {
+		return targetTags;
 	}
 }

@@ -32,5 +32,5 @@ public interface RegionVisitor {
 
 	public void visitPolygonRegion(Double[] points, String fill, Map<String, String> tags);
 
-	public void visitEnd();
+	public void visitEnd(Map<String, String> targetTags);
 }

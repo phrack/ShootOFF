@@ -3,6 +3,7 @@ package com.shootoff.session;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,10 +41,10 @@ public class TestSessionRecorder {
 		shot = new Shot(Color.RED, 0, 0, 0, 2);
 
 		targetName1 = "bullseye.target";
-		target1 = new TargetView(new File(targetName1), new Group(), config, canvasManager, false);
+		target1 = new TargetView(new File(targetName1), new Group(), new HashMap<String, String>(), config, canvasManager, false);
 
 		targetName2 = "shoot_dont_shoot" + File.separator + " shoot.target";
-		target2 = new TargetView(new File(targetName2), new Group(), config, canvasManager, false);
+		target2 = new TargetView(new File(targetName2), new Group(), new HashMap<String, String>(), config, canvasManager, false);
 
 		canvasManager.addTarget(target1);
 		canvasManager.addTarget(target2);

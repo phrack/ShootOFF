@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 
 import org.junit.After;
@@ -33,6 +32,7 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 public class TestRandomShoot {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -78,9 +78,9 @@ public class TestRandomShoot {
 	@Test
 	public void testFiveSmallTarget() throws IOException {
 		List<Target> targets = new ArrayList<Target>();
-		Group bullseyeFiveGroup = TargetIO
+		TargetComponents tc = TargetIO
 				.loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get();
-		TargetView bullseyeFiveTarget = new TargetView(bullseyeFiveGroup, new ArrayList<Target>());
+		TargetView bullseyeFiveTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), new ArrayList<Target>());
 		targets.add(bullseyeFiveTarget);
 
 		RandomShoot rs = new RandomShoot(targets, rng);
@@ -136,9 +136,12 @@ public class TestRandomShoot {
 	@Test
 	public void testNoSoundFilesForSubtargetNames() throws IOException {
 		List<Target> targets = new ArrayList<Target>();
-		TargetView missingSoundTarget = new TargetView(TargetIO
+		
+		TargetComponents tc = TargetIO
 				.loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile()))
-				.get(), targets);
+				.get();
+		
+		TargetView missingSoundTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
 		targets.add(missingSoundTarget);
 
 		RandomShoot rs = new RandomShoot(targets, rng);

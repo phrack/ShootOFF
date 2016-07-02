@@ -3,6 +3,7 @@ package com.shootoff.session.io;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +54,8 @@ public class TestSessionIO {
 
 		Configuration config = new Configuration(new String[0]);
 		MockCanvasManager canvasManager = new MockCanvasManager(config);
-		TargetView target = new TargetView(new File(targetName), new Group(), config, canvasManager, false);
+		TargetView target = new TargetView(new File(targetName), new Group(), new HashMap<String, String>(), config,
+				canvasManager, false);
 		canvasManager.addTarget(target);
 
 		hitRegionIndex = 0;

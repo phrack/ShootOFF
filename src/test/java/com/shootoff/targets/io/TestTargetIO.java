@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javafx.scene.Group;
@@ -41,11 +42,13 @@ import com.shootoff.targets.PolygonRegion;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 public class TestTargetIO {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private List<Node> regions = new ArrayList<Node>();
+	private Map<String, String> targetTags = new HashMap<>();
+	private List<Node> regions = new ArrayList<>();
 	private ImageRegion img;
 	private RectangleRegion rec;
 	private EllipseRegion ell;
@@ -56,25 +59,25 @@ public class TestTargetIO {
 	public void setUp() {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
-		Map<String, String> imgTags = new HashMap<String, String>();
+		Map<String, String> imgTags = new HashMap<>();
 		imgTags.put("1", "2");
 		img = new ImageRegion(6, 6, new File("targets" + File.separator + "circle-plate.gif"));
 		img.setTags(imgTags);
 
-		Map<String, String> recTags = new HashMap<String, String>();
+		Map<String, String> recTags = new HashMap<>();
 		recTags.put("a", "b");
 		recTags.put("c", "d");
 		rec = new RectangleRegion(10, 40, 20, 90);
 		rec.setFill(Color.ORANGE);
 		rec.setTags(recTags);
 
-		Map<String, String> ellTags = new HashMap<String, String>();
+		Map<String, String> ellTags = new HashMap<>();
 		ellTags.put("name", "value");
 		ell = new EllipseRegion(0, 20, 5, 5);
 		ell.setFill(Color.RED);
 		ell.setTags(ellTags);
 
-		Map<String, String> polTags = new HashMap<String, String>();
+		Map<String, String> polTags = new HashMap<>();
 		polTags.put("points", "3");
 		pol = new PolygonRegion(300, 0, 400, 30, 300, 100);
 		pol.setTags(polTags);
@@ -84,8 +87,11 @@ public class TestTargetIO {
 		regions.add(ell);
 		regions.add(pol);
 
+		targetTags.put("A", "B");
+		targetTags.put("C", "D");
+		
 		tempXMLTarget = new File("temp.target");
-		TargetIO.saveTarget(regions, tempXMLTarget);
+		TargetIO.saveTarget(targetTags, regions, tempXMLTarget);
 	}
 
 	@After
@@ -93,8 +99,8 @@ public class TestTargetIO {
 		if (!tempXMLTarget.delete()) System.err.println("Failed to delete " + tempXMLTarget.getPath());
 	}
 
-	private void checkTarget(Group targetGroup) {
-		for (Node node : targetGroup.getChildren()) {
+	private void checkTarget(TargetComponents targetComponents) {
+		for (Node node : targetComponents.getTargetGroup().getChildren()) {
 			TargetRegion region = (TargetRegion) node;
 
 			switch (region.getType()) {
@@ -130,32 +136,37 @@ public class TestTargetIO {
 				break;
 			}
 		}
+		
+		for (Entry<String, String> entry : targetComponents.getTargetTags().entrySet()) {
+			assertTrue(targetTags.containsKey(entry.getKey()));
+			assertEquals(targetTags.get(entry.getKey()), entry.getValue());
+		}
 	}
 
 	@Test
 	public void testXMLSerializationFile() {
-		Optional<Group> target = TargetIO.loadTarget(tempXMLTarget);
+		Optional<TargetComponents> targetComponents = TargetIO.loadTarget(tempXMLTarget);
 
-		assertTrue(target.isPresent());
+		assertTrue(targetComponents.isPresent());
 
-		Group targetGroup = target.get();
+		TargetComponents tc = targetComponents.get();
 
-		assertEquals(4, targetGroup.getChildren().size());
+		assertEquals(4, tc.getTargetGroup().getChildren().size());
 
-		checkTarget(targetGroup);
+		checkTarget(tc);
 	}
 
 	@Test
 	public void testXMLSerializationStream() throws FileNotFoundException {
-		Optional<Group> target = TargetIO.loadTarget(new FileInputStream(tempXMLTarget));
+		Optional<TargetComponents> targetComponents = TargetIO.loadTarget(new FileInputStream(tempXMLTarget));
 
-		assertTrue(target.isPresent());
+		assertTrue(targetComponents.isPresent());
 
-		Group targetGroup = target.get();
+		TargetComponents tc = targetComponents.get();
 
-		assertEquals(4, targetGroup.getChildren().size());
+		assertEquals(4, tc.getTargetGroup().getChildren().size());
 
-		checkTarget(targetGroup);
+		checkTarget(tc);
 	}
 
 	@Test
@@ -178,6 +189,6 @@ public class TestTargetIO {
 
 		assertEquals(4, targetGroup.getChildren().size());
 
-		checkTarget(targetGroup);
+		checkTarget(new TargetComponents(targetGroup, target.get().getAllTags()));
 	}
 }

@@ -60,6 +60,7 @@ import com.shootoff.targets.RegionType;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -712,21 +713,22 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public Optional<Target> addTarget(File targetFile) {
-		Optional<Group> targetGroup;
+		Optional<TargetComponents> targetComponents;
 
 		if ('@' == targetFile.toString().charAt(0)) {
 			try {
-				targetGroup = TargetIO.loadTarget(new FileInputStream(targetFile.toString().substring(1)));
+				targetComponents = TargetIO.loadTarget(new FileInputStream(targetFile.toString().substring(1)));
 			} catch (FileNotFoundException e) {
-				targetGroup = Optional.empty();
+				targetComponents = Optional.empty();
 				logger.error("Error adding target from stream", e);
 			}
 		} else {
-			targetGroup = TargetIO.loadTarget(targetFile);
+			targetComponents = TargetIO.loadTarget(targetFile);
 		}
 
-		if (targetGroup.isPresent()) {
-			Optional<Target> target = Optional.of(addTarget(targetFile, targetGroup.get(), true));
+		if (targetComponents.isPresent()) {
+			TargetComponents tc = targetComponents.get();
+			Optional<Target> target = Optional.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
 
 			if (config.getSessionRecorder().isPresent() && target.isPresent()) {
 				config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
@@ -738,8 +740,8 @@ public class CanvasManager implements CameraView {
 		return Optional.empty();
 	}
 
-	public Target addTarget(File targetFile, Group targetGroup, boolean userDeletable) {
-		TargetView newTarget = new TargetView(targetFile, targetGroup, config, this, userDeletable);
+	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
+		TargetView newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
 
 		return addTarget(newTarget);
 	}

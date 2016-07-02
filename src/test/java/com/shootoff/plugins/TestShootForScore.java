@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
@@ -28,6 +27,7 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 public class TestShootForScore {
 	private PrintStream originalOut;
@@ -47,12 +47,12 @@ public class TestShootForScore {
 		System.setOut(stringOutStream);
 
 		targets = new ArrayList<Target>();
-		Group bullseyeScore = TargetIO.loadTarget(new File("targets" + File.separator + "SimpleBullseye_score.target"))
+		TargetComponents tc = TargetIO.loadTarget(new File("targets" + File.separator + "SimpleBullseye_score.target"))
 				.get();
-		TargetView bullseyeScoreTarget = new TargetView(bullseyeScore, new ArrayList<Target>());
+		TargetView bullseyeScoreTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), new ArrayList<Target>());
 		targets.add(bullseyeScoreTarget);
 
-		for (Node node : bullseyeScore.getChildren()) {
+		for (Node node : tc.getTargetGroup().getChildren()) {
 			TargetRegion region = (TargetRegion) node;
 
 			if (region.tagExists("points") && region.getTag("points").equals("10")) {

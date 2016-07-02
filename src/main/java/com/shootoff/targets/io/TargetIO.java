@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -46,7 +47,26 @@ public class TargetIO {
 
 	public static final double DEFAULT_OPACITY = 0.5;
 
-	public static void saveTarget(final List<Node> regions, final File targetFile) {
+	public static class TargetComponents {
+		private final Group targetGroup;
+		private final Map<String, String> targetTags;
+
+		public TargetComponents(Group targetGroup, Map<String, String> targetTags) {
+			this.targetGroup = targetGroup;
+			this.targetTags = targetTags;
+		}
+
+		public Group getTargetGroup() {
+			return targetGroup;
+		}
+
+		public Map<String, String> getTargetTags() {
+			return targetTags;
+		}
+	}
+
+	public static void saveTarget(final Map<String, String> targetTags, final List<Node> regions,
+			final File targetFile) {
 		RegionVisitor visitor;
 
 		if (targetFile.getName().endsWith("target")) {
@@ -108,26 +128,26 @@ public class TargetIO {
 			}
 		}
 
-		visitor.visitEnd();
+		visitor.visitEnd(targetTags);
 	}
 
-	public static Optional<Group> loadTarget(final File targetFile) {
-		List<Node> regions;
-
+	public static Optional<TargetComponents> loadTarget(final File targetFile) {
+		final TargetReader reader;
+		
 		if (targetFile.getName().endsWith("target")) {
-			regions = new XMLTargetReader(targetFile).load();
+			reader = new XMLTargetReader(targetFile);
 		} else {
 			logger.error("Unknown target file type.");
 			return Optional.empty();
 		}
 
-		return Optional.of(processVisualTags(regions));
+		return Optional.of(new TargetComponents(processVisualTags(reader.getTargetNodes()), reader.getTargetTags()));
 	}
 
-	public static Optional<Group> loadTarget(final InputStream targetStream) {
-		final List<Node> regions = new XMLTargetReader(targetStream).load();
+	public static Optional<TargetComponents> loadTarget(final InputStream targetStream) {
+		final TargetReader reader = new XMLTargetReader(targetStream);
 
-		return Optional.of(processVisualTags(regions));
+		return Optional.of(new TargetComponents(processVisualTags(reader.getTargetNodes()), reader.getTargetTags()));
 	}
 
 	private static Group processVisualTags(List<Node> regions) {
@@ -135,7 +155,8 @@ public class TargetIO {
 		for (final Node node : regions) {
 			final TargetRegion region = (TargetRegion) node;
 
-			if (region.tagExists(TargetView.TAG_VISIBLE) && !Boolean.parseBoolean(region.getTag(TargetView.TAG_VISIBLE))) {
+			if (region.tagExists(TargetView.TAG_VISIBLE)
+					&& !Boolean.parseBoolean(region.getTag(TargetView.TAG_VISIBLE))) {
 				node.setVisible(false);
 			}
 

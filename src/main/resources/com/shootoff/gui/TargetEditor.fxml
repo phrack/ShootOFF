@@ -73,7 +73,7 @@
                   <Tooltip text="Send Backward" />
                </tooltip>    
           </Button>   
-          <ToggleButton fx:id="tagsButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleTagEditor" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center;">
+          <ToggleButton fx:id="tagsButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleTagEditor" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center;">
 			   <tooltip>
                   <Tooltip text="Edit Selected Region's Tags" />
                </tooltip>    

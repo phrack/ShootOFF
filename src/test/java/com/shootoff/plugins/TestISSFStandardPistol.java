@@ -27,6 +27,7 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import ch.qos.logback.classic.Logger;
 import javafx.collections.FXCollections;
@@ -64,7 +65,8 @@ public class TestISSFStandardPistol {
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
 		targets = new ArrayList<Target>();
-		TargetView issfTarget = new TargetView(TargetIO.loadTarget(new File("targets/ISSF.target")).get(), targets);
+		TargetComponents tc = TargetIO.loadTarget(new File("targets/ISSF.target")).get();
+		TargetView issfTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
 		targets.add(issfTarget);
 		scoredRegionHit = new Hit(issfTarget, (TargetRegion) issfTarget.getTargetGroup().getChildren().get(0), 0, 0);
 		regionScore = Integer.parseInt(scoredRegionHit.getHitRegion().getTag("points"));

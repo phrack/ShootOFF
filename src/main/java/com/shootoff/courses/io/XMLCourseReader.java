@@ -42,10 +42,10 @@ import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.application.Platform;
 import javafx.geometry.Dimension2D;
-import javafx.scene.Group;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
@@ -133,11 +133,13 @@ public class XMLCourseReader {
 
 			case "target": {
 				File targetFile = new File(attributes.getValue("file"));
-				Optional<Group> targetNodes = TargetIO.loadTarget(targetFile);
+				Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
 
-				if (targetNodes.isPresent()) {
-					TargetView t = new TargetView(targetFile, targetNodes.get(), arenaController.getConfiguration(),
-							arenaController.getCanvasManager(), true);
+				if (targetComponents.isPresent()) {
+					TargetComponents tc = targetComponents.get();
+
+					TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
+							arenaController.getConfiguration(), arenaController.getCanvasManager(), true);
 
 					t.setPosition(Double.parseDouble(attributes.getValue("x")),
 							Double.parseDouble(attributes.getValue("y")));

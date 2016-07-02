@@ -23,7 +23,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -41,6 +43,7 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.GifAnimation;
 import com.shootoff.targets.animation.SpriteAnimation;
 import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -48,7 +51,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -93,10 +95,11 @@ public class TargetEditorController {
 
 	private TargetListener targetListener = null;
 	private Optional<Node> cursorRegion = Optional.empty();
-	private final List<Node> targetRegions = new ArrayList<Node>();
+	private final List<Node> targetRegions = new ArrayList<>();
+	private final Map<String, String> targetTags = new HashMap<>();
 	private Optional<TagEditorPanel> tagEditor = Optional.empty();
-	private final List<Double> freeformPoints = new ArrayList<Double>();
-	private final Stack<Shape> freeformShapes = new Stack<Shape>();
+	private final List<Double> freeformPoints = new ArrayList<>();
+	private final Stack<Shape> freeformShapes = new Stack<>();
 	private Optional<Line> freeformEdge = Optional.empty();
 	private double lastMouseX = 0;
 	private double lastMouseY = 0;
@@ -105,6 +108,29 @@ public class TargetEditorController {
 		if (backgroundImg != null) {
 			ImageView backgroundImgView = new ImageView();
 			backgroundImgView.setImage(backgroundImg);
+
+			backgroundImgView.setOnMouseClicked((event) -> {
+				boolean reopenEditor = false;
+
+				if (tagEditor.isPresent()) {
+					// Close tag editor
+					tagsButton.setSelected(false);
+					toggleTagEditor();
+					reopenEditor = true;
+				}
+
+				if (cursorRegion.isPresent()) {
+					unhighlightRegion(cursorRegion.get());
+					cursorRegion = Optional.empty();
+				}
+
+				if (reopenEditor) {
+					// Re-open editor set for target tags
+					tagsButton.setSelected(true);
+					toggleTagEditor();
+				}
+			});
+
 			canvasPane.getChildren().add(backgroundImgView);
 		}
 
@@ -128,12 +154,15 @@ public class TargetEditorController {
 	public void init(Image backgroundImg, TargetListener targetListener, File targetFile) {
 		init(backgroundImg, targetListener);
 
-		final Optional<Group> target = TargetIO.loadTarget(targetFile);
+		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
 
-		if (target.isPresent()) {
-			targetRegions.addAll(target.get().getChildren());
+		if (targetComponents.isPresent()) {
+			TargetComponents tc = targetComponents.get();
 
-			for (Node region : target.get().getChildren()) {
+			targetTags.putAll(tc.getTargetTags());
+			targetRegions.addAll(tc.getTargetGroup().getChildren());
+
+			for (Node region : tc.getTargetGroup().getChildren()) {
 				region.setOnMouseClicked((e) -> {
 					regionClicked(e);
 				});
@@ -142,7 +171,7 @@ public class TargetEditorController {
 				});
 			}
 
-			canvasPane.getChildren().addAll(target.get().getChildren());
+			canvasPane.getChildren().addAll(tc.getTargetGroup().getChildren());
 		}
 	}
 
@@ -214,7 +243,7 @@ public class TargetEditorController {
 			targetFile = new File(path);
 			final boolean isNewTarget = !targetFile.exists();
 
-			TargetIO.saveTarget(targetRegions, targetFile);
+			TargetIO.saveTarget(targetTags, targetRegions, targetFile);
 
 			if (isNewTarget) targetListener.newTarget(targetFile);
 		}
@@ -351,6 +380,11 @@ public class TargetEditorController {
 		freeformPoints.add(event.getY());
 	}
 
+	private void unhighlightRegion(Node region) {
+		if (((TargetRegion) region).getType() != RegionType.IMAGE)
+			((Shape) region).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
+	}
+
 	public void regionClicked(MouseEvent event) {
 		if (!cursorButton.isSelected()) {
 			// We want to drop a new region
@@ -362,20 +396,19 @@ public class TargetEditorController {
 		final Node selected = (Node) event.getTarget();
 		boolean tagEditorOpen = false;
 
+		if (tagEditor.isPresent()) {
+			// Close tag editor
+			tagsButton.setSelected(false);
+			toggleTagEditor();
+			tagEditorOpen = true;
+		}
+		
 		if (cursorRegion.isPresent()) {
 			final Node previous = cursorRegion.get();
 
 			// Unhighlight the old selection
 			if (!previous.equals(selected)) {
-				if (((TargetRegion) previous).getType() != RegionType.IMAGE)
-					((Shape) previous).setStroke(TargetRegion.UNSELECTED_STROKE_COLOR);
-
-				if (tagEditor.isPresent()) {
-					// Close tag editor
-					tagsButton.setSelected(false);
-					toggleTagEditor();
-					tagEditorOpen = true;
-				}
+				unhighlightRegion(previous);
 			}
 		}
 
@@ -735,18 +768,42 @@ public class TargetEditorController {
 	}
 
 	private void toggleTagEditor() {
-		if (tagsButton.isSelected() && cursorRegion.isPresent()) {
-			final TagEditorPanel editor = new TagEditorPanel(((TargetRegion) cursorRegion.get()).getAllTags());
-			tagEditor = Optional.of(editor);
-			targetEditorPane.getChildren().add(editor);
-			editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
-			editor.setLayoutY(
-					tagsButton.getLayoutY() + tagsButton.getHeight() + tagsButton.getPadding().getBottom() + 2);
-		} else if (!tagsButton.isSelected() && tagEditor.isPresent()) {
-			final TagEditorPanel editor = tagEditor.get();
+		if (!tagsButton.isSelected() && tagEditor.isPresent()) {
+			// Close the tag editor
+			TagEditorPanel editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
-			if (cursorRegion.isPresent()) ((TargetRegion) cursorRegion.get()).setTags(editor.getTags());
 			tagEditor = Optional.empty();
+
+			if (cursorRegion.isPresent()) {
+				((TargetRegion) cursorRegion.get()).setTags(editor.getTags());
+			} else {
+				targetTags.clear();
+				targetTags.putAll(editor.getTags());
+			}
+
+			return;	
 		}
+		
+
+		final TagEditorPanel editor;
+		
+		if (tagsButton.isSelected()) {
+			if (cursorRegion.isPresent()) {
+				// Edit tags for a selected target region
+				editor = new TagEditorPanel(((TargetRegion) cursorRegion.get()).getAllTags());
+			} else {
+				// Edit target-level tags
+				editor = new TagEditorPanel(targetTags);
+			}
+		} else {
+			throw new AssertionError("It should not be possible to toggle the tags button without either the "
+					+ "background or a target region selected.");
+		}
+
+		// Show the tag editor
+		tagEditor = Optional.of(editor);
+		targetEditorPane.getChildren().add(editor);
+		editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
+		editor.setLayoutY(tagsButton.getLayoutY() + tagsButton.getHeight() + tagsButton.getPadding().getBottom() + 2);
 	}
 }

@@ -19,6 +19,7 @@
 package com.shootoff.gui;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -105,48 +106,42 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeCalibrationTargetIfPresent();
 
 		PerspectiveManager pm = null;
-		
-		Dimension2D feedDim = new Dimension2D(calibratingCameraManager.getFeedWidth(),calibratingCameraManager.getFeedHeight());
 
-		
+		Dimension2D feedDim = new Dimension2D(calibratingCameraManager.getFeedWidth(),
+				calibratingCameraManager.getFeedHeight());
+
 		if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName(), feedDim)) {
 			if (perspectivePaperDims.isPresent()) {
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
-						calibratingCameraManager.getProjectionBounds().get(),
-						feedDim,
-						arenaController.getArenaStageResolution(),
-						perspectivePaperDims.get());
+						calibratingCameraManager.getProjectionBounds().get(), feedDim,
+						arenaController.getArenaStageResolution(), perspectivePaperDims.get());
 				pm.setProjectorResolution(arenaController.getArenaStageResolution());
 			} else {
 				// TODO: Prompt the user to enter a distance
 
-				
 				pm = new PerspectiveManager(calibratingCameraManager.getName(),
-						calibratingCameraManager.getProjectionBounds().get(), 
-						feedDim, arenaController.getArenaStageResolution(), 3479);
+						calibratingCameraManager.getProjectionBounds().get(), feedDim,
+						arenaController.getArenaStageResolution(), 3479);
 			}
-			
+
 			// TODO: Should come from the user
 			pm.setShooterDistance(3406);
 
-		}
-		else
-		{
+		} else {
 			if (perspectivePaperDims.isPresent()) {
 				// TODO: Prompt the user to enter a distance
-				pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(),
-						feedDim,
+				pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(), feedDim,
 						perspectivePaperDims.get(), arenaController.getArenaStageResolution(), 3479);
-								
+
 				// TODO: Should come from the user
 				pm.setShooterDistance(3406);
-								
+
 			} else {
-				logger.debug("Camera not supported for perspective {} or feed resolution", calibratingCameraManager.getName());
-			
+				logger.debug("Camera not supported for perspective {} or feed resolution",
+						calibratingCameraManager.getName());
+
 			}
 		}
-
 
 		calibrationListener.calibrated(Optional.ofNullable(pm));
 
@@ -168,14 +163,15 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeCalibrationTargetIfPresent();
 
 		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);
-		
-		//createCalibrationTarget(arenaBounds.getMinX(), arenaBounds.getMinY(), arenaBounds.getWidth(),
-		//		arenaBounds.getHeight());
+
+		// createCalibrationTarget(arenaBounds.getMinX(), arenaBounds.getMinY(),
+		// arenaBounds.getWidth(),
+		// arenaBounds.getHeight());
 
 		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), arenaBounds);
-		
+
 		logger.debug("calibrate {} {} {}", arenaBounds, perspectivePaperDims, calibratedFromCanvas);
-		
+
 		this.perspectivePaperDims = perspectivePaperDims;
 
 		if (isCalibrating()) stopCalibration();
@@ -201,7 +197,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		});
 		calibrationGroup.getChildren().add(calibrationRectangle);
 
-		calibrationTarget = Optional.of((TargetView) calibratingCanvasManager.addTarget(null, calibrationGroup, false));
+		calibrationTarget = Optional.of((TargetView) calibratingCanvasManager.addTarget(null, calibrationGroup,
+				new HashMap<String, String>(), false));
 		calibrationTarget.get().setKeepInBounds(true);
 	}
 
@@ -297,7 +294,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (!isShowingPattern.get()) arenaController.saveCurrentBackground();
 		setArenaBackground("pattern.png");
 		isShowingPattern.set(true);
-		
+
 		calibratingCameraManager.enableAutoCalibration(false);
 
 		showAutoCalibrationMessage();
