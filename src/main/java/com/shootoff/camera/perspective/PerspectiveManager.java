@@ -28,14 +28,26 @@ import org.slf4j.LoggerFactory;
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 
-/*
+/**
+ * This class is used to resize targets on the projector arena to real world
+ * dimensions. This allows users and training exercises to take virtual targets
+ * and set them to the sizes they are in real life are specific distances. For
+ * example, ISSF targets are 10 cm x 10 cm at 25 m for most handgun
+ * competitions. This class lets you resize an ISSF target on a projector arena
+ * to 10 cm by 10 cm as if it were at 25 m. Given defaults like the ISSF case,
+ * this class can resize a target to appear as if it is at any distance.
+ * 
+ * All units for this class are in millimeters because those units make the
+ * calculations nicer. In particular, we use the following formula to calculate
+ * unknown camera and distance parameters and target dimensions:
  * 
  * distance to object (mm) =
  * 
- *  focal length (mm) * real height of the object (mm) * image height (pixels)
+ * focal length (mm) * real height of the object (mm) * image height (pixels)
  * ---------------------------------------------------------------------------
- *                  object height (pixels) * sensor height (mm)
+ * object height (pixels) * sensor height (mm)
  * 
+ * @author cbdmaul
  */
 
 public class PerspectiveManager {
@@ -111,8 +123,8 @@ public class PerspectiveManager {
 	// so that they can be easily tweaked/added to
 	static {
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.58, 2.02, new Dimension2D(1280, 720)));
-		cameraParameters.add(new CameraParameters("C270", 4.0, 3.127, 2.260, new Dimension2D(640, 480)));
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.580, 2.636, new Dimension2D(800, 600)));
+		cameraParameters.add(new CameraParameters("C270", 4.0, 3.127, 2.260, new Dimension2D(640, 480)));
 		cameraParameters.add(new CameraParameters("C920", 3.67, 4.80, 3.60, new Dimension2D(1280, 720)));
 	}
 
@@ -308,15 +320,15 @@ public class PerspectiveManager {
 		return projectionHeight;
 	}
 
-	public double getFocalLength() {
+	protected double getFocalLength() {
 		return focalLength;
 	}
 
-	public double getSensorWidth() {
+	protected double getSensorWidth() {
 		return sensorWidth;
 	}
 
-	public double getSensorHeight() {
+	protected double getSensorHeight() {
 		return sensorHeight;
 	}
 
@@ -399,7 +411,32 @@ public class PerspectiveManager {
 			logger.trace("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
 	}
 
-	// Parameters in mm, return in px
+	/**
+	 * Starting with a target's real world width and height in mm, as it appears
+	 * on a projection, calculate a new width and height in pixels to resize the
+	 * target to such that it appears to be a distance of
+	 * <code>desiredDistance</code> in mm away. This calculation assumes that
+	 * the current real world dimensions are the result of the target being
+	 * <code>realDistance</code> away in mm.
+	 * 
+	 * To set the initial real word size of a target, call this method with the
+	 * desired <code>realWidth</code> and <code>realHeight</code> with
+	 * <code>realDistance</code> and <code>desiredDistance</code> equal to the
+	 * target's initial real world distance.
+	 * 
+	 * @param realWidth
+	 *            the current width of the target on the projection in mm
+	 * @param realHeight
+	 *            the current height of the target on the projection in mm
+	 * @param realDistance
+	 *            the current distance of the target in mm
+	 * @param desiredDistance
+	 *            the desired new distance of the target used to derive the new
+	 *            target dimensions
+	 * @return the new targets dimensions in pixels necessary to make it appear
+	 *         <code>desiredDistance</code> away given its current real world
+	 *         dimensions and distance
+	 */
 	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, double realDistance,
 			double desiredDistance) {
 		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || cameraDistance == -1

@@ -291,6 +291,10 @@ public class ProjectorArenaController implements CalibrationListener {
 		return canvasManager;
 	}
 
+	public Optional<PerspectiveManager> getPerspectiveManager() {
+		return perspectiveManager;
+	}
+
 	public void close() {
 		arenaStage.close();
 		TimerPool.cancelTimer(mouseExitedFuture);
@@ -508,6 +512,19 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 	}
 
+	/**
+	 * Used by the {@link com.shootoff.gui.CalibrationManager} to notify the
+	 * arena controller of the canvas manager that belongs to the camera used to
+	 * detect shots on the arena. This particular canvas manager is used by the
+	 * arena controller to display arena specific diagnostic messages on the
+	 * webcam feed pointed at the projection. It is also used to disable shot
+	 * detection when necessary to enhance user experience (e.g. when the mouse
+	 * cursor is on the arena because a user is resizing targets).
+	 * 
+	 * @param canvasManager
+	 *            the canvas manager showing the webcam feed pointed at the
+	 *            projection for the projection arena controlled by this class
+	 */
 	public void setFeedCanvasManager(CanvasManager canvasManager) {
 		this.feedCanvasManager = canvasManager;
 
@@ -523,6 +540,18 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 	}
 
+	/**
+	 * This methods is used by
+	 * {@link com.shootoff.gui.controller.ShootOFFController} to notify the
+	 * arena controller of new targets added to the arena. Without this method
+	 * the targets would be added directly to the arena's canvas manager,
+	 * bypassing the arena controller. Thus, the arena controller would not be
+	 * able to configure arena-specific target operations (e.g. setting a
+	 * targets distance).
+	 * 
+	 * @param target
+	 *            a new target that was just added to the projector arena
+	 */
 	public void targetAdded(Target target) {
 		resizeTargetToDefaultPerspective(target);
 

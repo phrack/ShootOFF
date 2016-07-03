@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javafx.application.Platform;
+import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
@@ -48,6 +49,10 @@ import com.shootoff.targets.Target;
 
 /**
  * The API for training exercises that only work on the projector arena.
+ * Training exercises that are intended to be used with the projector arena only
+ * (i.e. those that require a projector) should extend this class. If the
+ * exercise is not intended to only work with a projector, extend
+ * {@link TrainingExerciseBase} instead.
  * 
  * @author phrack
  */
@@ -216,8 +221,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	/**
-	 * Returns the current instance of this class. This metehod exists so that
-	 * we can call methods in this class when in an internal class (e.g. to
+	 * Returns the current instance of this class. This method exists so that we
+	 * can call methods in this class when in an internal class (e.g. to
 	 * implement Callable) that doesn't have access to super.
 	 * 
 	 * @return the current instance of this class
@@ -227,7 +232,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	/**
-	 * Set the projector arena's background image
+	 * Set the projector arena's background image.
 	 * 
 	 * @param background
 	 *            a file on the filesystem or a resource to set as the projector
@@ -240,10 +245,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	/**
-	 * Remove all targets on the arena and replace them with the course specified
-	 * in the file <code>courseFile</code>.
+	 * Remove all targets on the arena and replace them with the course
+	 * specified in the file <code>courseFile</code>.
 	 * 
-	 * @param courseFile a file specifying the course to use
+	 * @param courseFile
+	 *            a file specifying the course to use
 	 * @return a list of the targets loaded from <code>courseFile</code>
 	 * 
 	 * @since 3.8
@@ -252,6 +258,71 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		Optional<Course> newCourse = CourseIO.loadCourse(arenaController, courseFile);
 		arenaController.setCourse(newCourse.get());
 		return newCourse.get().getTargets();
+	}
+
+	/**
+	 * Determines whether or not ShootOFF has sufficient information to set a
+	 * target's distance to a real world distance.
+	 * 
+	 * @return <code>true</code> if ShootOFF can set a target to a real world
+	 *         distance
+	 * 
+	 * @since 3.8
+	 */
+	public boolean isPerspectiveInitialized() {
+		return arenaController.getPerspectiveManager().isPresent()
+				&& arenaController.getPerspectiveManager().get().isInitialized();
+	}
+
+	/**
+	 * Changes the size of a target to real world dimensions at a particular
+	 * distance (e.g. to simulate a target that is 36"x24" at 10 yards). To do
+	 * this, you must already know the size of the target and ShootOFF must be
+	 * initialized with the distance and camera specification information
+	 * required to measure distances in the real world. Look at the USPSA target
+	 * for an example of setting a default real world width, height, and
+	 * distance for a target.
+	 * 
+	 * Distance and camera specification information is typically determined
+	 * during the auto-calibration process. However, a user will have to
+	 * manually enter at least the camera distance by manually setting a
+	 * target's distance if they did not auto-calibrate or if they
+	 * auto-calibrated without the perspective calibration pattern present.
+	 * 
+	 * @param target
+	 *            the target to resize
+	 * @param currentRealWidth
+	 *            the current width of the target as it appears on the
+	 *            projection in mm
+	 * @param currentRealHeight
+	 *            the current height of the target as it appears on the
+	 *            projection in mm
+	 * @param currentRealDistance
+	 *            the distance the target is currently sized to appear at (e.g.
+	 *            the target appears to be currentRealWidth x currentRealHeight
+	 *            because it is currentRealDistance away in mm)
+	 * @param desiredDistance
+	 *            the new distance the target should appear at in mm (i.e.
+	 *            resize the target so it appears to be desiredDistance away
+	 *            based on its current size and distance)
+	 * @return <code>true</code> if ShootOFF has the data to resize a target and
+	 *         successfully calculated new target dimensions
+	 */
+	public boolean setTargetDistance(Target target, int currentRealWidth, int currentRealHeight,
+			int currentRealDistance, int desiredDistance) {
+		if (!isPerspectiveInitialized()) return false;
+
+		Optional<Dimension2D> targetDimensions = arenaController.getPerspectiveManager().get()
+				.calculateObjectSize(currentRealWidth, currentRealHeight, currentRealDistance, desiredDistance);
+
+		if (targetDimensions.isPresent()) {
+			Dimension2D d = targetDimensions.get();
+			target.setDimensions(d.getWidth(), d.getHeight());
+
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
