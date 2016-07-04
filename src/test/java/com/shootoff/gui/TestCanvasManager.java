@@ -28,7 +28,7 @@ import javafx.scene.shape.Shape;
 
 public class TestCanvasManager {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
-
+	
 	private CanvasManager cm;
 	private Target ipscTarget;
 	private ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
@@ -127,7 +127,8 @@ public class TestCanvasManager {
 	public void testAddShot() {
 		assertEquals(0, cm.getShots().size());
 
-		cm.addShot(Color.RED, 0, 0);
+		Shot shot = new Shot(Color.RED, 0, 0, 0, 2);		
+		cm.addShot(shot);
 
 		assertEquals(1, cm.getShots().size());
 	}
@@ -137,10 +138,9 @@ public class TestCanvasManager {
 		config.setDisplayResolution(800, 600);
 		cm.getCameraManager().setFeedResolution(640, 480);
 
-		
 		assertEquals(0, cm.getShots().size());
 		
-		cm.addShot(Color.RED, 640, 480);
+		cm.getCameraManager().injectShot(Color.RED, 640, 480, true);
 
 		assertEquals(1, cm.getShots().size());
 
@@ -155,7 +155,7 @@ public class TestCanvasManager {
 
 		assertEquals(0, cm.getShots().size());
 
-		cm.addShot(Color.RED, 640, 480);
+		cm.getCameraManager().injectShot(Color.RED, 640, 480, true);
 
 		assertEquals(1, cm.getShots().size());
 
@@ -169,7 +169,7 @@ public class TestCanvasManager {
 
 		assertEquals(0, cm.getShots().size());
 
-		cm.addShot(Color.RED, 320, 240, true);
+		cm.getCameraManager().injectShot(Color.RED, 320, 240, false);
 
 		assertEquals(1, cm.getShots().size());
 

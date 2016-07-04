@@ -15,7 +15,6 @@ import com.shootoff.targets.Target;
 import javafx.collections.FXCollections;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 
 public class MockCanvasManager extends CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(MockCanvasManager.class);
@@ -23,8 +22,6 @@ public class MockCanvasManager extends CanvasManager {
 	private final Configuration config;
 	private final String cameraName;
 	private final boolean useShotProcessors;
-
-	private long startTime = 0;
 
 	public MockCanvasManager(Configuration config) {
 		super(new Group(), config, new ShootOFFController(), String.format("%d", System.nanoTime()),
@@ -49,11 +46,7 @@ public class MockCanvasManager extends CanvasManager {
 	}
 
 	@Override
-	public void addShot(Color color, double x, double y) {
-		if (startTime == 0) startTime = System.currentTimeMillis();
-		Shot shot = new Shot(color, x, y, System.currentTimeMillis(), this.cameraManager.getFrameCount(),
-				config.getMarkerRadius());
-
+	public void addShot(Shot shot) {
 		if (useShotProcessors) {
 
 			for (ShotProcessor p : config.getShotProcessors()) {

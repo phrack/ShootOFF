@@ -46,9 +46,14 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.GREEN, 586.30, 395.44, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 532.16, 347.98, 0, 2));
-		requiredShots.add(new Shot(Color.GREEN, 587.80, 396.73, 0, 2));
+		// These coordinates are scaled down to a 640x480 display resolution
+		
+		// Scaled down from 586.30, 395.44
+		requiredShots.add(new Shot(Color.GREEN, 293.14, 263.34, 0, 2));
+		// Scaled down from 532.16, 347.98
+		requiredShots.add(new Shot(Color.GREEN, 265.61, 231.68, 0, 2));
+		// Scaled down from 587.80, 396.73
+		requiredShots.add(new Shot(Color.GREEN, 294.02, 264.28, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 

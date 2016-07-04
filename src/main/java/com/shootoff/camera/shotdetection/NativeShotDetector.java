@@ -6,7 +6,6 @@ import org.opencv.core.Mat;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotDetector;
 import com.shootoff.config.Configuration;
 
@@ -71,8 +70,6 @@ public class NativeShotDetector extends ShotDetector {
 	public void foundShot(int x, int y, int rgb) {
 		Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
 
-		final Shot shot = new Shot(c, x, y, 0, cameraManager.getFrameCount(), config.getMarkerRadius());
-
-		super.addShot(shot);
+		super.addShot(c, x, y, true);
 	}
 }

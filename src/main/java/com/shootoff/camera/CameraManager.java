@@ -220,12 +220,18 @@ public class CameraManager {
 		feedWidth = width;
 		feedHeight = height;
 	}
+	
+	// Used by click-to-shoot and tests to inject a shot via the shot detector
+	public void injectShot(Color color, double x, double y, boolean scaleShot) {
+		shotDetector.addShot(color, x, y, scaleShot);
+	}
 
 	public void clearShots() {
 		cameraView.clearShots();
 	}
 
 	public void reset() {
+		shotDetector.reset();
 		cameraView.reset();
 	}
 

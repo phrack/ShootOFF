@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotDetector;
 import com.shootoff.config.Configuration;
 
@@ -408,9 +407,7 @@ public final class JavaShotDetector extends ShotDetector {
 		final double x = pc.centerPixelX;
 		final double y = pc.centerPixelY;
 
-		final Shot shot = new Shot(color.get(), x, y, 0, cameraManager.getFrameCount(), config.getMarkerRadius());
-
-		if (super.addShot(shot) && config.isDebugShotsRecordToFiles()) {
+		if (super.addShot(color.get(), x, y, true) && config.isDebugShotsRecordToFiles()) {
 			final Mat debugFrame = new Mat();
 			Imgproc.cvtColor(workingFrame, debugFrame, Imgproc.COLOR_HSV2BGR);
 

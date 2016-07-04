@@ -27,7 +27,7 @@ public interface CameraView {
 	 */
 	public boolean addChild(Node c);
 
-	public void addShot(Color color, double x, double y);
+	public void addShot(Shot shot);
 
 	public Optional<Target> addTarget(File targetFile);
 

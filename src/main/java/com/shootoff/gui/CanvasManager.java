@@ -107,7 +107,6 @@ public class CanvasManager implements CameraView {
 	private ProgressIndicator progress;
 	private Optional<ContextMenu> contextMenu = Optional.empty();
 	private Optional<TargetView> selectedTarget = Optional.empty();
-	private long startTime = 0;
 	private boolean showShots = true;
 	private boolean hadMalfunction = false;
 	private boolean hadReload = false;
@@ -143,9 +142,9 @@ public class CanvasManager implements CameraView {
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
-					addShot(Color.RED, event.getX(), event.getY(), true);
+					cameraManager.injectShot(Color.RED, event.getX(), event.getY(), false);
 				} else if (event.isControlDown()) {
-					addShot(Color.GREEN, event.getX(), event.getY(), true);
+					cameraManager.injectShot(Color.GREEN, event.getX(), event.getY(), false);
 				}
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
@@ -405,8 +404,6 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public void reset() {
-		startTime = System.currentTimeMillis();
-
 		// Reset animations
 		for (Target target : targets) {
 			for (TargetRegion region : target.getRegions()) {
@@ -510,24 +507,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	@Override
-	public void addShot(Color color, double x, double y) {
-		addShot(color, x, y, false);
-	}
-
-	public void addShot(Color color, double x, double y, boolean cameFromCanvas) {
-		if (startTime == 0) startTime = System.currentTimeMillis();
-
-		Shot shot = new Shot(color, x, y, System.currentTimeMillis() - startTime, cameraManager.getFrameCount(),
-				config.getMarkerRadius());
-
-		// If the shot didn't come from click to shoot (cameFromCanvas) and the
-		// resolution of the display and feed differ, translate shot coordinates
-		if (!cameFromCanvas && (config.getDisplayWidth() != cameraManager.getFeedWidth()
-				|| config.getDisplayHeight() != cameraManager.getFeedHeight())) {
-			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
-					cameraManager.getFeedHeight());
-		}
-
+	public void addShot(Shot shot) {
 		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 		if (rejectingProcessor.isPresent()) {
 			recordRejectedShot(shot, rejectingProcessor.get());
@@ -558,9 +538,9 @@ public class CanvasManager implements CameraView {
 		shots.add(shot);
 		drawShot(shot);
 
-		if (config.useRedLaserSound() && color.equals(Color.RED)) {
+		if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
 			TrainingExerciseBase.playSound(config.getRedLaserSound());
-		} else if (config.useGreenLaserSound() && color.equals(Color.GREEN)) {
+		} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
 			TrainingExerciseBase.playSound(config.getGreenLaserSound());
 		}
 
