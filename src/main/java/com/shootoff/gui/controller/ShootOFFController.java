@@ -172,7 +172,29 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		if (config.getWebcams().isEmpty()) {
 			Optional<Camera> defaultCamera = Camera.getDefault();
 			if (defaultCamera.isPresent()) {
-				if (!addCameraTab("Default", defaultCamera.get())) cameraLockFailure(defaultCamera.get(), true);
+				if (!addCameraTab("Default", defaultCamera.get())) {
+					// Failed to open the default camera. This sometimes happens
+					// on Windows when video devices get registered and set as
+					// the default camera even though the physical device is not
+					// actually present. This seems to happen sometimes with TV
+					// tuners and buggy camera drivers. As a workaround, try to
+					// fall back to using a different camera as the default.
+					List<Camera> allCameras = Camera.getWebcams();
+
+					if (allCameras.size() <= 1) {
+						cameraLockFailure(defaultCamera.get(), true);
+					} else {
+						for (Camera c : allCameras) {
+							if (!c.equals(defaultCamera.get())) {
+								if (!addCameraTab("Default", c)) {
+									cameraLockFailure(c, true);
+								}
+
+								break;
+							}
+						}
+					}
+				}
 			} else {
 				Main.closeNoCamera();
 			}
