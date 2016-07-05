@@ -446,7 +446,7 @@ public class PerspectiveManager {
 		}
 
 		// Make it appropriate size for the shooter
-		double distRatio = realDistance / shooterDistance;
+		double distRatio = shooterDistance / realDistance;
 
 		// Make it appropriate size for the desired distance
 		distRatio *= cameraDistance / desiredDistance;

@@ -61,14 +61,14 @@ public class TestPerspectiveManager {
 
 		dims = pm.calculateObjectSize(300, 200, 3406 * 2, 3406);
 		assertTrue(dims.isPresent());
-		assertEquals(350.7, dims.get().getWidth(), 1);
-		assertEquals(236.5, dims.get().getHeight(), 1);
+		assertEquals(87.7, dims.get().getWidth(), 1);
+		assertEquals(59.1, dims.get().getHeight(), 1);
 
 		pm.setShooterDistance(3406 * 2);
 		dims = pm.calculateObjectSize(300, 200, 3406, 3406);
 		assertTrue(dims.isPresent());
-		assertEquals(87.7, dims.get().getWidth(), 1);
-		assertEquals(59.1, dims.get().getHeight(), 1);
+		assertEquals(350.7, dims.get().getWidth(), 1);
+		assertEquals(236.5, dims.get().getHeight(), 1);
 
 	}
 
