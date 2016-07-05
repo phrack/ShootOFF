@@ -404,7 +404,12 @@ public class TargetView implements com.shootoff.targets.Target {
 
 	private RectangleRegion addAnchor(final double x, final double y) {
 		final RectangleRegion anchor = new RectangleRegion(x, y, ANCHOR_WIDTH, ANCHOR_HEIGHT);
-		((TargetRegion) anchor).getAllTags().put(TargetView.TAG_IGNORE_HIT, "true");
+
+		// Make the anchor regions unshootable and unresizable
+		Map<String, String> regionTags = ((TargetRegion) anchor).getAllTags();
+		regionTags.put(TargetView.TAG_IGNORE_HIT, "true");
+		regionTags.put(TargetView.TAG_RESIZABLE, "false");
+
 		anchor.setFill(Color.GOLD);
 		anchor.setStroke(Color.BLACK);
 
@@ -593,8 +598,20 @@ public class TargetView implements com.shootoff.targets.Target {
 				if (keepInBounds && (targetGroup.getBoundsInParent().getMinX() <= 0
 						|| targetGroup.getBoundsInParent().getMaxX() >= config.get().getDisplayWidth())) {
 
+					// Target went out of bounds, so go back to the old size
 					targetGroup.setLayoutX(oldLayoutX);
 					targetGroup.setScaleX(oldScaleX);
+				} else {
+					// Target stayed in bounds so make sure that unresizable
+					// target regions stay the same size
+					for (Node n : targetGroup.getChildren()) {
+						TargetRegion r = (TargetRegion) n;
+
+						if (r.tagExists(Target.TAG_RESIZABLE)
+								&& !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
+							n.setScaleX(n.getScaleX() * (1.0 + scaleDelta));
+						}
+					}
 				}
 			}
 
@@ -638,8 +655,20 @@ public class TargetView implements com.shootoff.targets.Target {
 				if (keepInBounds && (targetGroup.getBoundsInParent().getMinY() <= 0
 						|| targetGroup.getBoundsInParent().getMaxY() >= config.get().getDisplayHeight())) {
 
+					// Target went out of bounds, so go back to the old size
 					targetGroup.setLayoutY(oldLayoutY);
 					targetGroup.setScaleY(oldScaleY);
+				} else {
+					// Target stayed in bounds so make sure that unresizable
+					// target regions stay the same size
+					for (Node n : targetGroup.getChildren()) {
+						TargetRegion r = (TargetRegion) n;
+
+						if (r.tagExists(Target.TAG_RESIZABLE)
+								&& !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
+							n.setScaleY(n.getScaleY() * (1.0 + scaleDelta));
+						}
+					}
 				}
 			}
 

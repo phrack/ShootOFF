@@ -21,6 +21,7 @@ import javafx.scene.Node;
  */
 public interface Target {
 	public static final String TAG_IGNORE_HIT = "ignoreHit";
+	public static final String TAG_RESIZABLE = "isResizable";
 	public static final String TAG_OPACITY = "opacity";
 	public static final String TAG_VISIBLE = "visible";
 	public static final String TAG_DEFAULT_PERCEIVED_WIDTH = "defaultPerceivedWidth";
