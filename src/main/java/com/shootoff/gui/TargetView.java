@@ -108,6 +108,9 @@ public class TargetView implements com.shootoff.targets.Target {
 		this.cameraName = parent.getCameraName();
 
 		targetGroup.setOnMouseClicked((event) -> {
+			// Skip target selection of click to shoot is being used
+			if (config.inDebugMode() && (event.isShiftDown() || event.isControlDown())) return;
+
 			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();
 			event.consume();
