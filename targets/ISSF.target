@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<target defaultPerceivedWidth="100" defaultPerceivedHeight="100" defaultDistance="25000">
+<target defaultPerceivedWidth="500" defaultPerceivedHeight="500" defaultDistance="10000">
 	<ellipse centerX="334.000000" centerY="230.000000" radiusX="185.000000" radiusY="189.000000" fill="black">
 		<tag name="points" value="1" />
 	</ellipse>
