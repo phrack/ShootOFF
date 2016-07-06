@@ -594,6 +594,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		distanceSettingsStage.setScene(scene);
 		distanceSettingsStage.setX(event.getScreenX());
 		distanceSettingsStage.setY(event.getScreenY());
+		distanceSettingsStage.setAlwaysOnTop(true);
 		distanceSettingsStage.showAndWait();
 
 		if (!distanceSettingsPane.userCancelled()) {
