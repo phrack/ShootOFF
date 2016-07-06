@@ -27,8 +27,6 @@ public interface Target {
 	public static final String TAG_DEFAULT_PERCEIVED_WIDTH = "defaultPerceivedWidth";
 	public static final String TAG_DEFAULT_PERCEIVED_HEIGHT = "defaultPerceivedHeight";
 	public static final String TAG_DEFAULT_PERCEIVED_DISTANCE = "defaultDistance";
-	public static final String TAG_CURRENT_PERCEIVED_WIDTH = "currentPerceivedWidth";
-	public static final String TAG_CURRENT_PERCEIVED_HEIGHT = "currentPerceivedHeight";
 	public static final String TAG_CURRENT_PERCEIVED_DISTANCE = "currentDistance";
 	public static final String TAG_SHOOTER_DISTANCE = "shooterDistance";
 	

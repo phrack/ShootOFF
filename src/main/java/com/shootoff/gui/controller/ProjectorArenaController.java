@@ -598,19 +598,19 @@ public class ProjectorArenaController implements CalibrationListener {
 		distanceSettingsStage.showAndWait();
 
 		if (!distanceSettingsPane.userCancelled()) {
-			int currentWidth = distanceSettingsPane.getCurrentTargetWidth();
-			int currentHeight = distanceSettingsPane.getCurrentTargetHeight();
+			int width = distanceSettingsPane.getDefaultTargetWidth();
+			int height = distanceSettingsPane.getDefaultTargetHeight();
 			int currentDistance = distanceSettingsPane.getCurrentTargetDistance();
 			int newDistance = distanceSettingsPane.getNewTargetDistance();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace(
 						"New target settings from distance settings pane: current width = {}, "
-								+ "current height = {}, current distance = {}, new distance = {}",
-						currentWidth, currentHeight, currentDistance, newDistance);
+								+ "default height = {}, default distance = {}, new distance = {}",
+						width, height, currentDistance, newDistance);
 			}
 
-			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(currentWidth, currentHeight,
+			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height,
 					currentDistance, newDistance);
 
 			if (targetDimensions.isPresent()) {

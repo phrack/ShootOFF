@@ -63,17 +63,13 @@ public class TargetDistancePane extends GridPane {
 		this.config = config;
 		this.cameraName = perspectiveManager.getCalibratedCameraName();
 
-		if (target.tagExists(Target.TAG_CURRENT_PERCEIVED_WIDTH)) {
-			currentTargetWidth = target.getTag(Target.TAG_CURRENT_PERCEIVED_WIDTH);
-		} else if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)) {
+		if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)) {
 			currentTargetWidth = target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH);
 		} else {
 			currentTargetWidth = "";
 		}
 
-		if (target.tagExists(Target.TAG_CURRENT_PERCEIVED_HEIGHT)) {
-			currentTargetHeight = target.getTag(Target.TAG_CURRENT_PERCEIVED_HEIGHT);
-		} else if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)) {
+		if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)) {
 			currentTargetHeight = target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT);
 		} else {
 			currentTargetHeight = "";
@@ -131,25 +127,34 @@ public class TargetDistancePane extends GridPane {
 	}
 
 	private void layoutGui() {
-		final int WIDTH_ROW = 0;
+		final int ROW_OFFSET;
+		final boolean collectDimensions = currentTargetWidth.isEmpty() || currentTargetHeight.isEmpty();
 		final TextField targetWidthTextField = new TextField(currentTargetWidth);
-		targetWidthTextField.textProperty().addListener(new NumberOnlyChangeListener(targetWidthTextField));
-		final Label targetWidthLabel = new Label("Target Width (mm): ");
-		targetWidthLabel.setLabelFor(targetWidthTextField);
-
-		this.add(targetWidthLabel, 0, WIDTH_ROW);
-		this.add(targetWidthTextField, 1, WIDTH_ROW);
-
-		final int HEIGHT_ROW = 1;
 		final TextField targetHeightTextField = new TextField(currentTargetHeight);
-		targetHeightTextField.textProperty().addListener(new NumberOnlyChangeListener(targetHeightTextField));
-		final Label targetHeightLabel = new Label("Target Height (mm): ");
-		targetHeightLabel.setLabelFor(targetHeightTextField);
 
-		this.add(targetHeightLabel, 0, HEIGHT_ROW);
-		this.add(targetHeightTextField, 1, HEIGHT_ROW);
+		if (collectDimensions) {
+			final int WIDTH_ROW = 0;
+			targetWidthTextField.textProperty().addListener(new NumberOnlyChangeListener(targetWidthTextField));
+			final Label targetWidthLabel = new Label("Target Width (mm): ");
+			targetWidthLabel.setLabelFor(targetWidthTextField);
 
-		final int DISTANCE_ROW = 2;
+			this.add(targetWidthLabel, 0, WIDTH_ROW);
+			this.add(targetWidthTextField, 1, WIDTH_ROW);
+
+			final int HEIGHT_ROW = 1;
+			targetHeightTextField.textProperty().addListener(new NumberOnlyChangeListener(targetHeightTextField));
+			final Label targetHeightLabel = new Label("Target Height (mm): ");
+			targetHeightLabel.setLabelFor(targetHeightTextField);
+
+			this.add(targetHeightLabel, 0, HEIGHT_ROW);
+			this.add(targetHeightTextField, 1, HEIGHT_ROW);
+
+			ROW_OFFSET = 2;
+		} else {
+			ROW_OFFSET = 0;
+		}
+
+		final int DISTANCE_ROW = ROW_OFFSET;
 		final TextField targetDistanceTextField = new TextField(currentTargetDistance);
 		targetDistanceTextField.textProperty().addListener(new NumberOnlyChangeListener(targetDistanceTextField));
 		final Label targetDistanceLabel = new Label("Target Distance (mm): ");
@@ -158,7 +163,7 @@ public class TargetDistancePane extends GridPane {
 		this.add(targetDistanceLabel, 0, DISTANCE_ROW);
 		this.add(targetDistanceTextField, 1, DISTANCE_ROW);
 
-		final int SHOOTER_DISTANCE_ROW = 3;
+		final int SHOOTER_DISTANCE_ROW = 1 + ROW_OFFSET;
 		final TextField shooterDistanceTextField = new TextField(shooterDistance);
 		shooterDistanceTextField.textProperty().addListener(new NumberOnlyChangeListener(shooterDistanceTextField));
 		final Label shooterDistanceLabel = new Label("Shooter Distance (mm): ");
@@ -167,7 +172,7 @@ public class TargetDistancePane extends GridPane {
 		this.add(shooterDistanceLabel, 0, SHOOTER_DISTANCE_ROW);
 		this.add(shooterDistanceTextField, 1, SHOOTER_DISTANCE_ROW);
 
-		final int CAMERA_DISTANCE_ROW = 4;
+		final int CAMERA_DISTANCE_ROW = 2 + ROW_OFFSET;
 		final TextField cameraDistanceTextField = new TextField(cameraDistance);
 		cameraDistanceTextField.textProperty().addListener(new NumberOnlyChangeListener(cameraDistanceTextField));
 		final Label cameraDistanceLabel = new Label("Camera Distance (mm): ");
@@ -176,7 +181,7 @@ public class TargetDistancePane extends GridPane {
 		this.add(cameraDistanceLabel, 0, CAMERA_DISTANCE_ROW);
 		this.add(cameraDistanceTextField, 1, CAMERA_DISTANCE_ROW);
 
-		final int BUTTONS_ROW = 5;
+		final int BUTTONS_ROW = 3 + ROW_OFFSET;
 		final Button cancelButton = new Button("Cancel");
 
 		cancelButton.setOnAction((event) -> {
@@ -187,12 +192,13 @@ public class TargetDistancePane extends GridPane {
 		final Button okButton = new Button("OK");
 
 		okButton.setOnAction((event) -> {
-			if (targetWidthTextField.getText().isEmpty() || targetHeightTextField.getText().isEmpty()
+			if (collectDimensions
+					&& (targetWidthTextField.getText().isEmpty() || targetHeightTextField.getText().isEmpty())
 					|| targetDistanceTextField.getText().isEmpty()) {
 				Alert missingDataAlert = new Alert(AlertType.ERROR);
 
-				String message = "All of the following must be entered to set a target's distance:\n\n"
-						+ "-Target width\n-Target height\n-Target distance\n-Camera distance";
+				String message = "All target distance settings must be filled in, otherwise there is not enough "
+						+ "information to calculate the target size.";
 
 				missingDataAlert.setTitle("Missing Data");
 				missingDataAlert.setHeaderText("Critical Distance Data Missing!");
@@ -201,8 +207,10 @@ public class TargetDistancePane extends GridPane {
 				missingDataAlert.initOwner((Stage) this.getScene().getWindow());
 				missingDataAlert.showAndWait();
 			} else {
-				currentTargetWidth = targetWidthTextField.getText();
-				currentTargetHeight = targetHeightTextField.getText();
+				if (collectDimensions) {
+					currentTargetWidth = targetWidthTextField.getText();
+					currentTargetHeight = targetHeightTextField.getText();
+				}
 				newTargetDistance = targetDistanceTextField.getText();
 				shooterDistance = shooterDistanceTextField.getText();
 				if (!cameraDistance.equals(cameraDistanceTextField.getText())) cameraDistanceEdited = true;
@@ -220,11 +228,11 @@ public class TargetDistancePane extends GridPane {
 		this.add(cancelButton, 1, BUTTONS_ROW);
 	}
 
-	public int getCurrentTargetWidth() {
+	public int getDefaultTargetWidth() {
 		return Integer.parseInt(currentTargetWidth);
 	}
 
-	public int getCurrentTargetHeight() {
+	public int getDefaultTargetHeight() {
 		return Integer.parseInt(currentTargetHeight);
 	}
 
@@ -250,9 +258,12 @@ public class TargetDistancePane extends GridPane {
 
 	private void persistSettings() {
 		Map<String, String> tags = target.getAllTags();
-
-		tags.put(Target.TAG_CURRENT_PERCEIVED_WIDTH, currentTargetWidth);
-		tags.put(Target.TAG_CURRENT_PERCEIVED_HEIGHT, currentTargetHeight);
+		if (!currentTargetWidth.isEmpty()) {
+			tags.put(Target.TAG_DEFAULT_PERCEIVED_WIDTH, currentTargetWidth);
+		}
+		if (!currentTargetHeight.isEmpty()) {
+			tags.put(Target.TAG_DEFAULT_PERCEIVED_HEIGHT, currentTargetHeight);
+		}
 		tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, newTargetDistance);
 		tags.put(Target.TAG_SHOOTER_DISTANCE, shooterDistance);
 

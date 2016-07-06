@@ -321,8 +321,6 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			target.setDimensions(d.getWidth(), d.getHeight());
 			
 			Map<String, String> tags = target.getAllTags();
-			tags.put(Target.TAG_CURRENT_PERCEIVED_HEIGHT, String.valueOf(d.getWidth()));
-			tags.put(Target.TAG_CURRENT_PERCEIVED_HEIGHT, String.valueOf(d.getHeight()));
 			tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, String.valueOf(desiredDistance));
 
 			return true;
