@@ -229,11 +229,11 @@ public class TargetDistancePane extends GridPane {
 	}
 
 	public int getDefaultTargetWidth() {
-		return Integer.parseInt(currentTargetWidth);
+		return Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
 	}
 
 	public int getDefaultTargetHeight() {
-		return Integer.parseInt(currentTargetHeight);
+		return Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
 	}
 
 	public int getCurrentTargetDistance() {
