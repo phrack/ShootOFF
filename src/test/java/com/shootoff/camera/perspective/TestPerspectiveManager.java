@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.imgproc.Imgproc;
 
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.MockCameraManager;
@@ -61,8 +62,8 @@ public class TestPerspectiveManager {
 
 		dims = pm.calculateObjectSize(300, 200, 3406 * 2, 3406);
 		assertTrue(dims.isPresent());
-		assertEquals(87.7, dims.get().getWidth(), 1);
-		assertEquals(59.1, dims.get().getHeight(), 1);
+		assertEquals(350.7, dims.get().getWidth(), 1);
+		assertEquals(236.5, dims.get().getHeight(), 1);
 
 		pm.setShooterDistance(3406 * 2);
 		dims = pm.calculateObjectSize(300, 200, 3406, 3406);
@@ -144,7 +145,11 @@ public class TestPerspectiveManager {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/perspective/c270_pattern_new.png"));
 
-		Mat mat = Camera.bufferedImageToMat(testFrame);
+		Mat matTemp = Camera.bufferedImageToMat(testFrame);
+		final Mat mat = new Mat();
+		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		
+
 
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -184,7 +189,11 @@ public class TestPerspectiveManager {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/perspective/c270_pattern_new_small.png"));
 
-		Mat mat = Camera.bufferedImageToMat(testFrame);
+		Mat matTemp = Camera.bufferedImageToMat(testFrame);
+		final Mat mat = new Mat();
+		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		
+
 
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);

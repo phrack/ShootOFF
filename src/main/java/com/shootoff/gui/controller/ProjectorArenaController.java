@@ -627,7 +627,8 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			PerspectiveManager pm = perspectiveManager.get();
 
-			pm.setShooterDistance(pm.getCameraDistance());
+			if (pm.getShooterDistance() == -1)
+				pm.setShooterDistance(pm.getCameraDistance());
 
 			if (pm.isInitialized()) {
 				int width = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));

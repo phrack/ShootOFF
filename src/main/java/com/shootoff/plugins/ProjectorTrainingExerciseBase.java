@@ -320,8 +320,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			Dimension2D d = targetDimensions.get();
 			target.setDimensions(d.getWidth(), d.getHeight());
 			
-			Map<String, String> tags = target.getAllTags();
-			tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, String.valueOf(desiredDistance));
+			//Map<String, String> tags = target.getAllTags();
+			//tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, String.valueOf(desiredDistance));
 
 			return true;
 		}

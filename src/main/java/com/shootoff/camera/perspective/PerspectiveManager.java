@@ -125,7 +125,7 @@ public class PerspectiveManager {
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.58, 2.02, new Dimension2D(1280, 720)));
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.580, 2.636, new Dimension2D(800, 600)));
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.127, 2.260, new Dimension2D(640, 480)));
-		cameraParameters.add(new CameraParameters("C920", 3.67, 4.80, 3.60, new Dimension2D(1280, 720)));
+		cameraParameters.add(new CameraParameters("C920", 3.67, 4.80, 2.70, new Dimension2D(1280, 720)));
 	}
 
 	// For testing
@@ -274,9 +274,14 @@ public class PerspectiveManager {
 	/* Distance (in mm) camera to screen */
 	public void setCameraDistance(int cameraDistance) {
 		if (logger.isTraceEnabled()) logger.trace("cameraDistance {}", cameraDistance);
+
 		this.cameraDistance = cameraDistance;
 
-		calculateUnknown();
+		// TODO: Add logic to recalculate camera parameters if they were set via calibration and not stored parameters
+		if (!isInitialized())
+		{
+			calculateUnknown();
+		}
 	}
 
 	/* Distance (in mm) camera to shooter */
@@ -445,20 +450,26 @@ public class PerspectiveManager {
 			return Optional.empty();
 		}
 
-		// Make it appropriate size for the shooter
-		double distRatio = shooterDistance / realDistance;
-
 		// Make it appropriate size for the desired distance
-		distRatio *= cameraDistance / desiredDistance;
-
+		// TODO: No fucking idea
+		double distRatio = shooterDistance / cameraDistance;
+		distRatio *= realDistance / cameraDistance;
+		distRatio *= cameraDistance / desiredDistance;				
+		
+		
 		final double adjWidthmm = realWidth * distRatio;
 		final double adjHeightmm = realHeight * distRatio;
 
 		final double adjWidthpx = adjWidthmm * pxPerMMwide;
 		final double adjHeightpx = adjHeightmm * pxPerMMhigh;
 
-		if (logger.isTraceEnabled()) logger.trace("rD {} dD {} sD {} dR {} - adjmm {} {} adjpx {} {}", realDistance,
-				desiredDistance, shooterDistance, distRatio, adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
+		if (logger.isTraceEnabled())
+		{
+			logger.trace("real w {} h {} d {}", realWidth, realHeight, realDistance);
+			logger.trace("rD {} dD {} sD {} dR {} - adjmm {} {} adjpx {} {}", realDistance,
+					desiredDistance, shooterDistance, distRatio, adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
+			
+		}
 
 		return Optional.of(new Dimension2D(adjWidthpx, adjHeightpx));
 	}

@@ -237,11 +237,7 @@ public class TargetDistancePane extends GridPane {
 	}
 
 	public int getCurrentTargetDistance() {
-		if (currentTargetDistance.isEmpty()) {
-			return Integer.parseInt(newTargetDistance);
-		} else {
 			return Integer.parseInt(currentTargetDistance);
-		}
 	}
 
 	public int getNewTargetDistance() {

@@ -146,25 +146,48 @@ public class AutoCalibrationManager {
 	public void processFrame(final BufferedImage frame) {
 		if (boundsResult == null) {
 			
-			Mat mat;
+			final Mat matTemp;
 
 			synchronized (frame) {
-				mat = Camera.bufferedImageToMat(frame);
+				matTemp = Camera.bufferedImageToMat(frame);
 			}
+			
+			final Mat mat = new Mat();
+			Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+			
+			// This is dynamic per OTSU algorithm
+			Imgproc.threshold(mat, mat, 128, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
+			String filename = String.format("bw.png");
+			File file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, mat);
+
+			
+			// TODO: Make a master function that finds all chessboard corners, then just returns them as a list
+			// Instead of all this garbage intertwined with paper and projector calibration
 
 			// Step 1: Find the chessboard corners
-			final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
+			Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
 
 			if (!boardCorners.isPresent()) return;
 
-			if (!paperDimensions.isPresent())
+			// THIS FUNCTION ALSO BLANKS THE PAPER PATTERN IN mat
+			// Which the function description tells you, so this is a second warning
+			Optional<Dimension2D> newPaperDimensions = findPaperPattern(boardCorners.get(), mat, null);
+			
+			if (!paperDimensions.isPresent() && newPaperDimensions.isPresent())
 			{
-				paperDimensions = findPaperPattern(boardCorners.get(), mat, null);
+				paperDimensions = newPaperDimensions;
 				
-				if (paperDimensions.isPresent())
-					logger.debug("Found paper dimensions {}", paperDimensions.get());
+				logger.debug("Found paper dimensions {}", paperDimensions.get());
 			}
 
+			if (newPaperDimensions.isPresent())
+				boardCorners = findChessboard(mat);
+			
+			if (!boardCorners.isPresent()) return;
+			
 			Optional<Bounds> bounds = calibrateFrame(boardCorners.get(), mat);
 
 			if (bounds.isPresent()) {
@@ -352,22 +375,36 @@ public class AutoCalibrationManager {
 				|| height > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.rows()) {
 			logger.trace("Pattern too big to be paper, must be projection, setting blank {} x {}", box.getWidth(),
 					box.getHeight());
+			
+			
 			workingMat.submat((int) box.getMinY(), (int) box.getMaxY(), (int) box.getMinX(), (int) box.getMaxX())
 					.setTo(new Scalar(0, 0, 0));
+			
+			if (logger.isTraceEnabled())
+			{
+				String filename = String.format("blanked-box.png");
+				File file = new File(filename);
+				filename = file.toString();
+				Highgui.imwrite(filename, workingMat);
+
+			}
 
 			final Optional<MatOfPoint2f> boardCornersNew = findChessboard(workingMat);
 
 			if (!boardCornersNew.isPresent()) return Optional.empty();
+			
+			logger.trace("Found new pattern, attempting findPaperPattern {}", boardCornersNew.get());
 
 			return findPaperPattern(boardCornersNew.get(), mat, workingMat);
 
 		}
 
-		logger.trace("pattern width {} height {}", box.getWidth(), box.getHeight());
-
-		logger.trace("paper width {} height {}", width, height);
-
 		if (logger.isTraceEnabled()) {
+			logger.trace("pattern width {} height {}", box.getWidth(), box.getHeight());
+
+			logger.trace("paper width {} height {}", width, height);
+
+			
 			int widthOffset = ((int)width - (int)box.getWidth()) / 2;
 			int heightOffset = ((int)height - (int)box.getHeight()) / 2;
 
@@ -375,6 +412,8 @@ public class AutoCalibrationManager {
 			
 			Mat fullpattern = workingMat.clone();
 			
+			// TODO: This doesn't work if the pattern is upside down, but this is for debugging anyway right now
+			// Should fix in case it causes an out of bounds or something
 			Point topLeft = new Point(boardCorners.get(0, 0)[0], boardCorners.get(0, 0)[1]);
 			Point topRight = new Point(boardCorners.get(PATTERN_WIDTH - 1, 0)[0], boardCorners.get(PATTERN_WIDTH - 1, 0)[1]);
 			Point bottomRight = new Point(boardCorners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[0],
@@ -424,10 +463,19 @@ public class AutoCalibrationManager {
 		// Turn the chessboard into corners
 		final MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
 
-		final Point topLeft = new Point(boardRect.get(0, 0)[0], boardRect.get(0, 0)[1]);
-		final Point topRight = new Point(boardRect.get(1, 0)[0], boardRect.get(1, 0)[1]);
-		final Point bottomRight = new Point(boardRect.get(2, 0)[0], boardRect.get(2, 0)[1]);
-		final Point bottomLeft = new Point(boardRect.get(3, 0)[0], boardRect.get(3, 0)[1]);
+		final Point pt1 = new Point(boardRect.get(0, 0)[0], boardRect.get(0, 0)[1]);
+		final Point pt2 = new Point(boardRect.get(1, 0)[0], boardRect.get(1, 0)[1]);
+		final Point pt3 = new Point(boardRect.get(2, 0)[0], boardRect.get(2, 0)[1]);
+		final Point pt4 = new Point(boardRect.get(3, 0)[0], boardRect.get(3, 0)[1]);
+		
+		
+		Point[] patternCorners = { pt1, pt2, pt3, pt4 };
+		patternCorners = sortCorners(patternCorners);
+		
+		final Point topLeft = patternCorners[0];
+		final Point topRight = patternCorners[1];
+		final Point bottomLeft = patternCorners[2];
+		final Point bottomRight = patternCorners[3];
 
 		logger.trace("Paper Corners {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
 
@@ -710,17 +758,22 @@ public class AutoCalibrationManager {
 	private Optional<MatOfPoint2f> findIdealCorners(final Mat frame, final MatOfPoint2f estimatedPatternRect) {
 		Mat traceMat = null;
 		if (logger.isTraceEnabled()) {
-			traceMat = frame.clone();
+			Mat traceMatTemp = frame.clone();
+			traceMat = new Mat();
+			
+			Imgproc.cvtColor(traceMatTemp, traceMat, Imgproc.COLOR_GRAY2BGR);
 		}
 
 		// pixel distance, dynamic because we want to allow any resolution or
 		// distance from pattern
-		final int toleranceThreshold = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 2.0);
+		final int toleranceThreshold = (int) (minimumDimension / (double) (PATTERN_HEIGHT - 1) / 1.5);
 
 		// Grey scale conversion.
-		final Mat grey = new Mat();
-		Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
-
+		//final Mat grey = new Mat();
+		//Imgproc.cvtColor(frame, grey, Imgproc.COLOR_BGR2GRAY);
+		final Mat grey = frame;
+		
+		
 		// Find edges
 		Imgproc.Canny(grey, grey, CANNY_THRESHOLD_1, CANNY_THRESHOLD_2);
 
@@ -856,6 +909,12 @@ public class AutoCalibrationManager {
 
 	// Given 4 corners, use the mass center to arrange the corners into correct
 	// order
+	// Sort them into the correct order
+	// 1st-------2nd
+	// | |
+	// | |
+	// | |
+	// 3rd-------4th
 	private Point[] sortCorners(final Point[] corners) {
 		final Point[] result = new Point[4];
 
@@ -996,9 +1055,11 @@ public class AutoCalibrationManager {
 	}
 
 	public Optional<MatOfPoint2f> findChessboard(Mat mat) {
-		Mat grayImage = new Mat();
+		//Mat grayImage = new Mat();
 
-		Imgproc.cvtColor(mat, grayImage, Imgproc.COLOR_BGR2GRAY);
+		//Imgproc.cvtColor(mat, grayImage, Imgproc.COLOR_BGR2GRAY);
+		
+		Mat grayImage = mat;
 
 		MatOfPoint2f imageCorners = new MatOfPoint2f();
 
