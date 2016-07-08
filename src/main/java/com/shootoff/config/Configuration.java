@@ -332,7 +332,9 @@ public class Configuration {
 		if (prop.containsKey(PERSPECTIVE_WEBCAM_DISTANCES)) {
 			for (String distanceString : prop.getProperty(PERSPECTIVE_WEBCAM_DISTANCES).split(",")) {
 				String[] distanceComponents = distanceString.split("\\|");
-				cameraDistances.put(distanceComponents[0], Integer.parseInt(distanceComponents[1]));
+				if (distanceComponents.length == 2) {
+					cameraDistances.put(distanceComponents[0], Integer.parseInt(distanceComponents[1]));
+				}
 			}
 		}
 
