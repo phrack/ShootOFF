@@ -310,11 +310,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 *         successfully calculated new target dimensions
 	 */
 	public boolean setTargetDistance(Target target, int currentRealWidth, int currentRealHeight,
-			int currentRealDistance, int desiredDistance) {
+			 int desiredDistance) {
 		if (!isPerspectiveInitialized()) return false;
 
 		Optional<Dimension2D> targetDimensions = arenaController.getPerspectiveManager().get()
-				.calculateObjectSize(currentRealWidth, currentRealHeight, currentRealDistance, desiredDistance);
+				.calculateObjectSize(currentRealWidth, currentRealHeight, desiredDistance);
 
 		if (targetDimensions.isPresent()) {
 			Dimension2D d = targetDimensions.get();

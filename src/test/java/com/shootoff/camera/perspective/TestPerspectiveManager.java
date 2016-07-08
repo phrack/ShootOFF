@@ -50,23 +50,23 @@ public class TestPerspectiveManager {
 		assertEquals(1753.0, pm.getProjectionWidth(), 1);
 		assertEquals(1299.0, pm.getProjectionHeight(), 1);
 
-		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406, 3406);
+		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406);
 		assertTrue(dims.isPresent());
 		assertEquals(175.3, dims.get().getWidth(), 1);
 		assertEquals(118.2, dims.get().getHeight(), 1);
 
-		dims = pm.calculateObjectSize(300, 200, 3406, 3406 * 2);
+		dims = pm.calculateObjectSize(300, 200, 3406*2);
 		assertTrue(dims.isPresent());
 		assertEquals(87.7, dims.get().getWidth(), 1);
 		assertEquals(59.1, dims.get().getHeight(), 1);
 
-		dims = pm.calculateObjectSize(300, 200, 3406 * 2, 3406);
+		dims = pm.calculateObjectSize(300, 200, 3406 / 2);
 		assertTrue(dims.isPresent());
 		assertEquals(350.7, dims.get().getWidth(), 1);
 		assertEquals(236.5, dims.get().getHeight(), 1);
 
 		pm.setShooterDistance(3406 * 2);
-		dims = pm.calculateObjectSize(300, 200, 3406, 3406);
+		dims = pm.calculateObjectSize(300, 200, 3406);
 		assertTrue(dims.isPresent());
 		assertEquals(350.7, dims.get().getWidth(), 1);
 		assertEquals(236.5, dims.get().getHeight(), 1);
@@ -88,7 +88,7 @@ public class TestPerspectiveManager {
 		assertEquals(1753.0, pm.getProjectionWidth(), 1);
 		assertEquals(1299.0, pm.getProjectionHeight(), 1);
 
-		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406, 3406);
+		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406);
 
 		assertTrue(dims.isPresent());
 		assertEquals(175.3, dims.get().getWidth(), 1);
@@ -111,7 +111,7 @@ public class TestPerspectiveManager {
 		assertEquals(3.122, pm.getSensorWidth(), .01);
 		assertEquals(2.317, pm.getSensorHeight(), .01);
 
-		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406, 3406);
+		Optional<Dimension2D> dims = pm.calculateObjectSize(300, 200, 3406);
 
 		assertTrue(dims.isPresent());
 		assertEquals(175.3, dims.get().getWidth(), 1);
@@ -133,7 +133,7 @@ public class TestPerspectiveManager {
 		assertEquals(3.047, pm.getSensorWidth(), .01);
 		assertEquals(2.235, pm.getSensorHeight(), .01);
 
-		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
+		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
 		assertEquals(162.6, dims.get().getWidth(), 1);
@@ -170,7 +170,7 @@ public class TestPerspectiveManager {
 
 		pm.setShooterDistance(pm.getCameraDistance());
 
-		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
+		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
 		assertEquals(168.75, dims.get().getWidth(), 1);
@@ -214,7 +214,7 @@ public class TestPerspectiveManager {
 
 		pm.setShooterDistance(pm.getCameraDistance());
 		
-		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance(), pm.getCameraDistance());
+		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
 		assertEquals(85.10, dims.get().getWidth(), 1);

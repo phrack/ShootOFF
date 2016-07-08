@@ -442,19 +442,19 @@ public class PerspectiveManager {
 	 *         <code>desiredDistance</code> away given its current real world
 	 *         dimensions and distance
 	 */
-	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, double realDistance,
+	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, 
 			double desiredDistance) {
-		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || cameraDistance == -1
+		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1
 				|| pxPerMMhigh == -1) {
-			logger.error("projectionWidth, projectionHeight, shooterDistance, pxPerMMhigh, or cameraDistance unknown");
+			logger.error("projectionWidth, projectionHeight, shooterDistance, pxPerMMhigh unknown");
 			return Optional.empty();
 		}
 
 		// Make it appropriate size for the desired distance
-		// TODO: No fucking idea
-		double distRatio = shooterDistance / cameraDistance;
-		distRatio *= realDistance / cameraDistance;
-		distRatio *= cameraDistance / desiredDistance;				
+		// TODO: Handle divide by 0
+		// Should just cap the result dimensions at the size of the projector
+		
+		double distRatio = shooterDistance / desiredDistance;
 		
 		
 		final double adjWidthmm = realWidth * distRatio;
@@ -465,9 +465,9 @@ public class PerspectiveManager {
 
 		if (logger.isTraceEnabled())
 		{
-			logger.trace("real w {} h {} d {}", realWidth, realHeight, realDistance);
-			logger.trace("rD {} dD {} sD {} dR {} - adjmm {} {} adjpx {} {}", realDistance,
-					desiredDistance, shooterDistance, distRatio, adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
+			logger.trace("real w {} h {} d {}", realWidth, realHeight, desiredDistance);
+			logger.trace("sD {} dR {} - adjmm {} {} adjpx {} {}",
+					shooterDistance, distRatio, adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
 			
 		}
 

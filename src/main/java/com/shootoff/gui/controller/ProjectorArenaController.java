@@ -611,7 +611,7 @@ public class ProjectorArenaController implements CalibrationListener {
 			}
 
 			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height,
-					currentDistance, newDistance);
+					newDistance);
 
 			if (targetDimensions.isPresent()) {
 				Dimension2D d = targetDimensions.get();
@@ -635,7 +635,7 @@ public class ProjectorArenaController implements CalibrationListener {
 				int height = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
 				int distance = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_DISTANCE));
 
-				Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, distance, distance);
+				Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, distance);
 
 				if (targetDimensions.isPresent()) {
 					Dimension2D d = targetDimensions.get();
