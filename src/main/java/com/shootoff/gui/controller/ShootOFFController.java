@@ -652,9 +652,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
 						.newInstance(arenaController.getCanvasManager().getTargets());
+				config.setExercise(newExercise);
 				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
 				newExercise.init();
-				config.setExercise(newExercise);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
