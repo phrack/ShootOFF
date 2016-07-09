@@ -486,13 +486,19 @@ public class CameraManager {
 			if (currentFrame == null) continue;
 			currentFrame = processFrame(currentFrame);
 
-			synchronized (projectionBounds) {
-				if (cropFeedToProjection && projectionBounds.isPresent()) {
-					Bounds b = projectionBounds.get();
+			Bounds b;
 
-					currentFrame = currentFrame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
-							(int) b.getHeight());
+			synchronized (projectionBounds) {
+				if (projectionBounds.isPresent()) {
+					b = projectionBounds.get();
+				} else {
+					b = null;
 				}
+			}
+
+			if (cropFeedToProjection && b != null) {
+				currentFrame = currentFrame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
+						(int) b.getHeight());
 			}
 
 			if (recordingShots) {
