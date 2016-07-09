@@ -437,7 +437,7 @@ public class PerspectiveManager {
 	 *            the current distance of the target in mm
 	 * @param desiredDistance
 	 *            the desired new distance of the target used to derive the new
-	 *            target dimensions
+	 *            target dimensions. Value must be > 0
 	 * @return the new targets dimensions in pixels necessary to make it appear
 	 *         <code>desiredDistance</code> away given its current real world
 	 *         dimensions and distance
@@ -449,9 +449,12 @@ public class PerspectiveManager {
 			logger.error("projectionWidth, projectionHeight, shooterDistance, pxPerMMhigh unknown");
 			return Optional.empty();
 		}
+		
+		if (desiredDistance == 0) {
+			throw new IllegalArgumentException("desiredDistance cannot be 0");
+		}
 
 		// Make it appropriate size for the desired distance
-		// TODO: Handle divide by 0
 		// Should just cap the result dimensions at the size of the projector
 		
 		double distRatio = shooterDistance / desiredDistance;
