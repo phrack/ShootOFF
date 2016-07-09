@@ -192,8 +192,8 @@ public class TargetDistancePane extends GridPane {
 		okButton.setOnAction((event) -> {
 			if (collectDimensions
 					&& (targetWidthTextField.getText().isEmpty() || targetHeightTextField.getText().isEmpty())
-					|| targetDistanceTextField.getText().isEmpty() || shooterDistanceTextField.getText().isEmpty() ||
-					cameraDistanceTextField.getText().isEmpty()) {
+					|| targetDistanceTextField.getText().isEmpty() || shooterDistanceTextField.getText().isEmpty()
+					|| cameraDistanceTextField.getText().isEmpty()) {
 				Alert missingDataAlert = new Alert(AlertType.ERROR);
 
 				String message = "All target distance settings must be filled in, otherwise there is not enough "
@@ -205,7 +205,7 @@ public class TargetDistancePane extends GridPane {
 				missingDataAlert.setContentText(message);
 				missingDataAlert.initOwner((Stage) this.getScene().getWindow());
 				missingDataAlert.showAndWait();
-			} else if ("0".equals(targetDistanceTextField.getText())){
+			} else if ("0".equals(targetDistanceTextField.getText())) {
 				Alert invalidDataAlert = new Alert(AlertType.ERROR);
 
 				String message = "Target Distance cannot be 0, please set a value greater than 0.";
@@ -247,7 +247,7 @@ public class TargetDistancePane extends GridPane {
 	}
 
 	public int getCurrentTargetDistance() {
-			return Integer.parseInt(currentTargetDistance);
+		return Integer.parseInt(currentTargetDistance);
 	}
 
 	public int getNewTargetDistance() {
