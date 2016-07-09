@@ -21,7 +21,6 @@ package com.shootoff.plugins;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javafx.application.Platform;
@@ -319,9 +318,6 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		if (targetDimensions.isPresent()) {
 			Dimension2D d = targetDimensions.get();
 			target.setDimensions(d.getWidth(), d.getHeight());
-			
-			//Map<String, String> tags = target.getAllTags();
-			//tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, String.valueOf(desiredDistance));
 
 			return true;
 		}
