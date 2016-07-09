@@ -149,7 +149,7 @@ public class CameraManager {
 		this.cameraView.setCameraManager(this);
 
 		initDetector(new VideoStreamer());
-		
+
 		if (NativeShotDetector.loadNativeShotDetector()) {
 			logger.debug("Using native shot detection");
 
@@ -220,7 +220,7 @@ public class CameraManager {
 		feedWidth = width;
 		feedHeight = height;
 	}
-	
+
 	// Used by click-to-shoot and tests to inject a shot via the shot detector
 	public void injectShot(Color color, double x, double y, boolean scaleShot) {
 		shotDetector.addShot(color, x, y, scaleShot);
@@ -273,7 +273,9 @@ public class CameraManager {
 	}
 
 	public void setProjectionBounds(final Bounds projectionBounds) {
-		this.projectionBounds = Optional.ofNullable(projectionBounds);
+		synchronized (this.projectionBounds) {
+			this.projectionBounds = Optional.ofNullable(projectionBounds);
+		}
 	}
 
 	public void setCropFeedToProjection(final boolean cropFeed) {
@@ -484,11 +486,13 @@ public class CameraManager {
 			if (currentFrame == null) continue;
 			currentFrame = processFrame(currentFrame);
 
-			if (cropFeedToProjection && projectionBounds.isPresent()) {
-				Bounds b = projectionBounds.get();
+			synchronized (projectionBounds) {
+				if (cropFeedToProjection && projectionBounds.isPresent()) {
+					Bounds b = projectionBounds.get();
 
-				currentFrame = currentFrame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
-						(int) b.getHeight());
+					currentFrame = currentFrame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
+							(int) b.getHeight());
+				}
 			}
 
 			if (recordingShots) {
@@ -532,9 +536,9 @@ public class CameraManager {
 
 	protected BufferedImage processFrame(BufferedImage currentFrame) {
 		frameCount++;
-		
+
 		if (isAutoCalibrating.get() && ((getFrameCount() % Math.min(getFPS(), 3)) == 0)) {
-			
+
 			acm.processFrame(currentFrame);
 			return currentFrame;
 		}
@@ -542,15 +546,24 @@ public class CameraManager {
 		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
 		Mat submatFrameBGR = null;
 
-		if (cameraAutoCalibrated && projectionBounds.isPresent()) {
+		Bounds projectionBounds;
+
+		synchronized (this.projectionBounds) {
+			if (this.projectionBounds.isPresent()) {
+				projectionBounds = this.projectionBounds.get();
+			} else {
+				projectionBounds = null;
+			}
+		}
+
+		if (cameraAutoCalibrated && projectionBounds != null) {
 			if (acm != null) {
 				// MUST BE IN BGR pixel format.
 				matFrameBGR = acm.undistortFrame(matFrameBGR);
 			}
 
-			submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
-					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
-					(int) projectionBounds.get().getMaxX());
+			submatFrameBGR = matFrameBGR.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
+					(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			if (recordingCalibratedArea) {
 				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
@@ -571,10 +584,10 @@ public class CameraManager {
 			}
 		}
 
-		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && getProjectionBounds().isPresent()) {
-			if (submatFrameBGR == null) submatFrameBGR = matFrameBGR.submat((int) projectionBounds.get().getMinY(),
-					(int) projectionBounds.get().getMaxY(), (int) projectionBounds.get().getMinX(),
-					(int) projectionBounds.get().getMaxX());
+		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
+			if (submatFrameBGR == null)
+				submatFrameBGR = matFrameBGR.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
+						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			shotDetector.processFrame(submatFrameBGR, isDetecting.get());
 		} else {
@@ -683,8 +696,9 @@ public class CameraManager {
 		if (isAutoCalibrating.get() && cameraCalibrationListener != null) {
 			isAutoCalibrating.set(false);
 
-			logger.debug("autoCalibrateSuccess {} {} {} {} paper {}", (int) arenaBounds.getMinX(), (int) arenaBounds.getMinY(),
-					(int) arenaBounds.getWidth(), (int) arenaBounds.getHeight(), paperDims.isPresent());
+			logger.debug("autoCalibrateSuccess {} {} {} {} paper {}", (int) arenaBounds.getMinX(),
+					(int) arenaBounds.getMinY(), (int) arenaBounds.getWidth(), (int) arenaBounds.getHeight(),
+					paperDims.isPresent());
 
 			cameraAutoCalibrated = true;
 			cameraCalibrationListener.calibrate(arenaBounds, paperDims, false);
