@@ -213,9 +213,7 @@ public class TargetView implements com.shootoff.targets.Target {
 
 		if (currentWidth != newWidth) {
 			double scaleXDelta = 1.0 + ((newWidth - currentWidth) / currentWidth);
-			double newScale = targetGroup.getScaleX() * scaleXDelta;
-
-			targetGroup.setScaleX(newScale);
+			targetGroup.setScaleX(targetGroup.getScaleX() * scaleXDelta);
 
 			// Keep unresizable regions the same size
 			for (Node n : targetGroup.getChildren()) {
