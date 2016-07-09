@@ -340,7 +340,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 
 		TimerPool.close();
-		GlobalExecutorPool.getPool().shutdownNow();
+		synchronized(GlobalExecutorPool.getPool()) {
+			GlobalExecutorPool.getPool().shutdownNow();
+		}
 
 		if (!config.getVideoPlayers().isEmpty()) {
 			for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {

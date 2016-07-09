@@ -30,6 +30,7 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.openimaj.util.function.Operation;
+import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -345,30 +346,32 @@ public final class JavaShotDetector extends ShotDetector {
 
 		// In this loop we accomplish both MovingAverage updates AND threshold
 		// pixel detection
-		Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
-			public void perform(Integer sector) {
-				final int sectorX = sector.intValue() % SECTOR_COLUMNS;
-				final int sectorY = sector.intValue() / SECTOR_ROWS;
+		synchronized (GlobalExecutorPool.getPool()) {
+			Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
+				public void perform(Integer sector) {
+					final int sectorX = sector.intValue() % SECTOR_COLUMNS;
+					final int sectorY = sector.intValue() / SECTOR_ROWS;
 
-				if (!cameraManager.isSectorOn(sectorX, sectorY)) return;
+					if (!cameraManager.isSectorOn(sectorX, sectorY)) return;
 
-				final int startX = subWidth * sectorX;
-				final int startY = subHeight * sectorY;
+					final int startX = subWidth * sectorX;
+					final int startY = subHeight * sectorY;
 
-				for (int y = startY; y < startY + subHeight; y++) {
-					final int yOffset = y * cols;
-					for (int x = startX; x < startX + subWidth; x++) {
-						final int currentH = workingFramePrimitive[(yOffset + x) * channels] & 0xFF;
-						final int currentS = workingFramePrimitive[(yOffset + x) * channels + 1] & 0xFF;
-						final int currentV = workingFramePrimitive[(yOffset + x) * channels + 2] & 0xFF;
+					for (int y = startY; y < startY + subHeight; y++) {
+						final int yOffset = y * cols;
+						for (int x = startX; x < startX + subWidth; x++) {
+							final int currentH = workingFramePrimitive[(yOffset + x) * channels] & 0xFF;
+							final int currentS = workingFramePrimitive[(yOffset + x) * channels + 1] & 0xFF;
+							final int currentV = workingFramePrimitive[(yOffset + x) * channels + 2] & 0xFF;
 
-						final Pixel pixel = updateFilter(currentH, currentS, currentV, x, y, detectShots);
+							final Pixel pixel = updateFilter(currentH, currentS, currentV, x, y, detectShots);
 
-						if (pixel != null) thresholdPixels.add(pixel);
+							if (pixel != null) thresholdPixels.add(pixel);
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 
 		return thresholdPixels;
 	}
