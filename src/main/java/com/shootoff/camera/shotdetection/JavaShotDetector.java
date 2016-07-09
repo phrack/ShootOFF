@@ -104,7 +104,7 @@ public final class JavaShotDetector extends ShotDetector {
 
 		GlobalExecutorPool.getPool().setRejectedExecutionHandler((r, p) -> {
 			if (!p.isShutdown()) {
-				logger.error("Shot detection thread was rejected but th pool was not shot down");
+				logger.error("Shot detection thread was rejected but GlobalExecutorPool was not shot down");
 			}
 		});
 		
