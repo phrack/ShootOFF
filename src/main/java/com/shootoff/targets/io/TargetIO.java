@@ -133,7 +133,7 @@ public class TargetIO {
 
 	public static Optional<TargetComponents> loadTarget(final File targetFile) {
 		final TargetReader reader;
-		
+
 		if (targetFile.getName().endsWith("target")) {
 			reader = new XMLTargetReader(targetFile);
 		} else {
@@ -144,8 +144,9 @@ public class TargetIO {
 		return Optional.of(new TargetComponents(processVisualTags(reader.getTargetNodes()), reader.getTargetTags()));
 	}
 
-	public static Optional<TargetComponents> loadTarget(final InputStream targetStream) {
-		final TargetReader reader = new XMLTargetReader(targetStream);
+	// Used for loading targets from resource files for modular exercises
+	public static Optional<TargetComponents> loadTarget(final InputStream targetStream, final ClassLoader loader) {
+		final TargetReader reader = new XMLTargetReader(targetStream, loader);
 
 		return Optional.of(new TargetComponents(processVisualTags(reader.getTargetNodes()), reader.getTargetTags()));
 	}

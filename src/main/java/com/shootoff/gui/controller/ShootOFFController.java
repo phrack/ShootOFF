@@ -58,6 +58,7 @@ import com.shootoff.gui.TargetListener;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
@@ -630,7 +631,16 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 
 				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
+
+				Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+				if (plugin.isPresent()) {
+					config.setPlugin(plugin.get());
+				} else {
+					config.setPlugin(null);
+				}
+
 				config.setExercise(newExercise);
+
 				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
 				newExercise.init();
 			} catch (Exception ex) {
@@ -652,7 +662,16 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor
 						.newInstance(arenaController.getCanvasManager().getTargets());
+
+				Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+				if (plugin.isPresent()) {
+					config.setPlugin(plugin.get());
+				} else {
+					config.setPlugin(null);
+				}
+
 				config.setExercise(newExercise);
+
 				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
 				newExercise.init();
 			} catch (Exception ex) {

@@ -47,6 +47,7 @@ import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
+import com.shootoff.plugins.TrainingExercise;
 
 /**
  * Watch for new plugin jars and manage plugin registration and deletion.
@@ -139,6 +140,14 @@ public class PluginEngine implements Runnable {
 
 	public Set<Plugin> getPlugins() {
 		return plugins;
+	}
+	
+	public Optional<Plugin> getPlugin(TrainingExercise trainingExercise) {
+		for (Plugin p : plugins) {
+			if (p.getExercise().getInfo().equals(trainingExercise.getInfo())) return Optional.of(p);
+		}
+		
+		return Optional.empty();
 	}
 
 	/**

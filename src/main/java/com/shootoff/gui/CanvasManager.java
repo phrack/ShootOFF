@@ -23,8 +23,6 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -696,11 +694,19 @@ public class CanvasManager implements CameraView {
 		Optional<TargetComponents> targetComponents;
 
 		if ('@' == targetFile.toString().charAt(0)) {
-			try {
-				targetComponents = TargetIO.loadTarget(new FileInputStream(targetFile.toString().substring(1)));
-			} catch (FileNotFoundException e) {
+			if (!config.getPlugin().isPresent()) {
+				throw new AssertionError("Loaded target from training exercise resources, but a plugin does not "
+						+ "exist for the target.");
+			}
+			
+			ClassLoader loader = config.getPlugin().get().getLoader();
+			
+			InputStream resourceTargetStream = loader.getResourceAsStream(targetFile.toString().substring(1));
+			if (resourceTargetStream != null) {
+				targetComponents = TargetIO.loadTarget(resourceTargetStream, loader);
+			} else {
 				targetComponents = Optional.empty();
-				logger.error("Error adding target from stream", e);
+				logger.error("Error adding target from stream created from resource {}", targetFile.toString());
 			}
 		} else {
 			targetComponents = TargetIO.loadTarget(targetFile);

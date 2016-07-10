@@ -20,13 +20,11 @@ package com.shootoff.targets;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.shootoff.targets.animation.SpriteAnimation;
 
@@ -34,25 +32,23 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class ImageRegion extends ImageView implements TargetRegion {
-	private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
-
 	private final Map<String, String> tags = new HashMap<String, String>();
 	private final File imageFile;
 
 	private Optional<SpriteAnimation> animation = Optional.empty();
 
-	public ImageRegion(final double x, final double y, final File imageFile) {
+	public ImageRegion(final double x, final double y, final File imageFile) throws FileNotFoundException {
+		this(x, y, imageFile, new FileInputStream(imageFile));
+	}
+
+	public ImageRegion(final double x, final double y, final File imageFile, final InputStream imageStream) {
 		super();
 
 		this.setLayoutX(x);
 		this.setLayoutY(y);
 		this.imageFile = imageFile;
 
-		try {
-			this.setImage(new Image(new FileInputStream(imageFile)));
-		} catch (IOException e) {
-			logger.error("Error reading image file to set image target region's picture", e);
-		}
+		this.setImage(new Image(imageStream));
 	}
 
 	public boolean onFirstFrame() {
