@@ -126,6 +126,8 @@ public class PerspectiveManager {
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.580, 2.636, new Dimension2D(800, 600)));
 		cameraParameters.add(new CameraParameters("C270", 4.0, 3.127, 2.260, new Dimension2D(640, 480)));
 		cameraParameters.add(new CameraParameters("C920", 3.67, 4.80, 2.70, new Dimension2D(1280, 720)));
+
+		cameraParameters.add(new CameraParameters("HD-3000", 4, 3.781, 2.713, new Dimension2D(640, 480)));	
 	}
 
 	// For testing
