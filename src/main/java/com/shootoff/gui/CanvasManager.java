@@ -700,12 +700,12 @@ public class CanvasManager implements CameraView {
 			
 			ClassLoader loader = config.getPlugin().get().getLoader();
 			
-			InputStream resourceTargetStream = loader.getResourceAsStream(targetFile.toString().substring(1));
+			InputStream resourceTargetStream = loader.getResourceAsStream(targetFile.toString().substring(1).replace("\\", "/"));
 			if (resourceTargetStream != null) {
 				targetComponents = TargetIO.loadTarget(resourceTargetStream, playAnimations, loader);
 			} else {
 				targetComponents = Optional.empty();
-				logger.error("Error adding target from stream created from resource {}", targetFile.toString());
+				logger.error("Error adding target from stream created from resource {}", targetFile.toString().substring(1).replace("\\", "/"));
 			}
 		} else {
 			targetComponents = TargetIO.loadTarget(targetFile, playAnimations);
