@@ -43,6 +43,15 @@ import org.w3c.dom.NodeList;
 public class GifAnimation extends SpriteAnimation {
 	private static ImageFrame[] frames;
 
+	public GifAnimation(ImageView imageView, InputStream gifStream) throws IOException {
+		super(imageView, readGif(gifStream));
+
+		int delay = frames[0].getDelay();
+		if (delay < 1) delay = SpriteAnimation.DEFAULT_DELAY;
+
+		this.setCycleDuration(Duration.millis(delay));
+	}
+	
 	public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
 		super(imageView, readGif(new FileInputStream(gifFile)));
 

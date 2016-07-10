@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
@@ -32,7 +31,6 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
@@ -56,7 +54,7 @@ public class TestTargetIO {
 	private File tempXMLTarget;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws FileNotFoundException {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
 		Map<String, String> imgTags = new HashMap<>();
@@ -158,7 +156,7 @@ public class TestTargetIO {
 
 	@Test
 	public void testXMLSerializationStream() throws FileNotFoundException {
-		Optional<TargetComponents> targetComponents = TargetIO.loadTarget(new FileInputStream(tempXMLTarget));
+		Optional<TargetComponents> targetComponents = TargetIO.loadTarget(new FileInputStream(tempXMLTarget), null);
 
 		assertTrue(targetComponents.isPresent());
 
@@ -169,7 +167,7 @@ public class TestTargetIO {
 		checkTarget(tc);
 	}
 
-	@Test
+	@Test(expected = AssertionError.class)
 	public void testXMLSerializationExerciseStream() throws FileNotFoundException, ConfigurationException {
 		Configuration config = new Configuration(new String[0]);
 
@@ -181,14 +179,6 @@ public class TestTargetIO {
 		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
 		pteb.init(config, cs, new ShootOFFController(), pac);
 
-		Optional<Target> target = pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
-
-		assertTrue(target.isPresent());
-
-		Group targetGroup = ((TargetView) target.get()).getTargetGroup();
-
-		assertEquals(4, targetGroup.getChildren().size());
-
-		checkTarget(new TargetComponents(targetGroup, target.get().getAllTags()));
+		pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
 	}
 }

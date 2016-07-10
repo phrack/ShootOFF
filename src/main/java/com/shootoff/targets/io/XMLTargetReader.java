@@ -20,12 +20,14 @@ package com.shootoff.targets.io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -55,16 +57,29 @@ public class XMLTargetReader implements TargetReader {
 
 	private final List<Node> targetNodes = new ArrayList<>();
 	private final Map<String, String> targetTags = new HashMap<>();
+	private final boolean playAnimations;
+	private final Optional<ClassLoader> loader;
 
-	public XMLTargetReader(File targetFile) {
-		try (InputStream is = new FileInputStream(targetFile)){
+	public XMLTargetReader(File targetFile, boolean playAnimations) {
+		this.playAnimations = playAnimations;
+		loader = Optional.empty();
+
+		try (InputStream is = new FileInputStream(targetFile)) {
 			load(is);
 		} catch (IOException e) {
 			logger.error("Problem initializing target reader from file", e);
 		}
 	}
 
-	public XMLTargetReader(InputStream targetStream) {
+	public XMLTargetReader(InputStream targetStream, boolean playAnimations) {
+		this.playAnimations = playAnimations;
+		loader = Optional.empty();
+		load(targetStream);
+	}
+
+	public XMLTargetReader(InputStream targetStream, boolean playAnimations, ClassLoader loader) {
+		this.playAnimations = playAnimations;
+		this.loader = Optional.ofNullable(loader);
 		load(targetStream);
 	}
 
@@ -101,7 +116,7 @@ public class XMLTargetReader implements TargetReader {
 		}
 	}
 
-	private static class TargetXMLHandler extends DefaultHandler {
+	private class TargetXMLHandler extends DefaultHandler {
 		private final Map<String, String> targetTags = new HashMap<>();
 		private final List<Node> regions = new ArrayList<Node>();
 		private TargetRegion currentRegion;
@@ -137,27 +152,49 @@ public class XMLTargetReader implements TargetReader {
 
 				File savedFile = new File(attributes.getValue("file"));
 
+				InputStream imageStream = null;
+				if ('@' == savedFile.toString().charAt(0) && loader.isPresent()) {
+					imageStream = loader.get().getResourceAsStream(savedFile.toString().substring(1));
+				}
+
 				File imageFile;
-				if (savedFile.isAbsolute()) {
+				if (savedFile.isAbsolute() || '@' == savedFile.toString().charAt(0)) {
 					imageFile = savedFile;
 				} else {
 					imageFile = new File(
 							System.getProperty("shootoff.home") + File.separator + attributes.getValue("file"));
 				}
 
-				ImageRegion imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
-						Double.parseDouble(attributes.getValue("y")), imageFile);
+				ImageRegion imageRegion;
+				if (imageStream != null) {
+					imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
+							Double.parseDouble(attributes.getValue("y")), imageFile, imageStream);
+				} else {
+					try {
+						imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
+								Double.parseDouble(attributes.getValue("y")), imageFile);
+					} catch (FileNotFoundException e) {
+						logger.error("Failed to load target image from file: {}", e);
+						return;
+					}
+				}
+
 				try {
 					int firstDot = imageFile.getName().indexOf('.') + 1;
 					String extension = imageFile.getName().substring(firstDot);
 
-					if (extension.endsWith("gif")) {
+					if (extension.endsWith("gif") && '@' == savedFile.toString().charAt(0) && loader.isPresent()) {
+						InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1));
+						GifAnimation gif = new GifAnimation(imageRegion, gifStream);
+						imageRegion.setImage(gif.getFirstFrame());
+						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
+					} else if (extension.endsWith("gif")) {
 						GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
 						imageRegion.setImage(gif.getFirstFrame());
 						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
 					}
 
-					if (imageRegion.getAnimation().isPresent()) {
+					if (imageRegion.getAnimation().isPresent() && playAnimations) {
 						final SpriteAnimation animation = imageRegion.getAnimation().get();
 						animation.setCycleCount(1);
 

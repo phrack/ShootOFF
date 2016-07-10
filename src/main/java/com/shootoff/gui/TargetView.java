@@ -214,11 +214,35 @@ public class TargetView implements com.shootoff.targets.Target {
 		if (currentWidth != newWidth) {
 			double scaleXDelta = 1.0 + ((newWidth - currentWidth) / currentWidth);
 			targetGroup.setScaleX(targetGroup.getScaleX() * scaleXDelta);
+
+			// Keep unresizable regions the same size
+			for (Node n : targetGroup.getChildren()) {
+				TargetRegion r = (TargetRegion) n;
+
+				if (r.tagExists(Target.TAG_RESIZABLE) && !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
+					double width = n.getBoundsInParent().getWidth();
+					double scaledPercentChange = (width / (width * targetGroup.getScaleX()));
+
+					n.setScaleX(scaledPercentChange);
+				}
+			}
 		}
 
 		if (Math.abs(currentHeight - newHeight) > .0000001) {
 			double scaleYDelta = 1.0 + ((newHeight - currentHeight) / currentHeight);
 			targetGroup.setScaleY(targetGroup.getScaleY() * scaleYDelta);
+
+			// Keep unresizable regions the same size
+			for (Node n : targetGroup.getChildren()) {
+				TargetRegion r = (TargetRegion) n;
+
+				if (r.tagExists(Target.TAG_RESIZABLE) && !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
+					double height = n.getBoundsInParent().getHeight();
+					double scaledPercentChange = (height / (height * targetGroup.getScaleX()));
+
+					n.setScaleY(scaledPercentChange);
+				}
+			}
 		}
 	}
 
@@ -414,6 +438,19 @@ public class TargetView implements com.shootoff.targets.Target {
 		anchor.setStroke(Color.BLACK);
 
 		getTargetGroup().getChildren().add(anchor);
+
+		// Ensure anchors appear the intended visual size even if the target
+		// has been scaled
+		if (targetGroup.getScaleX() != 1.0f) {
+			double scaledPercentChange = (ANCHOR_WIDTH / (ANCHOR_WIDTH * targetGroup.getScaleX()));
+			anchor.setScaleX(scaledPercentChange);
+		}
+
+		if (targetGroup.getScaleY() != 1.0f) {
+			double scaledPercentChange = (ANCHOR_HEIGHT / (ANCHOR_HEIGHT * targetGroup.getScaleY()));
+			anchor.setScaleY(scaledPercentChange);
+		}
+
 		resizeAnchors.add(anchor);
 
 		return anchor;

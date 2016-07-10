@@ -117,9 +117,7 @@ public class TargetDistancePane extends GridPane {
 
 		@Override
 		public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-			if (newValue.matches("\\d*")) {
-				// int value = Integer.parseInt(newValue);
-			} else {
+			if (!newValue.matches("\\d*")) {
 				observedTextField.setText(oldValue);
 				observedTextField.positionCaret(observedTextField.getLength());
 			}
@@ -194,7 +192,8 @@ public class TargetDistancePane extends GridPane {
 		okButton.setOnAction((event) -> {
 			if (collectDimensions
 					&& (targetWidthTextField.getText().isEmpty() || targetHeightTextField.getText().isEmpty())
-					|| targetDistanceTextField.getText().isEmpty()) {
+					|| targetDistanceTextField.getText().isEmpty() || shooterDistanceTextField.getText().isEmpty()
+					|| cameraDistanceTextField.getText().isEmpty()) {
 				Alert missingDataAlert = new Alert(AlertType.ERROR);
 
 				String message = "All target distance settings must be filled in, otherwise there is not enough "
@@ -206,6 +205,17 @@ public class TargetDistancePane extends GridPane {
 				missingDataAlert.setContentText(message);
 				missingDataAlert.initOwner((Stage) this.getScene().getWindow());
 				missingDataAlert.showAndWait();
+			} else if ("0".equals(targetDistanceTextField.getText())) {
+				Alert invalidDataAlert = new Alert(AlertType.ERROR);
+
+				String message = "Target Distance cannot be 0, please set a value greater than 0.";
+
+				invalidDataAlert.setTitle("Invalid Target Distance");
+				invalidDataAlert.setHeaderText("Target Distance Cannot Be Zero");
+				invalidDataAlert.setResizable(true);
+				invalidDataAlert.setContentText(message);
+				invalidDataAlert.initOwner((Stage) this.getScene().getWindow());
+				invalidDataAlert.showAndWait();
 			} else {
 				if (collectDimensions) {
 					currentTargetWidth = targetWidthTextField.getText();
@@ -237,7 +247,7 @@ public class TargetDistancePane extends GridPane {
 	}
 
 	public int getCurrentTargetDistance() {
-			return Integer.parseInt(currentTargetDistance);
+		return Integer.parseInt(currentTargetDistance);
 	}
 
 	public int getNewTargetDistance() {

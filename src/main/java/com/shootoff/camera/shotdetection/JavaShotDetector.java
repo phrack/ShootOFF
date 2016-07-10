@@ -30,6 +30,7 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.openimaj.util.function.Operation;
+import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.openimaj.util.parallel.Parallel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,12 @@ public final class JavaShotDetector extends ShotDetector {
 			final CameraView cameraView) {
 		super(cameraManager, config, cameraView);
 
+		GlobalExecutorPool.getPool().setRejectedExecutionHandler((r, p) -> {
+			if (!p.isShutdown()) {
+				logger.error("Shot detection thread was rejected but GlobalExecutorPool was not shot down");
+			}
+		});
+		
 		this.cameraManager = cameraManager;
 		this.config = config;
 

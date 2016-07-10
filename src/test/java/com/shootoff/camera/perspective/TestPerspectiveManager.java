@@ -227,4 +227,17 @@ public class TestPerspectiveManager {
 		assertEquals(6864, pm.getCameraDistance());
 	}
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void testDesiredDistanceCannotBeZero() {
+		PerspectiveManager pm = new PerspectiveManager("C270", new Dimension2D(1280, 720), new BoundingBox(0, 0, 736, 544));
+
+		pm.setCameraFeedSize(1280, 720);
+		pm.setCameraDistance(3406);
+		pm.setShooterDistance(3406);
+		pm.setProjectorResolution(1024, 768);
+
+		pm.calculateUnknown();
+		
+		pm.calculateObjectSize(10, 10, 0);
+	}
 }

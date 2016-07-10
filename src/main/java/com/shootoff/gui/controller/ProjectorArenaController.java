@@ -588,13 +588,10 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		final Stage distanceSettingsStage = new Stage();
 		final Scene scene = new Scene(distanceSettingsPane);
-		distanceSettingsStage.initOwner(arenaStage);
+		distanceSettingsStage.initOwner(shootOFFStage);
 		distanceSettingsStage.initModality(Modality.WINDOW_MODAL);
 		distanceSettingsStage.setTitle("Target Distance Settings");
 		distanceSettingsStage.setScene(scene);
-		distanceSettingsStage.setX(event.getScreenX());
-		distanceSettingsStage.setY(event.getScreenY());
-		distanceSettingsStage.setAlwaysOnTop(true);
 		distanceSettingsStage.showAndWait();
 
 		if (!distanceSettingsPane.userCancelled()) {
@@ -610,8 +607,7 @@ public class ProjectorArenaController implements CalibrationListener {
 						width, height, currentDistance, newDistance);
 			}
 
-			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height,
-					newDistance);
+			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, newDistance);
 
 			if (targetDimensions.isPresent()) {
 				Dimension2D d = targetDimensions.get();
@@ -627,8 +623,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 			PerspectiveManager pm = perspectiveManager.get();
 
-			if (pm.getShooterDistance() == -1)
-				pm.setShooterDistance(pm.getCameraDistance());
+			if (pm.getShooterDistance() == -1) pm.setShooterDistance(pm.getCameraDistance());
 
 			if (pm.isInitialized()) {
 				int width = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));

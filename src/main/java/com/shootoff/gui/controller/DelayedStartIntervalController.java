@@ -40,9 +40,7 @@ public class DelayedStartIntervalController {
 		minTextField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (newValue.matches("\\d*")) {
-					// int value = Integer.parseInt(newValue);
-				} else {
+				if (!newValue.matches("\\d*")) {
 					minTextField.setText(oldValue);
 					minTextField.positionCaret(minTextField.getLength());
 				}
@@ -52,9 +50,7 @@ public class DelayedStartIntervalController {
 		maxTextField.textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (newValue.matches("\\d*")) {
-					// int value = Integer.parseInt(newValue);
-				} else {
+				if (!newValue.matches("\\d*")) {
 					maxTextField.setText(oldValue);
 					maxTextField.positionCaret(maxTextField.getLength());
 				}

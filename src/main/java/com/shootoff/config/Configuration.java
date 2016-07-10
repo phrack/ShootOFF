@@ -61,6 +61,7 @@ import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
 import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.session.SessionRecorder;
 
 import ch.qos.logback.classic.Level;
@@ -137,6 +138,7 @@ public class Configuration {
 	private Set<VideoPlayerController> videoPlayers = new HashSet<>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
+	private Plugin currentPlugin = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
 	private Map<String, Integer> cameraDistances = new HashMap<>();
@@ -332,7 +334,9 @@ public class Configuration {
 		if (prop.containsKey(PERSPECTIVE_WEBCAM_DISTANCES)) {
 			for (String distanceString : prop.getProperty(PERSPECTIVE_WEBCAM_DISTANCES).split(",")) {
 				String[] distanceComponents = distanceString.split("\\|");
-				cameraDistances.put(distanceComponents[0], Integer.parseInt(distanceComponents[1]));
+				if (distanceComponents.length == 2) {
+					cameraDistances.put(distanceComponents[0], Integer.parseInt(distanceComponents[1]));
+				}
 			}
 		}
 
@@ -786,6 +790,10 @@ public class Configuration {
 
 		currentExercise = exercise;
 	}
+	
+	public void setPlugin(Plugin plugin) {
+		currentPlugin = plugin;
+	}
 
 	public void setArenaPosition(double x, double y) {
 		arenaPosition = Optional.of(new Point2D(x, y));
@@ -888,9 +896,11 @@ public class Configuration {
 	}
 
 	public Optional<TrainingExercise> getExercise() {
-		if (currentExercise == null) return Optional.empty();
-
-		return Optional.of(currentExercise);
+		return Optional.ofNullable(currentExercise);
+	}
+	
+	public Optional<Plugin> getPlugin() {
+		return Optional.ofNullable(currentPlugin);
 	}
 
 	public Optional<Color> getShotTimerRowColor() {
