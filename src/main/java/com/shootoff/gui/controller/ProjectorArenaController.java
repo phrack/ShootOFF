@@ -616,7 +616,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 	}
 
-	private void resizeTargetToDefaultPerspective(Target target) {
+	public void resizeTargetToDefaultPerspective(Target target) {
 		if (perspectiveManager.isPresent() && target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)
 				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)
 				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_DISTANCE)) {

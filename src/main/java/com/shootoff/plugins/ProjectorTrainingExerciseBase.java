@@ -118,8 +118,15 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target, false);
 
 		if (newTarget.isPresent()) {
-			newTarget.get().setPosition(x, y);
-			targets.add(newTarget.get());
+			Target t = newTarget.get();
+			
+			t.setPosition(x, y);
+			
+			if (isPerspectiveInitialized()) {
+				arenaController.resizeTargetToDefaultPerspective(t);
+			}
+			
+			targets.add(t);
 		}
 
 		return newTarget;
