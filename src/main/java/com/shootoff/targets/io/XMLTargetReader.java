@@ -154,7 +154,7 @@ public class XMLTargetReader implements TargetReader {
 
 				InputStream imageStream = null;
 				if ('@' == savedFile.toString().charAt(0) && loader.isPresent()) {
-					imageStream = loader.get().getResourceAsStream(savedFile.toString().substring(1));
+					imageStream = loader.get().getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
 				}
 
 				File imageFile;
@@ -184,7 +184,7 @@ public class XMLTargetReader implements TargetReader {
 					String extension = imageFile.getName().substring(firstDot);
 
 					if (extension.endsWith("gif") && '@' == savedFile.toString().charAt(0) && loader.isPresent()) {
-						InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1));
+						InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
 						GifAnimation gif = new GifAnimation(imageRegion, gifStream);
 						imageRegion.setImage(gif.getFirstFrame());
 						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
