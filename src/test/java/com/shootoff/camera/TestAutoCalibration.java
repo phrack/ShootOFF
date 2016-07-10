@@ -102,14 +102,14 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(314, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(32, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(318, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 		
-	    File outputfile = new File("calibrate-projection-result.png");
-	    ImageIO.write(resultFrame, "png", outputfile);
+	    //File outputfile = new File("calibrate-projection-result.png");
+	    //ImageIO.write(resultFrame, "png", outputfile);
 
 		
 		BufferedImage compareFrame = ImageIO.read(
@@ -139,11 +139,15 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(418, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(312, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(34, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(316, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
+		
+	    //File outputfile = new File("calibrate-projection-2-result.png");
+	    //ImageIO.write(resultFrame, "png", outputfile);
+
 
 		BufferedImage compareFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2-result.png"));
@@ -233,11 +237,14 @@ public class TestAutoCalibration {
 
 		assertEquals(45, calibrationBounds.get().getMinX(), 1.0);
 		assertEquals(25, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(570, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(572, calibrationBounds.get().getWidth(), 1.0);
 		assertEquals(431, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
-		
+
+	    //File outputfile = new File("tight-calibration-pattern-result.png");
+	    //ImageIO.write(resultFrame, "png", outputfile);
+
 
 		BufferedImage compareFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-result.png"));
@@ -264,12 +271,16 @@ public class TestAutoCalibration {
 
 		assertTrue(calibrationBounds.isPresent());
 
-		assertEquals(137, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(65, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(402, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(282, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(133, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(60, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(410, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(292, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
+		
+	    //File outputfile = new File("tight-calibration-pattern-turned-result.png");
+	    //ImageIO.write(resultFrame, "png", outputfile);
+		
 
 		BufferedImage compareFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned-result.png"));
@@ -302,9 +313,9 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(418, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(312, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(34, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(316, calibrationBounds.get().getHeight(), 1.0);
 
 	}
 	

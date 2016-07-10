@@ -134,13 +134,10 @@ public class AutoCalibrationManager {
 			matTemp = Camera.bufferedImageToMat(frame);
 		}
 		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
-		
-		// This is dynamic per OTSU algorithm
-		Imgproc.threshold(mat, mat, 128, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-		
+				
 		if (logger.isTraceEnabled())
 		{
-			String filename = String.format("bw.png");
+			String filename = String.format("grayscale.png");
 			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, mat);
@@ -358,6 +355,13 @@ public class AutoCalibrationManager {
 	}
 
 	private MatOfPoint findCorners(MatOfPoint2f boardRect, Mat mat, MatOfPoint2f estimatedPatternRect) {
+		// Turn mat BW for corner discovery
+		
+		// This is dynamic per OTSU algorithm
+		Imgproc.threshold(mat, mat, 128, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
+
+		
 		MatOfPoint corners = new MatOfPoint();
 		
 		Mat mask = Mat.zeros(mat.size(), CvType.CV_8UC1);
@@ -373,7 +377,10 @@ public class AutoCalibrationManager {
 		{
 			Mat tempMask = new Mat();
 			tempMask.create(mat.rows()+2, mat.cols()+2, CvType.CV_8UC1);
-			Imgproc.floodFill(mat, tempMask, pt, new Scalar(255));
+			Point upwards = new Point(pt.x-5, pt.y-5);
+			Point downwards = new Point(pt.x-5, pt.y+5);
+			Imgproc.floodFill(mat, tempMask, upwards, new Scalar(255));
+			Imgproc.floodFill(mat, tempMask, downwards, new Scalar(255));
 		}
 		
 		// Create a mask containing the search region for each corner
@@ -386,7 +393,7 @@ public class AutoCalibrationManager {
 			
 			
 		}
-		
+				
 		// Finds the corners
 		Imgproc.goodFeaturesToTrack(mat, corners, 4, .01, region, mask, 3, false, .04);
 		
@@ -853,7 +860,7 @@ public class AutoCalibrationManager {
 		MatOfPoint2f imageCorners = new MatOfPoint2f();
 
 		boolean found = Calib3d.findChessboardCorners(mat, boardSize, imageCorners,
-				0);
+				Calib3d.CALIB_CB_ADAPTIVE_THRESH | Calib3d.CALIB_CB_NORMALIZE_IMAGE);
 
 		logger.trace("found {}", found);
 

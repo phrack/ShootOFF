@@ -164,23 +164,33 @@ public class TestPerspectiveManager {
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
 
-		pm.setCameraDistance(3481);
+		pm.calculateUnknown();
 		
-		assertEquals(3481, pm.getCameraDistance());
+		assertEquals(3444, pm.getCameraDistance());
 
 		pm.setShooterDistance(pm.getCameraDistance());
 
 		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
-		assertEquals(168.75, dims.get().getWidth(), 1);
+		assertEquals(172.00, dims.get().getWidth(), 1);
 		assertEquals(123.98, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(3481, pm.getCameraDistance());
+		assertEquals(3444, pm.getCameraDistance());
+		
+		pm = new PerspectiveManager(new BoundingBox(0, 0, 698, 544),
+				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
+		
+		pm.setCameraDistance(3444);
+		
+		pm.calculateUnknown();
+		
+		assertEquals(3.58, pm.getSensorWidth(), .05);
+		assertEquals(2.02, pm.getSensorHeight(), .05);
 	}
 
 	
@@ -208,23 +218,23 @@ public class TestPerspectiveManager {
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
 
-		pm.setCameraDistance(6864);
+		pm.setCameraDistance(6767);
 		
-		assertEquals(6864, pm.getCameraDistance());
+		assertEquals(6767, pm.getCameraDistance());
 
 		pm.setShooterDistance(pm.getCameraDistance());
 		
 		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
-		assertEquals(85.10, dims.get().getWidth(), 1);
+		assertEquals(87.2, dims.get().getWidth(), 1);
 		assertEquals(63.24, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(6864, pm.getCameraDistance());
+		assertEquals(6767, pm.getCameraDistance());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
