@@ -88,9 +88,8 @@ public class TestAutoCalibration {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
 		
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -103,28 +102,20 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(32, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(318, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(314, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
-
-		assertEquals(false, acm.getPerspMat() == null);
-
-		double[][] expectedMatrix = { { 1.03, 0.02, -11.20 }, { -0.00, 1.04, -7.04 }, { 0.00, 0.00, 1.00 } };
-
-		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
-			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
-				assertEquals(expectedMatrix[i][j], acm.getPerspMat().get(i, j)[0], .1);
-			}
-		}
+		
+	    File outputfile = new File("calibrate-projection-result.png");
+	    ImageIO.write(resultFrame, "png", outputfile);
 
 		
 		BufferedImage compareFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-result.png"));
 
-		//TODO: fix image
-		//assertEquals(true, compareImages(compareFrame, resultFrame));
+		assertEquals(true, compareImages(compareFrame, resultFrame));
 	}
 
 	@Test
@@ -133,9 +124,8 @@ public class TestAutoCalibration {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 
 		
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -149,27 +139,16 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(34, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(316, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(36, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(418, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(312, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
-
-		assertEquals(false, acm.getPerspMat() == null);
-
-		double[][] expectedMatrix = { { 1.04, 0.03, -15.14 }, { -0.00, 1.04, -6.32 }, { 0.00, 0.00, 1.00 } };
-
-		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
-			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
-				assertEquals(expectedMatrix[i][j], acm.getPerspMat().get(i, j)[0], .1);
-			}
-		}
 
 		BufferedImage compareFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2-result.png"));
 
-		//TODO: fix image
-		//assertEquals(true, compareImages(compareFrame, resultFrame));
+		assertEquals(true, compareImages(compareFrame, resultFrame));
 
 	}
 
@@ -199,9 +178,8 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
 
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -220,9 +198,8 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -241,9 +218,8 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -257,20 +233,11 @@ public class TestAutoCalibration {
 
 		assertEquals(45, calibrationBounds.get().getMinX(), 1.0);
 		assertEquals(25, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(572, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(570, calibrationBounds.get().getWidth(), 1.0);
 		assertEquals(431, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
-
-		assertEquals(false, acm.getPerspMat() == null);
-
-		double[][] expectedMatrix = { { 1.00, 0.00, -1.66 }, { 0.00, 1.00, -1.39 }, { 0.00, 0.00, 1.00 } };
-
-		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
-			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
-				assertEquals(expectedMatrix[i][j], acm.getPerspMat().get(i, j)[0], .1);
-			}
-		}
+		
 
 		BufferedImage compareFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-result.png"));
@@ -284,9 +251,8 @@ public class TestAutoCalibration {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -298,28 +264,17 @@ public class TestAutoCalibration {
 
 		assertTrue(calibrationBounds.isPresent());
 
-		assertEquals(116, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(88, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(298, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(137, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(65, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(402, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(282, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
-
-		assertEquals(false, acm.getPerspMat() == null);
-
-		double[][] expectedMatrix = { { 0.88, -0.34, 89.04 }, { 0.24, 0.80, -55.97 }, { -0.00, -0.00, 1.00 } };
-
-		for (int i = 0; i < acm.getPerspMat().rows(); i++) {
-			for (int j = 0; j < acm.getPerspMat().cols(); j++) {
-				assertEquals(expectedMatrix[i][j], acm.getPerspMat().get(i, j)[0], .1);
-			}
-		}
 
 		BufferedImage compareFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned-result.png"));
 
-		//TODO: fix image
-		//assertEquals(true, compareImages(compareFrame, resultFrame));
+		assertEquals(true, compareImages(compareFrame, resultFrame));
 	}
 
 	@Test
