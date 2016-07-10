@@ -512,9 +512,16 @@ public class AutoCalibrationManager {
 		    Core.line(tempMat, points[i], points[(i+1)%4], new Scalar(255,255,255));
 		}
 		
-		Mat tempMask = new Mat();
-		tempMask.create(mat.rows()+2, mat.cols()+2, CvType.CV_8UC1);
-		Imgproc.floodFill(tempMat, tempMask, rect.center, new Scalar(255,255,255));
+		Mat tempMask = Mat.zeros((mat.rows()+2), (mat.cols()+2), CvType.CV_8UC1);
+		Imgproc.floodFill(tempMat, tempMask, rect.center, new Scalar(255,255,255), null, new Scalar(0,0,0), new Scalar(254,254,254), 4);
+
+		if (logger.isTraceEnabled())
+		{
+			String filename = String.format("poly.png");
+			File file = new File(filename);
+			filename = file.toString();
+			Highgui.imwrite(filename, tempMat);
+		}
 		
 		mat.setTo(new Scalar(0,0,0), tempMat);
 	}
