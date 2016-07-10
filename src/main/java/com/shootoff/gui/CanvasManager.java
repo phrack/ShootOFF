@@ -688,9 +688,8 @@ public class CanvasManager implements CameraView {
 			}
 		});
 	}
-
-	@Override
-	public Optional<Target> addTarget(File targetFile) {
+	
+	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
 		Optional<TargetComponents> targetComponents;
 
 		if ('@' == targetFile.toString().charAt(0)) {
@@ -703,13 +702,13 @@ public class CanvasManager implements CameraView {
 			
 			InputStream resourceTargetStream = loader.getResourceAsStream(targetFile.toString().substring(1));
 			if (resourceTargetStream != null) {
-				targetComponents = TargetIO.loadTarget(resourceTargetStream, loader);
+				targetComponents = TargetIO.loadTarget(resourceTargetStream, playAnimations, loader);
 			} else {
 				targetComponents = Optional.empty();
 				logger.error("Error adding target from stream created from resource {}", targetFile.toString());
 			}
 		} else {
-			targetComponents = TargetIO.loadTarget(targetFile);
+			targetComponents = TargetIO.loadTarget(targetFile, playAnimations);
 		}
 
 		if (targetComponents.isPresent()) {
@@ -723,7 +722,12 @@ public class CanvasManager implements CameraView {
 			return target;
 		}
 
-		return Optional.empty();
+		return Optional.empty();	
+	}
+
+	@Override
+	public Optional<Target> addTarget(File targetFile) {
+		return addTarget(targetFile, true);
 	}
 
 	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {

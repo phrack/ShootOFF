@@ -115,7 +115,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		if ('@' != target.toString().charAt(0) && !target.isAbsolute())
 			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
 
-		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target);
+		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target, false);
 
 		if (newTarget.isPresent()) {
 			newTarget.get().setPosition(x, y);

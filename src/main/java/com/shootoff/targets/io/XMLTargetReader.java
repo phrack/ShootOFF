@@ -57,9 +57,11 @@ public class XMLTargetReader implements TargetReader {
 
 	private final List<Node> targetNodes = new ArrayList<>();
 	private final Map<String, String> targetTags = new HashMap<>();
+	private final boolean playAnimations;
 	private final Optional<ClassLoader> loader;
 
-	public XMLTargetReader(File targetFile) {
+	public XMLTargetReader(File targetFile, boolean playAnimations) {
+		this.playAnimations = playAnimations;
 		loader = Optional.empty();
 
 		try (InputStream is = new FileInputStream(targetFile)) {
@@ -69,12 +71,14 @@ public class XMLTargetReader implements TargetReader {
 		}
 	}
 
-	public XMLTargetReader(InputStream targetStream) {
+	public XMLTargetReader(InputStream targetStream, boolean playAnimations) {
+		this.playAnimations = playAnimations;
 		loader = Optional.empty();
 		load(targetStream);
 	}
 
-	public XMLTargetReader(InputStream targetStream, ClassLoader loader) {
+	public XMLTargetReader(InputStream targetStream, boolean playAnimations, ClassLoader loader) {
+		this.playAnimations = playAnimations;
 		this.loader = Optional.ofNullable(loader);
 		load(targetStream);
 	}
@@ -180,7 +184,7 @@ public class XMLTargetReader implements TargetReader {
 					String extension = imageFile.getName().substring(firstDot);
 
 					if (extension.endsWith("gif") && '@' == savedFile.toString().charAt(0) && loader.isPresent()) {
-						InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1));		
+						InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1));
 						GifAnimation gif = new GifAnimation(imageRegion, gifStream);
 						imageRegion.setImage(gif.getFirstFrame());
 						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
@@ -190,7 +194,7 @@ public class XMLTargetReader implements TargetReader {
 						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
 					}
 
-					if (imageRegion.getAnimation().isPresent()) {
+					if (imageRegion.getAnimation().isPresent() && playAnimations) {
 						final SpriteAnimation animation = imageRegion.getAnimation().get();
 						animation.setCycleCount(1);
 

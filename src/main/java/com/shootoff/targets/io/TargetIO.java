@@ -132,10 +132,19 @@ public class TargetIO {
 	}
 
 	public static Optional<TargetComponents> loadTarget(final File targetFile) {
+		return loadTarget(targetFile, true);
+	}
+
+	// Used for loading targets from resource files for modular exercises
+	public static Optional<TargetComponents> loadTarget(final InputStream targetStream, final ClassLoader loader) {
+		return loadTarget(targetStream, true, loader);
+	}
+
+	public static Optional<TargetComponents> loadTarget(final File targetFile, boolean playAnimations) {
 		final TargetReader reader;
 
 		if (targetFile.getName().endsWith("target")) {
-			reader = new XMLTargetReader(targetFile);
+			reader = new XMLTargetReader(targetFile, playAnimations);
 		} else {
 			logger.error("Unknown target file type.");
 			return Optional.empty();
@@ -145,8 +154,9 @@ public class TargetIO {
 	}
 
 	// Used for loading targets from resource files for modular exercises
-	public static Optional<TargetComponents> loadTarget(final InputStream targetStream, final ClassLoader loader) {
-		final TargetReader reader = new XMLTargetReader(targetStream, loader);
+	public static Optional<TargetComponents> loadTarget(final InputStream targetStream, boolean playAnimations,
+			final ClassLoader loader) {
+		final TargetReader reader = new XMLTargetReader(targetStream, playAnimations, loader);
 
 		return Optional.of(new TargetComponents(processVisualTags(reader.getTargetNodes()), reader.getTargetTags()));
 	}
