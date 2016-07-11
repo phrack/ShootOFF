@@ -53,7 +53,8 @@ public class AutoCalibrationManager {
 
 	private static final int PATTERN_WIDTH = 9;
 	private static final int PATTERN_HEIGHT = 6;
-	private static final double PAPER_MARGINS = 1.048;
+	private static final double PAPER_MARGIN_WIDTH = 1.048;
+	private static final double PAPER_MARGIN_HEIGHT = 1.063;
 	private static final Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
 	private Callback<Void, Void> callback;
@@ -460,9 +461,9 @@ public class AutoCalibrationManager {
 		}
 
 		width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
-				* PAPER_MARGINS * 1+(BORDER_FACTOR/PATTERN_WIDTH));
+				* PAPER_MARGIN_WIDTH * 1+(BORDER_FACTOR/PATTERN_WIDTH));
 		height = ((double) height
-				* ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGINS * 1+(BORDER_FACTOR/PATTERN_HEIGHT));
+				* ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGIN_HEIGHT * 1+(BORDER_FACTOR/PATTERN_HEIGHT));
 
 		final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
 		if (width > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.cols()
