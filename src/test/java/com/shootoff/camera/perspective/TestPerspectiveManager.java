@@ -161,12 +161,12 @@ public class TestPerspectiveManager {
 
 		assertTrue(paperDimensions.isPresent());
 
-		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
+		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(329, 35, 701, 545),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
 
 		pm.calculateUnknown();
 		
-		assertEquals(3444, pm.getCameraDistance());
+		assertEquals(3422, pm.getCameraDistance());
 
 		pm.setShooterDistance(pm.getCameraDistance());
 
@@ -174,23 +174,23 @@ public class TestPerspectiveManager {
 
 		assertTrue(dims.isPresent());
 		assertEquals(172.00, dims.get().getWidth(), 1);
-		assertEquals(123.98, dims.get().getHeight(), 1);
+		assertEquals(126.05, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(3444, pm.getCameraDistance());
+		assertEquals(3422, pm.getCameraDistance());
 		
-		pm = new PerspectiveManager(new BoundingBox(0, 0, 698, 544),
+		pm = new PerspectiveManager(new BoundingBox(329, 35, 701, 545),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
 		
-		pm.setCameraDistance(3444);
+		pm.setCameraDistance(3422);
 		
 		pm.calculateUnknown();
 		
-		assertEquals(3.58, pm.getSensorWidth(), .05);
-		assertEquals(2.02, pm.getSensorHeight(), .05);
+		assertEquals(3.58, pm.getSensorWidth(), .02);
+		assertEquals(2.02, pm.getSensorHeight(), .02);
 	}
 
 	
@@ -234,7 +234,7 @@ public class TestPerspectiveManager {
 
 		pm.calculateUnknown();
 
-		assertEquals(6767, pm.getCameraDistance());
+		assertEquals(6765, pm.getCameraDistance());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
