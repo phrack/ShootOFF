@@ -170,9 +170,14 @@ public class PerspectiveManager {
 		this(cameraName, feedDims, arenaBounds);
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
 		this.setProjectorResolution(projectorRes);
-
+		
 		// Camera distance is unknown
 		calculateUnknown();
+
+		// This makes things work easier if the user doesn't really know to set shooter distance
+		// or the user starts an exercise that uses perspective but didn't set shooter distance
+		if (shooterDistance == -1)
+			shooterDistance = cameraDistance;
 	}
 
 	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
@@ -283,6 +288,14 @@ public class PerspectiveManager {
 		if (!isInitialized())
 		{
 			calculateUnknown();
+			
+			
+			// This makes things work easier if the user doesn't really know to set shooter distance
+			// or the user starts an exercise that uses perspective but didn't set shooter distance
+			if (shooterDistance == -1)
+				shooterDistance = cameraDistance;
+			
+			
 		}
 	}
 
