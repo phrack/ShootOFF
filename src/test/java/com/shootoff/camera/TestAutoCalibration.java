@@ -56,6 +56,8 @@ public class TestAutoCalibration {
 	}
 
 	private Boolean autoCalibrationVideo(String videoPath) {
+		acm.reset();
+		
 		Object processingLock = new Object();
 		File videoFile = new File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
 
@@ -84,6 +86,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateProjection() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
@@ -120,6 +124,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateProjection2() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 
@@ -158,12 +164,13 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateProjectionCutoff() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
 
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -179,6 +186,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateTightPatternUpsidedown() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
 
@@ -199,6 +208,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateTightPatternCutOff() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 
@@ -219,6 +230,8 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateTightPattern() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 
@@ -299,13 +312,14 @@ public class TestAutoCalibration {
 	
 	@Test
 	public void testCalibrateProjectionPaper() throws IOException {
+		acm.reset();
+		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-paper.png"));
 
 		
-		Mat matTemp = Camera.bufferedImageToMat(testFrame);
 		final Mat mat = new Mat();
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
+		acm.preProcessFrame(testFrame, mat);
 		
 		acm.processFrame(testFrame);
 		Optional<Bounds> calibrationBounds = Optional.of(acm.getBoundsResult());

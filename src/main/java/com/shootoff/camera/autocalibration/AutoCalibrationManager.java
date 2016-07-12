@@ -68,6 +68,8 @@ public class AutoCalibrationManager {
 
 	// Stores the bounding box we'll pass back to CameraManager
 	private Bounds boundingBox = null;
+	
+	private RotatedRect boundsRect;
 
 	private boolean warpInitialized = false;
 	private boolean isCalibrated = false;
@@ -123,6 +125,8 @@ public class AutoCalibrationManager {
 		isCalibrated = false;
 		warpInitialized = false;
 		boundsResult = null;
+		boundsRect = null;
+		boundingBox = null;
 
 		paperDimensions = Optional.empty();
 	}
@@ -597,7 +601,6 @@ public class AutoCalibrationManager {
 		return warpPerspective(mat);
 	}
 
-	private RotatedRect boundsRect;
 
 	private MatOfPoint2f estimatePatternRect(Mat traceMat, MatOfPoint2f boardRect) {
 
