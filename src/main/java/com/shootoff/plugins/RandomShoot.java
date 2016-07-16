@@ -34,6 +34,7 @@ import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
+	private List<Target> targets;
 	private Target selectedTarget = null;
 	private final List<String> subtargets = new ArrayList<String>();
 	private final Stack<Integer> currentSubtargets = new Stack<Integer>();
@@ -43,6 +44,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 
 	public RandomShoot(List<Target> targets) {
 		super(targets);
+		this.targets = targets;
 		if (fetchSubtargets(targets)) startRound();
 	}
 
@@ -54,6 +56,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	 */
 	protected RandomShoot(List<Target> targets, Random rng) {
 		super(targets);
+		this.targets = targets;
 		this.rng = rng;
 		if (fetchSubtargets(targets)) startRound();
 	}
@@ -63,17 +66,33 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {
-		if (TargetChange.REMOVED.equals(change)) return;
-		
-		// Didn't previously have a usable target, if we do now
-		// start the exercise
-		if (selectedTarget == null) {
-			for (TargetRegion region : target.getRegions()) {
-				if (region.tagExists("subtarget")) {
-					if (fetchSubtargets(Arrays.asList(target))) startRound();
-					break;
+		switch(change) {
+		case ADDED:
+			// Didn't previously have a usable target, if we do now
+			// start the exercise
+			if (selectedTarget == null) {
+				for (TargetRegion region : target.getRegions()) {
+					if (region.tagExists("subtarget")) {
+						if (fetchSubtargets(Arrays.asList(target))) startRound();
+						break;
+					}
 				}
 			}
+			
+			targets.add(target);
+			
+			break;
+		case REMOVED:
+			targets.remove(target);
+			
+			if (target.equals(selectedTarget)) {
+				selectedTarget = null;
+				
+				// Clear state and state error
+				if (fetchSubtargets(targets)) startRound();
+			}
+			
+			break;
 		}
 	}
 	
@@ -112,6 +131,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	 */
 	private boolean fetchSubtargets(List<Target> targets) {
 		subtargets.clear();
+		currentSubtargets.clear();
 
 		boolean foundTarget = false;
 		for (Target target : targets) {
@@ -193,8 +213,16 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 		List<File> soundFiles = new ArrayList<File>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
+		int subtargetIndex = currentSubtargets.peek();
+		
+		if (subtargets.size() == 0 || subtargetIndex > subtargets.size()) {
+			// Error condition, there are no subtargets left or the index indicates
+			// a target that doesn't exist. Try restarting
+			startRound();
+		}
+		
 		File targetNameSound = new File(
-				String.format("sounds/voice/shootoff-%s.wav", subtargets.get(currentSubtargets.peek())));
+				String.format("sounds/voice/shootoff-%s.wav", subtargets.get(subtargetIndex)));
 
 		if (targetNameSound.exists()) {
 			soundFiles.add(targetNameSound);
@@ -241,6 +269,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 
 	@Override
 	public void reset(List<Target> targets) {
+		this.targets = targets;
 		if (fetchSubtargets(targets)) startRound();
 	}
 
