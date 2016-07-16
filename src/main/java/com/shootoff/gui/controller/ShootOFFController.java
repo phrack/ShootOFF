@@ -25,10 +25,12 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -1071,18 +1073,31 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	// and we don't handle that right now. I'm not too worried about that
 	// because I don't think the periods are going to be vastly different
 	// This is only intended for very short disablement periods
-	@Override
 	public void disableShotDetection(int msDuration) {
 		// Don't disable the cameras if they are already disabled (e.g. because
 		// a training protocol paused shot detection)
 		if (!camerasSupervisor.areDetecting()) return;
+
+		// Keep track of cameras that already had shot detection off so that
+		// we can ensure they stay off when we re-enable shot detection
+		Set<CameraManager> alreadyOff = new HashSet<>();
+
+		for (CameraManager cm : camerasSupervisor.getCameraManagers()) {
+			if (!cm.isDetecting()) alreadyOff.add(cm);
+		}
 
 		camerasSupervisor.setDetectingAll(false);
 
 		Runnable restartDetection = () -> {
 			if (!calibrationManager.isPresent()
 					|| (calibrationManager.isPresent() && !calibrationManager.get().isCalibrating())) {
-				camerasSupervisor.setDetectingAll(true);
+				if (alreadyOff.isEmpty()) {
+					camerasSupervisor.setDetectingAll(true);
+				} else {
+					for (CameraManager cm : camerasSupervisor.getCameraManagers()) {
+						if (!alreadyOff.contains(cm)) cm.setDetecting(true);
+					}
+				}
 			} else {
 				logger.info("disableShotDetectionTimer did not re-enable shot detection, isCalibrating is true");
 			}

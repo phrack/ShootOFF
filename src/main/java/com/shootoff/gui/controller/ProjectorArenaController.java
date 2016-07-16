@@ -464,6 +464,7 @@ public class ProjectorArenaController implements CalibrationListener {
 						15000 /* ms */, Color.YELLOW);
 
 				feedCanvasManager.getCameraManager().setDetecting(false);
+				feedCanvasManager.getCameraManager().setDetectionLockState(true);
 			}
 		} else if (showingCursorWarning) {
 			mouseInWindow = false;
@@ -486,6 +487,7 @@ public class ProjectorArenaController implements CalibrationListener {
 						logger.error("Exception thrown when re-enabling shot detection due to mouse leaving arena", e);
 					}
 
+					feedCanvasManager.getCameraManager().setDetectionLockState(false);
 					feedCanvasManager.getCameraManager().setDetecting(true);
 				}
 			}, 100 /* ms */);
@@ -529,6 +531,18 @@ public class ProjectorArenaController implements CalibrationListener {
 		this.feedCanvasManager = canvasManager;
 
 		if (arenaStage != null) {
+			arenaStage.getScene().setOnMouseMoved((event) -> {
+				// Only disable shot detection if the cursor is actually
+				// over the stage. We may inject mouse movements later to
+				// allow targets to be moved around on the arena from the
+				// calibrated camera feed.
+				if (event.getScreenX() >= arenaStage.getX() && event.getScreenX() < arenaStage.getX() + getWidth()
+						&& event.getScreenY() >= arenaStage.getY()
+						&& event.getScreenY() < arenaStage.getY() + getHeight()) {
+					cursorWarningToggle(true);
+				}
+			});
+
 			arenaStage.getScene().setOnMouseEntered((event) -> {
 				cursorWarningToggle(true);
 			});

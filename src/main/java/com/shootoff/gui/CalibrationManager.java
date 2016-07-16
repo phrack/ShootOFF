@@ -138,11 +138,10 @@ public class CalibrationManager implements CameraCalibrationListener {
 		isShowingPattern.set(false);
 
 		// We disable shot detection briefly because the pattern going away can
-		// cause false shots
-		// This statement applies to all the cam feeds rather than just the
-		// arena. I don't think that should
-		// be a problem?
-		calibrationConfigurator.disableShotDetection(400);
+		// cause false shots.  This statement applies to all the cam feeds rather
+		// than just the arena. I don't think that should be a problem?
+		calibratingCameraManager.setDetecting(false);
+		TimerPool.schedule(() -> calibratingCameraManager.setDetecting(true), 400);
 	}
 
 	@Override

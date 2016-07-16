@@ -90,6 +90,7 @@ public class CameraManager {
 	protected Optional<Bounds> projectionBounds = Optional.empty();
 
 	private final AtomicBoolean isStreaming = new AtomicBoolean(true);
+	private final AtomicBoolean isDetectionLocked = new AtomicBoolean(false);
 	private final AtomicBoolean isDetecting = new AtomicBoolean(true);
 	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
 	private boolean shownBrightnessWarning = false;
@@ -251,7 +252,19 @@ public class CameraManager {
 		this.isStreaming.set(isStreaming);
 	}
 
+	// Sometimes it is useful to ensure that a camera that isn't detecting
+	// states not detecting (e.g. to not be turned back on by reset button
+	public void setDetectionLockState(boolean isLocked) {
+		isDetectionLocked.set(isLocked);
+	}
+
 	public void setDetecting(boolean isDetecting) {
+		if (isDetectionLocked.get()) {
+			logger.debug("Attempted to set detection for {} to {}, but the detection state is locked.", getName(),
+					isDetecting);
+			return;
+		}
+
 		// Lock this to false during calibration
 		if (isCalibrating.get() && isDetecting) {
 			logger.info("Not changing detection to true during calibration");
