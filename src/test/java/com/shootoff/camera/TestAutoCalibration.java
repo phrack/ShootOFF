@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.imgproc.Imgproc;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
