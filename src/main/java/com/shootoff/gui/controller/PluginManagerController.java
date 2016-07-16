@@ -124,6 +124,8 @@ public class PluginManagerController {
 									final Text text = new Text(item);
 									text.wrappingWidthProperty().bind(descriptionCol.widthProperty());
 									setGraphic(text);
+								} else {
+									setGraphic(null);
 								}
 							}
 						};
@@ -219,6 +221,8 @@ public class PluginManagerController {
 				}
 
 				setGraphic(actionButton);
+			} else {
+				setGraphic(null);
 			}
 		}
 	};
