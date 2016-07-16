@@ -110,22 +110,24 @@ public class CalibrationManager implements CameraCalibrationListener {
 		Dimension2D feedDim = new Dimension2D(calibratingCameraManager.getFeedWidth(),
 				calibratingCameraManager.getFeedHeight());
 
-		if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName(), feedDim)) {
-			if (perspectivePaperDims.isPresent()) {
-				pm = new PerspectiveManager(calibratingCameraManager.getName(),
-						calibratingCameraManager.getProjectionBounds().get(), feedDim, perspectivePaperDims.get(),
-						arenaController.getArenaStageResolution());
+		if (calibratingCameraManager.getProjectionBounds().isPresent()) {
+			if (PerspectiveManager.isCameraSupported(calibratingCameraManager.getName(), feedDim)) {
+				if (perspectivePaperDims.isPresent()) {
+					pm = new PerspectiveManager(calibratingCameraManager.getName(),
+							calibratingCameraManager.getProjectionBounds().get(), feedDim, perspectivePaperDims.get(),
+							arenaController.getArenaStageResolution());
+				} else {
+					pm = new PerspectiveManager(calibratingCameraManager.getName(),
+							calibratingCameraManager.getProjectionBounds().get(), feedDim,
+							arenaController.getArenaStageResolution());
+				}
 			} else {
-				pm = new PerspectiveManager(calibratingCameraManager.getName(),
-						calibratingCameraManager.getProjectionBounds().get(), feedDim,
-						arenaController.getArenaStageResolution());
-			}
-		} else {
-			if (perspectivePaperDims.isPresent()) {
-				pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(), feedDim,
-						perspectivePaperDims.get(), arenaController.getArenaStageResolution());
-			} else {
-				logger.debug("Too many perspective parameters are unknown to create a perspective manager.");
+				if (perspectivePaperDims.isPresent()) {
+					pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(), feedDim,
+							perspectivePaperDims.get(), arenaController.getArenaStageResolution());
+				} else {
+					logger.debug("Too many perspective parameters are unknown to create a perspective manager.");
+				}
 			}
 		}
 
