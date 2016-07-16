@@ -46,6 +46,9 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 		super.addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
 	}
 
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {}
+	
 	/**
 	 * Returns the score for the red player. This method exists to make this
 	 * exercise easier to test.

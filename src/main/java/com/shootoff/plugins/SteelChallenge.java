@@ -61,7 +61,8 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		thisSuper = super.getInstance();
 		this.targets = targets;
 
-		if (checkTargets(targets)) startRound();
+		repeatExercise = checkTargets(targets);
+		startRound();
 	}
 
 	@Override
@@ -80,19 +81,43 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		targets = new ArrayList<Target>();
 		targets.addAll(course.getTargets());
 
-		if (checkTargets(targets)) startRound();
+		repeatExercise = checkTargets(targets);
+		startRound();
+	}
+
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {
+		switch (change) {
+		case ADDED:
+			targets.add(target);
+
+			if (!repeatExercise && isStopTarget(target)) {
+				repeatExercise = checkTargets(targets);
+				startRound();
+			}
+
+			break;
+		case REMOVED:
+			targets.remove(target);
+			break;
+		}
+	}
+
+	private boolean isStopTarget(Target target) {
+		for (final TargetRegion r : target.getRegions()) {
+			if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean checkTargets(final List<Target> targets) {
 		boolean hasStopTarget = false;
 
 		for (final Target t : targets) {
-			for (final TargetRegion r : t.getRegions()) {
-				if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
-					hasStopTarget = true;
-					break;
-				}
-			}
+			hasStopTarget = isStopTarget(t);
 
 			if (hasStopTarget) break;
 		}
@@ -247,7 +272,8 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 		this.targets = targets;
 
-		if (checkTargets(targets)) startRound();
+		repeatExercise = checkTargets(targets);
+		startRound();
 	}
 
 	@Override

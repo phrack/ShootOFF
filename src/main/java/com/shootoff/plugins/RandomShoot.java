@@ -20,6 +20,7 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,7 @@ import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
+	private Target selectedTarget = null;
 	private final List<String> subtargets = new ArrayList<String>();
 	private final Stack<Integer> currentSubtargets = new Stack<Integer>();
 	private Random rng = new Random();
@@ -59,6 +61,22 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	@Override
 	public void init() {}
 
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {
+		if (TargetChange.REMOVED.equals(change)) return;
+		
+		// Didn't previously have a usable target, if we do now
+		// start the exercise
+		if (selectedTarget == null) {
+			for (TargetRegion region : target.getRegions()) {
+				if (region.tagExists("subtarget")) {
+					if (fetchSubtargets(Arrays.asList(target))) startRound();
+					break;
+				}
+			}
+		}
+	}
+	
 	private void startRound() {
 		pickSubtargets();
 		saySubtargets();
@@ -104,7 +122,10 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 				}
 			}
 
-			if (foundTarget) break;
+			if (foundTarget) {
+				selectedTarget = target;
+				break;
+			}
 		}
 
 		if (foundTarget && subtargets.size() > 0) {

@@ -63,6 +63,9 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		super(targets);
 		this.thisSuper = super.getInstance();
 	}
+	
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {}
 
 	/**
 	 * This is used to make this plugin deterministic for testing.

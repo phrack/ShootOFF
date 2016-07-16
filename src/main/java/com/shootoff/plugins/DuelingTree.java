@@ -20,6 +20,7 @@ package com.shootoff.plugins;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -76,14 +77,12 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 			if (foundTarget) break;
 
 			for (TargetRegion region : target.getRegions()) {
-				if (region.tagExists("subtarget")) {
-					if (region.getTag("subtarget").startsWith("left_paddle")) {
-						paddlesOnLeft.add(region);
-						foundTarget = true;
-					} else if (region.getTag("subtarget").startsWith("right_paddle")) {
-						paddlesOnRight.add(region);
-						foundTarget = true;
-					}
+				if (isLeftPaddle(region)) {
+					paddlesOnLeft.add(region);
+					foundTarget = true;
+				} else if (isRightPaddle(region)) {
+					paddlesOnRight.add(region);
+					foundTarget = true;
 				}
 			}
 		}
@@ -94,6 +93,28 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 		}
 
 		return foundTarget;
+	}
+
+	private boolean isLeftPaddle(TargetRegion region) {
+		if (!region.tagExists("subtarget")) return false;
+		return region.getTag("subtarget").startsWith("left_paddle");
+	}
+
+	private boolean isRightPaddle(TargetRegion region) {
+		if (!region.tagExists("subtarget")) return false;
+		return region.getTag("subtarget").startsWith("right_paddle");
+	}
+
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {
+		if (TargetChange.REMOVED.equals(change)) return;
+		
+		for (TargetRegion r : target.getRegions()) {
+			if (isLeftPaddle(r) || isRightPaddle(r)) {
+				continueExercise = findTargets(Arrays.asList(target));
+				break;
+			}
+		}
 	}
 
 	@Override

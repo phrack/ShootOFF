@@ -57,6 +57,9 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	public TimedHolsterDrill(List<Target> targets) {
 		super(targets);
 	}
+	
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {}
 
 	@Override
 	public ExerciseMetadata getInfo() {

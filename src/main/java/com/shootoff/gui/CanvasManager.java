@@ -688,7 +688,7 @@ public class CanvasManager implements CameraView {
 			}
 		});
 	}
-	
+
 	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
 		Optional<TargetComponents> targetComponents;
 
@@ -697,15 +697,17 @@ public class CanvasManager implements CameraView {
 				throw new AssertionError("Loaded target from training exercise resources, but a plugin does not "
 						+ "exist for the target.");
 			}
-			
+
 			ClassLoader loader = config.getPlugin().get().getLoader();
-			
-			InputStream resourceTargetStream = loader.getResourceAsStream(targetFile.toString().substring(1).replace("\\", "/"));
+
+			InputStream resourceTargetStream = loader
+					.getResourceAsStream(targetFile.toString().substring(1).replace("\\", "/"));
 			if (resourceTargetStream != null) {
 				targetComponents = TargetIO.loadTarget(resourceTargetStream, playAnimations, loader);
 			} else {
 				targetComponents = Optional.empty();
-				logger.error("Error adding target from stream created from resource {}", targetFile.toString().substring(1).replace("\\", "/"));
+				logger.error("Error adding target from stream created from resource {}",
+						targetFile.toString().substring(1).replace("\\", "/"));
 			}
 		} else {
 			targetComponents = TargetIO.loadTarget(targetFile, playAnimations);
@@ -722,7 +724,7 @@ public class CanvasManager implements CameraView {
 			return target;
 		}
 
-		return Optional.empty();	
+		return Optional.empty();
 	}
 
 	@Override
@@ -748,6 +750,10 @@ public class CanvasManager implements CameraView {
 
 		targets.add(newTarget);
 
+		Optional<TrainingExercise> enabledExercise = config.getExercise();
+		if (enabledExercise.isPresent())
+			enabledExercise.get().targetUpdate(newTarget, TrainingExercise.TargetChange.ADDED);
+
 		return newTarget;
 	}
 
@@ -766,6 +772,10 @@ public class CanvasManager implements CameraView {
 		}
 
 		targets.remove(target);
+
+		Optional<TrainingExercise> enabledExercise = config.getExercise();
+		if (enabledExercise.isPresent())
+			enabledExercise.get().targetUpdate(target, TrainingExercise.TargetChange.REMOVED);
 	}
 
 	public void clearTargets() {

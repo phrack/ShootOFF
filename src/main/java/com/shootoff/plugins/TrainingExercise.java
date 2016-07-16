@@ -33,6 +33,20 @@ public interface TrainingExercise {
 	 */
 	public void init();
 
+	public enum TargetChange {
+		ADDED, REMOVED
+	};
+
+	/**
+	 * Called when a target is added or removed from any webcam feed or arena.
+	 * 
+	 * @param target
+	 *            the target that was changed in some way
+	 * @param change
+	 *            what happened to <code>target</code>
+	 */
+	public void targetUpdate(Target target, TargetChange change);
+
 	/**
 	 * Called when a training exercise is first loaded to retrive information
 	 * about the plugin that is displayable to the user.

@@ -69,6 +69,9 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		setThisSuper(super.getInstance());
 	}
 
+	@Override
+	public void targetUpdate(Target target, TargetChange change) {}
+	
 	// For testing
 	protected void init(int shootCount, int dontShootCount, int maxVelocity) {
 		testing = true;
