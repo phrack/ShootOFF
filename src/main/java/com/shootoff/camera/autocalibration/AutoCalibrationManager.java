@@ -127,6 +127,8 @@ public class AutoCalibrationManager {
 		boundsResult = null;
 		boundsRect = null;
 		boundingBox = null;
+		callback = null;
+		perspMat = null;
 
 		paperDimensions = Optional.empty();
 	}
@@ -381,8 +383,7 @@ public class AutoCalibrationManager {
 		// Otherwise the corner detection will pick up the wrong corner potentially
 		for (Point pt : boardRect.toList())
 		{
-			Mat tempMask = new Mat();
-			tempMask.create(mat.rows()+2, mat.cols()+2, CvType.CV_8UC1);
+			Mat tempMask = Mat.zeros(mat.rows()+2, mat.cols()+2, CvType.CV_8UC1);
 			Point upwards = new Point(pt.x-5, pt.y-5);
 			Point downwards = new Point(pt.x-5, pt.y+5);
 			Imgproc.floodFill(mat, tempMask, upwards, new Scalar(255));
@@ -587,7 +588,7 @@ public class AutoCalibrationManager {
 		} else {
 			logger.warn("undistortFrame called when isCalibrated is false");
 		}
-
+		
 		return frame;
 	}
 	
