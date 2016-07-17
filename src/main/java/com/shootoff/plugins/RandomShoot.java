@@ -219,6 +219,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 			// Error condition, there are no subtargets left or the index indicates
 			// a target that doesn't exist. Try restarting
 			startRound();
+			return;
 		}
 		
 		File targetNameSound = new File(
