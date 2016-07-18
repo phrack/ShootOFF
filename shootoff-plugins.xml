@@ -9,4 +9,7 @@
   <plugin name="Shot to Click" version="1.3" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Shot-to-Click/releases/download/v1.3-FINAL/ShootOFF-Shot-to-Click.jar" 
     description="Play click-based Flash games using this exercise, which converts a shot on the arena to a mouse click on the screen the arena was calibrated on." />
+  <plugin name="Clay Buster" version="1.0" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Clay-Buster/releases/download/v1.0-FINAL/ShootOFF-Clay-Buster.jar" 
+    description="Practice shooting clays with a new clay launched every 7 seconds." />
 </plugins>
