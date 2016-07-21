@@ -143,6 +143,8 @@ public class AutoCalibrationManager {
 		}
 		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
 				
+		Imgproc.equalizeHist(mat, mat);
+		
 		if (logger.isTraceEnabled())
 		{
 			String filename = String.format("grayscale.png");
@@ -178,6 +180,10 @@ public class AutoCalibrationManager {
 				paperDimensions = newPaperDimensions;
 				
 				logger.debug("Found paper dimensions {}", paperDimensions.get());
+			}
+			else if (paperDimensions.isPresent() && newPaperDimensions.isPresent())
+			{
+				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions.get()));
 			}
 
 			if (newPaperDimensions.isPresent())
@@ -216,6 +222,10 @@ public class AutoCalibrationManager {
 				}
 			}
 		}
+	}
+
+	private Dimension2D averageDimensions(Dimension2D d2d1, Dimension2D d2d2) {
+		return new Dimension2D((d2d1.getWidth()+d2d2.getWidth())/2, (d2d1.getHeight()+d2d2.getHeight())/2);
 	}
 
 	private double[] patternLuminosity = { -1, -1, -1 };
@@ -263,19 +273,22 @@ public class AutoCalibrationManager {
 		}
 
 		// Turn the chessboard into corners
-		final MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
+		final Optional<MatOfPoint2f> boardRect = calcBoardRectFromCorners(boardCorners);
+		
+		if (!boardRect.isPresent())
+			return Optional.empty();
 		
 		// Estimate the pattern corners
-		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect);
+		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect.get());
 		
 		// More definitively find corners using goodFeaturesToTrack
-		final MatOfPoint corners = findCorners(boardRect, mat, estimatedPatternRect);
+		final Optional<Point[]> corners = findCorners(boardRect.get(), mat, estimatedPatternRect);
 
-		if (corners.total() != 4) return Optional.empty();
+		if (!corners.isPresent()) return Optional.empty();
 		
 
 		// Creates sorted cornerArray for warp perspective
-		MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect, corners);
+		MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect.get(), corners.get());
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-dist.png");
@@ -338,12 +351,12 @@ public class AutoCalibrationManager {
 		return Optional.of(boundingBox);
 	}
 
-	private MatOfPoint2f sortPointsForWarpPerspective(final MatOfPoint2f boardRect, final MatOfPoint corners) {
+	private MatOfPoint2f sortPointsForWarpPerspective(final MatOfPoint2f boardRect, final Point[] corners) {
 		Point[] cornerArray = new Point[4];
 		Double[] cornerED = new Double[4];
 		Point[] boardRectArray = boardRect.toArray();
 		for (int i = 0; i < 4; i++) cornerED[i] = -1.0;
-		for (Point cpt : corners.toArray())
+		for (Point cpt : corners)
 		{
 			for (int i = 0; i < 4; i++)
 			{
@@ -362,70 +375,85 @@ public class AutoCalibrationManager {
 		return corners2f;
 	}
 
-	private MatOfPoint findCorners(MatOfPoint2f boardRect, Mat mat, MatOfPoint2f estimatedPatternRect) {
-		// Turn mat BW for corner discovery
+	private Optional<Point[]> findCorners(MatOfPoint2f boardRect, Mat mat, MatOfPoint2f estimatedPatternRect) {
 		
-		// This is dynamic per OTSU algorithm
-		Imgproc.threshold(mat, mat, 128, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-
-
+		Point[] cornerArray = new Point[4];
 		
-		MatOfPoint corners = new MatOfPoint();
-		
-		Mat mask = Mat.zeros(mat.size(), CvType.CV_8UC1);
+		Mat mask;
 		
 		final Point[] estimatedPoints = estimatedPatternRect.toArray();
 		
 		// Establishes a search region
 		long region = mat.total() / 19200;
+
 		
-		// This gets rid of the checkerboard pattern on the corners
-		// Otherwise the corner detection will pick up the wrong corner potentially
-		for (Point pt : boardRect.toList())
+
+		
+		Mat tempMat = null;	
+		if (logger.isTraceEnabled())
 		{
-			Mat tempMask = Mat.zeros(mat.rows()+2, mat.cols()+2, CvType.CV_8UC1);
-			Point upwards = new Point(pt.x-5, pt.y-5);
-			Point downwards = new Point(pt.x-5, pt.y+5);
-			Imgproc.floodFill(mat, tempMask, upwards, new Scalar(255));
-			Imgproc.floodFill(mat, tempMask, downwards, new Scalar(255));
+			
+			tempMat = new Mat(mat.size(), CvType.CV_8UC3);
+			Imgproc.cvtColor(mat, tempMat, Imgproc.COLOR_GRAY2BGR);
 		}
 		
-		// Create a mask containing the search region for each corner
+		int i = 0;
 		for (Point pt : estimatedPoints)
 		{
+			MatOfPoint tempCorners = new MatOfPoint();
+			
+			mask = Mat.zeros(mat.size(), CvType.CV_8UC1);
+			
 			Point leftpt = new Point(pt.x-region, pt.y-region);
 			Point rightpt = new Point(pt.x+region, pt.y+region);
 			
 			Core.rectangle(mask, leftpt, rightpt, new Scalar(255),-1);
 			
-			
-		}
-				
-		// Finds the corners
-		Imgproc.goodFeaturesToTrack(mat, corners, 4, .01, region, mask, 3, false, .04);
-		
-		if (logger.isTraceEnabled())
-		{
-			String filename = String.format("mask.png");
+			String filename = String.format("mask-%d.png", i);
 			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, mask);
 			
-			Mat tempMat = new Mat(mat.size(), CvType.CV_8UC3);
-			Imgproc.cvtColor(mat, tempMat, Imgproc.COLOR_GRAY2BGR);
+			Imgproc.goodFeaturesToTrack(mat, tempCorners, 2, .10, 0, mask, 3, true, .04);
+						
+			if (tempCorners.empty())
+				return Optional.empty();
 			
-			for (Point corner : corners.toList())
+			Point res = null;
+			long dist = mat.total();
+			
+			for (Point p : tempCorners.toArray())
 			{
-				Core.circle(tempMat, corner, 1, new Scalar(0, 0, 255), -1);	
+				long tempDist = (long)(Math.min(mat.width() - p.x, p.x) + Math.min(mat.height() - p.y, p.y));
+				if (tempDist < dist)
+				{
+					dist = tempDist;
+					res = p;
+				}
+				
+				if (logger.isTraceEnabled())
+				{
+					logger.trace("corner {} {}", p.x, p.y);
+					Core.circle(tempMat, p, 1, new Scalar(0, 0, 255), -1);	
+				}
 			}
+
 			
-			filename = String.format("corners.png");
-			file = new File(filename);
+			cornerArray[i] = res;
+			
+			i++;
+		}
+		
+		if (logger.isTraceEnabled())
+		{
+
+			String filename = String.format("corners.png");
+			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, tempMat);
 
 		}
-		return corners;
+		return Optional.of(cornerArray);
 	}
 
 	/**
@@ -447,13 +475,16 @@ public class AutoCalibrationManager {
 
 		if (workingMat == null) workingMat = mat.clone();
 
-		final RotatedRect rect = getPaperPatternDimensions(workingMat, boardCorners);
+		final Optional<RotatedRect> rect = getPaperPatternDimensions(workingMat, boardCorners);
+		
+		if (!rect.isPresent())
+			return Optional.empty();
 
 		// OpenCV gives us the checkerboard corners, not the outside dimension
 		// So this estimates where the outside corner would be, plus a fudge
 		// factor for the edge of the paper
 		// Printer margins are usually a quarter inch on each edge
-		double rect_width = rect.size.width,rect_height = rect.size.height;
+		double rect_width = rect.get().size.width,rect_height = rect.get().size.height;
 		double width = rect_width,height = rect_height;
 		
 		// Flip them if its sideways
@@ -475,7 +506,7 @@ public class AutoCalibrationManager {
 				|| height > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.rows()) {
 			logger.trace("Pattern too big to be paper, must be projection, setting blank {}", rect);
 			
-			blankRotatedRect(workingMat, rect);
+			blankRotatedRect(workingMat, rect.get());
 			
 			if (logger.isTraceEnabled())
 			{
@@ -503,7 +534,7 @@ public class AutoCalibrationManager {
 
 		}
 
-		blankRotatedRect(mat, rect);
+		blankRotatedRect(mat, rect.get());
 
 		return Optional.of(new Dimension2D(width, height));
 	}
@@ -532,9 +563,13 @@ public class AutoCalibrationManager {
 		mat.setTo(new Scalar(0,0,0), tempMat);
 	}
 
-	private RotatedRect getPaperPatternDimensions(Mat traceMat, MatOfPoint2f boardCorners) {
-		final MatOfPoint2f boardRect2f = calcBoardRectFromCorners(boardCorners);	
-		return Imgproc.minAreaRect(boardRect2f);
+	private Optional<RotatedRect> getPaperPatternDimensions(Mat traceMat, MatOfPoint2f boardCorners) {
+		final Optional<MatOfPoint2f> boardRect2f = calcBoardRectFromCorners(boardCorners);	
+		
+		if (!boardRect2f.isPresent())
+			return Optional.empty();
+		
+		return Optional.of(Imgproc.minAreaRect(boardRect2f.get()));
 		
 	}
 
@@ -887,7 +922,7 @@ public class AutoCalibrationManager {
 	}
 
 	// converts the chessboard corners into a quadrilateral
-	private MatOfPoint2f calcBoardRectFromCorners(MatOfPoint2f corners) {
+	private Optional<MatOfPoint2f> calcBoardRectFromCorners(MatOfPoint2f corners) {
 		MatOfPoint2f result = new MatOfPoint2f();
 		result.alloc(4);
 
@@ -897,11 +932,16 @@ public class AutoCalibrationManager {
 				corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[1]);
 		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0],
 				corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[1]);
+		
+		
+		if (bottomRight.x < topLeft.x || bottomRight.y < topLeft.y)
+			// Pattern is upside down
+			return Optional.empty();
 
 		result.put(0, 0, topLeft.x, topLeft.y, topRight.x, topRight.y, bottomRight.x, bottomRight.y, bottomLeft.x,
 				bottomLeft.y);
 
-		return result;
+		return Optional.of(result);
 	}
 
 	private Point findChessBoardSquareCenter(Mat corners, int row, int col) {

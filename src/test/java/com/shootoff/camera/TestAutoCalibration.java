@@ -55,10 +55,8 @@ public class TestAutoCalibration {
 	}
 
 	private Boolean autoCalibrationVideo(String videoPath) {
-		acm.reset();
-		
 		Object processingLock = new Object();
-		File videoFile = new File(TestCameraManagerLifecam.class.getResource(videoPath).getFile());
+		File videoFile = new File(TestAutoCalibration.class.getResource(videoPath).getFile());
 
 		MockCameraManager cameraManager;
 		cameraManager = new MockCameraManager(videoFile, processingLock, mockCanvasManager, config, sectorStatuses,
@@ -107,7 +105,7 @@ public class TestAutoCalibration {
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
 		assertEquals(32, calibrationBounds.get().getMinY(), 1.0);
 		assertEquals(422, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(318, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(316, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 		
@@ -193,7 +191,6 @@ public class TestAutoCalibration {
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
 		
-		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
 		assertTrue(boardCorners.isPresent());
@@ -201,7 +198,8 @@ public class TestAutoCalibration {
 		
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), mat);
 
-		assertEquals(false, calibrationBounds.isPresent());
+		assertFalse(calibrationBounds.isPresent());
+
 
 	}
 
@@ -249,7 +247,7 @@ public class TestAutoCalibration {
 
 		assertEquals(45, calibrationBounds.get().getMinX(), 1.0);
 		assertEquals(25, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(572, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(570, calibrationBounds.get().getWidth(), 1.0);
 		assertEquals(431, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
@@ -283,10 +281,10 @@ public class TestAutoCalibration {
 
 		assertTrue(calibrationBounds.isPresent());
 
-		assertEquals(133, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(60, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(410, calibrationBounds.get().getWidth(), 1.0);
-		assertEquals(292, calibrationBounds.get().getHeight(), 1.0);
+		assertEquals(137, calibrationBounds.get().getMinX(), 1.0);
+		assertEquals(66, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(402, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(280, calibrationBounds.get().getHeight(), 1.0);
 
 		BufferedImage resultFrame = acm.undistortFrame(testFrame);
 		
@@ -303,6 +301,12 @@ public class TestAutoCalibration {
 	@Test
 	public void testCalibrateHighRes() throws IOException {
 		Boolean result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
+		assertEquals(true, result);
+	}
+	
+	@Test
+	public void testCalibrateWithPaperPattern() throws IOException {
+		Boolean result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e.mp4");
 		assertEquals(true, result);
 	}
 	
