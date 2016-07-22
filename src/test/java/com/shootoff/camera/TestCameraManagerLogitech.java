@@ -56,7 +56,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 		List<Shot> optionalShots = new ArrayList<Shot>();
 		optionalShots.add(new Shot(Color.GREEN, 386.0, 258, 0, 2));
 
-		super.checkShots(collector, shots, requiredShots, optionalShots, false);
+		super.checkShots(collector, shots, requiredShots, optionalShots, true);
 	}
 
 	@Test
