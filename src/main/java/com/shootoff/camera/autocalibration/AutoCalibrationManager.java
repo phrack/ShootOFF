@@ -20,6 +20,8 @@ package com.shootoff.camera.autocalibration;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
@@ -79,15 +81,18 @@ public class AutoCalibrationManager {
 	// Maybe I should have made it divisible...
 	private static final double BORDER_FACTOR = 0.065476;
 
-	private long frameTimestampBeforeFrameChange;
+	private long frameTimestampBeforeFrameChange = -1;
 
 	private Bounds boundsResult = null;
-	private long frameDelayResult;
+	private long frameDelayResult = -1;
 
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 60, 0.0001);
 
 	/* Paper Pattern */
 	private Optional<Dimension2D> paperDimensions = Optional.empty();
+	
+	private int stepThreeAttempts = 0;
+	private final static int STEP_THREE_MAX_ATTEMPTS = 2;
 
 	public Optional<Dimension2D> getPaperDimensions() {
 		return paperDimensions;
@@ -129,6 +134,9 @@ public class AutoCalibrationManager {
 		boundingBox = null;
 		callback = null;
 		perspMat = null;
+		frameDelayResult = -1;
+		frameTimestampBeforeFrameChange = -1;
+		stepThreeAttempts = 0;
 
 		paperDimensions = Optional.empty();
 	}
@@ -154,74 +162,196 @@ public class AutoCalibrationManager {
 		}
 
 	}
+	
+	
+	private boolean isStepOneCompleted()
+	{
+		return !(boundsResult == null);
+	}
+	
+	private boolean isStepTwoCompleted()
+	{
+		// If frameDelayResult > -1 OR calculateFrameDelay is False
+		// Then step two is complete
+		return !(frameDelayResult == -1 && calculateFrameDelay);
+	}
+	
+	private boolean inStepTwo()
+	{
+		// We're in step two if frameTimestampBeforeFrameChange > -1
+		// AND step two is not complete
+		return !(frameTimestampBeforeFrameChange == -1 || isStepTwoCompleted());
+	}
+	
+	
+	private boolean isStepThreeCompleted()
+	{
+		return paperDimensions.isPresent() || (stepThreeAttempts == STEP_THREE_MAX_ATTEMPTS);
+	}
+	
+	private boolean isFinished()
+	{
+		return (isStepOneCompleted() && isStepTwoCompleted() && isStepThreeCompleted());
+	}
+	
+	// Step one: Find main pattern, paper pattern optional
+	// Step two: Frame delay, if enabled
+	// Step three: Paper pattern attempt IF not found in step one
 
 	public void processFrame(final BufferedImage frame) {
-		if (boundsResult == null) {
-			
-			
-			Mat mat = new Mat();
-			preProcessFrame(frame, mat);
-
-			
-			// TODO: Make a master function that finds all chessboard corners, then just returns them as a list
-			// Instead of all this garbage intertwined with paper and projector calibration
-
-			// Step 1: Find the chessboard corners
-			Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
-
-			if (!boardCorners.isPresent()) return;
-
-			// THIS FUNCTION ALSO BLANKS THE PAPER PATTERN IN mat
-			// Which the function description tells you, so this is a second warning
-			Optional<Dimension2D> newPaperDimensions = findPaperPattern(boardCorners.get(), mat, null);
-			
-			if (!paperDimensions.isPresent() && newPaperDimensions.isPresent())
-			{
-				paperDimensions = newPaperDimensions;
-				
-				logger.debug("Found paper dimensions {}", paperDimensions.get());
-			}
-			else if (paperDimensions.isPresent() && newPaperDimensions.isPresent())
-			{
-				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions.get()));
-			}
-
-			if (newPaperDimensions.isPresent())
-				boardCorners = findChessboard(mat);
-			
-			if (!boardCorners.isPresent()) return;
-			
+		if (isFinished())
+		{
+			callback();
+			return;
+		}
 		
-			Optional<Bounds> bounds = calibrateFrame(boardCorners.get(), mat);
+		Mat mat = new Mat();
+		preProcessFrame(frame, mat);
+		
+		
+		if (!isStepOneCompleted()) {
+			stepOne(mat);
+			
+			if (isFinished())
+				callback();
 
-			if (bounds.isPresent()) {
-				boundsResult = bounds.get();
+			return;
+		}
+		
+		if (isStepOneCompleted() && !isStepTwoCompleted())
+		{
+			stepTwo(mat);
+			
+			if (isFinished())
+				callback();
 
-				if (calculateFrameDelay) {
-					logger.debug("Checking frame delay");
-
-					checkForFrameChange(mat);
-					frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
-					cameraManager.setArenaBackground(null);
-				} else {
-					if (callback != null) {
-						callback.call(null);
-					}
-				}
+			if (isStepTwoCompleted())
+			{
+				cameraManager.setArenaBackground(null);
 			}
-		} else {
-			final Optional<Long> frameDelay = checkForFrameChange(Camera.bufferedImageToMat(frame));
+			
+			return;
+			
+		}
+		
+		if (isStepOneCompleted() && isStepTwoCompleted() && !isStepThreeCompleted())
+		{
+			cameraManager.setArenaBackground(null);
+			
+			
+			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
+
+			if (listPatterns.isEmpty()) return;
+			
+			findPaperPattern(mat, listPatterns);
+			
+			stepThreeAttempts++;
+			
+			if (isFinished())
+				callback();
+
+			return;
+		}
+		
+		if (isFinished())
+			callback();
+	}
+
+	private void stepTwo(Mat mat) {
+		if (!inStepTwo())
+		{
+			logger.debug("Step two: Checking frame delay");
+
+			checkForFrameChange(mat);
+			frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
+			cameraManager.setArenaBackground(null);
+		}
+		else
+		{
+			final Optional<Long> frameDelay = checkForFrameChange(mat);
 
 			if (frameDelay.isPresent()) {
 				frameDelayResult = frameDelay.get();
 
-				logger.debug("frameDelayResult {}", frameDelayResult);
+				logger.debug("Step Two: frameDelayResult {}", frameDelayResult);
 
-				if (callback != null) {
-					callback.call(null);
-				}
 			}
 		}
+	}
+
+	private void callback() {
+		if (callback != null) {
+			callback.call(null);
+			callback = null;
+		}
+	}
+
+	private void stepOne(Mat mat) {
+		List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
+
+		if (listPatterns.isEmpty()) return;
+		
+		findPaperPattern(mat, listPatterns);
+
+		if (listPatterns.isEmpty()) return;
+		
+
+		// Technically there could still be more than one pattern
+		// or even a pattern that is much too small
+		// But damn if we're gonna fix every problem the user gives us
+		Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), mat);
+
+		if (bounds.isPresent()) {
+			boundsResult = bounds.get();
+
+		}
+		else
+		{
+			boundsResult = null;
+		}
+	}
+
+	private List<MatOfPoint2f> findPatterns(Mat mat, boolean findMultiple) {
+		List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
+		
+		int count = 0;
+		while (true)
+		{
+			Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
+			
+			if (boardCorners.isPresent())
+			{
+				patternList.add(boardCorners.get());
+				
+				if (!findMultiple)
+					break;
+				
+				final Optional<RotatedRect> rect = getPatternDimensions(boardCorners.get());
+				
+				blankRotatedRect(mat, rect.get());
+				
+				if (logger.isTraceEnabled())
+				{
+					String filename = String.format("blanked-box-%d.png", count);
+					File file = new File(filename);
+					filename = file.toString();
+					Highgui.imwrite(filename, mat);
+
+				}
+				
+				// Shortcut to not try to find three+ patterns
+				// We never should see more than two but maybe that'll change
+				// in the future
+				findMultiple = false;
+
+			}
+			else
+			{
+				break;
+			}
+			count++;
+		}
+		return patternList;
 	}
 
 	private Dimension2D averageDimensions(Dimension2D d2d1, Dimension2D d2d2) {
@@ -247,8 +377,14 @@ public class AutoCalibrationManager {
 
 		Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
 
+		final long change = cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange;
+		
 		if (tempMat.get(0, 1)[2] < .9 * tempMat.get(0, 0)[2]) {
-			return Optional.of(cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange);
+			return Optional.of(change);
+		}
+		else if(change > 250)
+		{
+			return Optional.of(-1L);
 		}
 
 		return Optional.empty();
@@ -463,80 +599,81 @@ public class AutoCalibrationManager {
 	 * outline of the projection area We are only concerned with size, not
 	 * alignment or angle
 	 * 
-	 * This function blanks out the pattern that it discovers in the Mat it is
-	 * provided. This is so that the pattern is not discovered by future pattern
-	 * discovery, e.g. auto-calibration
-	 * 
-	 * workingMat should be null for all external callers unless there is some
-	 * need to work off a different Mat than is having patterns blanked out by
-	 * this function
 	 */
-	public Optional<Dimension2D> findPaperPattern(MatOfPoint2f boardCorners, Mat mat, Mat workingMat) {
+	public void findPaperPattern(Mat mat, List<MatOfPoint2f> patternList) {
 
-		if (workingMat == null) workingMat = mat.clone();
-
-		final Optional<RotatedRect> rect = getPaperPatternDimensions(workingMat, boardCorners);
+		MatOfPoint2f boardCorners = null;
+		int index = 0;
+		boolean found = false;
 		
-		if (!rect.isPresent())
-			return Optional.empty();
-
-		// OpenCV gives us the checkerboard corners, not the outside dimension
-		// So this estimates where the outside corner would be, plus a fudge
-		// factor for the edge of the paper
-		// Printer margins are usually a quarter inch on each edge
-		double rect_width = rect.get().size.width,rect_height = rect.get().size.height;
-		double width = rect_width,height = rect_height;
-		
-		// Flip them if its sideways
-		if (height > width)
+		for (; index < patternList.size(); index++)
 		{
-			width = rect_height;
-			height = rect_width;
-			rect_height = width;
-			rect_width = height;
-		}
-
-		width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
-				* PAPER_MARGIN_WIDTH * 1+(BORDER_FACTOR/PATTERN_WIDTH));
-		height = ((double) height
-				* ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGIN_HEIGHT * 1+(BORDER_FACTOR/PATTERN_HEIGHT));
-
-		final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
-		if (width > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.cols()
-				|| height > PAPER_PATTERN_SIZE_THRESHOLD * workingMat.rows()) {
-			logger.trace("Pattern too big to be paper, must be projection, setting blank {}", rect);
+			boardCorners = patternList.get(index);
 			
-			blankRotatedRect(workingMat, rect.get());
+			final Optional<RotatedRect> rect = getPatternDimensions(boardCorners);
 			
-			if (logger.isTraceEnabled())
+			if (!rect.isPresent())
+				continue;
+	
+			// OpenCV gives us the checkerboard corners, not the outside dimension
+			// So this estimates where the outside corner would be, plus a fudge
+			// factor for the edge of the paper
+			// Printer margins are usually a quarter inch on each edge
+			double rect_width = rect.get().size.width,rect_height = rect.get().size.height;
+			double width = rect_width,height = rect_height;
+			
+			// Flip them if its sideways
+			if (height > width)
 			{
-				String filename = String.format("blanked-box.png");
-				File file = new File(filename);
-				filename = file.toString();
-				Highgui.imwrite(filename, workingMat);
+				width = rect_height;
+				height = rect_width;
+				rect_height = width;
+				rect_width = height;
+			}
+	
+			width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
+					* PAPER_MARGIN_WIDTH * 1+(BORDER_FACTOR/PATTERN_WIDTH));
+			height = ((double) height
+					* ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGIN_HEIGHT * 1+(BORDER_FACTOR/PATTERN_HEIGHT));
+	
+			final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
+			if (width > PAPER_PATTERN_SIZE_THRESHOLD * mat.cols()
+					|| height > PAPER_PATTERN_SIZE_THRESHOLD * mat.rows()) {
+				continue;
+			}
+	
+			if (logger.isTraceEnabled()) {
+				logger.trace("pattern width {} height {}", rect_width, rect_height);
+	
+				logger.trace("paper width {} height {}", width, height);
+	
+			}
+			
+			final Dimension2D newPaperDimensions = new Dimension2D(width, height);
+			
+			found = true;
 
+			if (!paperDimensions.isPresent())
+			{
+				paperDimensions = Optional.of(newPaperDimensions);
+				
+				logger.debug("Found paper dimensions {}", paperDimensions.get());
+			}
+			else if (paperDimensions.isPresent())
+			{
+				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
 			}
 
-			final Optional<MatOfPoint2f> boardCornersNew = findChessboard(workingMat);
-
-			if (!boardCornersNew.isPresent()) return Optional.empty();
-			
-			logger.trace("Found new pattern, attempting findPaperPattern {}", boardCornersNew.get());
-
-			return findPaperPattern(boardCornersNew.get(), mat, workingMat);
-
+	
+			break;
 		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("pattern width {} height {}", rect_width, rect_height);
-
-			logger.trace("paper width {} height {}", width, height);
-
+		
+		if (found)
+		{
+			logger.trace("Removing paper pattern from patternList (index {})", index);
+			patternList.remove(index);
 		}
-
-		blankRotatedRect(mat, rect.get());
-
-		return Optional.of(new Dimension2D(width, height));
+		
 	}
 
 	// What a stupid function, can't be the best way
@@ -563,7 +700,7 @@ public class AutoCalibrationManager {
 		mat.setTo(new Scalar(0,0,0), tempMat);
 	}
 
-	private Optional<RotatedRect> getPaperPatternDimensions(Mat traceMat, MatOfPoint2f boardCorners) {
+	private Optional<RotatedRect> getPatternDimensions(MatOfPoint2f boardCorners) {
 		final Optional<MatOfPoint2f> boardRect2f = calcBoardRectFromCorners(boardCorners);	
 		
 		if (!boardRect2f.isPresent())

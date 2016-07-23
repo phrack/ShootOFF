@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
@@ -149,15 +151,17 @@ public class TestPerspectiveManager {
 		final Mat mat = new Mat();
 		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
 		
-
-
-		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
 		assertTrue(boardCorners.isPresent());
 
-		Optional<Dimension2D> paperDimensions = acm.findPaperPattern(boardCorners.get(),
-				Camera.bufferedImageToMat(testFrame), null);
+		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
+		patternList.add(boardCorners.get());
+		
+		acm.findPaperPattern(boardCorners.get(),
+				patternList);
+		
+		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
 
 		assertTrue(paperDimensions.isPresent());
 
@@ -203,17 +207,17 @@ public class TestPerspectiveManager {
 		final Mat mat = new Mat();
 		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
 		
-
-
-		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
 		assertTrue(boardCorners.isPresent());
 
-		Optional<Dimension2D> paperDimensions = acm.findPaperPattern(boardCorners.get(),
-				Camera.bufferedImageToMat(testFrame), null);
-
-		assertTrue(paperDimensions.isPresent());
+		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
+		patternList.add(boardCorners.get());
+		
+		acm.findPaperPattern(boardCorners.get(),
+				patternList);
+		
+		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
 
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));

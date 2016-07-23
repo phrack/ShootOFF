@@ -330,8 +330,8 @@ public class TestAutoCalibration {
 		assertTrue(calibrationBounds.isPresent());
 
 		assertEquals(113, calibrationBounds.get().getMinX(), 1.0);
-		assertEquals(34, calibrationBounds.get().getMinY(), 1.0);
-		assertEquals(420, calibrationBounds.get().getWidth(), 1.0);
+		assertEquals(37, calibrationBounds.get().getMinY(), 1.0);
+		assertEquals(418, calibrationBounds.get().getWidth(), 1.0);
 		assertEquals(316, calibrationBounds.get().getHeight(), 1.0);
 
 	}
