@@ -158,7 +158,7 @@ public class TestPerspectiveManager {
 		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
 		patternList.add(boardCorners.get());
 		
-		acm.findPaperPattern(boardCorners.get(),
+		acm.findPaperPattern(mat,
 				patternList);
 		
 		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
@@ -214,7 +214,7 @@ public class TestPerspectiveManager {
 		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
 		patternList.add(boardCorners.get());
 		
-		acm.findPaperPattern(boardCorners.get(),
+		acm.findPaperPattern(mat,
 				patternList);
 		
 		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
