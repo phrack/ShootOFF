@@ -24,7 +24,6 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.gui.controller.ProjectorArenaController;
 
