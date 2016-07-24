@@ -35,6 +35,7 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
+import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetDistancePane;
 import com.shootoff.gui.TargetView;
@@ -92,11 +93,6 @@ public class ProjectorArenaController implements CalibrationListener {
 	public void init(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
 		this.canvasManager = canvasManager;
-
-		arenaStage = new Stage();
-		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
-		final Scene scene = new Scene(arenaAnchor, 500, 500);
-		arenaStage.setScene(scene);
 	}
 
 	public void init(Stage shootOFFStage, Configuration config, Resetter resetter) {

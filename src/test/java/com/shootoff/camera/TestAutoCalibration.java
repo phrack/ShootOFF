@@ -24,6 +24,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.MockCanvasManager;
+import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.gui.controller.ProjectorArenaController;
 
@@ -63,9 +64,12 @@ public class TestAutoCalibration {
 				Optional.empty());
 
 		mockCanvasManager.setCameraManager(cameraManager);
+		
+		ProjectorArenaController pac = new ProjectorArenaController();
+		pac.init(config, mockCanvasManager);
 
 		cameraManager.setCalibrationManager(
-				new CalibrationManager(new ShootOFFController(), cameraManager, new ProjectorArenaController()));
+				new CalibrationManager(new ShootOFFController(), cameraManager, pac));
 		cameraManager.enableAutoCalibration(false);
 		cameraManager.processVideo();
 

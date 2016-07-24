@@ -199,6 +199,7 @@ public class AutoCalibrationManager {
 	// Step three: Paper pattern attempt IF not found in step one
 
 	public void processFrame(final BufferedImage frame) {
+		
 		if (isFinished())
 		{
 			callback();
@@ -214,6 +215,8 @@ public class AutoCalibrationManager {
 			
 			if (isFinished())
 				callback();
+			
+			logger.trace("stepOne {}", isStepOneCompleted());
 
 			return;
 		}
@@ -230,12 +233,17 @@ public class AutoCalibrationManager {
 				cameraManager.setArenaBackground(null);
 			}
 			
+			logger.trace("stepTwo {}", isStepTwoCompleted());
+
+			
 			return;
 			
 		}
 		
 		if (isStepOneCompleted() && isStepTwoCompleted() && !isStepThreeCompleted())
 		{
+			stepThreeAttempts++;
+			
 			cameraManager.setArenaBackground(null);
 			
 			
@@ -245,13 +253,18 @@ public class AutoCalibrationManager {
 			
 			findPaperPattern(mat, listPatterns);
 			
-			stepThreeAttempts++;
 			
 			if (isFinished())
 				callback();
+			
+			logger.trace("stepThree {}", isStepThreeCompleted());
+
 
 			return;
 		}
+		
+		logger.trace("finished {}", isFinished());
+
 		
 		if (isFinished())
 			callback();
@@ -952,10 +965,10 @@ public class AutoCalibrationManager {
 		destCorners.put(2, 0, new double[] { boundsRect.boundingRect().x + boundsRect.boundingRect().width,
 				boundsRect.boundingRect().y + boundsRect.boundingRect().height });
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("initializeWarpPerspective {} {} {} {}", sourceCorners.get(0, 0), sourceCorners.get(1, 0),
+		if (logger.isTraceEnabled()) {
+			logger.trace("initializeWarpPerspective src corners {} {} {} {}", sourceCorners.get(0, 0), sourceCorners.get(1, 0),
 					sourceCorners.get(2, 0), sourceCorners.get(3, 0));
-			logger.debug("initializeWarpPerspective {} {} {} {}", destCorners.get(0, 0), destCorners.get(1, 0),
+			logger.trace("initializeWarpPerspective dest corners {} {} {} {}", destCorners.get(0, 0), destCorners.get(1, 0),
 					destCorners.get(2, 0), destCorners.get(3, 0));
 		}
 
