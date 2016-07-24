@@ -339,9 +339,9 @@ public class AutoCalibrationManager {
 				if (!findMultiple)
 					break;
 				
-				final Optional<RotatedRect> rect = getPatternDimensions(boardCorners.get());
+				final RotatedRect rect = getPatternDimensions(boardCorners.get());
 				
-				blankRotatedRect(mat, rect.get());
+				blankRotatedRect(mat, rect);
 				
 				if (logger.isTraceEnabled())
 				{
@@ -414,7 +414,7 @@ public class AutoCalibrationManager {
 	}
 
 	public Optional<Bounds> calibrateFrame(MatOfPoint2f boardCorners, Mat mat) {
-
+		
 		// For debugging
 		Mat traceMat = null;
 		if (logger.isTraceEnabled()) {
@@ -422,22 +422,19 @@ public class AutoCalibrationManager {
 		}
 
 		// Turn the chessboard into corners
-		final Optional<MatOfPoint2f> boardRect = calcBoardRectFromCorners(boardCorners);
-		
-		if (!boardRect.isPresent())
-			return Optional.empty();
-		
+		final MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
+				
 		// Estimate the pattern corners
-		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect.get());
+		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect);
 		
 		// More definitively find corners using goodFeaturesToTrack
-		final Optional<Point[]> corners = findCorners(boardRect.get(), mat, estimatedPatternRect);
+		final Optional<Point[]> corners = findCorners(boardRect, mat, estimatedPatternRect);
 
 		if (!corners.isPresent()) return Optional.empty();
 		
 
 		// Creates sorted cornerArray for warp perspective
-		MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect.get(), corners.get());
+		MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect, corners.get());
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-dist.png");
@@ -558,10 +555,13 @@ public class AutoCalibrationManager {
 			
 			Core.rectangle(mask, leftpt, rightpt, new Scalar(255),-1);
 			
-			String filename = String.format("mask-%d.png", i);
-			File file = new File(filename);
-			filename = file.toString();
-			Highgui.imwrite(filename, mask);
+			if (logger.isTraceEnabled())
+			{
+				String filename = String.format("mask-%d.png", i);
+				File file = new File(filename);
+				filename = file.toString();
+				Highgui.imwrite(filename, mask);
+			}
 			
 			Imgproc.goodFeaturesToTrack(mat, tempCorners, 2, .10, 0, mask, 3, true, .04);
 						
@@ -623,16 +623,13 @@ public class AutoCalibrationManager {
 		{
 			boardCorners = patternList.get(index);
 			
-			final Optional<RotatedRect> rect = getPatternDimensions(boardCorners);
+			RotatedRect rect = getPatternDimensions(boardCorners);
 			
-			if (!rect.isPresent())
-				continue;
-	
 			// OpenCV gives us the checkerboard corners, not the outside dimension
 			// So this estimates where the outside corner would be, plus a fudge
 			// factor for the edge of the paper
 			// Printer margins are usually a quarter inch on each edge
-			double rect_width = rect.get().size.width,rect_height = rect.get().size.height;
+			double rect_width = rect.size.width,rect_height = rect.size.height;
 			double width = rect_width,height = rect_height;
 			
 			// Flip them if its sideways
@@ -713,13 +710,10 @@ public class AutoCalibrationManager {
 		mat.setTo(new Scalar(0,0,0), tempMat);
 	}
 
-	private Optional<RotatedRect> getPatternDimensions(MatOfPoint2f boardCorners) {
-		final Optional<MatOfPoint2f> boardRect2f = calcBoardRectFromCorners(boardCorners);	
-		
-		if (!boardRect2f.isPresent())
-			return Optional.empty();
-		
-		return Optional.of(Imgproc.minAreaRect(boardRect2f.get()));
+	private RotatedRect getPatternDimensions(MatOfPoint2f boardCorners) {
+		final MatOfPoint2f boardRect2f = calcBoardRectFromCorners(boardCorners);	
+				
+		return Imgproc.minAreaRect(boardRect2f);
 		
 	}
 
@@ -1072,7 +1066,7 @@ public class AutoCalibrationManager {
 	}
 
 	// converts the chessboard corners into a quadrilateral
-	private Optional<MatOfPoint2f> calcBoardRectFromCorners(MatOfPoint2f corners) {
+	private MatOfPoint2f calcBoardRectFromCorners(MatOfPoint2f corners) {
 		MatOfPoint2f result = new MatOfPoint2f();
 		result.alloc(4);
 
@@ -1083,15 +1077,55 @@ public class AutoCalibrationManager {
 		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0],
 				corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[1]);
 		
+		Point[] unsorted = { topLeft, topRight, bottomLeft, bottomRight };
+		Point[] sorted = sortCorners(unsorted);
 		
-		if (bottomRight.x < topLeft.x || bottomRight.y < topLeft.y)
-			// Pattern is upside down
-			return Optional.empty();
+		result.fromArray(sorted);
+		
 
-		result.put(0, 0, topLeft.x, topLeft.y, topRight.x, topRight.y, bottomRight.x, bottomRight.y, bottomLeft.x,
-				bottomLeft.y);
+		//result.put(0, 0, topLeft.x, topLeft.y, topRight.x, topRight.y, bottomRight.x, bottomRight.y, bottomLeft.x,
+		//		bottomLeft.y);
 
-		return Optional.of(result);
+		return result;
+	}
+	
+	// Given 4 corners, use the mass center to arrange the corners into correct
+	// order
+	
+	// 1st-------2nd
+	// | |
+	// | |
+	// | |
+	// 4th-------3rd
+	private Point[] sortCorners(Point[] corners) {
+		Point[] result = new Point[4];
+
+		Point center = new Point(0, 0);
+		for (Point corner : corners) {
+			center.x += corner.x;
+			center.y += corner.y;
+		}
+
+		center.x *= (1.0 / corners.length);
+		center.y *= (1.0 / corners.length);
+
+		List<Point> top = new ArrayList<Point>();
+		List<Point> bot = new ArrayList<Point>();
+
+		for (int i = 0; i < corners.length; i++) {
+			if (corners[i].y < center.y)
+				top.add(corners[i]);
+			else
+				bot.add(corners[i]);
+		}
+
+		result[0] = top.get(0).x > top.get(1).x ? top.get(1) : top.get(0);
+		result[1] = top.get(0).x > top.get(1).x ? top.get(0) : top.get(1);
+		result[2] = bot.get(0).x > bot.get(1).x ? bot.get(0) : bot.get(1);
+		result[3] = bot.get(0).x > bot.get(1).x ? bot.get(1) : bot.get(0);
+
+		return result;
+
 	}
 
 	private Point findChessBoardSquareCenter(Mat corners, int row, int col) {

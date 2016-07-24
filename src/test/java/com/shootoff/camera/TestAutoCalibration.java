@@ -201,7 +201,7 @@ public class TestAutoCalibration {
 		
 		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), mat);
 
-		assertFalse(calibrationBounds.isPresent());
+		assertTrue(calibrationBounds.isPresent());
 
 
 	}
