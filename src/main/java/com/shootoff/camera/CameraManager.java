@@ -492,7 +492,7 @@ public class CameraManager {
 				continue;
 			}
 
-			if ((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) {
+			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && !isAutoCalibrating.get()) {
 				estimateCameraFPS();
 			}
 
@@ -634,8 +634,9 @@ public class CameraManager {
 		if (debuggerListener.isPresent()) {
 			debuggerListener.get().updateFeedData(getFPS());
 		}
-
-		checkIfMinimumFPS();
+		
+		if (lastFrameCount > DEFAULT_FPS*2)
+			checkIfMinimumFPS();
 	}
 
 	protected void setFPS(double newFPS) {
