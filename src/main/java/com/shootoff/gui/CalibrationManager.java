@@ -141,7 +141,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		// cause false shots.  This statement applies to all the cam feeds rather
 		// than just the arena. I don't think that should be a problem?
 		calibratingCameraManager.setDetecting(false);
-		TimerPool.schedule(() -> calibratingCameraManager.setDetecting(true), 400);
+		TimerPool.schedule(() -> calibratingCameraManager.setDetecting(true), 600);
 	}
 
 	@Override
