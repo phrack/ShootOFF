@@ -54,7 +54,7 @@ public class TestAutoCalibration {
 		}
 	}
 
-	private Boolean autoCalibrationVideo(String videoPath) {
+	private MockCameraManager autoCalibrationVideo(String videoPath) {
 		Object processingLock = new Object();
 		File videoFile = new File(TestAutoCalibration.class.getResource(videoPath).getFile());
 
@@ -81,7 +81,7 @@ public class TestAutoCalibration {
 			e.printStackTrace();
 		}
 
-		return cameraManager.cameraAutoCalibrated;
+		return cameraManager;
 	}
 
 	@Test
@@ -303,17 +303,31 @@ public class TestAutoCalibration {
 
 	@Test
 	public void testCalibrateHighRes() throws IOException {
-		Boolean result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
-		assertEquals(true, result);
+		CameraManager result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
+		assertEquals(true, result.cameraAutoCalibrated);
 	}
 	
 	@Test
 	public void testCalibrateWithPaperPattern() throws IOException {
-		Boolean result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e.mp4");
-		assertEquals(true, result);
+		MockCameraManager result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e.mp4");
+		assertEquals(true, result.cameraAutoCalibrated);
+		
+		assertEquals(76.84, result.getACM().getPaperDimensions().get().getWidth(), .01);
+		assertEquals(55.58, result.getACM().getPaperDimensions().get().getHeight(), .01);
+
+	
 	}
 	
 	
+	@Test
+	public void testCalibrateWithPaperPattern2() throws IOException {
+		MockCameraManager result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e-2.mp4");
+		assertEquals(true, result.cameraAutoCalibrated);
+		
+		assertEquals(77.05, result.getACM().getPaperDimensions().get().getWidth(), .01);
+		assertEquals(56.36, result.getACM().getPaperDimensions().get().getHeight(), .01);
+		
+	}
 	
 	
 	@Test

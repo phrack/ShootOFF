@@ -122,7 +122,7 @@ public class CameraManager {
 	private double webcamFPS = DEFAULT_FPS;
 	private boolean showedFPSWarning = false;
 
-	private AutoCalibrationManager acm = null;
+	protected AutoCalibrationManager acm = null;
 	private final AtomicBoolean isAutoCalibrating = new AtomicBoolean(false);
 	protected boolean cameraAutoCalibrated = false;
 

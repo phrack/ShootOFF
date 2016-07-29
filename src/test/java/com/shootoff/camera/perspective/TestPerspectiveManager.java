@@ -159,7 +159,7 @@ public class TestPerspectiveManager {
 		patternList.add(boardCorners.get());
 		
 		acm.findPaperPattern(mat,
-				patternList);
+				patternList, true);
 		
 		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
 
@@ -215,7 +215,7 @@ public class TestPerspectiveManager {
 		patternList.add(boardCorners.get());
 		
 		acm.findPaperPattern(mat,
-				patternList);
+				patternList, true);
 		
 		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
 

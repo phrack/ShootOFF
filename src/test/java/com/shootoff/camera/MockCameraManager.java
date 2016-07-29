@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javafx.geometry.Bounds;
 
+import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.MockCanvasManager;
@@ -28,6 +29,7 @@ public class MockCameraManager extends CameraManager {
 
 	protected final Object processingLock;
 	protected boolean processedVideo = false;
+	
 
 	protected MockCameraManager(File videoFile, Object processingLock, CanvasManager canvas, Configuration config,
 			boolean[][] sectorStatuses, Optional<Bounds> projectionBounds) {
@@ -46,6 +48,11 @@ public class MockCameraManager extends CameraManager {
 
 		this.videoFile = videoFile;
 
+	}
+
+	public AutoCalibrationManager getACM()
+	{
+		return acm;
 	}
 
 	public void processVideo() {

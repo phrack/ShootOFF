@@ -178,7 +178,7 @@ public class AutoCalibrationManager {
 	}
 
 	private boolean isStepThreeCompleted() {
-		return paperDimensions.isPresent() || (stepThreeAttempts == STEP_THREE_MAX_ATTEMPTS);
+		return (stepThreeAttempts == STEP_THREE_MAX_ATTEMPTS);
 	}
 
 	private boolean isFinished() {
@@ -191,6 +191,8 @@ public class AutoCalibrationManager {
 
 	public void processFrame(final BufferedImage frame) {
 
+		logger.trace("processFrame");
+		
 		if (isFinished()) {
 			callback();
 			return;
@@ -228,14 +230,20 @@ public class AutoCalibrationManager {
 			stepThreeAttempts++;
 
 			cameraManager.setArenaBackground(null);
+			
+			mat = undistortFrame(mat);
 
 			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
 
 			if (listPatterns.isEmpty()) return;
 
-			findPaperPattern(mat, listPatterns);
+			findPaperPattern(mat, listPatterns, false);
 
-			if (isFinished()) callback();
+			if (isFinished())
+			{
+				callback();
+				stepThreeAttempts = STEP_THREE_MAX_ATTEMPTS;
+			}
 
 			logger.trace("stepThree {}", isStepThreeCompleted());
 
@@ -278,7 +286,7 @@ public class AutoCalibrationManager {
 
 		if (listPatterns.isEmpty()) return;
 
-		findPaperPattern(mat, listPatterns);
+		findPaperPattern(mat, listPatterns, true);
 
 		if (listPatterns.isEmpty()) return;
 
@@ -559,7 +567,7 @@ public class AutoCalibrationManager {
 	 * alignment or angle
 	 * 
 	 */
-	public void findPaperPattern(Mat mat, List<MatOfPoint2f> patternList) {
+	public boolean findPaperPattern(Mat mat, List<MatOfPoint2f> patternList, boolean averagePatterns) {
 
 		MatOfPoint2f boardCorners = null;
 		int index = 0;
@@ -612,8 +620,15 @@ public class AutoCalibrationManager {
 				paperDimensions = Optional.of(newPaperDimensions);
 
 				logger.debug("Found paper dimensions {}", paperDimensions.get());
-			} else if (paperDimensions.isPresent()) {
+			} else if (paperDimensions.isPresent() && averagePatterns) {
 				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
+				logger.debug("Averaged paper dimensions {}", paperDimensions.get());				
+
+			} else
+			{
+				paperDimensions = Optional.of(newPaperDimensions);
+
+				logger.debug("Found paper dimensions {}", paperDimensions.get());				
 			}
 
 			break;
@@ -622,7 +637,9 @@ public class AutoCalibrationManager {
 		if (found) {
 			logger.trace("Removing paper pattern from patternList (index {})", index);
 			patternList.remove(index);
+			return true;
 		}
+		return false;
 
 	}
 
