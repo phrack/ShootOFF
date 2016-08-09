@@ -52,7 +52,7 @@ public class PixelCluster extends HashSet<Pixel> {
 	// Usually the pixels in the shot are max brightness which are biased green
 	// So we look around the shot instead
 	@SuppressWarnings("unused")
-	public double getColorDifference(final Mat workingFrame, final int[][] colorDistanceFromRed) {
+	public int getColorDifference(final Mat workingFrame, final int[][] colorDistanceFromRed) {
 		
 		Mat traceMat = null;
 		if (logger.isTraceEnabled() && debugColorsToFile)
@@ -176,7 +176,7 @@ public class PixelCluster extends HashSet<Pixel> {
 	}
 
 	public Optional<Color> getColor(final Mat workingFrame, final int[][] colorDistanceFromRed) {
-		final double colorDist = getColorDifference(workingFrame, colorDistanceFromRed);
+		final int colorDist = getColorDifference(workingFrame, colorDistanceFromRed);
 
 		//logger.trace("colorDist {}", colorDist);
 		

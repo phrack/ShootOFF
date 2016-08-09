@@ -87,6 +87,7 @@ public class CameraManager {
 
 	protected final CameraView cameraView;
 	protected final Configuration config;
+	private final Object projectionBoundsLock = new Object();
 	protected Optional<Bounds> projectionBounds = Optional.empty();
 
 	private final AtomicBoolean isStreaming = new AtomicBoolean(true);
@@ -215,8 +216,7 @@ public class CameraManager {
 	}
 
 	// TODO: This doesn't handle potential side effects of modifying the feed
-	// resolution
-	// on the fly.
+	// resolution on the fly.
 	public void setFeedResolution(int width, int height) {
 		feedWidth = width;
 		feedHeight = height;
@@ -286,7 +286,7 @@ public class CameraManager {
 	}
 
 	public void setProjectionBounds(final Bounds projectionBounds) {
-		synchronized (this.projectionBounds) {
+		synchronized (projectionBoundsLock) {
 			this.projectionBounds = Optional.ofNullable(projectionBounds);
 		}
 	}
@@ -501,7 +501,7 @@ public class CameraManager {
 
 			Bounds b;
 
-			synchronized (projectionBounds) {
+			synchronized (projectionBoundsLock) {
 				if (projectionBounds.isPresent()) {
 					b = projectionBounds.get();
 				} else {
@@ -567,7 +567,7 @@ public class CameraManager {
 
 		Bounds projectionBounds;
 
-		synchronized (this.projectionBounds) {
+		synchronized (projectionBoundsLock) {
 			if (this.projectionBounds.isPresent()) {
 				projectionBounds = this.projectionBounds.get();
 			} else {
