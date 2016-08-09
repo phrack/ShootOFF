@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <target>
-	<polygon fill="white">
+	<polygon fill="gray">
 		<point x="482.666473" y="373.155701" />
 		<point x="482.666473" y="291.497772" />
 		<point x="477.633453" y="276.965881" />

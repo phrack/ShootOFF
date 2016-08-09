@@ -89,6 +89,7 @@ public class TargetEditorController {
 	private static final Logger logger = LoggerFactory.getLogger(TargetEditorController.class);
 
 	private static final Color DEFAULT_FILL_COLOR = Color.BLACK;
+	private static final Color DARK_GRAY = Color.rgb(0x50, 0x50, 0x50, 1.0f);
 
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
@@ -191,7 +192,7 @@ public class TargetEditorController {
 		case "brown":
 			return Color.SADDLEBROWN;
 		case "gray":
-			return Color.GRAY;
+			return DARK_GRAY;
 		case "green":
 			return Color.GREEN;
 		case "orange":
@@ -212,7 +213,7 @@ public class TargetEditorController {
 			return "blue";
 		} else if (Color.SADDLEBROWN.equals(color)) {
 			return "brown";
-		} else if (Color.GRAY.equals(color)) {
+		} else if (DARK_GRAY.equals(color)) {
 			return "gray";
 		} else if (Color.GREEN.equals(color)) {
 			return "green";
