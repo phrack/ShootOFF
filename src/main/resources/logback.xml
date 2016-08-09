@@ -20,8 +20,4 @@
     <appender-ref ref="STDOUT"/>
   </root>
 
- <logger name="com.shootoff.camera.autocalibration.AutoCalibrationManager" level="TRACE"/>
- <logger name="com.shootoff.camera.perspective.PerspectiveManager" level="TRACE"/>
-
-  
 </configuration>

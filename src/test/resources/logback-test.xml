@@ -17,6 +17,4 @@
     <appender-ref ref="STDOUT"/>
   </root>
   
-   <logger name="com.shootoff.camera.shotdetection.PixelCluster" level="TRACE"/>
-   <logger name="com.shootoff.camera.autocalibration.AutoCalibrationManager" level="TRACE"/>
 </configuration>
