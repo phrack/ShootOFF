@@ -1066,7 +1066,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			config.getExercise().get().reset(knownTargets);
 		}
 
-		disableShotDetection(600);
+		disableShotDetection(1000);
 	}
 
 	// Technically the period could be shorter than the previous call
