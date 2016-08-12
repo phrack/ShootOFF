@@ -49,6 +49,7 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
 import com.shootoff.plugins.engine.PluginEngine;
+import com.shootoff.util.HardwareData;
 import com.shootoff.util.VersionChecker;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
@@ -68,11 +69,21 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
+	private static final int MINIMUM_CPU_SCORE_EXCELLENT = 4000;
+	private static final int MINIMUM_CPU_SCORE_PASSABLE = 3000;
+	private static final long MINIMUM_RAM_EXCELLENT = 11712; // MB
+	private static final long MINIMUM_RAM_PASSABLE = 4096; // MB
+
+	private static final String POOR_HARDWARE_MESSAGE = "Hardware Status: Poor -- Based on the data we gathered,\nShootOFF will likely not run well on this machine.";
+	private static final String PASSABLE_HARDWARE_MESSAGE = "Hardware Status: Passable -- Based on the data we gathered,\nShootOFF will likely run OK on this machine but may miss\noccasional shots.";
+	private static final String EXCELLENT_HARDWARE_MESSAGE = "Hardware Status: Excellent -- Based on the data we gathered,\nthis machine should have no problems running ShootOFF.";
 
 	public static final String SHOOTOFF_DOMAIN = "http://shootoffapp.com/";
 
@@ -578,7 +589,58 @@ public class Main extends Application {
 		}
 	}
 
+	private Label getHardwareMessage(int cpuScore) {
+		final Label hardwareMessageLabel = new Label();
+
+		if (cpuScore < MINIMUM_CPU_SCORE_PASSABLE) {
+			hardwareMessageLabel.setText(POOR_HARDWARE_MESSAGE);
+			hardwareMessageLabel.setTextFill(Color.RED);
+		} else if (cpuScore < MINIMUM_CPU_SCORE_EXCELLENT) {
+			hardwareMessageLabel.setText(PASSABLE_HARDWARE_MESSAGE);
+			hardwareMessageLabel.setTextFill(Color.GOLD);
+		} else {
+			hardwareMessageLabel.setText(EXCELLENT_HARDWARE_MESSAGE);
+			hardwareMessageLabel.setTextFill(Color.DARKGREEN);
+		}
+
+		return hardwareMessageLabel;
+	}
+
+	private Label getHardwareMessage(long installedRam) {
+		final Label hardwareMessageLabel = new Label();
+
+		if (installedRam < MINIMUM_RAM_PASSABLE) {
+			hardwareMessageLabel.setText(POOR_HARDWARE_MESSAGE);
+			hardwareMessageLabel.setTextFill(Color.RED);
+		} else if (installedRam < MINIMUM_RAM_EXCELLENT) {
+			hardwareMessageLabel.setText(PASSABLE_HARDWARE_MESSAGE);
+			hardwareMessageLabel.setTextFill(Color.GOLD);
+		} else {
+			hardwareMessageLabel.setText(EXCELLENT_HARDWARE_MESSAGE);
+			hardwareMessageLabel.setTextFill(Color.DARKGREEN);
+		}
+
+		return hardwareMessageLabel;
+	}
+
 	private boolean showFirstRunMessage() {
+		final String cpuName = HardwareData.getCpuName();
+		final Optional<Integer> cpuScore = HardwareData.getCpuScore();
+		final long installedRam = HardwareData.getMegabytesOfRam();
+
+		final Label hardwareMessageLabel;
+
+		if (cpuScore.isPresent()) {
+			if (logger.isDebugEnabled()) logger.debug("Processor: {}, Processor Score: {}, installed RAM: {} MB",
+					cpuName, cpuScore.get(), installedRam);
+
+			hardwareMessageLabel = getHardwareMessage(cpuScore.get());
+		} else {
+			if (logger.isDebugEnabled()) logger.debug("Processor: {}, installed RAM: {} MB", cpuName, installedRam);
+
+			hardwareMessageLabel = getHardwareMessage(installedRam);
+		}
+
 		final Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
 		shootoffWelcome.setTitle("Welcome to ShootOFF");
 		shootoffWelcome.setHeaderText("Please Ensure Your Firearm is Unloaded!");
@@ -596,7 +658,7 @@ public class Main extends Application {
 		final CheckBox useErrorReporting = new CheckBox("Allow ShootOFF to Send Error Reports");
 		useErrorReporting.setSelected(true);
 
-		fp.getChildren().addAll(lbl, useErrorReporting);
+		fp.getChildren().addAll(hardwareMessageLabel, lbl, useErrorReporting);
 
 		shootoffWelcome.getDialogPane().contentProperty().set(fp);
 		shootoffWelcome.showAndWait();

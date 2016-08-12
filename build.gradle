@@ -117,6 +117,12 @@ dependencies {
     
     //OpenCV
     compile 'org.openpnp:opencv:2.4.+'
+    
+    // OSHI to collect HW and system state data
+    compile group: 'com.github.dblock', name: 'oshi-core', version: '2.+'
+    
+    // JSoup to get processor benchmark data
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.+'
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
     testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.+'
