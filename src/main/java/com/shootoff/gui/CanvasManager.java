@@ -109,6 +109,10 @@ public class CanvasManager implements CameraView {
 	private boolean hadMalfunction = false;
 	private boolean hadReload = false;
 
+	private static final int MAX_FEED_FPS = 15;
+	private static final int MINIMUM_FRAME_DELTA = 1000 / MAX_FEED_FPS; // ms
+	private long lastFrameTime = 0;
+
 	private Optional<ProjectorArenaController> arenaController = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
@@ -278,6 +282,13 @@ public class CanvasManager implements CameraView {
 			background.setImage(null);
 			return;
 		}
+
+		// Prevent the webcam feed from being refreshed faster than some maximum
+		// FPS otherwise we waste CPU cycles converting a frames to show the
+		// user and these are cycles we could spend detecting shots. A lower
+		// FPS (e.g. ~15) looks perfect fine to a person
+		if (System.currentTimeMillis() - lastFrameTime < MINIMUM_FRAME_DELTA) return;
+		else lastFrameTime = System.currentTimeMillis();
 
 		Image img;
 		if (projectionBounds.isPresent()) {
