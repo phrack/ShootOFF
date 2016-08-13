@@ -233,7 +233,7 @@ public class CanvasManager implements CameraView {
 					event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
-					event.isStillSincePress(), event.getPickResult());
+					event.isStillSincePress(), null);
 
 			logger.debug("clickEvent x {} y {}", clickEvent.getX(), clickEvent.getY());
 
@@ -285,6 +285,8 @@ public class CanvasManager implements CameraView {
 						n.getOnMouseDragged().handle(event);
 					} else if (MouseEvent.MOUSE_MOVED.equals(event.getEventType())) {
 						n.getOnMouseMoved().handle(event);
+					} else if (MouseEvent.MOUSE_RELEASED.equals(event.getEventType())) {
+						n.getOnMouseReleased().handle(event);
 					}
 
 					break;
