@@ -150,8 +150,6 @@ public class CanvasManager implements CameraView {
 		// arena so that arena targets can be arranged from the calibrated
 		// webcam feed.
 		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
-			logger.debug("mouseevent {} {} x {} y {}", arenaController.isPresent(), projectionBounds.isPresent(), event.getX(), event.getY());
-			
 			if (arenaController.isPresent() && projectionBounds.isPresent()) {
 				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
 			} else {
@@ -192,60 +190,32 @@ public class CanvasManager implements CameraView {
 	private void translateMouseEventToArena(ProjectorArenaController arenaController, Bounds projectionBounds,
 			MouseEvent event) {
 		if (projectionBounds.contains(event.getX(), event.getY())) {
-			final Screen clickedScreen = Screen.getScreensForRectangle(event.getScreenX(), event.getScreenY(), 1, 1)
-					.get(0);
-			
-			logger.debug("event x {} y {}", event.getX(), event.getY());
+
 			
 			final double insideX = (event.getX() - projectionBounds.getMinX());
 			final double insideY = (event.getY() - projectionBounds.getMinY());
 
-			logger.debug("inside x {} y {}", insideX, insideY);
 
 			final double scaleX = insideX / projectionBounds.getWidth();
 			final double scaleY = insideY / projectionBounds.getHeight();
 
+			final double translatedX = arenaController.getArenaHome().getBounds().getWidth() * scaleX;
+			final double translatedY = arenaController.getArenaHome().getBounds().getHeight() * scaleY;
 
-			logger.debug("scale x {} y {}", scaleX, scaleY);
-
-
-			
-			//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
-			// Number of actual horizontal lines (768p)
-			double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-			// Number of scaled horizontal lines. (384p for 200%)
-			double scaledHorizontalLines = arenaController.getArenaHome().getBounds().getHeight();
-			// DPI scale factor.
-			double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
-			
-			final double translatedX = arenaController.getArenaHome().getBounds().getWidth() * dpiScaleFactor * scaleX;
-			final double translatedY = arenaController.getArenaHome().getBounds().getHeight()  * dpiScaleFactor * scaleY;
-
-
-			logger.debug("translated x {} y {}", translatedX, translatedY);
-
-
-			final double newScreenX = arenaController.getArenaHome().getBounds().getMinX() * dpiScaleFactor;
-			final double newScreenY = arenaController.getArenaHome().getBounds().getMinY() * dpiScaleFactor;
-			
-			logger.debug("newscreen x {} y {}", newScreenX, newScreenY);
-			
-			final double resultX = translatedX + newScreenX;
-			final double resultY = translatedY + newScreenY;
+			if (logger.isTraceEnabled())
+			{
+				logger.trace("event x {} y {}", event.getX(), event.getY());
+				logger.trace("inside x {} y {}", insideX, insideY);
+				logger.trace("scale x {} y {}", scaleX, scaleY);
+				logger.trace("translated x {} y {}", translatedX, translatedY);
+			}
 			
 
-			logger.debug("result x {} y {}", resultX, resultY);
-			
-			
-
-			final MouseEvent clickEvent = new MouseEvent(event.getEventType(), resultX, resultY, newScreenX,
-					newScreenY, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
+			final MouseEvent clickEvent = new MouseEvent(event.getEventType(), translatedX, translatedY, 0,
+					0, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
-					event.isStillSincePress(), event.getPickResult());
-			
-			logger.debug("clickEvent x {} y {}", clickEvent.getX(), clickEvent.getY());
-			
+					event.isStillSincePress(), null);
 			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) clickEvent);
 		}
 	}
@@ -255,19 +225,6 @@ public class CanvasManager implements CameraView {
 	// This passes the event to any targets on the arena in the same location
 	// as the event.
 	private void translateConvertedEventToTarget(MouseEvent event) {
-        Button x = new Button("XXXXXX");
-
-        logger.debug("arenaevent x {} y {}", event.getX(), event.getY());
-        
-        logger.debug("arenaeventsc x {} y {}", event.getSceneX(), event.getSceneY());
-
-        logger.debug("arenaevents x {} y {}", event.getScreenX(), event.getScreenY());
-        
-        logger.debug("mousesrc is null {}", event.getSource());
-        
-        x.setLayoutX(event.getX());
-        x.setLayoutY(event.getY());
-        canvasGroup.getChildren().add(x);
 		for (Node n : canvasGroup.getChildren()) {
 			if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
 				if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {

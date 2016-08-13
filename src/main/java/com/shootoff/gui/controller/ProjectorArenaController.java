@@ -199,7 +199,7 @@ public class ProjectorArenaController implements CalibrationListener {
 				boolean matchedOriginal = false;
 				for (Screen screen : screens)
 				{
-					if (originalArenaHomeScreen == screen)
+					if (originalArenaHomeScreen.equals(screen))
 					{
 						logger.debug("Stored arena coordinates are on current home screen");
 						matchedOriginal = true;
@@ -213,6 +213,10 @@ public class ProjectorArenaController implements CalibrationListener {
 
 					Platform.runLater(() -> toggleFullScreen());
 					
+					arenaHome = screens.get(0);
+
+					Rectangle2D arenaScreenBounds = arenaHome.getBounds();
+					arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX(), arenaScreenBounds.getMinY());
 
 					return;
 				}
