@@ -675,6 +675,13 @@ public class Main extends Application {
 		cameraAlert.showAndWait();
 		Main.forceClose(-1);
 	}
+	
+	public static void closeNoV4lCompat(File v4lCompat) {
+		logger.error("This system uses Video4Linux, but v4lcompat is not preloaded. "
+				+ "Run the following command then run ShootOFF again: "
+				+ "export LD_PRELOAD=\"" + v4lCompat.getPath() + "\"");
+		Main.forceClose(-1);
+	}
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -785,6 +792,17 @@ public class Main extends Application {
 					}
 				} else if (!tempBinsDir.mkdir()) {
 					logger.error("Failed to create temporary directory to store ShootOFF binaries.");
+				}
+			} else if (os.startsWith("Linux")) {
+				// Need to ensure v4l1compat is preloaded if it exists otherwise OpenCV won't work
+				final File v4lCompat = new File("/usr/lib/libv4l/v4l1compat.so");
+				
+				if (v4lCompat.exists()) {
+					final String preload = System.getenv("LD_PRELOAD");
+					
+					if (preload == null || !preload.contains(v4lCompat.getPath())) {
+						closeNoV4lCompat(v4lCompat);
+					}
 				}
 			}
 		}

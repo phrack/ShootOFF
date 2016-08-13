@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -34,6 +35,8 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
+import org.opencv.highgui.Highgui;
+import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +73,12 @@ public class Camera {
 	private static final List<Camera> knownWebcams;
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera.class);
-
-	private final Webcam webcam;
+	
+	private static final List<Camera> openCameras = Collections.synchronizedList(new ArrayList<>());
+	
+	private final VideoCapture camera;
+	private final int cameraIndex;
+	private final Webcam ipcam;
 	private final boolean isIpCam;
 
 	public static class CompositeDriver extends WebcamCompositeDriver {
@@ -93,7 +100,7 @@ public class Camera {
 			knownWebcams = new ArrayList<Camera>();
 
 			for (final Webcam w : Webcam.getWebcams()) {
-				knownWebcams.add(new Camera(w));
+				knownWebcams.add(new Camera(w.getName()));
 			}
 
 		} else {
@@ -160,46 +167,62 @@ public class Camera {
 
 	// For testing
 	protected Camera() {
-		this.webcam = null;
-		this.isIpCam = false;
+		camera = null;
+		cameraIndex = -1;
+		ipcam = null;
+		isIpCam = false;
 	}
 
-	private Camera(final Webcam webcam) {
-		this.webcam = webcam;
-		this.isIpCam = false;
+	private Camera(final String cameraName) {
+		final List<Webcam> webcams = Webcam.getWebcams();
+		int cameraIndex = -1;
 
-		logger.debug("WebcamDevice type: {}", webcam.getDevice().getClass().getName());
+		for (int i = 0; i < webcams.size(); i++) {
+			if (webcams.get(i).getName().equals(cameraName)) {
+				cameraIndex = i;
+				break;
+			}
+		}
+
+		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
+
+		camera = new VideoCapture();
+		this.cameraIndex = cameraIndex;
+		this.ipcam = null;
+		this.isIpCam = false;
 	}
 
 	private Camera(final IpCamDevice ipcam) {
-		this.isIpCam = true;
+		camera = null;
+		cameraIndex = -1;
+		isIpCam = true;
 
 		for (final Camera webcam : getWebcams()) {
 			if (webcam.getName().equals(ipcam.getName())) {
-				this.webcam = webcam.getWebcam();
+				this.ipcam = webcam.getWebcam();
 				return;
 			}
 		}
 
-		this.webcam = null;
+		this.ipcam = null;
 	}
 
 	protected Webcam getWebcam() {
-		return webcam;
+		return ipcam;
 	}
 
 	public static Optional<Camera> getDefault() {
 		Camera defaultCam;
 
 		if (isMac) {
-			defaultCam = new Camera(defaultWebcam);
+			defaultCam = new Camera(defaultWebcam.getName());
 		} else {
 			final Webcam cam = Webcam.getDefault();
 
 			if (cam == null) {
 				defaultCam = null;
 			} else {
-				defaultCam = new Camera(cam);
+				defaultCam = new Camera(cam.getName());
 			}
 		}
 
@@ -212,14 +235,42 @@ public class Camera {
 		final List<Camera> webcams = new ArrayList<Camera>();
 
 		for (Webcam w : Webcam.getWebcams()) {
-			webcams.add(new Camera(w));
+			Camera c = new Camera(w.getName());
+			
+			// If we already have an open instance of the camera
+			// go ahead and reuse it in this list as opposed to
+			// the newly created camera
+			int i = openCameras.indexOf(c);
+			if (i >= 0) {
+				webcams.add(openCameras.get(i));
+			} else {
+				webcams.add(c);
+			}
 		}
 
 		return webcams;
 	}
 
+	public Mat getFrame() {
+		final Mat frame = new Mat();
+		if (!camera.read(frame) || frame.size().height == 0) 
+			return null;
+		
+		return frame;
+	}
+
 	public BufferedImage getImage() {
-		return webcam.getImage();
+		if (isIpCam) {
+			return ipcam.getImage();
+		} else {
+			Mat frame = getFrame();
+			
+			if (frame == null) {
+				return null;
+			} else {
+				return matToBufferedImage(getFrame());
+			}
+		}
 	}
 
 	public boolean isIpCam() {
@@ -227,59 +278,93 @@ public class Camera {
 	}
 
 	public boolean open() {
-		boolean open = false;
-
-		try {
-			open = webcam.open();
-		} catch (WebcamException we) {
-			open = false;
+		boolean open;
+		
+		if (isIpCam) {
+			try {
+				open = ipcam.open();
+			} catch (WebcamException we) {
+				open = false;
+			}
+		} else {
+			open = camera.open(cameraIndex);
 		}
+		
+		if (open) openCameras.add(this);
 
 		return open;
 	}
 
 	public Dimension getViewSize() {
-		return webcam.getViewSize();
+		if (isIpCam) {
+			return ipcam.getViewSize();
+		} else {
+			return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
+					(int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
+		}
 	}
 
 	public boolean close() {
-		if (isMac) {
-			new Thread(() -> {
-				webcam.close();
-			}, "CloseMacOSXWebcam").start();
-			return true;
+		if (isIpCam) {
+			if (isMac) {
+				new Thread(() -> {
+					ipcam.close();
+				}, "CloseMacOSXWebcam").start();
+				return true;
+			} else {
+				return ipcam.close();
+			}
 		} else {
-			return webcam.close();
+			camera.release();
+			openCameras.remove(this);
+			return true;
 		}
 	}
 
 	public String getName() {
-		return webcam.getName();
+		if (isIpCam) {
+			return ipcam.getName();
+		} else {
+			return Webcam.getWebcams().get(cameraIndex).getName();
+		}
 	}
 
 	public boolean isOpen() {
-		return webcam.isOpen();
+		if (isIpCam) {
+			return ipcam.isOpen();
+		} else {
+			return camera.isOpened();
+		}
 	}
 
 	public boolean isLocked() {
-		return webcam.getLock().isLocked();
+		if (isIpCam) {
+			return ipcam.getLock().isLocked();
+		} else {
+			return isOpen();
+		}
 	}
 
 	public boolean isImageNew() {
-		return webcam.isImageNew();
-	}
-
-	public double getFPS() {
-		return webcam.getFPS();
+		if (isIpCam) {
+			return ipcam.isImageNew();
+		} else {
+			return true;
+		}
 	}
 
 	public void setViewSize(final Dimension size) {
-		try {
-			webcam.setCustomViewSizes(new Dimension[] { size });
+		if (isIpCam) {
+			try {
+				ipcam.setCustomViewSizes(new Dimension[] { size });
 
-			webcam.setViewSize(size);
-		} catch (IllegalArgumentException e) {
-			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
+				ipcam.setViewSize(size);
+			} catch (IllegalArgumentException e) {
+				logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
+			}
+		} else {
+			camera.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, size.getWidth());
+			camera.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, size.getHeight());
 		}
 
 	}
@@ -288,7 +373,7 @@ public class Camera {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((webcam == null) ? 0 : webcam.hashCode());
+		result = prime * result + ((ipcam == null) ? 0 : ipcam.hashCode());
 		return result;
 	}
 
@@ -306,7 +391,7 @@ public class Camera {
 		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
 		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		matBGR.get(0, 0, targetPixels);
-		
+
 		return image;
 	}
 

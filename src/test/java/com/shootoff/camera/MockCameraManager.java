@@ -117,7 +117,7 @@ public class MockCameraManager extends CameraManager {
 			}
 			lastVideoTimestamp = event.getTimeStamp();
 
-			processFrame(currentFrame);
+			processFrame(Camera.bufferedImageToMat(currentFrame));
 		}
 
 		@Override

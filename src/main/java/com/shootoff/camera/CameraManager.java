@@ -476,15 +476,14 @@ public class CameraManager {
 
 	private void streamCameraFrames() {
 		while (isStreaming.get()) {
-
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
-			BufferedImage currentFrame = webcam.get().getImage();
+			Mat currentFrame = webcam.get().getFrame();
 			currentFrameTimestamp = System.currentTimeMillis();
 
 			if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
 				// Camera appears to have closed
-				if (cameraErrorView.isPresent()) cameraErrorView.get().showMissingCameraError(webcam.get());
+				if (isStreaming.get() && cameraErrorView.isPresent()) cameraErrorView.get().showMissingCameraError(webcam.get());
 				return;
 			} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
 				// Camera appears to be open but got a null frame
@@ -497,7 +496,7 @@ public class CameraManager {
 			}
 
 			if (currentFrame == null) continue;
-			currentFrame = processFrame(currentFrame);
+			BufferedImage currentImage = processFrame(currentFrame);
 
 			Bounds b;
 
@@ -510,12 +509,12 @@ public class CameraManager {
 			}
 
 			if (cropFeedToProjection && b != null) {
-				currentFrame = currentFrame.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
+				currentImage = currentImage.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
 						(int) b.getHeight());
 			}
 
 			if (recordingShots) {
-				rollingRecorder.recordFrame(currentFrame);
+				rollingRecorder.recordFrame(currentImage);
 
 				List<Shot> removeKeys = new ArrayList<Shot>();
 				for (Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
@@ -523,7 +522,7 @@ public class CameraManager {
 						r.getValue().close();
 						removeKeys.add(r.getKey());
 					} else {
-						r.getValue().recordFrame(currentFrame);
+						r.getValue().recordFrame(currentImage);
 					}
 				}
 
@@ -532,7 +531,7 @@ public class CameraManager {
 			}
 
 			if (recordingStream) {
-				BufferedImage image = ConverterFactory.convertToType(currentFrame, BufferedImage.TYPE_3BYTE_BGR);
+				BufferedImage image = ConverterFactory.convertToType(currentImage, BufferedImage.TYPE_3BYTE_BGR);
 				IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 				IVideoPicture frame = converter.toPicture(image,
@@ -544,7 +543,7 @@ public class CameraManager {
 				videoWriterStream.encodeVideo(0, frame);
 			}
 
-			final BufferedImage frame = currentFrame;
+			final BufferedImage frame = currentImage;
 			if (cropFeedToProjection && projectionBounds.isPresent()) {
 				cameraView.updateBackground(frame, projectionBounds);
 			} else {
@@ -553,16 +552,16 @@ public class CameraManager {
 		}
 	}
 
-	protected BufferedImage processFrame(BufferedImage currentFrame) {
+	protected BufferedImage processFrame(Mat currentFrame) {
 		frameCount++;
 
 		if (isAutoCalibrating.get() && ((getFrameCount() % Math.min(getFPS(), 3)) == 0)) {
-
-			acm.processFrame(currentFrame);
-			return currentFrame;
+			final BufferedImage currentImage = Camera.matToBufferedImage(currentFrame);
+			
+			acm.processFrame(currentImage);
+			return currentImage;
 		}
-
-		Mat matFrameBGR = Camera.bufferedImageToMat(currentFrame);
+		
 		Mat submatFrameBGR = null;
 
 		Bounds projectionBounds;
@@ -578,10 +577,10 @@ public class CameraManager {
 		if (cameraAutoCalibrated && projectionBounds != null) {
 			if (acm != null) {
 				// MUST BE IN BGR pixel format.
-				matFrameBGR = acm.undistortFrame(matFrameBGR);
+				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			submatFrameBGR = matFrameBGR.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
+			submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 					(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			if (recordingCalibratedArea) {
@@ -605,17 +604,17 @@ public class CameraManager {
 
 		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
 			if (submatFrameBGR == null)
-				submatFrameBGR = matFrameBGR.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
+				submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			shotDetector.processFrame(submatFrameBGR, isDetecting.get());
 		} else {
-			shotDetector.processFrame(matFrameBGR, isDetecting.get());
+			shotDetector.processFrame(currentFrame, isDetecting.get());
 		}
 
 		// matFrameBGR is showing the colored pixels for brightness and motion,
 		// hence why we need to return the converted version
-		return Camera.matToBufferedImage(matFrameBGR);
+		return Camera.matToBufferedImage(currentFrame);
 	}
 
 	private void estimateCameraFPS() {
@@ -624,8 +623,6 @@ public class CameraManager {
 					/ (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
 
 			setFPS(estimateFPS);
-			if (logger.isTraceEnabled())
-				logger.trace("fps comparison estimate {} reported {}", estimateFPS, webcam.get().getFPS());
 		}
 
 		lastCameraTimestamp = System.currentTimeMillis();
