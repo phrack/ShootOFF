@@ -80,11 +80,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -150,11 +151,12 @@ public class CanvasManager implements CameraView {
 		// arena so that arena targets can be arranged from the calibrated
 		// webcam feed.
 		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
-			logger.debug("mouseevent {} {} x {} y {}", arenaController.isPresent(), projectionBounds.isPresent(), event.getX(), event.getY());
-			
+			logger.debug("mouseevent {} {} x {} y {}", arenaController.isPresent(), projectionBounds.isPresent(),
+					event.getX(), event.getY());
+
 			if (arenaController.isPresent() && projectionBounds.isPresent()) {
 				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
-			} else {
+			} else if (event instanceof TranslatedMouseEvent){
 				translateConvertedEventToTarget(event);
 			}
 		};
@@ -192,11 +194,8 @@ public class CanvasManager implements CameraView {
 	private void translateMouseEventToArena(ProjectorArenaController arenaController, Bounds projectionBounds,
 			MouseEvent event) {
 		if (projectionBounds.contains(event.getX(), event.getY())) {
-			final Screen clickedScreen = Screen.getScreensForRectangle(event.getScreenX(), event.getScreenY(), 1, 1)
-					.get(0);
-			
 			logger.debug("event x {} y {}", event.getX(), event.getY());
-			
+
 			final double insideX = (event.getX() - projectionBounds.getMinX());
 			final double insideY = (event.getY() - projectionBounds.getMinY());
 
@@ -205,741 +204,756 @@ public class CanvasManager implements CameraView {
 			final double scaleX = insideX / projectionBounds.getWidth();
 			final double scaleY = insideY / projectionBounds.getHeight();
 
-
 			logger.debug("scale x {} y {}", scaleX, scaleY);
 
-
-			
-			//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+			// http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
 			// Number of actual horizontal lines (768p)
 			double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 			// Number of scaled horizontal lines. (384p for 200%)
 			double scaledHorizontalLines = arenaController.getArenaHome().getBounds().getHeight();
 			// DPI scale factor.
 			double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
-			
-			final double translatedX = arenaController.getArenaHome().getBounds().getWidth() * dpiScaleFactor * scaleX;
-			final double translatedY = arenaController.getArenaHome().getBounds().getHeight()  * dpiScaleFactor * scaleY;
 
+			final double translatedX = arenaController.getArenaHome().getBounds().getWidth() * dpiScaleFactor * scaleX;
+			final double translatedY = arenaController.getArenaHome().getBounds().getHeight() * dpiScaleFactor * scaleY;
 
 			logger.debug("translated x {} y {}", translatedX, translatedY);
 
-
 			final double newScreenX = arenaController.getArenaHome().getBounds().getMinX() * dpiScaleFactor;
 			final double newScreenY = arenaController.getArenaHome().getBounds().getMinY() * dpiScaleFactor;
-			
+
 			logger.debug("newscreen x {} y {}", newScreenX, newScreenY);
-			
+
 			final double resultX = translatedX + newScreenX;
 			final double resultY = translatedY + newScreenY;
-			
 
 			logger.debug("result x {} y {}", resultX, resultY);
-			
-			
 
-			final MouseEvent clickEvent = new MouseEvent(event.getEventType(), resultX, resultY, newScreenX,
-					newScreenY, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
+			final MouseEvent clickEvent = new TranslatedMouseEvent(event.getEventType(), resultX, resultY, newScreenX, newScreenY,
+					event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
 					event.isStillSincePress(), event.getPickResult());
-			
+
 			logger.debug("clickEvent x {} y {}", clickEvent.getX(), clickEvent.getY());
-			
+
 			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) clickEvent);
 		}
 	}
 
-	// A mouse event was received by the canvas because this is the arena
-	// canvas and a mouse event happened on a webcam feed's calibrated region.
-	// This passes the event to any targets on the arena in the same location
-	// as the event.
-	private void translateConvertedEventToTarget(MouseEvent event) {
-        Button x = new Button("XXXXXX");
+	private static class TranslatedMouseEvent extends MouseEvent {
+		private static final long serialVersionUID = -8044365212934237607L;
 
-        logger.debug("arenaevent x {} y {}", event.getX(), event.getY());
-        
-        logger.debug("arenaeventsc x {} y {}", event.getSceneX(), event.getSceneY());
+		public TranslatedMouseEvent(EventType<? extends MouseEvent> eventType, double x, double y, double screenX, 
+				double screenY, MouseButton button, int clickCount, boolean shiftDown, boolean controlDown, 
+				boolean altDown, boolean metaDown, boolean primaryButtonDown, boolean middleButtonDown, 
+				boolean secondaryButtonDown, boolean synthesized, boolean popupTrigger, boolean stillSincePress, 
+				PickResult pickResult) {
+			super(eventType, x, y, screenX, screenY, button, clickCount, shiftDown, controlDown, altDown, metaDown,
+					primaryButtonDown, middleButtonDown, secondaryButtonDown, synthesized, popupTrigger, stillSincePress,
+					pickResult);
+		}
+	}
 
-        logger.debug("arenaevents x {} y {}", event.getScreenX(), event.getScreenY());
-        
-        logger.debug("mousesrc is null {}", event.getSource());
-        
-        x.setLayoutX(event.getX());
-        x.setLayoutY(event.getY());
-        canvasGroup.getChildren().add(x);
-		for (Node n : canvasGroup.getChildren()) {
-			if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
-				if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {
-					n.getOnMouseClicked().handle(event);
-				} else if (MouseEvent.MOUSE_PRESSED.equals(event.getEventType())) {
-					n.getOnMousePressed().handle(event);
-				} else if (MouseEvent.MOUSE_DRAGGED.equals(event.getEventType())) {
-					n.getOnMouseDragged().handle(event);
-				} else if (MouseEvent.MOUSE_MOVED.equals(event.getEventType())) {
-					n.getOnMouseMoved().handle(event);
+		// A mouse event was received by the canvas because this is the arena
+		// canvas and a mouse event happened on a webcam feed's calibrated
+		// region.
+		// This passes the event to any targets on the arena in the same
+		// location
+		// as the event.
+		private void translateConvertedEventToTarget(MouseEvent event) {
+			Button x = new Button("XXXXXX");
+
+			logger.debug("arenaevent x {} y {}", event.getX(), event.getY());
+
+			logger.debug("arenaeventsc x {} y {}", event.getSceneX(), event.getSceneY());
+
+			logger.debug("arenaevents x {} y {}", event.getScreenX(), event.getScreenY());
+
+			logger.debug("mousesrc is null {}", event.getSource());
+
+			x.setLayoutX(event.getX());
+			x.setLayoutY(event.getY());
+			canvasGroup.getChildren().add(x);
+			for (Node n : canvasGroup.getChildren()) {
+				if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
+					if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {
+						n.getOnMouseClicked().handle(event);
+					} else if (MouseEvent.MOUSE_PRESSED.equals(event.getEventType())) {
+						n.getOnMousePressed().handle(event);
+					} else if (MouseEvent.MOUSE_DRAGGED.equals(event.getEventType())) {
+						n.getOnMouseDragged().handle(event);
+					} else if (MouseEvent.MOUSE_MOVED.equals(event.getEventType())) {
+						n.getOnMouseMoved().handle(event);
+					}
+
+					break;
+				}
+			}
+		}
+
+		@Override
+		public void close() {
+			diagnosticExecutorService.shutdownNow();
+		}
+
+		@Override
+		public void setCameraManager(CameraManager cameraManager) {
+			this.cameraManager = cameraManager;
+		}
+
+		public CameraManager getCameraManager() {
+			return cameraManager;
+		}
+
+		@Override
+		public boolean addChild(Node c) {
+			return getCanvasGroup().getChildren().add(c);
+		}
+
+		@Override
+		public boolean removeChild(Node c) {
+			return getCanvasGroup().getChildren().remove(c);
+		}
+
+		public Label addDiagnosticMessage(final String message, final long chimeDelay, final Color backgroundColor) {
+			final Label diagnosticLabel = new Label(message);
+			diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));
+
+			final ImageView muteView = new ImageView();
+			muteView.setFitHeight(20);
+			muteView.setFitWidth(muteView.getFitHeight());
+			if (config.isChimeMuted(message)) {
+				muteView.setImage(muteImage);
+			} else {
+				muteView.setImage(soundImage);
+			}
+
+			diagnosticLabel.setContentDisplay(ContentDisplay.RIGHT);
+			diagnosticLabel.setGraphic(muteView);
+			diagnosticLabel.setOnMouseClicked((event) -> {
+				if (config.isChimeMuted(message)) {
+					muteView.setImage(soundImage);
+					config.unmuteMessageChime(message);
+				} else {
+					muteView.setImage(muteImage);
+					config.muteMessageChime(message);
 				}
 
-				break;
+				try {
+					config.writeConfigurationFile();
+				} catch (Exception e) {
+					logger.error("Failed persisting message's (" + message + ") chime mute settings.", e);
+				}
+			});
+
+			Platform.runLater(() -> diagnosticsVBox.getChildren().add(diagnosticLabel));
+
+			if (!config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
+				@SuppressWarnings("unchecked")
+				ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
+						() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
+				diagnosticFutures.put(diagnosticLabel, chimeFuture);
+			}
+
+			return diagnosticLabel;
+		}
+
+		@Override
+		public Label addDiagnosticMessage(String message, Color backgroundColor) {
+			return addDiagnosticMessage(message, DIAGNOSTIC_CHIME_DELAY, backgroundColor);
+		}
+
+		@Override
+		public void removeDiagnosticMessage(Label diagnosticLabel) {
+			if (diagnosticFutures.containsKey(diagnosticLabel)) {
+				diagnosticFutures.get(diagnosticLabel).cancel(false);
+				diagnosticFutures.remove(diagnosticLabel);
+			}
+
+			Platform.runLater(() -> diagnosticsVBox.getChildren().remove(diagnosticLabel));
+		}
+
+		public static String colorToWebCode(Color color) {
+			return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
+					(int) (color.getBlue() * 255));
+		}
+
+		private void jdk8094135Warning() {
+			Platform.runLater(() -> {
+				Alert cameraAlert = new Alert(AlertType.ERROR);
+				cameraAlert.setTitle("Internal Error");
+				cameraAlert.setHeaderText("Internal Error -- Likely Too Many false Shots");
+				cameraAlert.setResizable(true);
+				cameraAlert
+						.setContentText("An internal error due to JDK bug 8094135 occured in Java that will cause all "
+								+ "of your shots to be lost. This error is most likely to occur when you are getting a lot of false "
+								+ "shots due to poor lighting conditions and/or a poor camera setup. Please put the camera in front "
+								+ "of the shooter and turn off any bright lights in front of the camera that are the same height as "
+								+ "the shooter. If problems persist you may need to restart ShootOFF.");
+				cameraAlert.show();
+
+				shots.clear();
+				shotEntries.clear();
+			});
+		}
+
+		public String getCameraName() {
+			return cameraName;
+		}
+
+		public void setContextMenu(ContextMenu menu) {
+			this.contextMenu = Optional.of(menu);
+		}
+
+		public void setBackgroundFit(double width, double height) {
+			background.setFitWidth(width);
+			background.setFitHeight(height);
+		}
+
+		@Override
+		public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds) {
+			updateCanvasGroup();
+
+			if (frame == null) {
+				background.setX(0);
+				background.setY(0);
+				background.setImage(null);
+				return;
+			}
+
+			// Prevent the webcam feed from being refreshed faster than some
+			// maximum
+			// FPS otherwise we waste CPU cycles converting a frames to show the
+			// user and these are cycles we could spend detecting shots. A lower
+			// FPS (e.g. ~15) looks perfect fine to a person
+			if (System.currentTimeMillis() - lastFrameTime < MINIMUM_FRAME_DELTA)
+				return;
+			else
+				lastFrameTime = System.currentTimeMillis();
+
+			Image img;
+			if (projectionBounds.isPresent()) {
+				Bounds translatedBounds = translateCameraToCanvas(projectionBounds.get());
+				background.setX(translatedBounds.getMinX());
+				background.setY(translatedBounds.getMinY());
+
+				img = SwingFXUtils.toFXImage(
+						resize(frame, (int) translatedBounds.getWidth(), (int) translatedBounds.getHeight()), null);
+			} else {
+				background.setX(0);
+				background.setY(0);
+
+				img = SwingFXUtils.toFXImage(
+						resize(frame, (int) config.getDisplayWidth(), (int) config.getDisplayHeight()), null);
+			}
+
+			Platform.runLater(() -> background.setImage(img));
+		}
+
+		public void updateBackground(Image img) {
+			updateCanvasGroup();
+			background.setX(0);
+			background.setY(0);
+			Platform.runLater(() -> background.setImage(img));
+		}
+
+		private void updateCanvasGroup() {
+			if (!canvasGroup.getChildren().contains(background)) {
+				if (canvasGroup.getChildren().isEmpty()) {
+					canvasGroup.getChildren().add(background);
+				} else {
+					// Remove the wait spinner and replace it
+					// with the background
+					Platform.runLater(() -> canvasGroup.getChildren().set(0, background));
+				}
 			}
 		}
-	}
 
-	@Override
-	public void close() {
-		diagnosticExecutorService.shutdownNow();
-	}
+		private BufferedImage resize(BufferedImage source, int width, int height) {
+			if (source.getWidth() == width && source.getHeight() == height) return source;
 
-	@Override
-	public void setCameraManager(CameraManager cameraManager) {
-		this.cameraManager = cameraManager;
-	}
+			BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g2 = tmp.createGraphics();
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g2.drawImage(source, 0, 0, width, height, null);
+			g2.dispose();
 
-	public CameraManager getCameraManager() {
-		return cameraManager;
-	}
-
-	@Override
-	public boolean addChild(Node c) {
-		return getCanvasGroup().getChildren().add(c);
-	}
-
-	@Override
-	public boolean removeChild(Node c) {
-		return getCanvasGroup().getChildren().remove(c);
-	}
-
-	public Label addDiagnosticMessage(final String message, final long chimeDelay, final Color backgroundColor) {
-		final Label diagnosticLabel = new Label(message);
-		diagnosticLabel.setStyle("-fx-background-color: " + colorToWebCode(backgroundColor));
-
-		final ImageView muteView = new ImageView();
-		muteView.setFitHeight(20);
-		muteView.setFitWidth(muteView.getFitHeight());
-		if (config.isChimeMuted(message)) {
-			muteView.setImage(muteImage);
-		} else {
-			muteView.setImage(soundImage);
+			return tmp;
 		}
 
-		diagnosticLabel.setContentDisplay(ContentDisplay.RIGHT);
-		diagnosticLabel.setGraphic(muteView);
-		diagnosticLabel.setOnMouseClicked((event) -> {
-			if (config.isChimeMuted(message)) {
-				muteView.setImage(soundImage);
-				config.unmuteMessageChime(message);
+		public BufferedImage getBufferedImage() {
+			BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
+			return projectedScene;
+		}
+
+		public Bounds translateCameraToCanvas(Bounds bounds) {
+			if (config.getDisplayWidth() == cameraManager.getFeedWidth()
+					&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+				return bounds;
+
+			double scaleX = (double) config.getDisplayWidth() / (double) cameraManager.getFeedWidth();
+			double scaleY = (double) config.getDisplayHeight() / (double) cameraManager.getFeedHeight();
+
+			double minX = (bounds.getMinX() * scaleX);
+			double minY = (bounds.getMinY() * scaleY);
+			double width = (bounds.getWidth() * scaleX);
+			double height = (bounds.getHeight() * scaleY);
+
+			logger.trace("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+					bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
+
+			return new BoundingBox(minX, minY, width, height);
+		}
+
+		public Bounds translateCanvasToCamera(Bounds bounds) {
+			if (config.getDisplayWidth() == cameraManager.getFeedWidth()
+					&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+				return bounds;
+
+			double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
+			double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
+
+			double minX = (bounds.getMinX() * scaleX);
+			double minY = (bounds.getMinY() * scaleY);
+			double width = (bounds.getWidth() * scaleX);
+			double height = (bounds.getHeight() * scaleY);
+
+			logger.trace("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
+					bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
+
+			return new BoundingBox(minX, minY, width, height);
+		}
+
+		public Group getCanvasGroup() {
+			return canvasGroup;
+		}
+
+		@Override
+		public void clearShots() {
+			final Runnable clearShotsAction = () -> {
+				for (Shot shot : shots) {
+					canvasGroup.getChildren().remove(shot.getMarker());
+				}
+
+				shots.clear();
+				try {
+					if (shotEntries != null) shotEntries.clear();
+				} catch (NullPointerException npe) {
+					logger.error("JDK 8094135 exception", npe);
+					jdk8094135Warning();
+				}
+				if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
+			};
+
+			if (Platform.isFxApplicationThread()) {
+				clearShotsAction.run();
 			} else {
-				muteView.setImage(muteImage);
-				config.muteMessageChime(message);
+				Platform.runLater(clearShotsAction);
+			}
+		}
+
+		@Override
+		public void reset() {
+			// Reset animations
+			for (Target target : targets) {
+				for (TargetRegion region : target.getRegions()) {
+					if (region.getType() == RegionType.IMAGE) ((ImageRegion) region).reset();
+				}
+			}
+
+			if (arenaController.isPresent()) {
+				arenaController.get().getCanvasManager().reset();
+			}
+
+			clearShots();
+		}
+
+		public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {
+			this.arenaController = Optional.ofNullable(arenaController);
+
+			this.projectionBounds = Optional.ofNullable(projectionBounds);
+		}
+
+		public void setShowShots(boolean showShots) {
+			if (this.showShots != showShots) {
+				for (Shot shot : shots)
+					shot.getMarker().setVisible(showShots);
+			}
+
+			this.showShots = showShots;
+		}
+
+		private void notifyShot(Shot shot) {
+			if (config.getSessionRecorder().isPresent()) {
+				for (CameraManager cm : config.getRecordingManagers())
+					cm.notifyShot(shot);
+			}
+		}
+
+		private Optional<String> createVideoString(Shot shot) {
+			if (config.getSessionRecorder().isPresent() && !config.getRecordingManagers().isEmpty()) {
+
+				StringBuilder sb = new StringBuilder();
+
+				for (CameraManager cm : config.getRecordingManagers()) {
+					ShotRecorder r = cm.getRevelantRecorder(shot);
+
+					if (sb.length() > 0) {
+						sb.append(",");
+					}
+
+					sb.append(r.getCameraName());
+					sb.append(":");
+					sb.append(r.getRelativeVideoFile().getPath());
+				}
+
+				return Optional.of(sb.toString());
+			}
+
+			return Optional.empty();
+		}
+
+		private Optional<ShotProcessor> processShot(Shot shot) {
+
+			Optional<ShotProcessor> rejectingProcessor = Optional.empty();
+
+			for (ShotProcessor processor : config.getShotProcessors()) {
+				if (!processor.processShot(shot)) {
+					if (processor instanceof MalfunctionsProcessor) {
+						hadMalfunction = true;
+					} else if (processor instanceof VirtualMagazineProcessor) {
+						hadReload = true;
+					}
+
+					rejectingProcessor = Optional.of(processor);
+					logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
+					break;
+				}
+			}
+
+			return rejectingProcessor;
+		}
+
+		private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
+
+			if (!config.getSessionRecorder().isPresent()) return;
+
+			notifyShot(shot);
+
+			Optional<String> videoString = createVideoString(shot);
+
+			if (rejectingProcessor instanceof MalfunctionsProcessor) {
+				config.getSessionRecorder().get().recordShot(cameraName, shot, true, false, Optional.empty(),
+						Optional.empty(), videoString);
+			} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
+				config.getSessionRecorder().get().recordShot(cameraName, shot, false, true, Optional.empty(),
+						Optional.empty(), videoString);
+			}
+		}
+
+		// For testing
+		protected List<Shot> getShots() {
+			return shots;
+		}
+
+		@Override
+		public void addShot(Shot shot) {
+			Optional<ShotProcessor> rejectingProcessor = processShot(shot);
+			if (rejectingProcessor.isPresent()) {
+				recordRejectedShot(shot, rejectingProcessor.get());
+				return;
+			} else {
+				notifyShot(shot);
+			}
+
+			Optional<Shot> lastShot = Optional.empty();
+			if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
+
+			ShotEntry shotEntry;
+			if (hadMalfunction || hadReload) {
+				shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
+				hadMalfunction = false;
+				hadReload = false;
+			} else {
+				shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
 			}
 
 			try {
-				config.writeConfigurationFile();
-			} catch (Exception e) {
-				logger.error("Failed persisting message's (" + message + ") chime mute settings.", e);
-			}
-		});
-
-		Platform.runLater(() -> diagnosticsVBox.getChildren().add(diagnosticLabel));
-
-		if (!config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
-			@SuppressWarnings("unchecked")
-			ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
-					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
-			diagnosticFutures.put(diagnosticLabel, chimeFuture);
-		}
-
-		return diagnosticLabel;
-	}
-
-	@Override
-	public Label addDiagnosticMessage(String message, Color backgroundColor) {
-		return addDiagnosticMessage(message, DIAGNOSTIC_CHIME_DELAY, backgroundColor);
-	}
-
-	@Override
-	public void removeDiagnosticMessage(Label diagnosticLabel) {
-		if (diagnosticFutures.containsKey(diagnosticLabel)) {
-			diagnosticFutures.get(diagnosticLabel).cancel(false);
-			diagnosticFutures.remove(diagnosticLabel);
-		}
-
-		Platform.runLater(() -> diagnosticsVBox.getChildren().remove(diagnosticLabel));
-	}
-
-	public static String colorToWebCode(Color color) {
-		return String.format("#%02X%02X%02X", (int) (color.getRed() * 255), (int) (color.getGreen() * 255),
-				(int) (color.getBlue() * 255));
-	}
-
-	private void jdk8094135Warning() {
-		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.ERROR);
-			cameraAlert.setTitle("Internal Error");
-			cameraAlert.setHeaderText("Internal Error -- Likely Too Many false Shots");
-			cameraAlert.setResizable(true);
-			cameraAlert.setContentText("An internal error due to JDK bug 8094135 occured in Java that will cause all "
-					+ "of your shots to be lost. This error is most likely to occur when you are getting a lot of false "
-					+ "shots due to poor lighting conditions and/or a poor camera setup. Please put the camera in front "
-					+ "of the shooter and turn off any bright lights in front of the camera that are the same height as "
-					+ "the shooter. If problems persist you may need to restart ShootOFF.");
-			cameraAlert.show();
-
-			shots.clear();
-			shotEntries.clear();
-		});
-	}
-
-	public String getCameraName() {
-		return cameraName;
-	}
-
-	public void setContextMenu(ContextMenu menu) {
-		this.contextMenu = Optional.of(menu);
-	}
-
-	public void setBackgroundFit(double width, double height) {
-		background.setFitWidth(width);
-		background.setFitHeight(height);
-	}
-
-	@Override
-	public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds) {
-		updateCanvasGroup();
-
-		if (frame == null) {
-			background.setX(0);
-			background.setY(0);
-			background.setImage(null);
-			return;
-		}
-
-		// Prevent the webcam feed from being refreshed faster than some maximum
-		// FPS otherwise we waste CPU cycles converting a frames to show the
-		// user and these are cycles we could spend detecting shots. A lower
-		// FPS (e.g. ~15) looks perfect fine to a person
-		if (System.currentTimeMillis() - lastFrameTime < MINIMUM_FRAME_DELTA)
-			return;
-		else
-			lastFrameTime = System.currentTimeMillis();
-
-		Image img;
-		if (projectionBounds.isPresent()) {
-			Bounds translatedBounds = translateCameraToCanvas(projectionBounds.get());
-			background.setX(translatedBounds.getMinX());
-			background.setY(translatedBounds.getMinY());
-
-			img = SwingFXUtils.toFXImage(
-					resize(frame, (int) translatedBounds.getWidth(), (int) translatedBounds.getHeight()), null);
-		} else {
-			background.setX(0);
-			background.setY(0);
-
-			img = SwingFXUtils.toFXImage(resize(frame, (int) config.getDisplayWidth(), (int) config.getDisplayHeight()),
-					null);
-		}
-
-		Platform.runLater(() -> background.setImage(img));
-	}
-
-	public void updateBackground(Image img) {
-		updateCanvasGroup();
-		background.setX(0);
-		background.setY(0);
-		Platform.runLater(() -> background.setImage(img));
-	}
-
-	private void updateCanvasGroup() {
-		if (!canvasGroup.getChildren().contains(background)) {
-			if (canvasGroup.getChildren().isEmpty()) {
-				canvasGroup.getChildren().add(background);
-			} else {
-				// Remove the wait spinner and replace it
-				// with the background
-				Platform.runLater(() -> canvasGroup.getChildren().set(0, background));
-			}
-		}
-	}
-
-	private BufferedImage resize(BufferedImage source, int width, int height) {
-		if (source.getWidth() == width && source.getHeight() == height) return source;
-
-		BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2 = tmp.createGraphics();
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g2.drawImage(source, 0, 0, width, height, null);
-		g2.dispose();
-
-		return tmp;
-	}
-
-	public BufferedImage getBufferedImage() {
-		BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
-		return projectedScene;
-	}
-
-	public Bounds translateCameraToCanvas(Bounds bounds) {
-		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
-				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
-			return bounds;
-
-		double scaleX = (double) config.getDisplayWidth() / (double) cameraManager.getFeedWidth();
-		double scaleY = (double) config.getDisplayHeight() / (double) cameraManager.getFeedHeight();
-
-		double minX = (bounds.getMinX() * scaleX);
-		double minY = (bounds.getMinY() * scaleY);
-		double width = (bounds.getWidth() * scaleX);
-		double height = (bounds.getHeight() * scaleY);
-
-		logger.trace("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
-				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
-
-		return new BoundingBox(minX, minY, width, height);
-	}
-
-	public Bounds translateCanvasToCamera(Bounds bounds) {
-		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
-				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
-			return bounds;
-
-		double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
-		double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
-
-		double minX = (bounds.getMinX() * scaleX);
-		double minY = (bounds.getMinY() * scaleY);
-		double width = (bounds.getWidth() * scaleX);
-		double height = (bounds.getHeight() * scaleY);
-
-		logger.trace("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
-				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
-
-		return new BoundingBox(minX, minY, width, height);
-	}
-
-	public Group getCanvasGroup() {
-		return canvasGroup;
-	}
-
-	@Override
-	public void clearShots() {
-		final Runnable clearShotsAction = () -> {
-			for (Shot shot : shots) {
-				canvasGroup.getChildren().remove(shot.getMarker());
-			}
-
-			shots.clear();
-			try {
-				if (shotEntries != null) shotEntries.clear();
+				shotEntries.add(shotEntry);
 			} catch (NullPointerException npe) {
 				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
-			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
-		};
 
-		if (Platform.isFxApplicationThread()) {
-			clearShotsAction.run();
-		} else {
-			Platform.runLater(clearShotsAction);
-		}
-	}
+			shots.add(shot);
+			drawShot(shot);
 
-	@Override
-	public void reset() {
-		// Reset animations
-		for (Target target : targets) {
-			for (TargetRegion region : target.getRegions()) {
-				if (region.getType() == RegionType.IMAGE) ((ImageRegion) region).reset();
+			if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
+				TrainingExerciseBase.playSound(config.getRedLaserSound());
+			} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
+				TrainingExerciseBase.playSound(config.getGreenLaserSound());
+			}
+
+			Optional<String> videoString = createVideoString(shot);
+			Optional<TrainingExercise> currentExercise = config.getExercise();
+			Optional<Hit> hit = checkHit(shot, videoString);
+			if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
+
+			boolean processedShot = false;
+
+			if (arenaController.isPresent() && projectionBounds.isPresent()) {
+				Bounds b = projectionBounds.get();
+
+				if (b.contains(shot.getX(), shot.getY())) {
+					double x_scale = arenaController.get().getWidth() / b.getWidth();
+					double y_scale = arenaController.get().getHeight() / b.getHeight();
+
+					Shot arenaShot = new Shot(shot.getColor(), (shot.getX() - b.getMinX()) * x_scale,
+							(shot.getY() - b.getMinY()) * y_scale, shot.getTimestamp(), shot.getFrame(),
+							config.getMarkerRadius());
+
+					processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, videoString);
+				}
+			}
+
+			if (currentExercise.isPresent() && !processedShot) {
+				currentExercise.get().shotListener(shot, hit);
 			}
 		}
 
-		if (arenaController.isPresent()) {
-			arenaController.get().getCanvasManager().reset();
+		public boolean addArenaShot(Shot shot, Optional<String> videoString) {
+			shots.add(shot);
+			drawShot(shot);
+
+			Optional<TrainingExercise> currentExercise = config.getExercise();
+			Optional<Hit> hit = checkHit(shot, videoString);
+			if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
+				executeRegionCommands(hit.get());
+			}
+
+			if (currentExercise.isPresent()) {
+				currentExercise.get().shotListener(shot, hit);
+				return true;
+			}
+
+			return false;
 		}
 
-		clearShots();
-	}
-
-	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {
-		this.arenaController = Optional.ofNullable(arenaController);
-
-		this.projectionBounds = Optional.ofNullable(projectionBounds);
-	}
-
-	public void setShowShots(boolean showShots) {
-		if (this.showShots != showShots) {
-			for (Shot shot : shots)
+		private void drawShot(Shot shot) {
+			Platform.runLater(() -> {
+				canvasGroup.getChildren().add(shot.getMarker());
 				shot.getMarker().setVisible(showShots);
+			});
 		}
 
-		this.showShots = showShots;
-	}
+		protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
+			// Targets are in order of when they were added, thus we must search
+			// in
+			// reverse to ensure shots register for the top target when targets
+			// overlap
+			for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
+				Target target = li.previous();
 
-	private void notifyShot(Shot shot) {
-		if (config.getSessionRecorder().isPresent()) {
-			for (CameraManager cm : config.getRecordingManagers())
-				cm.notifyShot(shot);
-		}
-	}
+				Optional<Hit> hit = target.isHit(shot);
 
-	private Optional<String> createVideoString(Shot shot) {
-		if (config.getSessionRecorder().isPresent() && !config.getRecordingManagers().isEmpty()) {
+				if (hit.isPresent()) {
+					TargetRegion region = hit.get().getHitRegion();
 
-			StringBuilder sb = new StringBuilder();
+					if (config.inDebugMode()) {
+						Map<String, String> tags = region.getAllTags();
 
-			for (CameraManager cm : config.getRecordingManagers()) {
-				ShotRecorder r = cm.getRevelantRecorder(shot);
+						StringBuilder tagList = new StringBuilder();
+						for (Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
+							Entry<String, String> entry = it.next();
+							tagList.append(entry.getKey());
+							tagList.append(":");
+							tagList.append(entry.getValue());
+							if (it.hasNext()) tagList.append(", ");
+						}
 
-				if (sb.length() > 0) {
-					sb.append(",");
-				}
-
-				sb.append(r.getCameraName());
-				sb.append(":");
-				sb.append(r.getRelativeVideoFile().getPath());
-			}
-
-			return Optional.of(sb.toString());
-		}
-
-		return Optional.empty();
-	}
-
-	private Optional<ShotProcessor> processShot(Shot shot) {
-
-		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
-
-		for (ShotProcessor processor : config.getShotProcessors()) {
-			if (!processor.processShot(shot)) {
-				if (processor instanceof MalfunctionsProcessor) {
-					hadMalfunction = true;
-				} else if (processor instanceof VirtualMagazineProcessor) {
-					hadReload = true;
-				}
-
-				rejectingProcessor = Optional.of(processor);
-				logger.debug("Processing Shot: Shot Rejected By {}", processor.getClass().getName());
-				break;
-			}
-		}
-
-		return rejectingProcessor;
-	}
-
-	private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
-
-		if (!config.getSessionRecorder().isPresent()) return;
-
-		notifyShot(shot);
-
-		Optional<String> videoString = createVideoString(shot);
-
-		if (rejectingProcessor instanceof MalfunctionsProcessor) {
-			config.getSessionRecorder().get().recordShot(cameraName, shot, true, false, Optional.empty(),
-					Optional.empty(), videoString);
-		} else if (rejectingProcessor instanceof VirtualMagazineProcessor) {
-			config.getSessionRecorder().get().recordShot(cameraName, shot, false, true, Optional.empty(),
-					Optional.empty(), videoString);
-		}
-	}
-
-	// For testing
-	protected List<Shot> getShots() {
-		return shots;
-	}
-
-	@Override
-	public void addShot(Shot shot) {
-		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
-		if (rejectingProcessor.isPresent()) {
-			recordRejectedShot(shot, rejectingProcessor.get());
-			return;
-		} else {
-			notifyShot(shot);
-		}
-
-		Optional<Shot> lastShot = Optional.empty();
-		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
-
-		ShotEntry shotEntry;
-		if (hadMalfunction || hadReload) {
-			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
-			hadMalfunction = false;
-			hadReload = false;
-		} else {
-			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
-		}
-
-		try {
-			shotEntries.add(shotEntry);
-		} catch (NullPointerException npe) {
-			logger.error("JDK 8094135 exception", npe);
-			jdk8094135Warning();
-		}
-
-		shots.add(shot);
-		drawShot(shot);
-
-		if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
-			TrainingExerciseBase.playSound(config.getRedLaserSound());
-		} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
-			TrainingExerciseBase.playSound(config.getGreenLaserSound());
-		}
-
-		Optional<String> videoString = createVideoString(shot);
-		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, videoString);
-		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
-
-		boolean processedShot = false;
-
-		if (arenaController.isPresent() && projectionBounds.isPresent()) {
-			Bounds b = projectionBounds.get();
-
-			if (b.contains(shot.getX(), shot.getY())) {
-				double x_scale = arenaController.get().getWidth() / b.getWidth();
-				double y_scale = arenaController.get().getHeight() / b.getHeight();
-
-				Shot arenaShot = new Shot(shot.getColor(), (shot.getX() - b.getMinX()) * x_scale,
-						(shot.getY() - b.getMinY()) * y_scale, shot.getTimestamp(), shot.getFrame(),
-						config.getMarkerRadius());
-
-				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, videoString);
-			}
-		}
-
-		if (currentExercise.isPresent() && !processedShot) {
-			currentExercise.get().shotListener(shot, hit);
-		}
-	}
-
-	public boolean addArenaShot(Shot shot, Optional<String> videoString) {
-		shots.add(shot);
-		drawShot(shot);
-
-		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, videoString);
-		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
-			executeRegionCommands(hit.get());
-		}
-
-		if (currentExercise.isPresent()) {
-			currentExercise.get().shotListener(shot, hit);
-			return true;
-		}
-
-		return false;
-	}
-
-	private void drawShot(Shot shot) {
-		Platform.runLater(() -> {
-			canvasGroup.getChildren().add(shot.getMarker());
-			shot.getMarker().setVisible(showShots);
-		});
-	}
-
-	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
-		// Targets are in order of when they were added, thus we must search in
-		// reverse to ensure shots register for the top target when targets
-		// overlap
-		for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
-			Target target = li.previous();
-
-			Optional<Hit> hit = target.isHit(shot);
-
-			if (hit.isPresent()) {
-				TargetRegion region = hit.get().getHitRegion();
-
-				if (config.inDebugMode()) {
-					Map<String, String> tags = region.getAllTags();
-
-					StringBuilder tagList = new StringBuilder();
-					for (Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
-						Entry<String, String> entry = it.next();
-						tagList.append(entry.getKey());
-						tagList.append(":");
-						tagList.append(entry.getValue());
-						if (it.hasNext()) tagList.append(", ");
+						logger.debug("Processing Shot: Found Hit Region For Shot ({}, {}), Type ({}), Tags ({})",
+								shot.getX(), shot.getY(), region.getType(), tagList.toString());
 					}
 
-					logger.debug("Processing Shot: Found Hit Region For Shot ({}, {}), Type ({}), Tags ({})",
-							shot.getX(), shot.getY(), region.getType(), tagList.toString());
-				}
-
-				if (config.getSessionRecorder().isPresent()) {
-					config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.of(target),
-							Optional.of(target.getRegions().indexOf(region)), videoString);
-				}
-
-				return hit;
-			}
-		}
-
-		logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", shot.getX(), shot.getY());
-
-		if (config.getSessionRecorder().isPresent()) {
-			config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.empty(),
-					Optional.empty(), videoString);
-		}
-
-		return Optional.empty();
-	}
-
-	private void executeRegionCommands(Hit hit) {
-		TargetView.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
-			switch (commandName) {
-			case "reset":
-				resetter.reset();
-				break;
-
-			case "animate":
-				hit.getTarget().animate(hit.getHitRegion(), args);
-				break;
-
-			case "reverse":
-				hit.getTarget().reverseAnimation(hit.getHitRegion());
-				break;
-
-			case "play_sound":
-				// If there is a second parameter, we should look to see
-				// if it's an image region that is down and if so, don't
-				// play the sound
-				if (args.size() == 2) {
-					Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets, hit.getHitRegion(),
-							args.get(1));
-					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
-						if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
+					if (config.getSessionRecorder().isPresent()) {
+						config.getSessionRecorder().get().recordShot(cameraName, shot, false, false,
+								Optional.of(target), Optional.of(target.getRegions().indexOf(region)), videoString);
 					}
+
+					return hit;
+				}
+			}
+
+			logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", shot.getX(), shot.getY());
+
+			if (config.getSessionRecorder().isPresent()) {
+				config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.empty(),
+						Optional.empty(), videoString);
+			}
+
+			return Optional.empty();
+		}
+
+		private void executeRegionCommands(Hit hit) {
+			TargetView.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
+				switch (commandName) {
+				case "reset":
+					resetter.reset();
+					break;
+
+				case "animate":
+					hit.getTarget().animate(hit.getHitRegion(), args);
+					break;
+
+				case "reverse":
+					hit.getTarget().reverseAnimation(hit.getHitRegion());
+					break;
+
+				case "play_sound":
+					// If there is a second parameter, we should look to see
+					// if it's an image region that is down and if so, don't
+					// play the sound
+					if (args.size() == 2) {
+						Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets,
+								hit.getHitRegion(), args.get(1));
+						if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
+							if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
+						}
+					}
+
+					// If the string starts with an @ we are supposed to
+					// load the sound as a resource from the current exercises
+					// JAR file. This indicates that the target is from
+					// a modular exercise
+					String soundPath = args.get(0);
+					if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
+						InputStream is = config.getExercise().get().getClass()
+								.getResourceAsStream(soundPath.substring(1));
+						TrainingExerciseBase.playSound(new BufferedInputStream(is));
+					} else if ('@' != soundPath.charAt(0)) {
+						TrainingExerciseBase.playSound(soundPath);
+					} else {
+						logger.error("Can't play {} because it is a resource in an exercise but no exercise is loaded.",
+								soundPath);
+					}
+
+					break;
+				}
+			});
+		}
+
+		public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
+			Optional<TargetComponents> targetComponents;
+
+			if ('@' == targetFile.toString().charAt(0)) {
+				if (!config.getPlugin().isPresent()) {
+					throw new AssertionError("Loaded target from training exercise resources, but a plugin does not "
+							+ "exist for the target.");
 				}
 
-				// If the string starts with an @ we are supposed to
-				// load the sound as a resource from the current exercises
-				// JAR file. This indicates that the target is from
-				// a modular exercise
-				String soundPath = args.get(0);
-				if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
-					InputStream is = config.getExercise().get().getClass().getResourceAsStream(soundPath.substring(1));
-					TrainingExerciseBase.playSound(new BufferedInputStream(is));
-				} else if ('@' != soundPath.charAt(0)) {
-					TrainingExerciseBase.playSound(soundPath);
+				ClassLoader loader = config.getPlugin().get().getLoader();
+
+				InputStream resourceTargetStream = loader
+						.getResourceAsStream(targetFile.toString().substring(1).replace("\\", "/"));
+				if (resourceTargetStream != null) {
+					targetComponents = TargetIO.loadTarget(resourceTargetStream, playAnimations, loader);
 				} else {
-					logger.error("Can't play {} because it is a resource in an exercise but no exercise is loaded.",
-							soundPath);
+					targetComponents = Optional.empty();
+					logger.error("Error adding target from stream created from resource {}",
+							targetFile.toString().substring(1).replace("\\", "/"));
+				}
+			} else {
+				targetComponents = TargetIO.loadTarget(targetFile, playAnimations);
+			}
+
+			if (targetComponents.isPresent()) {
+				TargetComponents tc = targetComponents.get();
+				Optional<Target> target = Optional
+						.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
+
+				if (config.getSessionRecorder().isPresent() && target.isPresent()) {
+					config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
 				}
 
-				break;
-			}
-		});
-	}
-
-	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
-		Optional<TargetComponents> targetComponents;
-
-		if ('@' == targetFile.toString().charAt(0)) {
-			if (!config.getPlugin().isPresent()) {
-				throw new AssertionError("Loaded target from training exercise resources, but a plugin does not "
-						+ "exist for the target.");
+				return target;
 			}
 
-			ClassLoader loader = config.getPlugin().get().getLoader();
+			return Optional.empty();
+		}
 
-			InputStream resourceTargetStream = loader
-					.getResourceAsStream(targetFile.toString().substring(1).replace("\\", "/"));
-			if (resourceTargetStream != null) {
-				targetComponents = TargetIO.loadTarget(resourceTargetStream, playAnimations, loader);
+		@Override
+		public Optional<Target> addTarget(File targetFile) {
+			return addTarget(targetFile, true);
+		}
+
+		public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags,
+				boolean userDeletable) {
+			TargetView newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
+
+			return addTarget(newTarget);
+		}
+
+		@Override
+		public Target addTarget(Target newTarget) {
+			final Runnable addTargetAction = () -> canvasGroup.getChildren()
+					.add(((TargetView) newTarget).getTargetGroup());
+
+			if (Platform.isFxApplicationThread()) {
+				addTargetAction.run();
 			} else {
-				targetComponents = Optional.empty();
-				logger.error("Error adding target from stream created from resource {}",
-						targetFile.toString().substring(1).replace("\\", "/"));
-			}
-		} else {
-			targetComponents = TargetIO.loadTarget(targetFile, playAnimations);
-		}
-
-		if (targetComponents.isPresent()) {
-			TargetComponents tc = targetComponents.get();
-			Optional<Target> target = Optional.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
-
-			if (config.getSessionRecorder().isPresent() && target.isPresent()) {
-				config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
+				Platform.runLater(addTargetAction);
 			}
 
-			return target;
+			targets.add(newTarget);
+
+			Optional<TrainingExercise> enabledExercise = config.getExercise();
+			if (enabledExercise.isPresent())
+				enabledExercise.get().targetUpdate(newTarget, TrainingExercise.TargetChange.ADDED);
+
+			return newTarget;
 		}
 
-		return Optional.empty();
-	}
+		public void removeTarget(Target target) {
+			final Runnable removeTargetAction = () -> canvasGroup.getChildren()
+					.remove(((TargetView) target).getTargetGroup());
 
-	@Override
-	public Optional<Target> addTarget(File targetFile) {
-		return addTarget(targetFile, true);
-	}
+			if (Platform.isFxApplicationThread()) {
+				removeTargetAction.run();
+			} else {
+				Platform.runLater(removeTargetAction);
+			}
 
-	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
-		TargetView newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
+			if (config.getSessionRecorder().isPresent()) {
+				config.getSessionRecorder().get().recordTargetRemoved(cameraName, target);
+			}
 
-		return addTarget(newTarget);
-	}
+			targets.remove(target);
 
-	@Override
-	public Target addTarget(Target newTarget) {
-		final Runnable addTargetAction = () -> canvasGroup.getChildren().add(((TargetView) newTarget).getTargetGroup());
-
-		if (Platform.isFxApplicationThread()) {
-			addTargetAction.run();
-		} else {
-			Platform.runLater(addTargetAction);
+			Optional<TrainingExercise> enabledExercise = config.getExercise();
+			if (enabledExercise.isPresent())
+				enabledExercise.get().targetUpdate(target, TrainingExercise.TargetChange.REMOVED);
 		}
 
-		targets.add(newTarget);
-
-		Optional<TrainingExercise> enabledExercise = config.getExercise();
-		if (enabledExercise.isPresent())
-			enabledExercise.get().targetUpdate(newTarget, TrainingExercise.TargetChange.ADDED);
-
-		return newTarget;
-	}
-
-	public void removeTarget(Target target) {
-		final Runnable removeTargetAction = () -> canvasGroup.getChildren()
-				.remove(((TargetView) target).getTargetGroup());
-
-		if (Platform.isFxApplicationThread()) {
-			removeTargetAction.run();
-		} else {
-			Platform.runLater(removeTargetAction);
+		public void clearTargets() {
+			for (Target t : new ArrayList<Target>(targets)) {
+				removeTarget(t);
+			}
 		}
 
-		if (config.getSessionRecorder().isPresent()) {
-			config.getSessionRecorder().get().recordTargetRemoved(cameraName, target);
+		public List<Target> getTargets() {
+			return targets;
 		}
 
-		targets.remove(target);
+		public void toggleTargetSelection(Optional<TargetView> newSelection) {
+			if (selectedTarget.isPresent()) selectedTarget.get().toggleSelected();
 
-		Optional<TrainingExercise> enabledExercise = config.getExercise();
-		if (enabledExercise.isPresent())
-			enabledExercise.get().targetUpdate(target, TrainingExercise.TargetChange.REMOVED);
-	}
-
-	public void clearTargets() {
-		for (Target t : new ArrayList<Target>(targets)) {
-			removeTarget(t);
+			if (newSelection.isPresent()) {
+				newSelection.get().toggleSelected();
+				selectedTarget = newSelection;
+			} else {
+				selectedTarget = Optional.empty();
+				canvasGroup.requestFocus();
+			}
 		}
-	}
-
-	public List<Target> getTargets() {
-		return targets;
-	}
-
-	public void toggleTargetSelection(Optional<TargetView> newSelection) {
-		if (selectedTarget.isPresent()) selectedTarget.get().toggleSelected();
-
-		if (newSelection.isPresent()) {
-			newSelection.get().toggleSelected();
-			selectedTarget = newSelection;
-		} else {
-			selectedTarget = Optional.empty();
-			canvasGroup.requestFocus();
-		}
-	}
 }
