@@ -457,6 +457,11 @@ public class CameraManager {
 
 					if ((int) openDimension.getWidth() != getFeedWidth()
 							|| (int) openDimension.getHeight() != getFeedHeight()) {
+						if (openDimension.getWidth() == -1) {
+							cameraErrorView.get().showCameraLockError(webcam.get(), true);
+							return;
+						}
+						
 						if (logger.isWarnEnabled()) logger.warn(
 								"Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
 								getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),

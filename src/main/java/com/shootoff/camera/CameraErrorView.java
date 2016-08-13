@@ -6,6 +6,8 @@ package com.shootoff.camera;
  * @author phrack
  */
 public interface CameraErrorView {
+	public void showCameraLockError(Camera webcam, boolean allCamerasFailed);
+	
 	public void showMissingCameraError(Camera webcam);
 
 	public void showFPSWarning(Camera webcam, double fps);
