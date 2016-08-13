@@ -18,6 +18,7 @@
 
 package com.shootoff.gui.controller;
 
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -125,20 +126,30 @@ public class ProjectorArenaController implements CalibrationListener {
 	}
 
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
-		final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1, 1);
+		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+		// Number of actual horizontal lines (768p)
+		double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+		// Number of scaled horizontal lines. (384p for 200%)
+		double scaledHorizontalLines =  Screen.getPrimary().getBounds().getHeight();
+		// DPI scale factor.
+		double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
+		
+		
+		
+		final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX() / dpiScaleFactor, stage.getY() / dpiScaleFactor, 1, 1);
 
 		if (stageHomeScreens.isEmpty()) {
 			final StringBuilder message = new StringBuilder(
-					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens: %n%n",
-							stage.getTitle(), stage.getX(), stage.getY()));
+					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens:\n",
+							stage.getTitle(), stage.getX() / dpiScaleFactor, stage.getY() / dpiScaleFactor));
 
 			final Iterator<Screen> it = Screen.getScreens().iterator();
 
 			while (it.hasNext()) {
 				Screen s = it.next();
 
-				message.append(String.format("(w = %f, h = %f, dpi = %f)", s.getBounds().getWidth(),
-						s.getBounds().getHeight(), s.getDpi()));
+				message.append(String.format("(w = %f, h = %f, x = %f, y = %f, dpi = %f)", s.getBounds().getWidth(),
+						s.getBounds().getHeight(), s.getBounds().getMinX(), s.getBounds().getMinY(), s.getDpi()));
 
 				if (it.hasNext()) {
 					message.append("\n");
@@ -184,12 +195,28 @@ public class ProjectorArenaController implements CalibrationListener {
 					arenaPosition.getY(), 1, 1);
 
 			if (!screens.isEmpty()) {
-				arenaStage.setX(arenaPosition.getX());
-				arenaStage.setY(arenaPosition.getY());
+				
+				boolean matchedOriginal = false;
+				for (Screen screen : screens)
+				{
+					if (originalArenaHomeScreen == screen)
+					{
+						logger.debug("Stored arena coordinates are on current home screen");
+						matchedOriginal = true;
+					}
+				}
+				
+				if (!matchedOriginal)
+				{
+					arenaStage.setX(arenaPosition.getX());
+					arenaStage.setY(arenaPosition.getY());
 
-				Platform.runLater(() -> toggleFullScreen());
+					Platform.runLater(() -> toggleFullScreen());
+					
 
-				return;
+					return;
+				}
+
 			} else {
 				logger.debug("Saved screen coordinates ({}, {}) no longer exists, attempting fallback approaches...",
 						arenaPosition.getX(), arenaPosition.getY());
@@ -235,10 +262,19 @@ public class ProjectorArenaController implements CalibrationListener {
 		}
 
 		if (projector.isPresent()) {
+			
+			//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+			// Number of actual horizontal lines (768p)
+			double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+			// Number of scaled horizontal lines. (384p for 200%)
+			double scaledHorizontalLines = Screen.getPrimary().getBounds().getHeight();
+			// DPI scale factor.
+			double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
+			
 			arenaHome = projector.get();
 
-			double newX = arenaHome.getVisualBounds().getMinX();
-			double newY = arenaHome.getVisualBounds().getMinY();
+			double newX = arenaHome.getBounds().getMinX() * dpiScaleFactor;
+			double newY = arenaHome.getBounds().getMinY() * dpiScaleFactor;
 
 			logger.debug("Found likely projector screen: resolution = {}x{}, newX = {}, newY = {}",
 					arenaHome.getBounds().getWidth(), arenaHome.getBounds().getHeight(), newX, newY);
@@ -264,6 +300,10 @@ public class ProjectorArenaController implements CalibrationListener {
 		} else {
 			arenaStage.show();
 		}
+	}
+	
+	public Screen getArenaHome() {
+		return arenaHome;
 	}
 
 	public double getWidth() {
@@ -395,7 +435,17 @@ public class ProjectorArenaController implements CalibrationListener {
 					&& !detectedProjectorScreen.equals(currentArenaScreen.get());
 
 			if (fullyManual || movedAfterAuto) {
-				config.setArenaPosition(arenaStage.getX(), arenaStage.getY());
+				
+				//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+				// Number of actual horizontal lines (768p)
+				double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+				// Number of scaled horizontal lines. (384p for 200%)
+				double scaledHorizontalLines = arenaHome.getBounds().getHeight();
+				// DPI scale factor.
+				double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
+				
+				
+				config.setArenaPosition(arenaStage.getX() / dpiScaleFactor, arenaStage.getY() / dpiScaleFactor);
 				try {
 					config.writeConfigurationFile();
 				} catch (ConfigurationException | IOException e) {
