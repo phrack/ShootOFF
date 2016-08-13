@@ -73,9 +73,9 @@ public class Camera {
 	private static final List<Camera> knownWebcams;
 
 	private static final Logger logger = LoggerFactory.getLogger(Camera.class);
-	
+
 	private static final List<Camera> openCameras = Collections.synchronizedList(new ArrayList<>());
-	
+
 	private final VideoCapture camera;
 	private final int cameraIndex;
 	private final Webcam ipcam;
@@ -236,7 +236,7 @@ public class Camera {
 
 		for (Webcam w : Webcam.getWebcams()) {
 			Camera c = new Camera(w.getName());
-			
+
 			// If we already have an open instance of the camera
 			// go ahead and reuse it in this list as opposed to
 			// the newly created camera
@@ -253,9 +253,8 @@ public class Camera {
 
 	public Mat getFrame() {
 		final Mat frame = new Mat();
-		if (!camera.read(frame) || frame.size().height == 0) 
-			return null;
-		
+		if (!camera.read(frame) || frame.size().height == 0) return null;
+
 		return frame;
 	}
 
@@ -264,7 +263,7 @@ public class Camera {
 			return ipcam.getImage();
 		} else {
 			Mat frame = getFrame();
-			
+
 			if (frame == null) {
 				return null;
 			} else {
@@ -279,7 +278,7 @@ public class Camera {
 
 	public boolean open() {
 		boolean open;
-		
+
 		if (isIpCam) {
 			try {
 				open = ipcam.open();
@@ -288,8 +287,11 @@ public class Camera {
 			}
 		} else {
 			open = camera.open(cameraIndex);
+			// Set the max FPS to 60. If we don't set this it defaults
+			// to 30, which unnecessarily hampers higher end cameras
+			camera.set(5, 60);
 		}
-		
+
 		if (open) openCameras.add(this);
 
 		return open;
