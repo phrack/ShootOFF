@@ -107,7 +107,7 @@ public final class JavaShotDetector extends ShotDetector {
 				logger.error("Shot detection thread was rejected but GlobalExecutorPool was not shot down");
 			}
 		});
-		
+
 		this.cameraManager = cameraManager;
 		this.config = config;
 
@@ -365,6 +365,14 @@ public final class JavaShotDetector extends ShotDetector {
 				for (int y = startY; y < startY + subHeight; y++) {
 					final int yOffset = y * cols;
 					for (int x = startX; x < startX + subWidth; x++) {
+						// If the thread is interrupted it's likely because the thread pool
+						// is being shutdown with shutdownNow. Thus cancel searching
+						// for a shot in the current frame.
+						if (Thread.currentThread().isInterrupted()) {
+							logger.trace("Shot detection sieve interrupted");
+							return;
+						}
+						
 						final int currentH = workingFramePrimitive[(yOffset + x) * channels] & 0xFF;
 						final int currentS = workingFramePrimitive[(yOffset + x) * channels + 1] & 0xFF;
 						final int currentV = workingFramePrimitive[(yOffset + x) * channels + 2] & 0xFF;
