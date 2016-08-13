@@ -185,12 +185,12 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					List<Camera> allCameras = Camera.getWebcams();
 
 					if (allCameras.size() <= 1) {
-						cameraLockFailure(defaultCamera.get(), true);
+						showCameraLockError(defaultCamera.get(), true);
 					} else {
 						for (Camera c : allCameras) {
 							if (!c.equals(defaultCamera.get())) {
 								if (!addCameraTab("Default", c)) {
-									cameraLockFailure(c, true);
+									showCameraLockError(c, true);
 								}
 
 								break;
@@ -410,7 +410,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			Optional<Camera> defaultCam = Camera.getDefault();
 
 			if (defaultCam.isPresent()) {
-				if (!addCameraTab("Default", defaultCam.get())) cameraLockFailure(defaultCam.get(), true);
+				if (!addCameraTab("Default", defaultCam.get())) showCameraLockError(defaultCam.get(), true);
 			} else {
 				logger.error("Default camera was not fetched after clearing camera settings!");
 				Main.closeNoCamera();
@@ -423,41 +423,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 				if (!addCameraTab(webcamName, webcam)) {
 					failureCount++;
-					cameraLockFailure(webcam, failureCount == config.getWebcams().size());
+					showCameraLockError(webcam, failureCount == config.getWebcams().size());
 				}
 			}
-		}
-	}
-
-	private void cameraLockFailure(Camera webcam, boolean allCamerasFailed) {
-		Alert cameraAlert = new Alert(AlertType.ERROR);
-		cameraAlert.setTitle("Webcam Locked");
-		cameraAlert.setHeaderText("Cannot Open Webcam");
-		cameraAlert.setResizable(true);
-		cameraAlert.getDialogPane().getScene().getWindow().requestFocus();
-
-		String messageFormat;
-
-		if (allCamerasFailed) {
-			messageFormat = "Cannot open the webcam %s. It is being "
-					+ "used by another program or it is an IPCam with the wrong credentials. This "
-					+ "is the only configured camera, thus ShootOFF must close.";
-		} else {
-			messageFormat = "Cannot open the webcam %s. It is being "
-					+ "used by another program, it is an IPCam with the wrong credentials, or you "
-					+ "have ShootOFF open more than once.";
-		}
-
-		Optional<String> webcamName = config.getWebcamsUserName(webcam);
-
-		cameraAlert.setContentText(
-				String.format(messageFormat, webcamName.isPresent() ? webcamName.get() : webcam.getName()));
-
-		if (allCamerasFailed) {
-			cameraAlert.showAndWait();
-			Main.forceClose(-1);
-		} else {
-			cameraAlert.show();
 		}
 	}
 
@@ -1178,6 +1146,41 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		addTargetMenu.getItems().add(addTargetItem);
 		addArenaTargetMenu.getItems().add(addProjectorTargetItem);
 		editTargetMenu.getItems().add(editTargetItem);
+	}
+
+	@Override
+	public void showCameraLockError(Camera webcam, boolean allCamerasFailed) {
+		Platform.runLater(() -> {
+			Alert cameraAlert = new Alert(AlertType.ERROR);
+			cameraAlert.setTitle("Webcam Locked");
+			cameraAlert.setHeaderText("Cannot Open Webcam");
+			cameraAlert.setResizable(true);
+			cameraAlert.getDialogPane().getScene().getWindow().requestFocus();
+
+			String messageFormat;
+
+			if (allCamerasFailed) {
+				messageFormat = "Cannot open the webcam %s. It is being "
+						+ "used by another program or it is an IPCam with the wrong credentials. This "
+						+ "is the only configured camera, thus ShootOFF must close.";
+			} else {
+				messageFormat = "Cannot open the webcam %s. It is being "
+						+ "used by another program, it is an IPCam with the wrong credentials, or you "
+						+ "have ShootOFF open more than once.";
+			}
+
+			Optional<String> webcamName = config.getWebcamsUserName(webcam);
+
+			cameraAlert.setContentText(
+					String.format(messageFormat, webcamName.isPresent() ? webcamName.get() : webcam.getName()));
+
+			if (allCamerasFailed) {
+				cameraAlert.showAndWait();
+				Main.forceClose(-1);
+			} else {
+				cameraAlert.show();
+			}
+		});
 	}
 
 	@Override
