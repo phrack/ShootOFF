@@ -458,8 +458,8 @@ public class CameraManager {
 					if ((int) openDimension.getWidth() != getFeedWidth()
 							|| (int) openDimension.getHeight() != getFeedHeight()) {
 						if (logger.isWarnEnabled()) logger.warn(
-								"Camera dimension differs from requested dimensions, requested {} {} actual {} {}",
-								getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
+								"Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
+								getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
 								(int) openDimension.getHeight());
 
 						setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
