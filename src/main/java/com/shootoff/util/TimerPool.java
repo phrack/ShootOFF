@@ -30,6 +30,8 @@ public class TimerPool {
 			new NamedThreadFactory("ShootOFFTimerPool"));
 
 	public static ScheduledFuture<?> schedule(Runnable task, long msDelay) {
+		if (executorService.isShutdown() || executorService.isTerminated()) return null;
+
 		return executorService.schedule(task, msDelay, TimeUnit.MILLISECONDS);
 	}
 
