@@ -77,8 +77,12 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -140,18 +144,92 @@ public class CanvasManager implements CameraView {
 			diagnosticsVBox.setPrefWidth(config.getDisplayWidth());
 		}
 
+		// Used to pass events from calibrated regions on a webcam feed to the
+		// arena so that arena targets can be arranged from the calibrated
+		// webcam feed.
+		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
+			if (arenaController.isPresent() && projectionBounds.isPresent()) {
+				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
+			} else {
+				translateConvertedEventToTarget(event);
+			}
+		};
+
 		canvasGroup.setOnMouseClicked((event) -> {
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
 					cameraManager.injectShot(Color.RED, event.getX(), event.getY(), false);
+					return;
 				} else if (event.isControlDown()) {
 					cameraManager.injectShot(Color.GREEN, event.getX(), event.getY(), false);
+					return;
 				}
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
 			}
+
+			passThroughHandler.handle(event);
 		});
+
+		canvasGroup.setOnMousePressed(passThroughHandler);
+
+		canvasGroup.setOnMouseDragged(passThroughHandler);
+
+		canvasGroup.setOnMouseMoved(passThroughHandler);
+
+		canvasGroup.setOnMouseReleased(passThroughHandler);
+	}
+
+	// Used when a mouse event happens on the calibrated region where there is
+	// not a target on the calibrated canvas to translate the event to the
+	// arena's canvas. This lets you control targets on the arena from a webcam
+	// feed.
+	private void translateMouseEventToArena(ProjectorArenaController arenaController, Bounds projectionBounds,
+			MouseEvent event) {
+		if (projectionBounds.contains(event.getX(), event.getY())) {
+			final double x_scale = arenaController.getWidth() / projectionBounds.getWidth();
+			final double y_scale = arenaController.getHeight() / projectionBounds.getHeight();
+
+			final double newX = (event.getX() - projectionBounds.getMinX()) * x_scale;
+			final double newY = (event.getY() - projectionBounds.getMinY()) * y_scale;
+
+			final Screen clickedScreen = Screen.getScreensForRectangle(event.getScreenX(), event.getScreenY(), 1, 1)
+					.get(0);
+			final double newScreenX = ((event.getScreenX() - clickedScreen.getBounds().getMinX()) * x_scale)
+					+ arenaController.getArenaScreenOrigin().getX();
+			final double newScreenY = ((event.getScreenY() - clickedScreen.getBounds().getMinY()) * y_scale)
+					+ arenaController.getArenaScreenOrigin().getY();
+
+			final MouseEvent clickEvent = new MouseEvent(null, null, event.getEventType(), newX, newY, newScreenX,
+					newScreenY, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
+					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
+					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
+					event.isStillSincePress(), event.getPickResult());
+			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) clickEvent);
+		}
+	}
+
+	// A mouse event was received by the canvas because this is the arena
+	// canvas and a mouse event happened on a webcam feed's calibrated region.
+	// This passes the event to any targets on the arena in the same location
+	// as the event.
+	private void translateConvertedEventToTarget(MouseEvent event) {
+		for (Node n : canvasGroup.getChildren()) {
+			if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
+				if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {
+					n.getOnMouseClicked().handle(event);
+				} else if (MouseEvent.MOUSE_PRESSED.equals(event.getEventType())) {
+					n.getOnMousePressed().handle(event);
+				} else if (MouseEvent.MOUSE_DRAGGED.equals(event.getEventType())) {
+					n.getOnMouseDragged().handle(event);
+				} else if (MouseEvent.MOUSE_MOVED.equals(event.getEventType())) {
+					n.getOnMouseMoved().handle(event);
+				}
+
+				break;
+			}
+		}
 	}
 
 	@Override
@@ -287,8 +365,10 @@ public class CanvasManager implements CameraView {
 		// FPS otherwise we waste CPU cycles converting a frames to show the
 		// user and these are cycles we could spend detecting shots. A lower
 		// FPS (e.g. ~15) looks perfect fine to a person
-		if (System.currentTimeMillis() - lastFrameTime < MINIMUM_FRAME_DELTA) return;
-		else lastFrameTime = System.currentTimeMillis();
+		if (System.currentTimeMillis() - lastFrameTime < MINIMUM_FRAME_DELTA)
+			return;
+		else
+			lastFrameTime = System.currentTimeMillis();
 
 		Image img;
 		if (projectionBounds.isPresent()) {
@@ -568,9 +648,8 @@ public class CanvasManager implements CameraView {
 				double y_scale = arenaController.get().getHeight() / b.getHeight();
 
 				Shot arenaShot = new Shot(shot.getColor(), (shot.getX() - b.getMinX()) * x_scale,
-						(shot.getY() - b.getMinY()) * y_scale,
-
-						shot.getTimestamp(), shot.getFrame(), config.getMarkerRadius());
+						(shot.getY() - b.getMinY()) * y_scale, shot.getTimestamp(), shot.getFrame(),
+						config.getMarkerRadius());
 
 				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, videoString);
 			}

@@ -80,6 +80,9 @@ configurations {
 
 dependencies {
     jfxant files("$javaHome" + "/../lib/ant-javafx.jar")
+    
+    // FindBugs annotations to suppress warnings
+    compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.+'
 
     // Raven, exception reporting client (requires logback)
     compile group: 'net.kencochrane.raven', name: 'raven-logback', version: '6.+'

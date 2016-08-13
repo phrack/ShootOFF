@@ -54,6 +54,7 @@ import com.shootoff.util.VersionChecker;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -446,6 +447,7 @@ public class Main extends Application {
 		}
 	}
 
+	@SuppressFBWarnings("DM_EXIT")
 	public static void forceClose(final int status) {
 		System.exit(status);
 	}
@@ -751,6 +753,7 @@ public class Main extends Application {
 		return version;
 	}
 
+	@SuppressFBWarnings("DMI_HARDCODED_ABSOLUTE_FILENAME")
 	public static void main(String[] args) {
 		// Check the comment at the top of the Camera class
 		// for more information about this hack

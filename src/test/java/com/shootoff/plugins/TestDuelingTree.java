@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +26,7 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.TargetView;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
@@ -36,6 +37,8 @@ import com.shootoff.targets.io.TargetIO.TargetComponents;
 import ch.qos.logback.classic.Logger;
 
 public class TestDuelingTree {
+	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+	
 	private PrintStream originalOut;
 	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
 	private PrintStream stringOutStream;
@@ -47,8 +50,6 @@ public class TestDuelingTree {
 	@Before
 	public void setUp() throws ConfigurationException, NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, IOException {
-		new JFXPanel(); // Initialize the JFX toolkit
-
 		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 

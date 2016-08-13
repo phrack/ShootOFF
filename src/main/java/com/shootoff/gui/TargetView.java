@@ -65,7 +65,7 @@ import javafx.scene.shape.Shape;
  * 
  * @author phrack
  */
-public class TargetView implements com.shootoff.targets.Target {
+public class TargetView implements Target {
 	private static final Logger logger = LoggerFactory.getLogger(TargetView.class);
 
 	private static final double ANCHOR_WIDTH = 10;
