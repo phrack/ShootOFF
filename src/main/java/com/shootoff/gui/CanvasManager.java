@@ -20,6 +20,7 @@ package com.shootoff.gui;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -74,6 +75,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -148,6 +150,8 @@ public class CanvasManager implements CameraView {
 		// arena so that arena targets can be arranged from the calibrated
 		// webcam feed.
 		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
+			logger.debug("mouseevent {} {} x {} y {}", arenaController.isPresent(), projectionBounds.isPresent(), event.getX(), event.getY());
+			
 			if (arenaController.isPresent() && projectionBounds.isPresent()) {
 				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
 			} else {
@@ -188,24 +192,60 @@ public class CanvasManager implements CameraView {
 	private void translateMouseEventToArena(ProjectorArenaController arenaController, Bounds projectionBounds,
 			MouseEvent event) {
 		if (projectionBounds.contains(event.getX(), event.getY())) {
-			final double x_scale = arenaController.getWidth() / projectionBounds.getWidth();
-			final double y_scale = arenaController.getHeight() / projectionBounds.getHeight();
-
-			final double newX = (event.getX() - projectionBounds.getMinX()) * x_scale;
-			final double newY = (event.getY() - projectionBounds.getMinY()) * y_scale;
-
 			final Screen clickedScreen = Screen.getScreensForRectangle(event.getScreenX(), event.getScreenY(), 1, 1)
 					.get(0);
-			final double newScreenX = ((event.getScreenX() - clickedScreen.getBounds().getMinX()) * x_scale)
-					+ arenaController.getArenaScreenOrigin().getX();
-			final double newScreenY = ((event.getScreenY() - clickedScreen.getBounds().getMinY()) * y_scale)
-					+ arenaController.getArenaScreenOrigin().getY();
+			
+			logger.debug("event x {} y {}", event.getX(), event.getY());
+			
+			final double insideX = (event.getX() - projectionBounds.getMinX());
+			final double insideY = (event.getY() - projectionBounds.getMinY());
 
-			final MouseEvent clickEvent = new MouseEvent(null, null, event.getEventType(), newX, newY, newScreenX,
+			logger.debug("inside x {} y {}", insideX, insideY);
+
+			final double scaleX = insideX / projectionBounds.getWidth();
+			final double scaleY = insideY / projectionBounds.getHeight();
+
+
+			logger.debug("scale x {} y {}", scaleX, scaleY);
+
+
+			
+			//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+			// Number of actual horizontal lines (768p)
+			double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+			// Number of scaled horizontal lines. (384p for 200%)
+			double scaledHorizontalLines = arenaController.getArenaHome().getBounds().getHeight();
+			// DPI scale factor.
+			double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
+			
+			final double translatedX = arenaController.getArenaHome().getBounds().getWidth() * dpiScaleFactor * scaleX;
+			final double translatedY = arenaController.getArenaHome().getBounds().getHeight()  * dpiScaleFactor * scaleY;
+
+
+			logger.debug("translated x {} y {}", translatedX, translatedY);
+
+
+			final double newScreenX = arenaController.getArenaHome().getBounds().getMinX() * dpiScaleFactor;
+			final double newScreenY = arenaController.getArenaHome().getBounds().getMinY() * dpiScaleFactor;
+			
+			logger.debug("newscreen x {} y {}", newScreenX, newScreenY);
+			
+			final double resultX = translatedX + newScreenX;
+			final double resultY = translatedY + newScreenY;
+			
+
+			logger.debug("result x {} y {}", resultX, resultY);
+			
+			
+
+			final MouseEvent clickEvent = new MouseEvent(event.getEventType(), resultX, resultY, newScreenX,
 					newScreenY, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
 					event.isStillSincePress(), event.getPickResult());
+			
+			logger.debug("clickEvent x {} y {}", clickEvent.getX(), clickEvent.getY());
+			
 			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) clickEvent);
 		}
 	}
@@ -215,6 +255,19 @@ public class CanvasManager implements CameraView {
 	// This passes the event to any targets on the arena in the same location
 	// as the event.
 	private void translateConvertedEventToTarget(MouseEvent event) {
+        Button x = new Button("XXXXXX");
+
+        logger.debug("arenaevent x {} y {}", event.getX(), event.getY());
+        
+        logger.debug("arenaeventsc x {} y {}", event.getSceneX(), event.getSceneY());
+
+        logger.debug("arenaevents x {} y {}", event.getScreenX(), event.getScreenY());
+        
+        logger.debug("mousesrc is null {}", event.getSource());
+        
+        x.setLayoutX(event.getX());
+        x.setLayoutY(event.getY());
+        canvasGroup.getChildren().add(x);
 		for (Node n : canvasGroup.getChildren()) {
 			if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
 				if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {
