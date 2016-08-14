@@ -133,7 +133,7 @@ public class ProjectorArenaController implements CalibrationListener {
 
 		if (stageHomeScreens.isEmpty()) {
 			final StringBuilder message = new StringBuilder(
-					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens:\n",
+					String.format("Didn't find screen for stage with title %s at (%f, %f)." + " Existing screens:%n",
 							stage.getTitle(), stage.getX() / dpiScaleFactor, stage.getY() / dpiScaleFactor));
 
 			final Iterator<Screen> it = Screen.getScreens().iterator();
