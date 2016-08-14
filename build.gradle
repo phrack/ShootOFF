@@ -122,7 +122,7 @@ dependencies {
     compile 'org.openpnp:opencv:2.4.+'
     
     // OSHI to collect HW and system state data
-    compile group: 'com.github.dblock', name: 'oshi-core', version: '2.+'
+    compile group: 'com.github.dblock', name: 'oshi-core', version: '3.+'
     
     // JSoup to get processor benchmark data
     compile group: 'org.jsoup', name: 'jsoup', version: '1.+'
