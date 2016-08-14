@@ -88,9 +88,11 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
@@ -101,10 +103,12 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -119,7 +123,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private Menu addTargetMenu;
 	@FXML private Menu editTargetMenu;
 	@FXML private Menu trainingMenu;
-	@FXML private RadioMenuItem noneTrainingMenuItem;
+	@FXML private RadioButton noneTrainingMenuItem;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
 	@FXML private ToggleGroup trainingToggleGroup;
@@ -170,6 +174,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		this.camerasSupervisor = new CamerasSupervisor(config);
 		this.pluginEngine = pluginEngine;
 
+		noneTrainingMenuItem.setTextFill(Color.BLACK);
+		
 		findTargets();
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
@@ -602,10 +608,18 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@Override
 	public void registerExercise(TrainingExercise exercise) {
-		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
-		exerciseItem.setToggleGroup(trainingToggleGroup);
-
-		exerciseItem.setOnAction((e) -> {
+		final RadioButton exerciseButton = new RadioButton(exercise.getInfo().getName());
+		
+		// Add the exercise's description as a tooltip to what will be the menu item
+		exerciseButton.setFont(noneTrainingMenuItem.getFont());
+		exerciseButton.setTextFill(Color.BLACK);
+		exerciseButton.setToggleGroup(trainingToggleGroup);
+		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
+		t.setPrefWidth(500);
+		t.setWrapText(true);
+		exerciseButton.setTooltip(t);
+		
+		exerciseButton.setOnAction((e) -> {
 			try {
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 
@@ -634,16 +648,27 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			}
 		});
 
-		trainingMenu.getItems().add(exerciseItem);
+		trainingMenu.getItems().add(new CustomMenuItem(exerciseButton));
 	}
 
 	@Override
 	public void registerProjectorExercise(TrainingExercise exercise) {
-		RadioMenuItem exerciseItem = new RadioMenuItem(exercise.getInfo().getName());
-		exerciseItem.setToggleGroup(trainingToggleGroup);
+		final RadioButton exerciseButton = new RadioButton(exercise.getInfo().getName());
+		
+		// Add the exercise's description as a tooltip to what will be the menu item
+		exerciseButton.setFont(noneTrainingMenuItem.getFont());
+		exerciseButton.setTextFill(Color.BLACK);
+		exerciseButton.setToggleGroup(trainingToggleGroup);
+		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
+		t.setPrefWidth(500);
+		t.setWrapText(true);
+		exerciseButton.setTooltip(t);
+		
+		final CustomMenuItem exerciseItem = new CustomMenuItem(exerciseButton);
+		
 		if (arenaController == null) exerciseItem.setDisable(true);
 
-		exerciseItem.setOnAction((e) -> {
+		exerciseButton.setOnAction((e) -> {
 			try {
 				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 				TrainingExercise newExercise = (TrainingExercise) ctor

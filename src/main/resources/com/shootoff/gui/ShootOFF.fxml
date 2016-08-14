@@ -6,6 +6,7 @@
  found in the LICENSE file.
 -->
 
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.canvas.*?>
@@ -41,11 +42,18 @@
                   <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
                   <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <RadioMenuItem fx:id="noneTrainingMenuItem" mnemonicParsing="false" onAction="#clickedNoneExercise" selected="true" text="None">
-                      <toggleGroup>
-            	  		   <ToggleGroup fx:id="trainingToggleGroup" />
-                      </toggleGroup>
-                  </RadioMenuItem>
+                  <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
+                     <content>
+                        <RadioButton fx:id="noneTrainingMenuItem" mnemonicParsing="false" onAction="#clickedNoneExercise" selected="true" text="None">
+                            <toggleGroup>
+                  	  		   <ToggleGroup fx:id="trainingToggleGroup" />
+                            </toggleGroup>
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </RadioButton>
+                     </content>
+                  </CustomMenuItem>
             </items>
           </Menu>
             <Menu mnemonicParsing="false" text="Projector">
