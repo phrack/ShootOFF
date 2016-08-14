@@ -80,11 +80,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -152,7 +154,7 @@ public class CanvasManager implements CameraView {
 		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
 			if (arenaController.isPresent() && projectionBounds.isPresent()) {
 				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
-			} else {
+			} else if (event instanceof TranslatedMouseEvent){
 				translateConvertedEventToTarget(event);
 			}
 		};
@@ -211,12 +213,26 @@ public class CanvasManager implements CameraView {
 			}
 			
 
-			final MouseEvent clickEvent = new MouseEvent(event.getEventType(), translatedX, translatedY, 0,
+			final MouseEvent clickEvent = new TranslatedMouseEvent(event.getEventType(), translatedX, translatedY, 0,
 					0, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
 					event.isStillSincePress(), null);
 			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) clickEvent);
+		}
+	}
+	
+	private static class TranslatedMouseEvent extends MouseEvent {
+		private static final long serialVersionUID = -8044365212934237607L;
+
+		public TranslatedMouseEvent(EventType<? extends MouseEvent> eventType, double x, double y, double screenX, 
+				double screenY, MouseButton button, int clickCount, boolean shiftDown, boolean controlDown, 
+				boolean altDown, boolean metaDown, boolean primaryButtonDown, boolean middleButtonDown, 
+				boolean secondaryButtonDown, boolean synthesized, boolean popupTrigger, boolean stillSincePress, 
+				PickResult pickResult) {
+			super(eventType, x, y, screenX, screenY, button, clickCount, shiftDown, controlDown, altDown, metaDown,
+					primaryButtonDown, middleButtonDown, secondaryButtonDown, synthesized, popupTrigger, stillSincePress,
+					pickResult);
 		}
 	}
 
