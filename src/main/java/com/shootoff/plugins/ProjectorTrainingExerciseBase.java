@@ -35,7 +35,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
 import com.shootoff.courses.Course;
@@ -171,6 +170,29 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 */
 	public Point2D getArenaScreenOrigin() {
 		return arenaController.getArenaScreenOrigin();
+	}
+	
+	/**
+	 * This function corrects coordinates in the arena area for the DPI of the
+	 * arena screen and relative to the origin.  This is for creating mouse
+	 * events and other javafx functions that need true coordinates rather 
+	 * than scaled ones.
+	 * 
+	 * @param point
+	 * 			The coordinates to be corrected
+	 * 
+	 * @return Translated coordinates
+	 * 
+	 * @since 3.8
+	 */
+	public Point2D translateToTrueArenaCoords(Point2D point)
+	{
+		final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
+
+		final Point2D origin = arenaController.getArenaScreenOrigin();
+		
+		return new Point2D(origin.getX() + (point.getX() * dpiScaleFactor),
+				origin.getY() + (point.getY() * dpiScaleFactor));
 	}
 
 	@Override

@@ -215,6 +215,8 @@ public class Camera {
 		Camera defaultCam;
 
 		if (isMac) {
+			if (defaultWebcam == null) return Optional.empty();
+			
 			defaultCam = new Camera(defaultWebcam.getName());
 		} else {
 			final Webcam cam = Webcam.getDefault();

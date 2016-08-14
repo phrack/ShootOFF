@@ -18,6 +18,7 @@
 
 package com.shootoff.gui.controller;
 
+import java.awt.Toolkit;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -107,6 +108,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
@@ -148,6 +150,20 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 
 	private Stage sessionViewerStage;
+	
+	
+	static public double getDpiScaleFactorForScreen()
+	{
+		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+		// Number of actual horizontal lines (768p)
+		final double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+		// Number of scaled horizontal lines. (384p for 200%)
+		final double scaledHorizontalLines = Screen.getPrimary().getBounds().getHeight();
+		// DPI scale factor.
+		final double dpiScaleFactor = trueHorizontalLines / scaledHorizontalLines;
+		
+		return dpiScaleFactor;
+	}
 
 	public void init(Configuration config, PluginEngine pluginEngine) {
 		this.config = config;
