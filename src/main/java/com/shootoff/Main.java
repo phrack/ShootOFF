@@ -56,6 +56,7 @@ import com.sun.javafx.application.HostServicesDelegate;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -591,9 +592,7 @@ public class Main extends Application {
 		}
 	}
 
-	private Label getHardwareMessage(int cpuScore) {
-		final Label hardwareMessageLabel = new Label();
-
+	private void setHardwareMessage(Label hardwareMessageLabel, int cpuScore) {
 		if (cpuScore < MINIMUM_CPU_SCORE_PASSABLE) {
 			hardwareMessageLabel.setText(POOR_HARDWARE_MESSAGE);
 			hardwareMessageLabel.setTextFill(Color.RED);
@@ -604,13 +603,9 @@ public class Main extends Application {
 			hardwareMessageLabel.setText(EXCELLENT_HARDWARE_MESSAGE);
 			hardwareMessageLabel.setTextFill(Color.DARKGREEN);
 		}
-
-		return hardwareMessageLabel;
 	}
 
-	private Label getHardwareMessage(long installedRam) {
-		final Label hardwareMessageLabel = new Label();
-
+	private void setHardwareMessage(Label hardwareMessageLabel, long installedRam) {
 		if (installedRam < MINIMUM_RAM_PASSABLE) {
 			hardwareMessageLabel.setText(POOR_HARDWARE_MESSAGE);
 			hardwareMessageLabel.setTextFill(Color.RED);
@@ -621,27 +616,28 @@ public class Main extends Application {
 			hardwareMessageLabel.setText(EXCELLENT_HARDWARE_MESSAGE);
 			hardwareMessageLabel.setTextFill(Color.DARKGREEN);
 		}
-
-		return hardwareMessageLabel;
 	}
 
 	private boolean showFirstRunMessage() {
-		final String cpuName = HardwareData.getCpuName();
-		final Optional<Integer> cpuScore = HardwareData.getCpuScore();
-		final long installedRam = HardwareData.getMegabytesOfRam();
+		final Label hardwareMessageLabel = new Label("Fetching hardware status to determine how well ShootOFF\n"
+				+ "will run on this machine. This may take a moment...");
 
-		final Label hardwareMessageLabel;
+		new Thread(() -> {
+			final String cpuName = HardwareData.getCpuName();
+			final Optional<Integer> cpuScore = HardwareData.getCpuScore();
+			final long installedRam = HardwareData.getMegabytesOfRam();
 
-		if (cpuScore.isPresent()) {
-			if (logger.isDebugEnabled()) logger.debug("Processor: {}, Processor Score: {}, installed RAM: {} MB",
-					cpuName, cpuScore.get(), installedRam);
+			if (cpuScore.isPresent()) {
+				if (logger.isDebugEnabled()) logger.debug("Processor: {}, Processor Score: {}, installed RAM: {} MB",
+						cpuName, cpuScore.get(), installedRam);
 
-			hardwareMessageLabel = getHardwareMessage(cpuScore.get());
-		} else {
-			if (logger.isDebugEnabled()) logger.debug("Processor: {}, installed RAM: {} MB", cpuName, installedRam);
+				Platform.runLater(() -> setHardwareMessage(hardwareMessageLabel, cpuScore.get()));
+			} else {
+				if (logger.isDebugEnabled()) logger.debug("Processor: {}, installed RAM: {} MB", cpuName, installedRam);
 
-			hardwareMessageLabel = getHardwareMessage(installedRam);
-		}
+				Platform.runLater(() -> setHardwareMessage(hardwareMessageLabel, installedRam));
+			}
+		}).start();
 
 		final Alert shootoffWelcome = new Alert(AlertType.INFORMATION);
 		shootoffWelcome.setTitle("Welcome to ShootOFF");
@@ -677,11 +673,11 @@ public class Main extends Application {
 		cameraAlert.showAndWait();
 		Main.forceClose(-1);
 	}
-	
+
 	public static void closeNoV4lCompat(File v4lCompat) {
 		logger.error("This system uses Video4Linux, but v4lcompat is not preloaded. "
-				+ "Run the following command then run ShootOFF again: "
-				+ "export LD_PRELOAD=\"" + v4lCompat.getPath() + "\"");
+				+ "Run the following command then run ShootOFF again: " + "export LD_PRELOAD=\"" + v4lCompat.getPath()
+				+ "\"");
 		Main.forceClose(-1);
 	}
 
@@ -797,12 +793,13 @@ public class Main extends Application {
 					logger.error("Failed to create temporary directory to store ShootOFF binaries.");
 				}
 			} else if (os.startsWith("Linux")) {
-				// Need to ensure v4l1compat is preloaded if it exists otherwise OpenCV won't work
+				// Need to ensure v4l1compat is preloaded if it exists otherwise
+				// OpenCV won't work
 				final File v4lCompat = new File("/usr/lib/libv4l/v4l1compat.so");
-				
+
 				if (v4lCompat.exists()) {
 					final String preload = System.getenv("LD_PRELOAD");
-					
+
 					if (preload == null || !preload.contains(v4lCompat.getPath())) {
 						closeNoV4lCompat(v4lCompat);
 					}
