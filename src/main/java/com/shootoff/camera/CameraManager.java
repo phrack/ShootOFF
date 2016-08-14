@@ -752,4 +752,10 @@ public class CameraManager {
 
 		cameraCalibrationListener.setArenaBackground(resourceFilename);
 	}
+
+	public void launchCameraSettings() {
+		if (webcam.isPresent()) {
+			webcam.get().launchCameraSettings();
+		}
+	}
 }

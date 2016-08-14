@@ -440,4 +440,8 @@ public class Camera {
 
 		return dst;
 	}
+
+	public void launchCameraSettings() {
+		camera.set(Highgui.CV_CAP_PROP_SETTINGS, 1);
+	}
 }
