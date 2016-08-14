@@ -761,6 +761,7 @@ public class Main extends Application {
 
 		if (os != null) {
 			if ("Mac OS X".equals(os)) {
+				nu.pattern.OpenCV.loadShared();
 				Camera.getDefault();
 			} else if (os.startsWith("Windows")) {
 				// OpenPNP's OpenCV wrapper for Java does not properly clean up
