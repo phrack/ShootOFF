@@ -246,6 +246,8 @@ public class CanvasManager implements CameraView {
 					n.getOnMouseDragged().handle(event);
 				} else if (MouseEvent.MOUSE_MOVED.equals(event.getEventType())) {
 					n.getOnMouseMoved().handle(event);
+				}  else if (MouseEvent.MOUSE_RELEASED.equals(event.getEventType())) {
+					n.getOnMouseReleased().handle(event);
 				}
 
 				break;
