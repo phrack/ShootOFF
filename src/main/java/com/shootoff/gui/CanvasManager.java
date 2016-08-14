@@ -20,7 +20,6 @@ package com.shootoff.gui;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -75,7 +74,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -83,7 +81,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -192,11 +189,8 @@ public class CanvasManager implements CameraView {
 	private void translateMouseEventToArena(ProjectorArenaController arenaController, Bounds projectionBounds,
 			MouseEvent event) {
 		if (projectionBounds.contains(event.getX(), event.getY())) {
-
-			
 			final double insideX = (event.getX() - projectionBounds.getMinX());
 			final double insideY = (event.getY() - projectionBounds.getMinY());
-
 
 			final double scaleX = insideX / projectionBounds.getWidth();
 			final double scaleY = insideY / projectionBounds.getHeight();
@@ -212,13 +206,12 @@ public class CanvasManager implements CameraView {
 				logger.trace("translated x {} y {}", translatedX, translatedY);
 			}
 			
-
-			final MouseEvent clickEvent = new TranslatedMouseEvent(event.getEventType(), translatedX, translatedY, 0,
+			final MouseEvent mouseEvent = new TranslatedMouseEvent(event.getEventType(), translatedX, translatedY, 0,
 					0, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
 					event.isStillSincePress(), null);
-			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) clickEvent);
+			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) mouseEvent);
 		}
 	}
 	
@@ -243,6 +236,8 @@ public class CanvasManager implements CameraView {
 	private void translateConvertedEventToTarget(MouseEvent event) {
 		for (Node n : canvasGroup.getChildren()) {
 			if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
+				// TODO: Translate coordinates to the n before passing along the event
+				
 				if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {
 					n.getOnMouseClicked().handle(event);
 				} else if (MouseEvent.MOUSE_PRESSED.equals(event.getEventType())) {
