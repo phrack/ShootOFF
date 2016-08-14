@@ -7,7 +7,7 @@
     </encoder>
   </appender>
 
-  <appender name="Sentry" class="net.kencochrane.raven.logback.SentryAppender">
+  <appender name="Sentry" class="com.getsentry.raven.logback.SentryAppender">
     <dsn>http://e125530c2ca249bd956343ca2ad09dd4:c34458865bef486195a6b0341e95e3de@dev.shootoffapp.com:9000/1</dsn>
     <tags>shootoff-version:3.8</tags>
   </appender>
@@ -19,5 +19,4 @@
   <root level="warn">
     <appender-ref ref="STDOUT"/>
   </root>
-
 </configuration>
