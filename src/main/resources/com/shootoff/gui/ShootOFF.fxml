@@ -48,9 +48,6 @@
                             <toggleGroup>
                   	  		   <ToggleGroup fx:id="trainingToggleGroup" />
                             </toggleGroup>
-                           <font>
-                              <Font size="12.0" />
-                           </font>
                         </RadioButton>
                      </content>
                   </CustomMenuItem>
