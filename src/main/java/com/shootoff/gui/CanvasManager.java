@@ -77,6 +77,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.VBox;
@@ -151,12 +152,13 @@ public class CanvasManager implements CameraView {
 		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
 			if (arenaController.isPresent() && projectionBounds.isPresent()) {
 				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
-			} else if (event instanceof TranslatedMouseEvent){
-				translateConvertedEventToTarget(event);
 			}
 		};
 
 		canvasGroup.setOnMouseClicked((event) -> {
+			if (contextMenu.isPresent() && contextMenu.get().isShowing())
+				contextMenu.get().hide();
+			
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				if (event.isShiftDown()) {
@@ -182,6 +184,8 @@ public class CanvasManager implements CameraView {
 		canvasGroup.setOnMouseReleased(passThroughHandler);
 	}
 
+	
+	Optional<Node> draggedNode = Optional.empty();
 	// Used when a mouse event happens on the calibrated region where there is
 	// not a target on the calibrated canvas to translate the event to the
 	// arena's canvas. This lets you control targets on the arena from a webcam
@@ -206,54 +210,75 @@ public class CanvasManager implements CameraView {
 				logger.trace("translated x {} y {}", translatedX, translatedY);
 			}
 			
-			final MouseEvent mouseEvent = new TranslatedMouseEvent(event.getEventType(), translatedX, translatedY, 0,
-					0, event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
+			Optional<Node> target = Optional.empty();
+			if (draggedNode.isPresent() && (MouseEvent.MOUSE_DRAGGED.equals(event.getEventType())))
+			{
+				target = Optional.of(draggedNode.get());
+			}
+			else
+			{
+				for (Node n : arenaController.getCanvasManager().getCanvasGroup().getChildren()) {
+	
+					
+					if (n instanceof Group && n.getBoundsInParent().contains(translatedX, translatedY)) {
+						target = Optional.of(n);
+						break;
+					}
+				}
+			}
+
+			final MouseEvent mouseEvent = new MouseEvent(event.getEventType(), translatedX, translatedY, arenaController.getArenaScreenOrigin().getX(),
+					arenaController.getArenaScreenOrigin().getY(), event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
 					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
 					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
 					event.isStillSincePress(), null);
-			arenaController.getCanvasManager().getCanvasGroup().fireEvent((Event) mouseEvent);
+			
+			if (logger.isTraceEnabled())
+			{
+				logger.trace("mouseevent type {}", mouseEvent.getEventType());
+				logger.trace("mouseevent x {} y {}", mouseEvent.getX(), event.getY());
+			}
+
+			if (!target.isPresent())
+			{
+				arenaController.getCanvasManager().toggleTargetSelection(Optional.empty());
+				return;
+			}
+			
+			if (MouseEvent.MOUSE_CLICKED.equals(mouseEvent.getEventType())) {
+				target.get().getOnMouseClicked().handle(mouseEvent);
+			} else if (MouseEvent.MOUSE_PRESSED.equals(mouseEvent.getEventType())) {
+				target.get().getOnMousePressed().handle(mouseEvent);
+			} else if (MouseEvent.MOUSE_DRAGGED.equals(mouseEvent.getEventType())) {
+				
+				
+				final double translatedInNodeX = translatedX - target.get().getBoundsInParent().getMinX();
+				final double translatedInNodeY = translatedY - target.get().getBoundsInParent().getMinY();
+				
+				if (logger.isTraceEnabled())
+				{
+					logger.trace("node x {} y {}", target.get().getBoundsInParent().getMinX(), target.get().getBoundsInParent().getMinY());
+					logger.trace("translatedInNode x {} y {}", translatedInNodeX, translatedInNodeY);
+				}
+				
+				final MouseEvent mouseDragEvent = new MouseEvent(event.getEventType(), translatedInNodeX, translatedInNodeY, arenaController.getArenaScreenOrigin().getX(),
+						arenaController.getArenaScreenOrigin().getY(), event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
+						event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
+						event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
+						event.isStillSincePress(), null);
+				
+				target.get().getOnMouseDragged().handle(mouseDragEvent);
+				
+				draggedNode = Optional.of(target.get());
+			} else if (MouseEvent.MOUSE_MOVED.equals(mouseEvent.getEventType())) {
+				target.get().getOnMouseMoved().handle(mouseEvent);
+			}  else if (MouseEvent.MOUSE_RELEASED.equals(mouseEvent.getEventType())) {
+				target.get().getOnMouseReleased().handle(mouseEvent);
+			}
+			
 		}
 	}
 	
-	private static class TranslatedMouseEvent extends MouseEvent {
-		private static final long serialVersionUID = -8044365212934237607L;
-
-		public TranslatedMouseEvent(EventType<? extends MouseEvent> eventType, double x, double y, double screenX, 
-				double screenY, MouseButton button, int clickCount, boolean shiftDown, boolean controlDown, 
-				boolean altDown, boolean metaDown, boolean primaryButtonDown, boolean middleButtonDown, 
-				boolean secondaryButtonDown, boolean synthesized, boolean popupTrigger, boolean stillSincePress, 
-				PickResult pickResult) {
-			super(eventType, x, y, screenX, screenY, button, clickCount, shiftDown, controlDown, altDown, metaDown,
-					primaryButtonDown, middleButtonDown, secondaryButtonDown, synthesized, popupTrigger, stillSincePress,
-					pickResult);
-		}
-	}
-
-	// A mouse event was received by the canvas because this is the arena
-	// canvas and a mouse event happened on a webcam feed's calibrated region.
-	// This passes the event to any targets on the arena in the same location
-	// as the event.
-	private void translateConvertedEventToTarget(MouseEvent event) {
-		for (Node n : canvasGroup.getChildren()) {
-			if (n instanceof Group && n.getBoundsInParent().contains(event.getX(), event.getY())) {
-				// TODO: Translate coordinates to the n before passing along the event
-				
-				if (MouseEvent.MOUSE_CLICKED.equals(event.getEventType())) {
-					n.getOnMouseClicked().handle(event);
-				} else if (MouseEvent.MOUSE_PRESSED.equals(event.getEventType())) {
-					n.getOnMousePressed().handle(event);
-				} else if (MouseEvent.MOUSE_DRAGGED.equals(event.getEventType())) {
-					n.getOnMouseDragged().handle(event);
-				} else if (MouseEvent.MOUSE_MOVED.equals(event.getEventType())) {
-					n.getOnMouseMoved().handle(event);
-				}  else if (MouseEvent.MOUSE_RELEASED.equals(event.getEventType())) {
-					n.getOnMouseReleased().handle(event);
-				}
-
-				break;
-			}
-		}
-	}
 
 	@Override
 	public void close() {
