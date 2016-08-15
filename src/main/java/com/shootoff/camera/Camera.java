@@ -298,13 +298,12 @@ public class Camera {
 
 		return open;
 	}
-
-	public Dimension getViewSize() {
+	
+	public boolean isOpen() {
 		if (isIpCam) {
-			return ipcam.getViewSize();
+			return ipcam.isOpen();
 		} else {
-			return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
-					(int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
+			return camera.isOpened();
 		}
 	}
 
@@ -330,14 +329,6 @@ public class Camera {
 			return ipcam.getName();
 		} else {
 			return Webcam.getWebcams().get(cameraIndex).getName();
-		}
-	}
-
-	public boolean isOpen() {
-		if (isIpCam) {
-			return ipcam.isOpen();
-		} else {
-			return camera.isOpened();
 		}
 	}
 
@@ -371,6 +362,15 @@ public class Camera {
 			camera.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, size.getHeight());
 		}
 
+	}
+	
+	public Dimension getViewSize() {
+		if (isIpCam) {
+			return ipcam.getViewSize();
+		} else {
+			return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
+					(int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
+		}
 	}
 
 	@Override
