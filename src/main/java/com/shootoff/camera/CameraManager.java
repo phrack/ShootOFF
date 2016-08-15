@@ -690,7 +690,7 @@ public class CameraManager {
 
 	public void showMotionWarning() {
 		if (!TimerPool.isWaiting(motionDiagnosticFuture)) {
-			motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion", Color.RED);
+			motionDiagnosticWarning = cameraView.addDiagnosticMessage("Warning: Excessive motion -- Try reducing the camera exposure setting", Color.RED);
 		} else {
 			// Stop the existing timer and start a new one
 			TimerPool.cancelTimer(motionDiagnosticFuture);
