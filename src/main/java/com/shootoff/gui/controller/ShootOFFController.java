@@ -723,9 +723,18 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			Iterator<MenuItem> it = trainingMenu.getItems().iterator();
 
 			while (it.hasNext()) {
-				MenuItem m = it.next();
-
-				if (m.getText() != null && m.getText().equals(exercise.getInfo().getName())) {
+				final MenuItem m = it.next();
+				
+				if (!(m instanceof CustomMenuItem)) continue;
+				
+				final CustomMenuItem cm = (CustomMenuItem) m;
+				final Node n = cm.getContent();
+				
+				if (!(n instanceof RadioButton)) continue;
+				
+				final RadioButton rb = (RadioButton) cm.getContent();
+				
+				if (rb.getText() != null && rb.getText().equals(exercise.getInfo().getName())) {
 					it.remove();
 				}
 			}
