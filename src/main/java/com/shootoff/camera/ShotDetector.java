@@ -30,6 +30,7 @@ public abstract class ShotDetector {
 
 	public void reset() {
 		startTime = System.currentTimeMillis();
+		cameraManager.getDeduplicationProcessor().reset();
 	}
 
 	/**
