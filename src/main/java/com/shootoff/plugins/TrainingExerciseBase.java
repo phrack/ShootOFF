@@ -253,9 +253,15 @@ public class TrainingExerciseBase {
 	 */
 	public void setShotTimerColumnText(final String name, final String value) {
 		if (shotTimerTable != null) {
-			Platform.runLater(() -> {
+			Runnable shotTimerColumnTextSetter = () -> {
 				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
-			});
+			};
+			
+			if (Platform.isFxApplicationThread()) {
+				shotTimerColumnTextSetter.run();
+			} else {
+				Platform.runLater(shotTimerColumnTextSetter);
+			}
 		}
 	}
 
