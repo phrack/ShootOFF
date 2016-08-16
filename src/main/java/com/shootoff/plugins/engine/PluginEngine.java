@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.plugins.BouncingTargets;
 import com.shootoff.plugins.DuelingTree;
+import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.ParForScore;
 import com.shootoff.plugins.ParRandomShot;
@@ -48,6 +49,7 @@ import com.shootoff.plugins.ShootForScore;
 import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.util.VersionChecker;
 
 /**
  * Watch for new plugin jars and manage plugin registration and deletion.
@@ -106,24 +108,63 @@ public class PluginEngine implements Runnable {
 	}
 
 	private boolean registerPlugin(final Path jarPath) {
-		final Plugin newPlugin;
+		final Plugin registeringPlugin;
 
 		try {
-			newPlugin = new Plugin(jarPath);
+			registeringPlugin = new Plugin(jarPath);
 		} catch (Exception e) {
 			logger.error("Error creating new plugin", e);
 			return false;
 		}
 
-		if (plugins.add(newPlugin)) {
-			if (PluginType.STANDARD.equals(newPlugin.getType())) {
-				pluginListener.registerExercise(newPlugin.getExercise());
-			} else if (PluginType.PROJECTOR_ONLY.equals(newPlugin.getType())) {
-				pluginListener.registerProjectorExercise(newPlugin.getExercise());
+		// If the plugin already exists and the new plugin is newer,
+		// unregister the old plugin before registering the new one.
+		// If the new plugin is actually older, don't load it
+		Optional<Plugin> existingPlugin = findPlugin(registeringPlugin);
+
+		if (existingPlugin.isPresent()) {
+			Plugin existing = existingPlugin.get();
+			
+			final ExerciseMetadata existingMetadata = existing.getExercise().getInfo();
+			final ExerciseMetadata registeringMetadata = registeringPlugin.getExercise().getInfo();
+			
+			final String existingVersion = existing.getExercise().getInfo().getVersion();
+			final String loadedVersion = registeringPlugin.getExercise().getInfo().getVersion();
+			if (VersionChecker.compareVersions(existingVersion, loadedVersion) == -1) {
+				// Existing is older
+				logger.debug("Registering plugin ({}, {}, {}, {}) is a newer duplicate of an " +
+						"already registered plugin ({}, {}, {}, {})",
+						registeringMetadata.getName(), registeringMetadata.getVersion(), registeringMetadata.getCreator(),
+						registeringPlugin.getJarPath(),
+						existingMetadata.getName(), existingMetadata.getVersion(), existingMetadata.getCreator(),
+						existing.getJarPath());
+				unregisterPlugin(existing);
+			} else {
+				// Existing is newer or the same, do nothing
+				logger.debug("Registering plugin ({}, {}, {}, {}) is an older or same version duplicate of an " +
+						"already registered plugin ({}, {}, {}, {})",
+						registeringMetadata.getName(), registeringMetadata.getVersion(), registeringMetadata.getCreator(),
+						registeringPlugin.getJarPath(),
+						existingMetadata.getName(), existingMetadata.getVersion(), existingMetadata.getCreator(),
+						existing.getJarPath());
+				return false;
+			}
+		}
+		
+		if (plugins.add(registeringPlugin)) {
+			if (PluginType.STANDARD.equals(registeringPlugin.getType())) {
+				pluginListener.registerExercise(registeringPlugin.getExercise());
+			} else if (PluginType.PROJECTOR_ONLY.equals(registeringPlugin.getType())) {
+				pluginListener.registerProjectorExercise(registeringPlugin.getExercise());
 			}
 		}
 
 		return true;
+	}
+	
+	private void unregisterPlugin(Plugin plugin) {
+		pluginListener.unregisterExercise(plugin.getExercise());
+		plugins.remove(plugin);
 	}
 
 	private void enumerateExistingPlugins() {
@@ -136,6 +177,22 @@ public class PluginEngine implements Runnable {
 		} catch (IOException e) {
 			logger.error("Error enumerating existing external plugins", e);
 		}
+	}
+	
+	private Optional<Plugin> findPlugin(Plugin plugin) {
+		for (Plugin p : plugins) {
+			final ExerciseMetadata existingMetadata = p.getExercise().getInfo();
+			final ExerciseMetadata newMetadata = plugin.getExercise().getInfo();
+			
+			// Plugins are considered to be the same if they have the
+			// same name and creator
+			if (existingMetadata.getName().equals(newMetadata.getName()) && 
+					existingMetadata.getCreator().equals(newMetadata.getCreator())) {
+				return Optional.of(p);
+			}
+		}
+		
+		return Optional.empty();
 	}
 
 	public Set<Plugin> getPlugins() {
@@ -210,8 +267,7 @@ public class PluginEngine implements Runnable {
 					}
 
 					if (deletedPlugin.isPresent()) {
-						pluginListener.unregisterExercise(deletedPlugin.get().getExercise());
-						plugins.remove(deletedPlugin.get());
+						unregisterPlugin(deletedPlugin.get());
 					}
 				} else {
 					logger.warn("Unexpected plugin watcher event {}", event.kind().toString());

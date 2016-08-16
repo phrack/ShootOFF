@@ -305,7 +305,7 @@ public class PluginManagerController {
 
 	private boolean uninstallPlugin(final Plugin plugin) {
 		if (!plugin.getJarPath().toFile().delete()) {
-			logger.error("Failed to uninstall {}", plugin.getJarPath().toString());
+			logger.error("Failed to uninstall file {} -- if Windows it's because the OS has a write lock on the file", plugin.getJarPath().toString());
 			return false;
 		}
 
@@ -469,9 +469,8 @@ public class PluginManagerController {
 					// Plugin is already installed but the installed version is
 					// older than the current compatible version, so auto-update
 					// it
-					if (uninstallPlugin(installedPlugin.get())) {
-						installPlugin(metadata, null, () -> pluginEntries.add(metadata));
-					}
+					uninstallPlugin(installedPlugin.get());
+					installPlugin(metadata, null, () -> pluginEntries.add(metadata));
 				} else {
 					pluginEntries.add(metadata);
 				}
