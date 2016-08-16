@@ -622,7 +622,7 @@ public class AutoCalibrationManager {
 				logger.debug("Found paper dimensions {}", paperDimensions.get());
 			} else if (paperDimensions.isPresent() && averagePatterns) {
 				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
-				logger.debug("Averaged paper dimensions {}", paperDimensions.get());				
+				logger.trace("Averaged paper dimensions {}", paperDimensions.get());				
 
 			} else
 			{

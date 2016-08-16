@@ -651,7 +651,6 @@ public class CameraManager {
 			webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
 		else
 			webcamFPS = newFPS;
-		deduplicationProcessor.setThresholdUsingFPS(getFPS());
 	}
 
 	private void checkIfMinimumFPS() {

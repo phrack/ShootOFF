@@ -42,7 +42,7 @@ public class PixelClusterManager {
 	private final static double MINIMUM_DENSITY = .69f;
 
 	private final static double MINIMUM_SHOT_RATIO = .5f;
-	private final static double MAXIMUM_SHOT_RATIO = 1.4f;
+	private final static double MAXIMUM_SHOT_RATIO = 1.43f;
 
 	// Use different values if shot width + shot height <= 16 px
 	private final static int SMALL_SHOT_THRESHOLD = 16;

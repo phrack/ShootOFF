@@ -108,7 +108,7 @@ public class MockCameraManager extends CameraManager {
 				shotDetector.setFrameSize(currentFrame.getWidth(), currentFrame.getHeight());
 			}
 
-			if (lastVideoTimestamp > -1 && (getFrameCount() % 5) == 0) {
+			if (lastVideoTimestamp > -1 && (getFrameCount() % 30) == 0) {
 
 				double estimateFPS = (double) SECOND_IN_MICROSECONDS
 						/ (double) (event.getTimeStamp() - lastVideoTimestamp);

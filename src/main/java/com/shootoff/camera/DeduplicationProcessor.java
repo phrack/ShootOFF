@@ -28,30 +28,23 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 	private Optional<Shot> lastShot = Optional.empty();
 
-	// About 12.5 pixels at 640x480
-	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 24576.0;
+	// About 30 pixels at 640x480
+	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 8000.0;
 	private double distanceThreshold;
 
-	public static final double DEDUPE_THRESHOLD_DIVISION_FACTOR = 6.0;
-	public static final int DEDUPE_THRESHOLD_MINIMUM = 4;
+	
+	// frames
+	public static final int DEDUPE_THRESHOLD_MINIMUM = 2;
+	
+	// ms
+	private static final int timestampThreshold = 60;
 
-	private int frameThreshold;
 
 	private final CameraManager cameraManager;
 
-	public int getThreshold() {
-		return frameThreshold;
-	}
-
-	public void setThreshold(final int ft) {
-		frameThreshold = ft;
-	}
 
 	public DeduplicationProcessor(final CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
-
-		frameThreshold = DEDUPE_THRESHOLD_MINIMUM;
-
 		setDistanceThreshold();
 	}
 
@@ -66,24 +59,35 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 	public boolean processShot(Shot shot, boolean updateLastShot) {
 		if (lastShot.isPresent()) {
+			long timeDiff = shot.getTimestamp() - lastShot.get().getTimestamp();
+			
+			if (timeDiff > timestampThreshold && (shot.getFrame() - lastShot.get().getFrame()) > DEDUPE_THRESHOLD_MINIMUM)
+			{
+				if (updateLastShot) lastShot = Optional.of(shot);
+				return true;
+			}
+			
+			timeDiff = Math.min(timeDiff, timestampThreshold);
+			
+			// The Size area for a dupe decreases from 1 * distanceThreshold to .5 distanceThreshold
+			//  over the time period
+			final double dynamicDistancePercentage = (int)((1-((.5*timeDiff)/(double)timestampThreshold)) * distanceThreshold);
+			
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("processShot {} {}", shot.getX(), shot.getY());
+				logger.trace("processShot ts {} - {}", shot.getTimestamp(), lastShot.get().getTimestamp());
 
-				logger.trace("processShot {} - {}", shot.getFrame() - lastShot.get().getFrame(), frameThreshold);
+				
+				logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(), DEDUPE_THRESHOLD_MINIMUM);
 
-				logger.trace("processShot distance {}", euclideanDistance(lastShot.get(), shot));
+				logger.trace("processShot distance {} - thresh {}", euclideanDistance(lastShot.get(), shot), dynamicDistancePercentage);
 			}
 
-			// If two shots have the same color, appear to have happened fast
-			// than Jerry Miculek can shoot
-			// and are very close to each other, ignore the new shot
-
-			if (shot.getFrame() - lastShot.get().getFrame() <= frameThreshold
-					&& euclideanDistance(lastShot.get(), shot) <= distanceThreshold) {
+			if (euclideanDistance(lastShot.get(), shot) <= dynamicDistancePercentage) {
 
 				if (logger.isTraceEnabled()) logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
-
+				lastShot = Optional.of(shot);
 				return false;
 			}
 		}
@@ -111,11 +115,4 @@ public class DeduplicationProcessor implements ShotProcessor {
 		lastShot = Optional.empty();
 	}
 
-	public void setThresholdUsingFPS(final double webcamFPS) {
-		final int newThreshold = (int) Math.max(webcamFPS / DEDUPE_THRESHOLD_DIVISION_FACTOR, DEDUPE_THRESHOLD_MINIMUM);
-
-		if (logger.isTraceEnabled()) logger.trace("setThresholdUsingFPS {} {}", webcamFPS, newThreshold);
-
-		setThreshold(newThreshold);
-	}
 }
