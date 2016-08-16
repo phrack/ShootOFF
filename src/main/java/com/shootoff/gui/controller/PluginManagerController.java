@@ -247,8 +247,9 @@ public class PluginManagerController {
 
 		final InputStream remoteStream = stream;
 		final HttpURLConnection con = connection;
-		final File downloadedFile = new File(String.format("%s%s%s-%s.jar", System.getProperty("shootoff.home"),
-				File.separator, metadata.getName().replaceAll("\\s", "_"), metadata.getCreator()));
+		final File downloadedFile = new File(String.format("%s%s%s-%s-%s.jar", System.getProperty("shootoff.home"),
+				File.separator, metadata.getName().replaceAll("\\s", "_"), metadata.getVersion(),
+				metadata.getCreator()));
 		Task<Boolean> downloadTask = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws InterruptedException {
