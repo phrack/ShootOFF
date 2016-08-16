@@ -26,7 +26,7 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
-		config.setDebugMode(true);
+		config.setDebugMode(false);
 		mockManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
