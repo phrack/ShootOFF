@@ -87,7 +87,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 			if (euclideanDistance(lastShot.get(), shot) <= dynamicDistancePercentage) {
 
 				if (logger.isTraceEnabled()) logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
-				lastShot = Optional.of(shot);
+				if (updateLastShot) lastShot = Optional.of(shot);
 				return false;
 			}
 		}
