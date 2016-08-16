@@ -93,7 +93,7 @@ public abstract class ShotDetector {
 			return false;
 		}
 
-		if (startTime == 0) startTime = System.currentTimeMillis();
+		if (startTime == 0) startTime = cameraManager.getCurrentFrameTimestamp();
 
 		final Shot shot;
 
@@ -102,10 +102,10 @@ public abstract class ShotDetector {
 
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
-			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), System.currentTimeMillis() - startTime,
+			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), cameraManager.getCurrentFrameTimestamp() - startTime,
 					cameraManager.getFrameCount(), config.getMarkerRadius());
 		} else {
-			shot = new Shot(color, x, y, System.currentTimeMillis() - startTime, cameraManager.getFrameCount(),
+			shot = new Shot(color, x, y, cameraManager.getCurrentFrameTimestamp() - startTime, cameraManager.getFrameCount(),
 					config.getMarkerRadius());
 		}
 

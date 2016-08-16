@@ -26,7 +26,7 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
-		config.setDebugMode(false);
+		config.setDebugMode(true);
 		mockManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
@@ -75,7 +75,8 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 		requiredShots.add(new Shot(Color.RED, 375.7, 228.6, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 289.1, 144.2, 0, 2));
 		requiredShots.add(new Shot(Color.RED, 200.4, 209.5, 0, 2));
-	
+		requiredShots.add(new Shot(Color.RED, 334.3, 227.3, 0, 2));
+		requiredShots.add(new Shot(Color.RED, 295.6, 352.7, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 

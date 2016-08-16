@@ -37,7 +37,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 2;
 	
 	// ms
-	private static final int timestampThreshold = 50;
+	private static final int timestampThreshold = 60;
 
 
 	private final CameraManager cameraManager;
@@ -59,7 +59,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 
 	public boolean processShot(Shot shot, boolean updateLastShot) {
 		if (lastShot.isPresent()) {
-			final long timeDiff = shot.getTimestamp() - lastShot.get().getTimestamp();
+			long timeDiff = shot.getTimestamp() - lastShot.get().getTimestamp();
 			
 			if (timeDiff > timestampThreshold && (shot.getFrame() - lastShot.get().getFrame()) > DEDUPE_THRESHOLD_MINIMUM)
 			{
@@ -67,10 +67,11 @@ public class DeduplicationProcessor implements ShotProcessor {
 				return true;
 			}
 			
+			timeDiff = Math.min(timeDiff, timestampThreshold);
 			
 			// The Size area for a dupe decreases from 1 * distanceThreshold to .5 distanceThreshold
 			//  over the time period
-			final int dynamicDistancePercentage = (int)((1-((.5*timeDiff)/(double)timestampThreshold)) * distanceThreshold);
+			final double dynamicDistancePercentage = (int)((1-((.5*timeDiff)/(double)timestampThreshold)) * distanceThreshold);
 			
 
 			if (logger.isTraceEnabled()) {
