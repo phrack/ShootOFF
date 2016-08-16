@@ -524,10 +524,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		final String os = System.getProperty("os.name");
 		
-		if (os.startsWith("Windows"))
+		if (os != null && os.startsWith("Windows"))
 		{
-		
-			MenuItem cameraMenuItem = new MenuItem("Configure Camera");
+			final MenuItem cameraMenuItem = new MenuItem("Configure Camera");
 
 			cameraMenuItem.setOnAction((event) -> {
 				CameraManager cameraManager = camerasSupervisor
@@ -537,7 +536,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			});
 
 			contextMenu.getItems().add(cameraMenuItem);
-		
 		}
 		
 		if (config.inDebugMode()) {
