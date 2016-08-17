@@ -77,10 +77,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.event.EventHandler;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -142,15 +140,6 @@ public class CanvasManager implements CameraView {
 			diagnosticsVBox.setPrefWidth(config.getDisplayWidth());
 		}
 
-		// Used to pass events from calibrated regions on a webcam feed to the
-		// arena so that arena targets can be arranged from the calibrated
-		// webcam feed.
-		EventHandler<? super MouseEvent> passThroughHandler = (event) -> {
-			if (arenaController.isPresent() && projectionBounds.isPresent()) {
-				translateMouseEventToArena(arenaController.get(), projectionBounds.get(), event);
-			}
-		};
-
 		canvasGroup.setOnMouseClicked((event) -> {
 			if (contextMenu.isPresent() && contextMenu.get().isShowing())
 				contextMenu.get().hide();
@@ -167,115 +156,9 @@ public class CanvasManager implements CameraView {
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
 			}
-
-			passThroughHandler.handle(event);
 		});
-
-		canvasGroup.setOnMousePressed(passThroughHandler);
-
-		canvasGroup.setOnMouseDragged(passThroughHandler);
-
-		canvasGroup.setOnMouseMoved(passThroughHandler);
-
-		canvasGroup.setOnMouseReleased(passThroughHandler);
-	}
-
-	
-	Optional<Node> draggedNode = Optional.empty();
-	// Used when a mouse event happens on the calibrated region where there is
-	// not a target on the calibrated canvas to translate the event to the
-	// arena's canvas. This lets you control targets on the arena from a webcam
-	// feed.
-	private void translateMouseEventToArena(ProjectorArenaController arenaController, Bounds projectionBounds,
-			MouseEvent event) {
-		if (projectionBounds.contains(event.getX(), event.getY())) {
-			final double insideX = (event.getX() - projectionBounds.getMinX());
-			final double insideY = (event.getY() - projectionBounds.getMinY());
-
-			final double scaleX = insideX / projectionBounds.getWidth();
-			final double scaleY = insideY / projectionBounds.getHeight();
-
-			final double translatedX = arenaController.getArenaHome().getBounds().getWidth() * scaleX;
-			final double translatedY = arenaController.getArenaHome().getBounds().getHeight() * scaleY;
-
-			if (logger.isTraceEnabled())
-			{
-				logger.trace("event x {} y {}", event.getX(), event.getY());
-				logger.trace("inside x {} y {}", insideX, insideY);
-				logger.trace("scale x {} y {}", scaleX, scaleY);
-				logger.trace("translated x {} y {}", translatedX, translatedY);
-			}
-			
-			Optional<Node> target = Optional.empty();
-			if (draggedNode.isPresent() && (MouseEvent.MOUSE_DRAGGED.equals(event.getEventType())))
-			{
-				target = Optional.of(draggedNode.get());
-			}
-			else
-			{
-				for (Node n : arenaController.getCanvasManager().getCanvasGroup().getChildren()) {
-	
-					
-					if (n instanceof Group && n.getBoundsInParent().contains(translatedX, translatedY)) {
-						target = Optional.of(n);
-						break;
-					}
-				}
-			}
-
-			final MouseEvent mouseEvent = new MouseEvent(event.getEventType(), translatedX, translatedY, arenaController.getArenaScreenOrigin().getX(),
-					arenaController.getArenaScreenOrigin().getY(), event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
-					event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
-					event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
-					event.isStillSincePress(), null);
-			
-			if (logger.isTraceEnabled())
-			{
-				logger.trace("mouseevent type {}", mouseEvent.getEventType());
-				logger.trace("mouseevent x {} y {}", mouseEvent.getX(), event.getY());
-			}
-
-			if (!target.isPresent())
-			{
-				arenaController.getCanvasManager().toggleTargetSelection(Optional.empty());
-				return;
-			}
-			
-			if (MouseEvent.MOUSE_CLICKED.equals(mouseEvent.getEventType())) {
-				target.get().getOnMouseClicked().handle(mouseEvent);
-			} else if (MouseEvent.MOUSE_PRESSED.equals(mouseEvent.getEventType())) {
-				target.get().getOnMousePressed().handle(mouseEvent);
-			} else if (MouseEvent.MOUSE_DRAGGED.equals(mouseEvent.getEventType())) {
-				
-				
-				final double translatedInNodeX = translatedX - target.get().getBoundsInParent().getMinX();
-				final double translatedInNodeY = translatedY - target.get().getBoundsInParent().getMinY();
-				
-				if (logger.isTraceEnabled())
-				{
-					logger.trace("node x {} y {}", target.get().getBoundsInParent().getMinX(), target.get().getBoundsInParent().getMinY());
-					logger.trace("translatedInNode x {} y {}", translatedInNodeX, translatedInNodeY);
-				}
-				
-				final MouseEvent mouseDragEvent = new MouseEvent(event.getEventType(), translatedInNodeX, translatedInNodeY, arenaController.getArenaScreenOrigin().getX(),
-						arenaController.getArenaScreenOrigin().getY(), event.getButton(), event.getClickCount(), event.isShiftDown(), event.isControlDown(),
-						event.isAltDown(), event.isMetaDown(), event.isPrimaryButtonDown(), event.isMiddleButtonDown(),
-						event.isSecondaryButtonDown(), event.isSynthesized(), event.isPopupTrigger(),
-						event.isStillSincePress(), null);
-				
-				target.get().getOnMouseDragged().handle(mouseDragEvent);
-				
-				draggedNode = Optional.of(target.get());
-			} else if (MouseEvent.MOUSE_MOVED.equals(mouseEvent.getEventType())) {
-				target.get().getOnMouseMoved().handle(mouseEvent);
-			}  else if (MouseEvent.MOUSE_RELEASED.equals(mouseEvent.getEventType())) {
-				target.get().getOnMouseReleased().handle(mouseEvent);
-			}
-			
-		}
 	}
 	
-
 	@Override
 	public void close() {
 		diagnosticExecutorService.shutdownNow();
