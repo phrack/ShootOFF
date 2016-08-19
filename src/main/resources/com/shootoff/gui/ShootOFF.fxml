@@ -18,102 +18,133 @@
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
    <children>
-      <MenuBar fx:id="mainMenu" prefHeight="29.0" VBox.vgrow="NEVER">
-        <menus>
-          <Menu text="_File">
-            <items>
-                  <MenuItem mnemonicParsing="false" onAction="#preferencesClicked" text="Preferences..." />
-                  <MenuItem mnemonicParsing="false" onAction="#saveFeedClicked" text="Save Feed Image..." />
-                  <SeparatorMenuItem mnemonicParsing="false" />
-              <MenuItem onAction="#exitMenuClicked" text="E_xit" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Targets">
-               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#createTargetMenuClicked" text="Create Target..." />
-                  <Menu fx:id="addTargetMenu" mnemonicParsing="false" text="Add Target" />
-                  <Menu fx:id="editTargetMenu" mnemonicParsing="false" text="Edit Target" />
-                  <MenuItem mnemonicParsing="false" onAction="#hideTargetsClicked" text="Hide Targets" />
-               </items>
-          </Menu>
-          <Menu fx:id="trainingMenu" mnemonicParsing="false" text="Training">
-            <items>
-                  <MenuItem mnemonicParsing="false" onAction="#getExercisesMenuItemClicked" text="Get Exercises..." />
-                  <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
-                  <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
-                  <SeparatorMenuItem mnemonicParsing="false" />
-                  <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
-                     <content>
-                        <RadioButton fx:id="noneTrainingMenuItem" mnemonicParsing="false" onAction="#clickedNoneExercise" selected="true" text="None">
-                            <toggleGroup>
-                  	  		   <ToggleGroup fx:id="trainingToggleGroup" />
-                            </toggleGroup>
-                        </RadioButton>
-                     </content>
-                  </CustomMenuItem>
-            </items>
-          </Menu>
-            <Menu mnemonicParsing="false" text="Projector">
-              <items>
-                 <MenuItem fx:id="startArenaMenuItem" mnemonicParsing="false" onAction="#startArenaClicked" text="Start Arena" />
-                  <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
-                  <Menu fx:id="calibrationOptionsMenu" disable="true" mnemonicParsing="false" text="Calibration Options">
-                     <items>
-                        <RadioMenuItem mnemonicParsing="false" text="Detect everywhere">
-                           <toggleGroup>
-                              <ToggleGroup fx:id="calibrationToggleGroup" />
-                           </toggleGroup>
-                        </RadioMenuItem>
-                        <RadioMenuItem mnemonicParsing="false" selected="true" text="Only detect in projector bounds" toggleGroup="$calibrationToggleGroup" />
-                        <RadioMenuItem mnemonicParsing="false" text="Crop feed to projector bounds" toggleGroup="$calibrationToggleGroup" />
-                     </items>
-                  </Menu>
-                  <Menu fx:id="addArenaTargetMenu" disable="true" mnemonicParsing="false" text="Add Target" />
-                  <MenuItem fx:id="clearArenaTargetsMenuItem" disable="true" mnemonicParsing="false" onAction="#clearArenaTargetsMenuItemClicked" text="Clear Targets" />
-                  <Menu fx:id="arenaBackgroundMenu" disable="true" mnemonicParsing="false" text="Background">
-                    <items>
-                      <MenuItem mnemonicParsing="false" onAction="#openArenaBackgroundMenuItemClicked" text="Open..." />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#removeArenaBackgroundMenuItemClicked" text="None" />
-                    </items>
-                  </Menu>
-                  <Menu fx:id="coursesMenu" disable="true" mnemonicParsing="false" text="Courses">
-                    <items>
-                      <MenuItem mnemonicParsing="false" onAction="#saveCourseMenuItemClicked" text="Save Course..." />
-                        <MenuItem mnemonicParsing="false" onAction="#loadCourseMenuItemClicked" text="Load Course..." />
-                    </items>
-                  </Menu>
-                  <MenuItem fx:id="toggleArenaShotsMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaShotsClicked" text="Show Shot Markers" />
-              </items>
-            </Menu>
-        </menus>
-      </MenuBar>
-      <HBox VBox.vgrow="ALWAYS">
+      <HBox alignment="TOP_CENTER" prefWidth="200.0" spacing="175.0" VBox.vgrow="ALWAYS">
          <children>
-            <TabPane fx:id="cameraTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER" />
+            <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File">
+               <contextMenu>
+                  <ContextMenu fx:id="fileContextMenu">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#preferencesClicked" text="Preferences..." />
+                        <MenuItem mnemonicParsing="false" onAction="#saveFeedClicked" text="Save Feed Image..." />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                    <MenuItem onAction="#exitMenuClicked" text="E_xit" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu>
+            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets">
+               <contextMenu>
+                  <ContextMenu fx:id="targetsContextMenu">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#createTargetMenuClicked" text="Create Target..." />
+                        <Menu fx:id="addTargetMenu" mnemonicParsing="false" text="Add Target" />
+                        <Menu fx:id="editTargetMenu" mnemonicParsing="false" text="Edit Target" />
+                        <MenuItem mnemonicParsing="false" onAction="#hideTargetsClicked" text="Hide Targets" />
+                     </items>
+                  </ContextMenu>
+               </contextMenu>
+            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training">
+               <contextMenu>
+                  <ContextMenu fx:id="trainingContextMenu">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#getExercisesMenuItemClicked" text="Get Exercises..." />
+                        <MenuItem fx:id="toggleSessionRecordingMenuItem" mnemonicParsing="false" onAction="#toggleSessionRecordingMenuItemClicked" text="Record Session" />
+                        <MenuItem fx:id="showSessionViewerMenuItem" mnemonicParsing="false" onAction="#showSessionViewerMenuItemClicked" text="View Sessions..." />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
+                           <content>
+                              <RadioButton fx:id="noneTrainingMenuItem" mnemonicParsing="false" onAction="#clickedNoneExercise" selected="true" text="None">
+                                  <toggleGroup>
+                        	  		   <ToggleGroup fx:id="trainingToggleGroup" />
+                                  </toggleGroup>
+                              </RadioButton>
+                           </content>
+                        </CustomMenuItem>
+                     </items>
+                  </ContextMenu>
+               </contextMenu>
+            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#projectorButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Projector">
+               <contextMenu>
+                  <ContextMenu fx:id="projectorContextMenu">
+                     <items>
+                       <MenuItem fx:id="startArenaMenuItem" mnemonicParsing="false" onAction="#startArenaClicked" text="Start Arena" />
+                        <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
+                        <Menu fx:id="calibrationOptionsMenu" disable="true" mnemonicParsing="false" text="Calibration Options">
+                           <items>
+                              <RadioMenuItem mnemonicParsing="false" text="Detect everywhere">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="calibrationToggleGroup" />
+                                 </toggleGroup>
+                              </RadioMenuItem>
+                              <RadioMenuItem mnemonicParsing="false" selected="true" text="Only detect in projector bounds" toggleGroup="$calibrationToggleGroup" />
+                              <RadioMenuItem mnemonicParsing="false" text="Crop feed to projector bounds" toggleGroup="$calibrationToggleGroup" />
+                           </items>
+                        </Menu>
+                        <Menu fx:id="addArenaTargetMenu" disable="true" mnemonicParsing="false" text="Add Target" />
+                        <MenuItem fx:id="clearArenaTargetsMenuItem" disable="true" mnemonicParsing="false" onAction="#clearArenaTargetsMenuItemClicked" text="Clear Targets" />
+                        <Menu fx:id="arenaBackgroundMenu" disable="true" mnemonicParsing="false" text="Background">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#openArenaBackgroundMenuItemClicked" text="Open..." />
+                              <SeparatorMenuItem mnemonicParsing="false" />
+                              <MenuItem mnemonicParsing="false" onAction="#removeArenaBackgroundMenuItemClicked" text="None" />
+                          </items>
+                        </Menu>
+                        <Menu fx:id="coursesMenu" disable="true" mnemonicParsing="false" text="Courses">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#saveCourseMenuItemClicked" text="Save Course..." />
+                              <MenuItem mnemonicParsing="false" onAction="#loadCourseMenuItemClicked" text="Load Course..." />
+                          </items>
+                        </Menu>
+                        <MenuItem fx:id="toggleArenaShotsMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaShotsClicked" text="Show Shot Markers" />
+                     </items>
+                  </ContextMenu>
+               </contextMenu>
+            </Button>
+         </children>
+         <padding>
+            <Insets left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </HBox>
+      <HBox spacing="30.0" VBox.vgrow="ALWAYS">
+         <children>
             <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportWidth="265.0" HBox.hgrow="ALWAYS">
                <content>
                   <TableView fx:id="shotTimerTable" minHeight="0.0" minWidth="0.0" />
                </content>
             </ScrollPane>
+            <TabPane fx:id="cameraTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER" />
+            <GridPane fx:id="buttonsGridPane" alignment="TOP_CENTER">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Button mnemonicParsing="false" onAction="#resetClicked" prefHeight="100.0" prefWidth="150.0" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                     <GridPane.margin>
+                        <Insets bottom="2.0" />
+                     </GridPane.margin>
+                  </Button>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </GridPane>
          </children>
          <VBox.margin>
             <Insets />
          </VBox.margin>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
       </HBox>
-      <GridPane fx:id="buttonsGridPane" alignment="TOP_CENTER" hgap="10.0" VBox.vgrow="NEVER">
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-            <Button mnemonicParsing="false" onAction="#resetClicked" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
-               <GridPane.margin>
-                  <Insets bottom="2.0" />
-               </GridPane.margin></Button>
-         </children>
-      </GridPane>
+      <ScrollPane hbarPolicy="NEVER" prefHeight="150.0" prefWidth="200.0">
+        <content>
+            <Pane />
+        </content>
+      </ScrollPane>
    </children>
 </VBox>

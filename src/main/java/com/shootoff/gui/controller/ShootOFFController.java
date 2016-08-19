@@ -90,7 +90,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
@@ -106,6 +105,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -119,10 +119,12 @@ import marytts.util.io.FileFilter;
 public class ShootOFFController implements CameraConfigListener, CameraErrorView, TargetListener, TargetManager,
 		PluginListener, CalibrationConfigurator, Resetter {
 	private Stage shootOFFStage;
-	@FXML private MenuBar mainMenu;
+	@FXML private ContextMenu fileContextMenu;
+	@FXML private ContextMenu targetsContextMenu;
+	@FXML private ContextMenu trainingContextMenu;
+	@FXML private ContextMenu projectorContextMenu;
 	@FXML private Menu addTargetMenu;
 	@FXML private Menu editTargetMenu;
-	@FXML private Menu trainingMenu;
 	@FXML private RadioButton noneTrainingMenuItem;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
@@ -180,7 +182,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
-		shootOFFStage = (Stage) mainMenu.getScene().getWindow();
+		shootOFFStage = (Stage) cameraTabPane.getScene().getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
 		shootOFFStage.getIcons().addAll(
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_16x16.png")),
@@ -664,7 +666,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			}
 		});
 
-		trainingMenu.getItems().add(new CustomMenuItem(exerciseButton));
+		trainingContextMenu.getItems().add(new CustomMenuItem(exerciseButton));
 	}
 
 	@Override
@@ -706,7 +708,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			}
 		});
 
-		trainingMenu.getItems().add(exerciseItem);
+		trainingContextMenu.getItems().add(exerciseItem);
 		projectorExerciseMenuItems.add(exerciseItem);
 	}
 
@@ -718,7 +720,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				noneTrainingMenuItem.fire();
 			}
 
-			Iterator<MenuItem> it = trainingMenu.getItems().iterator();
+			Iterator<MenuItem> it = trainingContextMenu.getItems().iterator();
 
 			while (it.hasNext()) {
 				final MenuItem m = it.next();
@@ -744,6 +746,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		config.setExercise(null);
 		trainingToggleGroup.selectToggle(noneTrainingMenuItem);
 	}
+	
+	@FXML
+	public void fileButtonClicked(MouseEvent event) {
+		fileContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());
+	}
 
 	@FXML
 	public void preferencesClicked(ActionEvent event) throws IOException {
@@ -759,6 +766,82 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		preferencesStage.setScene(new Scene(loader.getRoot()));
 		preferencesStage.show();
 		((PreferencesController) loader.getController()).setConfig(config, this);
+	}
+	
+	@FXML
+	public void saveFeedClicked(ActionEvent event) {
+		final AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+		final RenderedImage renderedImage = SwingFXUtils.fromFXImage(tabAnchor.snapshot(new SnapshotParameters(), null),
+				null);
+
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Save Feed Image");
+		fileChooser.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
+				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
+		final File feedFile = fileChooser.showSaveDialog(shootOFFStage);
+
+		if (feedFile != null) {
+			String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
+			File imageFile;
+
+			if (feedFile.getPath().endsWith(extension)) {
+				imageFile = feedFile;
+			} else {
+				imageFile = new File(feedFile.getPath() + "." + extension);
+			}
+
+			try {
+				ImageIO.write(renderedImage, extension, imageFile);
+			} catch (IOException e) {
+				logger.error("Error saving feed image", e);
+			}
+		}
+	}
+	
+	@FXML
+	public void exitMenuClicked(ActionEvent event) {
+		close();
+	}
+	
+	@FXML
+	public void targetsButtonClicked(MouseEvent event) {
+		targetsContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());	
+	}
+	
+	@FXML
+	public void hideTargetsClicked(ActionEvent event) {
+		MenuItem hideTargetMenuItem = (MenuItem) event.getSource();
+
+		if (hideTargetMenuItem.getText().equals("Hide Targets")) {
+			hideTargetMenuItem.setText("Show Targets");
+
+			for (Target target : getTargets()) {
+				target.setVisible(false);
+			}
+		} else {
+			hideTargetMenuItem.setText("Hide Targets");
+
+			for (Target target : getTargets()) {
+				target.setVisible(true);
+			}
+		}
+	}
+
+	@FXML
+	public void createTargetMenuClicked(ActionEvent event) throws IOException {
+		FXMLLoader loader = createPreferencesStage();
+
+		CameraManager currentCamera = camerasSupervisor
+				.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+		Image currentFrame = currentCamera.getCurrentFrame();
+		((TargetEditorController) loader.getController()).init(currentFrame, this);
+	}
+	
+	
+	@FXML
+	public void trainingButtonClicked(MouseEvent event) {
+		trainingContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());	
 	}
 
 	@FXML
@@ -828,6 +911,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		sessionViewerStage.setOnCloseRequest((e) -> {
 			showSessionViewerMenuItem.setDisable(false);
 		});
+	}
+	
+	@FXML
+	public void projectorButtonClicked(MouseEvent event) {
+		projectorContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());
 	}
 
 	@FXML
@@ -1031,40 +1119,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 
-	@FXML
-	public void exitMenuClicked(ActionEvent event) {
-		close();
-	}
-
-	@FXML
-	public void hideTargetsClicked(ActionEvent event) {
-		MenuItem hideTargetMenuItem = (MenuItem) event.getSource();
-
-		if (hideTargetMenuItem.getText().equals("Hide Targets")) {
-			hideTargetMenuItem.setText("Show Targets");
-
-			for (Target target : getTargets()) {
-				target.setVisible(false);
-			}
-		} else {
-			hideTargetMenuItem.setText("Hide Targets");
-
-			for (Target target : getTargets()) {
-				target.setVisible(true);
-			}
-		}
-	}
-
-	@FXML
-	public void createTargetMenuClicked(ActionEvent event) throws IOException {
-		FXMLLoader loader = createPreferencesStage();
-
-		CameraManager currentCamera = camerasSupervisor
-				.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-		Image currentFrame = currentCamera.getCurrentFrame();
-		((TargetEditorController) loader.getController()).init(currentFrame, this);
-	}
-
 	private FXMLLoader createPreferencesStage() throws IOException {
 		FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
@@ -1139,37 +1193,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		};
 
 		TimerPool.schedule(restartDetection, msDuration);
-	}
-
-	@FXML
-	public void saveFeedClicked(ActionEvent event) {
-		final AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
-		final RenderedImage renderedImage = SwingFXUtils.fromFXImage(tabAnchor.snapshot(new SnapshotParameters(), null),
-				null);
-
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Save Feed Image");
-		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
-				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
-		final File feedFile = fileChooser.showSaveDialog(shootOFFStage);
-
-		if (feedFile != null) {
-			String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
-			File imageFile;
-
-			if (feedFile.getPath().endsWith(extension)) {
-				imageFile = feedFile;
-			} else {
-				imageFile = new File(feedFile.getPath() + "." + extension);
-			}
-
-			try {
-				ImageIO.write(renderedImage, extension, imageFile);
-			} catch (IOException e) {
-				logger.error("Error saving feed image", e);
-			}
-		}
 	}
 
 	@Override
