@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<GridPane hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.PreferencesController">
+<GridPane fx:id="preferencesPane" hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.PreferencesController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
       <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0" />
@@ -15,7 +15,6 @@
    </columnConstraints>
    <rowConstraints>
       <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
@@ -32,8 +31,6 @@
       <Slider fx:id="markerRadiusSlider" blockIncrement="1.0" majorTickUnit="9.0" max="20.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
       <Slider fx:id="virtualMagazineSlider" blockIncrement="1.0" disable="true" majorTickUnit="5.0" max="45.0" min="1.0" minorTickCount="2" showTickLabels="true" showTickMarks="true" value="1.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
       <Slider fx:id="malfunctionsSlider" disable="true" max="99.9" min="0.1" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-      <Button minWidth="63.0" mnemonicParsing="false" onAction="#okClicked" text="OK" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
-      <Button cancelButton="true" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
       <ChoiceBox fx:id="ignoreLaserColorChoiceBox" prefWidth="180.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
       <Label fx:id="markerRadiusLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
       <Label fx:id="virtualMagazineLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" />

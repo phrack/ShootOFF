@@ -51,11 +51,14 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class PreferencesController implements DesignateShotRecorderListener {
+	@FXML private GridPane preferencesPane;
 	@FXML private ListView<String> webcamListView;
 	@FXML private Slider markerRadiusSlider;
 	@FXML private Label markerRadiusLabel;
@@ -73,7 +76,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	@FXML private Slider malfunctionsSlider;
 	@FXML private Label malfunctionsLabel;
 
-	private Stage preferencesStage;
+	private Stage parent;
 	private Configuration config;
 	private CameraConfigListener cameraConfigListener;
 	private boolean cameraConfigChanged = false;
@@ -81,11 +84,10 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	private final List<Camera> configuredCameras = new ArrayList<Camera>();
 	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 
-	public void setConfig(Configuration config, CameraConfigListener cameraConfigListener) {
+	public void setConfig(Stage parent, Configuration config, CameraConfigListener cameraConfigListener) {
 		ImageCell.createImageCache(Camera.getWebcams());
 
-		preferencesStage = (Stage) markerRadiusSlider.getScene().getWindow();
-
+		this.parent = parent;
 		this.cameraConfigListener = cameraConfigListener;
 
 		ignoreLaserColorChoiceBox.setItems(FXCollections.observableArrayList("None", "red", "green"));
@@ -158,6 +160,10 @@ public class PreferencesController implements DesignateShotRecorderListener {
 			}
 		});
 	}
+	
+	public Pane getPane() {
+		return preferencesPane;
+	}
 
 	@Override
 	public void registerShotRecorder(String webcamName) {
@@ -209,7 +215,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "sounds"));
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Sound File", "*.mp3", "*.wav"));
 
-		return Optional.ofNullable(fileChooser.showOpenDialog(preferencesStage));
+		return Optional.ofNullable(fileChooser.showOpenDialog(parent));
 	}
 
 	@FXML
@@ -224,7 +230,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 
 	@FXML
 	public void addCameraClicked(ActionEvent event) {
-		CameraSelectorScene cameraSelector = new CameraSelectorScene(config, preferencesStage, configuredCameras);
+		CameraSelectorScene cameraSelector = new CameraSelectorScene(config, parent, configuredCameras);
 
 		cameraSelector.setOnHidden((e) -> {
 			if (cameraSelector.getSelectedWebcams().isEmpty()) return;
@@ -238,8 +244,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		});
 	}
 
-	@FXML
-	public void okClicked(ActionEvent event) throws ConfigurationException, IOException {
+	public void save() throws ConfigurationException, IOException {
 		config.setWebcams(configuredNames, configuredCameras);
 		config.setRecordingCameras(recordingCameras);
 		config.setMarkerRadius((int) markerRadiusSlider.getValue());
@@ -255,14 +260,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		config.setMalfunctionsProbability((float) malfunctionsSlider.getValue());
 
 		if (config.writeConfigurationFile()) {
-			preferencesStage.close();
-
 			if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
 		}
-	}
-
-	@FXML
-	public void cancelClicked(ActionEvent event) {
-		preferencesStage.close();
 	}
 }

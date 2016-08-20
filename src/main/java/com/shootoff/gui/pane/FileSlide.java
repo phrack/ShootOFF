@@ -16,12 +16,10 @@ import com.shootoff.targets.CameraViews;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class FileSlide extends SlidePane {
@@ -40,14 +38,12 @@ public class FileSlide extends SlidePane {
 				return;
 			}
 
-			Stage preferencesStage = new Stage();
-
-			preferencesStage.initOwner(parent.getScene().getWindow());
-			preferencesStage.initModality(Modality.WINDOW_MODAL);
-			preferencesStage.setTitle("Preferences");
-			preferencesStage.setScene(new Scene(loader.getRoot()));
-			preferencesStage.show();
-			((PreferencesController) loader.getController()).setConfig(configListener.getConfiguration(), configListener);
+			final PreferencesController preferencesController = (PreferencesController) loader.getController();
+			preferencesController.setConfig((Stage) parent.getScene().getWindow(), 
+					configListener.getConfiguration(), configListener);
+			final PreferencesSlide preferencesSlide = new PreferencesSlide(this, preferencesController);
+			preferencesSlide.setOnSlideHidden(() -> { if (preferencesSlide.isSaved()) hide(); });
+			preferencesSlide.show();
 		});
 		
 		addSlideControlButton("Save Feed Image", (event) -> {

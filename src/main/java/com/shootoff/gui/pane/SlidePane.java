@@ -2,6 +2,7 @@ package com.shootoff.gui.pane;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -19,6 +20,7 @@ public class SlidePane extends Pane {
 	private final HBox slideControlContainer = new HBox(175);
 	private final List<Node> savedControls = new ArrayList<>();
 	
+	private Optional<SlideHiddenListener> slideHiddenListener = Optional.empty();
 	private final Pane parent;
 	
 	public SlidePane(Pane parent) {
@@ -48,6 +50,12 @@ public class SlidePane extends Pane {
 		parent.getChildren().remove(this);
 		parent.getChildren().addAll(savedControls);
 		savedControls.clear();
+		
+		if (slideHiddenListener.isPresent()) slideHiddenListener.get().onSlideHidden();
+	}
+	
+	public void setOnSlideHidden(SlideHiddenListener slideHiddenListener) {
+		this.slideHiddenListener = Optional.ofNullable(slideHiddenListener);
 	}
 	
 	// This used to add the buttons that appear across the very top row
