@@ -35,6 +35,7 @@ import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraErrorView;
@@ -111,7 +112,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews,
-		PluginListener, CalibrationConfigurator, Resetter {
+		PluginListener, CalibrationConfigurator, Closeable, Resetter {
 	private Stage shootOFFStage;
 	@FXML private VBox container;
 	@FXML private ContextMenu trainingContextMenu;
@@ -333,7 +334,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		shotTimerTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 
-	private void close() {
+	@Override
+	public void close() {
 		shootOFFStage.close();
 		camerasSupervisor.closeAll();
 		pluginEngine.stopWatching();
@@ -740,7 +742,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
-		new FileSlide(container, this).show();
+		new FileSlide(container, this, this).show();
 	}
 
 	@FXML
@@ -757,12 +759,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		preferencesStage.setScene(new Scene(loader.getRoot()));
 		preferencesStage.show();
 		((PreferencesController) loader.getController()).setConfig(config, this);
-	}
-	
-	
-	@FXML
-	public void exitMenuClicked(ActionEvent event) {
-		close();
 	}
 	
 	@FXML

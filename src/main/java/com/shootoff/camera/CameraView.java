@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
 
+import com.shootoff.Closeable;
 import com.shootoff.targets.Target;
 
 import javafx.geometry.Bounds;
@@ -17,7 +18,7 @@ import javafx.scene.paint.Color;
  * 
  * @author phrack
  */
-public interface CameraView {
+public interface CameraView extends Closeable {
 	/**
 	 * Add control to the GUI displaying camera and shot detection data.
 	 * 
@@ -37,6 +38,7 @@ public interface CameraView {
 
 	public void clearShots();
 
+	@Override
 	public void close();
 
 	public boolean removeChild(Node c);

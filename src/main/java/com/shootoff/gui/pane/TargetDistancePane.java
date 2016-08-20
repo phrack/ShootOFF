@@ -24,6 +24,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -39,7 +40,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-public class TargetDistancePane extends GridPane {
+public class TargetDistancePane extends GridPane implements Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(TargetDistancePane.class);
 
 	private String currentTargetWidth;
@@ -247,7 +248,8 @@ public class TargetDistancePane extends GridPane {
 		return Integer.parseInt(newTargetDistance);
 	}
 
-	private void close() {
+	@Override
+	public void close() {
 		((Stage) this.getScene().getWindow()).close();
 	}
 

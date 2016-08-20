@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -65,7 +66,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ProjectorArenaController implements CalibrationListener {
+public class ProjectorArenaController implements CalibrationListener, Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	protected Stage arenaStage;
@@ -327,6 +328,7 @@ public class ProjectorArenaController implements CalibrationListener {
 		return perspectiveManager;
 	}
 
+	@Override
 	public void close() {
 		arenaStage.close();
 		TimerPool.cancelTimer(mouseExitedFuture);

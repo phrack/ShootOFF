@@ -27,6 +27,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -38,7 +39,7 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-public class RollingRecorder {
+public class RollingRecorder implements Closeable {
 	private final Logger logger = LoggerFactory.getLogger(RollingRecorder.class);
 
 	private final ICodec.ID codec;
@@ -288,6 +289,7 @@ public class RollingRecorder {
 		}
 	}
 
+	@Override
 	public void close() {
 		recording = false;
 		synchronized (videoWriterLock) {

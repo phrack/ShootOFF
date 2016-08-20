@@ -37,6 +37,7 @@ import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
@@ -64,7 +65,7 @@ import javafx.util.Callback;
  * 
  * @author phrack and dmaul
  */
-public class CameraManager {
+public class CameraManager implements Closeable {
 	protected static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
 	public static final int DEFAULT_FEED_HEIGHT = 480;
@@ -236,6 +237,7 @@ public class CameraManager {
 		cameraView.reset();
 	}
 
+	@Override
 	public void close() {
 		getCameraView().close();
 		setDetecting(false);

@@ -24,13 +24,14 @@ import java.io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.xuggler.IPixelFormat;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-public class ShotRecorder {
+public class ShotRecorder implements Closeable {
 	// The number of milliseconds before and after a shot to record
 	public static final long RECORD_LENGTH = 5000; // ms
 
@@ -87,6 +88,7 @@ public class ShotRecorder {
 		return System.currentTimeMillis() - startTime > RECORD_LENGTH;
 	}
 
+	@Override
 	public void close() {
 		videoWriter.close();
 

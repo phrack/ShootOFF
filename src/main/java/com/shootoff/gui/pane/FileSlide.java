@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.Closeable;
 import com.shootoff.targets.CameraViews;
 
 import javafx.embed.swing.SwingFXUtils;
@@ -20,7 +21,7 @@ import javafx.stage.FileChooser;
 public class FileSlide extends SlidePane {
 	private static final Logger logger = LoggerFactory.getLogger(FileSlide.class);
 			
-	public FileSlide(Pane parent, CameraViews cameraViews) {
+	public FileSlide(Pane parent, CameraViews cameraViews, Closeable mainWindow) {
 		super(parent);
 		
 		addSlideControlButton("Preferences", (event) -> {
@@ -58,7 +59,7 @@ public class FileSlide extends SlidePane {
 		});
 		
 		addSlideControlButton("Exit", (evnet) -> {
-			
+			mainWindow.close();
 		});
 	}
 }
