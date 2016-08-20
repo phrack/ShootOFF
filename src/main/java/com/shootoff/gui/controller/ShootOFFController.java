@@ -107,7 +107,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -433,6 +432,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		config.unregisterAllRecordingCameraManagers();
 		addConfiguredCameras();
 	}
+	
+	@Override
+	public Configuration getConfiguration() {
+		return config;
+	}
 
 	private void addConfiguredCameras() {
 		cameraTabPane.getTabs().clear();
@@ -742,23 +746,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
-		new FileSlide(container, this, this).show();
-	}
-
-	@FXML
-	public void preferencesClicked(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/Preferences.fxml"));
-		loader.load();
-
-		Stage preferencesStage = new Stage();
-
-		preferencesStage.initOwner(shootOFFStage);
-		preferencesStage.initModality(Modality.WINDOW_MODAL);
-		preferencesStage.setTitle("Preferences");
-		preferencesStage.setScene(new Scene(loader.getRoot()));
-		preferencesStage.show();
-		((PreferencesController) loader.getController()).setConfig(config, this);
+		new FileSlide(container, this, this, this).show();
 	}
 	
 	@FXML
