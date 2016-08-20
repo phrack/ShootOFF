@@ -20,18 +20,7 @@
    <children>
       <HBox alignment="TOP_CENTER" prefWidth="200.0" spacing="175.0" VBox.vgrow="ALWAYS">
          <children>
-            <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File">
-               <contextMenu>
-                  <ContextMenu fx:id="fileContextMenu">
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#preferencesClicked" text="Preferences..." />
-                        <MenuItem mnemonicParsing="false" onAction="#saveFeedClicked" text="Save Feed Image..." />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                    <MenuItem onAction="#exitMenuClicked" text="E_xit" />
-                    </items>
-                  </ContextMenu>
-               </contextMenu>
-            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File" />
             <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets" />
             <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training">
                <contextMenu>

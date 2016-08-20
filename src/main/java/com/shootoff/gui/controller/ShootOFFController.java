@@ -19,7 +19,6 @@
 package com.shootoff.gui.controller;
 
 import java.awt.Toolkit;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,8 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import org.openimaj.util.parallel.GlobalExecutorPool;
 import org.slf4j.Logger;
@@ -55,8 +52,9 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.ShotEntry;
+import com.shootoff.gui.pane.FileSlide;
 import com.shootoff.gui.pane.ShotSectorPane;
-import com.shootoff.gui.pane.TargetPane;
+import com.shootoff.gui.pane.TargetSlide;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
@@ -66,7 +64,7 @@ import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.Target;
-import com.shootoff.targets.TargetRepository;
+import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 
@@ -76,14 +74,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
@@ -114,11 +110,10 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ShootOFFController implements CameraConfigListener, CameraErrorView, TargetRepository,
+public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews,
 		PluginListener, CalibrationConfigurator, Resetter {
 	private Stage shootOFFStage;
 	@FXML private VBox container;
-	@FXML private ContextMenu fileContextMenu;
 	@FXML private ContextMenu trainingContextMenu;
 	@FXML private ContextMenu projectorContextMenu;
 	@FXML private RadioButton noneTrainingMenuItem;
@@ -138,7 +133,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private MenuItem toggleArenaShotsMenuItem;
 	@FXML private VBox buttonsContainer;
 
-	private TargetPane targetPane;
+	private TargetSlide targetPane;
 	
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
@@ -154,7 +149,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
 
 	private Stage sessionViewerStage;
-	
 	
 	static public double getDpiScaleFactorForScreen() {
 		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
@@ -175,7 +169,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		noneTrainingMenuItem.setTextFill(Color.BLACK);
 		
-		targetPane = new TargetPane(container, this);
+		targetPane = new TargetSlide(container, this);
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
@@ -413,6 +407,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public CameraManager getSelectedCameraManager() {
 		return camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+	}
+	
+	@Override 
+	public Node getSelectedCameraContainer() {
+		return cameraTabPane.getSelectionModel().getSelectedItem().getContent();
 	}
 	
 	public Stage getStage() {
@@ -741,7 +740,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
-		fileContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());
+		new FileSlide(container, this).show();
 	}
 
 	@FXML
@@ -760,36 +759,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		((PreferencesController) loader.getController()).setConfig(config, this);
 	}
 	
-	@FXML
-	public void saveFeedClicked(ActionEvent event) {
-		final AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
-		final RenderedImage renderedImage = SwingFXUtils.fromFXImage(tabAnchor.snapshot(new SnapshotParameters(), null),
-				null);
-
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Save Feed Image");
-		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
-				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
-		final File feedFile = fileChooser.showSaveDialog(shootOFFStage);
-
-		if (feedFile != null) {
-			String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
-			File imageFile;
-
-			if (feedFile.getPath().endsWith(extension)) {
-				imageFile = feedFile;
-			} else {
-				imageFile = new File(feedFile.getPath() + "." + extension);
-			}
-
-			try {
-				ImageIO.write(renderedImage, extension, imageFile);
-			} catch (IOException e) {
-				logger.error("Error saving feed image", e);
-			}
-		}
-	}
 	
 	@FXML
 	public void exitMenuClicked(ActionEvent event) {

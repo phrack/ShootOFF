@@ -4,9 +4,9 @@ import com.shootoff.gui.controller.TargetEditorController;
 
 import javafx.scene.layout.Pane;
 
-public class TargetEditorPane extends SlidePane {
+public class TargetEditorSlide extends SlidePane {
 	
-	public TargetEditorPane(Pane parent, TargetEditorController editorController) {
+	public TargetEditorSlide(Pane parent, TargetEditorController editorController) {
 		super(parent);
 		
 		add(editorController.getPane());

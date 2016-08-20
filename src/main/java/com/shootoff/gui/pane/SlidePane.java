@@ -3,15 +3,20 @@ package com.shootoff.gui.pane;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 
 public class SlidePane extends Pane {
 	private final VBox container = new VBox();
+	private final HBox slideControlContainer = new HBox(175);
 	private final List<Node> savedControls = new ArrayList<>();
 	
 	private final Pane parent;
@@ -19,12 +24,14 @@ public class SlidePane extends Pane {
 	public SlidePane(Pane parent) {
 		this.parent = parent;
 		
-		final ImageView backImage = new ImageView(
-				new Image(SlidePane.class.getResourceAsStream("/images/back_button.png"), 64.0, 64.0, true, true));
-		final Button backButton = new Button("", backImage);
-		backButton.setOnAction((Event) -> hide());
-		add(backButton);
+		slideControlContainer.setPadding(new Insets(30, 30, 0, 30));
 		
+		final ImageView backImage = new ImageView(
+				new Image(SlidePane.class.getResourceAsStream("/images/back_button.png"), 80.0, 80.0, true, true));
+		 final Button backButton = addSlideControlButton("", (Event) -> hide());
+		 backButton.setGraphic(backImage);
+		 
+		 container.getChildren().add(slideControlContainer);
 		this.getChildren().add(container);
 	}
 	
@@ -43,7 +50,19 @@ public class SlidePane extends Pane {
 		savedControls.clear();
 	}
 	
-	public void add(Node node) {
+	// This used to add the buttons that appear across the very top row
+	// of the slide. These are intended to control the content
+	// that appears on the rest of the slide
+	protected Button addSlideControlButton(String text, final EventHandler<ActionEvent> eventHandler) {
+		final Button controlButton = new Button(text);
+		controlButton.setPrefSize(150, 100);
+		controlButton.setOnAction(eventHandler);
+		slideControlContainer.getChildren().add(controlButton);
+		
+		return controlButton;
+	}
+	
+	protected void add(Node node) {
 		container.getChildren().add(node);
 	}
 }

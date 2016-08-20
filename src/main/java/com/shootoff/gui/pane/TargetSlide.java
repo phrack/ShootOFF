@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.gui.TargetListener;
 import com.shootoff.gui.controller.TargetEditorController;
-import com.shootoff.targets.TargetRepository;
+import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
@@ -31,46 +31,43 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.text.TextAlignment;
 import marytts.util.io.FileFilter;
 
-public class TargetPane extends SlidePane implements TargetListener {
-	private static final Logger logger = LoggerFactory.getLogger(TargetPane.class);
+public class TargetSlide extends SlidePane implements TargetListener {
+	private static final Logger logger = LoggerFactory.getLogger(TargetSlide.class);
 	private static final int TARGET_COLUMNS = 6;
 	private static final int TARGET_BUTTON_DIMS = 150;
 	
 	private final TilePane container = new TilePane(30, 30);
-	private final TargetRepository targetRepository;
+	private final CameraViews cameraViews;
 	private final ToggleButton editTargetToggleButton = new ToggleButton("Edit Target");
 	private final ScrollPane scrollPane;
 	
 	private int targetCount = 0;
 	
-	public TargetPane(Pane parent, TargetRepository targetRepository) {
+	public TargetSlide(Pane parent, CameraViews cameraViews) {
 		super(parent);
 
-		final Button createTargetButton = new Button("Create Target");
-		createTargetButton.setPrefSize(150, 90);
-
-		editTargetToggleButton.setPrefSize(150, 90);
-
-		createTargetButton.setOnAction((event) -> {
+		addSlideControlButton("Create Target", (event) -> {
 			Optional<FXMLLoader> loader = createTargetEditorStage();
 
 			if (loader.isPresent()) {
-				CameraManager currentCamera = targetRepository.getSelectedCameraManager();
+				CameraManager currentCamera = cameraViews.getSelectedCameraManager();
 				Image currentFrame = currentCamera.getCurrentFrame();
 				TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 				editorController.init(currentFrame, this);
 				
-				new TargetEditorPane(this, editorController).show();
+				new TargetEditorSlide(this, editorController).show();
 			}
 		});
+
+		editTargetToggleButton.setPrefSize(150, 90);
 		
-		final HBox targetOptions = new HBox(createTargetButton, editTargetToggleButton);
+		final HBox targetOptions = new HBox(editTargetToggleButton);
 		targetOptions.setSpacing(30);
 		targetOptions.setPadding(new Insets(65, 65, 0, 65));
 		
 		container.setPrefColumns(TARGET_COLUMNS);
 		container.setPadding(new Insets(65, 65, 65, 65));
-		this.targetRepository = targetRepository;
+		this.cameraViews = cameraViews;
 
 		scrollPane = new ScrollPane(container);
 		scrollPane.setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
@@ -133,15 +130,15 @@ public class TargetPane extends SlidePane implements TargetListener {
 				Optional<FXMLLoader> loader = createTargetEditorStage();
 
 				if (loader.isPresent()) {
-					CameraManager currentCamera = targetRepository.getSelectedCameraManager();
+					CameraManager currentCamera = cameraViews.getSelectedCameraManager();
 					Image currentFrame = currentCamera.getCurrentFrame();
 					TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 					editorController.init(currentFrame, this, targetFile);
 					
-					new TargetEditorPane(this, editorController).show();
+					new TargetEditorSlide(this, editorController).show();
 				}
 			} else {
-				targetRepository.getSelectedCameraView().addTarget(targetFile);
+				cameraViews.getSelectedCameraView().addTarget(targetFile);
 				hide();
 			}
 		});
