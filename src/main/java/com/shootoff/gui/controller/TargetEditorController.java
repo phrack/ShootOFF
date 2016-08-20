@@ -151,7 +151,11 @@ public class TargetEditorController {
 			}
 		});
 	}
-
+	
+	public Pane getPane() {
+		return targetEditorPane;
+	}
+	
 	public void init(Image backgroundImg, TargetListener targetListener, File targetFile) {
 		init(backgroundImg, targetListener);
 

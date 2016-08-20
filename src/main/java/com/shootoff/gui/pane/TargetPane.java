@@ -17,7 +17,6 @@ import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -30,8 +29,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
 public class TargetPane extends SlidePane implements TargetListener {
@@ -60,7 +57,10 @@ public class TargetPane extends SlidePane implements TargetListener {
 			if (loader.isPresent()) {
 				CameraManager currentCamera = targetRepository.getSelectedCameraManager();
 				Image currentFrame = currentCamera.getCurrentFrame();
-				((TargetEditorController) loader.get().getController()).init(currentFrame, this);
+				TargetEditorController editorController = (TargetEditorController) loader.get().getController();
+				editorController.init(currentFrame, this);
+				
+				new TargetEditorPane(this, editorController).show();
 			}
 		});
 		
@@ -135,7 +135,10 @@ public class TargetPane extends SlidePane implements TargetListener {
 				if (loader.isPresent()) {
 					CameraManager currentCamera = targetRepository.getSelectedCameraManager();
 					Image currentFrame = currentCamera.getCurrentFrame();
-					((TargetEditorController) loader.get().getController()).init(currentFrame, this, targetFile);
+					TargetEditorController editorController = (TargetEditorController) loader.get().getController();
+					editorController.init(currentFrame, this, targetFile);
+					
+					new TargetEditorPane(this, editorController).show();
 				}
 			} else {
 				targetRepository.getSelectedCameraView().addTarget(targetFile);
@@ -157,13 +160,6 @@ public class TargetPane extends SlidePane implements TargetListener {
 			logger.error("Cannot load TargetEditor.fxml", e);
 			return Optional.empty();
 		}
-
-		Stage preferencesStage = new Stage();
-
-		preferencesStage.initModality(Modality.WINDOW_MODAL);
-		preferencesStage.setTitle("TargetEditor");
-		preferencesStage.setScene(new Scene(loader.getRoot()));
-		preferencesStage.show();
 
 		return Optional.of(loader);
 	}
