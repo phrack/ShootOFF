@@ -32,7 +32,7 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.gui.TagEditorPanel;
+import com.shootoff.gui.TagEditorPane;
 import com.shootoff.gui.TargetListener;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
@@ -98,7 +98,7 @@ public class TargetEditorController {
 	private Optional<Node> cursorRegion = Optional.empty();
 	private final List<Node> targetRegions = new ArrayList<>();
 	private final Map<String, String> targetTags = new HashMap<>();
-	private Optional<TagEditorPanel> tagEditor = Optional.empty();
+	private Optional<TagEditorPane> tagEditor = Optional.empty();
 	private final List<Double> freeformPoints = new ArrayList<>();
 	private final Stack<Shape> freeformShapes = new Stack<>();
 	private Optional<Line> freeformEdge = Optional.empty();
@@ -771,7 +771,7 @@ public class TargetEditorController {
 	private void toggleTagEditor() {
 		if (!tagsButton.isSelected() && tagEditor.isPresent()) {
 			// Close the tag editor
-			TagEditorPanel editor = tagEditor.get();
+			TagEditorPane editor = tagEditor.get();
 			targetEditorPane.getChildren().remove(editor);
 			tagEditor = Optional.empty();
 
@@ -786,15 +786,15 @@ public class TargetEditorController {
 		}
 		
 
-		final TagEditorPanel editor;
+		final TagEditorPane editor;
 		
 		if (tagsButton.isSelected()) {
 			if (cursorRegion.isPresent()) {
 				// Edit tags for a selected target region
-				editor = new TagEditorPanel(((TargetRegion) cursorRegion.get()).getAllTags());
+				editor = new TagEditorPane(((TargetRegion) cursorRegion.get()).getAllTags());
 			} else {
 				// Edit target-level tags
-				editor = new TagEditorPanel(targetTags);
+				editor = new TagEditorPane(targetTags);
 			}
 		} else {
 			throw new AssertionError("It should not be possible to toggle the tags button without either the "

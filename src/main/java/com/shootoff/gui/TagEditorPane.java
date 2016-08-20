@@ -30,11 +30,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Pane;
 
-public class TagEditorPanel extends Pane {
+public class TagEditorPane extends Pane {
 	private TableView<Tag> tagTable = new TableView<Tag>();
 
 	@SuppressWarnings("unchecked")
-	public TagEditorPanel(Map<String, String> tags) {
+	public TagEditorPane(Map<String, String> tags) {
 		tagTable.setEditable(true);
 		tagTable.setPrefHeight(200);
 		tagTable.setPrefWidth(200);
