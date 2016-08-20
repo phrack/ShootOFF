@@ -22,11 +22,11 @@ import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class FileSlide extends SlidePane {
+public class FileSlide extends Slide {
 	private static final Logger logger = LoggerFactory.getLogger(FileSlide.class);
 			
-	public FileSlide(Pane parent, CameraConfigListener configListener, CameraViews cameraViews, Closeable mainWindow) {
-		super(parent);
+	public FileSlide(Pane parentControls, Pane parentBody, CameraConfigListener configListener, CameraViews cameraViews, Closeable mainWindow) {
+		super(parentControls, parentBody);
 		
 		addSlideControlButton("Preferences", (event) -> {
 			FXMLLoader loader = new FXMLLoader(
@@ -39,11 +39,12 @@ public class FileSlide extends SlidePane {
 			}
 
 			final PreferencesController preferencesController = (PreferencesController) loader.getController();
-			preferencesController.setConfig((Stage) parent.getScene().getWindow(), 
+			preferencesController.setConfig((Stage) parentControls.getScene().getWindow(), 
 					configListener.getConfiguration(), configListener);
-			final PreferencesSlide preferencesSlide = new PreferencesSlide(this, preferencesController);
+			final PreferencesSlide preferencesSlide = new PreferencesSlide(parentControls, parentBody, preferencesController);
 			preferencesSlide.setOnSlideHidden(() -> { if (preferencesSlide.isSaved()) hide(); });
-			preferencesSlide.show();
+			preferencesSlide.showControls();
+			preferencesSlide.showBody();
 		});
 		
 		addSlideControlButton("Save Feed Image", (event) -> {
@@ -57,7 +58,7 @@ public class FileSlide extends SlidePane {
 					new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
 					new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
 			
-			final File feedFile = fileChooser.showSaveDialog(parent.getScene().getWindow());
+			final File feedFile = fileChooser.showSaveDialog(parentControls.getScene().getWindow());
 
 			if (feedFile != null) {
 				String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);

@@ -10,13 +10,13 @@ import com.shootoff.gui.controller.PreferencesController;
 
 import javafx.scene.layout.Pane;
 
-public class PreferencesSlide extends SlidePane {
+public class PreferencesSlide extends Slide {
 	private static final Logger logger = LoggerFactory.getLogger(PreferencesSlide.class);
 	
 	private boolean saved = false;
 	
-	public PreferencesSlide(Pane parent, PreferencesController preferencesController) {
-		super(parent);
+	public PreferencesSlide(Pane parentControls, Pane parentBody, PreferencesController preferencesController) {
+		super(parentControls, parentBody);
 		
 		addSlideControlButton("Save", (event) -> {
 			try {
@@ -29,7 +29,7 @@ public class PreferencesSlide extends SlidePane {
 			hide();
 		});
 		
-		add(preferencesController.getPane());
+		addBodyNode(preferencesController.getPane());
 	}
 	
 	public boolean isSaved() {

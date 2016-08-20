@@ -103,6 +103,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
@@ -113,7 +114,8 @@ import javafx.stage.Stage;
 public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews,
 		PluginListener, CalibrationConfigurator, Closeable, Resetter {
 	private Stage shootOFFStage;
-	@FXML private VBox container;
+	@FXML private HBox controlsContainer;
+	@FXML private VBox bodyContainer;
 	@FXML private ContextMenu trainingContextMenu;
 	@FXML private ContextMenu projectorContextMenu;
 	@FXML private RadioButton noneTrainingMenuItem;
@@ -169,7 +171,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		noneTrainingMenuItem.setTextFill(Color.BLACK);
 		
-		targetPane = new TargetSlide(container, this);
+		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
@@ -746,12 +748,12 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
-		new FileSlide(container, this, this, this).show();
+		new FileSlide(controlsContainer, bodyContainer, this, this, this).showControls();
 	}
 	
 	@FXML
 	public void targetsButtonClicked(MouseEvent event) {
-		targetPane.show();
+		targetPane.showControls();
 	}
 	
 	@FXML

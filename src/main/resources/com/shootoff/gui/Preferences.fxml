@@ -14,7 +14,7 @@
       <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
    </columnConstraints>
    <rowConstraints>
-      <RowConstraints percentHeight="20.0" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="15.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
@@ -49,6 +49,6 @@
       <Button fx:id="greenLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#greenLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
    </children>
    <padding>
-      <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+      <Insets left="30.0" right="30.0" />
    </padding>
 </GridPane>

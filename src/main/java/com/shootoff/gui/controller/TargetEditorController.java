@@ -61,8 +61,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -70,7 +70,7 @@ import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 
 public class TargetEditorController {
-	@FXML private BorderPane targetEditorPane;
+	@FXML private VBox targetEditorPane;
 	@FXML private Pane canvasPane;
 	@FXML private ToggleButton cursorButton;
 	@FXML private ToggleButton imageButton;

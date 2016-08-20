@@ -22,30 +22,41 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.TextAlignment;
 import marytts.util.io.FileFilter;
 
-public class TargetSlide extends SlidePane implements TargetListener {
+public class TargetSlide extends Slide implements TargetListener {
 	private static final Logger logger = LoggerFactory.getLogger(TargetSlide.class);
 	private static final int TARGET_COLUMNS = 6;
 	private static final int TARGET_BUTTON_DIMS = 150;
 	
-	private final TilePane container = new TilePane(30, 30);
+	private final TilePane targetButtonContainer = new TilePane(30, 30);
+	private final Pane parentControls;
+	private final Pane parentBody;
 	private final CameraViews cameraViews;
-	private final ToggleButton editTargetToggleButton = new ToggleButton("Edit Target");
 	private final ScrollPane scrollPane;
+	
+	private enum Mode { ADD, EDIT };
+	
+	private Mode mode;
 	
 	private int targetCount = 0;
 	
-	public TargetSlide(Pane parent, CameraViews cameraViews) {
-		super(parent);
-
+	public TargetSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews) {
+		super(parentControls, parentBody);
+		
+		this.parentControls = parentControls;
+		this.parentBody = parentBody;
+		
+		addSlideControlButton("Add Target", (event) -> {
+			mode = Mode.ADD;
+			showBody();
+		});
+		
 		addSlideControlButton("Create Target", (event) -> {
 			Optional<FXMLLoader> loader = createTargetEditorStage();
 
@@ -55,28 +66,28 @@ public class TargetSlide extends SlidePane implements TargetListener {
 				TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 				editorController.init(currentFrame, this);
 				
-				new TargetEditorSlide(this, editorController).show();
+				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
+				targetEditorSlide.showControls();
+				targetEditorSlide.showBody();
 			}
 		});
-
-		editTargetToggleButton.setPrefSize(150, 90);
 		
-		final HBox targetOptions = new HBox(editTargetToggleButton);
-		targetOptions.setSpacing(30);
-		targetOptions.setPadding(new Insets(65, 65, 0, 65));
+		addSlideControlButton("Edit Target", (event) -> {
+			mode = Mode.EDIT;
+			showBody();
+		});
 		
-		container.setPrefColumns(TARGET_COLUMNS);
-		container.setPadding(new Insets(65, 65, 65, 65));
+		targetButtonContainer.setPrefColumns(TARGET_COLUMNS);
+		targetButtonContainer.setPadding(new Insets(0, 65, 65, 65));
 		this.cameraViews = cameraViews;
 
-		scrollPane = new ScrollPane(container);
+		scrollPane = new ScrollPane(targetButtonContainer);
 		scrollPane.setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
 		scrollPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 		scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 		scrollPane.setFitToHeight(true);
 		
-		add(targetOptions);
-		add(scrollPane);
+		addBodyNode(scrollPane);
 		
 		findTargets();
 	}
@@ -117,16 +128,18 @@ public class TargetSlide extends SlidePane implements TargetListener {
 		final String targetPath = targetFile.getPath();
 		final String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
 		
-		final Button addTargetButton = new Button(targetName);
-		addTargetButton.setContentDisplay(ContentDisplay.TOP);
-		addTargetButton.setTextAlignment(TextAlignment.CENTER);
-		addTargetButton.setGraphic(targetImageView);
-		addTargetButton.setPrefSize(TARGET_BUTTON_DIMS, TARGET_BUTTON_DIMS);
-		addTargetButton.setWrapText(true);
+		final Button targetButton = new Button(targetName);
+		targetButton.setContentDisplay(ContentDisplay.TOP);
+		targetButton.setTextAlignment(TextAlignment.CENTER);
+		targetButton.setGraphic(targetImageView);
+		targetButton.setPrefSize(TARGET_BUTTON_DIMS, TARGET_BUTTON_DIMS);
+		targetButton.setWrapText(true);
 
-		addTargetButton.setOnAction((event) -> {
-			if (editTargetToggleButton.isSelected()) {
-				editTargetToggleButton.setSelected(false);
+		targetButton.setOnAction((event) -> {
+			if (Mode.ADD.equals(mode)) {
+				cameraViews.getSelectedCameraView().addTarget(targetFile);
+				hide();
+			} else {
 				Optional<FXMLLoader> loader = createTargetEditorStage();
 
 				if (loader.isPresent()) {
@@ -135,15 +148,14 @@ public class TargetSlide extends SlidePane implements TargetListener {
 					TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 					editorController.init(currentFrame, this, targetFile);
 					
-					new TargetEditorSlide(this, editorController).show();
+					final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
+					targetEditorSlide.showControls();
+					targetEditorSlide.showBody();
 				}
-			} else {
-				cameraViews.getSelectedCameraView().addTarget(targetFile);
-				hide();
 			}
 		});
 
-		container.getChildren().add(addTargetButton);
+		targetButtonContainer.getChildren().add(targetButton);
 		
 		scrollPane.setPrefViewportHeight((TARGET_BUTTON_DIMS + 65) * (targetCount / TARGET_COLUMNS));
 	}
