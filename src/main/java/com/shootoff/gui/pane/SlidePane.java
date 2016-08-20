@@ -1,4 +1,4 @@
-package com.shootoff.gui;
+package com.shootoff.gui.pane;
 
 import java.util.ArrayList;
 import java.util.List;

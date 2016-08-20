@@ -1,4 +1,4 @@
-package com.shootoff.gui;
+package com.shootoff.gui.pane;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
+import com.shootoff.gui.TargetListener;
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.TargetRepository;
 import com.shootoff.targets.io.TargetIO;

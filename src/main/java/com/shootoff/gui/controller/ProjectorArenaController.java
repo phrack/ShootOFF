@@ -36,8 +36,8 @@ import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
-import com.shootoff.gui.TargetDistancePane;
 import com.shootoff.gui.TargetView;
+import com.shootoff.gui.pane.TargetDistancePane;
 import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
 

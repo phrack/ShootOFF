@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.pane;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
