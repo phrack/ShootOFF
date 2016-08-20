@@ -104,13 +104,7 @@
                </content>
             </ScrollPane>
             <TabPane fx:id="cameraTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER" />
-            <GridPane fx:id="buttonsGridPane" alignment="TOP_CENTER">
-               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="10.0" />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-               </rowConstraints>
+            <VBox fx:id="buttonsContainer" alignment="CENTER" spacing="30.0">
                <children>
                   <Button mnemonicParsing="false" onAction="#resetClicked" prefHeight="100.0" prefWidth="150.0" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
                      <GridPane.margin>
@@ -118,10 +112,7 @@
                      </GridPane.margin>
                   </Button>
                </children>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
-            </GridPane>
+            </VBox>
          </children>
          <VBox.margin>
             <Insets />

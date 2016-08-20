@@ -106,7 +106,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
@@ -137,7 +136,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
-	@FXML private GridPane buttonsGridPane;
+	@FXML private VBox buttonsContainer;
 
 	private TargetPane targetPane;
 	
@@ -420,8 +419,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return shootOFFStage;
 	}
 
-	public GridPane getButtonsPane() {
-		return buttonsGridPane;
+	public VBox getButtonsPane() {
+		return buttonsContainer;
 	}
 
 	public TableView<ShotEntry> getShotEntryTable() {

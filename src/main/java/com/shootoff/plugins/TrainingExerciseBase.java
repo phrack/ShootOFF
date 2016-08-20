@@ -59,14 +59,13 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.HPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -89,7 +88,7 @@ public class TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TargetRepository targetManager;
-	private GridPane buttonsPane;
+	private VBox buttonsContainer;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 
@@ -112,11 +111,11 @@ public class TrainingExerciseBase {
 
 	// This is only required for unit tests where we don't want to create a full
 	// ShootOFFController
-	public void init(final Configuration config, final CamerasSupervisor camerasSupervisor, final GridPane buttonsPane,
+	public void init(final Configuration config, final CamerasSupervisor camerasSupervisor, final VBox buttonsPane,
 			final TableView<ShotEntry> shotEntryTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
-		this.buttonsPane = buttonsPane;
+		this.buttonsContainer = buttonsPane;
 		this.shotTimerTable = shotEntryTable;
 
 		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
@@ -359,12 +358,12 @@ public class TrainingExerciseBase {
 	 */
 	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
 		final Button exerciseButton = new Button(text);
+		Button resetButton = (Button) buttonsContainer.getChildren().get(0);
 		exerciseButton.setOnAction(eventHandler);
-		GridPane.setMargin(exerciseButton, GridPane.getMargin(buttonsPane.getChildren().get(0)));
-		GridPane.setHalignment(exerciseButton, HPos.CENTER);
+		exerciseButton.setPrefSize(resetButton.getPrefWidth(), resetButton.getPrefHeight());
 		exerciseButtons.add(exerciseButton);
 
-		buttonsPane.add(exerciseButton, buttonsPane.getChildren().size(), 0);
+		buttonsContainer.getChildren().add(exerciseButton);
 
 		return exerciseButton;
 	}
@@ -372,7 +371,7 @@ public class TrainingExerciseBase {
 	public void removeShootOFFButton(final Button exerciseButton) {
 		if (!exerciseButtons.contains(exerciseButton)) return;
 
-		buttonsPane.getChildren().remove(exerciseButton);
+		buttonsContainer.getChildren().remove(exerciseButton);
 		exerciseButtons.remove(exerciseButton);
 	}
 
@@ -539,7 +538,7 @@ public class TrainingExerciseBase {
 
 		while (itExerciseButtons.hasNext()) {
 			final Button exerciseButton = itExerciseButtons.next();
-			buttonsPane.getChildren().remove(exerciseButton);
+			buttonsContainer.getChildren().remove(exerciseButton);
 			itExerciseButtons.remove();
 		}
 

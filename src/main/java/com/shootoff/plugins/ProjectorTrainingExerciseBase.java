@@ -32,7 +32,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import com.shootoff.camera.CamerasSupervisor;
@@ -81,9 +81,9 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	// For unit tests
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, GridPane buttonsPane,
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, VBox buttonsContainer,
 			TableView<ShotEntry> shotEntryTable, ProjectorArenaController arenaController) {
-		super.init(config, camerasSupervisor, buttonsPane, shotEntryTable);
+		super.init(config, camerasSupervisor, buttonsContainer, shotEntryTable);
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaController = arenaController;
