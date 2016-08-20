@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
+<VBox fx:id="container" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
    <children>
       <HBox alignment="TOP_CENTER" prefWidth="200.0" spacing="175.0" VBox.vgrow="ALWAYS">
          <children>
@@ -32,18 +32,7 @@
                   </ContextMenu>
                </contextMenu>
             </Button>
-            <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets">
-               <contextMenu>
-                  <ContextMenu fx:id="targetsContextMenu">
-                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#createTargetMenuClicked" text="Create Target..." />
-                        <Menu fx:id="addTargetMenu" mnemonicParsing="false" text="Add Target" />
-                        <Menu fx:id="editTargetMenu" mnemonicParsing="false" text="Edit Target" />
-                        <MenuItem mnemonicParsing="false" onAction="#hideTargetsClicked" text="Hide Targets" />
-                     </items>
-                  </ContextMenu>
-               </contextMenu>
-            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets" />
             <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training">
                <contextMenu>
                   <ContextMenu fx:id="trainingContextMenu">

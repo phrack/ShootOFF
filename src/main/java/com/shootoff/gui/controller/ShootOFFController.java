@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +56,7 @@ import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.ShotSectorPane;
-import com.shootoff.gui.TargetListener;
+import com.shootoff.gui.TargetPane;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
@@ -67,7 +66,7 @@ import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.Target;
-import com.shootoff.targets.TargetManager;
+import com.shootoff.targets.TargetRepository;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 
@@ -108,23 +107,21 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import marytts.util.io.FileFilter;
 
-public class ShootOFFController implements CameraConfigListener, CameraErrorView, TargetListener, TargetManager,
+public class ShootOFFController implements CameraConfigListener, CameraErrorView, TargetRepository,
 		PluginListener, CalibrationConfigurator, Resetter {
 	private Stage shootOFFStage;
+	@FXML private VBox container;
 	@FXML private ContextMenu fileContextMenu;
-	@FXML private ContextMenu targetsContextMenu;
 	@FXML private ContextMenu trainingContextMenu;
 	@FXML private ContextMenu projectorContextMenu;
-	@FXML private Menu addTargetMenu;
-	@FXML private Menu editTargetMenu;
 	@FXML private RadioButton noneTrainingMenuItem;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
@@ -142,6 +139,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private MenuItem toggleArenaShotsMenuItem;
 	@FXML private GridPane buttonsGridPane;
 
+	private TargetPane targetPane;
+	
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
@@ -158,8 +157,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private Stage sessionViewerStage;
 	
 	
-	static public double getDpiScaleFactorForScreen()
-	{
+	static public double getDpiScaleFactorForScreen() {
 		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
 		// Number of actual horizontal lines (768p)
 		final double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
@@ -178,7 +176,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		noneTrainingMenuItem.setTextFill(Color.BLACK);
 		
-		findTargets();
+		targetPane = new TargetPane(container, this);
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
@@ -407,7 +405,17 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			return CalibrationOption.ONLY_IN_BOUNDS;
 		}
 	}
+	
+	@Override
+	public CameraView getSelectedCameraView() {
+		return camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex());
+	}
 
+	@Override
+	public CameraManager getSelectedCameraManager() {
+		return camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
+	}
+	
 	public Stage getStage() {
 		return shootOFFStage;
 	}
@@ -596,21 +604,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 
 		return contextMenu;
-	}
-
-	private void findTargets() {
-		File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
-
-		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
-
-		if (targetFiles != null) {
-			Arrays.sort(targetFiles);
-			for (File file : targetFiles) {
-				newTarget(file);
-			}
-		} else {
-			logger.error("Failed to find target files because a list of files could not be retrieved");
-		}
 	}
 
 	@Override
@@ -806,38 +799,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void targetsButtonClicked(MouseEvent event) {
-		targetsContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());	
+		targetPane.show();
 	}
-	
-	@FXML
-	public void hideTargetsClicked(ActionEvent event) {
-		MenuItem hideTargetMenuItem = (MenuItem) event.getSource();
-
-		if (hideTargetMenuItem.getText().equals("Hide Targets")) {
-			hideTargetMenuItem.setText("Show Targets");
-
-			for (Target target : getTargets()) {
-				target.setVisible(false);
-			}
-		} else {
-			hideTargetMenuItem.setText("Hide Targets");
-
-			for (Target target : getTargets()) {
-				target.setVisible(true);
-			}
-		}
-	}
-
-	@FXML
-	public void createTargetMenuClicked(ActionEvent event) throws IOException {
-		FXMLLoader loader = createPreferencesStage();
-
-		CameraManager currentCamera = camerasSupervisor
-				.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-		Image currentFrame = currentCamera.getCurrentFrame();
-		((TargetEditorController) loader.getController()).init(currentFrame, this);
-	}
-	
 	
 	@FXML
 	public void trainingButtonClicked(MouseEvent event) {
@@ -1119,22 +1082,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 
-	private FXMLLoader createPreferencesStage() throws IOException {
-		FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
-		loader.load();
-
-		Stage preferencesStage = new Stage();
-
-		preferencesStage.initOwner(shootOFFStage);
-		preferencesStage.initModality(Modality.WINDOW_MODAL);
-		preferencesStage.setTitle("TargetEditor");
-		preferencesStage.setScene(new Scene(loader.getRoot()));
-		preferencesStage.show();
-
-		return loader;
-	}
-
 	@FXML
 	public void resetClicked(ActionEvent event) {
 		reset();
@@ -1193,49 +1140,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		};
 
 		TimerPool.schedule(restartDetection, msDuration);
-	}
-
-	@Override
-	public void newTarget(File path) {
-		String targetPath = path.getPath();
-
-		String targetName = targetPath
-				.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
-
-		MenuItem addTargetItem = new MenuItem(targetName);
-		addTargetItem.setMnemonicParsing(false);
-
-		addTargetItem.setOnAction((e) -> {
-			camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex()).addTarget(path);
-		});
-
-		MenuItem addProjectorTargetItem = new MenuItem(targetName);
-		addProjectorTargetItem.setMnemonicParsing(false);
-
-		addProjectorTargetItem.setOnAction((e) -> {
-			Optional<Target> target = arenaController.getCanvasManager().addTarget(path);
-			if (target.isPresent()) arenaController.targetAdded(target.get());
-		});
-
-		MenuItem editTargetItem = new MenuItem(targetName);
-		editTargetItem.setMnemonicParsing(false);
-
-		editTargetItem.setOnAction((e) -> {
-			try {
-				FXMLLoader loader = createPreferencesStage();
-
-				CameraManager currentCamera = camerasSupervisor
-						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-				Image currentFrame = currentCamera.getCurrentFrame();
-				((TargetEditorController) loader.getController()).init(currentFrame, this, path);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		});
-
-		addTargetMenu.getItems().add(addTargetItem);
-		addArenaTargetMenu.getItems().add(addProjectorTargetItem);
-		editTargetMenu.getItems().add(editTargetItem);
 	}
 
 	@Override

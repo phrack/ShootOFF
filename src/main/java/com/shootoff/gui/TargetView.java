@@ -123,7 +123,7 @@ public class TargetView implements Target {
 		keyPressed();
 	}
 
-	// Used by the session viewer and for testing
+	// Used by the session viewer, target pane, and for testing
 	public TargetView(Group target, Map<String, String> targetTags, List<Target> targets) {
 		this.targetFile = null;
 		this.targetGroup = target;

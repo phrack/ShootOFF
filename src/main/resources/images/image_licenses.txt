@@ -1,5 +1,6 @@
 The following images were not created by ShootOFF contributors and have their own licenses:
 
+back_button.png Creative Commons Attribution by Appzgear (http://www.flaticon.com/packs/clear-icons)
 gnome_*.png -- GNU/GPL
 tags.png -- Freeware by Midtone Design Studios
 bring_forward.png -- LGPL

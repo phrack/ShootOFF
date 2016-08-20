@@ -51,7 +51,7 @@ import com.shootoff.gui.controller.DelayedStartIntervalController;
 import com.shootoff.gui.controller.ParIntervalController;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
-import com.shootoff.targets.TargetManager;
+import com.shootoff.targets.TargetRepository;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -88,7 +88,7 @@ public class TrainingExerciseBase {
 	@SuppressWarnings("unused") private List<Target> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
-	private TargetManager targetManager;
+	private TargetRepository targetManager;
 	private GridPane buttonsPane;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
@@ -107,7 +107,7 @@ public class TrainingExerciseBase {
 
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
-		this.targetManager = (TargetManager) controller;
+		this.targetManager = (TargetRepository) controller;
 	}
 
 	// This is only required for unit tests where we don't want to create a full
