@@ -69,7 +69,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 
 /**
@@ -89,7 +88,6 @@ public class TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private CameraViews cameraViews;
-	private Stage shootOFFStage = null;
 	private VBox buttonsContainer;
 	private HBox trainingExerciseContainer;
 	private TableView<ShotEntry> shotTimerTable;
@@ -113,7 +111,6 @@ public class TrainingExerciseBase {
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
 		this.cameraViews = (CameraViews) controller;
-		this.shootOFFStage = controller.getStage();
 		this.trainingExerciseContainer = controller.getTrainingExerciseContainer();
 	}
 
@@ -156,10 +153,6 @@ public class TrainingExerciseBase {
 	 */
 	public TrainingExerciseBase getInstance() {
 		return this;
-	}
-
-	public Stage getShootOFFStage() {
-		return shootOFFStage;
 	}
 	
 	private static class DelayPane extends GridPane {
@@ -259,6 +252,53 @@ public class TrainingExerciseBase {
 		exercisePanes.add(parPane);
 		haveParControls = true;
 	}
+	
+	/**
+	 * Add a pane with exercise-specific controls (e.g. to collect user
+	 * settings) to the bottom of the main ShootOFF window.
+	 * 
+	 * @param pane
+	 *            a pane with exercise-specific controls to add to the main
+	 *            ShootOFF window
+	 */
+	public void addExercisePane(Pane pane) {
+		trainingExerciseContainer.getChildren().add(pane);
+		exercisePanes.add(pane);
+	}
+	
+	/**
+	 * Adds a button to the right of the reset button on the main ShootOFF
+	 * window with caption <tt>text</tt> and action handler
+	 * <tt>eventHandler</tt>.
+	 * 
+	 * @param text
+	 *            the caption to display on the new button
+	 * 
+	 * @param eventHandler
+	 *            the event handler that performs actions when this new button
+	 *            is clicked
+	 * 
+	 * @return the new button that was added to the main ShootOFF window
+	 */
+	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
+		final Button exerciseButton = new Button(text);
+		Button resetButton = (Button) buttonsContainer.getChildren().get(0);
+		exerciseButton.setOnAction(eventHandler);
+		exerciseButton.setPrefSize(resetButton.getPrefWidth(), resetButton.getPrefHeight());
+		exerciseButtons.add(exerciseButton);
+
+		buttonsContainer.getChildren().add(exerciseButton);
+
+		return exerciseButton;
+	}
+
+	public void removeShootOFFButton(final Button exerciseButton) {
+		if (!exerciseButtons.contains(exerciseButton)) return;
+
+		buttonsContainer.getChildren().remove(exerciseButton);
+		exerciseButtons.remove(exerciseButton);
+	}
+
 
 	/**
 	 * Adds a column to the shot timer table. The <tt>name</tt> is used to
@@ -387,39 +427,6 @@ public class TrainingExerciseBase {
 	 */
 	public void pauseShotDetection(final boolean isPaused) {
 		camerasSupervisor.setDetectingAll(!isPaused);
-	}
-
-	/**
-	 * Adds a button to the right of the reset button on the main ShootOFF
-	 * window with caption <tt>text</tt> and action handler
-	 * <tt>eventHandler</tt>.
-	 * 
-	 * @param text
-	 *            the caption to display on the new button
-	 * 
-	 * @param eventHandler
-	 *            the event handler that performs actions when this new button
-	 *            is clicked
-	 * 
-	 * @return the new button that was added to the main ShootOFF window
-	 */
-	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
-		final Button exerciseButton = new Button(text);
-		Button resetButton = (Button) buttonsContainer.getChildren().get(0);
-		exerciseButton.setOnAction(eventHandler);
-		exerciseButton.setPrefSize(resetButton.getPrefWidth(), resetButton.getPrefHeight());
-		exerciseButtons.add(exerciseButton);
-
-		buttonsContainer.getChildren().add(exerciseButton);
-
-		return exerciseButton;
-	}
-
-	public void removeShootOFFButton(final Button exerciseButton) {
-		if (!exerciseButtons.contains(exerciseButton)) return;
-
-		buttonsContainer.getChildren().remove(exerciseButton);
-		exerciseButtons.remove(exerciseButton);
 	}
 
 	/**

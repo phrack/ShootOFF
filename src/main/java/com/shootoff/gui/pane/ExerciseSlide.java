@@ -77,8 +77,7 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 				sessionViewerSlide.showBody();
 			}
 		});
-		
-		
+			
 		exerciseButtonContainer.setPrefColumns(COLUMNS);
 		exerciseButtonContainer.setPadding(new Insets(0, 65, 65, 65));
 
@@ -91,7 +90,6 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 		addNoneButton();
 		
 		addBodyNode(scrollPane);
-
 	}
 	
 	@Override
@@ -191,7 +189,7 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 
 		exerciseButton.setOnAction((event) -> {
 			selectedExercise = exercise;
-			exerciseListener.setExercise(exercise);
+			exerciseListener.setProjectorExercise(exercise);
 			toggleGroup.selectToggle(exerciseButton);
 		});
 		

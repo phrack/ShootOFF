@@ -32,15 +32,11 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import com.shootoff.camera.Shot;
@@ -60,8 +56,6 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	private Timeline targetAnimation;
 	private int score = 0;
 
-	private boolean testing = false;
-
 	public BouncingTargets() {}
 
 	public BouncingTargets(List<Target> targets) {
@@ -74,8 +68,6 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	
 	// For testing
 	protected void init(int shootCount, int dontShootCount, int maxVelocity) {
-		testing = true;
-
 		this.shootCount = shootCount;
 		this.dontShootCount = dontShootCount;
 		setMaxVelocity(maxVelocity);
@@ -96,7 +88,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 	@Override
 	public void init() {
-		collectSettings();
+		addSettingControls();
 
 		startExercise();
 	}
@@ -112,10 +104,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		targetAnimation.play();
 	}
 
-	private void collectSettings() {
-		super.pauseShotDetection(true);
-
-		final Stage bouncingTargetsStage = new Stage();
+	private void addSettingControls() {
 		final GridPane bouncingTargetsPane = new GridPane();
 
 		final ColumnConstraints cc = new ColumnConstraints(100);
@@ -134,11 +123,21 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			targetCounts.add(Integer.toString(i));
 		final ComboBox<String> shootTargetsComboBox = new ComboBox<String>(targetCounts);
 		shootTargetsComboBox.getSelectionModel().select(SHOOT_DEFAULT_COUNT);
+		shootTargetsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+			shootCount = Integer.parseInt(newValue);
+			stopExercise();
+			startExercise();
+	    });
 		bouncingTargetsPane.add(new Label("Shoot Targets:"), 0, 0);
 		bouncingTargetsPane.add(shootTargetsComboBox, 1, 0);
 
 		final ComboBox<String> dontShootTargetsComboBox = new ComboBox<String>(targetCounts);
 		dontShootTargetsComboBox.getSelectionModel().select(DONT_SHOOT_DEFAULT_COUNT);
+		dontShootTargetsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+			dontShootCount = Integer.parseInt(newValue);
+			stopExercise();
+			startExercise();
+	    });
 		bouncingTargetsPane.add(new Label("Don't Shoot Targets:"), 0, 1);
 		bouncingTargetsPane.add(dontShootTargetsComboBox, 1, 1);
 
@@ -147,34 +146,20 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			maxVelocity.add(Integer.toString(i));
 		final ComboBox<String> maxVelocityComboBox = new ComboBox<String>(maxVelocity);
 		maxVelocityComboBox.getSelectionModel().select(DEFAULT_MAX_VELOCITY - 1);
+		maxVelocityComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+			BouncingTargets.maxVelocity = Integer.parseInt(newValue);
+			stopExercise();
+			startExercise();
+	    });
 		bouncingTargetsPane.add(new Label("Max Target Speed:"), 0, 2);
 		bouncingTargetsPane.add(maxVelocityComboBox, 1, 2);
 		
 		final CheckBox removeTargets = new CheckBox();
+		removeTargets.setOnAction((event) -> removeShootTargets = removeTargets.isSelected());
 		bouncingTargetsPane.add(new Label("Remove Hit Shoot Targets:"), 0, 3);
 		bouncingTargetsPane.add(removeTargets, 1, 3);
-
-		final Button okButton = new Button("OK");
-		okButton.setDefaultButton(true);
-		bouncingTargetsPane.add(okButton, 1, 4);
-
-		okButton.setOnAction((e) -> {
-			shootCount = Integer.parseInt(shootTargetsComboBox.getSelectionModel().getSelectedItem());
-			dontShootCount = Integer.parseInt(dontShootTargetsComboBox.getSelectionModel().getSelectedItem());
-			BouncingTargets.maxVelocity = Integer.parseInt(maxVelocityComboBox.getSelectionModel().getSelectedItem());
-			removeShootTargets = removeTargets.isSelected();
-			
-			bouncingTargetsStage.close();
-		});
-
-		final Scene scene = new Scene(bouncingTargetsPane);
-		bouncingTargetsStage.initOwner(super.getShootOFFStage());
-		bouncingTargetsStage.initModality(Modality.WINDOW_MODAL);
-		bouncingTargetsStage.setTitle("Bouncing Targets Settings");
-		bouncingTargetsStage.setScene(scene);
-		bouncingTargetsStage.showAndWait();
-
-		super.pauseShotDetection(false);
+		
+		super.addExercisePane(bouncingTargetsPane);
 	}
 
 	protected List<BouncingTarget> getShootTargets() {
@@ -363,8 +348,6 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	@Override
 	public void reset(List<Target> targets) {
 		stopExercise();
-		
-		if (!testing) collectSettings();
 
 		addTargets(shootTargets, "targets/shoot_dont_shoot/shoot.target", shootCount);
 		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target", dontShootCount);
