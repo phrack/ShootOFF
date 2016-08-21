@@ -47,7 +47,6 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.controller.DelayedStartIntervalController;
 import com.shootoff.gui.controller.ParIntervalController;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
@@ -65,6 +64,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -87,16 +91,18 @@ public class TrainingExerciseBase {
 	@SuppressWarnings("unused") private List<Target> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
-	private CameraViews targetManager;
+	private CameraViews cameraViews;
+	private Stage shootOFFStage = null;
 	private VBox buttonsContainer;
+	private HBox trainingExerciseContainer;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
+	private boolean haveDelayControls = false;
 	
-	private Stage shootOFFStage = null;
-
-	private final static Map<CameraView, Label> exerciseLabels = new HashMap<CameraView, Label>();
-	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
-	private final static List<Button> exerciseButtons = new ArrayList<Button>();
+	private final static Map<CameraView, Label> exerciseLabels = new HashMap<>();
+	private final static List<Pane> exercisePanes = new ArrayList<>();
+	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<>();
+	private final static List<Button> exerciseButtons = new ArrayList<>();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
@@ -108,8 +114,9 @@ public class TrainingExerciseBase {
 
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
-		this.targetManager = (CameraViews) controller;
+		this.cameraViews = (CameraViews) controller;
 		this.shootOFFStage = controller.getStage();
+		this.trainingExerciseContainer = controller.getTrainingExerciseContainer();
 	}
 
 	// This is only required for unit tests where we don't want to create a full
@@ -158,7 +165,7 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * Shows a popup window that lets the user set the interval for a random
+	 * Shows controls that let the user set the interval for a random
 	 * start delay in seconds. Notify interval points to a function that gets
 	 * the min and max values for the interval as parameters.
 	 * 
@@ -169,24 +176,51 @@ public class TrainingExerciseBase {
 	 * @since 1.4
 	 */
 	public void getDelayedStartInterval(final DelayedStartListener listener) {
-		final FXMLLoader loader = new FXMLLoader(
-				TrainingExerciseBase.class.getClassLoader().getResource("com/shootoff/gui/DelayedStartInterval.fxml"));
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("Error reading DelayedStartInterval FXML file", e);
-		}
+		if (listener == null) throw new IllegalArgumentException("Delayed start listener must be non-null");
+		
+		if (haveDelayControls) return;
+		
+		final GridPane delayPane = new GridPane();
+		delayPane.getColumnConstraints().add(new ColumnConstraints(100));
+		
+		final Label instructionsLabel = new Label("Set interval within which a beep will sound\n"
+				+ "to signal the start of a round.\nDefault: A round starts after a random wait\n"
+				+ "between 4 and 8 seconds in length.\n");
+		instructionsLabel.setPrefSize(300, 77);
+		
+		delayPane.add(instructionsLabel, 0, 0, 2, 3);
+		delayPane.addRow(3, new Label("Min (s)"));
+		delayPane.addRow(4, new Label("Max (s)"));
+		
+		final TextField minTextField = new TextField("4");
+		delayPane.add(minTextField, 1, 3);
+		
+		final TextField maxTextField = new TextField("8");
+		delayPane.add(maxTextField, 1, 4);
+		
+		minTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue.matches("\\d*")) {
+				minTextField.setText(oldValue);
+				minTextField.positionCaret(minTextField.getLength());
+			} else {
+				listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
+						Integer.parseInt(maxTextField.getText()));
+			}
+		});
 
-		final Stage delayedStartIntervalStage = new Stage();
-
-		final DelayedStartIntervalController controller = (DelayedStartIntervalController) loader.getController();
-		controller.init(listener);
-
-		delayedStartIntervalStage.initOwner(getShootOFFStage());
-		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
-		delayedStartIntervalStage.setTitle("Delayed Start Interval");
-		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
-		delayedStartIntervalStage.showAndWait();
+		maxTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (!newValue.matches("\\d*")) {
+				maxTextField.setText(oldValue);
+				maxTextField.positionCaret(maxTextField.getLength());
+			} else {
+				listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
+						Integer.parseInt(maxTextField.getText()));
+			}
+		});
+		
+		trainingExerciseContainer.getChildren().add(delayPane);
+		exercisePanes.add(delayPane);
+		haveDelayControls = true;
 	}
 
 	/**
@@ -320,7 +354,7 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		if (config.getExercise().isPresent()) config.getExercise().get().reset(targetManager.getTargets());
+		if (config.getExercise().isPresent()) config.getExercise().get().reset(cameraViews.getTargets());
 	}
 
 	/**
@@ -330,7 +364,7 @@ public class TrainingExerciseBase {
 	 *         targets known at the time this method was called)
 	 */
 	public List<Target> getCurrentTargets() {
-		return targetManager.getTargets();
+		return cameraViews.getTargets();
 	}
 
 	/**
@@ -537,11 +571,17 @@ public class TrainingExerciseBase {
 
 		exerciseLabels.clear();
 
+		final Iterator<Pane> itExercisePanes = exercisePanes.iterator();
+
+		while (itExercisePanes.hasNext()) {
+			trainingExerciseContainer.getChildren().remove(itExercisePanes.next());
+			itExercisePanes.remove();
+		}
+		
 		final Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
 
 		while (itExerciseButtons.hasNext()) {
-			final Button exerciseButton = itExerciseButtons.next();
-			buttonsContainer.getChildren().remove(exerciseButton);
+			buttonsContainer.getChildren().remove(itExerciseButtons.next());
 			itExerciseButtons.remove();
 		}
 

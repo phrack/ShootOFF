@@ -22,12 +22,7 @@
          <children>
             <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File" />
             <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets" />
-            <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training">
-               <contextMenu>
-                  <ContextMenu fx:id="trainingContextMenu">
-                  </ContextMenu>
-               </contextMenu>
-            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training" />
             <Button mnemonicParsing="false" onMouseClicked="#projectorButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Projector">
                <contextMenu>
                   <ContextMenu fx:id="projectorContextMenu">
@@ -97,10 +92,10 @@
                   <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                </padding>
             </HBox>
-            <ScrollPane hbarPolicy="NEVER" prefHeight="150.0" prefWidth="200.0">
-              <content>
-                  <Pane />
-              </content>
+            <ScrollPane hbarPolicy="NEVER" prefHeight="150.0" HBox.hgrow="ALWAYS">
+               <content>
+                  <HBox fx:id="trainingExerciseContainer" />
+               </content>
             </ScrollPane>
          </children>
       </VBox>

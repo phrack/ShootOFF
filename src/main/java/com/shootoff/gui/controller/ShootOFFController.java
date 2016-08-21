@@ -111,7 +111,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private Stage shootOFFStage;
 	@FXML private HBox controlsContainer;
 	@FXML private VBox bodyContainer;
-	@FXML private ContextMenu trainingContextMenu;
 	@FXML private ContextMenu projectorContextMenu;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
@@ -128,9 +127,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private Menu coursesMenu;
 	@FXML private MenuItem toggleArenaShotsMenuItem;
 	@FXML private VBox buttonsContainer;
+	@FXML private HBox trainingExerciseContainer;
 
 	private TargetSlide targetPane;
-	
 	private ExerciseSlide exerciseSlide;
 	
 	private String defaultWindowTitle;
@@ -416,6 +415,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	public VBox getButtonsPane() {
 		return buttonsContainer;
+	}
+	
+	public HBox getTrainingExerciseContainer() {
+		return trainingExerciseContainer;
 	}
 
 	public TableView<ShotEntry> getShotEntryTable() {
