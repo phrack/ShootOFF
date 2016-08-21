@@ -1,12 +1,18 @@
 package com.shootoff.gui.pane;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.gui.ExerciseListener;
+import com.shootoff.gui.controller.PluginManagerController;
+import com.shootoff.gui.controller.SessionViewerController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginListener;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -14,6 +20,8 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.TextAlignment;
@@ -32,11 +40,10 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 	private ExerciseListener exerciseListener = null;
 	
 	TrainingExercise selectedExercise = null;
+	ToggleGroup toggleGroup = new ToggleGroup();
+	final ToggleButton noneButton = new ToggleButton("None");
 	
 	private int exerciseCount = 0;
-
-	private Stage sessionViewerStage;
-	private Object pluginManagerStage;
 	
 	public ExerciseSlide(Pane parentControls, Pane parentBody, ExerciseListener exerciseListener) {
 		super(parentControls, parentBody);
@@ -46,11 +53,29 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 		this.exerciseListener = exerciseListener;
 		
 		addSlideControlButton("Get Exercises", (event) -> {
-			showExerciseManager();
+			Optional<FXMLLoader> loader = createPluginManagerStage();
+
+			if (loader.isPresent()) {
+				PluginManagerController pluginManagerController = (PluginManagerController) loader.get().getController();
+				pluginManagerController.init(exerciseListener.getPluginEngine(), (Stage) parentControls.getScene().getWindow());
+				
+				final PluginManagerSlide pluginViewerSlide = new PluginManagerSlide(parentControls, parentBody, pluginManagerController);
+				pluginViewerSlide.showControls();
+				pluginViewerSlide.showBody();
+			}
 		});
 		
 		addSlideControlButton("View Sessions", (event) -> {
-			showSessionViewer();
+			Optional<FXMLLoader> loader = createSessionViewerStage();
+
+			if (loader.isPresent()) {
+				SessionViewerController sessionViewerController = (SessionViewerController) loader.get().getController();
+				sessionViewerController.init(exerciseListener.getConfiguration());
+				
+				final SessionViewerSlide sessionViewerSlide = new SessionViewerSlide(parentControls, parentBody, sessionViewerController);
+				sessionViewerSlide.showControls();
+				sessionViewerSlide.showBody();
+			}
 		});
 		
 		
@@ -77,60 +102,51 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 	}
 
 	private void addNoneButton() {
-		final Button exerciseButton = new Button("None");
-		exerciseButton.setContentDisplay(ContentDisplay.TOP);
-		exerciseButton.setTextAlignment(TextAlignment.CENTER);
-		exerciseButton.setPrefSize(BUTTON_DIMS, BUTTON_DIMS);
-		exerciseButton.setWrapText(true);
+		noneButton.setContentDisplay(ContentDisplay.TOP);
+		noneButton.setTextAlignment(TextAlignment.CENTER);
+		noneButton.setPrefSize(BUTTON_DIMS, BUTTON_DIMS);
+		noneButton.setWrapText(true);
+		noneButton.setToggleGroup(toggleGroup);
 
-		exerciseButton.setOnAction((event) -> {
+		noneButton.setOnAction((event) -> {
 			selectedExercise = null;
 			exerciseListener.setExercise(null);
+			toggleGroup.selectToggle(noneButton);
 		});
 		
-		exerciseButtonContainer.getChildren().add(exerciseButton);
+		exerciseButtonContainer.getChildren().add(noneButton);
 		
 		scrollPane.setPrefViewportHeight((BUTTON_DIMS + 65) * (exerciseCount / COLUMNS));
 	}
-
-	//TODO: Implement
-	private void showSessionViewer() {
-		/*FXMLLoader loader = new FXMLLoader(
+	
+	
+	private Optional<FXMLLoader> createSessionViewerStage() {
+		FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
-		loader.load();
-
-		sessionViewerStage = new Stage();
-
-		sessionViewerStage.setTitle("Session Viewer");
-		sessionViewerStage.setScene(new Scene(loader.getRoot()));
-		sessionViewerStage.show();
-
-		SessionViewerController sessionViewerController = (SessionViewerController) loader.getController();
-		sessionViewerController.init(config);*/
-	}
-
-	//TODO: Implement
-	private void showExerciseManager() {
-		/*if (pluginManagerStage == null) {
-			FXMLLoader loader = new FXMLLoader(
-					getClass().getClassLoader().getResource("com/shootoff/gui/PluginManager.fxml"));
+		try {
 			loader.load();
+		} catch (IOException e) {
+			logger.error("Cannot load SessionViewer.fxml", e);
+			return Optional.empty();
+		}
 
-			pluginManagerStage = new Stage();
-
-			pluginManagerStage.initOwner(shootOFFStage);
-			pluginManagerStage.setTitle("Exercise Manager");
-			pluginManagerStage.setScene(new Scene(loader.getRoot()));
-			pluginManagerStage.show();
-			pluginManagerStage.setOnCloseRequest((e) -> {
-				pluginManagerStage = null;
-			});
-			((PluginManagerController) loader.getController()).init(pluginEngine);
-		} else {
-			pluginManagerStage.show();
-			pluginManagerStage.toFront();
-		}*/
+		return Optional.of(loader);
 	}
+	
+	
+	private Optional<FXMLLoader> createPluginManagerStage() {
+		FXMLLoader loader = new FXMLLoader(
+				getClass().getClassLoader().getResource("com/shootoff/gui/PluginManager.fxml"));
+		try {
+			loader.load();
+		} catch (IOException e) {
+			logger.error("Cannot load SessionViewer.fxml", e);
+			return Optional.empty();
+		}
+
+		return Optional.of(loader);
+	}
+
 
 	@Override
 	public void registerExercise(TrainingExercise exercise) {
@@ -138,16 +154,18 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 		exerciseCount++;
 	
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
-		final Button exerciseButton = new Button(exercise.getInfo().getName());
+		final ToggleButton exerciseButton = new ToggleButton(exercise.getInfo().getName());
 		exerciseButton.setContentDisplay(ContentDisplay.TOP);
 		exerciseButton.setTextAlignment(TextAlignment.CENTER);
 		exerciseButton.setPrefSize(BUTTON_DIMS, BUTTON_DIMS);
 		exerciseButton.setTooltip(t);
 		exerciseButton.setWrapText(true);
+		exerciseButton.setToggleGroup(toggleGroup);
 
 		exerciseButton.setOnAction((event) -> {
 			selectedExercise = exercise;
 			exerciseListener.setExercise(exercise);
+			toggleGroup.selectToggle(exerciseButton);
 		});
 
 		exerciseButtonContainer.getChildren().add(exerciseButton);
@@ -163,16 +181,18 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 		exerciseCount++;
 		
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
-		final Button exerciseButton = new Button(exercise.getInfo().getName());
+		final ToggleButton exerciseButton = new ToggleButton(exercise.getInfo().getName());
 		exerciseButton.setContentDisplay(ContentDisplay.TOP);
 		exerciseButton.setTextAlignment(TextAlignment.CENTER);
 		exerciseButton.setPrefSize(BUTTON_DIMS, BUTTON_DIMS);
 		exerciseButton.setTooltip(t);
 		exerciseButton.setWrapText(true);
+		exerciseButton.setToggleGroup(toggleGroup);
 
 		exerciseButton.setOnAction((event) -> {
 			selectedExercise = exercise;
 			exerciseListener.setExercise(exercise);
+			toggleGroup.selectToggle(exerciseButton);
 		});
 		
 		//TODO: separate projector items
@@ -192,6 +212,7 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 			{
 				exerciseListener.setExercise(null);
 				selectedExercise = null;
+				toggleGroup.selectToggle(noneButton);
 			}
 			
 			for (Node n : exerciseButtonContainer.getChildren())
@@ -207,7 +228,7 @@ public class ExerciseSlide extends Slide implements PluginListener  {
 	}
 
 	public void disableProjectorExercises() {
-		// TODO Auto-generated method stub
+		// TODO Implement
 		
 	}
 

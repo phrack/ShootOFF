@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<HBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.SessionViewerController">
+<HBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:id="sessionViewerPane" fx:controller="com.shootoff.gui.controller.SessionViewerController">
    <children>
       <ListView fx:id="sessionListView" HBox.hgrow="ALWAYS" />
       <VBox prefHeight="200.0" prefWidth="100.0">
