@@ -47,18 +47,16 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.controller.ParIntervalController;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.CameraViews;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -71,7 +69,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -98,6 +95,7 @@ public class TrainingExerciseBase {
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 	private boolean haveDelayControls = false;
+	private boolean haveParControls = false;
 	
 	private final static Map<CameraView, Label> exerciseLabels = new HashMap<>();
 	private final static List<Pane> exercisePanes = new ArrayList<>();
@@ -163,6 +161,47 @@ public class TrainingExerciseBase {
 	public Stage getShootOFFStage() {
 		return shootOFFStage;
 	}
+	
+	private static class DelayPane extends GridPane {
+		public DelayPane(DelayedStartListener listener) {
+			this.getColumnConstraints().add(new ColumnConstraints(100));
+			
+			final Label instructionsLabel = new Label("Set interval within which a beep will sound\n"
+					+ "to signal the start of a round.\nDefault: A round starts after a random wait\n"
+					+ "between 4 and 8 seconds in length.\n");
+			instructionsLabel.setPrefSize(300, 77);
+			
+			this.add(instructionsLabel, 0, 0, 2, 3);
+			this.addRow(3, new Label("Min (s)"));
+			this.addRow(4, new Label("Max (s)"));
+			
+			final TextField minTextField = new TextField("4");
+			this.add(minTextField, 1, 3);
+			
+			final TextField maxTextField = new TextField("8");
+			this.add(maxTextField, 1, 4);
+			
+			minTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+				if (!newValue.matches("\\d*")) {
+					minTextField.setText(oldValue);
+					minTextField.positionCaret(minTextField.getLength());
+				} else {
+					listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
+							Integer.parseInt(maxTextField.getText()));
+				}
+			});
+
+			maxTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+				if (!newValue.matches("\\d*")) {
+					maxTextField.setText(oldValue);
+					maxTextField.positionCaret(maxTextField.getLength());
+				} else {
+					listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
+							Integer.parseInt(maxTextField.getText()));
+				}
+			});
+		}
+	}
 
 	/**
 	 * Shows controls that let the user set the interval for a random
@@ -180,44 +219,8 @@ public class TrainingExerciseBase {
 		
 		if (haveDelayControls) return;
 		
-		final GridPane delayPane = new GridPane();
-		delayPane.getColumnConstraints().add(new ColumnConstraints(100));
-		
-		final Label instructionsLabel = new Label("Set interval within which a beep will sound\n"
-				+ "to signal the start of a round.\nDefault: A round starts after a random wait\n"
-				+ "between 4 and 8 seconds in length.\n");
-		instructionsLabel.setPrefSize(300, 77);
-		
-		delayPane.add(instructionsLabel, 0, 0, 2, 3);
-		delayPane.addRow(3, new Label("Min (s)"));
-		delayPane.addRow(4, new Label("Max (s)"));
-		
-		final TextField minTextField = new TextField("4");
-		delayPane.add(minTextField, 1, 3);
-		
-		final TextField maxTextField = new TextField("8");
-		delayPane.add(maxTextField, 1, 4);
-		
-		minTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (!newValue.matches("\\d*")) {
-				minTextField.setText(oldValue);
-				minTextField.positionCaret(minTextField.getLength());
-			} else {
-				listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
-						Integer.parseInt(maxTextField.getText()));
-			}
-		});
+		final DelayPane delayPane = new DelayPane(listener);
 
-		maxTextField.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (!newValue.matches("\\d*")) {
-				maxTextField.setText(oldValue);
-				maxTextField.positionCaret(maxTextField.getLength());
-			} else {
-				listener.updatedDelayedStartInterval(Integer.parseInt(minTextField.getText()),
-						Integer.parseInt(maxTextField.getText()));
-			}
-		});
-		
 		trainingExerciseContainer.getChildren().add(delayPane);
 		exercisePanes.add(delayPane);
 		haveDelayControls = true;
@@ -230,24 +233,31 @@ public class TrainingExerciseBase {
 	 *            the object to notify when a par time is set.
 	 */
 	public void getParInterval(final ParListener listener) {
-		final FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/ParInterval.fxml"));
-		try {
-			loader.load();
-		} catch (IOException e) {
-			logger.error("Error reading ParInterval FXML file", e);
-		}
+		if (listener == null) throw new IllegalArgumentException("Par listener must be non-null");
+		
+		if (haveParControls) return;
+		
+		final DelayPane parPane = new DelayPane(listener);
+		
+		final TextField parTextField = new TextField("2.0");
+		parPane.addRow(5, new Label("PAR Time (s)"));
+		parPane.add(parTextField, 1, 5);
 
-		final Stage delayedStartIntervalStage = new Stage();
-
-		final ParIntervalController controller = (ParIntervalController) loader.getController();
-		controller.init(listener);
-
-		delayedStartIntervalStage.initOwner(getShootOFFStage());
-		delayedStartIntervalStage.initModality(Modality.WINDOW_MODAL);
-		delayedStartIntervalStage.setTitle("Par Intervals");
-		delayedStartIntervalStage.setScene(new Scene(loader.getRoot()));
-		delayedStartIntervalStage.showAndWait();
+		parTextField.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (!newValue.matches("^\\d*\\.?\\d*$")) {
+					parTextField.setText(oldValue);
+					parTextField.positionCaret(parTextField.getLength());
+				} else {
+					listener.updatedParInterval(Double.parseDouble(parTextField.getText()));
+				}
+			}
+		});
+		
+		trainingExerciseContainer.getChildren().add(parPane);
+		exercisePanes.add(parPane);
+		haveParControls = true;
 	}
 
 	/**
