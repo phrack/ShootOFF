@@ -55,6 +55,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -66,11 +67,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 public class PluginManagerController {
 	private static final Logger logger = LoggerFactory.getLogger(PluginManagerController.class);
 
+	@FXML private VBox pluginManagerPane;
 	@FXML private TableView<PluginMetadata> pluginsTableView;
 
 	private static final String PLUGIN_METADATA_NAME = "shootoff-plugins.xml";
@@ -78,8 +81,7 @@ public class PluginManagerController {
 
 	private PluginEngine pluginEngine;
 
-	public void init(PluginEngine pluginEngine) {
-		final Stage pluginManagerStage = (Stage) pluginsTableView.getScene().getWindow();
+	public void init(PluginEngine pluginEngine, Stage pluginManagerStage) {
 		final String pluginMetadataAddress = Main.SHOOTOFF_DOMAIN + PLUGIN_METADATA_NAME;
 
 		this.pluginEngine = pluginEngine;
@@ -476,5 +478,9 @@ public class PluginManagerController {
 				}
 			}
 		}
+	}
+
+	public Node getPane() {
+		return pluginManagerPane;
 	}
 }

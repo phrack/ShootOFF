@@ -1090,5 +1090,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 
+	@Override
+	public PluginEngine getPluginEngine() {
+		return pluginEngine;
+	}
+
 	
 }

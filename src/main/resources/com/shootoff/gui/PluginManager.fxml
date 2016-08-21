@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.PluginManagerController">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:id="pluginManagerPane" fx:controller="com.shootoff.gui.controller.PluginManagerController">
    <children>
       <HBox minWidth="750.0" VBox.vgrow="ALWAYS">
          <children>
