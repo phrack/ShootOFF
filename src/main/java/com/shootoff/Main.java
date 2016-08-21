@@ -48,7 +48,6 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
-import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.util.HardwareData;
 import com.shootoff.util.VersionChecker;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
@@ -584,7 +583,7 @@ public class Main extends Application {
 				primaryStage.setTitle("ShootOFF");
 			primaryStage.setScene(scene);
 			final ShootOFFController controller = (ShootOFFController) loader.getController();
-			controller.init(config, new PluginEngine(controller));
+			controller.init(config);
 			primaryStage.show();
 		} catch (IOException e) {
 			logger.error("Error loading ShootOFF FXML file", e);

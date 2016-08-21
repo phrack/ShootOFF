@@ -91,6 +91,8 @@ public class TrainingExerciseBase {
 	private VBox buttonsContainer;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
+	
+	private Stage shootOFFStage = null;
 
 	private final static Map<CameraView, Label> exerciseLabels = new HashMap<CameraView, Label>();
 	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<String, TableColumn<ShotEntry, String>>();
@@ -107,6 +109,7 @@ public class TrainingExerciseBase {
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
 		this.targetManager = (CameraViews) controller;
+		this.shootOFFStage = controller.getStage();
 	}
 
 	// This is only required for unit tests where we don't want to create a full
@@ -151,7 +154,7 @@ public class TrainingExerciseBase {
 	}
 
 	public Stage getShootOFFStage() {
-		return (Stage) shotTimerTable.getScene().getWindow();
+		return shootOFFStage;
 	}
 
 	/**

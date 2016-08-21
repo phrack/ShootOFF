@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -50,9 +49,11 @@ import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.ExerciseListener;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.ShotEntry;
+import com.shootoff.gui.pane.ExerciseSlide;
 import com.shootoff.gui.pane.FileSlide;
 import com.shootoff.gui.pane.ShotSectorPane;
 import com.shootoff.gui.pane.TargetSlide;
@@ -61,7 +62,6 @@ import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.plugins.engine.PluginEngine;
-import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.session.SessionRecorder;
 import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.Target;
@@ -84,10 +84,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
@@ -98,27 +96,23 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews,
-		PluginListener, CalibrationConfigurator, Closeable, Resetter {
+public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews, CalibrationConfigurator, Closeable, Resetter, ExerciseListener {
 	private Stage shootOFFStage;
 	@FXML private HBox controlsContainer;
 	@FXML private VBox bodyContainer;
 	@FXML private ContextMenu trainingContextMenu;
 	@FXML private ContextMenu projectorContextMenu;
-	@FXML private RadioButton noneTrainingMenuItem;
 	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
 	@FXML private ToggleGroup trainingToggleGroup;
@@ -137,20 +131,18 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	private TargetSlide targetPane;
 	
+	private ExerciseSlide exerciseSlide;
+	
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
 	private Configuration config;
 	private PluginEngine pluginEngine;
-	private Stage pluginManagerStage = null;
 	private static final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
 
 	private ProjectorArenaController arenaController;
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
-	private List<MenuItem> projectorExerciseMenuItems = new ArrayList<MenuItem>();
-
-	private Stage sessionViewerStage;
 	
 	static public double getDpiScaleFactorForScreen() {
 		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
@@ -164,18 +156,23 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return dpiScaleFactor;
 	}
 
-	public void init(Configuration config, PluginEngine pluginEngine) {
+	public void init(Configuration config) throws IOException {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
-		this.pluginEngine = pluginEngine;
 
-		noneTrainingMenuItem.setTextFill(Color.BLACK);
-		
 		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);
+		
+		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this);
+
+		pluginEngine = new PluginEngine(exerciseSlide);
+
+		
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
-		shootOFFStage = (Stage) cameraTabPane.getScene().getWindow();
+		shootOFFStage = (Stage) controlsContainer
+				.getScene()
+				.getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
 		shootOFFStage.getIcons().addAll(
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_16x16.png")),
@@ -354,10 +351,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		if (config.getSessionRecorder().isPresent()) {
 			toggleSessionRecordingMenuItem.fire();
-		}
-
-		if (showSessionViewerMenuItem.isDisable()) {
-			sessionViewerStage.close();
 		}
 
 		TimerPool.close();
@@ -622,129 +615,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		return targets;
 	}
-
-	@Override
-	public void registerExercise(TrainingExercise exercise) {
-		final RadioButton exerciseButton = new RadioButton(exercise.getInfo().getName());
-		
-		// Add the exercise's description as a tooltip to what will be the menu item
-		exerciseButton.setFont(noneTrainingMenuItem.getFont());
-		exerciseButton.setTextFill(Color.BLACK);
-		exerciseButton.setToggleGroup(trainingToggleGroup);
-		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
-		t.setPrefWidth(500);
-		t.setWrapText(true);
-		exerciseButton.setTooltip(t);
-		
-		exerciseButton.setOnAction((e) -> {
-			try {
-				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
-
-				List<Target> knownTargets = new ArrayList<Target>();
-				knownTargets.addAll(getTargets());
-
-				if (arenaController != null) {
-					knownTargets.addAll(arenaController.getCanvasManager().getTargets());
-				}
-
-				TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
-
-				Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
-				if (plugin.isPresent()) {
-					config.setPlugin(plugin.get());
-				} else {
-					config.setPlugin(null);
-				}
-
-				config.setExercise(newExercise);
-
-				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
-				newExercise.init();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		});
-
-		trainingContextMenu.getItems().add(new CustomMenuItem(exerciseButton));
-	}
-
-	@Override
-	public void registerProjectorExercise(TrainingExercise exercise) {
-		final RadioButton exerciseButton = new RadioButton(exercise.getInfo().getName());
-		
-		// Add the exercise's description as a tooltip to what will be the menu item
-		exerciseButton.setFont(noneTrainingMenuItem.getFont());
-		exerciseButton.setTextFill(Color.BLACK);
-		exerciseButton.setToggleGroup(trainingToggleGroup);
-		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
-		t.setPrefWidth(500);
-		t.setWrapText(true);
-		exerciseButton.setTooltip(t);
-		
-		final CustomMenuItem exerciseItem = new CustomMenuItem(exerciseButton);
-		
-		if (arenaController == null) exerciseItem.setDisable(true);
-
-		exerciseButton.setOnAction((e) -> {
-			try {
-				Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
-				TrainingExercise newExercise = (TrainingExercise) ctor
-						.newInstance(arenaController.getCanvasManager().getTargets());
-
-				Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
-				if (plugin.isPresent()) {
-					config.setPlugin(plugin.get());
-				} else {
-					config.setPlugin(null);
-				}
-
-				config.setExercise(newExercise);
-
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
-				newExercise.init();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		});
-
-		trainingContextMenu.getItems().add(exerciseItem);
-		projectorExerciseMenuItems.add(exerciseItem);
-	}
-
-	@Override
-	public void unregisterExercise(TrainingExercise exercise) {
-		Platform.runLater(() -> {
-			// If we just unregistered the exercise that is on, disable it
-			if (config.getExercise().isPresent() && config.getExercise().get().getInfo().equals(exercise.getInfo())) {
-				noneTrainingMenuItem.fire();
-			}
-
-			Iterator<MenuItem> it = trainingContextMenu.getItems().iterator();
-
-			while (it.hasNext()) {
-				final MenuItem m = it.next();
-				
-				if (!(m instanceof CustomMenuItem)) continue;
-				
-				final CustomMenuItem cm = (CustomMenuItem) m;
-				final Node n = cm.getContent();
-				
-				if (!(n instanceof RadioButton)) continue;
-				
-				final RadioButton rb = (RadioButton) cm.getContent();
-				
-				if (rb.getText() != null && rb.getText().equals(exercise.getInfo().getName())) {
-					it.remove();
-				}
-			}
-		});
-	}
-
-	@FXML
-	public void clickedNoneExercise(ActionEvent event) {
-		config.setExercise(null);
-		trainingToggleGroup.selectToggle(noneTrainingMenuItem);
-	}
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
@@ -758,30 +628,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void trainingButtonClicked(MouseEvent event) {
-		trainingContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());	
-	}
-
-	@FXML
-	public void getExercisesMenuItemClicked(ActionEvent event) throws IOException {
-		if (pluginManagerStage == null) {
-			FXMLLoader loader = new FXMLLoader(
-					getClass().getClassLoader().getResource("com/shootoff/gui/PluginManager.fxml"));
-			loader.load();
-
-			pluginManagerStage = new Stage();
-
-			pluginManagerStage.initOwner(shootOFFStage);
-			pluginManagerStage.setTitle("Exercise Manager");
-			pluginManagerStage.setScene(new Scene(loader.getRoot()));
-			pluginManagerStage.show();
-			pluginManagerStage.setOnCloseRequest((e) -> {
-				pluginManagerStage = null;
-			});
-			((PluginManagerController) loader.getController()).init(pluginEngine);
-		} else {
-			pluginManagerStage.show();
-			pluginManagerStage.toFront();
-		}
+		exerciseSlide.showControls();
 	}
 
 	@FXML
@@ -806,28 +653,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			toggleSessionRecordingMenuItem.setText("Stop Recording");
 		}
-	}
-
-	@FXML
-	public void showSessionViewerMenuItemClicked(ActionEvent event) throws IOException {
-		showSessionViewerMenuItem.setDisable(true);
-
-		FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
-		loader.load();
-
-		sessionViewerStage = new Stage();
-
-		sessionViewerStage.setTitle("Session Viewer");
-		sessionViewerStage.setScene(new Scene(loader.getRoot()));
-		sessionViewerStage.show();
-
-		SessionViewerController sessionViewerController = (SessionViewerController) loader.getController();
-		sessionViewerController.init(config);
-
-		sessionViewerStage.setOnCloseRequest((e) -> {
-			showSessionViewerMenuItem.setDisable(false);
-		});
 	}
 	
 	@FXML
@@ -861,8 +686,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()
 						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
-					noneTrainingMenuItem.setSelected(true);
-					noneTrainingMenuItem.fire();
+					exerciseSlide.disableProjectorExercises();
 				}
 				toggleArenaShotsMenuItem.setText("Show Shot Markers");
 				if (calibrationManager.isPresent()) {
@@ -894,8 +718,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		coursesMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
 
-		for (MenuItem m : projectorExerciseMenuItems)
-			m.setDisable(isDisabled);
+		// TODO: Implement in ExerciseSlide
+		//for (MenuItem m : projectorExerciseMenuItems)
+		//	m.setDisable(isDisabled);
 	}
 
 	@Override
@@ -1205,4 +1030,65 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			brightnessAlert.show();
 		});
 	}
+
+	@Override
+	public void setExercise(TrainingExercise exercise) {
+		try {
+			if (exercise == null)
+			{
+				config.setExercise(null);
+				return;
+			}
+			
+			Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+
+			List<Target> knownTargets = new ArrayList<Target>();
+			knownTargets.addAll(getTargets());
+
+			if (arenaController != null) {
+				knownTargets.addAll(arenaController.getCanvasManager().getTargets());
+			}
+
+			TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
+
+			Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+			if (plugin.isPresent()) {
+				config.setPlugin(plugin.get());
+			} else {
+				config.setPlugin(null);
+			}
+
+			config.setExercise(newExercise);
+
+			((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
+			newExercise.init();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void setProjectorExercise(TrainingExercise exercise) {
+		try {
+			Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+			TrainingExercise newExercise = (TrainingExercise) ctor
+					.newInstance(arenaController.getCanvasManager().getTargets());
+
+			Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+			if (plugin.isPresent()) {
+				config.setPlugin(plugin.get());
+			} else {
+				config.setPlugin(null);
+			}
+
+			config.setExercise(newExercise);
+
+			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
+			newExercise.init();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	
 }
