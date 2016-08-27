@@ -99,6 +99,7 @@ public class Configuration {
 	private static final String MUTED_CHIME_MESSAGES = "shootoff.diagnosticmessages.chime.muted";
 	private static final String PERSPECTIVE_WEBCAM_DISTANCES = WEBCAMS_PROP + ".distances";
 	private static final String CALIBRATED_FEED_BEHAVIOR_PROP = "shootoff.arena.calibrated.behavior";
+	private static final String SHOW_ARENA_SHOT_MARKERS = "shootoff.arenra.show.markers";
 
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
@@ -156,7 +157,8 @@ public class Configuration {
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
-
+	private boolean showArenaShotMarkers = false;
+	
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
@@ -353,6 +355,10 @@ public class Configuration {
 			setCalibratedFeedBehavior(
 					CalibrationOption.valueOf(prop.getProperty(CALIBRATED_FEED_BEHAVIOR_PROP)));
 		}
+		
+		if (prop.containsKey(SHOW_ARENA_SHOT_MARKERS)) {
+			setShowArenaShotMarkers(Boolean.parseBoolean(prop.getProperty(SHOW_ARENA_SHOT_MARKERS)));
+		}
 
 		validateConfiguration();
 	}
@@ -444,6 +450,7 @@ public class Configuration {
 
 		prop.setProperty(PERSPECTIVE_WEBCAM_DISTANCES, cameraDistancesList.toString());
 		prop.setProperty(CALIBRATED_FEED_BEHAVIOR_PROP, calibratedFeedBehavior.name());
+		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
 		
 		OutputStream outputStream = new FileOutputStream(configName);
 
@@ -777,6 +784,10 @@ public class Configuration {
 	public void setCalibratedFeedBehavior(CalibrationOption calibrationOption) {
 		calibratedFeedBehavior = calibrationOption;
 	}
+	
+	public void setShowArenaShotMarkers(boolean showMarkers) {
+		showArenaShotMarkers = showMarkers;
+	}
 
 	public Set<Camera> getRecordingCameras() {
 		return recordingCameras;
@@ -938,5 +949,9 @@ public class Configuration {
 	
 	public CalibrationOption getCalibratedFeedBehavior() {
 		return calibratedFeedBehavior;
+	}
+	
+	public boolean showArenaShotMarkers() {
+		return showArenaShotMarkers;
 	}
 }

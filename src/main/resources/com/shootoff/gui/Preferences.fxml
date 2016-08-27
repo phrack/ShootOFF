@@ -22,11 +22,12 @@
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
       <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
+      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
       <Label text="Cameras:" />
       <Label text="Marker Radius:" GridPane.rowIndex="1" />
-      <Label text="Ignore Laser Color" GridPane.rowIndex="2" />
+      <Label text="Ignore Laser Color:" GridPane.rowIndex="2" />
       <CheckBox fx:id="virtualMagazineCheckBox" mnemonicParsing="false" onAction="#virtualMagazineCheckBoxClicked" text="Virtual Magazine:" GridPane.rowIndex="5" />
       <CheckBox fx:id="malfunctionsCheckBox" mnemonicParsing="false" onAction="#malfunctionsCheckBoxClicked" text="Inject Malfunctions (%):" GridPane.rowIndex="6" />
       <Slider fx:id="markerRadiusSlider" blockIncrement="1.0" majorTickUnit="9.0" max="20.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
@@ -48,8 +49,10 @@
       <TextField fx:id="greenLaserSoundTextField" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="4" />
       <Button fx:id="redLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#redLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
       <Button fx:id="greenLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#greenLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-      <Label text="Calibrated Projector Feed Behavior" GridPane.rowIndex="7" />
+      <Label text="Calibrated Projector Feed Behavior:" GridPane.rowIndex="7" />
       <ChoiceBox fx:id="calibratedOptionsChoiceBox" prefWidth="250.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+      <CheckBox fx:id="showArenaShotMarkersCheckBox" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+      <Label text="Show Shot Markers On Arena:" GridPane.rowIndex="8" />
    </children>
    <padding>
       <Insets left="30.0" right="30.0" />

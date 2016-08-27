@@ -78,6 +78,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	@FXML private Slider malfunctionsSlider;
 	@FXML private Label malfunctionsLabel;
 	@FXML private ChoiceBox<String> calibratedOptionsChoiceBox;
+	@FXML private CheckBox showArenaShotMarkersCheckBox;
 
 	private Stage parent;
 	private Configuration config;
@@ -155,6 +156,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		malfunctionsSlider.setValue(config.getMalfunctionsProbability());
 		malfunctionsSlider.setDisable(!config.useMalfunctions());
 		calibratedOptionsChoiceBox.setValue(config.getCalibratedFeedBehavior().toString());
+		showArenaShotMarkersCheckBox.setSelected(config.showArenaShotMarkers());
 	}
 
 	private void linkSliderToLabel(final Slider slider, final Label label) {
@@ -268,6 +270,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		config.setMalfunctions(malfunctionsCheckBox.isSelected());
 		config.setMalfunctionsProbability((float) malfunctionsSlider.getValue());
 		config.setCalibratedFeedBehavior(CalibrationOption.fromString(calibratedOptionsChoiceBox.getValue()));
+		config.setShowArenaShotMarkers(showArenaShotMarkersCheckBox.isSelected());
 
 		if (config.writeConfigurationFile()) {
 			calibrationConfigurator.calibratedFeedBehaviorsChanged();

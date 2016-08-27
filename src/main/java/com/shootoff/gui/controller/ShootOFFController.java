@@ -108,11 +108,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
-	@FXML private Menu addArenaTargetMenu;
 	@FXML private MenuItem clearArenaTargetsMenuItem;
 	@FXML private Menu arenaBackgroundMenu;
 	@FXML private Menu coursesMenu;
-	@FXML private MenuItem toggleArenaShotsMenuItem;
 	@FXML private VBox buttonsContainer;
 	@FXML private HBox trainingExerciseContainer;
 
@@ -610,14 +608,14 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			arenaController.init(this.getStage(), config, this);
 			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
 			arenaController.setCalibrationManager(calibrationManager.get());
-			arenaController.getCanvasManager().setShowShots(false);
+			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()
 						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
 					exerciseSlide.toggleProjectorExercises(true);
 				}
-				toggleArenaShotsMenuItem.setText("Show Shot Markers");
+				
 				if (calibrationManager.isPresent()) {
 					if (calibrationManager.get().isCalibrating()) {
 						calibrationManager.get().stopCalibration();
@@ -625,6 +623,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						calibrationManager.get().arenaClosing();
 					}
 				}
+				
 				toggleProjectorMenus(true);
 				arenaController.setFeedCanvasManager(null);
 				arenaController = null;
@@ -639,11 +638,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	private void toggleProjectorMenus(boolean isDisabled) {
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
-		addArenaTargetMenu.setDisable(isDisabled);
 		clearArenaTargetsMenuItem.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
 		coursesMenu.setDisable(isDisabled);
-		toggleArenaShotsMenuItem.setDisable(isDisabled);
 		exerciseSlide.toggleProjectorExercises(isDisabled);
 	}
 
@@ -656,6 +653,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	public void calibratedFeedBehaviorsChanged() {
 		if (calibrationManager.isPresent())
 			calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
+		
+		if (arenaController != null) 
+			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 	}
 	
 	@Override
@@ -782,17 +782,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			if (course.isPresent()) {
 				arenaController.setCourse(course.get());
 			}
-		}
-	}
-
-	@FXML
-	public void toggleArenaShotsClicked(ActionEvent event) {
-		if (toggleArenaShotsMenuItem.getText().equals("Show Shot Markers")) {
-			toggleArenaShotsMenuItem.setText("Hide Shot Markers");
-			arenaController.getCanvasManager().setShowShots(true);
-		} else {
-			toggleArenaShotsMenuItem.setText("Show Shot Markers");
-			arenaController.getCanvasManager().setShowShots(false);
 		}
 	}
 
