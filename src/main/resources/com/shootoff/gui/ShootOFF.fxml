@@ -18,7 +18,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
    <children>
-      <HBox fx:id="controlsContainer" prefWidth="200.0" spacing="175.0" VBox.vgrow="ALWAYS">
+      <HBox fx:id="controlsContainer" minHeight="160.0" prefWidth="200.0" spacing="175.0">
          <children>
             <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File" />
             <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets" />
@@ -62,7 +62,7 @@
             </Button>
          </children>
          <padding>
-            <Insets left="30.0" right="30.0" top="30.0" />
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </padding>
       </HBox>
       <VBox fx:id="bodyContainer">

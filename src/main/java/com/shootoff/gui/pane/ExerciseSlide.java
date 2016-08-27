@@ -24,10 +24,13 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Button;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class ExerciseSlide extends Slide implements PluginListener, ItemSelectionListener<TrainingExercise>  {
@@ -36,7 +39,13 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	private final Configuration config;
 	private final ExerciseListener exerciseListener;
 	
-	private final ItemSelectionPane<TrainingExercise> itemPane = new ItemSelectionPane<TrainingExercise>(true, this);
+	private final TitledPane projectorPane;
+	private final ToggleButton noneButton;
+	
+	private final ItemSelectionPane<TrainingExercise> exerciseItemPane = 
+			new ItemSelectionPane<TrainingExercise>(true, this);
+	private final ItemSelectionPane<TrainingExercise> projectorExerciseItemPane = 
+			new ItemSelectionPane<TrainingExercise>(exerciseItemPane.getToggleGroup(), this);
 	
 	private final TrainingExercise noneExercise = new TrainingExercise() {
 		@Override
@@ -104,9 +113,17 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 			}
 		});
 			
-		addNoneButton();
+		noneButton = addNoneButton();
 		
-		addBodyNode(itemPane);
+		final TitledPane universalPane = new TitledPane("Universal Exercises", exerciseItemPane);
+		projectorPane = new TitledPane("Projector Exercises", projectorExerciseItemPane);
+		projectorPane.setDisable(true);
+		projectorPane.setExpanded(false);
+		
+		final VBox exerciseContainer =  new VBox(universalPane, projectorPane);
+		exerciseContainer.setPadding(new Insets(30, 0, 0, 0));
+		
+		addBodyNode(exerciseContainer);
 	}
 	
 	@Override
@@ -115,9 +132,12 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		showBody();
 	}
 
-	private void addNoneButton() {
-		((ToggleButton) itemPane.addButton(noneExercise, "None")).setSelected(true);
-		itemPane.setDefault(noneExercise);
+	private ToggleButton addNoneButton() {
+		ToggleButton noneButton = (ToggleButton) exerciseItemPane.addButton(noneExercise, "None");
+		noneButton.setSelected(true);
+		exerciseItemPane.setDefault(noneExercise);
+		
+		return noneButton;
 	}
 	
 	private Optional<FXMLLoader> createSessionViewerStage() {
@@ -150,25 +170,29 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	@Override
 	public void registerExercise(TrainingExercise exercise) {
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
-		itemPane.addButton(exercise, exercise.getInfo().getName(), Optional.empty(), Optional.of(t));
+		t.setPrefWidth(500);
+		exerciseItemPane.addButton(exercise, exercise.getInfo().getName(), Optional.empty(), Optional.of(t));
 	}
-	
-	// TODO: Extend ItemSelectionPane into a multi section pane and disable projector exercises when not appropriate
 
 	@Override
 	public void registerProjectorExercise(TrainingExercise exercise) {
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
-		itemPane.addButton(exercise, exercise.getInfo().getName(), Optional.empty(), Optional.of(t));
+		t.setPrefWidth(500);
+		projectorExerciseItemPane.addButton(exercise, exercise.getInfo().getName(), Optional.empty(), Optional.of(t));
 	}
 
 	@Override
 	public void unregisterExercise(TrainingExercise exercise) {
-		itemPane.removeButton(exercise);
+		exerciseItemPane.removeButton(exercise);
 	}
 
-	public void disableProjectorExercises() {
-		// TODO Implement
+	public void toggleProjectorExercises(boolean isDisabled) {
+		if (isDisabled) {
+			noneButton.fire();
+			projectorPane.setExpanded(false);
+		}
 		
+		projectorPane.setDisable(isDisabled);
 	}
 	
 	private void startRecordingSession() {

@@ -155,13 +155,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
 
-		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);
-		
+		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);		
 		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this, config);
 
 		pluginEngine = new PluginEngine(exerciseSlide);
 
-		
 		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
@@ -661,7 +659,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()
 						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
-					exerciseSlide.disableProjectorExercises();
+					exerciseSlide.toggleProjectorExercises(true);
 				}
 				toggleArenaShotsMenuItem.setText("Show Shot Markers");
 				if (calibrationManager.isPresent()) {
@@ -692,10 +690,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		arenaBackgroundMenu.setDisable(isDisabled);
 		coursesMenu.setDisable(isDisabled);
 		toggleArenaShotsMenuItem.setDisable(isDisabled);
-
-		// TODO: Implement in ExerciseSlide
-		//for (MenuItem m : projectorExerciseMenuItems)
-		//	m.setDisable(isDisabled);
+		exerciseSlide.toggleProjectorExercises(isDisabled);
 	}
 
 	@Override

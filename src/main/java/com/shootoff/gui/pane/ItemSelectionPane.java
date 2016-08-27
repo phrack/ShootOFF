@@ -26,13 +26,13 @@ public class ItemSelectionPane<T> extends ScrollPane {
 	private static final int COLUMNS = 6;
 	private static final int ITEM_DIMS = 150;
 
-	private final Map<Object, ButtonBase> items = new HashMap<Object, ButtonBase>();
+	private final Map<Object, ButtonBase> items = new HashMap<>();
 	private final TilePane subContainer = new TilePane(30, 30);
-
+	private boolean toggleable;
+	
 	private ToggleGroup toggleGroup = null;
 	private T defaultSelection = null;
 	private T currentSelection = null;
-	private Boolean toggleable = false;
 
 	private ItemSelectionListener<T> itemListener = null;
 
@@ -58,6 +58,12 @@ public class ItemSelectionPane<T> extends ScrollPane {
 		this.setContent(subContainer);
 	}
 
+	public ItemSelectionPane(ToggleGroup toggleGroup, ItemSelectionListener<T> itemListener) {
+		this(true, itemListener);
+		
+		this.toggleGroup = toggleGroup;
+	}
+	
 	public ButtonBase addButton(T ref, String text, Optional<Node> graphic, Optional<Tooltip> tooltip) {
 		final ButtonBase button;
 		if (toggleable) {
@@ -140,6 +146,10 @@ public class ItemSelectionPane<T> extends ScrollPane {
 		return currentSelection;
 	}
 
+	public ToggleGroup getToggleGroup() {
+		return toggleGroup;
+	}
+	
 	public void setSelection(T ref) {
 		if (items.containsKey(ref)) {
 			currentSelection = ref;
