@@ -58,7 +58,7 @@ public class ItemSelectionPane<T> extends ScrollPane {
 		this.setContent(subContainer);
 	}
 
-	public void addButton(T ref, String text, Optional<Node> graphic, Optional<Tooltip> tooltip) {
+	public ButtonBase addButton(T ref, String text, Optional<Node> graphic, Optional<Tooltip> tooltip) {
 		final ButtonBase button;
 		if (toggleable) {
 			if (defaultSelection == null) defaultSelection = ref;
@@ -88,10 +88,11 @@ public class ItemSelectionPane<T> extends ScrollPane {
 
 		items.put(ref, button);
 
+		return button;
 	}
 
-	public void addButton(T ref, String text) {
-		this.addButton(ref, text, Optional.empty(), Optional.empty());
+	public ButtonBase addButton(T ref, String text) {
+		return this.addButton(ref, text, Optional.empty(), Optional.empty());
 	}
 
 	public void setDefault(T ref) {

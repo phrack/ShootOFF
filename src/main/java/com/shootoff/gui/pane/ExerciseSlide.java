@@ -19,6 +19,7 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -93,10 +94,9 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	}
 
 	private void addNoneButton() {
-		itemPane.addButton(noneExercise, "None");
+		((ToggleButton) itemPane.addButton(noneExercise, "None")).setSelected(true);
 		itemPane.setDefault(noneExercise);
 	}
-	
 	
 	private Optional<FXMLLoader> createSessionViewerStage() {
 		final FXMLLoader loader = new FXMLLoader(
@@ -161,5 +161,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		} else {
 			logger.error("Did not expect exercise type: {}", selectedExercise.getClass().getName());
 		}
+		
+		hide();
 	}
 }
