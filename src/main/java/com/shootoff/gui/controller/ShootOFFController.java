@@ -62,8 +62,6 @@ import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.plugins.engine.PluginEngine;
-import com.shootoff.session.SessionRecorder;
-import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.TargetRegion;
@@ -112,9 +110,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private HBox controlsContainer;
 	@FXML private VBox bodyContainer;
 	@FXML private ContextMenu projectorContextMenu;
-	@FXML private MenuItem toggleSessionRecordingMenuItem;
 	@FXML private MenuItem showSessionViewerMenuItem;
-	@FXML private ToggleGroup trainingToggleGroup;
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private MenuItem startArenaMenuItem;
@@ -161,7 +157,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);
 		
-		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this);
+		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this, config);
 
 		pluginEngine = new PluginEngine(exerciseSlide);
 
@@ -349,7 +345,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 
 		if (config.getSessionRecorder().isPresent()) {
-			toggleSessionRecordingMenuItem.fire();
+			exerciseSlide.stopRecordingSession();
 		}
 
 		TimerPool.close();
@@ -632,30 +628,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML
 	public void trainingButtonClicked(MouseEvent event) {
 		exerciseSlide.showControls();
-	}
-
-	@FXML
-	public void toggleSessionRecordingMenuItemClicked(ActionEvent event) {
-		if (config.getSessionRecorder().isPresent()) {
-			for (CameraManager cm : config.getRecordingManagers()) {
-				cm.stopRecordingShots();
-			}
-
-			SessionIO.saveSession(config.getSessionRecorder().get(), new File(System.getProperty("shootoff.home")
-					+ File.separator + "sessions/" + config.getSessionRecorder().get().getSessionName() + ".xml"));
-
-			config.setSessionRecorder(null);
-
-			toggleSessionRecordingMenuItem.setText("Record Session");
-		} else {
-			config.setSessionRecorder(new SessionRecorder());
-
-			for (CameraManager cm : config.getRecordingManagers()) {
-				cm.startRecordingShots();
-			}
-
-			toggleSessionRecordingMenuItem.setText("Stop Recording");
-		}
 	}
 	
 	@FXML
@@ -1097,6 +1069,4 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	public PluginEngine getPluginEngine() {
 		return pluginEngine;
 	}
-
-	
 }

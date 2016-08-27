@@ -1,5 +1,6 @@
 package com.shootoff.gui.pane;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +8,9 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.Shot;
+import com.shootoff.config.Configuration;
 import com.shootoff.gui.ExerciseListener;
 import com.shootoff.gui.controller.PluginManagerController;
 import com.shootoff.gui.controller.SessionViewerController;
@@ -15,11 +18,14 @@ import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginListener;
+import com.shootoff.session.SessionRecorder;
+import com.shootoff.session.io.SessionIO;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -27,7 +33,8 @@ import javafx.stage.Stage;
 public class ExerciseSlide extends Slide implements PluginListener, ItemSelectionListener<TrainingExercise>  {
 	private static final Logger logger = LoggerFactory.getLogger(ExerciseSlide.class);
 
-	private ExerciseListener exerciseListener = null;
+	private final Configuration config;
+	private final ExerciseListener exerciseListener;
 	
 	private final ItemSelectionPane<TrainingExercise> itemPane = new ItemSelectionPane<TrainingExercise>(true, this);
 	
@@ -51,10 +58,11 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		public void destroy() {}
 	};
 	
-	public ExerciseSlide(Pane parentControls, Pane parentBody, ExerciseListener exerciseListener) {
+	public ExerciseSlide(Pane parentControls, Pane parentBody, ExerciseListener exerciseListener, Configuration config) {
 		super(parentControls, parentBody);
 		
 		this.exerciseListener = exerciseListener;
+		this.config = config;
 		
 		addSlideControlButton("Get Exercises", (event) -> {
 			Optional<FXMLLoader> loader = createPluginManagerStage();
@@ -67,6 +75,20 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 				pluginViewerSlide.showControls();
 				pluginViewerSlide.showBody();
 			}
+		});
+		
+		addSlideControlButton("Record Session", (event) -> {
+			if (config.getSessionRecorder().isPresent()) {
+				stopRecordingSession();
+
+				((Button) event.getSource()).setText("Record Session");
+			} else {
+				startRecordingSession();
+				
+				((Button) event.getSource()).setText("Stop Recording");
+			}
+			
+			hide();
 		});
 		
 		addSlideControlButton("View Sessions", (event) -> {
@@ -125,7 +147,6 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		return Optional.of(loader);
 	}
 
-
 	@Override
 	public void registerExercise(TrainingExercise exercise) {
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
@@ -148,6 +169,25 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	public void disableProjectorExercises() {
 		// TODO Implement
 		
+	}
+	
+	private void startRecordingSession() {
+		config.setSessionRecorder(new SessionRecorder());
+
+		for (CameraManager cm : config.getRecordingManagers()) {
+			cm.startRecordingShots();
+		}
+	}
+	
+	public void stopRecordingSession() {
+		for (CameraManager cm : config.getRecordingManagers()) {
+			cm.stopRecordingShots();
+		}
+
+		SessionIO.saveSession(config.getSessionRecorder().get(), new File(System.getProperty("shootoff.home")
+				+ File.separator + "sessions/" + config.getSessionRecorder().get().getSessionName() + ".xml"));
+
+		config.setSessionRecorder(null);
 	}
 
 	@Override
