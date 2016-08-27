@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.Closeable;
+import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.controller.PreferencesController;
 import com.shootoff.targets.CameraViews;
@@ -25,7 +26,8 @@ import javafx.stage.Stage;
 public class FileSlide extends Slide {
 	private static final Logger logger = LoggerFactory.getLogger(FileSlide.class);
 			
-	public FileSlide(Pane parentControls, Pane parentBody, CameraConfigListener configListener, CameraViews cameraViews, Closeable mainWindow) {
+	public FileSlide(Pane parentControls, Pane parentBody, CalibrationConfigurator calibrationConfigurator, 
+			CameraConfigListener configListener, CameraViews cameraViews, Closeable mainWindow) {
 		super(parentControls, parentBody);
 		
 		addSlideControlButton("Preferences", (event) -> {
@@ -40,7 +42,7 @@ public class FileSlide extends Slide {
 
 			final PreferencesController preferencesController = (PreferencesController) loader.getController();
 			preferencesController.setConfig((Stage) parentControls.getScene().getWindow(), 
-					configListener.getConfiguration(), configListener);
+					configListener.getConfiguration(), calibrationConfigurator, configListener);
 			final PreferencesSlide preferencesSlide = new PreferencesSlide(parentControls, parentBody, preferencesController);
 			preferencesSlide.setOnSlideHidden(() -> { if (preferencesSlide.isSaved()) hide(); });
 			preferencesSlide.showControls();

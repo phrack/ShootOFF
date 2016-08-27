@@ -59,6 +59,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
+import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.Plugin;
@@ -97,6 +98,7 @@ public class Configuration {
 	private static final String ARENA_POSITION_Y_PROP = "shootoff.arena.y";
 	private static final String MUTED_CHIME_MESSAGES = "shootoff.diagnosticmessages.chime.muted";
 	private static final String PERSPECTIVE_WEBCAM_DISTANCES = WEBCAMS_PROP + ".distances";
+	private static final String CALIBRATED_FEED_BEHAVIOR_PROP = "shootoff.arena.calibrated.behavior";
 
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
@@ -153,6 +155,7 @@ public class Configuration {
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
+	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
 
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
@@ -345,6 +348,11 @@ public class Configuration {
 				muteMessageChime(message);
 			}
 		}
+		
+		if (prop.containsKey(CALIBRATED_FEED_BEHAVIOR_PROP)) {
+			setCalibratedFeedBehavior(
+					CalibrationOption.valueOf(prop.getProperty(CALIBRATED_FEED_BEHAVIOR_PROP)));
+		}
 
 		validateConfiguration();
 	}
@@ -435,7 +443,8 @@ public class Configuration {
 		}
 
 		prop.setProperty(PERSPECTIVE_WEBCAM_DISTANCES, cameraDistancesList.toString());
-
+		prop.setProperty(CALIBRATED_FEED_BEHAVIOR_PROP, calibratedFeedBehavior.name());
+		
 		OutputStream outputStream = new FileOutputStream(configName);
 
 		try {
@@ -764,6 +773,10 @@ public class Configuration {
 	public void unmuteMessageChime(String message) {
 		messagesChimeMuted.remove(message);
 	}
+	
+	public void setCalibratedFeedBehavior(CalibrationOption calibrationOption) {
+		calibratedFeedBehavior = calibrationOption;
+	}
 
 	public Set<Camera> getRecordingCameras() {
 		return recordingCameras;
@@ -921,5 +934,9 @@ public class Configuration {
 
 	public boolean isChimeMuted(String message) {
 		return messagesChimeMuted.contains(message);
+	}
+	
+	public CalibrationOption getCalibratedFeedBehavior() {
+		return calibratedFeedBehavior;
 	}
 }

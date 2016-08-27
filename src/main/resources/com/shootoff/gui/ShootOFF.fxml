@@ -28,17 +28,6 @@
                   <ContextMenu fx:id="projectorContextMenu">
                      <items>
                         <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
-                        <Menu fx:id="calibrationOptionsMenu" disable="true" mnemonicParsing="false" text="Calibration Options">
-                           <items>
-                              <RadioMenuItem mnemonicParsing="false" text="Detect everywhere">
-                                 <toggleGroup>
-                                    <ToggleGroup fx:id="calibrationToggleGroup" />
-                                 </toggleGroup>
-                              </RadioMenuItem>
-                              <RadioMenuItem mnemonicParsing="false" selected="true" text="Only detect in projector bounds" toggleGroup="$calibrationToggleGroup" />
-                              <RadioMenuItem mnemonicParsing="false" text="Crop feed to projector bounds" toggleGroup="$calibrationToggleGroup" />
-                           </items>
-                        </Menu>
                         <Menu fx:id="addArenaTargetMenu" disable="true" mnemonicParsing="false" text="Add Target" />
                         <MenuItem fx:id="clearArenaTargetsMenuItem" disable="true" mnemonicParsing="false" onAction="#clearArenaTargetsMenuItemClicked" text="Clear Targets" />
                         <Menu fx:id="arenaBackgroundMenu" disable="true" mnemonicParsing="false" text="Background">

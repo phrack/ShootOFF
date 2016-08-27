@@ -26,7 +26,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -68,8 +67,6 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -84,7 +81,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -92,8 +88,6 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -114,8 +108,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
-	@FXML private Menu calibrationOptionsMenu;
-	@FXML private ToggleGroup calibrationToggleGroup;
 	@FXML private Menu addArenaTargetMenu;
 	@FXML private MenuItem clearArenaTargetsMenuItem;
 	@FXML private Menu arenaBackgroundMenu;
@@ -235,15 +227,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			}
 		});
 
-		calibrationToggleGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
-				if (newToggle == null) return;
-
-				if (calibrationManager.isPresent())
-					calibrationManager.get().configureArenaCamera(getSelectedCalibrationOption());
-			}
-		});
-
 		shotTimerTable.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<ShotEntry>() {
 			@Override
 			public void onChanged(Change<? extends ShotEntry> change) {
@@ -357,36 +340,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		if (!config.inDebugMode()) Main.forceClose(0);
 	}
 
-	@Override
-	public CalibrationOption getSelectedCalibrationOption() {
-		if (calibrationToggleGroup == null) return CalibrationOption.EVERYWHERE;
-
-		Toggle selectedToggle = calibrationToggleGroup.getSelectedToggle();
-		if (selectedToggle != null && selectedToggle instanceof RadioMenuItem) {
-			RadioMenuItem selectedOption = (RadioMenuItem) calibrationToggleGroup.getSelectedToggle();
-
-			switch (selectedOption.getText().toLowerCase(Locale.getDefault())) {
-			case "detect everywhere":
-				return CalibrationOption.EVERYWHERE;
-
-			case "only detect in projector bounds":
-				return CalibrationOption.ONLY_IN_BOUNDS;
-
-			case "crop feed to projector bounds":
-				return CalibrationOption.CROP;
-
-			default:
-				logger.error("Unknown calibration option, defaulting to only in projection bounds: {}",
-						selectedOption.getText());
-
-				return CalibrationOption.ONLY_IN_BOUNDS;
-			}
-		} else {
-			logger.error("No calibration toggle selected or it's not a RadioMenuItem. This should not be possible.");
-			return CalibrationOption.ONLY_IN_BOUNDS;
-		}
-	}
-	
 	@Override
 	public CameraView getSelectedCameraView() {
 		return camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex());
@@ -614,7 +567,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
-		new FileSlide(controlsContainer, bodyContainer, this, this, this).showControls();
+		new FileSlide(controlsContainer, bodyContainer, this, this, this, this).showControls();
 	}
 	
 	@FXML
@@ -686,7 +639,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	private void toggleProjectorMenus(boolean isDisabled) {
 		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
-		calibrationOptionsMenu.setDisable(isDisabled);
 		addArenaTargetMenu.setDisable(isDisabled);
 		clearArenaTargetsMenuItem.setDisable(isDisabled);
 		arenaBackgroundMenu.setDisable(isDisabled);
@@ -695,6 +647,17 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		exerciseSlide.toggleProjectorExercises(isDisabled);
 	}
 
+	@Override
+	public CalibrationOption getCalibratedFeedBehavior() {
+		return config.getCalibratedFeedBehavior();
+	}
+	
+	@Override 
+	public void calibratedFeedBehaviorsChanged() {
+		if (calibrationManager.isPresent())
+			calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
+	}
+	
 	@Override
 	public void toggleCalibrating() {
 		final Runnable toggleCalibrationAction = () -> {

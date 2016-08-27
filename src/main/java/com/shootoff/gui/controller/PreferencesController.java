@@ -30,6 +30,8 @@ import java.util.Set;
 import com.shootoff.camera.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.CalibrationConfigurator;
+import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CameraSelectorScene;
 import com.shootoff.gui.DesignateShotRecorderListener;
@@ -75,22 +77,28 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	@FXML private CheckBox malfunctionsCheckBox;
 	@FXML private Slider malfunctionsSlider;
 	@FXML private Label malfunctionsLabel;
+	@FXML private ChoiceBox<String> calibratedOptionsChoiceBox;
 
 	private Stage parent;
 	private Configuration config;
+	private CalibrationConfigurator calibrationConfigurator;
 	private CameraConfigListener cameraConfigListener;
 	private boolean cameraConfigChanged = false;
 	private final Set<Camera> recordingCameras = new HashSet<Camera>();
 	private final List<Camera> configuredCameras = new ArrayList<Camera>();
 	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
 
-	public void setConfig(Stage parent, Configuration config, CameraConfigListener cameraConfigListener) {
+	public void setConfig(Stage parent, Configuration config, CalibrationConfigurator calibrationConfigurator,
+			CameraConfigListener cameraConfigListener) {
 		ImageCell.createImageCache(Camera.getWebcams());
 
 		this.parent = parent;
+		this.calibrationConfigurator = calibrationConfigurator;
 		this.cameraConfigListener = cameraConfigListener;
 
 		ignoreLaserColorChoiceBox.setItems(FXCollections.observableArrayList("None", "red", "green"));
+		calibratedOptionsChoiceBox.setItems(FXCollections.observableArrayList(CalibrationOption.EVERYWHERE.toString(), 
+				CalibrationOption.ONLY_IN_BOUNDS.toString(), CalibrationOption.CROP.toString()));
 
 		webcamListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
 			@Override
@@ -146,6 +154,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		malfunctionsCheckBox.setSelected(config.useMalfunctions());
 		malfunctionsSlider.setValue(config.getMalfunctionsProbability());
 		malfunctionsSlider.setDisable(!config.useMalfunctions());
+		calibratedOptionsChoiceBox.setValue(config.getCalibratedFeedBehavior().toString());
 	}
 
 	private void linkSliderToLabel(final Slider slider, final Label label) {
@@ -258,8 +267,10 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		config.setVirtualMagazineCapacity((int) virtualMagazineSlider.getValue());
 		config.setMalfunctions(malfunctionsCheckBox.isSelected());
 		config.setMalfunctionsProbability((float) malfunctionsSlider.getValue());
+		config.setCalibratedFeedBehavior(CalibrationOption.fromString(calibratedOptionsChoiceBox.getValue()));
 
 		if (config.writeConfigurationFile()) {
+			calibrationConfigurator.calibratedFeedBehaviorsChanged();
 			if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
 		}
 	}

@@ -150,12 +150,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeCalibrationTargetIfPresent();
 
 		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);
-
-		// createCalibrationTarget(arenaBounds.getMinX(), arenaBounds.getMinY(),
-		// arenaBounds.getWidth(),
-		// arenaBounds.getHeight());
-
-		configureArenaCamera(calibrationConfigurator.getSelectedCalibrationOption(), arenaBounds);
+		
+		configureArenaCamera(calibrationConfigurator.getCalibratedFeedBehavior(), arenaBounds);
 
 		logger.debug("calibrate {} {} {}", arenaBounds, perspectivePaperDims, calibratedFromCanvas);
 
