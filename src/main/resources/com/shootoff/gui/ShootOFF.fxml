@@ -27,7 +27,6 @@
                <contextMenu>
                   <ContextMenu fx:id="projectorContextMenu">
                      <items>
-                       <MenuItem fx:id="startArenaMenuItem" mnemonicParsing="false" onAction="#startArenaClicked" text="Start Arena" />
                         <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
                         <Menu fx:id="calibrationOptionsMenu" disable="true" mnemonicParsing="false" text="Calibration Options">
                            <items>

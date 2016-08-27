@@ -283,7 +283,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		}
 	}
 
-	public void toggleArena() throws IOException {
+	public void toggleArena() {
 		if (arenaStage.isShowing()) {
 			arenaStage.hide();
 		} else {

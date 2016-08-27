@@ -113,7 +113,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private MenuItem showSessionViewerMenuItem;
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
-	@FXML private MenuItem startArenaMenuItem;
 	@FXML private MenuItem toggleArenaCalibrationMenuItem;
 	@FXML private Menu calibrationOptionsMenu;
 	@FXML private ToggleGroup calibrationToggleGroup;
@@ -631,25 +630,29 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML
 	public void projectorButtonClicked(MouseEvent event) {
 		projectorContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());
+		startArena();
 	}
 
-	@FXML
-	public void startArenaClicked(ActionEvent event) throws IOException {
-		toggleProjectorMenus(false);
-		startArenaMenuItem.setDisable(true);
-
+	private void startArena() {
 		if (arenaController == null) {
-			FXMLLoader loader = new FXMLLoader(
+			toggleProjectorMenus(false);
+			
+			final FXMLLoader loader = new FXMLLoader(
 					getClass().getClassLoader().getResource("com/shootoff/gui/ProjectorArena.fxml"));
-			loader.load();
+			try {
+				loader.load();
+			} catch (IOException e) {
+				logger.error("Cannot load ProjectorArena.fxml", e);
+				return;
+			}
 
-			Stage arenaStage = new Stage();
+			final Stage arenaStage = new Stage();
 
 			arenaStage.setTitle("Projector Arena");
 			arenaStage.setScene(new Scene(loader.getRoot()));
 
 			arenaController = (ProjectorArenaController) loader.getController();
-			CameraManager calibratingCameraManager = camerasSupervisor
+			final CameraManager calibratingCameraManager = camerasSupervisor
 					.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 			arenaController.init(this.getStage(), config, this);
 			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
@@ -670,16 +673,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					}
 				}
 				toggleProjectorMenus(true);
-				startArenaMenuItem.setDisable(false);
 				arenaController.setFeedCanvasManager(null);
 				arenaController = null;
 			});
+			
+			arenaController.toggleArena();
+			arenaController.autoPlaceArena();
+
+			toggleArenaCalibrationMenuItem.fire();
 		}
-
-		arenaController.toggleArena();
-		arenaController.autoPlaceArena();
-
-		toggleArenaCalibrationMenuItem.fire();
 	}
 
 	private void toggleProjectorMenus(boolean isDisabled) {
