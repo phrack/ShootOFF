@@ -70,7 +70,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
 
 	protected Stage arenaStage;
-	private Stage shootOFFStage;
+	private Stage shootOffStage;
 	@FXML protected AnchorPane arenaAnchor;
 	@FXML private Group arenaCanvasGroup;
 	@FXML private Label calibrationLabel;
@@ -96,10 +96,10 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		this.canvasManager = canvasManager;
 	}
 
-	public void init(Stage shootOFFStage, Configuration config, Resetter resetter) {
+	public void init(Stage shootOffStage, Configuration config, Resetter resetter) {
 		this.config = config;
 
-		this.shootOFFStage = shootOFFStage;
+		this.shootOffStage = shootOffStage;
 		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
 
 		arenaStage.setFullScreenExitHint("");
@@ -120,6 +120,9 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		});
 
 		arenaAnchor.setStyle("-fx-background-color: #333333;");
+		
+		toggleArena();
+		autoPlaceArena();
 	}
 
 	public void setCalibrationManager(CalibrationManager calibrationManager) {
@@ -161,7 +164,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		return Optional.of(stageHomeScreens.get(0));
 	}
 
-	public void autoPlaceArena() {
+	private void autoPlaceArena() {
 		Optional<Screen> homeScreen = getStageHomeScreen(arenaStage);
 
 		if (homeScreen.isPresent()) {
@@ -225,7 +228,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		if (Screen.getScreens().size() == 2) {
 			logger.debug("Two screens present");
 
-			homeScreen = getStageHomeScreen(shootOFFStage);
+			homeScreen = getStageHomeScreen(shootOffStage);
 
 			if (!homeScreen.isPresent()) return;
 
@@ -307,8 +310,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		return new Dimension2D(arenaStage.getWidth(), arenaStage.getHeight());
 	}
 	
-	private void setArenaScreenOrigin(Screen screen)
-	{
+	private void setArenaScreenOrigin(Screen screen) {
 		final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
 		final Rectangle2D arenaScreenBounds = screen.getBounds();
 		arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX() * dpiScaleFactor, arenaScreenBounds.getMinY() * dpiScaleFactor);
@@ -551,6 +553,47 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 	}
 
 	/**
+	 * This methods is used by
+	 * {@link com.shootoff.gui.controller.ShootOFFController} to notify the
+	 * arena controller of new targets added to the arena. Without this method
+	 * the targets would be added directly to the arena's canvas manager,
+	 * bypassing the arena controller. Thus, the arena controller would not be
+	 * able to configure arena-specific target operations (e.g. setting a
+	 * targets distance).
+	 * 
+	 * @param target
+	 *            a new target that was just added to the projector arena
+	 */
+	public void targetAdded(Target target) {
+		resizeTargetToDefaultPerspective(target);
+	
+		if (!(target instanceof TargetView)) throw new AssertionError(
+				"Target is no longer an instance of TargetView. This code path was not upgraded at some point.");
+	
+		final TargetView tv = (TargetView) target;
+		final EventHandler<? super MouseEvent> mouseClickedHandler = tv.getTargetGroup().getOnMouseClicked();
+	
+		tv.getTargetGroup().setOnMouseClicked((event) -> {
+			if (MouseButton.SECONDARY.equals(event.getButton())) {
+				final MenuItem setDistanceMenuItem = new MenuItem("Set Target Distance");
+	
+				setDistanceMenuItem.setOnAction((e) -> {
+					if (perspectiveManager.isPresent()) {
+						showTargetResizeDialog(target, event);
+					} else {
+						showRecalibrationMessage();
+					}
+				});
+	
+				final ContextMenu menu = new ContextMenu(setDistanceMenuItem);
+				menu.show(tv.getTargetGroup(), event.getScreenX(), event.getScreenY());
+			}
+	
+			if (mouseClickedHandler != null) mouseClickedHandler.handle(event);
+		});
+	}
+
+	/**
 	 * Used by the {@link com.shootoff.gui.CalibrationManager} to notify the
 	 * arena controller of the canvas manager that belongs to the camera used to
 	 * detect shots on the arena. This particular canvas manager is used by the
@@ -590,47 +633,6 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		}
 	}
 
-	/**
-	 * This methods is used by
-	 * {@link com.shootoff.gui.controller.ShootOFFController} to notify the
-	 * arena controller of new targets added to the arena. Without this method
-	 * the targets would be added directly to the arena's canvas manager,
-	 * bypassing the arena controller. Thus, the arena controller would not be
-	 * able to configure arena-specific target operations (e.g. setting a
-	 * targets distance).
-	 * 
-	 * @param target
-	 *            a new target that was just added to the projector arena
-	 */
-	public void targetAdded(Target target) {
-		resizeTargetToDefaultPerspective(target);
-
-		if (!(target instanceof TargetView)) throw new AssertionError(
-				"Target is no longer an instance of TargetView. This code path was not upgraded at some point.");
-
-		final TargetView tv = (TargetView) target;
-		final EventHandler<? super MouseEvent> mouseClickedHandler = tv.getTargetGroup().getOnMouseClicked();
-
-		tv.getTargetGroup().setOnMouseClicked((event) -> {
-			if (MouseButton.SECONDARY.equals(event.getButton())) {
-				final MenuItem setDistanceMenuItem = new MenuItem("Set Target Distance");
-
-				setDistanceMenuItem.setOnAction((e) -> {
-					if (perspectiveManager.isPresent()) {
-						showTargetResizeDialog(target, event);
-					} else {
-						showRecalibrationMessage();
-					}
-				});
-
-				final ContextMenu menu = new ContextMenu(setDistanceMenuItem);
-				menu.show(tv.getTargetGroup(), event.getScreenX(), event.getScreenY());
-			}
-
-			if (mouseClickedHandler != null) mouseClickedHandler.handle(event);
-		});
-	}
-
 	private void showTargetResizeDialog(Target target, MouseEvent event) {
 		PerspectiveManager pm = perspectiveManager.get();
 
@@ -638,7 +640,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 
 		final Stage distanceSettingsStage = new Stage();
 		final Scene scene = new Scene(distanceSettingsPane);
-		distanceSettingsStage.initOwner(shootOFFStage);
+		distanceSettingsStage.initOwner(shootOffStage);
 		distanceSettingsStage.initModality(Modality.WINDOW_MODAL);
 		distanceSettingsStage.setTitle("Target Distance Settings");
 		distanceSettingsStage.setScene(scene);

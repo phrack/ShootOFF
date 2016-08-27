@@ -23,29 +23,7 @@
             <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File" />
             <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets" />
             <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training" />
-            <Button mnemonicParsing="false" onMouseClicked="#projectorButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Projector">
-               <contextMenu>
-                  <ContextMenu fx:id="projectorContextMenu">
-                     <items>
-                        <MenuItem fx:id="toggleArenaCalibrationMenuItem" disable="true" mnemonicParsing="false" onAction="#toggleArenaCalibrationClicked" text="Calibrate" />
-                        <MenuItem fx:id="clearArenaTargetsMenuItem" disable="true" mnemonicParsing="false" onAction="#clearArenaTargetsMenuItemClicked" text="Clear Targets" />
-                        <Menu fx:id="arenaBackgroundMenu" disable="true" mnemonicParsing="false" text="Background">
-                          <items>
-                            <MenuItem mnemonicParsing="false" onAction="#openArenaBackgroundMenuItemClicked" text="Open..." />
-                              <SeparatorMenuItem mnemonicParsing="false" />
-                              <MenuItem mnemonicParsing="false" onAction="#removeArenaBackgroundMenuItemClicked" text="None" />
-                          </items>
-                        </Menu>
-                        <Menu fx:id="coursesMenu" disable="true" mnemonicParsing="false" text="Courses">
-                          <items>
-                            <MenuItem mnemonicParsing="false" onAction="#saveCourseMenuItemClicked" text="Save Course..." />
-                              <MenuItem mnemonicParsing="false" onAction="#loadCourseMenuItemClicked" text="Load Course..." />
-                          </items>
-                        </Menu>
-                     </items>
-                  </ContextMenu>
-               </contextMenu>
-            </Button>
+            <Button mnemonicParsing="false" onMouseClicked="#projectorButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Projector" />
          </children>
          <padding>
             <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />

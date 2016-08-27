@@ -21,7 +21,6 @@ package com.shootoff.gui.controller;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,19 +40,15 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.config.Configuration;
-import com.shootoff.courses.Course;
-import com.shootoff.courses.io.CourseIO;
-import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
-import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.ExerciseListener;
-import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.pane.ExerciseSlide;
 import com.shootoff.gui.pane.FileSlide;
+import com.shootoff.gui.pane.ProjectorSlide;
 import com.shootoff.gui.pane.ShotSectorPane;
 import com.shootoff.gui.pane.TargetSlide;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
@@ -79,7 +74,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
@@ -95,27 +89,21 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
-import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews, CalibrationConfigurator, Closeable, Resetter, ExerciseListener {
+public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews, Closeable, Resetter, ExerciseListener {
 	private Stage shootOFFStage;
 	@FXML private HBox controlsContainer;
 	@FXML private VBox bodyContainer;
-	@FXML private ContextMenu projectorContextMenu;
-	@FXML private MenuItem showSessionViewerMenuItem;
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
-	@FXML private MenuItem toggleArenaCalibrationMenuItem;
-	@FXML private MenuItem clearArenaTargetsMenuItem;
-	@FXML private Menu arenaBackgroundMenu;
-	@FXML private Menu coursesMenu;
 	@FXML private VBox buttonsContainer;
 	@FXML private HBox trainingExerciseContainer;
 
 	private TargetSlide targetPane;
 	private ExerciseSlide exerciseSlide;
+	private ProjectorSlide projectorSlide;
 	
 	private String defaultWindowTitle;
 	private CamerasSupervisor camerasSupervisor;
@@ -124,9 +112,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private static final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
-
-	private ProjectorArenaController arenaController;
-	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 	
 	static public double getDpiScaleFactorForScreen() {
 		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
@@ -143,18 +128,16 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	public void init(Configuration config) throws IOException {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
+		
+		shootOFFStage = (Stage) controlsContainer.getScene().getWindow();
 
 		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);		
 		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this, config);
+		projectorSlide = new ProjectorSlide(controlsContainer, bodyContainer, config, this, shootOFFStage, this, exerciseSlide);
 
 		pluginEngine = new PluginEngine(exerciseSlide);
-
-		initDefaultBackgrounds();
 		pluginEngine.startWatching();
 
-		shootOFFStage = (Stage) controlsContainer
-				.getScene()
-				.getWindow();
 		this.defaultWindowTitle = shootOFFStage.getTitle();
 		shootOFFStage.getIcons().addAll(
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_16x16.png")),
@@ -313,10 +296,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		if (config.getExercise().isPresent()) config.getExercise().get().destroy();
 
-		if (arenaController != null) {
-			arenaController.getCanvasManager().close();
-			arenaController.close();
-		}
+		projectorSlide.closeArena();
 
 		for (Stage streamDebuggerStage : streamDebuggerStages) {
 			streamDebuggerStage.close();
@@ -565,7 +545,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void fileButtonClicked(MouseEvent event) {
-		new FileSlide(controlsContainer, bodyContainer, this, this, this, this).showControls();
+		new FileSlide(controlsContainer, bodyContainer, projectorSlide, this, this, this).showControls();
 	}
 	
 	@FXML
@@ -580,209 +560,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@FXML
 	public void projectorButtonClicked(MouseEvent event) {
-		projectorContextMenu.show((Node) event.getSource(), event.getScreenX(), event.getScreenY());
-		startArena();
-	}
-
-	private void startArena() {
-		if (arenaController == null) {
-			toggleProjectorMenus(false);
-			
-			final FXMLLoader loader = new FXMLLoader(
-					getClass().getClassLoader().getResource("com/shootoff/gui/ProjectorArena.fxml"));
-			try {
-				loader.load();
-			} catch (IOException e) {
-				logger.error("Cannot load ProjectorArena.fxml", e);
-				return;
-			}
-
-			final Stage arenaStage = new Stage();
-
-			arenaStage.setTitle("Projector Arena");
-			arenaStage.setScene(new Scene(loader.getRoot()));
-
-			arenaController = (ProjectorArenaController) loader.getController();
-			final CameraManager calibratingCameraManager = camerasSupervisor
-					.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
-			arenaController.init(this.getStage(), config, this);
-			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
-			arenaController.setCalibrationManager(calibrationManager.get());
-			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
-
-			arenaStage.setOnCloseRequest((e) -> {
-				if (config.getExercise().isPresent()
-						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
-					exerciseSlide.toggleProjectorExercises(true);
-				}
-				
-				if (calibrationManager.isPresent()) {
-					if (calibrationManager.get().isCalibrating()) {
-						calibrationManager.get().stopCalibration();
-					} else {
-						calibrationManager.get().arenaClosing();
-					}
-				}
-				
-				toggleProjectorMenus(true);
-				arenaController.setFeedCanvasManager(null);
-				arenaController = null;
-			});
-			
-			arenaController.toggleArena();
-			arenaController.autoPlaceArena();
-
-			toggleArenaCalibrationMenuItem.fire();
-		}
-	}
-
-	private void toggleProjectorMenus(boolean isDisabled) {
-		toggleArenaCalibrationMenuItem.setDisable(isDisabled);
-		clearArenaTargetsMenuItem.setDisable(isDisabled);
-		arenaBackgroundMenu.setDisable(isDisabled);
-		coursesMenu.setDisable(isDisabled);
-		exerciseSlide.toggleProjectorExercises(isDisabled);
-	}
-
-	@Override
-	public CalibrationOption getCalibratedFeedBehavior() {
-		return config.getCalibratedFeedBehavior();
-	}
-	
-	@Override 
-	public void calibratedFeedBehaviorsChanged() {
-		if (calibrationManager.isPresent())
-			calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
-		
-		if (arenaController != null) 
-			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
-	}
-	
-	@Override
-	public void toggleCalibrating() {
-		final Runnable toggleCalibrationAction = () -> {
-			if (toggleArenaCalibrationMenuItem.getText().equals("Calibrate"))
-				toggleArenaCalibrationMenuItem.setText("Stop Calibrating");
-			else
-				toggleArenaCalibrationMenuItem.setText("Calibrate");
-		};
-
-		if (Platform.isFxApplicationThread()) {
-			toggleCalibrationAction.run();
-		} else {
-			Platform.runLater(toggleCalibrationAction);
-		}
-	}
-
-	@FXML
-	public void toggleArenaCalibrationClicked(ActionEvent event) {
-		if (!calibrationManager.isPresent()) return;
-
-		if (!calibrationManager.get().isCalibrating()) {
-			calibrationManager.get().enableCalibration();
-		} else {
-			calibrationManager.get().stopCalibration();
-		}
-	}
-
-	private void initDefaultBackgrounds() {
-		addDefaultBackground("Hickok45 Autumn", "/arena/backgrounds/hickok45_autumn.gif");
-		addDefaultBackground("Hickok45 Summer", "/arena/backgrounds/hickok45_summer.gif");
-		addDefaultBackground("Indoor Range", "/arena/backgrounds/indoor_range.gif");
-		addDefaultBackground("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
-		addDefaultBackground("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
-		addDefaultBackground("Steel Range Bay", "/arena/backgrounds/steel_range_bay.gif");
-	}
-
-	private void addDefaultBackground(String menuName, String resourceName) {
-		MenuItem backgroundMenuItem = new MenuItem(menuName);
-
-		backgroundMenuItem.setOnAction((e) -> {
-			InputStream is = this.getClass().getResourceAsStream(resourceName);
-			LocatedImage img = new LocatedImage(is, resourceName);
-			arenaController.setBackground(img);
-		});
-
-		arenaBackgroundMenu.getItems().add(backgroundMenuItem);
-	}
-
-	@FXML
-	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
-		arenaController.getCanvasManager().clearTargets();
-	}
-
-	@FXML
-	public void removeArenaBackgroundMenuItemClicked(ActionEvent event) {
-		arenaController.setBackground(null);
-	}
-
-	@FXML
-	public void openArenaBackgroundMenuItemClicked(ActionEvent event) {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Select Arena Background");
-		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"),
-				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"));
-
-		File backgroundFile = fileChooser.showOpenDialog(shootOFFStage);
-
-		if (backgroundFile != null) {
-			LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
-			arenaController.setBackground(img);
-		}
-	}
-
-	@FXML
-	public void saveCourseMenuItemClicked(ActionEvent event) {
-		File coursesDir = new File(System.getProperty("shootoff.courses"));
-
-		if (!coursesDir.exists()) {
-			if (!coursesDir.mkdirs()) {
-				logger.error("Courses folder does not exist and cannot be created: {}", coursesDir.getAbsolutePath());
-			}
-		}
-
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Save Course");
-		fileChooser.setInitialDirectory(coursesDir);
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Course File (*.course)", "*.course"));
-
-		File courseFile = fileChooser.showSaveDialog(shootOFFStage);
-
-		if (courseFile != null) {
-			String path = courseFile.getPath();
-			if (!path.endsWith(".course")) path += ".course";
-
-			courseFile = new File(path);
-
-			CourseIO.saveCourse(arenaController, courseFile);
-		}
-	}
-
-	@FXML
-	public void loadCourseMenuItemClicked(ActionEvent event) {
-		File coursesDir = new File(System.getProperty("shootoff.courses"));
-
-		if (!coursesDir.exists()) {
-			if (!coursesDir.mkdirs()) {
-				logger.error("Courses folder does not exist and cannot be created: {}", coursesDir.getAbsolutePath());
-			}
-		}
-
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Open Course");
-		fileChooser.setInitialDirectory(coursesDir);
-		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Course File (*.course)", "*.course"));
-
-		File courseFile = fileChooser.showOpenDialog(shootOFFStage);
-
-		if (courseFile != null) {
-			Optional<Course> course = CourseIO.loadCourse(arenaController, courseFile);
-
-			if (course.isPresent()) {
-				arenaController.setCourse(course.get());
-			}
-		}
+		projectorSlide.startArena();
+		projectorSlide.showControls();
 	}
 
 	@FXML
@@ -798,8 +577,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
-			if (arenaController != null) {
-				knownTargets.addAll(arenaController.getCanvasManager().getTargets());
+			if (projectorSlide.getArenaController() != null) {
+				knownTargets.addAll(projectorSlide.getArenaController().getCanvasManager().getTargets());
 			}
 
 			config.getExercise().get().reset(knownTargets);
@@ -828,6 +607,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		camerasSupervisor.setDetectingAll(false);
 
 		Runnable restartDetection = () -> {
+			final Optional<CalibrationManager> calibrationManager = projectorSlide.getCalibrationManager();
+			
 			if (!calibrationManager.isPresent()
 					|| (calibrationManager.isPresent() && !calibrationManager.get().isCalibrating())) {
 				if (alreadyOff.isEmpty()) {
@@ -969,8 +750,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
-			if (arenaController != null) {
-				knownTargets.addAll(arenaController.getCanvasManager().getTargets());
+			if (projectorSlide.getArenaController() != null) {
+				knownTargets.addAll(projectorSlide.getArenaController().getCanvasManager().getTargets());
 			}
 
 			TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
@@ -996,7 +777,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		try {
 			Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 			TrainingExercise newExercise = (TrainingExercise) ctor
-					.newInstance(arenaController.getCanvasManager().getTargets());
+					.newInstance(projectorSlide.getArenaController().getCanvasManager().getTargets());
 
 			Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
 			if (plugin.isPresent()) {
@@ -1007,7 +788,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			config.setExercise(newExercise);
 
-			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaController);
+			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaController());
 			newExercise.init();
 		} catch (Exception ex) {
 			ex.printStackTrace();
