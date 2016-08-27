@@ -1,31 +1,54 @@
 package com.shootoff.gui.pane;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.Shot;
 import com.shootoff.gui.ExerciseListener;
-import com.shootoff.gui.container.ItemSelectionPane;
-import com.shootoff.gui.container.listeners.ItemSelectionListener;
 import com.shootoff.gui.controller.PluginManagerController;
 import com.shootoff.gui.controller.SessionViewerController;
+import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginListener;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class ExerciseSlide extends Slide implements PluginListener, ItemSelectionListener  {
+public class ExerciseSlide extends Slide implements PluginListener, ItemSelectionListener<TrainingExercise>  {
 	private static final Logger logger = LoggerFactory.getLogger(ExerciseSlide.class);
 
 	private ExerciseListener exerciseListener = null;
 	
-	private final ItemSelectionPane itemPane = new ItemSelectionPane(true, this);
+	private final ItemSelectionPane<TrainingExercise> itemPane = new ItemSelectionPane<TrainingExercise>(true, this);
 	
+	private final TrainingExercise noneExercise = new TrainingExercise() {
+		@Override
+		public void init() {}
+
+		@Override
+		public void targetUpdate(Target target, TargetChange change) {}
+
+		@Override
+		public ExerciseMetadata getInfo() { return null; }
+
+		@Override
+		public void shotListener(Shot shot, Optional<Hit> hit) {}
+
+		@Override
+		public void reset(List<Target> targets) {}
+
+		@Override
+		public void destroy() {}
+	};
 	
 	public ExerciseSlide(Pane parentControls, Pane parentBody, ExerciseListener exerciseListener) {
 		super(parentControls, parentBody);
@@ -64,20 +87,19 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	}
 	
 	@Override
-	public void showControls()
-	{
+	public void showControls() {
 		super.showControls();
 		showBody();
 	}
 
 	private void addNoneButton() {
-		itemPane.addButton("None", "None");
-		itemPane.setDefault("None");
+		itemPane.addButton(noneExercise, "None");
+		itemPane.setDefault(noneExercise);
 	}
 	
 	
 	private Optional<FXMLLoader> createSessionViewerStage() {
-		FXMLLoader loader = new FXMLLoader(
+		final FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
 		try {
 			loader.load();
@@ -129,25 +151,15 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	}
 
 	@Override
-	public void onItemClicked(Object ref) {
-		if (ref instanceof String && (String)ref == "None")
-		{
+	public void onItemClicked(TrainingExercise selectedExercise) {
+		if (selectedExercise.equals(noneExercise)) {
 			exerciseListener.setExercise(null);
-		}
-		else if (ref instanceof ProjectorTrainingExerciseBase)
-		{
-			exerciseListener.setProjectorExercise((TrainingExercise)ref);
-		}
-		else if (ref instanceof TrainingExercise)
-		{
-			exerciseListener.setExercise((TrainingExercise)ref);
-		}
-		else
-		{
-			logger.error("Did not expect this object - %s", ref);
+		} else if (selectedExercise instanceof ProjectorTrainingExerciseBase) {
+			exerciseListener.setProjectorExercise(selectedExercise);
+		} else if (selectedExercise instanceof TrainingExercise) {
+			exerciseListener.setExercise(selectedExercise);
+		} else {
+			logger.error("Did not expect exercise type: {}", selectedExercise.getClass().getName());
 		}
 	}
-
-
-	
 }

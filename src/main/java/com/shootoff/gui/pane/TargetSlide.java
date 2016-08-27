@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.gui.TargetListener;
-import com.shootoff.gui.container.ItemSelectionPane;
-import com.shootoff.gui.container.listeners.ItemSelectionListener;
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.io.TargetIO;
@@ -24,14 +22,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import marytts.util.io.FileFilter;
 
-public class TargetSlide extends Slide implements TargetListener, ItemSelectionListener {
+public class TargetSlide extends Slide implements TargetListener, ItemSelectionListener<File> {
 	private static final Logger logger = LoggerFactory.getLogger(TargetSlide.class);
 	
 	private final Pane parentControls;
 	private final Pane parentBody;
 	private final CameraViews cameraViews;
 	
-	private final ItemSelectionPane itemPane = new ItemSelectionPane(false, this);
+	private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<File>(false, this);
 	
 	private enum Mode { ADD, EDIT };
 	
@@ -126,7 +124,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 	}
 
 	@Override
-	public void onItemClicked(Object ref) {
+	public void onItemClicked(File ref) {
 		if (Mode.ADD.equals(mode)) {
 			cameraViews.getSelectedCameraView().addTarget((File)ref);
 			hide();
