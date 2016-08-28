@@ -138,7 +138,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		this.setStyle("-fx-background-color: #333333;");
 		
-		toggleArena();
 		autoPlaceArena();
 	}
 

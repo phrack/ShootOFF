@@ -115,8 +115,9 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			final Stage arenaStage = new Stage();
 
 			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
+			arenaPane.toggleArena();
 			
-			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(new Stage(), shootOffStage, config, resetter); 
+			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter); 
 			cameraViews.addCameraView("Arena", arenaTabPane);
 			
 			arenaStage.setTitle("Projector Arena");
