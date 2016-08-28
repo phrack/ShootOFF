@@ -101,6 +101,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 		final ImageView targetImageView = new ImageView();
 		targetImageView.setFitWidth(60);
 		targetImageView.setFitHeight(60);
+		targetImageView.setPreserveRatio(true);
 		targetImageView.setSmooth(true);
 		targetImageView.setImage(targetImage);
 		

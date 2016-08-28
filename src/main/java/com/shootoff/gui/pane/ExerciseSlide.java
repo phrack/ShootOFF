@@ -171,6 +171,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	public void registerExercise(TrainingExercise exercise) {
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
 		t.setPrefWidth(500);
+		t.setWrapText(true);
 		exerciseItemPane.addButton(exercise, exercise.getInfo().getName(), Optional.empty(), Optional.of(t));
 	}
 
@@ -178,6 +179,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	public void registerProjectorExercise(TrainingExercise exercise) {
 		final Tooltip t = new Tooltip(exercise.getInfo().getDescription());
 		t.setPrefWidth(500);
+		t.setWrapText(true);
 		projectorExerciseItemPane.addButton(exercise, exercise.getInfo().getName(), Optional.empty(), Optional.of(t));
 	}
 
