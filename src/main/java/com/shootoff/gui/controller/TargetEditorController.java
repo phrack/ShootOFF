@@ -94,6 +94,7 @@ public class TargetEditorController {
 	private static final int MOVEMENT_DELTA = 1;
 	private static final int SCALE_DELTA = 1;
 
+	private final ImageView backgroundImageView = new ImageView();
 	private TargetListener targetListener = null;
 	private Optional<Node> cursorRegion = Optional.empty();
 	private final List<Node> targetRegions = new ArrayList<>();
@@ -107,10 +108,9 @@ public class TargetEditorController {
 
 	public void init(Image backgroundImg, TargetListener targetListener) {
 		if (backgroundImg != null) {
-			ImageView backgroundImgView = new ImageView();
-			backgroundImgView.setImage(backgroundImg);
+			backgroundImageView.setImage(backgroundImg);
 
-			backgroundImgView.setOnMouseClicked((event) -> {
+			backgroundImageView.setOnMouseClicked((event) -> {
 				boolean reopenEditor = false;
 
 				if (tagEditor.isPresent()) {
@@ -132,7 +132,7 @@ public class TargetEditorController {
 				}
 			});
 
-			canvasPane.getChildren().add(backgroundImgView);
+			canvasPane.getChildren().add(backgroundImageView);
 		}
 
 		this.targetListener = targetListener;
@@ -251,6 +251,17 @@ public class TargetEditorController {
 			TargetIO.saveTarget(targetTags, targetRegions, targetFile);
 
 			if (isNewTarget) targetListener.newTarget(targetFile);
+		}
+	}
+	
+	@FXML
+	public void setBackgroundImage(ActionEvent event) {
+		final File selectedBackground = chooseImageFile();
+		
+		if (selectedBackground != null) {
+			backgroundImageView.setImage(new Image(selectedBackground.toURI().toString()));
+			canvasPane.setPrefSize(backgroundImageView.getBoundsInLocal().getWidth(),
+					backgroundImageView.getBoundsInLocal().getWidth());
 		}
 	}
 
@@ -500,14 +511,18 @@ public class TargetEditorController {
 		cursorRegion = Optional.empty();
 	}
 
-	@FXML
-	public void openImage(ActionEvent event) {
+	private File chooseImageFile() {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Open Image");
 		fileChooser.getExtensionFilters().addAll(
 				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
 				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
-		final File imageFile = fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
+		return fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
+	}
+	
+	@FXML
+	public void openImage(ActionEvent event) {
+		final File imageFile = chooseImageFile();
 
 		lastMouseX = 0;
 		lastMouseY = 0;

@@ -6,17 +6,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-
 <VBox fx:id="targetEditorPane" alignment="TOP_CENTER" fillWidth="false" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.TargetEditorController">
    <children>
       <ToolBar>
         <items>
-          <Button maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveTarget" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_media_floppy.png&quot;); -fx-background-position: center;">
+          <Button mnemonicParsing="false" onAction="#saveTarget" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/gnome_media_floppy.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;">
                <tooltip>
                   <Tooltip text="Save Target" />
                </tooltip>
           </Button>
-          <ToggleButton fx:id="cursorButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#cursorSelected" prefHeight="32.0" prefWidth="32.0" selected="true" style="-fx-background-image: url(&quot;images/cursor.png&quot;); -fx-background-position: center;">
+          <Button mnemonicParsing="false" onAction="#setBackgroundImage" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/pictures.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;">
+             <tooltip>
+                <Tooltip text="Set Background Image" />
+             </tooltip>
+          </Button>
+          <ToggleButton fx:id="cursorButton"  mnemonicParsing="false" onAction="#cursorSelected" prefHeight="40.0" prefWidth="40.0" selected="true" style="-fx-background-image: url(&quot;images/cursor.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;">
                <toggleGroup>
                   <ToggleGroup fx:id="targetDrawingControls" />
                </toggleGroup>
@@ -24,57 +28,57 @@
                   <Tooltip text="Select Region" />
                </tooltip>
           </ToggleButton>
-          <ToggleButton fx:id="imageButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openImage" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/gnome_image_x_generic.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="imageButton"  mnemonicParsing="false" onAction="#openImage" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/gnome_image_x_generic.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
                <tooltip>
                   <Tooltip text="Draw Image" />
                </tooltip>
           </ToggleButton>
-          <ToggleButton fx:id="rectangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/rectangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="rectangleButton"  mnemonicParsing="false" onAction="#drawShape" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/rectangle.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw Rectangle" />
                </tooltip>    
           </ToggleButton>      
-          <ToggleButton fx:id="ovalButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/oval.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="ovalButton"  mnemonicParsing="false" onAction="#drawShape" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/oval.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw Oval" />
                </tooltip>    
           </ToggleButton>     
-          <ToggleButton fx:id="triangleButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/triangle.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="triangleButton"  mnemonicParsing="false" onAction="#drawShape" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/triangle.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw Triangle" />
                </tooltip>    
           </ToggleButton>     
-          <ToggleButton fx:id="appleseedThreeButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_3.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="appleseedThreeButton"  mnemonicParsing="false" onAction="#drawShape" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_3.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw D Silhouette 3" />
                </tooltip>    
           </ToggleButton>     
-          <ToggleButton fx:id="appleseedFourButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_4.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="appleseedFourButton"  mnemonicParsing="false" onAction="#drawShape" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_4.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw D Silhouette 4" />
                </tooltip>    
           </ToggleButton>   
-          <ToggleButton fx:id="appleseedFiveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#drawShape" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_5.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="appleseedFiveButton"  mnemonicParsing="false" onAction="#drawShape" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/appleseed_d_silhouette_5.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw D Silhouette 5" />
                </tooltip>    
           </ToggleButton>   
-          <ToggleButton fx:id="freeformButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#startPolygon" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/freeform_polygon.png&quot;); -fx-background-position: center;" toggleGroup="$targetDrawingControls">
+          <ToggleButton fx:id="freeformButton"  mnemonicParsing="false" onAction="#startPolygon" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/freeform_polygon.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;" toggleGroup="$targetDrawingControls">
 			   <tooltip>
                   <Tooltip text="Draw Freeform Polygon" />
                </tooltip>    
           </ToggleButton>   
-          <Button fx:id="bringForwardButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#bringForward" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/bring_forward.png&quot;); -fx-background-position: center;">
+          <Button fx:id="bringForwardButton" disable="true"  mnemonicParsing="false" onAction="#bringForward" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/bring_forward.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;">
 			   <tooltip>
                   <Tooltip text="Bring Forward" />
                </tooltip>    
           </Button>   
-          <Button fx:id="sendBackwardButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#sendBackward" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/send_backward.png&quot;); -fx-background-position: center;">
+          <Button fx:id="sendBackwardButton" disable="true"  mnemonicParsing="false" onAction="#sendBackward" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/send_backward.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;">
 			   <tooltip>
                   <Tooltip text="Send Backward" />
                </tooltip>    
           </Button>   
-          <ToggleButton fx:id="tagsButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#toggleTagEditor" prefHeight="32.0" prefWidth="32.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center;">
+          <ToggleButton fx:id="tagsButton"  mnemonicParsing="false" onAction="#toggleTagEditor" prefHeight="40.0" prefWidth="40.0" style="-fx-background-image: url(&quot;images/tags.png&quot;); -fx-background-position: center; -fx-background-repeat: no-repeat;">
 			   <tooltip>
                   <Tooltip text="Edit Selected Region's Tags" />
                </tooltip>    
@@ -86,6 +90,6 @@
           </ChoiceBox>   
         </items>
       </ToolBar>
-      <Pane fx:id="canvasPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#regionDropped" onMouseMoved="#mouseMoved" prefHeight="480.0" prefWidth="640.0" />
+      <Pane fx:id="canvasPane" onMouseClicked="#regionDropped" onMouseMoved="#mouseMoved" prefHeight="480.0" prefWidth="640.0" />
    </children>
 </VBox>
