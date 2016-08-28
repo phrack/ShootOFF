@@ -68,7 +68,15 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		});
 		
 		addSlideControlButton("Courses", (event) -> {
-			
+			final ArenaCoursesSlide coursesSlide = new ArenaCoursesSlide(parentControls, 
+					parentBody, arenaController, shootOffStage);
+			coursesSlide.setOnSlideHidden(() -> {
+				if (coursesSlide.choseCourse()) {
+					hide();
+				}
+			});
+			coursesSlide.showControls();
+			coursesSlide.showBody();
 		});
 	}
 	
@@ -140,7 +148,12 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			
 			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, 
 					parentBody, arenaController, shootOffStage);
-			backgroundsSlide.setOnSlideHidden(() -> hide());
+			backgroundsSlide.setOnSlideHidden(() -> { 
+				if (backgroundsSlide.choseBackground()) {
+					backgroundsSlide.setChoseBackground(false);
+					hide(); 
+				}
+			} );
 			
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()

@@ -20,6 +20,8 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 	private final ProjectorArenaController arenaController;
 	private final Stage shootOffStage;
 	
+	private boolean choseBackground = false;
+	
 	public ArenaBackgroundsSlide(Pane parentControls, Pane parentBody, ProjectorArenaController arenaController,
 			Stage shootOffStage) {
 		super(parentControls, parentBody);
@@ -91,6 +93,16 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 			arenaController.setBackground(selectedImage);	
 		}
 		
+		choseBackground = true;
+		
 		hide();
+	}
+	
+	public void setChoseBackground(boolean choseBackground) {
+		this.choseBackground = choseBackground;
+	}
+	
+	public boolean choseBackground() {
+		return choseBackground;
 	}
 }
