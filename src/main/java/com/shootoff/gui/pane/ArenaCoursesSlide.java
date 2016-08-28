@@ -79,4 +79,8 @@ public class ArenaCoursesSlide extends Slide {
 			}
 		}
 	}
+	
+	public void clearArenaTargetsMenuItemClicked(ActionEvent event) {
+		arenaController.getCanvasManager().clearTargets();
+	}
 }

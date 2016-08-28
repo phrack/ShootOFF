@@ -26,12 +26,16 @@ import javafx.stage.Stage;
 public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorSlide.class);
 	
+	private final Pane parentControls;
+	private final Pane parentBody;
 	private final Configuration config;
 	private final CameraViews cameraViews;
 	private final Stage shootOffStage;
 	private final Resetter resetter;
 	private final ExerciseSlide exerciseSlide;
 	private final Button calibrateButton;
+	
+	private ArenaBackgroundsSlide backgroundsSlide;
 	
 	private ProjectorArenaController arenaController;
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
@@ -40,6 +44,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			Stage shootOffStage, Resetter resetter, ExerciseSlide exerciseSlide) {
 		super(parentControls, parentBody);
 		
+		this.parentControls = parentControls;
+		this.parentBody = parentBody;
 		this.config = config;
 		this.cameraViews = cameraViews;
 		this.shootOffStage = shootOffStage;
@@ -57,7 +63,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		});
 		
 		addSlideControlButton("Background", (event) -> {
-			
+			backgroundsSlide.showControls();
+			backgroundsSlide.showBody();
 		});
 		
 		addSlideControlButton("Courses", (event) -> {
@@ -130,6 +137,10 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
 			calibrateButton.fire();
+			
+			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, 
+					parentBody, arenaController, shootOffStage);
+			backgroundsSlide.setOnSlideHidden(() -> hide());
 			
 			arenaStage.setOnCloseRequest((e) -> {
 				if (config.getExercise().isPresent()

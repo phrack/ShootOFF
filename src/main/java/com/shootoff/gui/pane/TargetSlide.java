@@ -99,8 +99,8 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 		
 		final Image targetImage = targetComponents.get().getTargetGroup().snapshot(new SnapshotParameters(), null);
 		final ImageView targetImageView = new ImageView();
-		targetImageView.setFitWidth(45);
-		targetImageView.setFitHeight(45);
+		targetImageView.setFitWidth(60);
+		targetImageView.setFitHeight(60);
 		targetImageView.setSmooth(true);
 		targetImageView.setImage(targetImage);
 		
