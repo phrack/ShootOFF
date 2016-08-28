@@ -128,7 +128,7 @@ public class TestCanvasManager {
 		assertEquals(0, cm.getShots().size());
 
 		Shot shot = new Shot(Color.RED, 0, 0, 0, 2);		
-		cm.addShot(shot);
+		cm.addShot(shot, false);
 
 		assertEquals(1, cm.getShots().size());
 	}

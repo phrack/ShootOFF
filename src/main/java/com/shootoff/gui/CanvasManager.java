@@ -522,7 +522,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	@Override
-	public void addShot(Shot shot) {
+	public void addShot(Shot shot, boolean isMirroredShot) {
 		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 		if (rejectingProcessor.isPresent()) {
 			recordRejectedShot(shot, rejectingProcessor.get());
@@ -532,22 +532,28 @@ public class CanvasManager implements CameraView {
 		}
 
 		Optional<Shot> lastShot = Optional.empty();
-		if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
-
-		ShotEntry shotEntry;
-		if (hadMalfunction || hadReload) {
-			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
-			hadMalfunction = false;
-			hadReload = false;
-		} else {
-			shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
-		}
-
-		try {
-			shotEntries.add(shotEntry);
-		} catch (NullPointerException npe) {
-			logger.error("JDK 8094135 exception", npe);
-			jdk8094135Warning();
+		
+		// Create a shot entry to show the shot's data
+		// in the shot timer table if the shot timer
+		// table is in use
+		if (shotEntries != null) {
+			if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
+	
+			final ShotEntry shotEntry;
+			if (hadMalfunction || hadReload) {
+				shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
+				hadMalfunction = false;
+				hadReload = false;
+			} else {
+				shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
+			}
+	
+			try {
+				shotEntries.add(shotEntry);
+			} catch (NullPointerException npe) {
+				logger.error("JDK 8094135 exception", npe);
+				jdk8094135Warning();
+			}
 		}
 
 		shots.add(shot);
@@ -570,10 +576,10 @@ public class CanvasManager implements CameraView {
 			Bounds b = projectionBounds.get();
 
 			if (b.contains(shot.getX(), shot.getY())) {
-				double x_scale = arenaPane.get().getWidth() / b.getWidth();
-				double y_scale = arenaPane.get().getHeight() / b.getHeight();
+				final double x_scale = arenaPane.get().getWidth() / b.getWidth();
+				final double y_scale = arenaPane.get().getHeight() / b.getHeight();
 
-				Shot arenaShot = new Shot(shot.getColor(), (shot.getX() - b.getMinX()) * x_scale,
+				final Shot arenaShot = new Shot(shot.getColor(), (shot.getX() - b.getMinX()) * x_scale,
 						(shot.getY() - b.getMinY()) * y_scale, shot.getTimestamp(), shot.getFrame(),
 						config.getMarkerRadius());
 
@@ -581,7 +587,7 @@ public class CanvasManager implements CameraView {
 			}
 		}
 
-		if (currentExercise.isPresent() && !processedShot) {
+		if (!isMirroredShot && currentExercise.isPresent() && !processedShot) {
 			currentExercise.get().shotListener(shot, hit);
 		}
 	}

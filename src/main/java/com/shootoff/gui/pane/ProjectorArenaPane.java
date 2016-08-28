@@ -36,6 +36,7 @@ import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
+import com.shootoff.gui.MirroredCanvasManager;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -115,8 +116,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.shootOffStage = shootOffStage;
 		this.arenaStage = arenaStage;
 		
-		canvasManager = new CanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
-		canvasManager.updateBackground(null, Optional.empty());
+		canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
 
 		this.setPrefSize(640, 480);
 		
@@ -137,8 +137,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		});
 
 		this.setStyle("-fx-background-color: #333333;");
-		
-		autoPlaceArena();
 	}
 
 	public void setCalibrationManager(CalibrationManager calibrationManager) {
@@ -180,7 +178,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		return Optional.of(stageHomeScreens.get(0));
 	}
 
-	private void autoPlaceArena() {
+	public void autoPlaceArena() {
 		Optional<Screen> homeScreen = getStageHomeScreen(arenaStage);
 
 		if (homeScreen.isPresent()) {
@@ -573,7 +571,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 		final TargetView tv = (TargetView) target;
 		final EventHandler<? super MouseEvent> mouseClickedHandler = tv.getTargetGroup().getOnMouseClicked();
-	
+		
 		tv.getTargetGroup().setOnMouseClicked((event) -> {
 			if (MouseButton.SECONDARY.equals(event.getButton())) {
 				final MenuItem setDistanceMenuItem = new MenuItem("Set Target Distance");

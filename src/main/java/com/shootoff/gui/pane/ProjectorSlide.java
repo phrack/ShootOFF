@@ -7,6 +7,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
+import com.shootoff.gui.MirroredCanvasManager;
 import com.shootoff.gui.Resetter;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.targets.CameraViews;
@@ -115,10 +116,17 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			final Stage arenaStage = new Stage();
 
 			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
-			arenaPane.toggleArena();
 			
 			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter); 
-			cameraViews.addCameraView("Arena", arenaTabPane);
+			cameraViews.addCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager());
+			
+			final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaPane.getCanvasManager();
+			final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) arenaTabPane.getCanvasManager();
+			
+			projectorCanvasManager.setMirroredManager(tabCanvasManager);
+			tabCanvasManager.setMirroredManager(projectorCanvasManager);
+			projectorCanvasManager.updateBackground(null, Optional.empty());
+			tabCanvasManager.setCameraManager(new CameraManager(tabCanvasManager, config));
 			
 			arenaStage.setTitle("Projector Arena");
 			arenaStage.setScene(new Scene(arenaPane));
@@ -140,7 +148,10 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 					backgroundsSlide.setChoseBackground(false);
 					hide(); 
 				}
-			} );
+			});
+			
+			arenaPane.toggleArena();
+			arenaPane.autoPlaceArena();
 			
 			arenaStage.setOnCloseRequest((e) -> {
 				cameraViews.removeCameraView("Arena");

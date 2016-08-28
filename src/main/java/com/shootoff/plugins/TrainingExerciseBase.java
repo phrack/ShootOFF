@@ -338,7 +338,7 @@ public class TrainingExerciseBase {
 	 * @since 1.3
 	 */
 	public void setShotTimerColumnText(final String name, final String value) {
-		if (shotTimerTable != null) {
+		if (shotTimerTable != null && shotTimerTable.getItems() != null) {
 			Runnable shotTimerColumnTextSetter = () -> {
 				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
 			};

@@ -46,7 +46,7 @@ public class MockCanvasManager extends CanvasManager {
 	}
 
 	@Override
-	public void addShot(Shot shot) {
+	public void addShot(Shot shot, boolean mirroredShot) {
 		if (useShotProcessors) {
 
 			for (ShotProcessor p : config.getShotProcessors()) {

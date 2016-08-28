@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 
 public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListener<LocatedImage> {
 	private final ItemSelectionPane<LocatedImage> itemPane = new ItemSelectionPane<>(true, this);
-	private final ProjectorArenaPane arenPane;
+	private final ProjectorArenaPane arenaPane;
 	private final Stage shootOffStage;
 	
 	private boolean choseBackground = false;
@@ -25,7 +25,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 			Stage shootOffStage) {
 		super(parentControls, parentBody);
 		
-		this.arenPane = arenaPane;
+		this.arenaPane = arenaPane;
 		this.shootOffStage = shootOffStage;
 		
 		addNoneButton();
@@ -78,18 +78,18 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 
 		if (backgroundFile != null) {
 			LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
-			arenPane.setArenaBackground(img);
+			arenaPane.setArenaBackground(img);
 		}
 	}
 
 	@Override
 	public void onItemClicked(LocatedImage selectedImage) {
 		if (selectedImage.getURL().equals("/images/blank_page.png")) {
-			arenPane.setBackground(null);
+			arenaPane.setArenaBackground(null);
 		} else if (selectedImage.getURL().equals("/images/normal_folder.png")) {
 			selectedLocalImage();
 		} else {
-			arenPane.setArenaBackground(selectedImage);	
+			arenaPane.setArenaBackground(selectedImage);	
 		}
 		
 		choseBackground = true;

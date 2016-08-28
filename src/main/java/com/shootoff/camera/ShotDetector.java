@@ -127,7 +127,7 @@ public abstract class ShotDetector {
 		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(),
 				shot.getY(), shot.getColor(), cameraManager.getFrameCount());
 
-		cameraView.addShot(shot);
+		cameraView.addShot(shot, false);
 
 		return true;
 	}

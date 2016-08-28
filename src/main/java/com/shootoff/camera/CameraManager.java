@@ -164,8 +164,8 @@ public class CameraManager implements Closeable {
 		}
 	}
 
-	// For testing with videos
-	protected CameraManager(CameraView view, Configuration config) {
+	// For testing with videos and click-to-shoot on Arena tab
+	public CameraManager(CameraView view, Configuration config) {
 		this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;

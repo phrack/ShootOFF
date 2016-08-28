@@ -422,24 +422,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 
 		canvasManager.setContextMenu(createContextMenu());
-
-		// Show coords of mouse when in canvas during debug mode
-		if (config.inDebugMode()) {
-			canvasManager.getCanvasGroup().setOnMouseMoved((event) -> {
-				shootOFFStage.setTitle(defaultWindowTitle + String.format(" (%.1f, %.1f)", event.getX(), event.getY()));
-			});
-
-			canvasManager.getCanvasGroup().setOnMouseExited((event) -> {
-				shootOFFStage.setTitle(defaultWindowTitle);
-			});
-		}
+		installDebugCoordDisplay(canvasManager);
 
 		return cameraTabPane.getTabs().add(cameraTab);
 	}
 	
-	public void addCameraView(String name, Pane pane) {
+	public void addCameraView(String name, Pane pane, CanvasManager canvasManager) {
 		final Tab viewTab = new Tab(name, pane);
 		cameraTabPane.getTabs().add(viewTab);
+		installDebugCoordDisplay(canvasManager);
 	}
 	
 	public void removeCameraView(String name) {
@@ -453,6 +444,19 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 		
 		if (viewTab != null) cameraTabPane.getTabs().remove(viewTab);
+	}
+	
+	private void installDebugCoordDisplay(CanvasManager canvasManager) {
+		// Show coords of mouse when in canvas during debug mode
+		if (config.inDebugMode()) {
+			canvasManager.getCanvasGroup().setOnMouseMoved((event) -> {
+				shootOFFStage.setTitle(defaultWindowTitle + String.format(" (%.1f, %.1f)", event.getX(), event.getY()));
+			});
+
+			canvasManager.getCanvasGroup().setOnMouseExited((event) -> {
+				shootOFFStage.setTitle(defaultWindowTitle);
+			});
+		}
 	}
 
 	private ContextMenu createContextMenu() {
