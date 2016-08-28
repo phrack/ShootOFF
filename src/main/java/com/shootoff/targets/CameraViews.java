@@ -7,12 +7,11 @@ import com.shootoff.camera.CameraView;
 import com.shootoff.gui.CanvasManager;
 
 import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 
 public interface CameraViews {
 	List<Target> getTargets();
 	
-	void addCameraView(String name, Pane pane, CanvasManager canvasManager);
+	void addCameraView(String name, Node content, CanvasManager canvasManager);
 
 	void removeCameraView(String name);
 	

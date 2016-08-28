@@ -755,8 +755,14 @@ public class CanvasManager implements CameraView {
 	}
 
 	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
-		TargetView newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
-
+		final TargetView newTarget;
+		
+		if (this instanceof MirroredCanvasManager) {
+			newTarget = new MirroredTarget(targetFile, targetGroup, targetTags, config, this, userDeletable);
+		} else {
+			newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
+		}
+		
 		return addTarget(newTarget);
 	}
 

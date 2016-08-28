@@ -87,7 +87,6 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
@@ -427,8 +426,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return cameraTabPane.getTabs().add(cameraTab);
 	}
 	
-	public void addCameraView(String name, Pane pane, CanvasManager canvasManager) {
-		final Tab viewTab = new Tab(name, pane);
+	public void addCameraView(String name, Node content, CanvasManager canvasManager) {
+		final Tab viewTab = new Tab(name, content);
 		cameraTabPane.getTabs().add(viewTab);
 		installDebugCoordDisplay(canvasManager);
 	}

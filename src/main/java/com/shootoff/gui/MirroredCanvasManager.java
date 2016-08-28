@@ -8,6 +8,8 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.targets.Target;
+import com.shootoff.targets.io.TargetIO;
+import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
@@ -15,11 +17,15 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 
 public class MirroredCanvasManager extends CanvasManager {
+	private final Configuration config;
+	
 	private MirroredCanvasManager mirroredManager;
 	
 	public MirroredCanvasManager(Group canvasGroup, Configuration config, Resetter resetter, String cameraName,
 			ObservableList<ShotEntry> shotEntries) {
 		super(canvasGroup, config, resetter, cameraName, shotEntries);
+		
+		this.config = config;
 	}
  
 	public void setMirroredManager(MirroredCanvasManager mirroredManager) {
@@ -48,12 +54,48 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
-		mirroredManager.mirrorAddTarget(targetFile, targetGroup, targetTags, userDeletable);
+		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
+		
+		if (targetComponents.isPresent()) {
+			final TargetComponents tc = targetComponents.get();
+			mirroredManager.mirrorAddTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), userDeletable);
+		}
+		
 		return super.addTarget(targetFile, targetGroup, targetTags, userDeletable);
 	}
 	
 	public Target mirrorAddTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
 		return super.addTarget(targetFile, targetGroup, targetTags, userDeletable);
+	}
+	
+	@Override
+	public Target addTarget(Target newTarget) {
+		final MirroredTarget target;
+		
+		if (newTarget instanceof MirroredTarget) {
+			target = (MirroredTarget) newTarget;
+		} else {
+			target = new MirroredTarget(newTarget.getTargetFile(), ((TargetView) newTarget).getTargetGroup(),
+					newTarget.getAllTags(), config, this, ((TargetView) newTarget).isUserDeletable());
+		}
+		
+		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(newTarget.getTargetFile());
+		
+		if (targetComponents.isPresent()) {
+			final TargetComponents tc = targetComponents.get();
+			final MirroredTarget t = new MirroredTarget(newTarget.getTargetFile(), tc.getTargetGroup(), tc.getTargetTags(), config, 
+					mirroredManager, ((TargetView) newTarget).isUserDeletable());
+			mirroredManager.mirrorAddTarget(t);
+			
+			target.setMirroredTarget(t);
+			t.setMirroredTarget(target);
+		}
+		
+		return super.addTarget(target);
+	}
+	
+	public Target mirrorAddTarget(Target newTarget) {
+		return super.addTarget(newTarget);
 	}
 	
 	@Override
@@ -115,5 +157,15 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	public void mirrorAddShot(Shot shot) {
 		super.addShot(shot, true);
+	}
+	
+	@Override
+	public void clearShots() {
+		mirroredManager.mirrorClearShots();
+		super.clearShots();
+	}
+	
+	public void mirrorClearShots() {
+		super.clearShots();
 	}
 }

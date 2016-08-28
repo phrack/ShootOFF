@@ -101,7 +101,7 @@ public class TargetView implements Target {
 		this.targetFile = targetFile;
 		this.targetGroup = target;
 		this.targetTags = targetTags;
-		this.config = Optional.of(config);
+		this.config = Optional.ofNullable(config);
 		this.parent = Optional.of(parent);
 		this.targets = Optional.empty();
 		this.userDeletable = userDeletable;
@@ -109,7 +109,7 @@ public class TargetView implements Target {
 
 		targetGroup.setOnMouseClicked((event) -> {
 			// Skip target selection if click to shoot is being used
-			if (config.inDebugMode() && (event.isShiftDown() || event.isControlDown())) return;
+			if (config != null && config.inDebugMode() && (event.isShiftDown() || event.isControlDown())) return;
 
 			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();
@@ -141,6 +141,10 @@ public class TargetView implements Target {
 		keyPressed();
 	}
 
+	public boolean isUserDeletable() {
+		return userDeletable;
+	}
+	
 	@Override
 	public File getTargetFile() {
 		return targetFile;

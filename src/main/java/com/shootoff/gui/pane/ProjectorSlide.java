@@ -15,6 +15,7 @@ import com.shootoff.targets.CameraViews;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -118,7 +119,12 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
 			
 			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter); 
-			cameraViews.addCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager());
+			cameraViews.addCameraView("Arena", new ScrollPane(arenaTabPane), arenaTabPane.getCanvasManager());
+			
+			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
+			arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
+			
+			arenaPane.setArenaPaneMirror(arenaTabPane);
 			
 			final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaPane.getCanvasManager();
 			final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) arenaTabPane.getCanvasManager();

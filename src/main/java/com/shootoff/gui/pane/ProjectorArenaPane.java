@@ -90,7 +90,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private CalibrationManager calibrationManager;
 	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
 
-
+	private ProjectorArenaPane mirroredArenaPane;
+	
 	// Used for testing
 	public ProjectorArenaPane(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
@@ -137,6 +138,10 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		});
 
 		this.setStyle("-fx-background-color: #333333;");
+	}
+	
+	public void setArenaPaneMirror(ProjectorArenaPane mirroredArenaPane) {
+		this.mirroredArenaPane = mirroredArenaPane;
 	}
 
 	public void setCalibrationManager(CalibrationManager calibrationManager) {
@@ -392,7 +397,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		double widthScaleFactor = 1;
 		double heightScaleFactor = 1;
-
+		
 		if (scaleCourse) {
 			widthScaleFactor = getWidth() / course.getResolution().get().getWidth();
 			heightScaleFactor = getHeight() / course.getResolution().get().getHeight();
@@ -415,7 +420,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 				t.setDimensions(newWidth, newHeight);
 			}
 
-			canvasManager.addTarget((TargetView) t);
+			canvasManager.addTarget(t);
 		}
 	}
 
@@ -477,6 +482,12 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	@Override
 	public void startCalibration() {
 		setTargetsVisible(false);
+		
+		if (mirroredArenaPane != null) mirroredArenaPane.mirroredStartCalibration();
+	}
+	
+	public void mirroredStartCalibration() {
+		startCalibration();
 	}
 
 	private volatile boolean mouseInWindow = false;
@@ -549,6 +560,12 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 				resizeTargetToDefaultPerspective(t);
 			}
 		}
+		
+		if (mirroredArenaPane != null) mirroredArenaPane.mirrorCalibrated(perspectiveManager);
+	}
+	
+	public void mirrorCalibrated(Optional<PerspectiveManager> perspectiveManager) {
+		calibrated(perspectiveManager);
 	}
 
 	/**

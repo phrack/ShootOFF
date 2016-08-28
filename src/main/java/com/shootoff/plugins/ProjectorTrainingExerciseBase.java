@@ -132,7 +132,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	public void removeTarget(Target target) {
-		arenaPane.getCanvasManager().removeTarget((TargetView) target);
+		arenaPane.getCanvasManager().removeTarget(target);
 		targets.remove(target);
 	}
 
