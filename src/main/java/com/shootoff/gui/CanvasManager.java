@@ -436,7 +436,6 @@ public class CanvasManager implements CameraView {
 
 	public void setProjectorArena(ProjectorArenaPane arenaPane, Bounds projectionBounds) {
 		this.arenaPane = Optional.ofNullable(arenaPane);
-
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
 

@@ -87,6 +87,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
@@ -320,7 +321,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@Override
 	public CameraView getSelectedCameraView() {
-		return camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex());
+		if ("Arena".equals(cameraTabPane.getSelectionModel().getSelectedItem().getText())) {
+			return projectorSlide.getArenaPane().getCanvasManager();
+		} else {
+			return camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex());
+		}
 	}
 
 	@Override
@@ -430,6 +435,24 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 
 		return cameraTabPane.getTabs().add(cameraTab);
+	}
+	
+	public void addCameraView(String name, Pane pane) {
+		final Tab viewTab = new Tab(name, pane);
+		cameraTabPane.getTabs().add(viewTab);
+	}
+	
+	public void removeCameraView(String name) {
+		Tab viewTab = null;
+		
+		for (Tab t : cameraTabPane.getTabs()) {
+			if (t.getText().equals(name)) {
+				viewTab = t;
+				break;
+			}
+		}
+		
+		if (viewTab != null) cameraTabPane.getTabs().remove(viewTab);
 	}
 
 	private ContextMenu createContextMenu() {
@@ -577,8 +600,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
-			if (projectorSlide.getArenaController() != null) {
-				knownTargets.addAll(projectorSlide.getArenaController().getCanvasManager().getTargets());
+			if (projectorSlide.getArenaPane() != null) {
+				knownTargets.addAll(projectorSlide.getArenaPane().getCanvasManager().getTargets());
 			}
 
 			config.getExercise().get().reset(knownTargets);
@@ -750,8 +773,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
-			if (projectorSlide.getArenaController() != null) {
-				knownTargets.addAll(projectorSlide.getArenaController().getCanvasManager().getTargets());
+			if (projectorSlide.getArenaPane() != null) {
+				knownTargets.addAll(projectorSlide.getArenaPane().getCanvasManager().getTargets());
 			}
 
 			TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
@@ -777,7 +800,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		try {
 			Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 			TrainingExercise newExercise = (TrainingExercise) ctor
-					.newInstance(projectorSlide.getArenaController().getCanvasManager().getTargets());
+					.newInstance(projectorSlide.getArenaPane().getCanvasManager().getTargets());
 
 			Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
 			if (plugin.isPresent()) {
@@ -788,7 +811,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			config.setExercise(newExercise);
 
-			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaController());
+			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaPane());
 			newExercise.init();
 		} catch (Exception ex) {
 			ex.printStackTrace();

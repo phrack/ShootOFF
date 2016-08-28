@@ -102,7 +102,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		}
 	}
 	
-	public ProjectorArenaPane getArenaController() {
+	public ProjectorArenaPane getArenaPane() {
 		return arenaPane;
 	}
 	
@@ -115,7 +115,10 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			final Stage arenaStage = new Stage();
 
 			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
-
+			
+			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(new Stage(), shootOffStage, config, resetter); 
+			cameraViews.addCameraView("Arena", arenaTabPane);
+			
 			arenaStage.setTitle("Projector Arena");
 			arenaStage.setScene(new Scene(arenaPane));
 			arenaStage.setFullScreenExitHint("");
@@ -139,6 +142,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			} );
 			
 			arenaStage.setOnCloseRequest((e) -> {
+				cameraViews.removeCameraView("Arena");
+				
 				if (config.getExercise().isPresent()
 						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
 					exerciseSlide.toggleProjectorExercises(true);
