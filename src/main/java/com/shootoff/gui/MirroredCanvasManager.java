@@ -34,8 +34,7 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
-		mirroredManager.mirrorAddTarget(targetFile, playAnimations);
-		return super.addTarget(targetFile, playAnimations);
+		return mirroredManager.mirrorAddTarget(targetFile, playAnimations);
 	}
 	
 	public Optional<Target> mirrorAddTarget(File targetFile, boolean playAnimations) {
@@ -44,8 +43,7 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public Optional<Target> addTarget(File targetFile) {
-		mirroredManager.mirrorAddTarget(targetFile);
-		return super.addTarget(targetFile);
+		return mirroredManager.mirrorAddTarget(targetFile);
 	}
 	
 	public Optional<Target> mirrorAddTarget(File targetFile) {
@@ -58,10 +56,10 @@ public class MirroredCanvasManager extends CanvasManager {
 		
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
-			mirroredManager.mirrorAddTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), userDeletable);
+			return mirroredManager.mirrorAddTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), userDeletable);
 		}
 		
-		return super.addTarget(targetFile, targetGroup, targetTags, userDeletable);
+		return null;
 	}
 	
 	public Target mirrorAddTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
