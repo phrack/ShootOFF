@@ -173,8 +173,7 @@ public class TestTargetIO {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		MockProjectorArenaController pac = new MockProjectorArenaController();
-		pac.init(config, new MockCanvasManager(config));
+		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
 		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
 		pteb.init(config, cs, new ShootOFFController(), pac);

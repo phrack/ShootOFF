@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.TargetView;
-import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.targets.Target;
 
 import javafx.geometry.Dimension2D;
@@ -33,16 +32,16 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 	private final Map<String, ItemSelectionPane<File>> categoryMap = new HashMap<>();
 	
 	private final VBox coursePanes = new VBox();
-	private final ProjectorArenaController arenaController;
+	private final ProjectorArenaPane arenaPane;
 	private final Stage shootOffStage;
 	
 	private boolean choseCourse = false;
 	
-	public ArenaCoursesSlide(Pane parentControls, Pane parentBody, ProjectorArenaController arenaController,
+	public ArenaCoursesSlide(Pane parentControls, Pane parentBody, ProjectorArenaPane arenaPane,
 			Stage shootOffStage) {
 		super(parentControls, parentBody);
 		
-		this.arenaController = arenaController;
+		this.arenaPane = arenaPane;
 		this.shootOffStage = shootOffStage;
 		
 		addSlideControlButton("Save Course", (event) -> {
@@ -50,7 +49,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 		});
 		
 		addSlideControlButton("Clear Course", (event) -> {
-			arenaController.getCanvasManager().clearTargets();
+			arenaPane.getCanvasManager().clearTargets();
 		});
 		
 		addBodyNode(buildCoursePanes());
@@ -78,7 +77,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 
 			courseFile = new File(path);
 
-			CourseIO.saveCourse(arenaController, courseFile);
+			CourseIO.saveCourse(arenaPane, courseFile);
 			
 			// Add the course to the list in the appropriate category
 			ItemSelectionPane<File> itemPane;
@@ -148,7 +147,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 	}
 	
 	private ImageView getCourseThumbnail(File courseFile) {
-		final Optional<Course> course = CourseIO.loadCourse(arenaController, courseFile);
+		final Optional<Course> course = CourseIO.loadCourse(arenaPane, courseFile);
 
 		if (course.isPresent()) {
 			final Group courseGroup = new Group();
@@ -161,7 +160,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 				if (c.getResolution().isPresent()) {
 					courseDimensions = c.getResolution().get();
 				} else {
-					courseDimensions = new Dimension2D(arenaController.getWidth(), arenaController.getWidth());
+					courseDimensions = new Dimension2D(arenaPane.getWidth(), arenaPane.getWidth());
 				}
 				
 				final ImageView backgroundImageView = new ImageView(c.getBackground().get());
@@ -191,10 +190,10 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 
 	@Override
 	public void onItemClicked(File courseFile) {
-		final Optional<Course> course = CourseIO.loadCourse(arenaController, courseFile);
+		final Optional<Course> course = CourseIO.loadCourse(arenaPane, courseFile);
 
 		if (course.isPresent()) {
-			arenaController.setCourse(course.get());
+			arenaPane.setCourse(course.get());
 		}
 		
 		choseCourse = true;

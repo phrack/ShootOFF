@@ -49,7 +49,7 @@ import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.ShotRecorder;
 import com.shootoff.camera.VirtualMagazineProcessor;
 import com.shootoff.config.Configuration;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.targets.Hit;
@@ -113,7 +113,7 @@ public class CanvasManager implements CameraView {
 	private static final int MINIMUM_FRAME_DELTA = 1000 / MAX_FEED_FPS; // ms
 	private long lastFrameTime = 0;
 
-	private Optional<ProjectorArenaController> arenaController = Optional.empty();
+	private Optional<ProjectorArenaPane> arenaPane = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
 	public CanvasManager(Group canvasGroup, Configuration config, Resetter resetter, String cameraName,
@@ -408,7 +408,7 @@ public class CanvasManager implements CameraView {
 				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
-			if (arenaController.isPresent()) arenaController.get().getCanvasManager().clearShots();
+			if (arenaPane.isPresent()) arenaPane.get().getCanvasManager().clearShots();
 		};
 
 		if (Platform.isFxApplicationThread()) {
@@ -427,15 +427,15 @@ public class CanvasManager implements CameraView {
 			}
 		}
 
-		if (arenaController.isPresent()) {
-			arenaController.get().getCanvasManager().reset();
+		if (arenaPane.isPresent()) {
+			arenaPane.get().getCanvasManager().reset();
 		}
 
 		clearShots();
 	}
 
-	public void setProjectorArena(ProjectorArenaController arenaController, Bounds projectionBounds) {
-		this.arenaController = Optional.ofNullable(arenaController);
+	public void setProjectorArena(ProjectorArenaPane arenaPane, Bounds projectionBounds) {
+		this.arenaPane = Optional.ofNullable(arenaPane);
 
 		this.projectionBounds = Optional.ofNullable(projectionBounds);
 	}
@@ -567,18 +567,18 @@ public class CanvasManager implements CameraView {
 
 		boolean processedShot = false;
 
-		if (arenaController.isPresent() && projectionBounds.isPresent()) {
+		if (arenaPane.isPresent() && projectionBounds.isPresent()) {
 			Bounds b = projectionBounds.get();
 
 			if (b.contains(shot.getX(), shot.getY())) {
-				double x_scale = arenaController.get().getWidth() / b.getWidth();
-				double y_scale = arenaController.get().getHeight() / b.getHeight();
+				double x_scale = arenaPane.get().getWidth() / b.getWidth();
+				double y_scale = arenaPane.get().getHeight() / b.getHeight();
 
 				Shot arenaShot = new Shot(shot.getColor(), (shot.getX() - b.getMinX()) * x_scale,
 						(shot.getY() - b.getMinY()) * y_scale, shot.getTimestamp(), shot.getFrame(),
 						config.getMarkerRadius());
 
-				processedShot = arenaController.get().getCanvasManager().addArenaShot(arenaShot, videoString);
+				processedShot = arenaPane.get().getCanvasManager().addArenaShot(arenaShot, videoString);
 			}
 		}
 

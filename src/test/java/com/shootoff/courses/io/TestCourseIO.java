@@ -26,7 +26,7 @@ import com.shootoff.targets.io.TargetIO.TargetComponents;
 public class TestCourseIO {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private MockProjectorArenaController arenaController;
+	private MockProjectorArenaController arenaPane;
 	private String backgroundURL;
 	private boolean backgroundIsResource;
 	private String targetName;
@@ -41,8 +41,7 @@ public class TestCourseIO {
 		System.setProperty("shootoff.sessions", System.getProperty("shootoff.home") + File.separator + "sessions");
 
 		Configuration config = new Configuration(new String[0]);
-		arenaController = new MockProjectorArenaController();
-		arenaController.init(config, new MockCanvasManager(config));
+		arenaPane = new MockProjectorArenaController(config, new MockCanvasManager(config));
 		backgroundURL = "/arena/backgrounds/indoor_range.gif";
 		backgroundIsResource = true;
 		targetName = "targets/Reset.target";
@@ -53,7 +52,7 @@ public class TestCourseIO {
 
 		InputStream is = TestCourseIO.class.getResourceAsStream(backgroundURL);
 		LocatedImage img = new LocatedImage(is, backgroundURL);
-		arenaController.setBackground(img);
+		arenaPane.setArenaBackground(img);
 
 		File targetFile = new File(targetName);
 		TargetComponents tc = TargetIO.loadTarget(targetFile).get();
@@ -62,7 +61,7 @@ public class TestCourseIO {
 		target.setPosition(targetX, targetY);
 		target.setDimensions(targetWidth, targetHeight);
 
-		arenaController.getCanvasManager().addTarget(target);
+		arenaPane.getCanvasManager().addTarget(target);
 	}
 
 	private void checkCourse(Optional<Course> course) {
@@ -95,9 +94,9 @@ public class TestCourseIO {
 	@Test
 	public void testXMLSerialization() {
 		File tempXMLCourse = new File("temp_course.course");
-		CourseIO.saveCourse(arenaController, tempXMLCourse);
+		CourseIO.saveCourse(arenaPane, tempXMLCourse);
 
-		Optional<Course> course = CourseIO.loadCourse(arenaController, tempXMLCourse);
+		Optional<Course> course = CourseIO.loadCourse(arenaPane, tempXMLCourse);
 		checkCourse(course);
 
 		if (!tempXMLCourse.delete()) System.err.println("Failed to delete " + tempXMLCourse.getPath());
@@ -106,7 +105,7 @@ public class TestCourseIO {
 	@Test
 	public void testCourseDoesntExist() {
 		File XMLCourse = new File("does_not_exist.course");
-		Optional<Course> course = CourseIO.loadCourse(arenaController, XMLCourse);
+		Optional<Course> course = CourseIO.loadCourse(arenaPane, XMLCourse);
 
 		assertEquals(Optional.empty(), course);
 	}
@@ -114,7 +113,7 @@ public class TestCourseIO {
 	@Test
 	public void testUnknownCourseExtension() {
 		File XMLCourse = new File("does_not_exist.watisthis");
-		Optional<Course> course = CourseIO.loadCourse(arenaController, XMLCourse);
+		Optional<Course> course = CourseIO.loadCourse(arenaPane, XMLCourse);
 
 		assertEquals(Optional.empty(), course);
 	}

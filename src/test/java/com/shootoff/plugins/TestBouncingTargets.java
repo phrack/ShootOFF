@@ -57,8 +57,7 @@ public class TestBouncingTargets {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		MockProjectorArenaController pac = new MockProjectorArenaController();
-		pac.init(config, new MockCanvasManager(config));
+		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
 		bt.init(config, cs, null, null, pac);
 		bt.init(6, 5, 0);

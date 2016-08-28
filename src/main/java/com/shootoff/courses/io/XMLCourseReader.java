@@ -39,7 +39,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.shootoff.courses.Course;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.TargetView;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
@@ -52,11 +52,11 @@ import javafx.scene.control.Alert.AlertType;
 public class XMLCourseReader {
 	private static final Logger logger = LoggerFactory.getLogger(XMLCourseReader.class);
 
-	private final ProjectorArenaController arenaController;
+	private final ProjectorArenaPane arenaPane;
 	private final File courseFile;
 
-	public XMLCourseReader(ProjectorArenaController arenaController, File courseFile) {
-		this.arenaController = arenaController;
+	public XMLCourseReader(ProjectorArenaPane arenaPane, File courseFile) {
+		this.arenaPane = arenaPane;
 		this.courseFile = courseFile;
 	}
 
@@ -139,7 +139,7 @@ public class XMLCourseReader {
 					TargetComponents tc = targetComponents.get();
 
 					TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
-							arenaController.getConfiguration(), arenaController.getCanvasManager(), true);
+							arenaPane.getConfiguration(), arenaPane.getCanvasManager(), true);
 
 					t.setPosition(Double.parseDouble(attributes.getValue("x")),
 							Double.parseDouble(attributes.getValue("y")));

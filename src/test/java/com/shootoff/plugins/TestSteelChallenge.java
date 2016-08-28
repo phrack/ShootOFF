@@ -61,8 +61,7 @@ public class TestSteelChallenge {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		MockProjectorArenaController pacNoTargets = new MockProjectorArenaController();
-		pacNoTargets.init(config, new MockCanvasManager(config));
+		MockProjectorArenaController pacNoTargets = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
 		noTargetsSC.init(config, cs, null, null, pacNoTargets);
 
@@ -70,8 +69,7 @@ public class TestSteelChallenge {
 
 		targetsSC = new SteelChallenge();
 
-		MockProjectorArenaController pac = new MockProjectorArenaController();
-		pac.init(config, new MockCanvasManager(config));
+		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
 		Optional<Course> course = CourseIO.loadCourse(pac,
 				new File("courses/steel_challenge/accelerator.course".replace("/", File.separator)));

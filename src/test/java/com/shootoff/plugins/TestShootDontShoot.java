@@ -58,8 +58,7 @@ public class TestShootDontShoot {
 
 		CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		MockProjectorArenaController pac = new MockProjectorArenaController();
-		pac.init(config, new MockCanvasManager(config));
+		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
 		sds.init(config, cs, null, null, pac);
 	}

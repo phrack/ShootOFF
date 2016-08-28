@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.io.TargetIO;
 import com.shootoff.util.TimerPool;
@@ -50,7 +50,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final CameraManager calibratingCameraManager;
 	private final CanvasManager calibratingCanvasManager;
 	private final CalibrationListener calibrationListener;
-	private final ProjectorArenaController arenaController;
+	private final ProjectorArenaPane arenaPane;
 
 	private ScheduledFuture<?> autoCalibrationFuture = null;
 
@@ -61,14 +61,14 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
 
 	public CalibrationManager(CalibrationConfigurator calibrationConfigurator, CameraManager calibratingCameraManager,
-			ProjectorArenaController arenaController) {
+			ProjectorArenaPane arenaPane) {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
 		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
-		this.calibrationListener = (CalibrationListener) arenaController;
-		this.arenaController = arenaController;
+		this.calibrationListener = (CalibrationListener) arenaPane;
+		this.arenaPane = arenaPane;
 
-		arenaController.setFeedCanvasManager(calibratingCanvasManager);
+		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
 		calibratingCameraManager.setCalibrationManager(this);
 	}
 
@@ -81,7 +81,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		calibratingCameraManager.setCalibrating(true);
 		calibratingCameraManager.setProjectionBounds(null);
 
-		if (arenaController.isFullScreen()) {
+		if (arenaPane.isFullScreen()) {
 			enableAutoCalibration();
 		} else {
 			showFullScreenRequest();
@@ -115,16 +115,16 @@ public class CalibrationManager implements CameraCalibrationListener {
 				if (perspectivePaperDims.isPresent()) {
 					pm = new PerspectiveManager(calibratingCameraManager.getName(),
 							calibratingCameraManager.getProjectionBounds().get(), feedDim, perspectivePaperDims.get(),
-							arenaController.getArenaStageResolution());
+							arenaPane.getArenaStageResolution());
 				} else {
 					pm = new PerspectiveManager(calibratingCameraManager.getName(),
 							calibratingCameraManager.getProjectionBounds().get(), feedDim,
-							arenaController.getArenaStageResolution());
+							arenaPane.getArenaStageResolution());
 				}
 			} else {
 				if (perspectivePaperDims.isPresent()) {
 					pm = new PerspectiveManager(calibratingCameraManager.getProjectionBounds().get(), feedDim,
-							perspectivePaperDims.get(), arenaController.getArenaStageResolution());
+							perspectivePaperDims.get(), arenaPane.getArenaStageResolution());
 				} else {
 					logger.debug("Too many perspective parameters are unknown to create a perspective manager.");
 				}
@@ -195,7 +195,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
 		Bounds translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
 
-		calibratingCanvasManager.setProjectorArena(arenaController, bounds);
+		calibratingCanvasManager.setProjectorArena(arenaPane, bounds);
 		configureArenaCamera(option);
 		calibratingCameraManager.setProjectionBounds(translatedToCameraBounds);
 	}
@@ -270,11 +270,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 		logger.trace("enableAutoCalibration");
 
 		calibrationListener.startCalibration();
-		arenaController.setCalibrationMessageVisible(false);
+		arenaPane.setCalibrationMessageVisible(false);
 		// We may already be calibrating if the user decided to move the arena
 		// to another screen while calibrating. If we save the background in
 		// that case we are saving the calibration pattern as the background.
-		if (!isShowingPattern.get()) arenaController.saveCurrentBackground();
+		if (!isShowingPattern.get()) arenaPane.saveCurrentBackground();
 		setArenaBackground("pattern.png");
 		isShowingPattern.set(true);
 
@@ -305,9 +305,9 @@ public class CalibrationManager implements CameraCalibrationListener {
 		if (resourceFilename != null) {
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
 			LocatedImage img = new LocatedImage(is, resourceFilename);
-			arenaController.setBackground(img);
+			arenaPane.setArenaBackground(img);
 		} else {
-			arenaController.setBackground(null);
+			arenaPane.setArenaBackground(null);
 		}
 	}
 

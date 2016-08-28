@@ -1,10 +1,6 @@
 package com.shootoff.gui.pane;
 
-import java.io.IOException;
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.config.Configuration;
@@ -12,20 +8,16 @@ import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.Resetter;
-import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.targets.CameraViews;
 
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class ProjectorSlide extends Slide implements CalibrationConfigurator {
-	private static final Logger logger = LoggerFactory.getLogger(ProjectorSlide.class);
-	
 	private final Pane parentControls;
 	private final Pane parentBody;
 	private final Configuration config;
@@ -37,7 +29,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	
 	private ArenaBackgroundsSlide backgroundsSlide;
 	
-	private ProjectorArenaController arenaController;
+	private ProjectorArenaPane arenaPane;
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 	
 	public ProjectorSlide(Pane parentControls, Pane parentBody, Configuration config, CameraViews cameraViews,
@@ -69,7 +61,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		
 		addSlideControlButton("Courses", (event) -> {
 			final ArenaCoursesSlide coursesSlide = new ArenaCoursesSlide(parentControls, 
-					parentBody, arenaController, shootOffStage);
+					parentBody, arenaPane, shootOffStage);
 			coursesSlide.setOnSlideHidden(() -> {
 				if (coursesSlide.choseCourse()) {
 					hide();
@@ -90,8 +82,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		if (calibrationManager.isPresent())
 			calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
 		
-		if (arenaController != null) 
-			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
+		if (arenaPane != null) 
+			arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 	}
 	
 	@Override
@@ -110,8 +102,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		}
 	}
 	
-	public ProjectorArenaController getArenaController() {
-		return arenaController;
+	public ProjectorArenaPane getArenaController() {
+		return arenaPane;
 	}
 	
 	public Optional<CalibrationManager> getCalibrationManager() {
@@ -119,35 +111,26 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	}
 	
 	public void startArena() {
-		if (arenaController == null) {
-			final FXMLLoader loader = new FXMLLoader(
-					getClass().getClassLoader().getResource("com/shootoff/gui/ProjectorArena.fxml"));
-			try {
-				loader.load();
-			} catch (IOException e) {
-				logger.error("Cannot load ProjectorArena.fxml", e);
-				return;
-			}
-
+		if (arenaPane == null) {
 			final Stage arenaStage = new Stage();
 
-			arenaStage.setTitle("Projector Arena");
-			arenaStage.setScene(new Scene(loader.getRoot()));
+			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
 
-			arenaController = (ProjectorArenaController) loader.getController();
-			arenaController.init(shootOffStage, config, resetter);
-			
+			arenaStage.setTitle("Projector Arena");
+			arenaStage.setScene(new Scene(arenaPane));
+			arenaStage.setFullScreenExitHint("");
+
 			final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
-			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaController));
-			arenaController.setCalibrationManager(calibrationManager.get());
+			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane));
+			arenaPane.setCalibrationManager(calibrationManager.get());
 			
 			exerciseSlide.toggleProjectorExercises(false);
-			arenaController.getCanvasManager().setShowShots(config.showArenaShotMarkers());
+			arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
 			calibrateButton.fire();
 			
 			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, 
-					parentBody, arenaController, shootOffStage);
+					parentBody, arenaPane, shootOffStage);
 			backgroundsSlide.setOnSlideHidden(() -> { 
 				if (backgroundsSlide.choseBackground()) {
 					backgroundsSlide.setChoseBackground(false);
@@ -169,16 +152,16 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 					}
 				}
 				
-				arenaController.setFeedCanvasManager(null);
-				arenaController = null;
+				arenaPane.setFeedCanvasManager(null);
+				arenaPane = null;
 			});
 		}
 	}
 	
 	public void closeArena() {
-		if (arenaController != null) {
-			arenaController.getCanvasManager().close();
-			arenaController.close();
+		if (arenaPane != null) {
+			arenaPane.getCanvasManager().close();
+			arenaPane.close();
 		}
 	}
 }

@@ -1,22 +1,19 @@
 package com.shootoff.gui.controller;
 
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 
-public class MockProjectorArenaController extends ProjectorArenaController {
-
+public class MockProjectorArenaController extends ProjectorArenaPane {
 	// Used for testing
-	public void init(Configuration config, CanvasManager canvasManager) {
-		this.config = config;
-		this.canvasManager = canvasManager;
+	public MockProjectorArenaController(Configuration config, CanvasManager canvasManager) {
+		super(config, canvasManager);
 
 		arenaStage = new Stage();
-		arenaAnchor = new AnchorPane(canvasManager.getCanvasGroup());
-		Scene scene = new Scene(arenaAnchor, 500, 500);
+		Scene scene = new Scene(this, 500, 500);
 		arenaStage.setScene(scene);
 
 	}

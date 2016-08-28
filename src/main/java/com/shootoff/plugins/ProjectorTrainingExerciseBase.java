@@ -42,8 +42,8 @@ import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.TargetView;
-import com.shootoff.gui.controller.ProjectorArenaController;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Target;
 
 /**
@@ -58,7 +58,7 @@ import com.shootoff.targets.Target;
 public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
-	private ProjectorArenaController arenaController;
+	private ProjectorArenaPane arenaPane;
 	private final List<Target> targets = new ArrayList<Target>();
 	private final Label exerciseLabel = new Label();
 
@@ -71,29 +71,29 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller,
-			ProjectorArenaController arenaController) {
+			ProjectorArenaPane arenaPane) {
 		super.init(config, camerasSupervisor, controller);
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
-		this.arenaController = arenaController;
+		this.arenaPane = arenaPane;
 		exerciseLabel.setTextFill(Color.WHITE);
-		Platform.runLater(() -> arenaController.getCanvasManager().getCanvasGroup().getChildren().add(exerciseLabel));
+		Platform.runLater(() -> arenaPane.getCanvasManager().getCanvasGroup().getChildren().add(exerciseLabel));
 	}
 
 	// For unit tests
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, VBox buttonsContainer,
-			TableView<ShotEntry> shotEntryTable, ProjectorArenaController arenaController) {
+			TableView<ShotEntry> shotEntryTable, ProjectorArenaPane arenaPane) {
 		super.init(config, camerasSupervisor, buttonsContainer, shotEntryTable);
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
-		this.arenaController = arenaController;
+		this.arenaPane = arenaPane;
 	}
 
 	@Override
 	public void reset() {
 		camerasSupervisor.reset();
 		if (config.getExercise().isPresent())
-			config.getExercise().get().reset(arenaController.getCanvasManager().getTargets());
+			config.getExercise().get().reset(arenaPane.getCanvasManager().getTargets());
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		if ('@' != target.toString().charAt(0) && !target.isAbsolute())
 			target = new File(System.getProperty("shootoff.home") + File.separator + target.getPath());
 
-		final Optional<Target> newTarget = arenaController.getCanvasManager().addTarget(target, false);
+		final Optional<Target> newTarget = arenaPane.getCanvasManager().addTarget(target, false);
 
 		if (newTarget.isPresent()) {
 			Target t = newTarget.get();
@@ -122,7 +122,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			t.setPosition(x, y);
 			
 			if (isPerspectiveInitialized()) {
-				arenaController.resizeTargetToDefaultPerspective(t);
+				arenaPane.resizeTargetToDefaultPerspective(t);
 			}
 			
 			targets.add(t);
@@ -132,7 +132,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	}
 
 	public void removeTarget(Target target) {
-		arenaController.getCanvasManager().removeTarget((TargetView) target);
+		arenaPane.getCanvasManager().removeTarget((TargetView) target);
 		targets.remove(target);
 	}
 
@@ -144,7 +144,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 2.1
 	 */
 	public double getArenaWidth() {
-		return arenaController.getWidth();
+		return arenaPane.getWidth();
 	}
 
 	/**
@@ -155,7 +155,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 2.1
 	 */
 	public double getArenaHeight() {
-		return arenaController.getHeight();
+		return arenaPane.getHeight();
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 3.8
 	 */
 	public Point2D getArenaScreenOrigin() {
-		return arenaController.getArenaScreenOrigin();
+		return arenaPane.getArenaScreenOrigin();
 	}
 	
 	/**
@@ -189,7 +189,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	{
 		final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
 
-		final Point2D origin = arenaController.getArenaScreenOrigin();
+		final Point2D origin = arenaPane.getArenaScreenOrigin();
 		
 		return new Point2D(origin.getX() + (point.getX() * dpiScaleFactor),
 				origin.getY() + (point.getY() * dpiScaleFactor));
@@ -270,7 +270,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 3.7
 	 */
 	public void setArenaBackground(LocatedImage background) {
-		arenaController.setBackground(background);
+		arenaPane.setArenaBackground(background);
 	}
 
 	/**
@@ -284,8 +284,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 3.8
 	 */
 	public List<Target> setCourse(File courseFile) {
-		Optional<Course> newCourse = CourseIO.loadCourse(arenaController, courseFile);
-		arenaController.setCourse(newCourse.get());
+		Optional<Course> newCourse = CourseIO.loadCourse(arenaPane, courseFile);
+		arenaPane.setCourse(newCourse.get());
 		return newCourse.get().getTargets();
 	}
 
@@ -299,8 +299,8 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 3.8
 	 */
 	public boolean isPerspectiveInitialized() {
-		return arenaController.getPerspectiveManager().isPresent()
-				&& arenaController.getPerspectiveManager().get().isInitialized();
+		return arenaPane.getPerspectiveManager().isPresent()
+				&& arenaPane.getPerspectiveManager().get().isInitialized();
 	}
 
 	/**
@@ -341,7 +341,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			 int desiredDistance) {
 		if (!isPerspectiveInitialized()) return false;
 
-		Optional<Dimension2D> targetDimensions = arenaController.getPerspectiveManager().get()
+		Optional<Dimension2D> targetDimensions = arenaPane.getPerspectiveManager().get()
 				.calculateObjectSize(currentRealWidth, currentRealHeight, desiredDistance);
 
 		if (targetDimensions.isPresent()) {
@@ -357,11 +357,11 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	@Override
 	public void destroy() {
 		for (Target target : targets)
-			arenaController.getCanvasManager().removeTarget((TargetView) target);
+			arenaPane.getCanvasManager().removeTarget((TargetView) target);
 
 		Platform.runLater(() -> {
-			if (arenaController != null)
-				arenaController.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel);
+			if (arenaPane != null)
+				arenaPane.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel);
 		});
 
 		targets.clear();

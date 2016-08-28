@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui.controller;
+package com.shootoff.gui.pane;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,16 +38,16 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetView;
-import com.shootoff.gui.pane.TargetDistancePane;
+import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -62,21 +62,21 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ProjectorArenaController implements CalibrationListener, Closeable {
-	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaController.class);
+public class ProjectorArenaPane extends AnchorPane implements CalibrationListener, Closeable {
+	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaPane.class);
 
 	protected Stage arenaStage;
 	private Stage shootOffStage;
-	@FXML protected AnchorPane arenaAnchor;
-	@FXML private Group arenaCanvasGroup;
-	@FXML private Label calibrationLabel;
+	private final Configuration config;
+	private final Group arenaCanvasGroup;
+	private final Label calibrationLabel;
+	private final CanvasManager canvasManager;
 
-	protected Configuration config;
-	protected CanvasManager canvasManager;
 	private Label mouseOnArenaLabel = null;
 	private Optional<LocatedImage> background = Optional.empty();
 	private Optional<LocatedImage> savedBackground = Optional.empty();
@@ -91,35 +91,52 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 
 
 	// Used for testing
-	public void init(Configuration config, CanvasManager canvasManager) {
+	public ProjectorArenaPane(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
 		this.canvasManager = canvasManager;
+		this.arenaCanvasGroup = new Group();
+		this.calibrationLabel = null;
 	}
 
-	public void init(Stage shootOffStage, Configuration config, Resetter resetter) {
+	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Configuration config, Resetter resetter) {
 		this.config = config;
 
+		arenaCanvasGroup = new Group();
+		calibrationLabel = new Label("Needs Calibration");
+		calibrationLabel.setFont(Font.font(48));
+		calibrationLabel.setTextFill(Color.web("#f5a807"));
+		calibrationLabel.setLayoutX(6);
+		calibrationLabel.setLayoutY(6);
+		calibrationLabel.setPrefSize(628, 90);
+		calibrationLabel.setAlignment(Pos.CENTER);
+				
+		this.getChildren().addAll(arenaCanvasGroup, calibrationLabel);
+		
 		this.shootOffStage = shootOffStage;
-		arenaStage = (Stage) arenaAnchor.getScene().getWindow();
-
-		arenaStage.setFullScreenExitHint("");
-
+		this.arenaStage = arenaStage;
+		
 		canvasManager = new CanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
 		canvasManager.updateBackground(null, Optional.empty());
 
-		arenaAnchor.setOnMouseClicked((event) -> {
+		this.setPrefSize(640, 480);
+		
+		this.setOnKeyPressed((event) -> canvasKeyPressed(event));
+		
+		this.setOnMouseEntered((event) -> requestFocus());
+		
+		this.setOnMouseClicked((event) -> {
 			canvasManager.toggleTargetSelection(Optional.empty());
 		});
 
-		arenaAnchor.widthProperty().addListener((e) -> {
+		this.widthProperty().addListener((e) -> {
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
-		arenaAnchor.heightProperty().addListener((e) -> {
+		this.heightProperty().addListener((e) -> {
 			canvasManager.setBackgroundFit(getWidth(), getHeight());
 		});
 
-		arenaAnchor.setStyle("-fx-background-color: #333333;");
+		this.setStyle("-fx-background-color: #333333;");
 		
 		toggleArena();
 		autoPlaceArena();
@@ -298,14 +315,6 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		return arenaHome;
 	}
 
-	public double getWidth() {
-		return arenaAnchor.getWidth();
-	}
-
-	public double getHeight() {
-		return arenaAnchor.getHeight();
-	}
-
 	public Dimension2D getArenaStageResolution() {
 		return new Dimension2D(arenaStage.getWidth(), arenaStage.getHeight());
 	}
@@ -336,7 +345,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		TimerPool.cancelTimer(mouseExitedFuture);
 	}
 
-	public void setBackground(LocatedImage img) {
+	public void setArenaBackground(LocatedImage img) {
 		background = Optional.ofNullable(img);
 		canvasManager.updateBackground(img);
 	}
@@ -356,14 +365,14 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 	 */
 	public void restoreCurrentBackground() {
 		if (savedBackground.isPresent()) {
-			setBackground(savedBackground.get());
+			setArenaBackground(savedBackground.get());
 			savedBackground = Optional.empty();
 		} else {
-			setBackground(null);
+			setArenaBackground(null);
 		}
 	}
 
-	public Optional<LocatedImage> getBackground() {
+	public Optional<LocatedImage> getArenaBackground() {
 		return background;
 	}
 
@@ -373,9 +382,9 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 
 	public void setCourse(final Course course) {
 		if (course.getBackground().isPresent()) {
-			setBackground(course.getBackground().get());
+			setArenaBackground(course.getBackground().get());
 		} else {
-			setBackground(null);
+			setArenaBackground(null);
 		}
 
 		canvasManager.clearTargets();
@@ -413,8 +422,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 		}
 	}
 
-	@FXML
-	public void canvasKeyPressed(KeyEvent event) throws Exception {
+	public void canvasKeyPressed(KeyEvent event) {
 		boolean macFullscreen = event.getCode() == KeyCode.F && event.isControlDown() && event.isShortcutDown();
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
 			toggleFullScreen();
@@ -442,7 +450,6 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 					config.writeConfigurationFile();
 				} catch (ConfigurationException | IOException e) {
 					logger.error("Error writing configuration with arena location", e);
-					throw e;
 				}
 			}
 
@@ -469,12 +476,7 @@ public class ProjectorArenaController implements CalibrationListener, Closeable 
 	public void setCalibrationMessageVisible(final boolean visible) {
 		calibrationLabel.setVisible(visible);
 	}
-
-	@FXML
-	public void canvasMouseEntered(MouseEvent event) throws IOException {
-		arenaAnchor.requestFocus();
-	}
-
+	
 	@Override
 	public void startCalibration() {
 		setTargetsVisible(false);

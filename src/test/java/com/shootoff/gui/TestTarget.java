@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
-import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RegionType;
@@ -56,9 +55,6 @@ public class TestTarget {
 		config = new Configuration(new String[0]);
 		canvasManager = new MockCanvasManager(config);
 		canvasManager.getCanvasGroup().getChildren().clear();
-
-		MockProjectorArenaController arenaController = new MockProjectorArenaController();
-		arenaController.init(config, canvasManager);
 
 		targets = new ArrayList<Target>();
 		TargetComponents popperComponents = TargetIO.loadTarget(new File("targets/Pepper_Popper.target")).get();

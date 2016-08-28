@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.courses.Course;
 import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.controller.ProjectorArenaController;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Target;
 
 public class CourseIO {
 	private static final Logger logger = LoggerFactory.getLogger(CourseIO.class);
 
-	public static void saveCourse(ProjectorArenaController arenaController, final File courseFile) {
+	public static void saveCourse(ProjectorArenaPane arenaPane, final File courseFile) {
 		CourseVisitor visitor;
 
 		if (courseFile.getName().endsWith("course")) {
@@ -42,29 +42,29 @@ public class CourseIO {
 			return;
 		}
 
-		if (arenaController.getBackground().isPresent()) {
-			final LocatedImage background = arenaController.getBackground().get();
+		if (arenaPane.getArenaBackground().isPresent()) {
+			final LocatedImage background = arenaPane.getArenaBackground().get();
 			visitor.visitBackground(background.getURL(), background.isResource());
 		}
 
-		for (final Target t : arenaController.getCanvasManager().getTargets()) {
+		for (final Target t : arenaPane.getCanvasManager().getTargets()) {
 			final File relativeTargetFile = new File(t.getTargetFile().getAbsolutePath()
 					.replace(System.getProperty("shootoff.home") + File.separator, ""));
 			visitor.visitTarget(relativeTargetFile, t.getPosition().getX(), t.getPosition().getY(),
 					t.getDimension().getWidth(), t.getDimension().getHeight());
 		}
 
-		visitor.visitResolution(arenaController.getWidth(), arenaController.getHeight());
+		visitor.visitResolution(arenaPane.getWidth(), arenaPane.getHeight());
 
 		visitor.visitEnd();
 	}
 
-	public static Optional<Course> loadCourse(ProjectorArenaController arenaController, final File courseFile) {
+	public static Optional<Course> loadCourse(ProjectorArenaPane arenaPane, final File courseFile) {
 		if (!courseFile.getName().endsWith("course")) {
 			logger.error("Unknown course file type.");
 			return Optional.empty();
 		}
 
-		return new XMLCourseReader(arenaController, courseFile).load();
+		return new XMLCourseReader(arenaPane, courseFile).load();
 	}
 }
