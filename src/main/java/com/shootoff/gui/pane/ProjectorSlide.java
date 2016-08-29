@@ -118,8 +118,15 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 
 			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
 			
+			// Prepare calibrating manager up front so that we can switch
+			// to the arena tab when it's ready (otherwise
+			// getSelectedCameraManager() will fail)
+			final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
+			
+			// Mirror panes so that anything that happens to one also
+			// happens to the other
 			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter); 
-			cameraViews.addCameraView("Arena", new ScrollPane(arenaTabPane), arenaTabPane.getCanvasManager());
+			cameraViews.addCameraView("Arena", new ScrollPane(arenaTabPane), arenaTabPane.getCanvasManager(), true);
 			
 			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
 			arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
@@ -134,19 +141,17 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			projectorCanvasManager.updateBackground(null, Optional.empty());
 			tabCanvasManager.setCameraManager(new CameraManager(tabCanvasManager, config));
 			
+			// Final preparation to display
 			arenaStage.setTitle("Projector Arena");
 			arenaStage.setScene(new Scene(arenaPane));
 			arenaStage.setFullScreenExitHint("");
-
-			final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
+			
 			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane));
 			arenaPane.setCalibrationManager(calibrationManager.get());
 			
 			exerciseSlide.toggleProjectorExercises(false);
 			arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
-			calibrateButton.fire();
-			
 			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, 
 					parentBody, arenaPane, shootOffStage);
 			backgroundsSlide.setOnSlideHidden(() -> { 
@@ -156,6 +161,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 				}
 			});
 			
+			// Display the arena
+			calibrateButton.fire();
 			arenaPane.toggleArena();
 			arenaPane.autoPlaceArena();
 			

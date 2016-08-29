@@ -426,10 +426,14 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return cameraTabPane.getTabs().add(cameraTab);
 	}
 	
-	public void addCameraView(String name, Node content, CanvasManager canvasManager) {
+	public void addCameraView(String name, Node content, CanvasManager canvasManager, boolean select) {
 		final Tab viewTab = new Tab(name, content);
 		cameraTabPane.getTabs().add(viewTab);
 		installDebugCoordDisplay(canvasManager);
+		
+		if (select) {
+			cameraTabPane.getSelectionModel().selectLast();
+		}
 	}
 	
 	public void removeCameraView(String name) {

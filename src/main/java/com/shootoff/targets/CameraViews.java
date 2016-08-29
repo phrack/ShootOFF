@@ -11,7 +11,7 @@ import javafx.scene.Node;
 public interface CameraViews {
 	List<Target> getTargets();
 	
-	void addCameraView(String name, Node content, CanvasManager canvasManager);
+	void addCameraView(String name, Node content, CanvasManager canvasManager, boolean select);
 
 	void removeCameraView(String name);
 	
