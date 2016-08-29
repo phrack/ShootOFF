@@ -98,7 +98,7 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public void removeTarget(Target target) {
-		mirroredManager.mirrorRemoveTarget(target);
+		mirroredManager.mirrorRemoveTarget(((MirroredTarget) target).getMirroredTarget());
 		super.removeTarget(target);
 	}
 	

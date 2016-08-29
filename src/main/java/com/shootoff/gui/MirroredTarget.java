@@ -31,6 +31,10 @@ public class MirroredTarget extends TargetView {
 			if (mirroredKeyHandler != null) mirroredKeyHandler.handle(event);
 		});
 	}
+	
+	public MirroredTarget getMirroredTarget() {
+		return mirroredTarget;
+	}
 
 	@Override
 	public void setPosition(double x, double y) {
