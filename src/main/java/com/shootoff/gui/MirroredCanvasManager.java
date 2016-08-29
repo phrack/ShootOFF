@@ -13,6 +13,8 @@ import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
+import javafx.geometry.Dimension2D;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 
@@ -83,6 +85,10 @@ public class MirroredCanvasManager extends CanvasManager {
 			final TargetComponents tc = targetComponents.get();
 			final MirroredTarget t = new MirroredTarget(newTarget.getTargetFile(), tc.getTargetGroup(), tc.getTargetTags(), config, 
 					mirroredManager, ((TargetView) newTarget).isUserDeletable());
+			final Dimension2D targetDimension = target.getDimension(); 
+			t.mirrorSetDimensions(targetDimension.getWidth(), targetDimension.getHeight());
+			final Point2D targetPosition = target.getPosition();
+			t.mirrorSetPosition(targetPosition.getX(), targetPosition.getY());
 			mirroredManager.mirrorAddTarget(t);
 			
 			target.setMirroredTarget(t);
