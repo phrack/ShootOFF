@@ -523,20 +523,22 @@ public class CanvasManager implements CameraView {
 
 	@Override
 	public void addShot(Shot shot, boolean isMirroredShot) {
-		Optional<ShotProcessor> rejectingProcessor = processShot(shot);
-		if (rejectingProcessor.isPresent()) {
-			recordRejectedShot(shot, rejectingProcessor.get());
-			return;
-		} else {
-			notifyShot(shot);
+		if (!isMirroredShot) {
+			Optional<ShotProcessor> rejectingProcessor = processShot(shot);
+			if (rejectingProcessor.isPresent()) {
+				recordRejectedShot(shot, rejectingProcessor.get());
+				return;
+			} else {
+				notifyShot(shot);
+			}
 		}
 
-		Optional<Shot> lastShot = Optional.empty();
-		
 		// Create a shot entry to show the shot's data
 		// in the shot timer table if the shot timer
 		// table is in use
 		if (shotEntries != null) {
+			Optional<Shot> lastShot = Optional.empty();
+			
 			if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
 	
 			final ShotEntry shotEntry;
