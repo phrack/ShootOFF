@@ -8,7 +8,6 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.targets.Target;
-import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.collections.ObservableList;
@@ -54,7 +53,7 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
-		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
+		final Optional<TargetComponents> targetComponents = super.loadTarget(targetFile, false);
 		
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
@@ -79,7 +78,7 @@ public class MirroredCanvasManager extends CanvasManager {
 					newTarget.getAllTags(), config, this, ((TargetView) newTarget).isUserDeletable());
 		}
 		
-		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(newTarget.getTargetFile());
+		final Optional<TargetComponents> targetComponents = super.loadTarget(newTarget.getTargetFile(), false);
 		
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
@@ -93,6 +92,9 @@ public class MirroredCanvasManager extends CanvasManager {
 			
 			target.setMirroredTarget(t);
 			t.setMirroredTarget(target);
+			
+			target.setKeepInBounds(true);
+			t.setKeepInBounds(true);
 		}
 		
 		return super.addTarget(target);
