@@ -41,6 +41,7 @@ import com.shootoff.Closeable;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
+import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
@@ -153,7 +154,12 @@ public class CameraManager implements Closeable {
 
 		initDetector(new VideoStreamer());
 
-		if (NativeShotDetector.loadNativeShotDetector()) {
+		if (webcam instanceof OptiTrackCamera)
+		{
+			this.shotDetector = new OptiTrackShotDetector(this, config, view);
+			((OptiTrackShotDetector)shotDetector).startDetectionMode();
+		}
+		else if (NativeShotDetector.loadNativeShotDetector()) {
 			logger.debug("Using native shot detection");
 
 			this.shotDetector = new NativeShotDetector(this, config, view);
@@ -456,7 +462,7 @@ public class CameraManager implements Closeable {
 					webcam.get().open();
 
 					final Dimension openDimension = webcam.get().getViewSize();
-
+					
 					if ((int) openDimension.getWidth() != getFeedWidth()
 							|| (int) openDimension.getHeight() != getFeedHeight()) {
 						if (openDimension.getWidth() == -1) {
@@ -483,8 +489,15 @@ public class CameraManager implements Closeable {
 
 	private void streamCameraFrames() {
 		while (isStreaming.get()) {
+			
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
+			frameCount++;
+			
+			if ((shotDetector instanceof OptiTrackShotDetector) &&
+					!((getFrameCount() % 60) == 0))
+				continue;
+			
 			Mat currentFrame = webcam.get().getFrame();
 			currentFrameTimestamp = System.currentTimeMillis();
 
@@ -503,6 +516,8 @@ public class CameraManager implements Closeable {
 			}
 
 			if (currentFrame == null) continue;
+			
+
 			BufferedImage currentImage = processFrame(currentFrame);
 
 			Bounds b;
@@ -560,7 +575,6 @@ public class CameraManager implements Closeable {
 	}
 
 	protected BufferedImage processFrame(Mat currentFrame) {
-		frameCount++;
 
 		if (isAutoCalibrating.get() && ((getFrameCount() % Math.min(getFPS(), 3)) == 0)) {
 			final BufferedImage currentImage = Camera.matToBufferedImage(currentFrame);
@@ -614,9 +628,11 @@ public class CameraManager implements Closeable {
 				submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
-			shotDetector.processFrame(submatFrameBGR, isDetecting.get());
+			if (!(shotDetector instanceof OptiTrackShotDetector))
+				shotDetector.processFrame(submatFrameBGR, isDetecting.get());
 		} else {
-			shotDetector.processFrame(currentFrame, isDetecting.get());
+			if (!(shotDetector instanceof OptiTrackShotDetector))
+				shotDetector.processFrame(currentFrame, isDetecting.get());
 		}
 
 		// matFrameBGR is showing the colored pixels for brightness and motion,

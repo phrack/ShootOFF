@@ -57,6 +57,7 @@ import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.MalfunctionsProcessor;
+import com.shootoff.camera.OptiTrackCamera;
 import com.shootoff.camera.ShotProcessor;
 import com.shootoff.camera.VirtualMagazineProcessor;
 import com.shootoff.gui.CalibrationOption;
@@ -267,9 +268,10 @@ public class Configuration {
 
 			for (Camera webcam : Camera.getWebcams()) {
 				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
-				if (cameraIndex >= 0) {
+				if (cameraIndex >= 0)
 					webcams.put(webcamNames.get(cameraIndex), webcam);
-				}
+				else if (webcam instanceof OptiTrackCamera)
+					webcams.put(webcam.getName(), webcam);
 			}
 		}
 

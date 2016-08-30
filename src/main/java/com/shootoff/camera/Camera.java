@@ -77,9 +77,9 @@ public class Camera {
 	private static final List<Camera> openCameras = Collections.synchronizedList(new ArrayList<>());
 
 	private final VideoCapture camera;
-	private final int cameraIndex;
+	private int cameraIndex = -1;
 	private final Webcam ipcam;
-	private final boolean isIpCam;
+	private boolean isIpCam = false;
 
 	public static class CompositeDriver extends WebcamCompositeDriver {
 		public CompositeDriver() {
@@ -168,9 +168,7 @@ public class Camera {
 	// For testing
 	protected Camera() {
 		camera = null;
-		cameraIndex = -1;
 		ipcam = null;
-		isIpCam = false;
 	}
 
 	private Camera(final String cameraName) {
@@ -248,6 +246,11 @@ public class Camera {
 			} else {
 				webcams.add(c);
 			}
+		}
+		
+		if (OptiTrackCamera.cameraAvailable())
+		{
+			webcams.add(new OptiTrackCamera());
 		}
 
 		return webcams;

@@ -131,4 +131,6 @@ public abstract class ShotDetector {
 
 		return true;
 	}
+
+
 }
