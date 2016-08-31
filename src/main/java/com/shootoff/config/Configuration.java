@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.Main;
 import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.IpCamera;
 import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.OptiTrackCamera;
 import com.shootoff.camera.ShotProcessor;
@@ -596,7 +597,7 @@ public class Configuration {
 			Optional<String> password) {
 		try {
 			URL url = new URL(cameraURL);
-			Camera cam = Camera.registerIpCamera(cameraName, url, username, password);
+			Camera cam = IpCamera.registerIpCamera(cameraName, url, username, password);
 			ipcams.put(cameraName, url);
 
 			if (username.isPresent() && password.isPresent()) {
@@ -636,17 +637,17 @@ public class Configuration {
 	}
 
 	public void unregisterIpCam(String cameraName) {
-		if (Camera.unregisterIpCamera(cameraName)) {
+		if (IpCamera.unregisterIpCamera(cameraName)) {
 			ipcams.remove(cameraName);
 			ipcamCredentials.remove(cameraName);
 		}
 	}
 
-	public void setWebcams(List<String> webcamNames, List<Camera> webcams) {
+	public void setWebcams(List<String> webcamNames, List<Camera> configuredCameras) {
 		this.webcams.clear();
 
 		for (int i = 0; i < webcamNames.size(); i++) {
-			this.webcams.put(webcamNames.get(i), webcams.get(i));
+			this.webcams.put(webcamNames.get(i), configuredCameras.get(i));
 		}
 	}
 
@@ -767,8 +768,8 @@ public class Configuration {
 		rootLogger.addAppender(consoleAppender);
 	}
 
-	public void setRecordingCameras(Set<Camera> recordingCameras) {
-		this.recordingCameras = recordingCameras;
+	public void setRecordingCameras(Set<Camera> recordingCameras2) {
+		this.recordingCameras = recordingCameras2;
 	}
 
 	public void setShotTimerRowColor(Color c) {

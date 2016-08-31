@@ -141,9 +141,9 @@ public class CameraManager implements Closeable {
 		return deduplicationProcessor;
 	}
 
-	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
-		if (webcam != null)
-			this.webcam = Optional.of(webcam);
+	public CameraManager(Camera cameraInterface, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
+		if (cameraInterface != null)
+			this.webcam = Optional.of(cameraInterface);
 		else
 			this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
@@ -154,12 +154,7 @@ public class CameraManager implements Closeable {
 
 		initDetector(new VideoStreamer());
 
-		if (webcam instanceof OptiTrackCamera)
-		{
-			this.shotDetector = new OptiTrackShotDetector(this, config, view);
-			((OptiTrackShotDetector)shotDetector).startDetectionMode();
-		}
-		else if (NativeShotDetector.loadNativeShotDetector()) {
+		if (NativeShotDetector.loadNativeShotDetector()) {
 			logger.debug("Using native shot detection");
 
 			this.shotDetector = new NativeShotDetector(this, config, view);
@@ -493,10 +488,7 @@ public class CameraManager implements Closeable {
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
 			frameCount++;
-			
-			if ((shotDetector instanceof OptiTrackShotDetector) &&
-					!((getFrameCount() % 60) == 0))
-				continue;
+
 			
 			Mat currentFrame = webcam.get().getFrame();
 			currentFrameTimestamp = System.currentTimeMillis();
@@ -575,6 +567,7 @@ public class CameraManager implements Closeable {
 	}
 
 	protected BufferedImage processFrame(Mat currentFrame) {
+		frameCount++;
 
 		if (isAutoCalibrating.get() && ((getFrameCount() % Math.min(getFPS(), 3)) == 0)) {
 			final BufferedImage currentImage = Camera.matToBufferedImage(currentFrame);
@@ -622,17 +615,15 @@ public class CameraManager implements Closeable {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrameBGR));
 			}
 		}
-
+		
 		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
 			if (submatFrameBGR == null)
 				submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
-			if (!(shotDetector instanceof OptiTrackShotDetector))
-				shotDetector.processFrame(submatFrameBGR, isDetecting.get());
+			shotDetector.processFrame(submatFrameBGR, isDetecting.get());
 		} else {
-			if (!(shotDetector instanceof OptiTrackShotDetector))
-				shotDetector.processFrame(currentFrame, isDetecting.get());
+			shotDetector.processFrame(currentFrame, isDetecting.get());
 		}
 
 		// matFrameBGR is showing the colored pixels for brightness and motion,
@@ -771,8 +762,8 @@ public class CameraManager implements Closeable {
 	}
 
 	public void launchCameraSettings() {
-		if (webcam.isPresent()) {
-			webcam.get().launchCameraSettings();
+		if (webcam.isPresent() && webcam.get() instanceof WebcamCaptureCamera) {
+			((WebcamCaptureCamera)webcam.get()).launchCameraSettings();
 		}
 	}
 }

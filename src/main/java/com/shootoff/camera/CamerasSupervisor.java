@@ -34,8 +34,8 @@ public class CamerasSupervisor {
 		this.config = config;
 	}
 
-	public CameraManager addCameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView cameraView) {
-		final CameraManager manager = new CameraManager(webcam, cameraErrorView, cameraView, config);
+	public CameraManager addCameraManager(Camera cameraInterface, CameraErrorView cameraErrorView, CameraView cameraView) {
+		final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView, config);
 		managers.add(manager);
 		allDetecting.set(true);
 		return manager;
@@ -116,4 +116,8 @@ public class CamerasSupervisor {
 	public CameraView getCameraView(final int index) {
 		return managers.get(index).getCameraView();
 	}
+	
+	
+	
+
 }

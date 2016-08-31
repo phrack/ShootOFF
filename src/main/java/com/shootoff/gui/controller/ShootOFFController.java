@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.Closeable;
 import com.shootoff.Main;
-import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraErrorView;
+import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
@@ -391,8 +391,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 
-	private boolean addCameraTab(String webcamName, Camera webcam) {
-		if (webcam.isLocked() && !webcam.isOpen()) {
+	private boolean addCameraTab(String webcamName, Camera cameraInterface) {
+		if (cameraInterface.isLocked() && !cameraInterface.isOpen()) {
 			return false;
 		}
 
@@ -401,10 +401,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		// until later it's harder to give the user a good error message.
 		String os = System.getProperty("os.name");
 		if (os != null && !os.equals("Mac OS X")) {
-			if (!webcam.isOpen() && !webcam.open()) {
+			if (!cameraInterface.isOpen() && !cameraInterface.open()) {
 				return false;
 			} else {
-				webcam.close();
+				cameraInterface.close();
 			}
 		}
 
@@ -414,9 +414,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, this, webcamName, shotEntries);
-		CameraManager cameraManager = camerasSupervisor.addCameraManager(webcam, this, canvasManager);
+		CameraManager cameraManager = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
 
-		if (config.getRecordingCameras().contains(webcam)) {
+		if (config.getRecordingCameras().contains(cameraInterface)) {
 			config.registerRecordingCameraManager(cameraManager);
 		}
 
