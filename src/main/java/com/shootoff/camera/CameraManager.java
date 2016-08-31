@@ -41,7 +41,6 @@ import com.shootoff.Closeable;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
-import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
