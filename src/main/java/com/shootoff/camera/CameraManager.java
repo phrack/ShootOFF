@@ -140,9 +140,9 @@ public class CameraManager implements Closeable {
 		return deduplicationProcessor;
 	}
 
-	public CameraManager(Camera webcam, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
-		if (webcam != null)
-			this.webcam = Optional.of(webcam);
+	public CameraManager(Camera cameraInterface, CameraErrorView cameraErrorView, CameraView view, Configuration config) {
+		if (cameraInterface != null)
+			this.webcam = Optional.of(cameraInterface);
 		else
 			this.webcam = Optional.empty();
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
@@ -456,7 +456,7 @@ public class CameraManager implements Closeable {
 					webcam.get().open();
 
 					final Dimension openDimension = webcam.get().getViewSize();
-
+					
 					if ((int) openDimension.getWidth() != getFeedWidth()
 							|| (int) openDimension.getHeight() != getFeedHeight()) {
 						if (openDimension.getWidth() == -1) {
@@ -483,8 +483,12 @@ public class CameraManager implements Closeable {
 
 	private void streamCameraFrames() {
 		while (isStreaming.get()) {
+			
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
+			frameCount++;
+
+			
 			Mat currentFrame = webcam.get().getFrame();
 			currentFrameTimestamp = System.currentTimeMillis();
 
@@ -503,6 +507,8 @@ public class CameraManager implements Closeable {
 			}
 
 			if (currentFrame == null) continue;
+			
+
 			BufferedImage currentImage = processFrame(currentFrame);
 
 			Bounds b;
@@ -608,7 +614,7 @@ public class CameraManager implements Closeable {
 				debuggerListener.get().updateDebugView(Camera.matToBufferedImage(submatFrameBGR));
 			}
 		}
-
+		
 		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
 			if (submatFrameBGR == null)
 				submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
@@ -755,8 +761,8 @@ public class CameraManager implements Closeable {
 	}
 
 	public void launchCameraSettings() {
-		if (webcam.isPresent()) {
-			webcam.get().launchCameraSettings();
+		if (webcam.isPresent() && webcam.get() instanceof WebcamCaptureCamera) {
+			((WebcamCaptureCamera)webcam.get()).launchCameraSettings();
 		}
 	}
 }

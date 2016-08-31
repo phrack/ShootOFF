@@ -1,6 +1,6 @@
 package com.shootoff.camera;
 
-public class MockCamera extends Camera {
+public class MockCamera extends WebcamCaptureCamera {
 	public MockCamera() {
 		super();
 	}

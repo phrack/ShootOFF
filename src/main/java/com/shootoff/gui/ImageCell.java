@@ -49,9 +49,9 @@ public class ImageCell extends TextFieldListCell<String> {
 	private final List<String> userDefinedCameraNames;
 	private final Optional<Set<Camera>> recordingCameras;
 
-	public ImageCell(List<Camera> webcams, List<String> userDefinedCameraNames,
+	public ImageCell(List<Camera> unconfiguredWebcams, List<String> userDefinedCameraNames,
 			final Optional<DesignateShotRecorderListener> listener, final Optional<Set<Camera>> recordingCameras) {
-		this.webcams = new ArrayList<Camera>(webcams);
+		this.webcams = new ArrayList<Camera>(unconfiguredWebcams);
 		if (userDefinedCameraNames != null) {
 			this.userDefinedCameraNames = new ArrayList<String>(userDefinedCameraNames);
 		} else {
@@ -141,11 +141,11 @@ public class ImageCell extends TextFieldListCell<String> {
 		setText(item);
 	}
 
-	public static void cacheCamera(Camera camera) {
+	public static void cacheCamera(Camera c) {
 		ImageView iv = new ImageView();
 		iv.setFitWidth(100);
 		iv.setFitHeight(75);
-		imageCache.put(camera, iv);
+		imageCache.put(c, iv);
 	}
 
 	private Optional<ImageView> fetchWebcamImageView(String webcamName) {
