@@ -45,10 +45,8 @@ import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import ch.qos.logback.classic.Level;
-
-import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.cameratypes.Camera;
 
 public class AutoCalibrationManager {
 	private static final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);

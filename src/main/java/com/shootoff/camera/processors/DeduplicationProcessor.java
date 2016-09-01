@@ -16,12 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.camera;
+package com.shootoff.camera.processors;
 
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.Shot;
 
 public class DeduplicationProcessor implements ShotProcessor {
 	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
@@ -53,7 +56,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 				/ DISTANCE_THRESHOLD_DIVISION_FACTOR;
 	}
 
-	protected Optional<Shot> getLastShot() {
+	public Optional<Shot> getLastShot() {
 		return lastShot;
 	}
 

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.shootoff.camera.Camera;
+import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 
 import javafx.application.Platform;
@@ -57,7 +57,7 @@ import javafx.util.Callback;
  * new cameras to be used for shot detection. Also used to allow users to
  * register and de-register IP cameras via the GUI.
  * 
- * @see com.shootoff.camera.WebcamCaptureCamera
+ * @see com.shootoff.camera.cameratypes.WebcamCaptureCamera
  * 
  * @author phrack
  */

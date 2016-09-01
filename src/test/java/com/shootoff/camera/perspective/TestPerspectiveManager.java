@@ -16,10 +16,10 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.imgproc.Imgproc;
 
-import com.shootoff.camera.Camera;
 import com.shootoff.camera.MockCameraManager;
 import com.shootoff.camera.TestAutoCalibration;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.ConfigurationException;
 

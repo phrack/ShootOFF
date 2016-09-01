@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.processors.ShotProcessor;
+import com.shootoff.camera.processors.VirtualMagazineProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 

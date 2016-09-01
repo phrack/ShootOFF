@@ -1,5 +1,7 @@
 package com.shootoff.camera;
 
+import com.shootoff.camera.cameratypes.Camera;
+
 /**
  * View to display camera and shot detection errors on a GUI.
  * 

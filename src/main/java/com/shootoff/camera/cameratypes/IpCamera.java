@@ -1,4 +1,4 @@
-package com.shootoff.camera;
+package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -19,6 +19,12 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamAuth;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry;
 import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
+import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
+import com.shootoff.camera.shotdetection.NativeShotDetector;
+import com.shootoff.camera.shotdetection.ShotDetector;
+import com.shootoff.config.Configuration;
 
 public class IpCamera extends Camera {
 	private static final Logger logger = LoggerFactory.getLogger(IpCamera.class);
@@ -88,12 +94,12 @@ public class IpCamera extends Camera {
 	}
 
 	@Override
-	public Mat getFrame() {
-		return Camera.bufferedImageToMat(getImage());
+	public Mat getMatFrame() {
+		return Camera.bufferedImageToMat(getBufferedImage());
 	}
 
 	@Override
-	public BufferedImage getImage() {
+	public BufferedImage getBufferedImage() {
 		return ipcam.getImage();
 	}
 
@@ -165,5 +171,14 @@ public class IpCamera extends Camera {
 		return result;
 	}
 
-
+	@Override
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
+	{
+		if (NativeShotDetector.isSystemSupported())
+			return new NativeShotDetector(cameraManager, config, cameraView);
+		else if (JavaShotDetector.isSystemSupported())
+			return new JavaShotDetector(cameraManager, config, cameraView);
+		else
+			return null;
+	}
 }

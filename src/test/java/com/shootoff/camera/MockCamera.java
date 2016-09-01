@@ -1,5 +1,7 @@
 package com.shootoff.camera;
 
+import com.shootoff.camera.cameratypes.WebcamCaptureCamera;
+
 public class MockCamera extends WebcamCaptureCamera {
 	public MockCamera() {
 		super();

@@ -30,8 +30,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.cameratypes.Camera;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -183,7 +183,7 @@ public class ImageCell extends TextFieldListCell<String> {
 
 		Image webcamImg = null;
 		if (webcam.isOpen()) {
-			BufferedImage img = webcam.getImage();
+			BufferedImage img = webcam.getBufferedImage();
 
 			if (img != null) {
 				webcamImg = SwingFXUtils.toFXImage(img, null);

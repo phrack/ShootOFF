@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.shootoff.camera.cameratypes.Camera;
+import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.config.Configuration;
 
 public class CamerasSupervisor {

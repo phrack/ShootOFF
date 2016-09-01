@@ -54,12 +54,12 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.Main;
-import com.shootoff.camera.Camera;
 import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.IpCamera;
-import com.shootoff.camera.MalfunctionsProcessor;
-import com.shootoff.camera.ShotProcessor;
-import com.shootoff.camera.VirtualMagazineProcessor;
+import com.shootoff.camera.cameratypes.Camera;
+import com.shootoff.camera.cameratypes.IpCamera;
+import com.shootoff.camera.processors.MalfunctionsProcessor;
+import com.shootoff.camera.processors.ShotProcessor;
+import com.shootoff.camera.processors.VirtualMagazineProcessor;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.controller.VideoPlayerController;
 import com.shootoff.plugins.TrainingExercise;

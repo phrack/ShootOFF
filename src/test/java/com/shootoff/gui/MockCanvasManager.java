@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.ShotProcessor;
+import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;

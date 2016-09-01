@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.MalfunctionsProcessor;
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.ShotProcessor;
-import com.shootoff.camera.ShotRecorder;
-import com.shootoff.camera.VirtualMagazineProcessor;
+import com.shootoff.camera.processors.MalfunctionsProcessor;
+import com.shootoff.camera.processors.ShotProcessor;
+import com.shootoff.camera.processors.VirtualMagazineProcessor;
+import com.shootoff.camera.recorders.ShotRecorder;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.plugins.TrainingExercise;

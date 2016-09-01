@@ -39,7 +39,8 @@ import java.util.jar.JarFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Camera;
+import com.shootoff.camera.cameratypes.Camera;
+import com.shootoff.camera.cameratypes.OptiTrackCamera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -678,6 +679,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		
 		this.primaryStage = primaryStage;
 
 		final String os = System.getProperty("os.name");

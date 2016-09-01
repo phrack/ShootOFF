@@ -16,38 +16,46 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.camera;
+package com.shootoff.camera.processors;
 
 import java.io.File;
-import java.util.Random;
 
+import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.plugins.TrainingExerciseBase;
 
-public class MalfunctionsProcessor implements ShotProcessor {
-	private static boolean useTTS = true;
+public class VirtualMagazineProcessor implements ShotProcessor {
+	private final Configuration config;
+	private boolean useTTS = true;
+	private int roundCount = 0;
 
-	private static final Random rand = new Random();
-	private final float prob;
-
-	public MalfunctionsProcessor(final Configuration config) {
-		this.prob = config.getMalfunctionsProbability() / 100;
+	public VirtualMagazineProcessor(Configuration config) {
+		this.config = config;
+		roundCount = config.getVirtualMagazineCapacity();
 	}
 
-	public static void setUseTTS(final boolean useTTS) {
-		MalfunctionsProcessor.useTTS = useTTS;
+	public void setUseTTS(boolean useTTS) {
+		this.useTTS = useTTS;
+	}
+
+	public int getRountCount() {
+		return roundCount;
 	}
 
 	@Override
 	public boolean processShot(Shot shot) {
-		if (rand.nextFloat() < prob) {
-			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
+		if (roundCount == 0) {
+			roundCount = config.getVirtualMagazineCapacity();
+			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
 			return false;
 		}
 
+		roundCount--;
 		return true;
 	}
 
 	@Override
-	public void reset() {}
+	public void reset() {
+		roundCount = config.getVirtualMagazineCapacity();
+	}
 }
