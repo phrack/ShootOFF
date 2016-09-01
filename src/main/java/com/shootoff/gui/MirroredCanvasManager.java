@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
@@ -18,15 +19,17 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 
 public class MirroredCanvasManager extends CanvasManager {
+	private final ProjectorArenaPane arenaPane;
 	private final Configuration config;
 	
 	private MirroredCanvasManager mirroredManager;
 	
 	public MirroredCanvasManager(Group canvasGroup, Configuration config, Resetter resetter, String cameraName,
-			ObservableList<ShotEntry> shotEntries) {
+			ObservableList<ShotEntry> shotEntries, ProjectorArenaPane arenaPane) {
 		super(canvasGroup, config, resetter, cameraName, shotEntries);
 		
 		this.config = config;
+		this.arenaPane = arenaPane;
 	}
  
 	public void setMirroredManager(MirroredCanvasManager mirroredManager) {
@@ -92,6 +95,8 @@ public class MirroredCanvasManager extends CanvasManager {
 			
 			target.setMirroredTarget(t);
 			t.setMirroredTarget(target);
+			
+			arenaPane.targetAdded(target);
 		}
 		
 		return super.addTarget(target);

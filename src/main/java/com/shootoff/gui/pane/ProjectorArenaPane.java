@@ -51,20 +51,17 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -72,7 +69,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaPane.class);
 
 	protected Stage arenaStage;
-	private Stage shootOffStage;
+	private final Stage shootOffStage;
+	private final HBox trainingExerciseContainer;
 	private final Configuration config;
 	private final Group arenaCanvasGroup;
 	private final Label calibrationLabel;
@@ -90,6 +88,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private boolean calibrated = false;
 	private CalibrationManager calibrationManager;
 	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
+	private TargetDistancePane distanceSettingsPane;
+	private boolean showedRecalibrationMessage = false;
 
 	private ProjectorArenaPane mirroredArenaPane;
 	
@@ -97,11 +97,14 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	public ProjectorArenaPane(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
 		this.canvasManager = canvasManager;
+		this.shootOffStage = null;
+		this.trainingExerciseContainer = null;
 		this.arenaCanvasGroup = new Group();
 		this.calibrationLabel = null;
 	}
 
-	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Configuration config, Resetter resetter) {
+	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, HBox trainingExerciseContainer,
+			Configuration config, Resetter resetter) {
 		this.config = config;
 
 		arenaCanvasGroup = new Group();
@@ -117,8 +120,9 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		
 		this.shootOffStage = shootOffStage;
 		this.arenaStage = arenaStage;
+		this.trainingExerciseContainer = trainingExerciseContainer;
 		
-		canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null);
+		canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null, this);
 
 		this.setPrefSize(640, 480);
 		
@@ -602,23 +606,27 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		final EventHandler<? super MouseEvent> mouseClickedHandler = tv.getTargetGroup().getOnMouseClicked();
 		
 		tv.getTargetGroup().setOnMouseClicked((event) -> {
-			if (MouseButton.SECONDARY.equals(event.getButton())) {
-				final MenuItem setDistanceMenuItem = new MenuItem("Set Target Distance");
-	
-				setDistanceMenuItem.setOnAction((e) -> {
-					if (perspectiveManager.isPresent()) {
-						showTargetResizeDialog(target, event);
-					} else {
-						showRecalibrationMessage();
-					}
-				});
-	
-				final ContextMenu menu = new ContextMenu(setDistanceMenuItem);
-				menu.show(tv.getTargetGroup(), event.getScreenX(), event.getScreenY());
+			if (MouseButton.PRIMARY.equals(event.getButton())) {
+				if (perspectiveManager.isPresent()) {
+					if (distanceSettingsPane != null) trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
+					
+					distanceSettingsPane = new TargetDistancePane(target, 
+							perspectiveManager.get(), config);
+					
+					trainingExerciseContainer.getChildren().add(distanceSettingsPane);
+				} else {
+					showRecalibrationMessage();
+				}
 			}
 	
 			if (mouseClickedHandler != null) mouseClickedHandler.handle(event);
+			
+			if (mirroredArenaPane != null) mirroredArenaPane.mirrorTargetAdded(target);
 		});
+	}
+	
+	public void mirrorTargetAdded(Target target) {
+		targetAdded(target);
 	}
 
 	/**
@@ -661,41 +669,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		}
 	}
 
-	private void showTargetResizeDialog(Target target, MouseEvent event) {
-		PerspectiveManager pm = perspectiveManager.get();
-
-		TargetDistancePane distanceSettingsPane = new TargetDistancePane(target, pm, config);
-
-		final Stage distanceSettingsStage = new Stage();
-		final Scene scene = new Scene(distanceSettingsPane);
-		distanceSettingsStage.initOwner(shootOffStage);
-		distanceSettingsStage.initModality(Modality.WINDOW_MODAL);
-		distanceSettingsStage.setTitle("Target Distance Settings");
-		distanceSettingsStage.setScene(scene);
-		distanceSettingsStage.showAndWait();
-
-		if (!distanceSettingsPane.userCancelled()) {
-			int width = distanceSettingsPane.getDefaultTargetWidth();
-			int height = distanceSettingsPane.getDefaultTargetHeight();
-			int currentDistance = distanceSettingsPane.getCurrentTargetDistance();
-			int newDistance = distanceSettingsPane.getNewTargetDistance();
-
-			if (logger.isTraceEnabled()) {
-				logger.trace(
-						"New target settings from distance settings pane: current width = {}, "
-								+ "default height = {}, default distance = {}, new distance = {}",
-						width, height, currentDistance, newDistance);
-			}
-
-			Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, newDistance);
-
-			if (targetDimensions.isPresent()) {
-				Dimension2D d = targetDimensions.get();
-				target.setDimensions(d.getWidth(), d.getHeight());
-			}
-		}
-	}
-
 	public void resizeTargetToDefaultPerspective(Target target) {
 		if (perspectiveManager.isPresent() && target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)
 				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)
@@ -721,7 +694,9 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	private void showRecalibrationMessage() {
-		Alert recalibrationAlert = new Alert(AlertType.ERROR);
+		if (showedRecalibrationMessage) return;
+		
+		final Alert recalibrationAlert = new Alert(AlertType.ERROR);
 
 		String message = "Data required to set a target's distance is missing and there is no way "
 				+ "to determine the correct values unless you recalibrate the arena with the perspective "
@@ -736,5 +711,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		recalibrationAlert.setContentText(message);
 		recalibrationAlert.initOwner(arenaStage);
 		recalibrationAlert.showAndWait();
+		
+		showedRecalibrationMessage = true;
 	}
 }

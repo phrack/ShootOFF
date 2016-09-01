@@ -16,6 +16,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -25,6 +26,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private final Configuration config;
 	private final CameraViews cameraViews;
 	private final Stage shootOffStage;
+	private final HBox trainingExerciseContainer;
 	private final Resetter resetter;
 	private final ExerciseSlide exerciseSlide;
 	private final Button calibrateButton;
@@ -35,7 +37,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 	
 	public ProjectorSlide(Pane parentControls, Pane parentBody, Configuration config, CameraViews cameraViews,
-			Stage shootOffStage, Resetter resetter, ExerciseSlide exerciseSlide) {
+			Stage shootOffStage, HBox trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
 		super(parentControls, parentBody);
 		
 		this.parentControls = parentControls;
@@ -43,6 +45,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		this.config = config;
 		this.cameraViews = cameraViews;
 		this.shootOffStage = shootOffStage;
+		this.trainingExerciseContainer = trainingExerciseContainer;
 		this.resetter = resetter;
 		this.exerciseSlide = exerciseSlide;
 		
@@ -116,7 +119,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		if (arenaPane == null) {
 			final Stage arenaStage = new Stage();
 
-			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter);
+			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, config, resetter);
 			
 			// Prepare calibrating manager up front so that we can switch
 			// to the arena tab when it's ready (otherwise
@@ -125,7 +128,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			
 			// Mirror panes so that anything that happens to one also
 			// happens to the other
-			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, config, resetter); 
+			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer,
+					config, resetter); 
 			cameraViews.addCameraView("Arena", new ScrollPane(arenaTabPane), arenaTabPane.getCanvasManager(), true);
 			
 			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
