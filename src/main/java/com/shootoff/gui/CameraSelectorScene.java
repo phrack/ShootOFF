@@ -57,7 +57,7 @@ import javafx.util.Callback;
  * new cameras to be used for shot detection. Also used to allow users to
  * register and de-register IP cameras via the GUI.
  * 
- * @see com.shootoff.camera.Camera
+ * @see com.shootoff.camera.WebcamCaptureCamera
  * 
  * @author phrack
  */
