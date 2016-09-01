@@ -531,6 +531,12 @@ public class CanvasManager implements CameraView {
 			} else {
 				notifyShot(shot);
 			}
+			
+			if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
+				TrainingExerciseBase.playSound(config.getRedLaserSound());
+			} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
+				TrainingExerciseBase.playSound(config.getGreenLaserSound());
+			}
 		}
 
 		// Create a shot entry to show the shot's data
@@ -560,12 +566,6 @@ public class CanvasManager implements CameraView {
 
 		shots.add(shot);
 		drawShot(shot);
-
-		if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
-			TrainingExerciseBase.playSound(config.getRedLaserSound());
-		} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
-			TrainingExerciseBase.playSound(config.getGreenLaserSound());
-		}
 
 		Optional<String> videoString = createVideoString(shot);
 		Optional<TrainingExercise> currentExercise = config.getExercise();
