@@ -92,9 +92,6 @@ public class MirroredCanvasManager extends CanvasManager {
 			
 			target.setMirroredTarget(t);
 			t.setMirroredTarget(target);
-			
-			target.setKeepInBounds(true);
-			t.setKeepInBounds(true);
 		}
 		
 		return super.addTarget(target);
