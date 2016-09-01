@@ -1,9 +1,11 @@
-package com.shootoff.camera;
+package com.shootoff.camera.shotdetection;
 
-import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 
 import javafx.geometry.Bounds;
@@ -22,6 +24,11 @@ public abstract class ShotDetector {
 
 	private long startTime = 0;
 
+	public static boolean isSystemSupported()
+	{
+		return false;
+	}
+	
 	public ShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView) {
 		this.cameraManager = cameraManager;
 		this.config = config;
@@ -33,23 +40,6 @@ public abstract class ShotDetector {
 		cameraManager.getDeduplicationProcessor().reset();
 	}
 
-	/**
-	 * Process <code>frameBGR</code> to detect shots that appear in it. The
-	 * frame is in blue, green, red format, which is the default used by OpenCV
-	 * when it reads a frame off of a webcam. The behavior when
-	 * <code>isDetecting</code> is <code>false</code> is dependent on the
-	 * specific implementation of the shot detection algorithm. Some may perform
-	 * no processing in this case, others may still update filters, collect
-	 * diagnostic information (e.g. to show users where noise may occur), etc.
-	 * 
-	 * @param frameBGR
-	 *            the frame to process in search of a shot
-	 * @param isDetecting
-	 *            <code>true</code> if the algorithm should perform the full
-	 *            detection process, otherwise stop after collecting
-	 *            diagnostic/filter information
-	 */
-	public abstract void processFrame(Mat frameBGR, boolean isDetecting);
 
 	/**
 	 * Notify the shot detector of the dimensions of webcam frames (e.g. the

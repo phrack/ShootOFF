@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.camera;
+package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -25,6 +25,12 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
+import com.shootoff.camera.shotdetection.NativeShotDetector;
+import com.shootoff.camera.shotdetection.ShotDetector;
+import com.shootoff.config.Configuration;
 
 public class WebcamCaptureCamera extends Camera {
 	
@@ -56,7 +62,7 @@ public class WebcamCaptureCamera extends Camera {
 
 
 	@Override
-	public Mat getFrame() {
+	public Mat getMatFrame() {
 		final Mat frame = new Mat();
 		if (!camera.read(frame) || frame.size().height == 0) return null;
 
@@ -65,13 +71,13 @@ public class WebcamCaptureCamera extends Camera {
 
 
 	@Override
-	public BufferedImage getImage() {
-		Mat frame = getFrame();
+	public BufferedImage getBufferedImage() {
+		Mat frame = getMatFrame();
 
 		if (frame == null) {
 			return null;
 		} else {
-			return Camera.matToBufferedImage(getFrame());
+			return Camera.matToBufferedImage(getMatFrame());
 		}
 	}
 
@@ -111,19 +117,6 @@ public class WebcamCaptureCamera extends Camera {
 		return Webcam.getWebcams().get(cameraIndex).getName();
 	}
 
-
-	@Override
-	public boolean isLocked() {
-		return isOpen();
-	}
-
-
-	@Override
-	public boolean isImageNew() {
-		return true;
-	}
-
-
 	@Override
 	public void setViewSize(final Dimension size) {
 			camera.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, size.getWidth());
@@ -140,5 +133,16 @@ public class WebcamCaptureCamera extends Camera {
 
 	public void launchCameraSettings() {
 		camera.set(Highgui.CV_CAP_PROP_SETTINGS, 1);
+	}
+	
+	@Override
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
+	{
+		if (NativeShotDetector.isSystemSupported())
+			return new NativeShotDetector(cameraManager, config, cameraView);
+		else if (JavaShotDetector.isSystemSupported())
+			return new JavaShotDetector(cameraManager, config, cameraView);
+		else
+			return null;
 	}
 }

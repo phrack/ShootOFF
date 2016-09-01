@@ -6,12 +6,11 @@ import org.opencv.core.Mat;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.ShotDetector;
 import com.shootoff.config.Configuration;
 
 import javafx.scene.paint.Color;
 
-public class NativeShotDetector extends ShotDetector {
+public class NativeShotDetector extends FrameProcessingShotDetector {
 	private final CameraManager cameraManager;
 	private final Configuration config;
 
@@ -24,7 +23,7 @@ public class NativeShotDetector extends ShotDetector {
 		return true;
 	}
 
-	private static boolean isSystemSupported() {
+	public static boolean isSystemSupported() {
 		// TODO: Remove this flag when no longer loading dummy detector
 		boolean USE_NATIVE_DETECTION = false;
 

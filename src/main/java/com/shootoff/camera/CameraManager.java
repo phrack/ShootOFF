@@ -39,8 +39,18 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.Closeable;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.cameratypes.Camera;
+import com.shootoff.camera.cameratypes.FrameListener;
+import com.shootoff.camera.cameratypes.FrameYieldingCamera;
+import com.shootoff.camera.cameratypes.WebcamCaptureCamera;
+import com.shootoff.camera.processors.DeduplicationProcessor;
+import com.shootoff.camera.recorders.RollingRecorder;
+import com.shootoff.camera.recorders.ShotRecorder;
+import com.shootoff.camera.shotdetection.FrameProcessingShotDetector;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
+import com.shootoff.camera.shotdetection.ShotDetector;
+import com.shootoff.camera.shotdetection.ShotYieldingShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.util.TimerPool;
 import com.xuggle.mediatool.IMediaWriter;
@@ -150,18 +160,29 @@ public class CameraManager implements Closeable {
 		this.config = config;
 
 		this.cameraView.setCameraManager(this);
+		
+		if (!this.webcam.isPresent())
+		{
+			if (NativeShotDetector.loadNativeShotDetector()) {
+				logger.debug("Using native shot detection");
+
+				this.shotDetector = new NativeShotDetector(this, config, view);
+			} else {
+				logger.debug("Native shot detection is not supported on this system, falling back to Java detector");
+
+				this.shotDetector = new JavaShotDetector(this, config, view);
+			}
+		}
+		else
+		{
+			this.shotDetector = webcam.get().getPreferredShotDetector(this, config, view);
+			
+			if (this.shotDetector == null)
+				logger.error("No suitable shot detector found for camera {}", this.webcam.get().getName());
+		}
+
 
 		initDetector(new VideoStreamer());
-
-		if (NativeShotDetector.loadNativeShotDetector()) {
-			logger.debug("Using native shot detection");
-
-			this.shotDetector = new NativeShotDetector(this, config, view);
-		} else {
-			logger.debug("Native shot detection is not supported on this system, falling back to Java detector");
-
-			this.shotDetector = new JavaShotDetector(this, config, view);
-		}
 	}
 
 	// For testing with videos and click-to-shoot on Arena tab
@@ -382,7 +403,7 @@ public class CameraManager implements Closeable {
 
 	public Image getCurrentFrame() {
 		if (webcam.isPresent()) {
-			return SwingFXUtils.toFXImage(webcam.get().getImage(), null);
+			return SwingFXUtils.toFXImage(webcam.get().getBufferedImage(), null);
 		} else {
 			return null;
 		}
@@ -447,7 +468,7 @@ public class CameraManager implements Closeable {
 		videoWriterCalibratedArea.close();
 	}
 
-	protected class VideoStreamer extends MediaListenerAdapter implements Runnable {
+	protected class VideoStreamer extends MediaListenerAdapter implements Runnable, FrameListener {
 		@Override
 		public void run() {
 			if (webcam.isPresent()) {
@@ -475,9 +496,24 @@ public class CameraManager implements Closeable {
 						setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 					}
 				}
+				
+				if (shotDetector instanceof ShotYieldingShotDetector)
+					((ShotYieldingShotDetector) shotDetector).startDetecting();
 
-				streamCameraFrames();
+				if (webcam.get() instanceof FrameYieldingCamera)
+					((FrameYieldingCamera) webcam.get()).startYieldFrames(this);
+				else
+					streamCameraFrames();
+				
 			}
+			
+
+		}
+
+		@Override
+		public void newFrame(Mat frame) {
+			if (!handleFrame(frame))
+				logger.error("Invalid frame yielded from {}", webcam.get().getName());
 		}
 	}
 
@@ -486,85 +522,95 @@ public class CameraManager implements Closeable {
 			
 			if (!webcam.isPresent() || !webcam.get().isImageNew()) continue;
 
-			frameCount++;
-
-			
-			Mat currentFrame = webcam.get().getFrame();
+			Mat currentFrame = webcam.get().getMatFrame();
 			currentFrameTimestamp = System.currentTimeMillis();
 
-			if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
-				// Camera appears to have closed
-				if (isStreaming.get() && cameraErrorView.isPresent()) cameraErrorView.get().showMissingCameraError(webcam.get());
+			if (!handleFrame(currentFrame))
 				return;
-			} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
-				// Camera appears to be open but got a null frame
-				logger.warn("Null frame from camera: {}", webcam.get().getName());
-				continue;
-			}
-
-			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && !isAutoCalibrating.get()) {
-				estimateCameraFPS();
-			}
-
-			if (currentFrame == null) continue;
-			
-
-			BufferedImage currentImage = processFrame(currentFrame);
-
-			Bounds b;
-
-			synchronized (projectionBoundsLock) {
-				if (projectionBounds.isPresent()) {
-					b = projectionBounds.get();
-				} else {
-					b = null;
-				}
-			}
-
-			if (cropFeedToProjection && b != null) {
-				currentImage = currentImage.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
-						(int) b.getHeight());
-			}
-
-			if (recordingShots) {
-				rollingRecorder.recordFrame(currentImage);
-
-				List<Shot> removeKeys = new ArrayList<Shot>();
-				for (Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
-					if (r.getValue().isComplete()) {
-						r.getValue().close();
-						removeKeys.add(r.getKey());
-					} else {
-						r.getValue().recordFrame(currentImage);
-					}
-				}
-
-				for (Shot s : removeKeys)
-					shotRecorders.remove(s);
-			}
-
-			if (recordingStream) {
-				BufferedImage image = ConverterFactory.convertToType(currentImage, BufferedImage.TYPE_3BYTE_BGR);
-				IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
-
-				IVideoPicture frame = converter.toPicture(image,
-						(System.currentTimeMillis() - recordingStartTime) * 1000);
-				frame.setKeyFrame(isFirstStreamFrame);
-				frame.setQuality(0);
-				isFirstStreamFrame = false;
-
-				videoWriterStream.encodeVideo(0, frame);
-			}
-
-			final BufferedImage frame = currentImage;
-			if (cropFeedToProjection && projectionBounds.isPresent()) {
-				cameraView.updateBackground(frame, projectionBounds);
-			} else {
-				cameraView.updateBackground(frame, Optional.empty());
-			}
 		}
 	}
 
+	private boolean handleFrame(Mat currentFrame)
+	{
+		frameCount++;
+
+		
+		if (currentFrame == null && webcam.isPresent() && !webcam.get().isOpen()) {
+			// Camera appears to have closed
+			if (isStreaming.get() && cameraErrorView.isPresent()) cameraErrorView.get().showMissingCameraError(webcam.get());
+
+			
+			return false;
+		} else if (currentFrame == null && webcam.isPresent() && webcam.get().isOpen()) {
+			// Camera appears to be open but got a null frame
+			logger.warn("Null frame from camera: {}", webcam.get().getName());
+			return true;
+		}
+
+		if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && !isAutoCalibrating.get()) {
+			estimateCameraFPS();
+		}
+
+		if (currentFrame == null) return true;
+		
+
+		BufferedImage currentImage = processFrame(currentFrame);
+
+		Bounds b;
+
+		synchronized (projectionBoundsLock) {
+			if (projectionBounds.isPresent()) {
+				b = projectionBounds.get();
+			} else {
+				b = null;
+			}
+		}
+
+		if (cropFeedToProjection && b != null) {
+			currentImage = currentImage.getSubimage((int) b.getMinX(), (int) b.getMinY(), (int) b.getWidth(),
+					(int) b.getHeight());
+		}
+
+		if (recordingShots) {
+			rollingRecorder.recordFrame(currentImage);
+
+			List<Shot> removeKeys = new ArrayList<Shot>();
+			for (Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
+				if (r.getValue().isComplete()) {
+					r.getValue().close();
+					removeKeys.add(r.getKey());
+				} else {
+					r.getValue().recordFrame(currentImage);
+				}
+			}
+
+			for (Shot s : removeKeys)
+				shotRecorders.remove(s);
+		}
+
+		if (recordingStream) {
+			BufferedImage image = ConverterFactory.convertToType(currentImage, BufferedImage.TYPE_3BYTE_BGR);
+			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+
+			IVideoPicture frame = converter.toPicture(image,
+					(System.currentTimeMillis() - recordingStartTime) * 1000);
+			frame.setKeyFrame(isFirstStreamFrame);
+			frame.setQuality(0);
+			isFirstStreamFrame = false;
+
+			videoWriterStream.encodeVideo(0, frame);
+		}
+
+		final BufferedImage frame = currentImage;
+		if (cropFeedToProjection && projectionBounds.isPresent()) {
+			cameraView.updateBackground(frame, projectionBounds);
+		} else {
+			cameraView.updateBackground(frame, Optional.empty());
+		}
+		
+		return true;
+	}
+	
 	protected BufferedImage processFrame(Mat currentFrame) {
 		frameCount++;
 
@@ -620,9 +666,11 @@ public class CameraManager implements Closeable {
 				submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
-			shotDetector.processFrame(submatFrameBGR, isDetecting.get());
+			if (shotDetector instanceof FrameProcessingShotDetector)
+				((FrameProcessingShotDetector) shotDetector).processFrame(submatFrameBGR, isDetecting.get());
 		} else {
-			shotDetector.processFrame(currentFrame, isDetecting.get());
+			if (shotDetector instanceof FrameProcessingShotDetector)
+				((FrameProcessingShotDetector) shotDetector).processFrame(currentFrame, isDetecting.get());
 		}
 
 		// matFrameBGR is showing the colored pixels for brightness and motion,

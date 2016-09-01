@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.shootoff.camera.Camera;
+import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationConfigurator;

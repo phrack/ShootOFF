@@ -37,10 +37,9 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public final class JavaShotDetector extends ShotDetector {
+public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private static final Logger logger = LoggerFactory.getLogger(JavaShotDetector.class);
 
 	public static final int SECTOR_COLUMNS = 3;
@@ -97,6 +96,10 @@ public final class JavaShotDetector extends ShotDetector {
 	private boolean shouldShowBrightnessWarningBool = false;
 
 	final PixelClusterManager pixelClusterManager;
+	
+	public static boolean isSystemSupported() {
+		return true;
+	}
 
 	public JavaShotDetector(final CameraManager cameraManager, final Configuration config,
 			final CameraView cameraView) {

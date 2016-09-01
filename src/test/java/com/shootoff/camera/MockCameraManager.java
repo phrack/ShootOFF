@@ -7,6 +7,7 @@ import java.util.Optional;
 import javafx.geometry.Bounds;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.MockCanvasManager;

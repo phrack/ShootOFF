@@ -1,4 +1,4 @@
-package com.shootoff.camera;
+package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -18,12 +18,16 @@ import com.github.sarxos.webcam.WebcamCompositeDriver;
 import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
+import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
+import com.shootoff.camera.shotdetection.ShotDetector;
+import com.shootoff.config.Configuration;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 public abstract class Camera {
-	public abstract Mat getFrame();
+	public abstract Mat getMatFrame();
 
-	public abstract BufferedImage getImage();
+	public abstract BufferedImage getBufferedImage();
 
 	public abstract boolean open();
 
@@ -32,11 +36,19 @@ public abstract class Camera {
 	public abstract boolean close();
 
 	public abstract String getName();
+	
+	public abstract ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView);
+	
+	public boolean isLocked()
+	{
+		return false;
+	}
 
-	public abstract boolean isLocked();
-
-	public abstract boolean isImageNew();
-
+	public boolean isImageNew() {
+		return true;
+	}
+	
+	
 	public abstract void setViewSize(Dimension size);
 
 	public abstract Dimension getViewSize();
