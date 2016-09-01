@@ -531,6 +531,12 @@ public class CanvasManager implements CameraView {
 			} else {
 				notifyShot(shot);
 			}
+			
+			if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
+				TrainingExerciseBase.playSound(config.getRedLaserSound());
+			} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
+				TrainingExerciseBase.playSound(config.getGreenLaserSound());
+			}
 		}
 
 		// Create a shot entry to show the shot's data
@@ -560,12 +566,6 @@ public class CanvasManager implements CameraView {
 
 		shots.add(shot);
 		drawShot(shot);
-
-		if (config.useRedLaserSound() && Color.RED.equals(shot.getColor())) {
-			TrainingExerciseBase.playSound(config.getRedLaserSound());
-		} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
-			TrainingExerciseBase.playSound(config.getGreenLaserSound());
-		}
 
 		Optional<String> videoString = createVideoString(shot);
 		Optional<TrainingExercise> currentExercise = config.getExercise();
@@ -713,9 +713,9 @@ public class CanvasManager implements CameraView {
 		});
 	}
 
-	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
+	protected Optional<TargetComponents> loadTarget(File targetFile, boolean playAnimations) {
 		Optional<TargetComponents> targetComponents;
-
+		
 		if ('@' == targetFile.toString().charAt(0)) {
 			if (!config.getPlugin().isPresent()) {
 				throw new AssertionError("Loaded target from training exercise resources, but a plugin does not "
@@ -736,6 +736,12 @@ public class CanvasManager implements CameraView {
 		} else {
 			targetComponents = TargetIO.loadTarget(targetFile, playAnimations);
 		}
+
+		return targetComponents;
+	}
+	
+	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
+		Optional<TargetComponents> targetComponents = loadTarget(targetFile, playAnimations);
 
 		if (targetComponents.isPresent()) {
 			TargetComponents tc = targetComponents.get();

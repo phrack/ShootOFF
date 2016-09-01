@@ -8,11 +8,12 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.targets.Target;
-import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
+import javafx.geometry.Dimension2D;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 
@@ -52,7 +53,7 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
-		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
+		final Optional<TargetComponents> targetComponents = super.loadTarget(targetFile, false);
 		
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
@@ -77,12 +78,16 @@ public class MirroredCanvasManager extends CanvasManager {
 					newTarget.getAllTags(), config, this, ((TargetView) newTarget).isUserDeletable());
 		}
 		
-		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(newTarget.getTargetFile());
+		final Optional<TargetComponents> targetComponents = super.loadTarget(newTarget.getTargetFile(), false);
 		
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
 			final MirroredTarget t = new MirroredTarget(newTarget.getTargetFile(), tc.getTargetGroup(), tc.getTargetTags(), config, 
 					mirroredManager, ((TargetView) newTarget).isUserDeletable());
+			final Dimension2D targetDimension = target.getDimension(); 
+			t.mirrorSetDimensions(targetDimension.getWidth(), targetDimension.getHeight());
+			final Point2D targetPosition = target.getPosition();
+			t.mirrorSetPosition(targetPosition.getX(), targetPosition.getY());
 			mirroredManager.mirrorAddTarget(t);
 			
 			target.setMirroredTarget(t);

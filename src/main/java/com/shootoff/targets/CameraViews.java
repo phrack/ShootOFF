@@ -20,4 +20,6 @@ public interface CameraViews {
 	CameraManager getSelectedCameraManager();
 	
 	Node getSelectedCameraContainer();
+	
+	void selectCameraView(CameraView cameraView);
 }

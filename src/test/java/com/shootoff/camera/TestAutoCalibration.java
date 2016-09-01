@@ -79,7 +79,7 @@ public class TestAutoCalibration {
 					
 					@Override
 					public void calibratedFeedBehaviorsChanged() {}
-				}, cameraManager, pac));
+				}, cameraManager, pac, null));
 		cameraManager.enableAutoCalibration(false);
 		cameraManager.processVideo();
 

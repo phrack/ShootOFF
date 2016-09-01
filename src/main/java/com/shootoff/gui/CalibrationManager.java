@@ -31,6 +31,7 @@ import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.io.TargetIO;
 import com.shootoff.util.TimerPool;
@@ -49,6 +50,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final CalibrationConfigurator calibrationConfigurator;
 	private final CameraManager calibratingCameraManager;
 	private final CanvasManager calibratingCanvasManager;
+	private final CameraViews cameraViews;
 	private final CalibrationListener calibrationListener;
 	private final ProjectorArenaPane arenaPane;
 
@@ -61,12 +63,13 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
 
 	public CalibrationManager(CalibrationConfigurator calibrationConfigurator, CameraManager calibratingCameraManager,
-			ProjectorArenaPane arenaPane) {
+			ProjectorArenaPane arenaPane, CameraViews cameraViews) {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
 		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
 		this.calibrationListener = (CalibrationListener) arenaPane;
 		this.arenaPane = arenaPane;
+		this.cameraViews = cameraViews;
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
 		calibratingCameraManager.setCalibrationManager(this);
@@ -170,11 +173,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 	}
 
 	private void createCalibrationTarget(double x, double y, double width, double height) {
-		RectangleRegion calibrationRectangle = new RectangleRegion(x, y, width, height);
+		final RectangleRegion calibrationRectangle = new RectangleRegion(x, y, width, height);
 		calibrationRectangle.setFill(Color.PURPLE);
 		calibrationRectangle.setOpacity(TargetIO.DEFAULT_OPACITY);
 
-		Group calibrationGroup = new Group();
+		final Group calibrationGroup = new Group();
 		calibrationGroup.setOnMouseClicked((e) -> {
 			calibrationGroup.requestFocus();
 		});
@@ -207,6 +210,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		final int DEFAULT_POS = 150;
 
 		removeAutoCalibrationMessage();
+		
+		cameraViews.selectCameraView(calibratingCanvasManager);
 
 		showManualCalibrationRequestMessage();
 
