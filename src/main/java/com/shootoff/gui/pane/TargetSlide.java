@@ -143,6 +143,4 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 			}
 		}
 	}
-
-	// TODO: Add target to arena
 }
