@@ -39,8 +39,7 @@ import java.util.jar.JarFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.cameratypes.Camera;
-import com.shootoff.camera.cameratypes.OptiTrackCamera;
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -679,11 +678,12 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		//TODO: OptiTrackCamera.init();
 		
 		this.primaryStage = primaryStage;
 
 		final String os = System.getProperty("os.name");
-		if (os != null && "Mac OS X".equals(os) && Camera.getWebcams().isEmpty()) {
+		if (os != null && "Mac OS X".equals(os) && CameraFactory.getWebcams().isEmpty()) {
 			closeNoCamera();
 		}
 
@@ -755,7 +755,7 @@ public class Main extends Application {
 		if (os != null) {
 			if ("Mac OS X".equals(os)) {
 				nu.pattern.OpenCV.loadShared();
-				Camera.getDefault();
+				CameraFactory.getDefault();
 			} else if (os.startsWith("Linux")) {
 				// Need to ensure v4l1compat is preloaded if it exists otherwise
 				// OpenCV won't work
