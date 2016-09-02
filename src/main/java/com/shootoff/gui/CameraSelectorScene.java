@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 
@@ -77,7 +78,7 @@ public class CameraSelectorScene extends Stage {
 		this.config = config;
 		this.configuredCameras = configuredCameras;
 
-		for (Camera webcam : Camera.getWebcams()) {
+		for (Camera webcam : CameraFactory.getWebcams()) {
 			if (!configuredCameras.contains(webcam)) {
 				unconfiguredWebcams.add(webcam);
 				Platform.runLater(() -> {

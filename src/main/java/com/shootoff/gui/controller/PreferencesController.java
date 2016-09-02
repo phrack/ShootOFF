@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -91,7 +92,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 
 	public void setConfig(Stage parent, Configuration config, CalibrationConfigurator calibrationConfigurator,
 			CameraConfigListener cameraConfigListener) {
-		ImageCell.createImageCache(Camera.getWebcams());
+		ImageCell.createImageCache(CameraFactory.getWebcams());
 
 		this.parent = parent;
 		this.calibrationConfigurator = calibrationConfigurator;

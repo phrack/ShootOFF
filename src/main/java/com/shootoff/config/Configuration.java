@@ -54,6 +54,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.Main;
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.IpCamera;
@@ -266,7 +267,7 @@ public class Configuration {
 				}
 			}
 
-			for (Camera webcam : Camera.getWebcams()) {
+			for (Camera webcam : CameraFactory.getWebcams()) {
 				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
 				if (cameraIndex >= 0)
 					webcams.put(webcamNames.get(cameraIndex), webcam);

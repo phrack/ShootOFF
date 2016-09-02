@@ -25,6 +25,7 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
@@ -32,17 +33,18 @@ import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class WebcamCaptureCamera extends Camera {
+public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
+	private boolean closing = false;
 
 	// For testing
 	protected WebcamCaptureCamera() {
 		camera = null;
 	}
 
-	WebcamCaptureCamera(final String cameraName) {
+	public WebcamCaptureCamera(final String cameraName) {
 		final List<Webcam> webcams = Webcam.getWebcams();
 		int cameraIndex = -1;
 
@@ -66,6 +68,8 @@ public class WebcamCaptureCamera extends Camera {
 		final Mat frame = new Mat();
 		if (!camera.read(frame) || frame.size().height == 0) return null;
 
+		frameCount++;
+		currentFrameTimestamp = System.currentTimeMillis();
 		return frame;
 	}
 
@@ -92,7 +96,7 @@ public class WebcamCaptureCamera extends Camera {
 		// to 30, which unnecessarily hampers higher end cameras
 		camera.set(5, 60);
 		
-		if (open) Camera.openCameras.add(this);
+		if (open) CameraFactory.openCamerasAdd(this);
 
 		return open;
 	}
@@ -107,7 +111,8 @@ public class WebcamCaptureCamera extends Camera {
 	@Override
 	public boolean close() {
 		camera.release();
-		Camera.openCameras.remove(this);
+		CameraFactory.openCameraRemove(this);
+		closing = true;
 		return true;
 	}
 
@@ -145,4 +150,28 @@ public class WebcamCaptureCamera extends Camera {
 		else
 			return null;
 	}
+
+	@Override
+	public void run() {
+		while (isOpen() && !closing)
+		{
+			if (cameraEventListener.isPresent())
+				cameraEventListener.get().newFrame(getMatFrame());
+			
+			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0)  && cameraState != CameraState.CALIBRATING) {
+				estimateCameraFPS();
+			}
+			
+		}
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().cameraClosed();
+	}
+
+	@Override
+	public boolean isLocked() {
+		return false;
+	}
+
+	
+	
 }

@@ -139,7 +139,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			projectorCanvasManager.setMirroredManager(tabCanvasManager);
 			tabCanvasManager.setMirroredManager(projectorCanvasManager);
 			projectorCanvasManager.updateBackground(null, Optional.empty());
-			tabCanvasManager.setCameraManager(new CameraManager(tabCanvasManager, config));
+			//TODO: ??
+			//tabCanvasManager.setCameraManager(new CameraManager(tabCanvasManager, config));
 			
 			// Final preparation to display
 			arenaStage.setTitle("Projector Arena");

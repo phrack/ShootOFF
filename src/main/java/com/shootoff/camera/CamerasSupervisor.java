@@ -40,6 +40,7 @@ public class CamerasSupervisor {
 		final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView, config);
 		managers.add(manager);
 		allDetecting.set(true);
+		manager.start();
 		return manager;
 	}
 

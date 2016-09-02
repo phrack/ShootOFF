@@ -19,18 +19,20 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamAuth;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry;
 import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
-import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class IpCamera extends Camera {
+public class IpCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(IpCamera.class);
 	private final Webcam ipcam;
 	
-	IpCamera(final Webcam ipcam) {
+	private boolean closing = false;
+	
+	public IpCamera(final Webcam ipcam) {
 		this.ipcam = ipcam;
 	}
 	
@@ -95,11 +97,14 @@ public class IpCamera extends Camera {
 
 	@Override
 	public Mat getMatFrame() {
+		
 		return Camera.bufferedImageToMat(getBufferedImage());
 	}
 
 	@Override
 	public BufferedImage getBufferedImage() {
+		currentFrameTimestamp = System.currentTimeMillis();
+		frameCount++;
 		return ipcam.getImage();
 	}
 
@@ -111,7 +116,7 @@ public class IpCamera extends Camera {
 		} catch (WebcamException we) {
 			open = false;
 		}
-		if (open) Camera.openCameras.add(this);
+		if (open) CameraFactory.openCamerasAdd(this);
 		return open;
 	}
 
@@ -122,13 +127,19 @@ public class IpCamera extends Camera {
 
 	@Override
 	public boolean close() {
-		if (Camera.isMac) {
+		if (CameraFactory.isMac()) {
 			new Thread(() -> {
 				ipcam.close();
 			}, "CloseMacOSXWebcam").start();
+			
+			CameraFactory.openCameraRemove(this);
+			closing = true;
 			return true;
 		} else {
-			return ipcam.close();
+			boolean res = ipcam.close();
+			if (res) CameraFactory.openCameraRemove(this);
+			closing = true;
+			return res;
 		}
 	}
 
@@ -142,8 +153,7 @@ public class IpCamera extends Camera {
 		return ipcam.getLock().isLocked();
 	}
 
-	@Override
-	public boolean isImageNew() {
+	private boolean isImageNew() {
 		return ipcam.isImageNew();
 	}
 
@@ -174,11 +184,28 @@ public class IpCamera extends Camera {
 	@Override
 	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
 	{
-		if (NativeShotDetector.isSystemSupported())
-			return new NativeShotDetector(cameraManager, config, cameraView);
-		else if (JavaShotDetector.isSystemSupported())
+		if (JavaShotDetector.isSystemSupported())
 			return new JavaShotDetector(cameraManager, config, cameraView);
 		else
 			return null;
+	}
+	
+	
+	@Override
+	public void run() {
+		while (isOpen() && !closing)
+		{
+			if (!isImageNew()) continue;
+			
+			if (cameraEventListener.isPresent())
+				cameraEventListener.get().newFrame(getMatFrame());
+			
+			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
+				estimateCameraFPS();
+			}
+			
+		}
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().cameraClosed();
 	}
 }
