@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.Closeable;
 import com.shootoff.Main;
 import com.shootoff.camera.CameraErrorView;
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
@@ -153,7 +154,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		});
 
 		if (config.getWebcams().isEmpty()) {
-			Optional<Camera> defaultCamera = Camera.getDefault();
+			Optional<Camera> defaultCamera = CameraFactory.getDefault();
 			if (defaultCamera.isPresent()) {
 				if (!addCameraTab("Default", defaultCamera.get())) {
 					// Failed to open the default camera. This sometimes happens
@@ -162,7 +163,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					// actually present. This seems to happen sometimes with TV
 					// tuners and buggy camera drivers. As a workaround, try to
 					// fall back to using a different camera as the default.
-					List<Camera> allCameras = Camera.getWebcams();
+					List<Camera> allCameras = CameraFactory.getWebcams();
 
 					if (allCameras.size() <= 1) {
 						showCameraLockError(defaultCamera.get(), true);
@@ -374,7 +375,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		camerasSupervisor.clearManagers();
 
 		if (config.getWebcams().isEmpty()) {
-			Optional<Camera> defaultCam = Camera.getDefault();
+			Optional<Camera> defaultCam = CameraFactory.getDefault();
 
 			if (defaultCam.isPresent()) {
 				if (!addCameraTab("Default", defaultCam.get())) showCameraLockError(defaultCam.get(), true);

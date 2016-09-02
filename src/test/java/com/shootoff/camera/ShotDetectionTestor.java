@@ -22,7 +22,7 @@ import ch.qos.logback.classic.Logger;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 @Ignore
-public class ShotDetectionTestor {
+public class ShotDetectionTestor implements VideoFinishedListener {
 	private static int ALLOWED_COORD_VARIANCE = 3;
 
 	@BeforeClass
@@ -124,25 +124,32 @@ public class ShotDetectionTestor {
 		return Optional.empty();
 	}
 
+	Object processingLock = new Object();
 	protected List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds, MockCanvasManager mockManager,
 			Configuration config, boolean[][] sectorStatuses) {
-		Object processingLock = new Object();
+		
 		File videoFile = new File(ShotDetectionTestor.class.getResource(videoPath).getFile());
-		MockCameraManager cameraManager = new MockCameraManager(videoFile, processingLock, mockManager, config,
-				sectorStatuses, projectionBounds);
-
-		cameraManager.processVideo();
+		MockCameraManager cameraManager = new MockCameraManager(new MockCamera(videoFile), mockManager, config,
+				sectorStatuses, projectionBounds, this);
+		
+		cameraManager.start();
 
 		try {
 			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
+				processingLock.wait();
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
 		return mockManager.getShots();
+	}
+
+	@Override
+	public void videoFinished() {
+		synchronized (processingLock) {
+			processingLock.notifyAll();
+		}
 	}
 
 }

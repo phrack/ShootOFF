@@ -35,7 +35,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector {
 	
 	@Override
 	public void setFrameSize(int width, int height) {
-		// TODO: Should this be a noop for native shot detection?
+		// TODO: Should this be a noop for optitrack shot detection?
 	}
 
 	/**

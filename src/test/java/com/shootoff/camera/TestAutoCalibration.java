@@ -28,7 +28,7 @@ import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 
-public class TestAutoCalibration {
+public class TestAutoCalibration implements VideoFinishedListener {
 	private AutoCalibrationManager acm;
 
 	private Configuration config;
@@ -55,13 +55,14 @@ public class TestAutoCalibration {
 		}
 	}
 
+	Object processingLock = new Object();
 	private MockCameraManager autoCalibrationVideo(String videoPath) {
-		Object processingLock = new Object();
+
 		File videoFile = new File(TestAutoCalibration.class.getResource(videoPath).getFile());
 
 		MockCameraManager cameraManager;
-		cameraManager = new MockCameraManager(videoFile, processingLock, mockCanvasManager, config, sectorStatuses,
-				Optional.empty());
+		cameraManager = new MockCameraManager(new MockCamera(videoFile), mockCanvasManager, config, sectorStatuses,
+				Optional.empty(), this);
 
 		mockCanvasManager.setCameraManager(cameraManager);
 		
@@ -81,12 +82,12 @@ public class TestAutoCalibration {
 					public void calibratedFeedBehaviorsChanged() {}
 				}, cameraManager, pac, null));
 		cameraManager.enableAutoCalibration(false);
-		cameraManager.processVideo();
 
+		cameraManager.start();
+		
 		try {
 			synchronized (processingLock) {
-				while (!cameraManager.isVideoProcessed())
-					processingLock.wait();
+				processingLock.wait();
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -323,8 +324,8 @@ public class TestAutoCalibration {
 		MockCameraManager result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e.mp4");
 		assertEquals(true, result.cameraAutoCalibrated);
 		
-		assertEquals(76.84, result.getACM().getPaperDimensions().get().getWidth(), .01);
-		assertEquals(55.58, result.getACM().getPaperDimensions().get().getHeight(), .01);
+		assertEquals(76.84, result.getACM().getPaperDimensions().get().getWidth(), 1);
+		assertEquals(56.00, result.getACM().getPaperDimensions().get().getHeight(), 1);
 
 	
 	}
@@ -335,8 +336,8 @@ public class TestAutoCalibration {
 		MockCameraManager result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e-2.mp4");
 		assertEquals(true, result.cameraAutoCalibrated);
 		
-		assertEquals(77.05, result.getACM().getPaperDimensions().get().getWidth(), .01);
-		assertEquals(56.36, result.getACM().getPaperDimensions().get().getHeight(), .01);
+		assertEquals(77.05, result.getACM().getPaperDimensions().get().getWidth(), 1);
+		assertEquals(56.36, result.getACM().getPaperDimensions().get().getHeight(), 1);
 		
 	}
 	
@@ -394,4 +395,12 @@ public class TestAutoCalibration {
 
 		return true;
 	}
+
+	@Override
+	public void videoFinished() {
+		synchronized (processingLock) {
+			processingLock.notifyAll();
+		}
+	}
+
 }

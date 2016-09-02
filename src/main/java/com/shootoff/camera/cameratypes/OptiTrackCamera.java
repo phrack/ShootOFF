@@ -9,6 +9,7 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
@@ -17,7 +18,7 @@ import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class OptiTrackCamera extends Camera {
+public class OptiTrackCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackCamera.class);
 	
 	private static boolean initialized = false;
@@ -27,7 +28,7 @@ public class OptiTrackCamera extends Camera {
 		
 		if (cameraAvailable())
 		{
-			Camera.registerCamera(new OptiTrackCamera());
+			CameraFactory.registerCamera(new OptiTrackCamera());
 		}
 	}
 	
@@ -107,6 +108,8 @@ public class OptiTrackCamera extends Camera {
 	public Mat getMatFrame()
 	{
 		byte[] frame = getImageNative();
+		frameCount++;
+		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
 		return mat;
 	}
@@ -120,17 +123,6 @@ public class OptiTrackCamera extends Camera {
 		return Camera.matToBufferedImage(getMatFrame());
 	}
 
-	@Override
-	public int hashCode() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
 	@Override
 	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
@@ -148,6 +140,27 @@ public class OptiTrackCamera extends Camera {
 
 	public static boolean initialized() {
 		return initialized;
+	}
+	
+	
+	@Override
+	public void run() {
+		while (isOpen())
+		{
+			if (cameraEventListener.isPresent())
+				cameraEventListener.get().newFrame(getMatFrame());
+			
+			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0)  && cameraState != CameraState.CALIBRATING) {
+				estimateCameraFPS();
+			}
+		}
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().cameraClosed();
+	}
+
+	@Override
+	public boolean isLocked() {
+		return false;
 	}
 
 }
