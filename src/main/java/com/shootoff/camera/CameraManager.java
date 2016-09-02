@@ -74,21 +74,18 @@ import javafx.util.Callback;
  * @author phrack and dmaul
  */
 public class CameraManager implements Closeable, CameraEventListener {
-	protected static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
 	public static final int DEFAULT_FEED_HEIGHT = 480;
+	public static final int MIN_SHOT_DETECTION_FPS = 5;
 
 	protected int feedWidth = DEFAULT_FEED_WIDTH;
 	protected int feedHeight = DEFAULT_FEED_HEIGHT;
-
-	public static final int MIN_SHOT_DETECTION_FPS = 5;
-
 
 	protected final static int DIAGNOSTIC_MESSAGE_DURATION = 1000; // ms
 
 	protected Optional<CameraDebuggerListener> debuggerListener = Optional.empty();
 	
-
 	protected final ShotDetector shotDetector;
 
 	protected final Camera camera;
@@ -108,8 +105,6 @@ public class CameraManager implements Closeable, CameraEventListener {
 	private boolean limitDetectProjection = false;
 
 	protected Optional<Integer> minimumShotDimension = Optional.empty();
-
-
 
 	protected boolean recordingStream = false;
 	protected boolean isFirstStreamFrame = true;
@@ -169,13 +164,13 @@ public class CameraManager implements Closeable, CameraEventListener {
 	}
 
 	// For testing with videos and click-to-shoot on Arena tab
-	/*public CameraManager(CameraView view, Configuration config) {
-		this.camera = Optional.empty();
+	public CameraManager(CameraView view, Configuration config) {
+		this.camera = null;
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = view;
 		this.config = config;
 		this.shotDetector = new JavaShotDetector(this, config, view);
-	}*/
+	}
 
 	public String getName() {
 		return camera.getName();

@@ -14,34 +14,35 @@ import com.xuggle.xuggler.video.ConverterFactory;
 public interface Camera extends Runnable {
 	public enum CameraState { DISABLED, NORMAL, DETECTING, CALIBRATING };
 
-	public abstract Mat getMatFrame();
+	Mat getMatFrame();
 
-	public abstract BufferedImage getBufferedImage();
+	BufferedImage getBufferedImage();
 
-	public abstract boolean open();
+	boolean open();
 
-	public abstract boolean isOpen();
+	boolean isOpen();
 
-	public abstract boolean close();
+	boolean close();
 
-	public abstract String getName();
+	String getName();
 	
-	public abstract void setState(CameraState state);
+	void setState(CameraState state);
 	
-	public void setCameraEventListener(CameraEventListener cameraEventListener);
-	public long getCurrentFrameTimestamp();
-	public int getFrameCount();
+	void setCameraEventListener(CameraEventListener cameraEventListener);
 	
+	long getCurrentFrameTimestamp();
 	
-	public abstract ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView);
+	int getFrameCount();
 	
-	public boolean isLocked();
+	ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView);
+	
+	boolean isLocked();
 
-	public abstract void setViewSize(Dimension size);
+	void setViewSize(Dimension size);
 
-	public abstract Dimension getViewSize();	
+	Dimension getViewSize();	
 
-	public static BufferedImage matToBufferedImage(Mat matBGR) {
+	static BufferedImage matToBufferedImage(Mat matBGR) {
 		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
 		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		matBGR.get(0, 0, targetPixels);
@@ -49,7 +50,7 @@ public interface Camera extends Runnable {
 		return image;
 	}
 
-	public static Mat bufferedImageToMat(BufferedImage frame) {
+	static Mat bufferedImageToMat(BufferedImage frame) {
 		BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
 		byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
 		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
@@ -58,6 +59,6 @@ public interface Camera extends Runnable {
 		return mat;
 	}
 
-	public abstract double getFPS();
+	double getFPS();
 
 }
