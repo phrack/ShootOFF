@@ -92,9 +92,10 @@ public class TargetView implements Target {
 	private boolean bottom;
 	private boolean left;
 	private boolean right;
-
 	private double x;
 	private double y;
+	
+	private TargetSelectionListener selectionListener;
 
 	public TargetView(File targetFile, Group target, Map<String, String> targetTags, Configuration config,
 			CanvasManager parent, boolean userDeletable) {
@@ -401,6 +402,17 @@ public class TargetView implements Target {
 			getTargetGroup().getChildren().removeAll(resizeAnchors);
 			resizeAnchors.clear();
 		}
+		
+		if (selectionListener != null) selectionListener.targetSelected(this, isSelected);
+	}
+	
+	@Override
+	public void setTargetSelectionListener(TargetSelectionListener selectionListener) {
+		this.selectionListener = selectionListener;
+	}
+	
+	public interface TargetSelectionListener {
+		void targetSelected(Target target, boolean isSelected);
 	}
 
 	public boolean isSelected() {

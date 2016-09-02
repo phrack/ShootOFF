@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.gui.TargetView.TargetSelectionListener;
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
@@ -30,15 +31,15 @@ public interface Target {
 	public static final String TAG_CURRENT_PERCEIVED_DISTANCE = "currentDistance";
 	public static final String TAG_SHOOTER_DISTANCE = "shooterDistance";
 	
-	public File getTargetFile();
+	File getTargetFile();
 
-	public int getTargetIndex();
+	int getTargetIndex();
 
-	public void addTargetChild(Node child);
+	void addTargetChild(Node child);
 
-	public void removeTargetChild(Node child);
+	void removeTargetChild(Node child);
 
-	public List<TargetRegion> getRegions();
+	List<TargetRegion> getRegions();
 
 	/**
 	 * Check whether or not this target contains a particular region.
@@ -47,29 +48,31 @@ public interface Target {
 	 *            a region that may exist in this target
 	 * @return <tt>true</tt> if the target contains <tt>region</tt>
 	 */
-	public boolean hasRegion(TargetRegion region);
+	boolean hasRegion(TargetRegion region);
 
-	public void setVisible(boolean isVisible);
+	void setVisible(boolean isVisible);
 
-	public void setPosition(double x, double y);
+	void setPosition(double x, double y);
 
-	public Point2D getPosition();
+	Point2D getPosition();
 
-	public void setDimensions(double newWidth, double newHeight);
+	void setDimensions(double newWidth, double newHeight);
 
-	public Dimension2D getDimension();
+	Dimension2D getDimension();
 
-	public Bounds getBoundsInParent();
+	Bounds getBoundsInParent();
 
-	public void animate(TargetRegion region, List<String> args);
+	void animate(TargetRegion region, List<String> args);
 
-	public void reverseAnimation(TargetRegion region);
+	void reverseAnimation(TargetRegion region);
 
-	public Optional<Hit> isHit(Shot shot);
+	Optional<Hit> isHit(Shot shot);
 
-	public boolean tagExists(String name);
+	boolean tagExists(String name);
 
-	public String getTag(String name);
+	String getTag(String name);
 
-	public Map<String, String> getAllTags();
+	Map<String, String> getAllTags();
+	
+	void setTargetSelectionListener(TargetSelectionListener selectionListener);
 }

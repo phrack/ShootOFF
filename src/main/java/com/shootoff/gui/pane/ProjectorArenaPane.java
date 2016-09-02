@@ -45,7 +45,6 @@ import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -56,8 +55,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -602,27 +599,24 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		if (!(target instanceof TargetView)) throw new AssertionError(
 				"Target is no longer an instance of TargetView. This code path was not upgraded at some point.");
 	
-		final TargetView tv = (TargetView) target;
-		final EventHandler<? super MouseEvent> mouseClickedHandler = tv.getTargetGroup().getOnMouseClicked();
-		
-		tv.getTargetGroup().setOnMouseClicked((event) -> {
-			if (MouseButton.PRIMARY.equals(event.getButton())) {
-				if (perspectiveManager.isPresent()) {
-					if (distanceSettingsPane != null) trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
-					
-					distanceSettingsPane = new TargetDistancePane(target, 
-							perspectiveManager.get(), config);
-					
-					trainingExerciseContainer.getChildren().add(distanceSettingsPane);
-				} else {
-					showRecalibrationMessage();
-				}
+		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
+			if (!isSelected) {
+				trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
+				return;
 			}
-	
-			if (mouseClickedHandler != null) mouseClickedHandler.handle(event);
-			
-			if (mirroredArenaPane != null) mirroredArenaPane.mirrorTargetAdded(target);
+
+			if (perspectiveManager.isPresent()) {
+				if (distanceSettingsPane != null) trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
+
+				distanceSettingsPane = new TargetDistancePane(toggledTarget, perspectiveManager.get(), config);
+
+				trainingExerciseContainer.getChildren().add(distanceSettingsPane);
+			} else {
+				showRecalibrationMessage();
+			}
 		});
+		
+		if (mirroredArenaPane != null) mirroredArenaPane.mirrorTargetAdded(target);
 	}
 	
 	public void mirrorTargetAdded(Target target) {
