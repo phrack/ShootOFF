@@ -44,24 +44,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class PreferencesController implements DesignateShotRecorderListener {
-	@FXML private GridPane preferencesPane;
+	@FXML private ScrollPane preferencesPane;
 	@FXML private ListView<String> webcamListView;
 	@FXML private Slider markerRadiusSlider;
 	@FXML private Label markerRadiusLabel;
@@ -173,7 +173,7 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		});
 	}
 	
-	public Pane getPane() {
+	public Node getPane() {
 		return preferencesPane;
 	}
 

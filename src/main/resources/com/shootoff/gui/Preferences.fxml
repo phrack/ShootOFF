@@ -6,55 +6,106 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<GridPane fx:id="preferencesPane" hgap="5.0" vgap="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.PreferencesController">
-   <columnConstraints>
-      <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
-      <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0" />
-      <ColumnConstraints hgrow="SOMETIMES" percentWidth="35.0" />
-      <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
-   </columnConstraints>
-   <rowConstraints>
-      <RowConstraints percentHeight="15.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-      <RowConstraints percentHeight="11.0" vgrow="SOMETIMES" />
-   </rowConstraints>
-   <children>
-      <Label text="Cameras:" />
-      <Label text="Marker Radius:" GridPane.rowIndex="1" />
-      <Label text="Ignore Laser Color:" GridPane.rowIndex="2" />
-      <CheckBox fx:id="virtualMagazineCheckBox" mnemonicParsing="false" onAction="#virtualMagazineCheckBoxClicked" text="Virtual Magazine:" GridPane.rowIndex="5" />
-      <CheckBox fx:id="malfunctionsCheckBox" mnemonicParsing="false" onAction="#malfunctionsCheckBoxClicked" text="Inject Malfunctions (%):" GridPane.rowIndex="6" />
-      <Slider fx:id="markerRadiusSlider" blockIncrement="1.0" majorTickUnit="9.0" max="20.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-      <Slider fx:id="virtualMagazineSlider" blockIncrement="1.0" disable="true" majorTickUnit="5.0" max="45.0" min="1.0" minorTickCount="2" showTickLabels="true" showTickMarks="true" value="1.0" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-      <Slider fx:id="malfunctionsSlider" disable="true" max="99.9" min="0.1" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-      <ChoiceBox fx:id="ignoreLaserColorChoiceBox" prefWidth="250.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-      <Label fx:id="markerRadiusLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-      <Label fx:id="virtualMagazineLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
-      <Label fx:id="malfunctionsLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-      <ListView fx:id="webcamListView" editable="true" maxHeight="-Infinity" minHeight="-Infinity" orientation="HORIZONTAL" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2">
-         <GridPane.margin>
-            <Insets bottom="5.0" />
-         </GridPane.margin>
-      </ListView>
-      <Button mnemonicParsing="false" onAction="#addCameraClicked" text="Add" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
-      <CheckBox fx:id="redLaserSoundCheckBox" mnemonicParsing="false" onAction="#redLaserSoundCheckBoxClicked" text="Red Laser Sound:" GridPane.rowIndex="3" />
-      <CheckBox fx:id="greenLaserSoundCheckBox" mnemonicParsing="false" onAction="#greenLaserSoundCheckBoxClicked" text="Green Laser Sound:" GridPane.rowIndex="4" />
-      <TextField fx:id="redLaserSoundTextField" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-      <TextField fx:id="greenLaserSoundTextField" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-      <Button fx:id="redLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#redLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
-      <Button fx:id="greenLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#greenLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
-      <Label text="Calibrated Projector Feed Behavior:" GridPane.rowIndex="7" />
-      <ChoiceBox fx:id="calibratedOptionsChoiceBox" prefWidth="250.0" GridPane.columnIndex="2" GridPane.rowIndex="7" />
-      <CheckBox fx:id="showArenaShotMarkersCheckBox" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="8" />
-      <Label text="Show Shot Markers On Arena:" GridPane.rowIndex="8" />
-   </children>
-   <padding>
-      <Insets left="30.0" right="30.0" />
-   </padding>
-</GridPane>
+
+<ScrollPane fx:id="preferencesPane" fitToWidth="true" hbarPolicy="NEVER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.PreferencesController">
+   <content>
+      <VBox>
+         <children>
+            <TitledPane text="Camera Settings">
+               <content>
+                  <GridPane hgap="5.0" vgap="5.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="35.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints percentHeight="100.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label text="Cameras:" />
+                        <ListView fx:id="webcamListView" editable="true" minHeight="-Infinity" prefHeight="400.0" prefWidth="200.0" GridPane.columnIndex="2">
+                           <GridPane.margin>
+                              <Insets bottom="5.0" />
+                           </GridPane.margin>
+                        </ListView>
+                        <Button mnemonicParsing="false" onAction="#addCameraClicked" text="Add" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
+                     </children>
+                     <padding>
+                        <Insets left="30.0" right="30.0" top="30.0" bottom="30.0" />
+                     </padding>
+                  </GridPane>
+               </content>
+            </TitledPane>
+            <TitledPane text="Laser Settings">
+                     <content>
+                  <GridPane hgap="5.0" vgap="5.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="35.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints percentHeight="17.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="17.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="17.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="17.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="17.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="17.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label text="Marker Radius:" GridPane.rowIndex="0" />
+                        <Label fx:id="markerRadiusLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
+                        <Slider fx:id="markerRadiusSlider" blockIncrement="1.0" majorTickUnit="9.0" max="20.0" min="1.0" minorTickCount="4" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                        <Label text="Ignore Laser Color:" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="virtualMagazineCheckBox" mnemonicParsing="false" onAction="#virtualMagazineCheckBoxClicked" text="Virtual Magazine:" GridPane.rowIndex="4" />
+                        <CheckBox fx:id="malfunctionsCheckBox" mnemonicParsing="false" onAction="#malfunctionsCheckBoxClicked" text="Inject Malfunctions (%):" GridPane.rowIndex="5" />                
+                        <Slider fx:id="virtualMagazineSlider" blockIncrement="1.0" disable="true" majorTickUnit="5.0" max="45.0" min="1.0" minorTickCount="2" showTickLabels="true" showTickMarks="true" value="1.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                        <Slider fx:id="malfunctionsSlider" disable="true" max="99.9" min="0.1" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                        <ChoiceBox fx:id="ignoreLaserColorChoiceBox" prefWidth="300.0" GridPane.columnIndex="2" GridPane.columnSpan="2147483647" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                        <Label fx:id="virtualMagazineLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+                        <Label fx:id="malfunctionsLabel" maxWidth="55.0" minWidth="55.0" text="0" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+                        <CheckBox fx:id="redLaserSoundCheckBox" mnemonicParsing="false" onAction="#redLaserSoundCheckBoxClicked" text="Red Laser Sound:" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="greenLaserSoundCheckBox" mnemonicParsing="false" onAction="#greenLaserSoundCheckBoxClicked" text="Green Laser Sound:" GridPane.rowIndex="3" />
+                        <TextField fx:id="redLaserSoundTextField" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <TextField fx:id="greenLaserSoundTextField" disable="true" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Button fx:id="redLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#redLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                        <Button fx:id="greenLaserSoundButton" disable="true" mnemonicParsing="false" onAction="#greenLaserSoundButtonClicked" text="..." GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                     </children>
+                     <padding>
+                        <Insets left="30.0" right="30.0" top="30.0" bottom="30.0" />
+                     </padding>
+                  </GridPane>
+               </content>
+            </TitledPane>
+            <TitledPane animated="false" text="Projector Settings">
+                     <content>
+                  <GridPane hgap="5.0" vgap="5.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="35.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="5.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="45.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" percentWidth="15.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints percentHeight="50.0" vgrow="SOMETIMES" />
+                        <RowConstraints percentHeight="50.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label text="Calibrated Projector Feed Behavior:" GridPane.rowIndex="0" />
+                        <ChoiceBox fx:id="calibratedOptionsChoiceBox" prefWidth="300.0" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                        <CheckBox fx:id="showArenaShotMarkersCheckBox" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Label text="Show Shot Markers On Arena:" GridPane.rowIndex="1" />
+                     </children>
+                     <padding>
+                        <Insets left="30.0" right="30.0" top="30.0" bottom="30.0" />
+                     </padding>
+                  </GridPane>
+               </content>
+            </TitledPane>
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>
