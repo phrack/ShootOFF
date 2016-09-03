@@ -132,12 +132,12 @@ public class IpCamera extends CalculatedFPSCamera {
 				ipcam.close();
 			}, "CloseMacOSXWebcam").start();
 			
-			CameraFactory.openCameraRemove(this);
+			CameraFactory.openCamerasRemove(this);
 			closing = true;
 			return true;
 		} else {
 			boolean res = ipcam.close();
-			if (res) CameraFactory.openCameraRemove(this);
+			if (res) CameraFactory.openCamerasRemove(this);
 			closing = true;
 			return res;
 		}

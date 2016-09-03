@@ -116,7 +116,7 @@ public final class CameraFactory {
 
 		return webcams;
 	}
-	public static void openCameraRemove(Camera camera) {
+	public static void openCamerasRemove(Camera camera) {
 		openCameras.remove(camera);
 	}
 	public static void openCamerasAdd(Camera camera) {

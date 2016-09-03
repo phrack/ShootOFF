@@ -111,7 +111,7 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public boolean close() {
 		camera.release();
-		CameraFactory.openCameraRemove(this);
+		CameraFactory.openCamerasRemove(this);
 		closing = true;
 		return true;
 	}

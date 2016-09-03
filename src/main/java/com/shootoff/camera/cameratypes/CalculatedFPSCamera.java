@@ -8,17 +8,25 @@ public abstract class CalculatedFPSCamera implements Camera {
 	
 	protected CameraState cameraState;
 	
+	protected int frameCount = 0;
+	protected long currentFrameTimestamp = -1;
+	private long lastCameraTimestamp = -1;
+	private long lastFrameCount = 0;
+
+	
+	
 	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
+	public void setCameraEventListener(CameraEventListener cameraEventListener)
+	{
+		this.cameraEventListener = Optional.of(cameraEventListener);
+	}
 
 	public void setState(CameraState cameraState)
 	{
 		this.cameraState = cameraState;
 	}
 	
-	public void setCameraEventListener(CameraEventListener cameraEventListener)
-	{
-		this.cameraEventListener = Optional.of(cameraEventListener);
-	}
+
 	public long getCurrentFrameTimestamp() {
 		return currentFrameTimestamp;
 	}
@@ -38,14 +46,6 @@ public abstract class CalculatedFPSCamera implements Camera {
 		else
 			webcamFPS = newFPS;
 	}
-
-	
-	protected int frameCount = 0;
-	protected long currentFrameTimestamp = -1;
-	private long lastCameraTimestamp = -1;
-	private long lastFrameCount = 0;
-
-	
 
 	protected void estimateCameraFPS() {
 		if (lastCameraTimestamp > -1) {

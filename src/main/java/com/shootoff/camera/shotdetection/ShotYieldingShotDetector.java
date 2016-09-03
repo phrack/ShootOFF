@@ -11,6 +11,4 @@ public abstract class ShotYieldingShotDetector extends ShotDetector {
 	}
 	
 	public abstract void startDetecting();
-	public abstract void stopDetecting();
-
 }

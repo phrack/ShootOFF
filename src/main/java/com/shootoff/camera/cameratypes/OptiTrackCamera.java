@@ -3,6 +3,8 @@ package com.shootoff.camera.cameratypes;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Optional;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -12,22 +14,27 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.cameratypes.Camera.CameraState;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class OptiTrackCamera extends CalculatedFPSCamera {
+public class OptiTrackCamera implements Camera {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackCamera.class);
 	
 	private static boolean initialized = false;
+	protected CameraState cameraState;
+	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
+	protected long currentFrameTimestamp = -1;
 	
 	static {
 		init();
 		
-		if (cameraAvailable())
+		if (cameraAvailableNative())
 		{
+			logger.warn("camera available");
 			CameraFactory.registerCamera(new OptiTrackCamera());
 		}
 	}
@@ -58,6 +65,21 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 		logger.warn("init");
 	}
 	
+	public void setState(CameraState cameraState)
+	{
+		this.cameraState = cameraState;
+	}
+	
+	
+	public void setCameraEventListener(CameraEventListener cameraEventListener)
+	{
+		this.cameraEventListener = Optional.of(cameraEventListener);
+	}
+	
+	public long getCurrentFrameTimestamp() {
+		return currentFrameTimestamp;
+	}
+	
 	public String getName()
 	{
 		return "OptiTrack";
@@ -65,14 +87,8 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 	
 	private native static void initialize();
 	
-	public static boolean cameraAvailable()
-	{
-		if (!initialized)
-			init();
-		return cameraAvailableNative();
-	}
 	
-	public native static boolean cameraAvailableNative();
+	private native static boolean cameraAvailableNative();
 
 	
 	public native boolean open();
@@ -104,13 +120,9 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 		return dst;
 	}
 	
-	
-	// TODO: Use cameralistener on native side, use frame id for frame count
-	// for time also?
 	public Mat getMatFrame()
 	{
 		byte[] frame = getImageNative();
-		frameCount++;
 		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
 		return mat;
@@ -147,7 +159,9 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 	
 	@Override
 	public void run() {
-		if (!isOpen())
+		while (isOpen());
+		
+		/*if (!isOpen())
 			logger.error("camera thread started when camera is not open");
 		while (isOpen())
 		{
@@ -175,13 +189,22 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 			}
 		}
 		
-		cameraClosed();
+		cameraClosed();*/
+	}
+	
+	private void receiveFrame(byte[] frame)
+	{
+		currentFrameTimestamp = System.currentTimeMillis();
+		Mat mat = translateCameraArrayToMat(frame);
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().newFrame(mat);
 	}
 	
 	private void cameraClosed()
 	{
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
+		close();
 	}
 
 	@Override
@@ -191,5 +214,8 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 	
 	@Override
 	public native double getFPS();
+	
+	@Override
+	public native int getFrameCount();
 
 }

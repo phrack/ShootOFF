@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraFactory;
+import com.shootoff.camera.cameratypes.OptiTrackCamera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -679,6 +680,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		//TODO: OptiTrackCamera.init();
+		OptiTrackCamera.init();
 		
 		this.primaryStage = primaryStage;
 
