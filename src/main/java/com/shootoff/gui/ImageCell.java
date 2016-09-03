@@ -30,6 +30,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.cameratypes.Camera;
 
@@ -192,6 +193,7 @@ public class ImageCell extends TextFieldListCell<String> {
 
 		if (cameraOpened == true) {
 			webcam.close();
+			CameraFactory.openCameraRemove(webcam);
 		}
 
 		return Optional.ofNullable(webcamImg);
