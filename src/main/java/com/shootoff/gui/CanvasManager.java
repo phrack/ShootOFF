@@ -585,7 +585,7 @@ public class CanvasManager implements CameraView {
 						(shot.getY() - b.getMinY()) * y_scale, shot.getTimestamp(), shot.getFrame(),
 						config.getMarkerRadius());
 
-				processedShot = arenaPane.get().getCanvasManager().addArenaShot(arenaShot, videoString);
+				processedShot = arenaPane.get().getCanvasManager().addArenaShot(arenaShot, videoString, isMirroredShot);
 			}
 		}
 
@@ -594,7 +594,7 @@ public class CanvasManager implements CameraView {
 		}
 	}
 
-	public boolean addArenaShot(Shot shot, Optional<String> videoString) {
+	public boolean addArenaShot(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
 		shots.add(shot);
 		drawShot(shot);
 
@@ -604,9 +604,11 @@ public class CanvasManager implements CameraView {
 			executeRegionCommands(hit.get());
 		}
 
-		if (currentExercise.isPresent()) {
-			currentExercise.get().shotListener(shot, hit);
-			return true;
+		if (!isMirroredShot) {
+			if (currentExercise.isPresent()) {
+				currentExercise.get().shotListener(shot, hit);
+				return true;
+			}
 		}
 
 		return false;

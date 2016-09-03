@@ -172,6 +172,18 @@ public class MirroredCanvasManager extends CanvasManager {
 	}
 	
 	@Override
+	public boolean addArenaShot(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
+		mirroredManager.mirrorAddArenaShot(
+				new Shot(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp(), (int) shot.getMarker().getRadiusX()),
+				videoString);
+		return super.addArenaShot(shot, videoString, isMirroredShot);
+	}
+	
+	public boolean mirrorAddArenaShot(Shot shot, Optional<String> videoString) {
+		return super.addArenaShot(shot, videoString, true);
+	}
+	
+	@Override
 	public void clearShots() {
 		mirroredManager.mirrorClearShots();
 		super.clearShots();
@@ -179,5 +191,15 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	public void mirrorClearShots() {
 		super.clearShots();
+	}
+
+	@Override
+	public void reset() {
+		mirroredManager.mirrorReset();
+		super.reset();
+	}
+	
+	public void mirrorReset() {
+		super.reset();
 	}
 }
