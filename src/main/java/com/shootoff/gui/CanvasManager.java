@@ -472,8 +472,7 @@ public class CanvasManager implements CameraView {
 
 	private Optional<String> createVideoString(Shot shot) {
 		if (config.getSessionRecorder().isPresent() && !config.getRecordingManagers().isEmpty()) {
-
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 
 			for (CameraManager cm : config.getRecordingManagers()) {
 				ShotRecorder r = cm.getRevelantRecorder(shot);
@@ -584,7 +583,7 @@ public class CanvasManager implements CameraView {
 
 		Optional<String> videoString = createVideoString(shot);
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, videoString);
+		Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 
 		boolean processedShot = false;
@@ -614,7 +613,7 @@ public class CanvasManager implements CameraView {
 		drawShot(shot);
 
 		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, videoString);
+		Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
 			executeRegionCommands(hit.get());
 		}
@@ -630,13 +629,19 @@ public class CanvasManager implements CameraView {
 	}
 
 	private void drawShot(Shot shot) {
-		Platform.runLater(() -> {
+		Runnable drawShotAction  = () -> {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
-		});
+		};
+		
+		if (Platform.isFxApplicationThread()) {
+			drawShotAction.run();
+		} else {
+			Platform.runLater(drawShotAction);
+		}
 	}
 
-	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString) {
+	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
@@ -664,7 +669,7 @@ public class CanvasManager implements CameraView {
 							shot.getX(), shot.getY(), region.getType(), tagList.toString());
 				}
 
-				if (config.getSessionRecorder().isPresent()) {
+				if (!isMirroredShot && config.getSessionRecorder().isPresent()) {
 					config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.of(target),
 							Optional.of(target.getRegions().indexOf(region)), videoString);
 				}
@@ -675,7 +680,7 @@ public class CanvasManager implements CameraView {
 
 		logger.debug("Processing Shot: Did Not Find Hit For Shot ({}, {})", shot.getX(), shot.getY());
 
-		if (config.getSessionRecorder().isPresent()) {
+		if (!isMirroredShot && config.getSessionRecorder().isPresent()) {
 			config.getSessionRecorder().get().recordShot(cameraName, shot, false, false, Optional.empty(),
 					Optional.empty(), videoString);
 		}
