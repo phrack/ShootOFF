@@ -49,6 +49,9 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector {
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, int rgb) {
+		if (!cameraManager.isDetecting())
+			return;
+		
 		Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
 
 		super.addShot(c, x, y, true);

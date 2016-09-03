@@ -162,16 +162,6 @@ public class CameraManager implements Closeable, CameraEventListener {
 			logger.error("No suitable shot detector found for camera {}", this.camera.getName());
 
 	}
-
-	// For testing with videos and click-to-shoot on Arena tab
-	public CameraManager(CameraView view, Configuration config) {
-		this.camera = null;
-		this.cameraErrorView = Optional.empty();
-		this.cameraView = view;
-		this.config = config;
-		this.shotDetector = new JavaShotDetector(this, config, view);
-	}
-
 	public String getName() {
 		return camera.getName();
 	}
@@ -187,8 +177,14 @@ public class CameraManager implements Closeable, CameraEventListener {
 		}
 
 		if (!camera.isOpen()) {
+			
 			camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
-			camera.open();
+
+			if (!camera.open())
+			{
+				cameraErrorView.get().showCameraLockError(camera, true);
+				return;
+			}
 
 			final Dimension openDimension = camera.getViewSize();
 			
@@ -211,11 +207,13 @@ public class CameraManager implements Closeable, CameraEventListener {
 			}
 		}
 		
-		if (shotDetector instanceof ShotYieldingShotDetector)
-			((ShotYieldingShotDetector) shotDetector).startDetecting();
 
 		logger.debug("starting camera thread {}", camera.getName());
 		new Thread(camera, camera.getName()).start();
+		
+		if (shotDetector instanceof ShotYieldingShotDetector)
+			((ShotYieldingShotDetector) shotDetector).startDetecting();
+
 	}
 
 	public boolean isSectorOn(int x, int y) {

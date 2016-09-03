@@ -105,6 +105,8 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 	}
 	
 	
+	// TODO: Use cameralistener on native side, use frame id for frame count
+	// for time also?
 	public Mat getMatFrame()
 	{
 		byte[] frame = getImageNative();
@@ -145,15 +147,39 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 	
 	@Override
 	public void run() {
+		if (!isOpen())
+			logger.error("camera thread started when camera is not open");
 		while (isOpen())
 		{
-			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFrame(getMatFrame());
+			Mat mat = getMatFrame();
+			if (mat == null)
+				continue;
 			
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0)  && cameraState != CameraState.CALIBRATING) {
-				estimateCameraFPS();
+				// Don't yield all the frames
+				
+				if (cameraEventListener.isPresent())
+				{
+					cameraEventListener.get().newFrame(mat);
+					if (getFrameCount() > CalculatedFPSCamera.DEFAULT_FPS)
+						cameraEventListener.get().newFPS(getFPS());
+				}
+			}
+			
+			try {
+				synchronized(this)
+				{
+					this.wait(10);
+				}
+			} catch (InterruptedException e) {
 			}
 		}
+		
+		cameraClosed();
+	}
+	
+	private void cameraClosed()
+	{
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 	}
@@ -162,5 +188,8 @@ public class OptiTrackCamera extends CalculatedFPSCamera {
 	public boolean isLocked() {
 		return false;
 	}
+	
+	@Override
+	public native double getFPS();
 
 }
