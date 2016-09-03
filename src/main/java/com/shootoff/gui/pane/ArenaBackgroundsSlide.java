@@ -37,7 +37,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 	private ButtonBase addNoneButton() {
 		final LocatedImage none = new LocatedImage("/images/blank_page.png");
 		
-		final InputStream isThumbnail = this.getClass().getResourceAsStream("/images/blank_page.png");
+		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream("/images/blank_page.png");
 		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
 		
 		ToggleButton noneButton = (ToggleButton) itemPane.addButton(none, "None", 
@@ -59,7 +59,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 	}
 
 	private void addDefaultBackground(String buttonName, String resourceName) {
-		final InputStream is = this.getClass().getResourceAsStream(resourceName);
+		final InputStream is = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
 		final LocatedImage img = new LocatedImage(is, resourceName);
 		final InputStream isThumbnail = this.getClass().getResourceAsStream(resourceName);
 		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));

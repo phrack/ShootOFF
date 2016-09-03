@@ -47,7 +47,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	private final ItemSelectionPane<TrainingExercise> projectorExerciseItemPane = 
 			new ItemSelectionPane<TrainingExercise>(exerciseItemPane.getToggleGroup(), this);
 	
-	private final TrainingExercise noneExercise = new TrainingExercise() {
+	private static final TrainingExercise noneExercise = new TrainingExercise() {
 		@Override
 		public void init() {}
 
@@ -222,10 +222,8 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 			exerciseListener.setExercise(null);
 		} else if (selectedExercise instanceof ProjectorTrainingExerciseBase) {
 			exerciseListener.setProjectorExercise(selectedExercise);
-		} else if (selectedExercise instanceof TrainingExercise) {
-			exerciseListener.setExercise(selectedExercise);
 		} else {
-			logger.error("Did not expect exercise type: {}", selectedExercise.getClass().getName());
+			exerciseListener.setExercise(selectedExercise);
 		}
 		
 		hide();

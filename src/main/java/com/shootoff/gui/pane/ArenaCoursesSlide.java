@@ -109,11 +109,17 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 			}
 		};
 		
-		for (File courseFolder : coursesDirectory.listFiles(folderFilter)) {
-			coursePanes.getChildren().add(
-					new TitledPane(courseFolder.getName().replaceAll("_", "") + " Courses", buildCategoryPane(courseFolder)));
-		}
+		final File[] courseFolders = coursesDirectory.listFiles(folderFilter);
 		
+		if (courseFolders != null) {
+			for (File courseFolder : courseFolders) {
+				coursePanes.getChildren().add(
+						new TitledPane(courseFolder.getName().replaceAll("_", "") + " Courses", buildCategoryPane(courseFolder)));
+			}
+		} else {
+			logger.error("{} does not appear to be a valid course directory", coursesDirectory.getPath());			
+		}
+	
 		return coursePanes;
 	}
 	
@@ -128,8 +134,14 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 			}
 		};
 
-		for (File f : path.listFiles(courseFilter)) {
-			addCourseButton(itemPane, f);
+		final File[] courseFiles = path.listFiles(courseFilter);
+		
+		if (courseFiles != null) {
+			for (File f : courseFiles) {
+				addCourseButton(itemPane, f);
+			}
+		} else {
+			logger.error("{} doesn't appear to be a valid course-containing directory", path.getPath());
 		}
 
 		return itemPane;

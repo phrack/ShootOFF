@@ -52,6 +52,7 @@ import com.shootoff.gui.pane.FileSlide;
 import com.shootoff.gui.pane.ProjectorSlide;
 import com.shootoff.gui.pane.ShotSectorPane;
 import com.shootoff.gui.pane.TargetSlide;
+import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
@@ -803,8 +804,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
 			newExercise.init();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (ReflectiveOperationException e) {
+			ExerciseMetadata metadata = exercise.getInfo();
+			logger.error("Failed to start exercise " + metadata.getName() + " " + metadata.getVersion(), e);
 		}
 	}
 
@@ -826,8 +828,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaPane());
 			newExercise.init();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (ReflectiveOperationException e) {
+			ExerciseMetadata metadata = exercise.getInfo();
+			logger.error("Failed to start projector exercise " + metadata.getName() + " " + metadata.getVersion(), e);
 		}
 	}
 

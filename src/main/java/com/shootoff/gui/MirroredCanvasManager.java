@@ -108,6 +108,10 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public void removeTarget(Target target) {
+		if (!(target instanceof MirroredTarget)) {
+			throw new AssertionError("Expected a target passed to removeTarget on the arena pane to be a MirroredTarget");
+		}
+		
 		mirroredManager.mirrorRemoveTarget(((MirroredTarget) target).getMirroredTarget());
 		super.removeTarget(target);
 	}

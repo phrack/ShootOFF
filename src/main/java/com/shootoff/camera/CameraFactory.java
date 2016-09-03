@@ -29,7 +29,7 @@ public final class CameraFactory {
 	static List<Camera> openCameras = Collections.synchronizedList(new ArrayList<>());
 
 	// Cameras that are not discovered by webcam-capture can be registered here
-	public static List<Camera> registeredCameras = new ArrayList<Camera>();
+	private final static List<Camera> registeredCameras = new ArrayList<Camera>();
 	public static void registerCamera(Camera camera)
 	{
 		registeredCameras.add(camera);
