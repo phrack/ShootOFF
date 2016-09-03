@@ -54,14 +54,14 @@ public class TestCanvasManager {
 
 	@Test
 	public void testCheckHitMiss() {
-		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
+		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 	}
 
 	@Test
 	public void testCheckHitHit() {
-		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty());
+		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty(), false);
 
 		assertTrue(h.isPresent());
 		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
@@ -70,17 +70,17 @@ public class TestCanvasManager {
 
 	@Test
 	public void testAddShotMissHitMiss() {
-		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty());
+		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 
-		h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty());
+		h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty(), false);
 
 		assertTrue(h.isPresent());
 		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
 		assertEquals(ipscTarget, h.get().getTarget());
 
-		h = cm.checkHit(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
+		h = cm.checkHit(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 	}

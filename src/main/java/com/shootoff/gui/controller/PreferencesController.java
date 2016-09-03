@@ -34,34 +34,45 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
-import com.shootoff.gui.CameraSelectorScene;
 import com.shootoff.gui.DesignateShotRecorderListener;
-import com.shootoff.gui.ImageCell;
+import com.shootoff.gui.CheckableImageListCell;
+import com.shootoff.gui.CheckableImageListCell.CameraRenamedListener;
+import com.shootoff.gui.CheckableImageListCell.CameraSelectionListener;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.HPos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class PreferencesController implements DesignateShotRecorderListener {
-	@FXML private GridPane preferencesPane;
+public class PreferencesController implements DesignateShotRecorderListener, CameraSelectionListener,
+		CameraRenamedListener {
+	@FXML private ScrollPane preferencesPane;
 	@FXML private ListView<String> webcamListView;
 	@FXML private Slider markerRadiusSlider;
 	@FXML private Label markerRadiusLabel;
@@ -86,15 +97,17 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	private CalibrationConfigurator calibrationConfigurator;
 	private CameraConfigListener cameraConfigListener;
 	private boolean cameraConfigChanged = false;
-	private final Set<Camera> recordingCameras = new HashSet<Camera>();
-	private final List<Camera> configuredCameras = new ArrayList<Camera>();
-	private final ObservableList<String> configuredNames = FXCollections.observableArrayList();
+	private final Set<Camera> recordingCameras = new HashSet<>();
+	private final List<Camera> configuredCameras = new ArrayList<>();
+	private final List<String> configuredNames = new ArrayList<>();
+	private final ObservableList<String> cameras = FXCollections.observableArrayList();
 
 	public void setConfig(Stage parent, Configuration config, CalibrationConfigurator calibrationConfigurator,
 			CameraConfigListener cameraConfigListener) {
-		ImageCell.createImageCache(CameraFactory.getWebcams());
+		CheckableImageListCell.createImageCache(CameraFactory.getWebcams(), this);
 
 		this.parent = parent;
+		this.config = config;
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.cameraConfigListener = cameraConfigListener;
 
@@ -105,31 +118,18 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		webcamListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
 			@Override
 			public ListCell<String> call(ListView<String> list) {
-				return new ImageCell(configuredCameras, configuredNames, Optional.of(PreferencesController.this),
-						Optional.of(config.getRecordingCameras()));
+				return new CheckableImageListCell(CameraFactory.getWebcams(), configuredNames, PreferencesController.this,
+						PreferencesController.this, Optional.of(config.getRecordingCameras()));
 			}
 		});
 
 		webcamListView.setOnKeyPressed((event) -> {
 			if (event.getCode() == KeyCode.DELETE || event.getCode() == KeyCode.BACK_SPACE) {
-				ObservableList<String> selectedNames = webcamListView.getSelectionModel().getSelectedItems();
-
-				for (Iterator<Camera> it = configuredCameras.iterator(); it.hasNext();) {
-					Camera webcam = it.next();
-					if (selectedNames.contains(webcam.getName())) {
-						it.remove();
-					}
-				}
-
-				boolean changed = configuredNames.removeAll(selectedNames);
-				if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
+				removeSelectedIpCams();
 			}
 		});
 
 		webcamListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		webcamListView.setItems(configuredNames);
-
-		this.config = config;
 
 		linkSliderToLabel(markerRadiusSlider, markerRadiusLabel);
 		linkSliderToLabel(virtualMagazineSlider, virtualMagazineLabel);
@@ -138,7 +138,18 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		for (String webcamName : config.getWebcams().keySet()) {
 			configuredNames.add(webcamName);
 			configuredCameras.add(config.getWebcams().get(webcamName));
+			cameras.add(webcamName);
 		}
+		
+		for (Camera c : configuredCameras) {
+			CheckableImageListCell.getCameraCheckBoxes().get(c).setSelected(true);
+		}
+		
+		for (Camera c : CameraFactory.getWebcams()) {
+			if (!cameras.contains(c.getName())) cameras.add(c.getName());
+		}
+		
+		webcamListView.setItems(cameras);
 
 		markerRadiusSlider.setValue(config.getMarkerRadius());
 		ignoreLaserColorChoiceBox.setValue(config.getIgnoreLaserColorName());
@@ -173,7 +184,31 @@ public class PreferencesController implements DesignateShotRecorderListener {
 		});
 	}
 	
-	public Pane getPane() {
+	public void cameraSelectionChanged(Camera camera, boolean isSelected) {
+		if (isSelected) {
+			configuredCameras.add(camera);
+			configuredNames.add(camera.getName());
+		} else {
+			int cameraIndex = configuredCameras.indexOf(camera);
+			
+			configuredCameras.remove(cameraIndex);
+			configuredNames.remove(cameraIndex);
+		}
+		
+		cameraConfigChanged = true;
+	}
+	
+	public void cameraRenamed(String oldName, String newName) {
+		int oldIndex = configuredNames.indexOf(oldName);
+		
+		if (oldIndex > -1) {
+			configuredNames.set(oldIndex, newName);
+		}
+		
+		cameraConfigChanged = true;
+	}
+	
+	public Node getPane() {
 		return preferencesPane;
 	}
 
@@ -241,19 +276,109 @@ public class PreferencesController implements DesignateShotRecorderListener {
 	}
 
 	@FXML
-	public void addCameraClicked(ActionEvent event) {
-		CameraSelectorScene cameraSelector = new CameraSelectorScene(config, parent, configuredCameras);
+	public void registerCameraClicked(ActionEvent event) {
+		collectIpCamInfo();
+	}
 
-		cameraSelector.setOnHidden((e) -> {
-			if (cameraSelector.getSelectedWebcams().isEmpty()) return;
+	private void collectIpCamInfo() {
+		final Stage ipcamStage = new Stage();
+		final GridPane ipcamPane = new GridPane();
 
-			for (Camera webcam : cameraSelector.getSelectedWebcams()) {
-				boolean changed = configuredNames.add(webcam.getName());
-				configuredCameras.add(webcam);
+		final ColumnConstraints cc = new ColumnConstraints(400);
+		cc.setHalignment(HPos.CENTER);
+		ipcamPane.getColumnConstraints().addAll(new ColumnConstraints(), cc);
 
-				if (!cameraConfigChanged && changed) cameraConfigChanged = changed;
+		final TextField nameTextField = new TextField();
+		ipcamPane.add(new Label("IPCam Name:"), 0, 0);
+		ipcamPane.add(nameTextField, 1, 0);
+
+		final TextField userTextField = new TextField();
+		userTextField.setPromptText("Optional Username");
+		ipcamPane.add(new Label("Username:"), 0, 1);
+		ipcamPane.add(userTextField, 1, 1);
+
+		final PasswordField passwordField = new PasswordField();
+		passwordField.setPromptText("Optional Password");
+		ipcamPane.add(new Label("Password:"), 0, 2);
+		ipcamPane.add(passwordField, 1, 2);
+
+		final TextField urlTextField = new TextField("http://");
+		ipcamPane.add(new Label("IPCam URL:"), 0, 3);
+		ipcamPane.add(urlTextField, 1, 3);
+
+		final Button okButton = new Button("OK");
+		okButton.setDefaultButton(true);
+		ipcamPane.add(okButton, 1, 4);
+
+		okButton.setOnAction((e) -> {
+			if (nameTextField.getText().isEmpty() || urlTextField.getText().isEmpty()) {
+				final Alert ipcamInfoAlert = new Alert(AlertType.ERROR);
+				ipcamInfoAlert.setTitle("Missing Information");
+				ipcamInfoAlert.setHeaderText("Missing Required IPCam Information!");
+				ipcamInfoAlert.setResizable(true);
+				ipcamInfoAlert.setContentText("Please fill in both the IPCam name and the URL.");
+				ipcamInfoAlert.showAndWait();
+				return;
 			}
+
+			Optional<String> username = Optional.empty();
+			Optional<String> password = Optional.empty();
+
+			if (!userTextField.getText().isEmpty() || !passwordField.getText().isEmpty()) {
+				username = Optional.of(userTextField.getText());
+				password = Optional.of(passwordField.getText());
+			}
+
+			Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText(), username,
+					password);
+
+			if (cam.isPresent()) {
+				CheckableImageListCell.cacheCamera(cam.get(), PreferencesController.this);
+
+				if (!configuredCameras.contains(cam.get())) {
+					Platform.runLater(() -> {
+						webcamListView.setItems(null);
+						cameras.add(cam.get().getName());
+						webcamListView.setItems(cameras);
+					});
+				}
+			}
+
+			ipcamStage.close();
 		});
+
+		final Scene scene = new Scene(ipcamPane);
+		ipcamStage.initOwner(preferencesPane.getScene().getWindow());
+		ipcamStage.initModality(Modality.WINDOW_MODAL);
+		ipcamStage.setTitle("Register IPCam");
+		ipcamStage.setScene(scene);
+		ipcamStage.showAndWait();
+	}
+
+	private void removeSelectedIpCams() {
+		final ObservableList<String> selectedNames = webcamListView.getSelectionModel().getSelectedItems();
+
+		if (selectedNames.isEmpty()) return;
+
+		final List<String> removedCameraNames = new ArrayList<String>();
+
+		for (String webcamName : selectedNames) {
+			if (config.getRegistedIpCams().containsKey(webcamName)) {
+				config.unregisterIpCam(webcamName);
+				removedCameraNames.add(webcamName);
+			}
+		}
+		
+		final Iterator<Camera> it = configuredCameras.iterator();
+		while (it.hasNext()) {
+			final Camera c = it.next();
+			if (removedCameraNames.contains(c.getName())) {
+				it.remove();
+			}
+		}
+
+		configuredNames.removeAll(removedCameraNames);
+		cameras.removeAll(removedCameraNames);
 	}
 
 	public void save() throws ConfigurationException, IOException {
