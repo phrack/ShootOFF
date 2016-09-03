@@ -30,7 +30,7 @@
                               <Insets bottom="5.0" />
                            </GridPane.margin>
                         </ListView>
-                        <Button mnemonicParsing="false" onAction="#addCameraClicked" text="Add" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
+                        <Button mnemonicParsing="false" onAction="#registerCameraClicked" text="Register IP Camera" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
                      </children>
                      <padding>
                         <Insets left="30.0" right="30.0" top="30.0" bottom="30.0" />
