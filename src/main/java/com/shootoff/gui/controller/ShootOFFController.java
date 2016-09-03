@@ -403,18 +403,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			return false;
 		}
 
-		// We want the CameraManager to configure the camera, we just try to
-		// open and close it here to see if we can. If we hold off on doing this
-		// until later it's harder to give the user a good error message.
-		String os = System.getProperty("os.name");
-		if (os != null && !os.equals("Mac OS X")) {
-			if (!cameraInterface.isOpen() && !cameraInterface.open()) {
-				return false;
-			} else {
-				cameraInterface.close();
-			}
-		}
-
 		Tab cameraTab = new Tab(webcamName);
 		Group cameraCanvasGroup = new Group();
 		// 640 x 480
