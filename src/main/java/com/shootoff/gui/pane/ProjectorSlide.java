@@ -172,6 +172,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaPane.autoPlaceArena();
 			
 			arenaStage.setOnCloseRequest((e) -> {
+				arenaPane.close();
+				
 				cameraViews.removeCameraView("Arena");
 				
 				if (config.getExercise().isPresent()

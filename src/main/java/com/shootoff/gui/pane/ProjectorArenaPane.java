@@ -354,8 +354,13 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 	@Override
 	public void close() {
-		arenaStage.close();
+		if (feedCanvasManager != null) {
+			feedCanvasManager.removeDiagnosticMessage(mouseOnArenaLabel);
+		}
+		
 		TimerPool.cancelTimer(mouseExitedFuture);
+		
+		arenaStage.close();
 	}
 
 	public void setArenaBackground(LocatedImage img) {
