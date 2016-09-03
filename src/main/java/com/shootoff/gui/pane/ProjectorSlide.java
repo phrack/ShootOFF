@@ -16,7 +16,6 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -26,7 +25,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private final Configuration config;
 	private final CameraViews cameraViews;
 	private final Stage shootOffStage;
-	private final HBox trainingExerciseContainer;
+	private final Pane trainingExerciseContainer;
 	private final Resetter resetter;
 	private final ExerciseSlide exerciseSlide;
 	private final Button calibrateButton;
@@ -37,7 +36,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 	
 	public ProjectorSlide(Pane parentControls, Pane parentBody, Configuration config, CameraViews cameraViews,
-			Stage shootOffStage, HBox trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
+			Stage shootOffStage, Pane trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
 		super(parentControls, parentBody);
 		
 		this.parentControls = parentControls;

@@ -65,7 +65,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -89,7 +88,7 @@ public class TrainingExerciseBase {
 	private CamerasSupervisor camerasSupervisor;
 	private CameraViews cameraViews;
 	private VBox buttonsContainer;
-	private HBox trainingExerciseContainer;
+	private Pane trainingExerciseContainer;
 	private TableView<ShotEntry> shotTimerTable;
 	private boolean changedRowColor = false;
 	private boolean haveDelayControls = false;

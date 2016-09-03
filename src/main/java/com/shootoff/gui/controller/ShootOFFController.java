@@ -89,6 +89,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
@@ -101,7 +102,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private TabPane cameraTabPane;
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private VBox buttonsContainer;
-	@FXML private HBox trainingExerciseContainer;
+	@FXML private Pane trainingExerciseContainer;
 
 	private TargetSlide targetPane;
 	private ExerciseSlide exerciseSlide;
@@ -352,7 +353,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
 	}
 	
-	public HBox getTrainingExerciseContainer() {
+	public Pane getTrainingExerciseContainer() {
 		return trainingExerciseContainer;
 	}
 

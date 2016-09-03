@@ -58,7 +58,7 @@
             </HBox>
             <ScrollPane hbarPolicy="NEVER" prefHeight="150.0" HBox.hgrow="ALWAYS">
                <content>
-                  <HBox fx:id="trainingExerciseContainer" />
+                  <VBox fx:id="trainingExerciseContainer" />
                </content>
             </ScrollPane>
          </children>

@@ -56,7 +56,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
@@ -67,7 +67,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 	protected Stage arenaStage;
 	private final Stage shootOffStage;
-	private final HBox trainingExerciseContainer;
+	private final Pane trainingExerciseContainer;
 	private final Configuration config;
 	private final Group arenaCanvasGroup;
 	private final Label calibrationLabel;
@@ -100,7 +100,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.calibrationLabel = null;
 	}
 
-	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, HBox trainingExerciseContainer,
+	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Pane trainingExerciseContainer,
 			Configuration config, Resetter resetter) {
 		this.config = config;
 
