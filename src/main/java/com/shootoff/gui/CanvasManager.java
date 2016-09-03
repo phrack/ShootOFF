@@ -146,13 +146,28 @@ public class CanvasManager implements CameraView {
 			
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
+				final Color shotColor;
+				
 				if (event.isShiftDown()) {
-					cameraManager.injectShot(Color.RED, event.getX(), event.getY(), false);
-					return;
+					shotColor = Color.RED;
 				} else if (event.isControlDown()) {
-					cameraManager.injectShot(Color.GREEN, event.getX(), event.getY(), false);
+					shotColor = Color.GREEN;
+				} else {
 					return;
 				}
+				
+				// Skip the camera manager for injected shots made from the
+				// arena tab otherwise they get scaled before the call to
+				// addArenaShot when they go through the arena camera feed's
+				// canvas manager
+				if (this instanceof MirroredCanvasManager) {
+					addShot(
+							new Shot(shotColor, event.getX(), event.getY(), cameraManager.getShotTimestamp(), config.getMarkerRadius()), 
+							false);
+				} else {
+					cameraManager.injectShot(shotColor, event.getX(), event.getY(), false);
+				}
+				return;
 			} else if (contextMenu.isPresent() && event.getButton() == MouseButton.SECONDARY) {
 				contextMenu.get().show(canvasGroup, event.getScreenX(), event.getScreenY());
 			}

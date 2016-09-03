@@ -84,8 +84,6 @@ public abstract class ShotDetector {
 			return false;
 		}
 
-		if (startTime == 0) startTime = cameraManager.getCurrentFrameTimestamp();
-
 		final Shot shot;
 
 		if (scaleShot && (cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
@@ -93,10 +91,10 @@ public abstract class ShotDetector {
 
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
-			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), cameraManager.getCurrentFrameTimestamp() - startTime,
+			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), getShotTimestamp(),
 					cameraManager.getFrameCount(), config.getMarkerRadius());
 		} else {
-			shot = new Shot(color, x, y, cameraManager.getCurrentFrameTimestamp() - startTime, cameraManager.getFrameCount(),
+			shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(),
 					config.getMarkerRadius());
 		}
 
@@ -122,5 +120,9 @@ public abstract class ShotDetector {
 		return true;
 	}
 
-
+	public long getShotTimestamp() {
+		if (startTime == 0) startTime = cameraManager.getCurrentFrameTimestamp();
+		
+		return cameraManager.getCurrentFrameTimestamp() - startTime;
+	}
 }

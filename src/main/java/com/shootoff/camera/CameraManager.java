@@ -727,6 +727,10 @@ public class CameraManager implements Closeable, CameraEventListener {
 	public long getCurrentFrameTimestamp() {
 		return camera.getCurrentFrameTimestamp();
 	}
+	
+	public long getShotTimestamp() {
+		return shotDetector.getShotTimestamp();
+	}
 
 	@Override
 	public void newFPS(double cameraFPS) {
