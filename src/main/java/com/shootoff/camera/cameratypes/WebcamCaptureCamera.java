@@ -63,7 +63,13 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public Mat getMatFrame() {
 		final Mat frame = new Mat();
-		if (!isOpen() || !camera.read(frame) || frame.size().height == 0) return null;
+		try {
+			if (!isOpen() || !camera.read(frame) || frame.size().height == 0) return null;
+		} catch (Exception e)
+		{
+			// Sometimes there is a race condition on closing the camera vs. read()
+			return null;
+		}
 
 		frameCount++;
 		currentFrameTimestamp = System.currentTimeMillis();

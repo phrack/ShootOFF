@@ -679,7 +679,6 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		//TODO: OptiTrackCamera.init();
 		OptiTrackCamera.init();
 		
 		this.primaryStage = primaryStage;

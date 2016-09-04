@@ -29,23 +29,14 @@ public class OptiTrackCamera implements Camera {
 	protected CameraState cameraState;
 	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
 	protected long currentFrameTimestamp = -1;
-	
-	static {
-		init();
-		
-		if (cameraAvailableNative())
-		{
-			logger.warn("camera available");
-			CameraFactory.registerCamera(new OptiTrackCamera());
-		}
-	}
+	private Dimension dimension = null;
+	private int viewWidth = 0;
+	private int viewHeight = 0;
 	
 	public OptiTrackCamera()
 	{
-		if (initialized)
-			return;
-
-		init();
+		if (!initialized)
+			init();
 	}
 	
 	public static void init()
@@ -63,7 +54,11 @@ public class OptiTrackCamera implements Camera {
 			initialized = false;
 		}
 		
-		logger.warn("init");
+		
+		if (initialized && cameraAvailableNative())
+		{
+			CameraFactory.registerCamera(new OptiTrackCamera());
+		}
 	}
 	
 	public void setState(CameraState cameraState)
@@ -103,9 +98,12 @@ public class OptiTrackCamera implements Camera {
 	
 	public Dimension getViewSize()
 	{
-		int width = getViewWidth();
-		int height = getViewHeight();
-		return new Dimension(width, height);
+		if (dimension != null)
+			return dimension;
+		
+		dimension = new Dimension(getViewWidth(), getViewHeight());
+		
+		return dimension;
 	}
 
 	private native int getViewWidth();
@@ -115,8 +113,13 @@ public class OptiTrackCamera implements Camera {
 
 	public Mat translateCameraArrayToMat(byte[] imageBuffer)
 	{
-		Mat mat = new Mat(getViewHeight(), getViewWidth(), CvType.CV_8UC1);
-		Mat dst = new Mat(getViewHeight(), getViewWidth(), CvType.CV_8UC3);
+		if (viewHeight == 0)
+			viewHeight = getViewHeight();
+		if (viewWidth == 0)
+			viewWidth = getViewWidth();
+		
+		Mat mat = new Mat(viewHeight, viewWidth, CvType.CV_8UC1);
+		Mat dst = new Mat(viewHeight, viewWidth, CvType.CV_8UC3);
 		
 		mat.put(0,0, imageBuffer);
 		Imgproc.cvtColor(mat, dst, Imgproc.COLOR_GRAY2BGR);
@@ -162,13 +165,6 @@ public class OptiTrackCamera implements Camera {
 	
 	@Override
 	public void run() {
-		synchronized (this)
-		{
-			try {
-				this.wait();
-			} catch (InterruptedException e) {
-			}
-		}
 	}
 	
 	private void receiveFrame(byte[] frame)
