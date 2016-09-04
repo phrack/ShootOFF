@@ -461,12 +461,15 @@ public class CameraManager implements Closeable, CameraEventListener {
 	
 	@Override
 	public void newFrame(Mat frame) {
+		logger.debug("newFrame");
+		
 		if (!handleFrame(frame))
 			logger.error("Invalid frame yielded from {}", camera.getName());
 	}
 
 	private boolean handleFrame(Mat currentFrame)
 	{
+		logger.debug("handleFrame");
 		
 		if (currentFrame == null && !camera.isOpen()) {
 			// Camera appears to have closed
@@ -484,6 +487,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 
 		if (currentFrame == null) return true;
 		
+		logger.debug("handleFrame 2");
 
 		BufferedImage currentImage = processFrame(currentFrame);
 
@@ -732,6 +736,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 
 	@Override
 	public void newFPS(double cameraFPS) {
+		logger.debug("newFPS");
 		if (debuggerListener.isPresent())
 			debuggerListener.get().updateFeedData(cameraFPS);
 		

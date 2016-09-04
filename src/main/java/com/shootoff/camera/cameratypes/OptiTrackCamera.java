@@ -14,12 +14,13 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.cameratypes.Camera.CameraState;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
+
+import javafx.application.Platform;
 
 public class OptiTrackCamera implements Camera {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackCamera.class);
@@ -73,7 +74,9 @@ public class OptiTrackCamera implements Camera {
 	
 	public void setCameraEventListener(CameraEventListener cameraEventListener)
 	{
+		logger.debug("got event listener");
 		this.cameraEventListener = Optional.of(cameraEventListener);
+		this.cameraEventListener.get().newFPS(5);
 	}
 	
 	public long getCurrentFrameTimestamp() {
@@ -159,37 +162,13 @@ public class OptiTrackCamera implements Camera {
 	
 	@Override
 	public void run() {
-		while (isOpen());
-		
-		/*if (!isOpen())
-			logger.error("camera thread started when camera is not open");
-		while (isOpen())
+		synchronized (this)
 		{
-			Mat mat = getMatFrame();
-			if (mat == null)
-				continue;
-			
-			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0)  && cameraState != CameraState.CALIBRATING) {
-				// Don't yield all the frames
-				
-				if (cameraEventListener.isPresent())
-				{
-					cameraEventListener.get().newFrame(mat);
-					if (getFrameCount() > CalculatedFPSCamera.DEFAULT_FPS)
-						cameraEventListener.get().newFPS(getFPS());
-				}
-			}
-			
 			try {
-				synchronized(this)
-				{
-					this.wait(10);
-				}
+				this.wait();
 			} catch (InterruptedException e) {
 			}
 		}
-		
-		cameraClosed();*/
 	}
 	
 	private void receiveFrame(byte[] frame)
@@ -197,11 +176,15 @@ public class OptiTrackCamera implements Camera {
 		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
 		if (cameraEventListener.isPresent())
-			cameraEventListener.get().newFrame(mat);
+		{
+			Platform.runLater(() -> cameraEventListener.get().newFrame(mat));
+		}
+			
 	}
 	
 	private void cameraClosed()
 	{
+		logger.debug("cameraClosed");
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 		close();
