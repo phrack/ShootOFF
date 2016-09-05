@@ -17,17 +17,10 @@
  */
 
 
+package com.shootoff.camera.shotdetection;
 
-package com.shootoff.camera.cameratypes;
+import com.shootoff.camera.cameratypes.Camera.CameraState;
 
-import org.opencv.core.Mat;
-
-public interface CameraEventListener {
-	public void newFrame(Mat frame);
-	
-	public void newFPS(double cameraFPS);
-
-	public void cameraClosed();
-
-	public void setFeedResolution(int width, int height);
+public interface CameraStateListener {
+	void cameraStateChange(CameraState state);
 }

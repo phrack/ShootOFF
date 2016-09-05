@@ -162,7 +162,7 @@ public class CanvasManager implements CameraView {
 				// canvas manager
 				if (this instanceof MirroredCanvasManager) {
 					addShot(
-							new Shot(shotColor, event.getX(), event.getY(), cameraManager.getShotTimestamp(), config.getMarkerRadius()), 
+							new Shot(shotColor, event.getX(), event.getY(), cameraManager.getCurrentFrameTimestamp(), config.getMarkerRadius()), 
 							false);
 				} else {
 					cameraManager.injectShot(shotColor, event.getX(), event.getY(), false);

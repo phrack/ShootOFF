@@ -31,6 +31,7 @@ public class MockCameraManager extends CameraManager implements CameraEventListe
 			setProjectionBounds(projectionBounds.get());
 		}
 		
+		
 		this.videoFinishedListener = videoFinishedListener;
 
 	}

@@ -1,3 +1,23 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+
 package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
@@ -5,14 +25,16 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+
+import com.shootoff.Closeable;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 import com.xuggle.xuggler.video.ConverterFactory;
 
-public interface Camera extends Runnable {
-	public enum CameraState { DISABLED, NORMAL, DETECTING, CALIBRATING };
+public interface Camera extends Runnable, Closeable {
+	public enum CameraState { CLOSED, NORMAL, DETECTING, CALIBRATING };
 
 	Mat getMatFrame();
 
@@ -22,11 +44,13 @@ public interface Camera extends Runnable {
 
 	boolean isOpen();
 
-	boolean close();
+	void close();
 
 	String getName();
 	
-	void setState(CameraState state);
+	// Return false if the state change is not allowed
+	// for possible future use
+	boolean setState(CameraState state);
 	
 	void setCameraEventListener(CameraEventListener cameraEventListener);
 	
@@ -40,7 +64,11 @@ public interface Camera extends Runnable {
 
 	void setViewSize(Dimension size);
 
-	Dimension getViewSize();	
+	Dimension getViewSize();
+	
+	boolean supportsExposureAdjustment();
+	boolean decreaseExposure();
+	
 
 	static BufferedImage matToBufferedImage(Mat matBGR) {
 		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
