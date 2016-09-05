@@ -746,6 +746,11 @@ public class Configuration {
 			// noisy and doesn't output information we care about.
 			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
+			
+			// Drop WebcamDiscoveryService even lower because it is extremely
+			// noisy
+			Logger webcamDiscoveryLogger = (Logger) loggerContext.getLogger("com.github.sarxos.webcam.WebcamDiscoveryService");
+			webcamDiscoveryLogger.setLevel(Level.WARN);
 		} else {
 			rootLogger.setLevel(Level.WARN);
 		}

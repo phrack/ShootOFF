@@ -52,16 +52,16 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private static final Map<Camera, Pane> containerCache = new HashMap<>();
 	private static final Map<Camera, CheckBox> checkCache = new HashMap<>();
 	private final List<Camera> webcams;
-	private final List<String> userDefinedCameraNames;
+	private final List<String> configuredNames;
 	private final List<Camera> configuredCameras;
 	private final Optional<Set<Camera>> recordingCameras;
 
-	public CheckableImageListCell(List<Camera> webcams, List<String> userDefinedCameraNames,
+	public CheckableImageListCell(List<Camera> webcams, List<String> configuredNames,
 			List<Camera> configuredCameras, CameraRenamedListener cameraRenamedListener, 
 			final DesignateShotRecorderListener designatedListener,
 			final Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<>(webcams);
-		this.userDefinedCameraNames = userDefinedCameraNames;
+		this.configuredNames = configuredNames;
 		this.configuredCameras = configuredCameras;
 		this.recordingCameras = recordingCameras;
 
@@ -184,11 +184,11 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private Optional<Pane> fetchWebcamControls(String webcamName) {
 		Optional<Pane> webcamContainer = Optional.empty();
 
-		if (userDefinedCameraNames == null) {
+		if (configuredNames == null) {
 			webcamContainer = fetchUnrenamedWebcamControls(webcamName);
 		} else {
 			try {
-				int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
+				int cameraIndex = configuredNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
 					webcamContainer = Optional.of(containerCache.get(configuredCameras.get(cameraIndex)));
 				} else {
@@ -216,11 +216,11 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private boolean fetchWebcamChecked(String webcamName) {
 		boolean isChecked = false;
 
-		if (userDefinedCameraNames == null) {
+		if (configuredNames == null) {
 			isChecked = fetchUnrenamedWebcamChecked(webcamName);
 		} else {
 			try {
-				int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
+				int cameraIndex = configuredNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
 					isChecked = checkCache.get(configuredCameras.get(cameraIndex)).isSelected();
 				} else {
