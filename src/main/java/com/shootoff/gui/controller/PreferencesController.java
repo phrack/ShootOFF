@@ -186,10 +186,10 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 	}
 	
 	public void cameraSelectionChanged(Camera camera, boolean isSelected) {
-		if (isSelected) {
+		if (isSelected && !configuredCameras.contains(camera)) {			
 			configuredCameras.add(camera);
 			configuredNames.add(camera.getName());
-		} else {
+		} else if (!isSelected) {
 			int cameraIndex = configuredCameras.indexOf(camera);
 			
 			if (cameraIndex > -1) {
