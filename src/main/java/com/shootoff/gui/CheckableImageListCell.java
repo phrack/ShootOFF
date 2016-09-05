@@ -70,6 +70,8 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		this.itemProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (oldValue == null || newValue == null) return;
+				
 				final Optional<Pane> webcamContainer = fetchWebcamControls(oldValue);
 
 				if (webcamContainer.isPresent()) {
