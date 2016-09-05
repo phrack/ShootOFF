@@ -25,7 +25,6 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import com.github.sarxos.webcam.Webcam;
-import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
@@ -34,10 +33,8 @@ import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
 public class WebcamCaptureCamera extends CalculatedFPSCamera {
-	
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
-	private boolean closing = false;
 
 	// For testing
 	protected WebcamCaptureCamera() {
@@ -66,7 +63,13 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public Mat getMatFrame() {
 		final Mat frame = new Mat();
-		if (!camera.read(frame) || frame.size().height == 0) return null;
+		try {
+			if (!isOpen() || !camera.read(frame) || frame.size().height == 0) return null;
+		} catch (Exception e)
+		{
+			// Sometimes there is a race condition on closing the camera vs. read()
+			return null;
+		}
 
 		frameCount++;
 		currentFrameTimestamp = System.currentTimeMillis();
@@ -75,7 +78,7 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 
 	@Override
-	public BufferedImage getBufferedImage() {
+	public BufferedImage getBufferedImage() {		
 		Mat frame = getMatFrame();
 
 		if (frame == null) {
@@ -95,8 +98,6 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 		// Set the max FPS to 60. If we don't set this it defaults
 		// to 30, which unnecessarily hampers higher end cameras
 		camera.set(5, 60);
-		
-		if (open) CameraFactory.openCamerasAdd(this);
 
 		return open;
 	}
@@ -111,8 +112,6 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public boolean close() {
 		camera.release();
-		CameraFactory.openCameraRemove(this);
-		closing = true;
 		return true;
 	}
 
@@ -153,7 +152,7 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public void run() {
-		while (isOpen() && !closing)
+		while (isOpen())
 		{
 			if (cameraEventListener.isPresent())
 				cameraEventListener.get().newFrame(getMatFrame());

@@ -9,7 +9,7 @@ import com.shootoff.camera.cameratypes.OptiTrackCamera;
 import com.shootoff.config.Configuration;
 import javafx.scene.paint.Color;
 
-public class OptiTrackShotDetector extends ShotYieldingShotDetector {
+public class OptiTrackShotDetector extends ShotYieldingShotDetector implements DetectionListener {
 	private final CameraManager cameraManager;
 	private final Configuration config;
 
@@ -31,7 +31,10 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector {
 	}
 
 	private native void startDetectionModeNative();
-	private native void launchDetection();
+	@Override
+	public native void enableDetection();
+	@Override
+	public native void disableDetection();
 	
 	@Override
 	public void setFrameSize(int width, int height) {
@@ -49,6 +52,9 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector {
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, int rgb) {
+		if (!cameraManager.isDetecting())
+			return;
+		
 		Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
 
 		super.addShot(c, x, y, true);
@@ -58,12 +64,6 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector {
 	public void startDetecting() {
 		logger.debug("start");	
 		startDetectionModeNative();
-		new Thread(() -> launchDetection()).start();
-	}
-
-	@Override
-	public void stopDetecting() {
-		// TODO Auto-generated method stub
-		
+		enableDetection();
 	}
 }

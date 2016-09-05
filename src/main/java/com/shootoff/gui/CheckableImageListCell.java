@@ -249,6 +249,8 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
 			webcam.open();
 			cameraOpened = true;
+			CameraFactory.openCamerasAdd(webcam);
+			
 		}
 
 		Image webcamImg = null;
@@ -262,7 +264,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 
 		if (cameraOpened == true) {
 			webcam.close();
-			CameraFactory.openCameraRemove(webcam);
+			CameraFactory.openCamerasRemove(webcam);
 		}
 
 		return Optional.ofNullable(webcamImg);
