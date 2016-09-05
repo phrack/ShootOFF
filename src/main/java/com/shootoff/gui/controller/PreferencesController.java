@@ -136,12 +136,12 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		linkSliderToLabel(malfunctionsSlider, malfunctionsLabel);
 
 		for (String webcamName : config.getWebcams().keySet()) {
+			final Camera c = config.getWebcams().get(webcamName);
+			
 			configuredNames.add(webcamName);
-			configuredCameras.add(config.getWebcams().get(webcamName));
+			configuredCameras.add(c);
 			cameras.add(webcamName);
-		}
-		
-		for (Camera c : configuredCameras) {
+			
 			CheckableImageListCell.getCameraCheckBoxes().get(c).setSelected(true);
 		}
 		
@@ -191,8 +191,10 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		} else {
 			int cameraIndex = configuredCameras.indexOf(camera);
 			
-			configuredCameras.remove(cameraIndex);
-			configuredNames.remove(cameraIndex);
+			if (cameraIndex > -1) {
+				configuredCameras.remove(cameraIndex);
+				configuredNames.remove(cameraIndex);
+			}
 		}
 		
 		cameraConfigChanged = true;

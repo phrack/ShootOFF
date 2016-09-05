@@ -58,12 +58,12 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	public CheckableImageListCell(List<Camera> webcams, List<String> userDefinedCameraNames,
 			CameraRenamedListener cameraRenamedListener, final DesignateShotRecorderListener designatedListener,
 			final Optional<Set<Camera>> recordingCameras) {
-		this.webcams = new ArrayList<Camera>(webcams);
+		this.webcams = new ArrayList<>(webcams);
 		this.userDefinedCameraNames = userDefinedCameraNames;
 		this.recordingCameras = recordingCameras;
 
 		this.setConverter(new DefaultStringConverter());
-
+		
 		this.itemProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -81,23 +81,23 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			this.setOnMouseClicked((event) -> {
 				if (event.getClickCount() < 2) return;
 
-				this.cancelEdit();
+				cancelEdit();
 
 				// If camera is not checked, don't designate it and start editing
-				if (!fetchWebcamChecked(CheckableImageListCell.this.getText())) {
-					this.startEdit();
+				if (!fetchWebcamChecked(getText())) {
+					startEdit();
 					return;
 				}
 			
-				if (this.getStyle().isEmpty()) {
-					this.setStyle("-fx-background-color: green");
-					designatedListener.registerShotRecorder(this.getText());
+				if (getStyle().isEmpty()) {
+					setStyle("-fx-background-color: green");
+					designatedListener.registerShotRecorder(getText());
 				} else {
-					this.setStyle("");
-					designatedListener.unregisterShotRecorder(this.getText());
+					setStyle("");
+					designatedListener.unregisterShotRecorder(getText());
 				}
 
-				Optional<Pane> webcamContainer = fetchWebcamControls(CheckableImageListCell.this.getText());
+				final Optional<Pane> webcamContainer = fetchWebcamControls(CheckableImageListCell.this.getText());
 				
 				if (webcamContainer.isPresent()) {
 					setGraphic(webcamContainer.get());
@@ -127,7 +127,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		if (recordingCameras.isPresent()) {
 			for (Camera recordingCamera : recordingCameras.get()) {
 				if (recordingCamera.getName().equals(item)) {
-					this.setStyle("-fx-background-color: green");
+					setStyle("-fx-background-color: green");
 					break;
 				}
 			}
