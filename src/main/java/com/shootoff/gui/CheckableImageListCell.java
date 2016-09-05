@@ -53,13 +53,16 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private static final Map<Camera, CheckBox> checkCache = new HashMap<>();
 	private final List<Camera> webcams;
 	private final List<String> userDefinedCameraNames;
+	private final List<Camera> configuredCameras;
 	private final Optional<Set<Camera>> recordingCameras;
 
 	public CheckableImageListCell(List<Camera> webcams, List<String> userDefinedCameraNames,
-			CameraRenamedListener cameraRenamedListener, final DesignateShotRecorderListener designatedListener,
+			List<Camera> configuredCameras, CameraRenamedListener cameraRenamedListener, 
+			final DesignateShotRecorderListener designatedListener,
 			final Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<>(webcams);
 		this.userDefinedCameraNames = userDefinedCameraNames;
+		this.configuredCameras = configuredCameras;
 		this.recordingCameras = recordingCameras;
 
 		this.setConverter(new DefaultStringConverter());
@@ -79,7 +82,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 
 		if (designatedListener != null) {
 			this.setOnMouseClicked((event) -> {
-				if (event.getClickCount() < 2) return;
+				if (!event.isAltDown()) return;
 
 				cancelEdit();
 
@@ -187,7 +190,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			try {
 				int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
-					webcamContainer = Optional.of(containerCache.get(webcams.get(cameraIndex)));
+					webcamContainer = Optional.of(containerCache.get(configuredCameras.get(cameraIndex)));
 				} else {
 					webcamContainer = fetchUnrenamedWebcamControls(webcamName);
 				}
@@ -219,7 +222,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			try {
 				int cameraIndex = userDefinedCameraNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
-					isChecked = checkCache.get(webcams.get(cameraIndex)).isSelected();
+					isChecked = checkCache.get(configuredCameras.get(cameraIndex)).isSelected();
 				} else {
 					isChecked = fetchUnrenamedWebcamChecked(webcamName);
 				}
@@ -250,7 +253,6 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			webcam.open();
 			cameraOpened = true;
 			CameraFactory.openCamerasAdd(webcam);
-			
 		}
 
 		Image webcamImg = null;

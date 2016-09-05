@@ -118,8 +118,9 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		webcamListView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
 			@Override
 			public ListCell<String> call(ListView<String> list) {
-				return new CheckableImageListCell(CameraFactory.getWebcams(), configuredNames, PreferencesController.this,
-						PreferencesController.this, Optional.of(config.getRecordingCameras()));
+				return new CheckableImageListCell(CameraFactory.getWebcams(), configuredNames, configuredCameras, 
+						PreferencesController.this, PreferencesController.this, 
+						Optional.of(config.getRecordingCameras()));
 			}
 		});
 
