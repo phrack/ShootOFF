@@ -588,7 +588,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 	/**
 	 * This methods is used by
-	 * {@link com.shootoff.gui.controller.ShootOFFController} to notify the
+	 * {@link com.shootoff.gui.MirroredCanvasArena} to notify the
 	 * arena controller of new targets added to the arena. Without this method
 	 * the targets would be added directly to the arena's canvas manager,
 	 * bypassing the arena controller. Thus, the arena controller would not be
