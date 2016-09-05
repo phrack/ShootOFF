@@ -38,7 +38,6 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MirroredCanvasManager;
 import com.shootoff.gui.Resetter;
-import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
@@ -61,6 +60,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 public class ProjectorArenaPane extends AnchorPane implements CalibrationListener, Closeable {
 	private static final Logger logger = LoggerFactory.getLogger(ProjectorArenaPane.class);
@@ -85,7 +85,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private boolean calibrated = false;
 	private CalibrationManager calibrationManager;
 	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
-	private TargetDistancePane distanceSettingsPane;
+	private Pair<Target, TargetDistancePane> openDistancePane;
 	private boolean showedRecalibrationMessage = false;
 
 	private ProjectorArenaPane mirroredArenaPane;
@@ -603,16 +603,16 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
 			if (!isSelected) {
-				trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
+				trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 				return;
 			}
 
 			if (perspectiveManager.isPresent()) {
-				if (distanceSettingsPane != null) trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
+				if (openDistancePane != null) trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 
-				distanceSettingsPane = new TargetDistancePane(toggledTarget, perspectiveManager.get(), config);
+				openDistancePane = new Pair<>(target, new TargetDistancePane(toggledTarget, perspectiveManager.get(), config));
 
-				trainingExerciseContainer.getChildren().add(distanceSettingsPane);
+				trainingExerciseContainer.getChildren().add(openDistancePane.getValue());
 			} else {
 				showRecalibrationMessage();
 			}
@@ -623,6 +623,11 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 	public void mirrorTargetAdded(Target target) {
 		targetAdded(target);
+	}
+	
+	public void targetRemoved(Target target) {
+		if (openDistancePane != null && target.equals(openDistancePane.getKey())) 
+			trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 	}
 
 	/**

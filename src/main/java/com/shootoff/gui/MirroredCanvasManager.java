@@ -114,6 +114,8 @@ public class MirroredCanvasManager extends CanvasManager {
 		
 		mirroredManager.mirrorRemoveTarget(((MirroredTarget) target).getMirroredTarget());
 		super.removeTarget(target);
+		
+		arenaPane.targetRemoved(target);
 	}
 	
 	public void mirrorRemoveTarget(Target target) {
