@@ -2,6 +2,7 @@ package com.shootoff.camera;
 
 import static org.junit.Assert.*;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +35,16 @@ public class TestAutoCalibration implements VideoFinishedListener {
 	private Configuration config;
 	private MockCanvasManager mockCanvasManager;
 	private boolean[][] sectorStatuses;
-
+	private MockCamera mockCamera = new MockCamera();
+	
 	@Rule public ErrorCollector collector = new ErrorCollector();
 
 	@Before
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
 
-		acm = new AutoCalibrationManager(new MockCameraManager(), false);
+		acm = new AutoCalibrationManager(new MockCameraManager(), mockCamera, false);
+		
 
 		config = new Configuration(new String[0]);
 		config.setDebugMode(false);
@@ -66,6 +69,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 
 		mockCanvasManager.setCameraManager(cameraManager);
 		
+		
 		ProjectorArenaPane pac = new ProjectorArenaPane(config, mockCanvasManager);
 
 		cameraManager.setCalibrationManager(
@@ -83,6 +87,9 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				}, cameraManager, pac, null));
 		cameraManager.enableAutoCalibration(false);
 
+		cameraManager.setDetecting(false);
+		cameraManager.setDetectionLockState(true);
+		
 		cameraManager.start();
 		
 		try {
@@ -103,6 +110,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection.png"));
 
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 		
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
@@ -140,6 +148,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
 		
 		final Mat mat = new Mat();
@@ -180,6 +189,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
@@ -202,6 +212,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		
 		BufferedImage testFrame = ImageIO.read(TestAutoCalibration.class
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
+
 
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
@@ -224,6 +236,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
+
 
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
@@ -246,6 +260,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
+
 
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
@@ -282,6 +298,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 	public void testCalibrateTightPatternTurned() throws IOException {
 		BufferedImage testFrame = ImageIO.read(
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
+
 
 		final Mat mat = new Mat();
 		acm.preProcessFrame(testFrame, mat);
@@ -337,7 +355,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		assertEquals(true, result.cameraAutoCalibrated);
 		
 		assertEquals(77.05, result.getACM().getPaperDimensions().get().getWidth(), 1);
-		assertEquals(56.36, result.getACM().getPaperDimensions().get().getHeight(), 1);
+		assertEquals(57.36, result.getACM().getPaperDimensions().get().getHeight(), 1);
 		
 	}
 	
@@ -348,6 +366,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		
 		BufferedImage testFrame = ImageIO
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-paper.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
+
 
 		
 		final Mat mat = new Mat();

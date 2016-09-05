@@ -1,3 +1,23 @@
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+
 package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
@@ -19,8 +39,6 @@ import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
-
-import javafx.application.Platform;
 
 public class OptiTrackCamera implements Camera {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackCamera.class);
@@ -61,17 +79,35 @@ public class OptiTrackCamera implements Camera {
 		}
 	}
 	
-	public void setState(CameraState cameraState)
+	public boolean setState(CameraState cameraState)
 	{
 		this.cameraState = cameraState;
+		switch (cameraState)
+		{
+			case DETECTING:
+				//TODO: Re-enable when we have a 780nm to test
+				//if (!getIRFilterState())
+				//	toggleIRFilter();
+				break;
+			case CALIBRATING:
+				if (getIRFilterState())
+					toggleIRFilter();
+				break;
+			case CLOSED:
+				close();
+				break;
+			case NORMAL:
+			default:
+				break;
+			
+		}
+		return true;
 	}
 	
 	
 	public void setCameraEventListener(CameraEventListener cameraEventListener)
 	{
-		logger.debug("got event listener");
 		this.cameraEventListener = Optional.of(cameraEventListener);
-		this.cameraEventListener.get().newFPS(5);
 	}
 	
 	public long getCurrentFrameTimestamp() {
@@ -84,15 +120,28 @@ public class OptiTrackCamera implements Camera {
 	}
 	
 	private native static void initialize();
-	
-	
 	private native static boolean cameraAvailableNative();
-
+	private native int getViewWidth();
+	private native int getViewHeight();
+	private native byte[] getImageNative();
+	private native boolean getIRFilterState();
+	private native void toggleIRFilter();
+	private native int getExposure();
+	private native void setExposure(int exposure);
+	
+	public native void close();
 	
 	public native boolean open();
+	public native boolean isOpen();
+	
+	@Override
+	public native double getFPS();
+	
+	@Override
+	public native int getFrameCount();
+	
 	
 	public void setViewSize(final Dimension size) {
-		// Not supported
 		return;
 	}
 	
@@ -106,10 +155,7 @@ public class OptiTrackCamera implements Camera {
 		return dimension;
 	}
 
-	private native int getViewWidth();
-	private native int getViewHeight();
-	
-	public native boolean isOpen();
+
 
 	public Mat translateCameraArrayToMat(byte[] imageBuffer)
 	{
@@ -134,9 +180,7 @@ public class OptiTrackCamera implements Camera {
 		return mat;
 	}
 	
-	private native byte[] getImageNative();
-	
-	public native boolean close();
+
 
 	@Override
 	public BufferedImage getBufferedImage() {
@@ -173,9 +217,11 @@ public class OptiTrackCamera implements Camera {
 		Mat mat = translateCameraArrayToMat(frame);
 		if (cameraEventListener.isPresent())
 		{
-			Platform.runLater(() -> cameraEventListener.get().newFrame(mat));
+			cameraEventListener.get().newFrame(mat);
 		}
-			
+	
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().newFPS(getFPS());
 	}
 	
 	private void cameraClosed()
@@ -190,11 +236,18 @@ public class OptiTrackCamera implements Camera {
 	public boolean isLocked() {
 		return false;
 	}
-	
-	@Override
-	public native double getFPS();
-	
-	@Override
-	public native int getFrameCount();
 
+	@Override
+	public boolean supportsExposureAdjustment() {
+		return true;
+	}
+
+	@Override
+	public boolean decreaseExposure() {
+		final int curExp = getExposure();
+		final int newExp = (int)(curExp - (.1 * (double)curExp));
+		setExposure(newExp);
+		return (getExposure() == newExp);
+	}
+	
 }

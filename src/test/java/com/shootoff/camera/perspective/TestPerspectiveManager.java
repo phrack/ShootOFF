@@ -16,6 +16,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.imgproc.Imgproc;
 
+import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.MockCameraManager;
 import com.shootoff.camera.TestAutoCalibration;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
@@ -33,7 +34,7 @@ public class TestPerspectiveManager {
 	public void setUp() throws ConfigurationException {
 		nu.pattern.OpenCV.loadShared();
 
-		acm = new AutoCalibrationManager(new MockCameraManager(), false);
+		acm = new AutoCalibrationManager(new MockCameraManager(), new MockCamera(), false);
 	}
 
 	@Test
@@ -158,11 +159,9 @@ public class TestPerspectiveManager {
 		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
 		patternList.add(boardCorners.get());
 		
-		acm.findPaperPattern(mat,
-				patternList, true);
+		Optional<Dimension2D> paperDimensions = acm.findPaperPattern(mat,
+				patternList);
 		
-		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
-
 		assertTrue(paperDimensions.isPresent());
 
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(329, 35, 701, 545),
@@ -214,11 +213,9 @@ public class TestPerspectiveManager {
 		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
 		patternList.add(boardCorners.get());
 		
-		acm.findPaperPattern(mat,
-				patternList, true);
+		Optional<Dimension2D> paperDimensions = acm.findPaperPattern(mat,
+				patternList);
 		
-		Optional<Dimension2D> paperDimensions = acm.getPaperDimensions();
-
 		PerspectiveManager pm = new PerspectiveManager("C270", new BoundingBox(0, 0, 698, 544),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
 

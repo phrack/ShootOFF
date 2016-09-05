@@ -26,8 +26,6 @@ import java.util.Optional;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
-import javafx.util.Callback;
-
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -45,7 +43,7 @@ import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.cameratypes.Camera;
 
 public class AutoCalibrationManager {
@@ -57,11 +55,9 @@ public class AutoCalibrationManager {
 	private static final double PAPER_MARGIN_HEIGHT = 1.063;
 	private static final Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
-	private Callback<Void, Void> callback;
+	private CameraCalibrationListener calibrationListener;
 
-	private CameraManager cameraManager;
-
-	private final boolean calculateFrameDelay;
+	private Camera camera;
 
 	// Stores the transformation matrix
 	private Mat perspMat = null;
@@ -79,64 +75,53 @@ public class AutoCalibrationManager {
 	// Maybe I should have made it divisible...
 	private static final double BORDER_FACTOR = 0.065476;
 
-	private long frameTimestampBeforeFrameChange = -1;
-
-	private Bounds boundsResult = null;
-	private long frameDelayResult = -1;
-
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 60, 0.0001);
 
 	/* Paper Pattern */
-	private Optional<Dimension2D> paperDimensions = Optional.empty();
 
-	private int stepThreeAttempts = 0;
-	private final static int STEP_THREE_MAX_ATTEMPTS = 2;
 
 	public Optional<Dimension2D> getPaperDimensions() {
-		return paperDimensions;
+		return ((StepFindPaperPattern) stepFindPaperPattern).paperDimensions;
 	}
 
-	public void setPaperDimensions(Optional<Dimension2D> paperDimensions) {
-		this.paperDimensions = paperDimensions;
+	protected AutoCalStep stepFindBounds = null;
+	protected AutoCalStep stepFindDelay = null;
+	protected AutoCalStep stepFindPaperPattern = null;
+	List<AutoCalStep> steps = new ArrayList<AutoCalStep>();
+	
+	public AutoCalibrationManager(final CameraCalibrationListener calibrationListener, final Camera camera, final boolean calculateFrameDelay) {
+		this.camera = camera;
+		this.calibrationListener = calibrationListener;
+		
+		stepFindBounds = new StepFindBounds();
+		stepFindDelay = new StepFindDelay(calculateFrameDelay);
+		stepFindPaperPattern = new StepFindPaperPattern();
+		
+		steps.add(stepFindBounds);
+		steps.add(stepFindDelay);
+		steps.add(stepFindPaperPattern);
 	}
-
-	public AutoCalibrationManager(final CameraManager cameraManager, final boolean calculateFrameDelay) {
-		this.cameraManager = cameraManager;
-		this.calculateFrameDelay = calculateFrameDelay;
-	}
-
-	public void setCallback(final Callback<Void, Void> callback) {
-		this.callback = callback;
-	}
-
+	
 	public Mat getPerspMat() {
 		return perspMat;
 	}
 
 	public Bounds getBoundsResult() {
-		if (boundsResult == null)
+		if (((StepFindBounds)stepFindBounds).boundsResult == null)
 			logger.error("getBoundsResult called when boundsResult==null, isCalibrated {}", isCalibrated);
 
-		return boundsResult;
-	}
-
-	public long getFrameDelayResult() {
-		return frameDelayResult;
+		return ((StepFindBounds)stepFindBounds).boundsResult;
 	}
 
 	public void reset() {
 		isCalibrated = false;
 		warpInitialized = false;
-		boundsResult = null;
 		boundsRect = null;
 		boundingBox = null;
-		callback = null;
 		perspMat = null;
-		frameDelayResult = -1;
-		frameTimestampBeforeFrameChange = -1;
-		stepThreeAttempts = 0;
-
-		paperDimensions = Optional.empty();
+		for (AutoCalStep step : steps)
+			if (step.enabled())
+				step.reset();
 	}
 
 	// Converts to BW mat from bufferedimage
@@ -159,148 +144,248 @@ public class AutoCalibrationManager {
 
 	}
 
-	private boolean isStepOneCompleted() {
-		return !(boundsResult == null);
-	}
-
-	private boolean isStepTwoCompleted() {
-		// If frameDelayResult > -1 OR calculateFrameDelay is False
-		// Then step two is complete
-		return !(frameDelayResult == -1 && calculateFrameDelay);
-	}
-
-	private boolean inStepTwo() {
-		// We're in step two if frameTimestampBeforeFrameChange > -1
-		// AND step two is not complete
-		return !(frameTimestampBeforeFrameChange == -1 || isStepTwoCompleted());
-	}
-
-	private boolean isStepThreeCompleted() {
-		return (stepThreeAttempts == STEP_THREE_MAX_ATTEMPTS);
-	}
 
 	private boolean isFinished() {
-		return (isStepOneCompleted() && isStepTwoCompleted() && isStepThreeCompleted());
+		for (AutoCalStep step : steps)
+			if (step.enabled() && !step.completed())
+				return false;
+		return true;
 	}
-
-	// Step one: Find main pattern, paper pattern optional
-	// Step two: Frame delay, if enabled
-	// Step three: Paper pattern attempt IF not found in step one
 
 	public void processFrame(final BufferedImage frame) {
 
 		logger.trace("processFrame");
 		
-		if (isFinished()) {
-			callback();
-			return;
-		}
-
 		Mat mat = new Mat();
 		preProcessFrame(frame, mat);
+		for (AutoCalStep step : steps)
+		{
+			if (step.enabled() && !step.completed())
+			{
+				step.process(mat);
+				break;
+			}
+		}
+		if (isFinished())
+			calibrationListener.calibrate(
+						((StepFindBounds)stepFindBounds).boundsResult,
+						((StepFindPaperPattern)stepFindPaperPattern).paperDimensions, 
+						false,
+						((StepFindDelay)stepFindDelay).frameDelayResult);
 
-		if (!isStepOneCompleted()) {
-			stepOne(mat);
+	}
+	
 
-			if (isFinished()) callback();
 
-			logger.trace("stepOne {}", isStepOneCompleted());
+	interface AutoCalStep {
+		void reset();
+		boolean enabled();
+		boolean completed();
+		void process(Mat mat);
+	}
+	
+	class StepFindBounds implements AutoCalStep {
+		public Bounds boundsResult = null;
+		
+		public void reset() {
+			boundsResult = null;
+		}
+		
+		public boolean enabled() {
+			return true;
+		}
+		public boolean completed() {
+			return !(boundsResult == null);
+		}
+		public void process(Mat mat) {
+			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
+	
+			if (listPatterns.isEmpty()) return;
+	
+			Optional<Dimension2D> paperRes = findPaperPattern(mat, listPatterns);
+			if (paperRes.isPresent())
+				((StepFindPaperPattern) stepFindPaperPattern).addPaperDimensions(paperRes.get(), false);
+	
+			if (listPatterns.isEmpty()) return;
+	
+			// Technically there could still be more than one pattern
+			// or even a pattern that is much too small
+			// But damn if we're gonna fix every problem the user gives us
+			Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), mat);
+	
+			if (bounds.isPresent()) {
+				boundsResult = bounds.get();
+	
+			} else {
+				boundsResult = null;
+			}
+		}
+	}
 
-			return;
+	class StepFindDelay implements AutoCalStep {
+		private long frameTimestampBeforeFrameChange = -1;
+		private boolean calculateFrameDelay = false;
+		public long frameDelayResult = -1;
+		private double[] patternLuminosity = { -1, -1, -1 };
+
+		
+		public StepFindDelay(boolean calculateFrameDelay) {
+			this.calculateFrameDelay = calculateFrameDelay;
 		}
 
-		if (isStepOneCompleted() && !isStepTwoCompleted()) {
-			stepTwo(mat);
+		@Override
+		public void reset() {
+			patternLuminosity[0] = -1;
+			patternLuminosity[1] = -1;
+			patternLuminosity[2] = -1;
+			frameDelayResult = -1;
+			frameTimestampBeforeFrameChange = -1;
+		}
 
-			if (isFinished()) callback();
+		@Override
+		public boolean enabled() {
+			return calculateFrameDelay;
+		}
+		
+		public boolean completed() {
+			return frameDelayResult > -1;
+		}
 
-			if (isStepTwoCompleted()) {
-				cameraManager.setArenaBackground(null);
+		private boolean inStepTwo() {
+			// We're in step two if frameTimestampBeforeFrameChange > -1
+			// AND step two is not complete
+			return !(frameTimestampBeforeFrameChange == -1 || completed());
+		}
+
+		public void process(Mat mat) {
+			if (!inStepTwo()) {
+				logger.debug("Step two: Checking frame delay");
+
+				checkForFrameChange(mat);
+				frameTimestampBeforeFrameChange = camera.getCurrentFrameTimestamp();
+				calibrationListener.setArenaBackground(null);
+			} else {
+				final Optional<Long> frameDelay = checkForFrameChange(mat);
+
+				if (frameDelay.isPresent()) {
+					frameDelayResult = frameDelay.get();
+
+					logger.debug("Step Two: frameDelayResult {}", frameDelayResult);
+					
+					calibrationListener.setArenaBackground(null);
+
+				}
+			}
+		}
+		
+
+		private Optional<Long> checkForFrameChange(Mat mat) {
+			mat = undistortFrame(mat);
+
+			final double[] pixel = getFrameDelayPixel(mat);
+
+			// Initialize
+			if (patternLuminosity[0] == -1) {
+				patternLuminosity = pixel;
+				return Optional.empty();
 			}
 
-			logger.trace("stepTwo {}", isStepTwoCompleted());
+			final Mat tempMat = new Mat(1, 2, CvType.CV_8UC3);
+			tempMat.put(0, 0, patternLuminosity);
+			tempMat.put(0, 1, pixel);
 
-			return;
+			Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
 
+			final long change = camera.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange;
+
+			if (tempMat.get(0, 1)[2] < .9 * tempMat.get(0, 0)[2]) {
+				return Optional.of(change);
+			} else if (change > 250) {
+				return Optional.of(-1L);
+			}
+
+			return Optional.empty();
 		}
 
-		if (isStepOneCompleted() && isStepTwoCompleted() && !isStepThreeCompleted()) {
+		private double[] getFrameDelayPixel(Mat mat) {
+			final double squareHeight = getBoundsResult().getHeight() / (double) (PATTERN_HEIGHT + 1);
+			final double squareWidth = getBoundsResult().getWidth() / (double) (PATTERN_WIDTH + 1);
+
+			final int secondSquareCenterX = (int) (getBoundsResult().getMinX() + (squareWidth * 1.5));
+			final int secondSquareCenterY = (int) (getBoundsResult().getMinY() + (squareHeight * .5));
+
+			return mat.get(secondSquareCenterY, secondSquareCenterX);
+		}
+
+
+	}
+	
+	class StepFindPaperPattern implements AutoCalStep {
+		public Optional<Dimension2D> paperDimensions = Optional.empty();
+		private int stepThreeAttempts = 0;
+		private final static int STEP_THREE_MAX_ATTEMPTS = 3;
+		
+		@Override
+		public void reset() {
+			paperDimensions = Optional.empty();
+			stepThreeAttempts = 0;
+		}
+		
+		public boolean completed() {
+			return (stepThreeAttempts >= STEP_THREE_MAX_ATTEMPTS);
+		}
+
+		@Override
+		public boolean enabled() {
+			return true;
+		}
+
+		@Override
+		public void process(Mat mat) {
 			stepThreeAttempts++;
 
-			cameraManager.setArenaBackground(null);
+			calibrationListener.setArenaBackground(null);
 			
 			mat = undistortFrame(mat);
 
 			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
 
 			if (listPatterns.isEmpty()) return;
+			
+			Optional<Dimension2D> paperRes = findPaperPattern(mat, listPatterns);
 
-			findPaperPattern(mat, listPatterns, false);
-
-			if (isFinished())
+			if (paperRes.isPresent())
 			{
-				callback();
+				addPaperDimensions(paperRes.get(), false);
+				
 				stepThreeAttempts = STEP_THREE_MAX_ATTEMPTS;
+			} else {
+				stepThreeAttempts++;
 			}
+			
+			logger.trace("stepThree {}", completed());
 
-			logger.trace("stepThree {}", isStepThreeCompleted());
-
-			return;
 		}
+		
+		public void addPaperDimensions(Dimension2D newPaperDimensions, boolean averagePatterns) {
+			if (!paperDimensions.isPresent()) {
+				paperDimensions = Optional.of(newPaperDimensions);
 
-		logger.trace("finished {}", isFinished());
+				logger.debug("Found paper dimensions {}", paperDimensions.get());
+			} else if (paperDimensions.isPresent() && averagePatterns) {
+				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
+				logger.trace("Averaged paper dimensions {}", paperDimensions.get());				
 
-		if (isFinished()) callback();
-	}
+			} else
+			{
+				paperDimensions = Optional.of(newPaperDimensions);
 
-	private void stepTwo(Mat mat) {
-		if (!inStepTwo()) {
-			logger.debug("Step two: Checking frame delay");
-
-			checkForFrameChange(mat);
-			frameTimestampBeforeFrameChange = cameraManager.getCurrentFrameTimestamp();
-			cameraManager.setArenaBackground(null);
-		} else {
-			final Optional<Long> frameDelay = checkForFrameChange(mat);
-
-			if (frameDelay.isPresent()) {
-				frameDelayResult = frameDelay.get();
-
-				logger.debug("Step Two: frameDelayResult {}", frameDelayResult);
-
+				logger.debug("Found paper dimensions {}", paperDimensions.get());				
 			}
 		}
+		
 	}
-
-	private void callback() {
-		if (callback != null) {
-			callback.call(null);
-			callback = null;
-		}
-	}
-
-	private void stepOne(Mat mat) {
-		List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
-
-		if (listPatterns.isEmpty()) return;
-
-		findPaperPattern(mat, listPatterns, true);
-
-		if (listPatterns.isEmpty()) return;
-
-		// Technically there could still be more than one pattern
-		// or even a pattern that is much too small
-		// But damn if we're gonna fix every problem the user gives us
-		Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), mat);
-
-		if (bounds.isPresent()) {
-			boundsResult = bounds.get();
-
-		} else {
-			boundsResult = null;
-		}
-	}
-
+	
 	private List<MatOfPoint2f> findPatterns(Mat mat, boolean findMultiple) {
 		List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
 
@@ -338,49 +423,12 @@ public class AutoCalibrationManager {
 		return patternList;
 	}
 
+
 	private Dimension2D averageDimensions(Dimension2D d2d1, Dimension2D d2d2) {
 		return new Dimension2D((d2d1.getWidth() + d2d2.getWidth()) / 2, (d2d1.getHeight() + d2d2.getHeight()) / 2);
 	}
 
-	private double[] patternLuminosity = { -1, -1, -1 };
 
-	private Optional<Long> checkForFrameChange(Mat mat) {
-		mat = undistortFrame(mat);
-
-		final double[] pixel = getFrameDelayPixel(mat);
-
-		// Initialize
-		if (patternLuminosity[0] == -1) {
-			patternLuminosity = pixel;
-			return Optional.empty();
-		}
-
-		final Mat tempMat = new Mat(1, 2, CvType.CV_8UC3);
-		tempMat.put(0, 0, patternLuminosity);
-		tempMat.put(0, 1, pixel);
-
-		Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
-
-		final long change = cameraManager.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange;
-
-		if (tempMat.get(0, 1)[2] < .9 * tempMat.get(0, 0)[2]) {
-			return Optional.of(change);
-		} else if (change > 250) {
-			return Optional.of(-1L);
-		}
-
-		return Optional.empty();
-	}
-
-	private double[] getFrameDelayPixel(Mat mat) {
-		final double squareHeight = boundsResult.getHeight() / (double) (PATTERN_HEIGHT + 1);
-		final double squareWidth = boundsResult.getWidth() / (double) (PATTERN_WIDTH + 1);
-
-		final int secondSquareCenterX = (int) (boundsResult.getMinX() + (squareWidth * 1.5));
-		final int secondSquareCenterY = (int) (boundsResult.getMinY() + (squareHeight * .5));
-
-		return mat.get(secondSquareCenterY, secondSquareCenterX);
-	}
 
 	public Optional<Bounds> calibrateFrame(MatOfPoint2f boardCorners, Mat mat) {
 
@@ -415,8 +463,8 @@ public class AutoCalibrationManager {
 		initializeWarpPerspective(mat, corners2f);
 
 		if (boundingBox.getMinX() < 0 || boundingBox.getMinY() < 0
-				|| boundingBox.getWidth() > cameraManager.getFeedWidth()
-				|| boundingBox.getHeight() > cameraManager.getFeedHeight()) {
+				|| boundingBox.getWidth() > camera.getViewSize().getWidth()
+				|| boundingBox.getHeight() > camera.getViewSize().getHeight()) {
 			return Optional.empty();
 		}
 
@@ -440,14 +488,14 @@ public class AutoCalibrationManager {
 			Highgui.imwrite(filename, undistortedCropped);
 		}
 
-		Mat warpedBoardCorners = warpCorners(boardCorners);
-
 		isCalibrated = true;
 
-		if (calculateFrameDelay) {
+		//Mat warpedBoardCorners = warpCorners(boardCorners);
+
+		if (stepFindDelay.enabled()) {
 			final Mat undistorted = warpPerspective(mat);
 
-			findColors(undistorted, warpedBoardCorners);
+			//findColors(undistorted, warpedBoardCorners);
 
 			final double squareHeight = boundingBox.getHeight() / (double) (PATTERN_HEIGHT + 1);
 			final double squareWidth = boundingBox.getWidth() / (double) (PATTERN_WIDTH + 1);
@@ -565,11 +613,11 @@ public class AutoCalibrationManager {
 	 * alignment or angle
 	 * 
 	 */
-	public boolean findPaperPattern(Mat mat, List<MatOfPoint2f> patternList, boolean averagePatterns) {
+	public Optional<Dimension2D> findPaperPattern(Mat mat, List<MatOfPoint2f> patternList) {
 
 		MatOfPoint2f boardCorners = null;
 		int index = 0;
-		boolean found = false;
+		Optional<Dimension2D> result = Optional.empty();
 
 		for (; index < patternList.size(); index++) {
 			boardCorners = patternList.get(index);
@@ -612,32 +660,17 @@ public class AutoCalibrationManager {
 
 			final Dimension2D newPaperDimensions = new Dimension2D(width, height);
 
-			found = true;
-
-			if (!paperDimensions.isPresent()) {
-				paperDimensions = Optional.of(newPaperDimensions);
-
-				logger.debug("Found paper dimensions {}", paperDimensions.get());
-			} else if (paperDimensions.isPresent() && averagePatterns) {
-				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
-				logger.trace("Averaged paper dimensions {}", paperDimensions.get());				
-
-			} else
-			{
-				paperDimensions = Optional.of(newPaperDimensions);
-
-				logger.debug("Found paper dimensions {}", paperDimensions.get());				
-			}
+			result = Optional.of(newPaperDimensions);
 
 			break;
 		}
 
-		if (found) {
+		if (result.isPresent()) {
 			logger.trace("Removing paper pattern from patternList (index {})", index);
 			patternList.remove(index);
-			return true;
 		}
-		return false;
+		
+		return result;
 
 	}
 
@@ -672,6 +705,7 @@ public class AutoCalibrationManager {
 
 	}
 
+	@SuppressWarnings("unused")
 	private void findColors(Mat frame, Mat warpedBoardCorners) {
 		final Point rCenter = findChessBoardSquareCenter(warpedBoardCorners, 2, 3);
 		final Point gCenter = findChessBoardSquareCenter(warpedBoardCorners, 2, 5);
@@ -984,6 +1018,7 @@ public class AutoCalibrationManager {
 	}
 
 	// initializeWarpPerspective MUST BE CALLED first
+	@SuppressWarnings("unused")
 	private Mat warpCorners(MatOfPoint2f imageCorners) {
 		Mat mat = null;
 

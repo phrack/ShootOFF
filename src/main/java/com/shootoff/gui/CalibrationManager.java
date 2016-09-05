@@ -95,7 +95,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		isCalibrating.set(false);
 
 		if (calibrationTarget.isPresent())
-			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), Optional.empty(), true);
+			calibrate(calibrationTarget.get().getTargetGroup().getBoundsInParent(), Optional.empty(), true, -1);
 
 		calibratingCameraManager.disableAutoCalibration();
 
@@ -149,7 +149,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 	@Override
 	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims,
-			boolean calibratedFromCanvas) {
+			boolean calibratedFromCanvas, long delay) {
 		removeCalibrationTargetIfPresent();
 
 		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);

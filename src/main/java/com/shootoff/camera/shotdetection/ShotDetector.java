@@ -22,8 +22,6 @@ public abstract class ShotDetector {
 	private final Configuration config;
 	private final CameraView cameraView;
 
-	private long startTime = 0;
-
 	public static boolean isSystemSupported()
 	{
 		return false;
@@ -36,8 +34,6 @@ public abstract class ShotDetector {
 	}
 
 	public void reset() {
-		startTime = System.currentTimeMillis();
-		cameraManager.getDeduplicationProcessor().reset();
 	}
 
 
@@ -77,12 +73,8 @@ public abstract class ShotDetector {
 	 *         preprocessing
 	 */
 	public boolean addShot(Color color, double x, double y, boolean scaleShot) {
-		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
-				&& color.equals(config.getIgnoreLaserColor().get())) {
-			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
-					config.getIgnoreLaserColor().get());
+		if (!checkIgnoreColor(color))
 			return false;
-		}
 
 		final Shot shot;
 
@@ -106,23 +98,42 @@ public abstract class ShotDetector {
 					cameraManager.getFeedHeight());
 		}
 
+		if (!checkDuplicate(shot))
+			return false;
+
+		submitShot(shot);
+
+		return true;
+	}
+
+	protected void submitShot(final Shot shot) {
+		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(),
+				shot.getY(), shot.getColor(), cameraManager.getFrameCount());
+
+		cameraView.addShot(shot, false);
+	}
+
+	protected boolean checkDuplicate(final Shot shot) {
 		if (!cameraManager.getDeduplicationProcessor().processShot(shot)) {
 			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By {}",
 					cameraManager.getDeduplicationProcessor().getClass().getName());
 			return false;
 		}
-
-		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(),
-				shot.getY(), shot.getColor(), cameraManager.getFrameCount());
-
-		cameraView.addShot(shot, false);
-
+		return true;
+	}
+	
+	protected boolean checkIgnoreColor(Color color)
+	{
+		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
+				&& color.equals(config.getIgnoreLaserColor().get())) {
+			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
+					config.getIgnoreLaserColor().get());
+			return false;
+		}
 		return true;
 	}
 
-	public long getShotTimestamp() {
-		if (startTime == 0) startTime = cameraManager.getCurrentFrameTimestamp();
-		
-		return cameraManager.getCurrentFrameTimestamp() - startTime;
+	private long getShotTimestamp() {
+		return cameraManager.getCurrentFrameTimestamp();
 	}
 }

@@ -21,6 +21,8 @@ package com.shootoff.camera.cameratypes;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.Optional;
+
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
@@ -33,6 +35,9 @@ import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
 public class WebcamCaptureCamera extends CalculatedFPSCamera {
+	
+	public static final int CV_CAP_PROP_EXPOSURE = 15;
+	
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
 
@@ -110,9 +115,9 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 
 	@Override
-	public boolean close() {
+	public void close() {
 		camera.release();
-		return true;
+		return;
 	}
 
 
@@ -169,6 +174,32 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public boolean isLocked() {
 		return false;
+	}
+
+	private Optional<Double> origExposure = Optional.empty();
+	@Override
+	public boolean supportsExposureAdjustment() {
+		origExposure = Optional.of(camera.get(CV_CAP_PROP_EXPOSURE));
+		
+		boolean res = decreaseExposure();
+		if (!res) return false;
+		
+		resetExposure();
+		return true;
+	}
+
+	@Override
+	public boolean decreaseExposure() {
+		final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
+		final double newExp = curExp - (.1 * curExp);
+		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
+		return (camera.get(CV_CAP_PROP_EXPOSURE) == newExp);
+	}
+	
+	private void resetExposure()
+	{
+		if (origExposure.isPresent())
+			camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
 	}
 
 	

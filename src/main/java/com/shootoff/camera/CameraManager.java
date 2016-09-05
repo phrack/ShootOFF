@@ -46,6 +46,7 @@ import com.shootoff.camera.cameratypes.WebcamCaptureCamera;
 import com.shootoff.camera.processors.DeduplicationProcessor;
 import com.shootoff.camera.recorders.RollingRecorder;
 import com.shootoff.camera.recorders.ShotRecorder;
+import com.shootoff.camera.shotdetection.CameraStateListener;
 import com.shootoff.camera.shotdetection.FrameProcessingShotDetector;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
@@ -64,7 +65,6 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.util.Callback;
 
 /**
  * This class is responsible for fetching frames from its assigned camera and
@@ -73,7 +73,7 @@ import javafx.util.Callback;
  * 
  * @author phrack and dmaul
  */
-public class CameraManager implements Closeable, CameraEventListener {
+public class CameraManager implements Closeable, CameraEventListener, CameraCalibrationListener {
 	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
 	public static final int DEFAULT_FEED_HEIGHT = 480;
@@ -87,6 +87,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 	protected Optional<CameraDebuggerListener> debuggerListener = Optional.empty();
 	
 	protected final ShotDetector shotDetector;
+	private long startTime = 0;
 
 	protected final Camera camera;
 	private final Optional<CameraErrorView> cameraErrorView;
@@ -256,8 +257,14 @@ public class CameraManager implements Closeable, CameraEventListener {
 	}
 
 	public void reset() {
+		resetStartTime();
 		shotDetector.reset();
+		deduplicationProcessor.reset();
 		cameraView.reset();
+	}
+
+	private void resetStartTime() {
+		startTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -265,6 +272,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 		getCameraView().close();
 		setDetecting(false);
 		setStreaming(false);
+		setCameraState(CameraState.CLOSED);
 		camera.close();
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
@@ -281,6 +289,17 @@ public class CameraManager implements Closeable, CameraEventListener {
 	// states not detecting (e.g. to not be turned back on by reset button
 	public void setDetectionLockState(boolean isLocked) {
 		isDetectionLocked.set(isLocked);
+	}
+	
+	List<CameraStateListener> cameraStateListeners = new ArrayList<CameraStateListener>();
+	public void registerCameraStateListener(CameraStateListener csl) {
+		cameraStateListeners.add(csl);
+	}
+	private void setCameraState(CameraState state)
+	{
+		if (camera.setState(state))
+			for (CameraStateListener csl : cameraStateListeners)
+				csl.cameraStateChange(state);
 	}
 
 	public void setDetecting(boolean isDetecting) {
@@ -299,9 +318,9 @@ public class CameraManager implements Closeable, CameraEventListener {
 		if (logger.isTraceEnabled()) logger.trace("setDetecting was {} now {}", this.isDetecting, isDetecting);
 
 		if (isDetecting == true)
-			camera.setState(CameraState.DETECTING);
+			setCameraState(CameraState.DETECTING);
 		else
-			camera.setState(CameraState.NORMAL);
+			setCameraState(CameraState.NORMAL);
 		this.isDetecting.set(isDetecting);
 	}
 
@@ -310,7 +329,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 		this.isCalibrating.set(isCalibrating);
 		if (isCalibrating) {
 			setDetecting(false);
-			camera.setState(CameraState.CALIBRATING);
+			setCameraState(CameraState.CALIBRATING);
 		}
 	}
 
@@ -407,6 +426,11 @@ public class CameraManager implements Closeable, CameraEventListener {
 		}
 
 		setDetecting(true);
+	}
+	
+	public Camera getCamera()
+	{
+		return camera;
 	}
 
 	public Image getCurrentFrame() {
@@ -537,6 +561,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 	}
 	
 	protected BufferedImage processFrame(Mat currentFrame) {
+		// TODO: Add way to tell if yielding camera is limiting frames
 		if (isAutoCalibrating.get() && ((camera.getFrameCount() % Math.min(camera.getFPS(), 3)) == 0)) {
 			final BufferedImage currentImage = Camera.matToBufferedImage(currentFrame);
 			
@@ -654,13 +679,6 @@ public class CameraManager implements Closeable, CameraEventListener {
 
 	private void fireAutoCalibration() {
 		acm.reset();
-		acm.setCallback(new Callback<Void, Void>() {
-			@Override
-			public Void call(Void param) {
-				autoCalibrateSuccess(acm.getBoundsResult(), acm.getPaperDimensions(), acm.getFrameDelayResult());
-				return null;
-			}
-		});
 	}
 
 	protected void autoCalibrateSuccess(Bounds arenaBounds, Optional<Dimension2D> paperDims, long delay) {
@@ -672,7 +690,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 					paperDims.isPresent());
 
 			cameraAutoCalibrated = true;
-			cameraCalibrationListener.calibrate(arenaBounds, paperDims, false);
+			cameraCalibrationListener.calibrate(arenaBounds, paperDims, false, delay);
 
 			if (recordCalibratedArea && !recordingCalibratedArea)
 				startRecordingCalibratedArea(new File("calibratedArea.mp4"), (int) arenaBounds.getWidth(),
@@ -682,7 +700,7 @@ public class CameraManager implements Closeable, CameraEventListener {
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
 
-		if (acm == null) acm = new AutoCalibrationManager(this, calculateFrameDelay);
+		if (acm == null) acm = new AutoCalibrationManager(this, camera, calculateFrameDelay);
 		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
 
@@ -717,11 +735,9 @@ public class CameraManager implements Closeable, CameraEventListener {
 	}
 
 	public long getCurrentFrameTimestamp() {
-		return camera.getCurrentFrameTimestamp();
-	}
-	
-	public long getShotTimestamp() {
-		return shotDetector.getShotTimestamp();
+		if (startTime == 0) resetStartTime();
+		
+		return System.currentTimeMillis() - startTime;
 	}
 
 	@Override
@@ -736,6 +752,14 @@ public class CameraManager implements Closeable, CameraEventListener {
 	public void cameraClosed() {
 		close();
 	}
+
+	@Override
+	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims,
+			boolean calibratedFromCanvas, long delay) {
+		autoCalibrateSuccess(arenaBounds, perspectivePaperDims, delay);
+	}
+	
+
 
 
 }

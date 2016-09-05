@@ -91,6 +91,7 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 
 		if (frameCount == 0) {
 			if (cameraEventListener.isPresent())
+				setViewSize(new Dimension(currentFrame.getWidth(), currentFrame.getHeight()));
 				cameraEventListener.get().setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
 		}
 
@@ -139,8 +140,8 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	}
 
 	@Override
-	public boolean close() {
-		return false;
+	public void close() {
+		return;
 	}
 
 	@Override
@@ -171,15 +172,17 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	public boolean isLocked() {
 		return false;
 	}
+	
+	private Dimension size = null;
 
 	@Override
 	public void setViewSize(Dimension size) {
-		return;
+		this.size = size;
 	}
 
 	@Override
 	public Dimension getViewSize() {
-		return null;
+		return size;
 	}
 
 	@Override
@@ -188,7 +191,18 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	}
 
 	@Override
-	public void setState(CameraState state) {
-		// Not used currently
+	public boolean setState(CameraState state) {
+		return true;
+	}
+
+	@Override
+	public boolean supportsExposureAdjustment() {
+
+		return false;
+	}
+
+	@Override
+	public boolean decreaseExposure() {
+		return false;
 	}
 }
