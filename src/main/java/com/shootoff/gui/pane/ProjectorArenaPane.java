@@ -601,9 +601,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	public void targetAdded(Target target) {
 		resizeTargetToDefaultPerspective(target);
 	
-		if (!(target instanceof TargetView)) throw new AssertionError(
-				"Target is no longer an instance of TargetView. This code path was not upgraded at some point.");
-	
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
 			if (!isSelected) {
 				trainingExerciseContainer.getChildren().remove(distanceSettingsPane);
