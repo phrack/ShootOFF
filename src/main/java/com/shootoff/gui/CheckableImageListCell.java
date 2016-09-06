@@ -30,7 +30,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.cameratypes.Camera;
 
@@ -250,27 +249,31 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private static Optional<Image> fetchWebcamImage(Camera webcam) {
 		boolean cameraOpened = false;
 
-		if (!webcam.isOpen()) {
-			webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
-			webcam.open();
-			cameraOpened = true;
-			CameraFactory.openCamerasAdd(webcam);
-		}
-
-		Image webcamImg = null;
-		if (webcam.isOpen()) {
-			BufferedImage img = webcam.getBufferedImage();
-
-			if (img != null) {
-				webcamImg = SwingFXUtils.toFXImage(img, null);
+		synchronized(webcam)
+		{
+		
+			if (!webcam.isOpen()) {
+				webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
+				webcam.open();
+				cameraOpened = true;
 			}
+	
+			Image webcamImg = null;
+			if (webcam.isOpen()) {
+				BufferedImage img = webcam.getBufferedImage();
+	
+				if (img != null) {
+					webcamImg = SwingFXUtils.toFXImage(img, null);
+				}
+			}
+	
+			if (cameraOpened == true) {
+				webcam.close();
+			}
+			
+			return Optional.ofNullable(webcamImg);
 		}
 
-		if (cameraOpened == true) {
-			webcam.close();
-			CameraFactory.openCamerasRemove(webcam);
-		}
 
-		return Optional.ofNullable(webcamImg);
 	}
 }

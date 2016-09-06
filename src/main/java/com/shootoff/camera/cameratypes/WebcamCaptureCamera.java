@@ -27,6 +27,7 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import com.github.sarxos.webcam.Webcam;
+import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
@@ -35,7 +36,6 @@ import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
 public class WebcamCaptureCamera extends CalculatedFPSCamera {
-	
 	public static final int CV_CAP_PROP_EXPOSURE = 15;
 	
 	private int cameraIndex = -1;
@@ -57,6 +57,14 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 			}
 		}
 
+		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
+
+		camera = new VideoCapture();
+		this.cameraIndex = cameraIndex;
+
+	}
+	
+	public WebcamCaptureCamera(final String cameraName, int cameraIndex) {
 		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
 
 		camera = new VideoCapture();
@@ -96,13 +104,19 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	
 	@Override
-	public boolean open() {
+	public synchronized boolean open() {
+		if (isOpen())
+			return true;
+		
 		boolean open;
 
 		open = camera.open(cameraIndex);
 		// Set the max FPS to 60. If we don't set this it defaults
 		// to 30, which unnecessarily hampers higher end cameras
 		camera.set(5, 60);
+		
+		if (open)
+			CameraFactory.openCamerasAdd(this);
 
 		return open;
 	}
@@ -115,8 +129,13 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 
 	@Override
-	public void close() {
-		camera.release();
+	public synchronized void close() {
+		if (isOpen())
+			camera.release();
+		
+		if (!isOpen())
+			CameraFactory.openCamerasRemove(this);
+		
 		return;
 	}
 

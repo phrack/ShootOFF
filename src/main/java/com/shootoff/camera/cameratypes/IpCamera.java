@@ -129,7 +129,10 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	@Override
-	public boolean open() {
+	public synchronized boolean open() {
+		if (isOpen())
+			return true;
+		
 		boolean open = false;
 		try {
 			open = ipcam.open();
@@ -145,7 +148,10 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	@Override
-	public void close() {
+	public synchronized void close() {
+		if (!isOpen())
+			return;
+		
 		if (CameraFactory.isMac()) {
 			new Thread(() -> {
 				ipcam.close();
