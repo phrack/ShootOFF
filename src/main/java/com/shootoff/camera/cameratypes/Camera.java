@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
@@ -34,7 +32,9 @@ import com.shootoff.config.Configuration;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 public interface Camera extends Runnable, Closeable {
-	public enum CameraState { CLOSED, NORMAL, DETECTING, CALIBRATING };
+	public enum CameraState {
+		CLOSED, NORMAL, DETECTING, CALIBRATING
+	};
 
 	Mat getMatFrame();
 
@@ -47,28 +47,29 @@ public interface Camera extends Runnable, Closeable {
 	void close();
 
 	String getName();
-	
+
 	// Return false if the state change is not allowed
 	// for possible future use
 	boolean setState(CameraState state);
-	
+
 	void setCameraEventListener(CameraEventListener cameraEventListener);
-	
+
 	long getCurrentFrameTimestamp();
-	
+
 	int getFrameCount();
-	
-	ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView);
-	
+
+	ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
+			final CameraView cameraView);
+
 	boolean isLocked();
 
 	void setViewSize(Dimension size);
 
 	Dimension getViewSize();
-	
+
 	boolean supportsExposureAdjustment();
+
 	boolean decreaseExposure();
-	
 
 	static BufferedImage matToBufferedImage(Mat matBGR) {
 		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);

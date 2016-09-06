@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
@@ -51,15 +49,15 @@ public class IpCamera extends CalculatedFPSCamera {
 	private final Webcam ipcam;
 
 	private boolean closing = false;
-	
+
 	public IpCamera(final Webcam ipcam) {
 		this.ipcam = ipcam;
 	}
-	
+
 	protected Webcam getWebcam() {
 		return this.ipcam;
 	}
-	
+
 	public static IpCamera registerIpCamera(String cameraName, URL cameraURL, Optional<String> username,
 			Optional<String> password)
 			throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
@@ -117,7 +115,7 @@ public class IpCamera extends CalculatedFPSCamera {
 
 	@Override
 	public Mat getMatFrame() {
-		
+
 		return Camera.bufferedImageToMat(getBufferedImage());
 	}
 
@@ -132,7 +130,7 @@ public class IpCamera extends CalculatedFPSCamera {
 	public synchronized boolean open() {
 		if (isOpen())
 			return true;
-		
+
 		boolean open = false;
 		try {
 			open = ipcam.open();
@@ -151,7 +149,7 @@ public class IpCamera extends CalculatedFPSCamera {
 	public synchronized void close() {
 		if (!isOpen())
 			return;
-		
+
 		if (CameraFactory.isMac()) {
 			new Thread(() -> {
 				ipcam.close();
@@ -194,30 +192,29 @@ public class IpCamera extends CalculatedFPSCamera {
 	public Dimension getViewSize() {
 		return ipcam.getViewSize();
 	}
-	
+
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
-	{
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
+			final CameraView cameraView) {
 		if (JavaShotDetector.isSystemSupported())
 			return new JavaShotDetector(cameraManager, config, cameraView);
 		else
 			return null;
 	}
-	
-	
+
 	@Override
 	public void run() {
-		while (isOpen() && !closing)
-		{
-			if (!isImageNew()) continue;
-			
+		while (isOpen() && !closing) {
+			if (!isImageNew())
+				continue;
+
 			if (cameraEventListener.isPresent())
 				cameraEventListener.get().newFrame(getMatFrame());
-			
+
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
 			}
-			
+
 		}
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
@@ -232,7 +229,7 @@ public class IpCamera extends CalculatedFPSCamera {
 	public boolean decreaseExposure() {
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -243,13 +240,18 @@ public class IpCamera extends CalculatedFPSCamera {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (!super.equals(obj)) return false;
-		if (getClass() != obj.getClass()) return false;
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
 		IpCamera other = (IpCamera) obj;
 		if (ipcam == null) {
-			if (other.ipcam != null) return false;
-		} else if (!ipcam.equals(other.ipcam)) return false;
+			if (other.ipcam != null)
+				return false;
+		} else if (!ipcam.equals(other.ipcam))
+			return false;
 		return true;
 	}
 }

@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 package com.shootoff.camera.cameratypes;
 
 import java.awt.Dimension;
@@ -42,7 +40,7 @@ import com.shootoff.config.Configuration;
 
 public class OptiTrackCamera implements Camera {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackCamera.class);
-	
+
 	private static boolean initialized = false;
 	protected CameraState cameraState;
 	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
@@ -50,147 +48,137 @@ public class OptiTrackCamera implements Camera {
 	private Dimension dimension = null;
 	private int viewWidth = 0;
 	private int viewHeight = 0;
-	
-	public OptiTrackCamera()
-	{
+
+	public OptiTrackCamera() {
 		if (!initialized)
 			init();
 	}
-	
-	public static void init()
-	{
+
+	public static void init() {
 		if (initialized)
 			return;
-		
+
 		try {
 			File lib = new File(System.mapLibraryName("OptiTrackCamera"));
 			System.load(lib.getAbsolutePath());
 			initialize();
 			initialized = true;
-		} catch (UnsatisfiedLinkError exception)
-		{
+		} catch (UnsatisfiedLinkError exception) {
 			initialized = false;
 		}
-		
-		
-		if (initialized && cameraAvailableNative())
-		{
+
+		if (initialized && cameraAvailableNative()) {
 			CameraFactory.registerCamera(new OptiTrackCamera());
 		}
 	}
-	
-	public boolean setState(CameraState cameraState)
-	{
+
+	public boolean setState(CameraState cameraState) {
 		this.cameraState = cameraState;
-		switch (cameraState)
-		{
-			case DETECTING:
-				//TODO: Re-enable when we have a 780nm to test
-				//if (!getIRFilterState())
-				//	toggleIRFilter();
-				break;
-			case CALIBRATING:
-				if (getIRFilterState())
-					toggleIRFilter();
-				break;
-			case CLOSED:
-				close();
-				break;
-			case NORMAL:
-			default:
-				break;
-			
+		switch (cameraState) {
+		case DETECTING:
+			// TODO: Re-enable when we have a 780nm to test
+			// if (!getIRFilterState())
+			// toggleIRFilter();
+			break;
+		case CALIBRATING:
+			if (getIRFilterState())
+				toggleIRFilter();
+			break;
+		case CLOSED:
+			close();
+			break;
+		case NORMAL:
+		default:
+			break;
+
 		}
 		return true;
 	}
-	
-	
-	public void setCameraEventListener(CameraEventListener cameraEventListener)
-	{
+
+	public void setCameraEventListener(CameraEventListener cameraEventListener) {
 		this.cameraEventListener = Optional.of(cameraEventListener);
 	}
-	
+
 	public long getCurrentFrameTimestamp() {
 		return currentFrameTimestamp;
 	}
-	
-	public String getName()
-	{
+
+	public String getName() {
 		return "OptiTrack";
 	}
-	
+
 	private native static void initialize();
+
 	private native static boolean cameraAvailableNative();
+
 	private native int getViewWidth();
+
 	private native int getViewHeight();
+
 	private native byte[] getImageNative();
+
 	private native boolean getIRFilterState();
+
 	private native void toggleIRFilter();
+
 	private native int getExposure();
+
 	private native void setExposure(int exposure);
-	
+
 	public synchronized native void close();
-	
+
 	public synchronized native boolean open();
+
 	public native boolean isOpen();
-	
+
 	@Override
 	public native double getFPS();
-	
+
 	@Override
 	public native int getFrameCount();
-	
-	
+
 	public void setViewSize(final Dimension size) {
 		return;
 	}
-	
-	public Dimension getViewSize()
-	{
+
+	public Dimension getViewSize() {
 		if (dimension != null)
 			return dimension;
-		
+
 		dimension = new Dimension(getViewWidth(), getViewHeight());
-		
+
 		return dimension;
 	}
 
-
-
-	public Mat translateCameraArrayToMat(byte[] imageBuffer)
-	{
+	public Mat translateCameraArrayToMat(byte[] imageBuffer) {
 		if (viewHeight == 0)
 			viewHeight = getViewHeight();
 		if (viewWidth == 0)
 			viewWidth = getViewWidth();
-		
+
 		Mat mat = new Mat(viewHeight, viewWidth, CvType.CV_8UC1);
 		Mat dst = new Mat(viewHeight, viewWidth, CvType.CV_8UC3);
-		
-		mat.put(0,0, imageBuffer);
+
+		mat.put(0, 0, imageBuffer);
 		Imgproc.cvtColor(mat, dst, Imgproc.COLOR_GRAY2BGR);
 		return dst;
 	}
-	
-	public Mat getMatFrame()
-	{
+
+	public Mat getMatFrame() {
 		byte[] frame = getImageNative();
 		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
 		return mat;
 	}
-	
-
 
 	@Override
 	public BufferedImage getBufferedImage() {
 		return Camera.matToBufferedImage(getMatFrame());
 	}
 
-
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
-	{
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
+			final CameraView cameraView) {
 		if (OptiTrackShotDetector.isSystemSupported())
 			return new OptiTrackShotDetector(cameraManager, config, cameraView);
 		else if (NativeShotDetector.isSystemSupported())
@@ -200,33 +188,28 @@ public class OptiTrackCamera implements Camera {
 		else
 			return null;
 	}
-	
 
 	public static boolean initialized() {
 		return initialized;
 	}
-	
-	
+
 	@Override
 	public void run() {
 	}
-	
+
 	// TODO: Switch timestamps to optitrack internal timestamps
-	private void receiveFrame(byte[] frame)
-	{
+	private void receiveFrame(byte[] frame) {
 		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
-		if (cameraEventListener.isPresent())
-		{
+		if (cameraEventListener.isPresent()) {
 			cameraEventListener.get().newFrame(mat);
 		}
-	
+
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().newFPS(getFPS());
 	}
-	
-	private void cameraClosed()
-	{
+
+	private void cameraClosed() {
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 		close();
@@ -245,9 +228,9 @@ public class OptiTrackCamera implements Camera {
 	@Override
 	public boolean decreaseExposure() {
 		final int curExp = getExposure();
-		final int newExp = (int)(curExp - (.1 * (double)curExp));
+		final int newExp = (int) (curExp - (.1 * (double) curExp));
 		setExposure(newExp);
 		return (getExposure() == newExp);
 	}
-	
+
 }

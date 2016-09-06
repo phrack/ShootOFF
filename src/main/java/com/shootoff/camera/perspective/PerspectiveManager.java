@@ -128,7 +128,7 @@ public class PerspectiveManager {
 
 		cameraParameters.add(new CameraParameters("C920", 3.67, 4.80, 2.70, new Dimension2D(1280, 720)));
 
-		cameraParameters.add(new CameraParameters("HD-3000", 4, 3.787, 2.864, new Dimension2D(640, 480)));	
+		cameraParameters.add(new CameraParameters("HD-3000", 4, 3.787, 2.864, new Dimension2D(640, 480)));
 	}
 
 	// For testing
@@ -171,12 +171,14 @@ public class PerspectiveManager {
 		this(cameraName, feedDims, arenaBounds);
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
 		this.setProjectorResolution(projectorRes);
-		
+
 		// Camera distance is unknown
 		calculateUnknown();
 
-		// This makes things work easier if the user doesn't really know to set shooter distance
-		// or the user starts an exercise that uses perspective but didn't set shooter distance
+		// This makes things work easier if the user doesn't really know to set
+		// shooter distance
+		// or the user starts an exercise that uses perspective but didn't set
+		// shooter distance
 		if (shooterDistance == -1)
 			shooterDistance = cameraDistance;
 	}
@@ -226,7 +228,8 @@ public class PerspectiveManager {
 	 * to calibrate with paper
 	 */
 	protected void setProjectionSize(int width, int height) {
-		if (logger.isTraceEnabled()) logger.trace("projection w {} h {}", width, height);
+		if (logger.isTraceEnabled())
+			logger.trace("projection w {} h {}", width, height);
 
 		this.projectionHeight = height;
 		this.projectionWidth = width;
@@ -239,7 +242,8 @@ public class PerspectiveManager {
 	 * this though
 	 */
 	private void setProjectionSizeFromLetterPaperPixels(Dimension2D letterDims) {
-		if (logger.isTraceEnabled()) logger.trace("letter w {} h {}", letterDims.getWidth(), letterDims.getHeight());
+		if (logger.isTraceEnabled())
+			logger.trace("letter w {} h {}", letterDims.getWidth(), letterDims.getHeight());
 
 		if (cameraWidth == -1 || patternWidth == -1) {
 			logger.error("Missing cameraWidth or patternWidth for US Letter calculation");
@@ -270,7 +274,8 @@ public class PerspectiveManager {
 
 	/* The camera feed width and height (in px) */
 	public void setCameraFeedSize(int width, int height) {
-		if (logger.isTraceEnabled()) logger.trace("camera feed w {} h {}", width, height);
+		if (logger.isTraceEnabled())
+			logger.trace("camera feed w {} h {}", width, height);
 		this.cameraHeight = height;
 		this.cameraWidth = width;
 	}
@@ -281,28 +286,30 @@ public class PerspectiveManager {
 
 	/* Distance (in mm) camera to screen */
 	public void setCameraDistance(int cameraDistance) {
-		if (logger.isTraceEnabled()) logger.trace("cameraDistance {}", cameraDistance);
+		if (logger.isTraceEnabled())
+			logger.trace("cameraDistance {}", cameraDistance);
 
 		this.cameraDistance = cameraDistance;
 
-		// TODO: Add logic to recalculate camera parameters if they were set via calibration and not stored parameters
-		if (!isInitialized())
-		{
+		// TODO: Add logic to recalculate camera parameters if they were set via
+		// calibration and not stored parameters
+		if (!isInitialized()) {
 			calculateUnknown();
-			
-			
-			// This makes things work easier if the user doesn't really know to set shooter distance
-			// or the user starts an exercise that uses perspective but didn't set shooter distance
+
+			// This makes things work easier if the user doesn't really know to
+			// set shooter distance
+			// or the user starts an exercise that uses perspective but didn't
+			// set shooter distance
 			if (shooterDistance == -1)
 				shooterDistance = cameraDistance;
-			
-			
+
 		}
 	}
 
 	/* Distance (in mm) camera to shooter */
 	public void setShooterDistance(int shooterDistance) {
-		if (logger.isTraceEnabled()) logger.trace("shooterDistance {}", shooterDistance);
+		if (logger.isTraceEnabled())
+			logger.trace("shooterDistance {}", shooterDistance);
 		this.shooterDistance = shooterDistance;
 	}
 
@@ -324,7 +331,8 @@ public class PerspectiveManager {
 	 * to think of that way
 	 */
 	public void setProjectorResolution(int width, int height) {
-		if (logger.isTraceEnabled()) logger.trace("projector res w {} h {}", width, height);
+		if (logger.isTraceEnabled())
+			logger.trace("projector res w {} h {}", width, height);
 		this.projectorResWidth = width;
 		this.projectorResHeight = height;
 	}
@@ -361,7 +369,8 @@ public class PerspectiveManager {
 
 		for (int i = 0; i < wValues.length; i++) {
 			if (wValues[i] == -1) {
-				if (logger.isTraceEnabled()) logger.trace("Unknown: {}", i);
+				if (logger.isTraceEnabled())
+					logger.trace("Unknown: {}", i);
 				unknownCount++;
 			}
 		}
@@ -383,14 +392,16 @@ public class PerspectiveManager {
 			projectionHeight = (int) (((double) cameraDistance * (double) patternHeight * sensorHeight)
 					/ (focalLength * (double) cameraHeight));
 
-			if (logger.isTraceEnabled()) logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth,
-					sensorWidth, focalLength, cameraWidth);
+			if (logger.isTraceEnabled())
+				logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth, sensorWidth, focalLength,
+						cameraWidth);
 
 		} else if (sensorWidth == -1) {
 			// Fix focalLength at 4 since we do not know it and we can only
 			// calculate 1 unknown
 			// 4 is an arbitrary selection
-			if (focalLength == -1) focalLength = 4;
+			if (focalLength == -1)
+				focalLength = 4;
 
 			sensorWidth = ((projectionWidth * focalLength * (double) cameraWidth)
 					/ ((double) cameraDistance * (double) patternWidth));
@@ -458,36 +469,32 @@ public class PerspectiveManager {
 	 *         <code>desiredDistance</code> away given its current real world
 	 *         dimensions and distance
 	 */
-	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, 
-			double desiredDistance) {
-		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1
-				|| pxPerMMhigh == -1) {
+	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, double desiredDistance) {
+		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || pxPerMMhigh == -1) {
 			logger.error("projectionWidth, projectionHeight, shooterDistance, pxPerMMhigh unknown");
 			return Optional.empty();
 		}
-		
+
 		if (desiredDistance == 0) {
 			throw new IllegalArgumentException("desiredDistance cannot be 0");
 		}
 
 		// Make it appropriate size for the desired distance
 		// Should just cap the result dimensions at the size of the projector
-		
+
 		double distRatio = shooterDistance / desiredDistance;
-		
-		
+
 		final double adjWidthmm = realWidth * distRatio;
 		final double adjHeightmm = realHeight * distRatio;
 
 		final double adjWidthpx = adjWidthmm * pxPerMMwide;
 		final double adjHeightpx = adjHeightmm * pxPerMMhigh;
 
-		if (logger.isTraceEnabled())
-		{
+		if (logger.isTraceEnabled()) {
 			logger.trace("real w {} h {} d {}", realWidth, realHeight, desiredDistance);
-			logger.trace("sD {} dR {} - adjmm {} {} adjpx {} {}",
-					shooterDistance, distRatio, adjWidthmm, adjHeightmm, adjWidthpx, adjHeightpx);
-			
+			logger.trace("sD {} dR {} - adjmm {} {} adjpx {} {}", shooterDistance, distRatio, adjWidthmm, adjHeightmm,
+					adjWidthpx, adjHeightpx);
+
 		}
 
 		return Optional.of(new Dimension2D(adjWidthpx, adjHeightpx));

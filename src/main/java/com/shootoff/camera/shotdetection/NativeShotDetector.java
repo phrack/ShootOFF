@@ -15,7 +15,8 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	private final Configuration config;
 
 	public static boolean loadNativeShotDetector() {
-		if (!isSystemSupported()) return false;
+		if (!isSystemSupported())
+			return false;
 
 		File lib = new File(System.mapLibraryName("NativeShotDetector"));
 		System.load(lib.getAbsolutePath());
@@ -48,7 +49,8 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 
 	@Override
 	public void processFrame(Mat frameBGR, boolean isDetecting) {
-		if (isDetecting) analyzeFrame(frameBGR.getNativeObjAddr());
+		if (isDetecting)
+			analyzeFrame(frameBGR.getNativeObjAddr());
 	}
 
 	@Override

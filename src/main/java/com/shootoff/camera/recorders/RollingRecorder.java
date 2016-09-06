@@ -103,7 +103,8 @@ public class RollingRecorder implements Closeable {
 			isFirstShotFrame = false;
 
 			synchronized (videoWriterLock) {
-				if (recording) videoWriter.encodeVideo(0, f);
+				if (recording)
+					videoWriter.encodeVideo(0, f);
 			}
 
 			if (timestamp >= ShotRecorder.RECORD_LENGTH * 3) {
@@ -117,7 +118,8 @@ public class RollingRecorder implements Closeable {
 		forking = true;
 
 		synchronized (videoWriterLock) {
-			if (videoWriter.isOpen()) videoWriter.close();
+			if (videoWriter.isOpen())
+				videoWriter.close();
 		}
 
 		File relativeVideoFile;

@@ -35,16 +35,13 @@ public class DeduplicationProcessor implements ShotProcessor {
 	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 8000.0;
 	private double distanceThreshold;
 
-	
 	// frames
 	public static final int DEDUPE_THRESHOLD_MINIMUM = 2;
-	
+
 	// ms
 	private static final int timestampThreshold = 60;
 
-
 	private final CameraManager cameraManager;
-
 
 	public DeduplicationProcessor(final CameraManager cameraManager) {
 		this.cameraManager = cameraManager;
@@ -63,39 +60,45 @@ public class DeduplicationProcessor implements ShotProcessor {
 	public boolean processShot(Shot shot, boolean updateLastShot) {
 		if (lastShot.isPresent()) {
 			long timeDiff = shot.getTimestamp() - lastShot.get().getTimestamp();
-			
-			if (timeDiff > timestampThreshold && (shot.getFrame() - lastShot.get().getFrame()) > DEDUPE_THRESHOLD_MINIMUM)
-			{
-				if (updateLastShot) lastShot = Optional.of(shot);
+
+			if (timeDiff > timestampThreshold
+					&& (shot.getFrame() - lastShot.get().getFrame()) > DEDUPE_THRESHOLD_MINIMUM) {
+				if (updateLastShot)
+					lastShot = Optional.of(shot);
 				return true;
 			}
-			
+
 			timeDiff = Math.min(timeDiff, timestampThreshold);
-			
-			// The Size area for a dupe decreases from 1 * distanceThreshold to .5 distanceThreshold
-			//  over the time period
-			final double dynamicDistancePercentage = (int)((1-((.5*timeDiff)/(double)timestampThreshold)) * distanceThreshold);
-			
+
+			// The Size area for a dupe decreases from 1 * distanceThreshold to
+			// .5 distanceThreshold
+			// over the time period
+			final double dynamicDistancePercentage = (int) ((1 - ((.5 * timeDiff) / (double) timestampThreshold))
+					* distanceThreshold);
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("processShot {} {}", shot.getX(), shot.getY());
 				logger.trace("processShot ts {} - {}", shot.getTimestamp(), lastShot.get().getTimestamp());
 
-				
-				logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(), DEDUPE_THRESHOLD_MINIMUM);
+				logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(),
+						DEDUPE_THRESHOLD_MINIMUM);
 
-				logger.trace("processShot distance {} - thresh {}", euclideanDistance(lastShot.get(), shot), dynamicDistancePercentage);
+				logger.trace("processShot distance {} - thresh {}", euclideanDistance(lastShot.get(), shot),
+						dynamicDistancePercentage);
 			}
 
 			if (euclideanDistance(lastShot.get(), shot) <= dynamicDistancePercentage) {
 
-				if (logger.isTraceEnabled()) logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
-				if (updateLastShot) lastShot = Optional.of(shot);
+				if (logger.isTraceEnabled())
+					logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
+				if (updateLastShot)
+					lastShot = Optional.of(shot);
 				return false;
 			}
 		}
 
-		if (updateLastShot) lastShot = Optional.of(shot);
+		if (updateLastShot)
+			lastShot = Optional.of(shot);
 
 		return true;
 	}

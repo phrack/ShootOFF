@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package com.shootoff.camera.shotdetection;
 
 import org.slf4j.Logger;
@@ -34,7 +33,6 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	private final Configuration config;
 
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackShotDetector.class);
-	
 
 	public OptiTrackShotDetector(final CameraManager cameraManager, final Configuration config,
 			final CameraView cameraView) {
@@ -42,34 +40,33 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 
 		this.cameraManager = cameraManager;
 		this.config = config;
-		
+
 		cameraManager.registerCameraStateListener(this);
 	}
-	
+
 	public static boolean isSystemSupported() {
 		return OptiTrackCamera.initialized();
 	}
-	
-	public void cameraStateChange(CameraState state)
-	{
+
+	public void cameraStateChange(CameraState state) {
 		logger.debug("got state change {}", state);
-		switch (state)
-		{
-			case DETECTING:
-				enableDetection();
-				break;
-			default:
-				disableDetection();
-				break;
-			
+		switch (state) {
+		case DETECTING:
+			enableDetection();
+			break;
+		default:
+			disableDetection();
+			break;
+
 		}
 	}
 
 	private native void startDetectionModeNative();
+
 	private native void enableDetection();
+
 	private native void disableDetection();
-	
-	
+
 	@Override
 	public void setFrameSize(int width, int height) {
 		// TODO: Should this be a noop for optitrack shot detection?
@@ -88,7 +85,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	public void foundShot(int x, int y, int rgb) {
 		if (!cameraManager.isDetecting())
 			return;
-		
+
 		Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
 
 		super.addShot(c, x, y, true);
@@ -96,7 +93,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 
 	@Override
 	public void startDetecting() {
-		logger.debug("start");	
+		logger.debug("start");
 		startDetectionModeNative();
 		enableDetection();
 	}

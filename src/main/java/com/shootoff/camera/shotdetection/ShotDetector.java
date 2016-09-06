@@ -22,11 +22,10 @@ public abstract class ShotDetector {
 	private final Configuration config;
 	private final CameraView cameraView;
 
-	public static boolean isSystemSupported()
-	{
+	public static boolean isSystemSupported() {
 		return false;
 	}
-	
+
 	public ShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView) {
 		this.cameraManager = cameraManager;
 		this.config = config;
@@ -35,7 +34,6 @@ public abstract class ShotDetector {
 
 	public void reset() {
 	}
-
 
 	/**
 	 * Notify the shot detector of the dimensions of webcam frames (e.g. the
@@ -83,11 +81,10 @@ public abstract class ShotDetector {
 
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
-			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), getShotTimestamp(),
-					cameraManager.getFrameCount(), config.getMarkerRadius());
-		} else {
-			shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(),
+			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), getShotTimestamp(), cameraManager.getFrameCount(),
 					config.getMarkerRadius());
+		} else {
+			shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(), config.getMarkerRadius());
 		}
 
 		// If the shot didn't come from click to shoot (cameFromCanvas) and the
@@ -107,27 +104,29 @@ public abstract class ShotDetector {
 	}
 
 	protected void submitShot(final Shot shot) {
-		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(),
-				shot.getY(), shot.getColor(), cameraManager.getFrameCount());
+		if (logger.isInfoEnabled())
+			logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(), shot.getY(),
+					shot.getColor(), cameraManager.getFrameCount());
 
 		cameraView.addShot(shot, false);
 	}
 
 	protected boolean checkDuplicate(final Shot shot) {
 		if (!cameraManager.getDeduplicationProcessor().processShot(shot)) {
-			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By {}",
-					cameraManager.getDeduplicationProcessor().getClass().getName());
+			if (logger.isDebugEnabled())
+				logger.debug("Processing Shot: Shot Rejected By {}",
+						cameraManager.getDeduplicationProcessor().getClass().getName());
 			return false;
 		}
 		return true;
 	}
-	
-	protected boolean checkIgnoreColor(Color color)
-	{
+
+	protected boolean checkIgnoreColor(Color color) {
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
 				&& color.equals(config.getIgnoreLaserColor().get())) {
-			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
-					config.getIgnoreLaserColor().get());
+			if (logger.isDebugEnabled())
+				logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
+						config.getIgnoreLaserColor().get());
 			return false;
 		}
 		return true;
