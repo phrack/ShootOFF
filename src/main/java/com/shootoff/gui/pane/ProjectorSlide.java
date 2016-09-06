@@ -7,6 +7,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
+import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.MirroredCanvasManager;
 import com.shootoff.gui.Resetter;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
@@ -136,8 +137,21 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			
 			arenaPane.setArenaPaneMirror(arenaTabPane);
 			
-			final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaPane.getCanvasManager();
-			final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) arenaTabPane.getCanvasManager();
+			final CanvasManager arenaCanvasManager = arenaPane.getCanvasManager();
+			
+			if (!(arenaCanvasManager instanceof MirroredCanvasManager)) {
+				throw new AssertionError("Arena canvas manager is not of type MirroredCanvasManager");
+			}
+			
+			final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaCanvasManager;
+			
+			final CanvasManager tabArenaCanvasManager = arenaTabPane.getCanvasManager();
+			
+			if (!(tabArenaCanvasManager instanceof MirroredCanvasManager)) {
+				throw new AssertionError("Tab arena canvas manager is not of type MirroredCanvasManager");
+			}
+			
+			final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) tabArenaCanvasManager;
 			
 			projectorCanvasManager.setMirroredManager(tabCanvasManager);
 			tabCanvasManager.setMirroredManager(projectorCanvasManager);

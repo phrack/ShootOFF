@@ -61,7 +61,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 	private void addDefaultBackground(String buttonName, String resourceName) {
 		final InputStream is = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
 		final LocatedImage img = new LocatedImage(is, resourceName);
-		final InputStream isThumbnail = this.getClass().getResourceAsStream(resourceName);
+		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
 		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
 		
 		itemPane.addButton(img, buttonName, Optional.of(thumbnailView), Optional.empty());

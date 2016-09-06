@@ -49,7 +49,7 @@ import com.shootoff.config.Configuration;
 public class IpCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(IpCamera.class);
 	private final Webcam ipcam;
-	
+
 	private boolean closing = false;
 	
 	public IpCamera(final Webcam ipcam) {
@@ -190,14 +190,6 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 	
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((ipcam == null) ? 0 : ipcam.hashCode());
-		return result;
-	}
-
-	@Override
 	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
 	{
 		if (JavaShotDetector.isSystemSupported())
@@ -233,5 +225,25 @@ public class IpCamera extends CalculatedFPSCamera {
 	@Override
 	public boolean decreaseExposure() {
 		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((ipcam == null) ? 0 : ipcam.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
+		IpCamera other = (IpCamera) obj;
+		if (ipcam == null) {
+			if (other.ipcam != null) return false;
+		} else if (!ipcam.equals(other.ipcam)) return false;
+		return true;
 	}
 }
