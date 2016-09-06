@@ -129,9 +129,9 @@ public class OptiTrackCamera implements Camera {
 	private native int getExposure();
 	private native void setExposure(int exposure);
 	
-	public native void close();
+	public synchronized native void close();
 	
-	public native boolean open();
+	public synchronized native boolean open();
 	public native boolean isOpen();
 	
 	@Override
@@ -211,6 +211,7 @@ public class OptiTrackCamera implements Camera {
 	public void run() {
 	}
 	
+	// TODO: Switch timestamps to optitrack internal timestamps
 	private void receiveFrame(byte[] frame)
 	{
 		currentFrameTimestamp = System.currentTimeMillis();
@@ -226,7 +227,6 @@ public class OptiTrackCamera implements Camera {
 	
 	private void cameraClosed()
 	{
-		logger.debug("cameraClosed");
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 		close();
