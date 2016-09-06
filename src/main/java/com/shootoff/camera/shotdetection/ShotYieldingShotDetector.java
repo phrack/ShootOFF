@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package com.shootoff.camera.shotdetection;
 
 import com.shootoff.camera.CameraManager;
@@ -25,11 +24,10 @@ import com.shootoff.config.Configuration;
 
 public abstract class ShotYieldingShotDetector extends ShotDetector {
 
-	
 	// TODO: Handle projector bound sizing
 	public ShotYieldingShotDetector(CameraManager cameraManager, Configuration config, CameraView cameraView) {
 		super(cameraManager, config, cameraView);
 	}
-	
+
 	public abstract void startDetecting();
 }

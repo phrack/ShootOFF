@@ -9,7 +9,7 @@ import com.shootoff.camera.cameratypes.Camera;
  */
 public interface CameraErrorView {
 	public void showCameraLockError(Camera webcam, boolean allCamerasFailed);
-	
+
 	public void showMissingCameraError(Camera webcam);
 
 	public void showFPSWarning(Camera webcam, double fps);

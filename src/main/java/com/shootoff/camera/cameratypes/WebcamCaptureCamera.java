@@ -37,7 +37,7 @@ import com.shootoff.config.Configuration;
 
 public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	public static final int CV_CAP_PROP_EXPOSURE = 15;
-	
+
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
 
@@ -57,30 +57,32 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 			}
 		}
 
-		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
+		if (cameraIndex < 0)
+			throw new IllegalArgumentException("Camera not found: " + cameraName);
 
 		camera = new VideoCapture();
 		this.cameraIndex = cameraIndex;
 
 	}
-	
+
 	public WebcamCaptureCamera(final String cameraName, int cameraIndex) {
-		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
+		if (cameraIndex < 0)
+			throw new IllegalArgumentException("Camera not found: " + cameraName);
 
 		camera = new VideoCapture();
 		this.cameraIndex = cameraIndex;
 
 	}
-
 
 	@Override
 	public Mat getMatFrame() {
 		final Mat frame = new Mat();
 		try {
-			if (!isOpen() || !camera.read(frame) || frame.size().height == 0) return null;
-		} catch (Exception e)
-		{
-			// Sometimes there is a race condition on closing the camera vs. read()
+			if (!isOpen() || !camera.read(frame) || frame.size().height == 0)
+				return null;
+		} catch (Exception e) {
+			// Sometimes there is a race condition on closing the camera vs.
+			// read()
 			return null;
 		}
 
@@ -89,9 +91,8 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 		return frame;
 	}
 
-
 	@Override
-	public BufferedImage getBufferedImage() {		
+	public BufferedImage getBufferedImage() {
 		Mat frame = getMatFrame();
 
 		if (frame == null) {
@@ -101,44 +102,39 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 		}
 	}
 
-
-	
 	@Override
 	public synchronized boolean open() {
 		if (isOpen())
 			return true;
-		
+
 		boolean open;
 
 		open = camera.open(cameraIndex);
 		// Set the max FPS to 60. If we don't set this it defaults
 		// to 30, which unnecessarily hampers higher end cameras
 		camera.set(5, 60);
-		
+
 		if (open)
 			CameraFactory.openCamerasAdd(this);
 
 		return open;
 	}
 
-	
 	@Override
 	public boolean isOpen() {
 		return camera.isOpened();
 	}
 
-
 	@Override
 	public synchronized void close() {
 		if (isOpen())
 			camera.release();
-		
+
 		if (!isOpen())
 			CameraFactory.openCamerasRemove(this);
-		
+
 		return;
 	}
-
 
 	@Override
 	public String getName() {
@@ -147,25 +143,23 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public void setViewSize(final Dimension size) {
-			camera.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, size.getWidth());
-			camera.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, size.getHeight());
+		camera.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, size.getWidth());
+		camera.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, size.getHeight());
 	}
-	
 
 	@Override
 	public Dimension getViewSize() {
-			return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
-					(int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
+		return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
+				(int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
 	}
-
 
 	public void launchCameraSettings() {
 		camera.set(Highgui.CV_CAP_PROP_SETTINGS, 1);
 	}
-	
+
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView)
-	{
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
+			final CameraView cameraView) {
 		if (NativeShotDetector.isSystemSupported())
 			return new NativeShotDetector(cameraManager, config, cameraView);
 		else if (JavaShotDetector.isSystemSupported())
@@ -176,15 +170,14 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public void run() {
-		while (isOpen())
-		{
+		while (isOpen()) {
 			if (cameraEventListener.isPresent())
 				cameraEventListener.get().newFrame(getMatFrame());
-			
-			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0)  && cameraState != CameraState.CALIBRATING) {
+
+			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
 			}
-			
+
 		}
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
@@ -196,13 +189,15 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	}
 
 	private Optional<Double> origExposure = Optional.empty();
+
 	@Override
 	public boolean supportsExposureAdjustment() {
 		origExposure = Optional.of(camera.get(CV_CAP_PROP_EXPOSURE));
-		
+
 		boolean res = decreaseExposure();
-		if (!res) return false;
-		
+		if (!res)
+			return false;
+
 		resetExposure();
 		return true;
 	}
@@ -214,13 +209,10 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
 		return (camera.get(CV_CAP_PROP_EXPOSURE) == newExp);
 	}
-	
-	private void resetExposure()
-	{
+
+	private void resetExposure() {
 		if (origExposure.isPresent())
 			camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
 	}
 
-	
-	
 }

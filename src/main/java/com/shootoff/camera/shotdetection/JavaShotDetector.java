@@ -96,7 +96,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private boolean shouldShowBrightnessWarningBool = false;
 
 	final PixelClusterManager pixelClusterManager;
-	
+
 	public static boolean isSystemSupported() {
 		return true;
 	}
@@ -187,7 +187,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private boolean pixelAboveThreshold(int currentLum, int lumsMovingAverage) {
 		final int increase = (currentLum - lumsMovingAverage);
 
-		if (increase < MINIMUM_BRIGHTNESS_INCREASE) return false;
+		if (increase < MINIMUM_BRIGHTNESS_INCREASE)
+			return false;
 
 		// (var >> 2) equivalent to (var / 4)
 		final int threshold = (MAXIMUM_LUM_VALUE - lumsMovingAverage) >> 2;
@@ -198,7 +199,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		final int dynamic_threshold = threshold + dynamic_increase;
 
 		if (increase < dynamic_threshold) {
-			if (increase > threshold) dynamicallyThresholded++;
+			if (increase > threshold)
+				dynamicallyThresholded++;
 			return false;
 		}
 
@@ -239,8 +241,9 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		int thresholdPixelsSize = thresholdPixels.size();
 
 		if (logger.isTraceEnabled()) {
-			if (thresholdPixelsSize >= 1) logger.trace("thresholdPixels {} getMinimumShotDimension {}",
-					thresholdPixelsSize, getMinimumShotDimension());
+			if (thresholdPixelsSize >= 1)
+				logger.trace("thresholdPixels {} getMinimumShotDimension {}", thresholdPixelsSize,
+						getMinimumShotDimension());
 
 			for (final Pixel pixel : thresholdPixels) {
 				logger.trace("thresholdPixel {} {} - from array {} from pixel cur {} avg {}", pixel.x, pixel.y,
@@ -248,7 +251,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			}
 		}
 
-		if (!filtersInitialized) filtersInitialized = checkIfInitialized();
+		if (!filtersInitialized)
+			filtersInitialized = checkIfInitialized();
 
 		if (detectShots && filtersInitialized) {
 			updateAvgThresholdPixels(thresholdPixelsSize);
@@ -274,7 +278,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			// Moved to after detectShots because otherwise we'll have changed
 			// pixels in the frame that's being checked for shots
 			else if (isExcessiveMotion(thresholdPixelsSize)) {
-				if (shouldShowMotionWarning(thresholdPixelsSize)) cameraManager.showMotionWarning();
+				if (shouldShowMotionWarning(thresholdPixelsSize))
+					cameraManager.showMotionWarning();
 
 				for (final Pixel pixel : thresholdPixels) {
 					frameBGR.put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
@@ -317,11 +322,13 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	}
 
 	private boolean shouldShowBrightnessWarning() {
-		if (logger.isTraceEnabled()) logger.trace("avgBrightPixels {}", avgBrightPixels);
+		if (logger.isTraceEnabled())
+			logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount() > BRIGHTNESS_WARNING_FRAMECOUNT) {
-			if (logger.isTraceEnabled()) logger.trace("HIGH BRIGHTNESS - avgBrightPixels {}", avgBrightPixels);
+			if (logger.isTraceEnabled())
+				logger.trace("HIGH BRIGHTNESS - avgBrightPixels {}", avgBrightPixels);
 
 			shouldShowBrightnessWarningBool = true;
 
@@ -341,7 +348,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 
 		final Set<Pixel> thresholdPixels = Collections.synchronizedSet(new HashSet<Pixel>());
 
-		if (!cameraManager.isDetecting()) return thresholdPixels;
+		if (!cameraManager.isDetecting())
+			return thresholdPixels;
 
 		final int subWidth = workingFrame.cols() / SECTOR_COLUMNS;
 		final int subHeight = workingFrame.rows() / SECTOR_ROWS;
@@ -360,7 +368,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 				final int sectorX = sector.intValue() % SECTOR_COLUMNS;
 				final int sectorY = sector.intValue() / SECTOR_ROWS;
 
-				if (!cameraManager.isSectorOn(sectorX, sectorY)) return;
+				if (!cameraManager.isSectorOn(sectorX, sectorY))
+					return;
 
 				final int startX = subWidth * sectorX;
 				final int startY = subHeight * sectorY;
@@ -368,21 +377,24 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 				for (int y = startY; y < startY + subHeight; y++) {
 					final int yOffset = y * cols;
 					for (int x = startX; x < startX + subWidth; x++) {
-						// If the thread is interrupted it's likely because the thread pool
-						// is being shutdown with shutdownNow. Thus cancel searching
+						// If the thread is interrupted it's likely because the
+						// thread pool
+						// is being shutdown with shutdownNow. Thus cancel
+						// searching
 						// for a shot in the current frame.
 						if (Thread.currentThread().isInterrupted()) {
 							logger.trace("Shot detection sieve interrupted");
 							return;
 						}
-						
+
 						final int currentH = workingFramePrimitive[(yOffset + x) * channels] & 0xFF;
 						final int currentS = workingFramePrimitive[(yOffset + x) * channels + 1] & 0xFF;
 						final int currentV = workingFramePrimitive[(yOffset + x) * channels + 2] & 0xFF;
 
 						final Pixel pixel = updateFilter(currentH, currentS, currentV, x, y, detectShots);
 
-						if (pixel != null) thresholdPixels.add(pixel);
+						if (pixel != null)
+							thresholdPixels.add(pixel);
 					}
 				}
 			}
@@ -418,7 +430,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		final Optional<Color> color = pc.getColor(workingFrame, colorDistanceFromRed);
 
 		if (!color.isPresent()) {
-			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By Lack Of Color Density");
+			if (logger.isDebugEnabled())
+				logger.debug("Processing Shot: Shot Rejected By Lack Of Color Density");
 			return;
 		}
 

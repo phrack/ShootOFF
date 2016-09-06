@@ -42,7 +42,8 @@ public class MalfunctionsProcessor implements ShotProcessor {
 	@Override
 	public boolean processShot(Shot shot) {
 		if (rand.nextFloat() < prob) {
-			if (useTTS) TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
+			if (useTTS)
+				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
 			return false;
 		}
 
@@ -50,5 +51,6 @@ public class MalfunctionsProcessor implements ShotProcessor {
 	}
 
 	@Override
-	public void reset() {}
+	public void reset() {
+	}
 }

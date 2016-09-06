@@ -35,7 +35,7 @@ import javafx.scene.paint.Color;
 
 public class PixelCluster extends HashSet<Pixel> {
 	private static final Logger logger = LoggerFactory.getLogger(PixelCluster.class);
-	
+
 	private static final boolean debugColorsToFile = false;
 
 	private static final long serialVersionUID = 1L;
@@ -53,14 +53,12 @@ public class PixelCluster extends HashSet<Pixel> {
 	// So we look around the shot instead
 	@SuppressWarnings("unused")
 	public int getColorDifference(final Mat workingFrame, final int[][] colorDistanceFromRed) {
-		
+
 		Mat traceMat = null;
-		if (logger.isTraceEnabled() && debugColorsToFile)
-		{
+		if (logger.isTraceEnabled() && debugColorsToFile) {
 			traceMat = Mat.zeros(workingFrame.size(), workingFrame.type());
 		}
-		
-		
+
 		final Map<Pixel, byte[]> visited = new HashMap<Pixel, byte[]>();
 		int avgSaturation = 0;
 		int avgLum = 0;
@@ -69,12 +67,14 @@ public class PixelCluster extends HashSet<Pixel> {
 			if (pixel.getConnectedness() < MAXIMUM_CONNECTEDNESS) {
 				for (int h = -1; h <= 1; h++) {
 					for (int w = -1; w <= 1; w++) {
-						if (h == 0 && w == 0) continue;
+						if (h == 0 && w == 0)
+							continue;
 
 						final int rx = pixel.x + w;
 						final int ry = pixel.y + h;
 
-						if (rx < 0 || ry < 0 || rx >= workingFrame.cols() || ry >= workingFrame.rows()) continue;
+						if (rx < 0 || ry < 0 || rx >= workingFrame.cols() || ry >= workingFrame.rows())
+							continue;
 
 						final Pixel nearPoint = new Pixel(rx, ry);
 
@@ -85,7 +85,7 @@ public class PixelCluster extends HashSet<Pixel> {
 
 							final int npSaturation = np[1] & 0xFF;
 							avgSaturation += npSaturation;
-							
+
 							final int npLum = np[2] & 0xFF;
 							avgLum += npLum;
 
@@ -97,7 +97,8 @@ public class PixelCluster extends HashSet<Pixel> {
 		}
 
 		final int pixelCount = visited.size();
-		if (pixelCount == 0) return 0;
+		if (pixelCount == 0)
+			return 0;
 
 		avgSaturation /= pixelCount;
 		avgLum /= pixelCount;
@@ -110,17 +111,15 @@ public class PixelCluster extends HashSet<Pixel> {
 		int tempColorDistance = 0;
 
 		for (final Entry<Pixel, byte[]> pixelEntry : visited.entrySet()) {
-						
+
 			byte[] np = pixelEntry.getValue();
-			
-			if (logger.isTraceEnabled() && debugColorsToFile)
-			{
-				
-				System.out.println(String.format("x %d y %d pc %d - %d %d %d - %d - %d", (int)centerPixelX, (int)centerPixelY, pixelCount, np[0] & 0xFF, np[1], np[2] & 0xFF, avgSaturation, avgLum));
+
+			if (logger.isTraceEnabled() && debugColorsToFile) {
+
+				System.out.println(String.format("x %d y %d pc %d - %d %d %d - %d - %d", (int) centerPixelX,
+						(int) centerPixelY, pixelCount, np[0] & 0xFF, np[1], np[2] & 0xFF, avgSaturation, avgLum));
 			}
 
-			
-			
 			final int npSaturation = np[1] & 0xFF;
 			final int npLum = np[2] & 0xFF;
 
@@ -129,7 +128,7 @@ public class PixelCluster extends HashSet<Pixel> {
 
 				final int thisDFromRed = Math.min(npColor, Math.abs(180 - npColor)) * npLum * npSaturation;
 				final int thisDFromGreen = Math.abs(60 - npColor) * npLum * npSaturation;
-				
+
 				redSum += thisDFromRed;
 				greenSum += thisDFromGreen;
 
@@ -137,36 +136,38 @@ public class PixelCluster extends HashSet<Pixel> {
 
 				final Pixel pixel = pixelEntry.getKey();
 
-				//logger.trace("red {} green {} diff {} CDFR {}", thisDFromRed, thisDFromGreen, currentCol, colorDistanceFromRed[pixel.x][pixel.y]);
+				// logger.trace("red {} green {} diff {} CDFR {}", thisDFromRed,
+				// thisDFromGreen, currentCol,
+				// colorDistanceFromRed[pixel.x][pixel.y]);
 
-				
 				colorDistance += currentCol
-						- (int)(CURRENT_COLOR_BIAS_MULTIPLIER * colorDistanceFromRed[pixel.x][pixel.y]);
-				
-				if (logger.isTraceEnabled() && debugColorsToFile) {
-					traceMat.put(pixelEntry.getKey().y, pixelEntry.getKey().x, workingFrame.get(pixelEntry.getKey().y, pixelEntry.getKey().x));
+						- (int) (CURRENT_COLOR_BIAS_MULTIPLIER * colorDistanceFromRed[pixel.x][pixel.y]);
 
-					//logger.trace("pixel cD {} cC {} cD {}", colorDistance, currentCol, CURRENT_COLOR_BIAS_MULTIPLIER * colorDistanceFromRed[pixel.x][pixel.y]);
-					
+				if (logger.isTraceEnabled() && debugColorsToFile) {
+					traceMat.put(pixelEntry.getKey().y, pixelEntry.getKey().x,
+							workingFrame.get(pixelEntry.getKey().y, pixelEntry.getKey().x));
+
+					// logger.trace("pixel cD {} cC {} cD {}", colorDistance,
+					// currentCol, CURRENT_COLOR_BIAS_MULTIPLIER *
+					// colorDistanceFromRed[pixel.x][pixel.y]);
+
 					tempColorDistance += currentCol;
 					avgColorDistance += colorDistanceFromRed[pixel.x][pixel.y];
 				}
 			}
 		}
-		
-		if (logger.isTraceEnabled() && debugColorsToFile)
-		{
-			System.out.println(String.format("%d, %d, %d, %d, %d, %b",
-					colorDistance / pixelCount, avgColorDistance / pixelCount, tempColorDistance / pixelCount, redSum / pixelCount, greenSum / pixelCount, colorDistance > 0));
 
-			
-			System.out.println(String.format("x %d y %d pc %d", (int)centerPixelX, (int)centerPixelY, pixelCount));
-			
-			
+		if (logger.isTraceEnabled() && debugColorsToFile) {
+			System.out.println(String.format("%d, %d, %d, %d, %d, %b", colorDistance / pixelCount,
+					avgColorDistance / pixelCount, tempColorDistance / pixelCount, redSum / pixelCount,
+					greenSum / pixelCount, colorDistance > 0));
+
+			System.out.println(String.format("x %d y %d pc %d", (int) centerPixelX, (int) centerPixelY, pixelCount));
+
 			Mat testMat = new Mat();
 			Imgproc.cvtColor(traceMat, testMat, Imgproc.COLOR_HSV2BGR);
-			
-			String filename = String.format("shot-colors-%d-%d.png", (int)centerPixelX, (int)centerPixelY);
+
+			String filename = String.format("shot-colors-%d-%d.png", (int) centerPixelX, (int) centerPixelY);
 			File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, testMat);
@@ -178,8 +179,8 @@ public class PixelCluster extends HashSet<Pixel> {
 	public Optional<Color> getColor(final Mat workingFrame, final int[][] colorDistanceFromRed) {
 		final int colorDist = getColorDifference(workingFrame, colorDistanceFromRed);
 
-		//logger.trace("colorDist {}", colorDist);
-		
+		// logger.trace("colorDist {}", colorDist);
+
 		// Sometimes it's better to guess than to return nothing
 		if (colorDist < 1000)
 			return Optional.of(Color.RED);

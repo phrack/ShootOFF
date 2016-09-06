@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package com.shootoff.camera.shotdetection;
 
 import com.shootoff.camera.cameratypes.Camera.CameraState;
