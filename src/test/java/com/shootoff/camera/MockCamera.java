@@ -201,8 +201,18 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 		return false;
 	}
 
-	@Override
 	public boolean decreaseExposure() {
+		return false;
+	}
+	
+	public void resetExposure()
+	{
+		return;
+	}
+	
+	@Override
+	public boolean limitsFrames()
+	{
 		return false;
 	}
 }

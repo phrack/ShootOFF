@@ -68,8 +68,8 @@ public interface Camera extends Runnable, Closeable {
 	Dimension getViewSize();
 
 	boolean supportsExposureAdjustment();
-
 	boolean decreaseExposure();
+	void resetExposure();
 
 	static BufferedImage matToBufferedImage(Mat matBGR) {
 		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
@@ -89,5 +89,9 @@ public interface Camera extends Runnable, Closeable {
 	}
 
 	double getFPS();
+	
+	// Does the camera limit the number of frames that are
+	// delivered to CameraManager?
+	boolean limitsFrames();
 
 }

@@ -177,39 +177,45 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 				sectorStatuses[y][x] = true;
 			}
 		}
+		
+		synchronized(camera)
+		{
 
-		if (!camera.isOpen()) {
-
-			camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
-
-			if (!camera.open()) {
-				cameraErrorView.get().showCameraLockError(camera, true);
-				return;
-			}
-
-			final Dimension openDimension = camera.getViewSize();
-
-			if ((int) openDimension.getWidth() != getFeedWidth()
-					|| (int) openDimension.getHeight() != getFeedHeight()) {
-				if (openDimension.getWidth() == -1) {
+			if (!camera.isOpen()) {
+	
+				camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
+	
+				if (!camera.open()) {
 					cameraErrorView.get().showCameraLockError(camera, true);
 					return;
 				}
-
-				if (logger.isWarnEnabled())
-					logger.warn("Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
-							getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
-							(int) openDimension.getHeight());
-
-				setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
-				shotDetector.setFrameSize((int) openDimension.getWidth(), (int) openDimension.getHeight());
-			} else {
-				setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
+	
+				final Dimension openDimension = camera.getViewSize();
+	
+				if ((int) openDimension.getWidth() != getFeedWidth()
+						|| (int) openDimension.getHeight() != getFeedHeight()) {
+					if (openDimension.getWidth() == -1) {
+						cameraErrorView.get().showCameraLockError(camera, true);
+						return;
+					}
+	
+					if (logger.isWarnEnabled())
+						logger.warn("Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
+								getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
+								(int) openDimension.getHeight());
+	
+					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
+					shotDetector.setFrameSize((int) openDimension.getWidth(), (int) openDimension.getHeight());
+				} else {
+					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
+				}
 			}
+			
+	
+			logger.debug("starting camera thread {}", camera.getName());
+			new Thread(camera, camera.getName()).start();
+		
 		}
-
-		logger.debug("starting camera thread {}", camera.getName());
-		new Thread(camera, camera.getName()).start();
 
 		if (shotDetector instanceof ShotYieldingShotDetector)
 			((ShotYieldingShotDetector) shotDetector).startDetecting();
@@ -563,12 +569,9 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 	}
 
 	protected BufferedImage processFrame(Mat currentFrame) {
-		// TODO: Add way to tell if yielding camera is limiting frames
-		if (isAutoCalibrating.get() && ((camera.getFrameCount() % Math.min(camera.getFPS(), 3)) == 0)) {
-			final BufferedImage currentImage = Camera.matToBufferedImage(currentFrame);
-
-			acm.processFrame(currentImage);
-			return currentImage;
+		if (isAutoCalibrating.get() && (camera.limitsFrames() || ((camera.getFrameCount() % Math.min(camera.getFPS(), 3)) == 0))) {
+			acm.processFrame(currentFrame);
+			return Camera.matToBufferedImage(currentFrame);
 		}
 
 		Mat submatFrameBGR = null;
