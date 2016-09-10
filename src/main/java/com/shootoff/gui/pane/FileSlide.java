@@ -17,8 +17,8 @@ import com.shootoff.targets.CameraViews;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -55,8 +55,8 @@ public class FileSlide extends Slide {
 		});
 		
 		addSlideControlButton("Save Feed Image", (event) -> {
-			final AnchorPane tabAnchor = (AnchorPane) cameraViews.getSelectedCameraContainer();
-			final RenderedImage renderedImage = SwingFXUtils.fromFXImage(tabAnchor.snapshot(new SnapshotParameters(), null),
+			final Node container = cameraViews.getSelectedCameraContainer();
+			final RenderedImage renderedImage = SwingFXUtils.fromFXImage(container.snapshot(new SnapshotParameters(), null),
 					null);
 
 			final FileChooser fileChooser = new FileChooser();
