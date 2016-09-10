@@ -501,12 +501,8 @@ public class PerspectiveManager {
 	}
 
 	public boolean isInitialized() {
-		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || cameraDistance == -1
-				|| pxPerMMhigh == -1) {
-			return false;
-		}
-
-		return true;
+		return projectionWidth > -1 && projectionHeight > -1 && shooterDistance > -1 && cameraDistance > -1 &&
+				pxPerMMhigh > -1;
 	}
 
 	public boolean isCameraParamsKnown() {

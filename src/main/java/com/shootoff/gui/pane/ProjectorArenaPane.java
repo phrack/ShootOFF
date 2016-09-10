@@ -577,6 +577,15 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			for (Target t : canvasManager.getTargets()) {
 				resizeTargetToDefaultPerspective(t);
 			}
+			
+			if (perspectiveManager.get().isInitialized() && mirroredArenaPane != null) {
+				// Chime delay is intentionally longer than the message
+				// displays so that it will never play
+				final Label successLabel = mirroredArenaPane.getCanvasManager().addDiagnosticMessage(
+						"Perspective Fully Initialized -- Using Real World Distances", 10000, Color.LIMEGREEN);
+				
+				TimerPool.schedule(() -> mirroredArenaPane.getCanvasManager().removeDiagnosticMessage(successLabel), 5000); 
+			}
 		}
 		
 		if (mirroredArenaPane != null) mirroredArenaPane.mirrorCalibrated(perspectiveManager);
