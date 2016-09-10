@@ -603,7 +603,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
 			if (!isSelected) {
-				trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
+				if (perspectiveManager.isPresent() && openDistancePane != null)
+					trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 				return;
 			}
 
