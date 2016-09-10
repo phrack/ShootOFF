@@ -191,10 +191,10 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	public void toggleProjectorExercises(boolean isDisabled) {
 		if (isDisabled) {
 			noneButton.fire();
-			projectorPane.setExpanded(false);
 		}
 		
 		projectorPane.setDisable(isDisabled);
+		projectorPane.setExpanded(!isDisabled);
 	}
 	
 	private void startRecordingSession() {

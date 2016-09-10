@@ -203,6 +203,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 					}
 				}
 				
+				exerciseSlide.toggleProjectorExercises(true);
+				
 				arenaPane.setFeedCanvasManager(null);
 				arenaPane = null;
 			});
