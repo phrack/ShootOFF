@@ -13,6 +13,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
 public abstract class Slide {
+	// We set a maximum on the number of control buttons at the top
+	// because we want them to always maintain the same alighment and
+	// size. If slide had more than the maximum, it would break
+	// the size and alignment invariant.
+	public static final int MAX_CONTROL_BUTTONS = 4;
+	public static final int CONTROL_BUTTON_WIDTH = 150;
+	public static final int CONTROL_BUTTON_HEIGHT = 100;
+	
 	private final List<Node> controlNodes = new ArrayList<>();
 	private final List<Node> bodyNodes = new ArrayList<>();
 	private final List<Node> savedControls = new ArrayList<>();
@@ -33,6 +41,19 @@ public abstract class Slide {
 	}
 	
 	public void showControls() {
+		// If we have less than the maximum number of control buttons
+		// add empty panes as place holders for missing buttons to
+		// ensure control button alignment and size is maintained.
+		if (controlNodes.size() < MAX_CONTROL_BUTTONS) {
+			final int sizeDelta = MAX_CONTROL_BUTTONS - controlNodes.size();
+			
+			for (int i = 0; i < sizeDelta; i++) {
+				Pane placeHolderPane = new Pane();
+				placeHolderPane.setPrefSize(CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT);
+				controlNodes.add(placeHolderPane);
+			}
+		}
+		
 		show(parentControls, controlNodes, savedControls);
 	}
 	
@@ -70,8 +91,12 @@ public abstract class Slide {
 	// of the slide. These are intended to control the content
 	// that appears on the rest of the slide
 	protected Button addSlideControlButton(String text, final EventHandler<ActionEvent> eventHandler) {
+		if (controlNodes.size() >= MAX_CONTROL_BUTTONS) {
+			throw new AssertionError("The slide already has the maximum number of control buttons");
+		}
+		
 		final Button controlButton = new Button(text);
-		controlButton.setPrefSize(150, 100);
+		controlButton.setPrefSize(CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT);
 		controlButton.setOnAction(eventHandler);
 		controlNodes.add(controlButton);
 		
