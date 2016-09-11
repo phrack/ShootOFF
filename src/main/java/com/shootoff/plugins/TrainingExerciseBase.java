@@ -339,6 +339,12 @@ public class TrainingExerciseBase {
 	public void setShotTimerColumnText(final String name, final String value) {
 		if (shotTimerTable != null && shotTimerTable.getItems() != null) {
 			Runnable shotTimerColumnTextSetter = () -> {
+				if (shotTimerTable.getItems().size() == 0) {
+					logger.error("Trying to set shot timer column text on an empty shot timer list", 
+							new AssertionError("Shot timer table is empty"));
+					return;
+				}
+				
 				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
 			};
 			

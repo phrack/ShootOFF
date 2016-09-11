@@ -349,6 +349,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return buttonsContainer;
 	}
 	
+	public ObservableList<ShotEntry> getShotTimerModel() {
+		return shotEntries;
+	}
+	
 	public void selectCameraView(CameraView cameraView) {
 		cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
 	}

@@ -119,7 +119,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		if (arenaPane == null) {
 			final Stage arenaStage = new Stage();
 
-			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, config, resetter);
+			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, config, resetter, null);
 			
 			// Prepare calibrating manager up front so that we can switch
 			// to the arena tab when it's ready (otherwise
@@ -129,7 +129,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			// Mirror panes so that anything that happens to one also
 			// happens to the other
 			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer,
-					config, resetter); 
+					config, resetter, cameraViews.getShotTimerModel()); 
 			cameraViews.addCameraView("Arena", new ScrollPane(arenaTabPane), arenaTabPane.getCanvasManager(), true);
 			
 			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());

@@ -38,6 +38,7 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MirroredCanvasManager;
 import com.shootoff.gui.Resetter;
+import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
@@ -101,7 +102,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Pane trainingExerciseContainer,
-			Configuration config, Resetter resetter) {
+			Configuration config, Resetter resetter, ObservableList<ShotEntry> shotTimerModel) {
 		this.config = config;
 
 		arenaCanvasGroup = new Group();
@@ -119,7 +120,12 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.arenaStage = arenaStage;
 		this.trainingExerciseContainer = trainingExerciseContainer;
 		
-		canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null, this);
+		if (shotTimerModel == null) {
+			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null, this);
+		} else {
+			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena",
+					shotTimerModel, this);
+		}
 
 		this.setPrefSize(640, 480);
 		
