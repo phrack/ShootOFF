@@ -24,7 +24,6 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
@@ -120,10 +119,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		projectorPane.setDisable(true);
 		projectorPane.setExpanded(false);
 		
-		final VBox exerciseContainer =  new VBox(universalPane, projectorPane);
-		exerciseContainer.setPadding(new Insets(30, 0, 0, 0));
-		
-		addBodyNode(exerciseContainer);
+		addBodyNode(new VBox(universalPane, projectorPane));
 	}
 	
 	@Override
