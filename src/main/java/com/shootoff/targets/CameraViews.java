@@ -1,6 +1,7 @@
 package com.shootoff.targets;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
@@ -18,6 +19,8 @@ public interface CameraViews {
 	void removeCameraView(String name);
 	
 	boolean isArenaViewSelected();
+	
+	Optional<CameraView> getArenaView();
 	
 	CameraView getSelectedCameraView();
 	

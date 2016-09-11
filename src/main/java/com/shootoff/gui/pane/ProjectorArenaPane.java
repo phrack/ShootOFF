@@ -160,6 +160,10 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	public void setArenaPaneMirror(ProjectorArenaPane mirroredArenaPane) {
 		this.mirroredArenaPane = mirroredArenaPane;
 	}
+	
+	public ProjectorArenaPane getArenaPaneMirror() {
+		return mirroredArenaPane;
+	}
 
 	public void setCalibrationManager(CalibrationManager calibrationManager) {
 		this.calibrationManager = calibrationManager;

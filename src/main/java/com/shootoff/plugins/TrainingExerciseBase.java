@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.sound.sampled.AudioFormat;
@@ -94,10 +95,10 @@ public class TrainingExerciseBase {
 	private boolean haveDelayControls = false;
 	private boolean haveParControls = false;
 	
-	private final static Map<CameraView, Label> exerciseLabels = new HashMap<>();
-	private final static List<Pane> exercisePanes = new ArrayList<>();
-	private final static Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<>();
-	private final static List<Button> exerciseButtons = new ArrayList<>();
+	private final Map<CameraView, Label> exerciseLabels = new HashMap<>();
+	private final List<Pane> exercisePanes = new ArrayList<>();
+	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<>();
+	private final List<Button> exerciseButtons = new ArrayList<>();
 
 	// Only exists to make it easy to call getInfo without having
 	// to do a bunch of unnecessary setup
@@ -111,6 +112,14 @@ public class TrainingExerciseBase {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
 		this.cameraViews = (CameraViews) controller;
 		this.trainingExerciseContainer = controller.getTrainingExerciseContainer();
+		
+		if (cameraViews.getArenaView().isPresent()) {
+			final Label exerciseLabel = new Label();
+			exerciseLabel.setTextFill(Color.WHITE);
+			CameraView arenaView = cameraViews.getArenaView().get();
+			arenaView.addChild(exerciseLabel);
+			exerciseLabels.put(arenaView, exerciseLabel);
+		}
 	}
 
 	// This is only required for unit tests where we don't want to create a full
@@ -587,8 +596,8 @@ public class TrainingExerciseBase {
 			}
 		}
 
-		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
-			cv.removeChild(exerciseLabels.get(cv));
+		for (final Entry<CameraView, Label> entry : exerciseLabels.entrySet()) {
+			entry.getKey().removeChild(entry.getValue());
 		}
 
 		exerciseLabels.clear();
