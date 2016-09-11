@@ -33,7 +33,7 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.IpCamera;
-import com.shootoff.camera.cameratypes.WebcamCaptureCamera;
+import com.shootoff.camera.cameratypes.SarxosCaptureCamera;
 
 public final class CameraFactory {
 	private static final Logger logger = LoggerFactory.getLogger(CameraFactory.class);
@@ -74,15 +74,14 @@ public final class CameraFactory {
 		if (os != null && os.equals("Mac OS X")) {
 			isMac = true;
 			defaultWebcam = Webcam.getDefault();
-
 			knownWebcams = new ArrayList<Camera>();
 
 			for (final Webcam w : Webcam.getWebcams()) {
-				Camera c = null;
+				final Camera c;
 				if (w.getDevice() instanceof IpCamDevice)
 					c = new IpCamera(w);
 				else
-					c = new WebcamCaptureCamera(w.getName());
+					c = new SarxosCaptureCamera(w.getName());
 
 				knownWebcams.add(c);
 			}
@@ -101,7 +100,7 @@ public final class CameraFactory {
 			if (defaultWebcam == null)
 				return Optional.empty();
 
-			defaultCam = new WebcamCaptureCamera(defaultWebcam.getName());
+			defaultCam = new SarxosCaptureCamera(defaultWebcam.getName());
 		} else {
 			final Webcam cam = Webcam.getDefault();
 
@@ -109,7 +108,7 @@ public final class CameraFactory {
 				defaultCam = null;
 			} else {
 
-				defaultCam = new WebcamCaptureCamera(cam.getName());
+				defaultCam = new SarxosCaptureCamera(cam.getName());
 			}
 		}
 
@@ -117,26 +116,25 @@ public final class CameraFactory {
 	}
 
 	public static List<Camera> getWebcams() {
-		if (isMac)
-			return knownWebcams;
+		if (isMac) return knownWebcams;
 
 		final List<Camera> webcams = new ArrayList<Camera>();
 
 		int cameraIndex = 0;
 		for (Webcam w : Webcam.getWebcams()) {
-			Camera c = null;
+			final Camera c;
 			if (w.getDevice() instanceof IpCamDevice)
 				c = new IpCamera(w);
 			else
-				c = new WebcamCaptureCamera(w.getName(), cameraIndex);
+				c = new SarxosCaptureCamera(w.getName(), cameraIndex);
 
 			synchronized (openCameras) {
 				// If we already have an open instance of the camera
 				// go ahead and reuse it in this list as opposed to
 				// the newly created camera
-				int i = openCameras.indexOf(c);
+				final int i = openCameras.indexOf(c);
 
-				logger.trace("Looking in openCameras for {} found at {}", w.getName(), i);
+				if (logger.isTraceEnabled()) logger.trace("Looking in openCameras for {} found at {}", w.getName(), i);
 				if (i >= 0) {
 					webcams.add(openCameras.get(i));
 				} else {

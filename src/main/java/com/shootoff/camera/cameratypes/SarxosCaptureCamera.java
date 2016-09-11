@@ -35,18 +35,18 @@ import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class WebcamCaptureCamera extends CalculatedFPSCamera {
+public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	public static final int CV_CAP_PROP_EXPOSURE = 15;
 
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
 
 	// For testing
-	protected WebcamCaptureCamera() {
+	protected SarxosCaptureCamera() {
 		camera = null;
 	}
 
-	public WebcamCaptureCamera(final String cameraName) {
+	public SarxosCaptureCamera(final String cameraName) {
 		final List<Webcam> webcams = Webcam.getWebcams();
 		int cameraIndex = -1;
 
@@ -65,7 +65,7 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	}
 
-	public WebcamCaptureCamera(final String cameraName, int cameraIndex) {
+	public SarxosCaptureCamera(final String cameraName, int cameraIndex) {
 		if (cameraIndex < 0)
 			throw new IllegalArgumentException("Camera not found: " + cameraName);
 
