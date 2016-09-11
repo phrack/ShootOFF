@@ -328,10 +328,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		if (!config.inDebugMode()) Main.forceClose(0);
 	}
+	
+	@Override
+	public boolean isArenaViewSelected() {
+		return "Arena".equals(cameraTabPane.getSelectionModel().getSelectedItem().getText());
+	}
 
 	@Override
 	public CameraView getSelectedCameraView() {
-		if ("Arena".equals(cameraTabPane.getSelectionModel().getSelectedItem().getText())) {
+		if (isArenaViewSelected()) {
 			return projectorSlide.getArenaPane().getCanvasManager();
 		} else {
 			return camerasSupervisor.getCameraView(cameraTabPane.getSelectionModel().getSelectedIndex());

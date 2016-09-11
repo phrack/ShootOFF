@@ -17,6 +17,8 @@ public interface CameraViews {
 
 	void removeCameraView(String name);
 	
+	boolean isArenaViewSelected();
+	
 	CameraView getSelectedCameraView();
 	
 	CameraManager getSelectedCameraManager();
