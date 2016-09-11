@@ -77,6 +77,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -103,6 +104,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@FXML private TableView<ShotEntry> shotTimerTable;
 	@FXML private VBox buttonsContainer;
 	@FXML private Pane trainingExerciseContainer;
+	@FXML private ScrollPane trainingExerciseScrollPane;
 
 	private TargetSlide targetPane;
 	private ExerciseSlide exerciseSlide;
@@ -153,6 +155,11 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		shootOFFStage.setOnCloseRequest((value) -> {
 			close();
+		});
+		
+		shootOFFStage.heightProperty().addListener((observable, oldValue, newValue) -> {
+			trainingExerciseScrollPane.setPrefHeight(trainingExerciseScrollPane.getLayoutBounds().getHeight() + 
+					(newValue.doubleValue() - oldValue.doubleValue()));
 		});
 
 		if (config.getWebcams().isEmpty()) {

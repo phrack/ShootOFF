@@ -56,7 +56,7 @@
                   <Insets bottom="30.0" left="30.0" right="30.0" />
                </padding>
             </HBox>
-            <ScrollPane hbarPolicy="NEVER" minHeight="150.0" HBox.hgrow="ALWAYS">
+            <ScrollPane fx:id="trainingExerciseScrollPane" hbarPolicy="NEVER" minHeight="150.0" HBox.hgrow="ALWAYS">
                <content>
                   <VBox fx:id="trainingExerciseContainer" />
                </content>
