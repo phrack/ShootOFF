@@ -336,7 +336,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	
 	@Override
 	public Optional<CameraView> getArenaView() {
-		if (projectorSlide.getArenaPane() != null) {
+		if (projectorSlide != null && projectorSlide.getArenaPane() != null) {
 			return Optional.of(projectorSlide.getArenaPane().getArenaPaneMirror().getCanvasManager());
 		}
 		
