@@ -38,6 +38,7 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MirroredCanvasManager;
 import com.shootoff.gui.Resetter;
+import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.targets.Target;
 import com.shootoff.util.TimerPool;
@@ -101,7 +102,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Pane trainingExerciseContainer,
-			Configuration config, Resetter resetter) {
+			Configuration config, Resetter resetter, ObservableList<ShotEntry> shotTimerModel) {
 		this.config = config;
 
 		arenaCanvasGroup = new Group();
@@ -119,7 +120,12 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.arenaStage = arenaStage;
 		this.trainingExerciseContainer = trainingExerciseContainer;
 		
-		canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null, this);
+		if (shotTimerModel == null) {
+			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null, this);
+		} else {
+			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena",
+					shotTimerModel, this);
+		}
 
 		this.setPrefSize(640, 480);
 		
@@ -153,6 +159,10 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 	public void setArenaPaneMirror(ProjectorArenaPane mirroredArenaPane) {
 		this.mirroredArenaPane = mirroredArenaPane;
+	}
+	
+	public ProjectorArenaPane getArenaPaneMirror() {
+		return mirroredArenaPane;
 	}
 
 	public void setCalibrationManager(CalibrationManager calibrationManager) {
@@ -577,6 +587,15 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			for (Target t : canvasManager.getTargets()) {
 				resizeTargetToDefaultPerspective(t);
 			}
+			
+			if (perspectiveManager.get().isInitialized() && mirroredArenaPane != null) {
+				// Chime delay is intentionally longer than the message
+				// displays so that it will never play
+				final Label successLabel = mirroredArenaPane.getCanvasManager().addDiagnosticMessage(
+						"Perspective Fully Initialized -- Using Real World Distances", 10000, Color.LIMEGREEN);
+				
+				TimerPool.schedule(() -> mirroredArenaPane.getCanvasManager().removeDiagnosticMessage(successLabel), 5000); 
+			}
 		}
 		
 		if (mirroredArenaPane != null) mirroredArenaPane.mirrorCalibrated(perspectiveManager);
@@ -603,7 +622,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
 			if (!isSelected) {
-				trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
+				if (perspectiveManager.isPresent() && openDistancePane != null)
+					trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 				return;
 			}
 

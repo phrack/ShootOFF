@@ -23,7 +23,10 @@ import javafx.scene.text.TextAlignment;
 
 public class ItemSelectionPane<T> extends ScrollPane {
 	private static final Logger logger = LoggerFactory.getLogger(ItemSelectionPane.class);
-	private static final int COLUMNS = 6;
+	private static final int DEFAULT_COLUMNS = 6;
+	// Above MAX_COLUMNS and you end up having to move your mouse side to side
+	// too much
+	private static final int MAX_COLUMNS = 8; 
 	private static final int ITEM_DIMS = 150;
 
 	private final Map<Object, ButtonBase> items = new HashMap<>();
@@ -46,9 +49,18 @@ public class ItemSelectionPane<T> extends ScrollPane {
 			toggleGroup = new ToggleGroup();
 		}
 
-		subContainer.setPrefColumns(COLUMNS);
+		subContainer.setPrefColumns(DEFAULT_COLUMNS);
 		subContainer.setPadding(new Insets(0, 65, 65, 65));
-
+		
+		this.widthProperty().addListener((observable, oldValue, newValue) -> {
+			final Insets padding = subContainer.getPadding();
+			final int hgap = (int) subContainer.getHgap();
+			final int columnCount = (newValue.intValue() - (int) (padding.getLeft() + padding.getRight()) + hgap) / 
+					(ITEM_DIMS + hgap);
+			
+			if (columnCount <= MAX_COLUMNS) subContainer.setPrefColumns(columnCount);
+		});
+		
 		this.setStyle(
 				"-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
 		this.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);

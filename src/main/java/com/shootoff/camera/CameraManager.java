@@ -42,7 +42,7 @@ import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
 import com.shootoff.camera.cameratypes.CameraEventListener;
-import com.shootoff.camera.cameratypes.WebcamCaptureCamera;
+import com.shootoff.camera.cameratypes.SarxosCaptureCamera;
 import com.shootoff.camera.processors.DeduplicationProcessor;
 import com.shootoff.camera.recorders.RollingRecorder;
 import com.shootoff.camera.recorders.ShotRecorder;
@@ -727,8 +727,8 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 	}
 
 	public void launchCameraSettings() {
-		if (camera instanceof WebcamCaptureCamera) {
-			((WebcamCaptureCamera) camera).launchCameraSettings();
+		if (camera instanceof SarxosCaptureCamera) {
+			((SarxosCaptureCamera) camera).launchCameraSettings();
 		}
 	}
 

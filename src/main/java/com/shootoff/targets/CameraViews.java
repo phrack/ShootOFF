@@ -1,11 +1,14 @@
 package com.shootoff.targets;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.gui.CanvasManager;
+import com.shootoff.gui.ShotEntry;
 
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
 public interface CameraViews {
@@ -15,6 +18,10 @@ public interface CameraViews {
 
 	void removeCameraView(String name);
 	
+	boolean isArenaViewSelected();
+	
+	Optional<CameraView> getArenaView();
+	
 	CameraView getSelectedCameraView();
 	
 	CameraManager getSelectedCameraManager();
@@ -22,4 +29,6 @@ public interface CameraViews {
 	Node getSelectedCameraContainer();
 	
 	void selectCameraView(CameraView cameraView);
+	
+	ObservableList<ShotEntry> getShotTimerModel();
 }

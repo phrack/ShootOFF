@@ -50,9 +50,21 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 			Optional<FXMLLoader> loader = createTargetEditorStage();
 
 			if (loader.isPresent()) {
-				CameraManager currentCamera = cameraViews.getSelectedCameraManager();
-				Image currentFrame = currentCamera.getCurrentFrame();
-				TargetEditorController editorController = (TargetEditorController) loader.get().getController();
+				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
+				
+				final Image currentFrame;
+				
+				if (cameraViews.isArenaViewSelected()) {
+					final Pane backgroundPane = new Pane();
+					backgroundPane.setStyle("-fx-background-color: lightgray;");
+					backgroundPane.setPrefSize(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT);
+					currentFrame = backgroundPane.snapshot(new SnapshotParameters(), null);
+				} else {
+					final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
+					currentFrame = currentCamera.getCurrentFrame();
+				}
+				
+				
 				editorController.init(currentFrame, this);
 				
 				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);

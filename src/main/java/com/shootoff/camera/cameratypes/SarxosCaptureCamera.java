@@ -38,8 +38,8 @@ import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class WebcamCaptureCamera extends CalculatedFPSCamera {
-	private static final Logger logger = LoggerFactory.getLogger(WebcamCaptureCamera.class);
+public class SarxosCaptureCamera extends CalculatedFPSCamera {
+	private static final Logger logger = LoggerFactory.getLogger(SarxosCaptureCamera.class);
 	
 	public static final int CV_CAP_PROP_EXPOSURE = 15;
 
@@ -47,11 +47,11 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 	private final VideoCapture camera;
 
 	// For testing
-	protected WebcamCaptureCamera() {
+	protected SarxosCaptureCamera() {
 		camera = null;
 	}
 
-	public WebcamCaptureCamera(final String cameraName) {
+	public SarxosCaptureCamera(final String cameraName) {
 		final List<Webcam> webcams = Webcam.getWebcams();
 		int cameraIndex = -1;
 
@@ -70,7 +70,7 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	}
 
-	public WebcamCaptureCamera(final String cameraName, int cameraIndex) {
+	public SarxosCaptureCamera(final String cameraName, int cameraIndex) {
 		if (cameraIndex < 0)
 			throw new IllegalArgumentException("Camera not found: " + cameraName);
 
@@ -209,6 +209,8 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 			return true;
 		
 		double exp = camera.get(CV_CAP_PROP_EXPOSURE);
+
+		logger.info("Initial camera exposure {}", exp);
 		
 		if (exp == 0)
 			return false;
@@ -218,6 +220,7 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 		boolean res = decreaseExposure();
 		if (!res)
 		{
+			resetExposure();
 			origExposure = Optional.empty();
 			return false;
 		}
@@ -228,9 +231,20 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public boolean decreaseExposure() {
+		// Logic:
+		// If camera exposure is positive, decrease towards zero
+		// If camera exposure is negative and between -9.9 and 0, increase towards zero (Logitech c270)
+		// If camera exposure is negative and less than -10, decrease away from zero (oCam)
+		
+		// In any case, if exposure doesn't change in the same direction when we change it, fail out.
 		final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
-		final double newExp = curExp - (.1 * curExp);
-		logger.trace("curExp[ {} newExp {}", curExp, newExp);
+		double newExp = 0;
+		if (curExp <= -10.0) {
+			newExp = curExp + (.1 * curExp);
+		} else {
+			newExp = curExp - (.1 * curExp);
+		}
+		logger.debug("curExp[ {} newExp {}", curExp, newExp);
 		
 		// If they don't have the same sign, ABORT
 		if (!((curExp<0) == (newExp<0)) || curExp == newExp)
@@ -238,8 +252,13 @@ public class WebcamCaptureCamera extends CalculatedFPSCamera {
 		
 		
 		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
-		logger.trace("curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
-		return (Math.abs(camera.get(CV_CAP_PROP_EXPOSURE)) < Math.abs(curExp));
+		
+		logger.info("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
+
+		if (curExp <= -10.0)
+			return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
+		else
+			return (Math.abs(camera.get(CV_CAP_PROP_EXPOSURE)) < Math.abs(curExp));
 	}
 
 	public void resetExposure() {

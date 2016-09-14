@@ -76,9 +76,9 @@ public class OptiTrackCamera implements Camera {
 		this.cameraState = cameraState;
 		switch (cameraState) {
 		case DETECTING:
-			// TODO: Re-enable when we have a 780nm to test
-			// if (!getIRFilterState())
-			// toggleIRFilter();
+			// TODO: If 780nm, enable.  If visible, keep disabled
+			 if (!getIRFilterState())
+				 toggleIRFilter();
 			break;
 		case CALIBRATING:
 			if (getIRFilterState())
