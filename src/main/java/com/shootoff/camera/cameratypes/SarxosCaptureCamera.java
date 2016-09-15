@@ -26,6 +26,9 @@ import java.util.Optional;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
@@ -36,6 +39,8 @@ import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
 public class SarxosCaptureCamera extends CalculatedFPSCamera {
+	private static final Logger logger = LoggerFactory.getLogger(SarxosCaptureCamera.class);
+	
 	public static final int CV_CAP_PROP_EXPOSURE = 15;
 
 	private int cameraIndex = -1;
@@ -110,12 +115,15 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		boolean open;
 
 		open = camera.open(cameraIndex);
-		// Set the max FPS to 60. If we don't set this it defaults
-		// to 30, which unnecessarily hampers higher end cameras
-		camera.set(5, 60);
 
 		if (open)
+		{
+			// Set the max FPS to 60. If we don't set this it defaults
+			// to 30, which unnecessarily hampers higher end cameras
+			camera.set(5, 60);
+
 			CameraFactory.openCamerasAdd(this);
+		}
 
 		return open;
 	}
@@ -128,7 +136,10 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public synchronized void close() {
 		if (isOpen())
+		{
+			resetExposure();
 			camera.release();
+		}
 
 		if (!isOpen())
 			CameraFactory.openCamerasRemove(this);
@@ -192,11 +203,27 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public boolean supportsExposureAdjustment() {
-		origExposure = Optional.of(camera.get(CV_CAP_PROP_EXPOSURE));
+		// If we already verified that it works, 
+		// we have an origExposure value set
+		if (origExposure.isPresent())
+			return true;
+		
+		double exp = camera.get(CV_CAP_PROP_EXPOSURE);
+
+		logger.info("Initial camera exposure {}", exp);
+		
+		if (exp == 0)
+			return false;
+		
+		origExposure = Optional.of(exp);
 
 		boolean res = decreaseExposure();
 		if (!res)
+		{
+			resetExposure();
+			origExposure = Optional.empty();
 			return false;
+		}
 
 		resetExposure();
 		return true;
@@ -204,15 +231,42 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public boolean decreaseExposure() {
+		// Logic:
+		// If camera exposure is positive, decrease towards zero
+		// If camera exposure is negative and between -9.9 and 0, increase towards zero (Logitech c270)
+		// If camera exposure is negative and less than -10, decrease away from zero (oCam)
+		
+		// In any case, if exposure doesn't change in the same direction when we change it, fail out.
 		final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
-		final double newExp = curExp - (.1 * curExp);
+		double newExp = 0;
+		if (curExp <= -10.0) {
+			newExp = curExp + (.1 * curExp);
+		} else {
+			newExp = curExp - (.1 * curExp);
+		}
+		logger.debug("curExp[ {} newExp {}", curExp, newExp);
+		
+		// If they don't have the same sign, ABORT
+		if (!((curExp<0) == (newExp<0)) || curExp == newExp)
+			return false;
+		
+		
 		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
-		return (camera.get(CV_CAP_PROP_EXPOSURE) == newExp);
+		
+		logger.info("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
+
+		if (curExp <= -10.0)
+			return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
+		else
+			return (Math.abs(camera.get(CV_CAP_PROP_EXPOSURE)) < Math.abs(curExp));
 	}
 
-	private void resetExposure() {
+	public void resetExposure() {
 		if (origExposure.isPresent())
 			camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
 	}
 
+	public boolean limitsFrames(){
+		return false;
+	}
 }

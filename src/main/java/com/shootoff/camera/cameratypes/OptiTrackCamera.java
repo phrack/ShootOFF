@@ -76,9 +76,9 @@ public class OptiTrackCamera implements Camera {
 		this.cameraState = cameraState;
 		switch (cameraState) {
 		case DETECTING:
-			// TODO: Re-enable when we have a 780nm to test
-			// if (!getIRFilterState())
-			// toggleIRFilter();
+			// TODO: If 780nm, enable.  If visible, keep disabled
+			 if (!getIRFilterState())
+				 toggleIRFilter();
 			break;
 		case CALIBRATING:
 			if (getIRFilterState())
@@ -201,6 +201,7 @@ public class OptiTrackCamera implements Camera {
 	private void receiveFrame(byte[] frame) {
 		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
+		
 		if (cameraEventListener.isPresent()) {
 			cameraEventListener.get().newFrame(mat);
 		}
@@ -220,8 +221,13 @@ public class OptiTrackCamera implements Camera {
 		return false;
 	}
 
+	private Optional<Integer> origExposure = Optional.empty();
+
+	
 	@Override
 	public boolean supportsExposureAdjustment() {
+		if (!origExposure.isPresent())
+			origExposure = Optional.of(getExposure());
 		return true;
 	}
 
@@ -229,8 +235,25 @@ public class OptiTrackCamera implements Camera {
 	public boolean decreaseExposure() {
 		final int curExp = getExposure();
 		final int newExp = (int) (curExp - (.1 * (double) curExp));
+		logger.debug("curExp[ {} newExp {}", curExp, newExp);
+		
+		if (newExp < 20)
+			return false;
+		
 		setExposure(newExp);
+		logger.debug("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
 		return (getExposure() == newExp);
+	}
+	
+	public void resetExposure()
+	{
+		if (origExposure.isPresent())
+			setExposure(origExposure.get());
+	}
+	
+	public boolean limitsFrames()
+	{
+		return true;
 	}
 
 }

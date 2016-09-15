@@ -86,6 +86,7 @@ public class AutoCalibrationManager {
 	protected AutoCalStep stepFindBounds = null;
 	protected AutoCalStep stepFindDelay = null;
 	protected AutoCalStep stepFindPaperPattern = null;
+	protected AutoCalStep stepAdjustExposure = null;
 	List<AutoCalStep> steps = new ArrayList<AutoCalStep>();
 
 	public AutoCalibrationManager(final CameraCalibrationListener calibrationListener, final Camera camera,
@@ -96,10 +97,12 @@ public class AutoCalibrationManager {
 		stepFindBounds = new StepFindBounds();
 		stepFindDelay = new StepFindDelay(calculateFrameDelay);
 		stepFindPaperPattern = new StepFindPaperPattern();
+		stepAdjustExposure = new StepAdjustExposure();
 
 		steps.add(stepFindBounds);
 		steps.add(stepFindDelay);
 		steps.add(stepFindPaperPattern);
+		steps.add(stepAdjustExposure);
 	}
 
 	public Mat getPerspMat() {
@@ -124,24 +127,20 @@ public class AutoCalibrationManager {
 				step.reset();
 	}
 
-	// Converts to BW mat from bufferedimage
-	public void preProcessFrame(final BufferedImage frame, final Mat mat) {
-		final Mat matTemp;
+	public Mat preProcessFrame(final Mat mat) {
+		Mat newMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1);
+		
+		Imgproc.cvtColor(mat, newMat, Imgproc.COLOR_BGR2GRAY);
 
-		synchronized (frame) {
-			matTemp = Camera.bufferedImageToMat(frame);
-		}
-		Imgproc.cvtColor(matTemp, mat, Imgproc.COLOR_BGR2GRAY);
-
-		Imgproc.equalizeHist(mat, mat);
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("grayscale.png");
 			File file = new File(filename);
 			filename = file.toString();
-			Highgui.imwrite(filename, mat);
+			Highgui.imwrite(filename, newMat);
 		}
 
+		return newMat;
 	}
 
 	private boolean isFinished() {
@@ -151,15 +150,11 @@ public class AutoCalibrationManager {
 		return true;
 	}
 
-	public void processFrame(final BufferedImage frame) {
-
-		logger.trace("processFrame");
-
-		Mat mat = new Mat();
-		preProcessFrame(frame, mat);
+	public void processFrame(final Mat mat) {
+		Mat grayMat = preProcessFrame(mat);
 		for (AutoCalStep step : steps) {
 			if (step.enabled() && !step.completed()) {
-				step.process(mat);
+				step.process(grayMat);
 				break;
 			}
 		}
@@ -169,6 +164,15 @@ public class AutoCalibrationManager {
 					((StepFindDelay) stepFindDelay).frameDelayResult);
 
 	}
+	
+	// FOR TESTS ONLY
+	public Mat prepTestFrame(BufferedImage frame)
+	{
+		Mat mat = preProcessFrame(Camera.bufferedImageToMat(frame));
+		Imgproc.equalizeHist(mat, mat);
+		return mat;
+	}
+	
 
 	interface AutoCalStep {
 		void reset();
@@ -196,8 +200,10 @@ public class AutoCalibrationManager {
 		}
 
 		public void process(Mat mat) {
+			Imgproc.equalizeHist(mat, mat);
+			
 			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
-
+			
 			if (listPatterns.isEmpty())
 				return;
 
@@ -381,6 +387,91 @@ public class AutoCalibrationManager {
 		}
 
 	}
+	
+	
+	class StepAdjustExposure implements AutoCalStep {
+		private static final int TARGET_THRESH = 80;
+		private static final int SAMPLE_DELAY = 150;
+		private static final int NUM_TRIES = 6;
+		private boolean completed = false;
+		private int tries = 0;
+		private boolean patternSet = false;
+		private long lastSample = 0;
+		private double origMean = 0;
+		
+		@Override
+		public void reset() {
+			completed = false;
+			patternSet = false;
+			lastSample = 0;
+			origMean = 0;
+			tries = 0;
+		}
+
+		public boolean completed() {
+			return completed;
+		}
+
+		@Override
+		public boolean enabled() {
+			return camera.supportsExposureAdjustment();
+		}
+
+		@Override
+		public void process(Mat mat) {
+			if (!patternSet)
+			{
+				calibrationListener.setArenaBackground("white.png");
+				patternSet = true;
+				lastSample = System.currentTimeMillis();
+				return;
+			}
+			
+			if (completed || (System.currentTimeMillis() - lastSample) < SAMPLE_DELAY)
+				return;
+			
+			Scalar mean = Core.mean(mat);
+			if (origMean == 0)
+				origMean = mean.val[0];
+			
+			logger.warn("{} {}", mean.val[0], TARGET_THRESH);
+			
+			if (mean.val[0] > TARGET_THRESH)
+			{
+				if (!camera.decreaseExposure())
+					completed = true;
+			} else {
+				completed = true;
+			}
+			
+			if (logger.isTraceEnabled())
+			{
+				String filename = String.format("exposure-%d.png", lastSample);
+				File file = new File(filename);
+				filename = file.toString();
+				Highgui.imwrite(filename, mat);
+			}
+
+			tries++;
+			if (tries == NUM_TRIES)
+				completed = true;
+			
+			if (completed)
+			{
+				if (mean.val[0] > origMean || mean.val[0] < .8 * TARGET_THRESH)
+				{
+					camera.resetExposure();
+				}
+			}
+			
+
+			lastSample = System.currentTimeMillis();
+		}
+
+	}
+
+	
+	
 
 	private List<MatOfPoint2f> findPatterns(Mat mat, boolean findMultiple) {
 		List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();

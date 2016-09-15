@@ -113,20 +113,17 @@ public class IpCamera extends CalculatedFPSCamera {
 		return IpCamDeviceRegistry.unregister(cameraName);
 	}
 
-	@Override
 	public Mat getMatFrame() {
 
 		return Camera.bufferedImageToMat(getBufferedImage());
 	}
 
-	@Override
 	public BufferedImage getBufferedImage() {
 		currentFrameTimestamp = System.currentTimeMillis();
 		frameCount++;
 		return ipcam.getImage();
 	}
 
-	@Override
 	public synchronized boolean open() {
 		if (isOpen())
 			return true;
@@ -140,12 +137,10 @@ public class IpCamera extends CalculatedFPSCamera {
 		return open;
 	}
 
-	@Override
 	public boolean isOpen() {
 		return ipcam.isOpen();
 	}
 
-	@Override
 	public synchronized void close() {
 		if (!isOpen())
 			return;
@@ -163,12 +158,10 @@ public class IpCamera extends CalculatedFPSCamera {
 		}
 	}
 
-	@Override
 	public String getName() {
 		return ipcam.getName();
 	}
 
-	@Override
 	public boolean isLocked() {
 		return ipcam.getLock().isLocked();
 	}
@@ -177,7 +170,6 @@ public class IpCamera extends CalculatedFPSCamera {
 		return ipcam.isImageNew();
 	}
 
-	@Override
 	public void setViewSize(Dimension size) {
 		try {
 			ipcam.setCustomViewSizes(new Dimension[] { size });
@@ -188,12 +180,10 @@ public class IpCamera extends CalculatedFPSCamera {
 		}
 	}
 
-	@Override
 	public Dimension getViewSize() {
 		return ipcam.getViewSize();
 	}
 
-	@Override
 	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
 			final CameraView cameraView) {
 		if (JavaShotDetector.isSystemSupported())
@@ -202,7 +192,6 @@ public class IpCamera extends CalculatedFPSCamera {
 			return null;
 	}
 
-	@Override
 	public void run() {
 		while (isOpen() && !closing) {
 			if (!isImageNew())
@@ -220,17 +209,19 @@ public class IpCamera extends CalculatedFPSCamera {
 			cameraEventListener.get().cameraClosed();
 	}
 
-	@Override
 	public boolean supportsExposureAdjustment() {
 		return false;
 	}
 
-	@Override
 	public boolean decreaseExposure() {
 		return false;
 	}
+	
+	public void resetExposure()
+	{
+		return;
+	}
 
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
@@ -238,7 +229,6 @@ public class IpCamera extends CalculatedFPSCamera {
 		return result;
 	}
 
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -253,5 +243,9 @@ public class IpCamera extends CalculatedFPSCamera {
 		} else if (!ipcam.equals(other.ipcam))
 			return false;
 		return true;
+	}
+	
+	public boolean limitsFrames(){
+		return false;
 	}
 }

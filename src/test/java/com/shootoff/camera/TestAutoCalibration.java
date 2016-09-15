@@ -20,6 +20,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
+import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -112,9 +113,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 		
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
-		
+		final Mat mat = acm.prepTestFrame(testFrame);
+
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
@@ -150,10 +150,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-2.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
-		
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
-		
+		final Mat mat = acm.prepTestFrame(testFrame);
+
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
@@ -191,8 +189,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-cutoff.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
+		final Mat mat = acm.prepTestFrame(testFrame);
+
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -214,10 +212,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				.getResourceAsStream("/autocalibration/tight-calibration-pattern-upsidedown.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
+		final Mat mat = acm.prepTestFrame(testFrame);
 
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
-		
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
 		assertTrue(boardCorners.isPresent());
@@ -238,9 +234,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-cutoff.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
+		final Mat mat = acm.prepTestFrame(testFrame);
 
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -262,9 +257,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
-
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
+		final Mat mat = acm.prepTestFrame(testFrame);
 		
 		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
@@ -300,11 +293,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				TestAutoCalibration.class.getResourceAsStream("/autocalibration/tight-calibration-pattern-turned.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
+		final Mat mat = acm.prepTestFrame(testFrame);
 
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
-		
-		// Step 1: Find the chessboard corners
 		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
 
 		assertTrue(boardCorners.isPresent());
@@ -368,12 +358,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-paper.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
+		acm.processFrame(Camera.bufferedImageToMat(testFrame));
 
-		
-		final Mat mat = new Mat();
-		acm.preProcessFrame(testFrame, mat);
-		
-		acm.processFrame(testFrame);
 		Optional<Bounds> calibrationBounds = Optional.of(acm.getBoundsResult());
 
 		assertTrue(calibrationBounds.isPresent());
