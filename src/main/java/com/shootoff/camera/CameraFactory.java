@@ -46,13 +46,16 @@ public final class CameraFactory {
 	// the program on start-up. This has the side effect that the
 	// cameras that are known when ShootOFF starts are the only
 	// ones it will ever know on Mac.
-	private static boolean isMac = false;
+	private static final boolean isMac;
 	private static Webcam defaultWebcam = null;
 	private static List<Camera> knownWebcams;
 
 	private static List<Camera> openCameras = Collections.synchronizedList(new ArrayList<>());
 
-	// Cameras that are not discovered by webcam-capture can be registered here
+	// This list contains cameras that are not discoverable by webcam-capture
+	// because they are non-UVC cameras with no webcam-capture driver (e.g.
+	// Omnitrack). Adding such cameras to this list ensures they are returned
+	// by CameraFactory.getWebcams().
 	private final static List<Camera> registeredCameras = new ArrayList<Camera>();
 
 	public static void registerCamera(Camera camera) {
@@ -69,23 +72,18 @@ public final class CameraFactory {
 
 	static {
 		Webcam.setDriver(new CompositeDriver());
-		final String os = System.getProperty("os.name");
 
-		if (os != null && os.equals("Mac OS X")) {
+		if ("Mac OS X".equals(System.getProperty("os.name"))) {
 			isMac = true;
 			defaultWebcam = Webcam.getDefault();
-			knownWebcams = new ArrayList<Camera>();
+			knownWebcams = new ArrayList<>();
 
 			for (final Webcam w : Webcam.getWebcams()) {
-				final Camera c;
-				if (w.getDevice() instanceof IpCamDevice)
-					c = new IpCamera(w);
-				else
-					c = new SarxosCaptureCamera(w.getName());
+				final Camera c = (w.getDevice() instanceof IpCamDevice) ? new IpCamera(w)
+						: new SarxosCaptureCamera(w.getName());
 
 				knownWebcams.add(c);
 			}
-
 		} else {
 			isMac = false;
 			defaultWebcam = null;
@@ -94,22 +92,16 @@ public final class CameraFactory {
 	}
 
 	public static Optional<Camera> getDefault() {
-		Camera defaultCam;
+		final Camera defaultCam;
 
 		if (isMac) {
-			if (defaultWebcam == null)
-				return Optional.empty();
+			if (defaultWebcam == null) return Optional.empty();
 
 			defaultCam = new SarxosCaptureCamera(defaultWebcam.getName());
 		} else {
 			final Webcam cam = Webcam.getDefault();
 
-			if (cam == null) {
-				defaultCam = null;
-			} else {
-
-				defaultCam = new SarxosCaptureCamera(cam.getName());
-			}
+			defaultCam = cam == null ? null : new SarxosCaptureCamera(cam.getName());
 		}
 
 		return Optional.ofNullable(defaultCam);
@@ -118,7 +110,7 @@ public final class CameraFactory {
 	public static List<Camera> getWebcams() {
 		if (isMac) return knownWebcams;
 
-		final List<Camera> webcams = new ArrayList<Camera>();
+		final List<Camera> webcams = new ArrayList<>();
 
 		int cameraIndex = 0;
 		for (Webcam w : Webcam.getWebcams()) {
