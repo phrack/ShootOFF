@@ -12,7 +12,7 @@
   <plugin name="Pistol Isometrics" version="1.4" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Pistol-Isometrics/releases/download/v1.4-FINAL/ShootOFF-Pistol-Isometrics.jar" 
     description="Walk through a series of shoot and hold exercises to strenghten muscles activated when accurately shooting a firearm." />
-  <plugin name="Shot to Click" version="1.5" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
-    creator="phrack" download="https://github.com/phrack/ShootOFF-Shot-to-Click/releases/download/v1.5-FINAL/ShootOFF-Shot-to-Click.jar" 
+  <plugin name="Shot to Click" version="1.6" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Shot-to-Click/releases/download/v1.6-FINAL/ShootOFF-Shot-to-Click.jar" 
     description="Play click-based Flash games using this exercise, which converts a shot on the arena to a mouse click on the screen the arena was calibrated on." />
 </plugins>
