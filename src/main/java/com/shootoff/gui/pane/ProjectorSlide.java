@@ -3,8 +3,10 @@ package com.shootoff.gui.pane;
 import java.util.Optional;
 
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CalibrationConfigurator;
+import com.shootoff.gui.CalibrationListener;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CanvasManager;
@@ -166,6 +168,21 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaStage.setFullScreenExitHint("");
 			
 			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, cameraViews));
+			
+			calibrationManager.get().addCalibrationListener(new CalibrationListener() {
+				@Override
+				public void startCalibration() { }
+				
+				@Override
+				public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
+					if (Platform.isFxApplicationThread()) {
+						hide();
+					} else {
+						Platform.runLater(() -> hide());
+					}
+				}
+			});
+			
 			arenaPane.setCalibrationManager(calibrationManager.get());
 			
 			exerciseSlide.toggleProjectorExercises(false);

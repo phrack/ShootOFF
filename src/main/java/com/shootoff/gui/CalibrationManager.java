@@ -19,7 +19,9 @@
 package com.shootoff.gui;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,7 +54,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final CameraManager calibratingCameraManager;
 	private final CanvasManager calibratingCanvasManager;
 	private final CameraViews cameraViews;
-	private final CalibrationListener calibrationListener;
+	private final List<CalibrationListener> calibrationListeners = new ArrayList<>();
 	private final ProjectorArenaPane arenaPane;
 
 	private ScheduledFuture<?> autoCalibrationFuture = null;
@@ -68,7 +70,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
 		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
-		this.calibrationListener = (CalibrationListener) arenaPane;
+		calibrationListeners.add((CalibrationListener) arenaPane);
 		this.arenaPane = arenaPane;
 		this.cameraViews = cameraViews;
 
@@ -77,6 +79,10 @@ public class CalibrationManager implements CameraCalibrationListener {
 		calibratingCameraManager.setOnCloseListener(() -> 
 			Platform.runLater(() -> 
 				arenaPane.fireEvent(new WindowEvent(null, WindowEvent.WINDOW_CLOSE_REQUEST))));
+	}
+	
+	public void addCalibrationListener(CalibrationListener calibrationListener) {
+		calibrationListeners.add(calibrationListener);
 	}
 
 	public void enableCalibration() {
@@ -138,7 +144,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 			}
 		}
 
-		calibrationListener.calibrated(Optional.ofNullable(pm));
+		for (CalibrationListener c : calibrationListeners)
+			c.calibrated(Optional.ofNullable(pm));
 
 		calibratingCameraManager.setCalibrating(false);
 
@@ -200,7 +207,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	}
 
 	private void configureArenaCamera(CalibrationOption option, Bounds bounds) {
-		Bounds translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
+		final Bounds translatedToCameraBounds = calibratingCanvasManager.translateCanvasToCamera(bounds);
 
 		calibratingCanvasManager.setProjectorArena(arenaPane, bounds);
 		configureArenaCamera(option);
@@ -278,7 +285,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
 
-		calibrationListener.startCalibration();
+		for (CalibrationListener c : calibrationListeners)
+			c.startCalibration();
 		arenaPane.setCalibrationMessageVisible(false);
 		// We may already be calibrating if the user decided to move the arena
 		// to another screen while calibrating. If we save the background in
