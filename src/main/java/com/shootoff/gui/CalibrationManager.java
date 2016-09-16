@@ -42,6 +42,7 @@ import javafx.geometry.Dimension2D;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+import javafx.stage.WindowEvent;
 
 public class CalibrationManager implements CameraCalibrationListener {
 	private static final int MAX_AUTO_CALIBRATION_TIME = 10 * 1000;
@@ -73,6 +74,9 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
 		calibratingCameraManager.setCalibrationManager(this);
+		calibratingCameraManager.setOnCloseListener(() -> 
+			Platform.runLater(() -> 
+				arenaPane.fireEvent(new WindowEvent(null, WindowEvent.WINDOW_CLOSE_REQUEST))));
 	}
 
 	public void enableCalibration() {

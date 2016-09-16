@@ -37,7 +37,7 @@ import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.Closeable;
+import com.shootoff.ObservableCloseable;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
@@ -73,7 +73,7 @@ import javafx.scene.paint.Color;
  * 
  * @author phrack and dmaul
  */
-public class CameraManager implements Closeable, CameraEventListener, CameraCalibrationListener {
+public class CameraManager implements ObservableCloseable, CameraEventListener, CameraCalibrationListener {
 	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
 	public static final int DEFAULT_FEED_HEIGHT = 480;
@@ -91,6 +91,7 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 
 	protected final Camera camera;
 	private final Optional<CameraErrorView> cameraErrorView;
+	private Optional<CloseListener> closeListener = Optional.empty();
 
 	protected final CameraView cameraView;
 	protected final Configuration config;
@@ -272,6 +273,11 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 	private void resetStartTime() {
 		startTime = System.currentTimeMillis();
 	}
+	
+	@Override
+	public void setOnCloseListener(CloseListener closeListener) {
+		this.closeListener = Optional.of(closeListener);
+	}
 
 	@Override
 	public void close() {
@@ -287,6 +293,8 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 
 		if (recordingCalibratedArea)
 			stopRecordingCalibratedArea();
+		
+		if (closeListener.isPresent()) closeListener.get().closing();
 	}
 
 	public void setStreaming(boolean isStreaming) {

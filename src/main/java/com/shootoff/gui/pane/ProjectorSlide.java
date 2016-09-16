@@ -115,7 +115,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		return calibrationManager;
 	}
 	
-	public void startArena() {
+	public void startArena() {	
 		if (arenaPane == null) {
 			final Stage arenaStage = new Stage();
 
@@ -186,7 +186,11 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaPane.autoPlaceArena();
 			
 			arenaStage.setOnCloseRequest((e) -> {
+				arenaStage.setOnCloseRequest(null);
+				
 				arenaPane.close();
+				arenaPane.setFeedCanvasManager(null);
+				arenaPane = null;
 				
 				cameraViews.removeCameraView("Arena");
 				
@@ -204,9 +208,6 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 				}
 				
 				exerciseSlide.toggleProjectorExercises(true);
-				
-				arenaPane.setFeedCanvasManager(null);
-				arenaPane = null;
 			});
 		}
 	}

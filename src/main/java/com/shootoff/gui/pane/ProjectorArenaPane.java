@@ -370,7 +370,11 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		
 		TimerPool.cancelTimer(mouseExitedFuture);
 		
-		arenaStage.close();
+		if (Platform.isFxApplicationThread()) {
+			arenaStage.close();
+		} else {
+			Platform.runLater(() -> arenaStage.close());
+		}
 	}
 
 	public void setArenaBackground(LocatedImage img) {
