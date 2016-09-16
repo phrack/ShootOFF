@@ -178,11 +178,8 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 			}
 		}
 		
-		synchronized(camera)
-		{
-
+		synchronized(camera) {
 			if (!camera.isOpen()) {
-	
 				camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 	
 				if (!camera.open()) {
@@ -199,10 +196,11 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 						return;
 					}
 	
-					if (logger.isWarnEnabled())
+					if (logger.isWarnEnabled()) {
 						logger.warn("Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
 								getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
 								(int) openDimension.getHeight());
+					}
 	
 					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 					shotDetector.setFrameSize((int) openDimension.getWidth(), (int) openDimension.getHeight());
@@ -212,8 +210,10 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 			}
 			
 	
-			logger.debug("starting camera thread {}", camera.getName());
-			new Thread(camera, camera.getName()).start();
+			if (logger.isDebugEnabled()) logger.debug("starting camera thread {}", camera.getName());
+			final String threadName = String.format("Shot detection %s %s", camera.getName(), 
+					shotDetector.getClass().getName());
+			new Thread(camera, threadName).start();
 		
 		}
 
@@ -325,7 +325,7 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 		}
 
 		if (logger.isTraceEnabled())
-			logger.trace("setDetecting was {} now {}", this.isDetecting, isDetecting);
+			logger.trace("setDetecting was {} now {} for {}", this.isDetecting, isDetecting, getName());
 
 		if (isDetecting == true)
 			setCameraState(CameraState.DETECTING);
@@ -704,7 +704,6 @@ public class CameraManager implements Closeable, CameraEventListener, CameraCali
 	}
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
-
 		if (acm == null)
 			acm = new AutoCalibrationManager(this, camera, calculateFrameDelay);
 		isAutoCalibrating.set(true);
