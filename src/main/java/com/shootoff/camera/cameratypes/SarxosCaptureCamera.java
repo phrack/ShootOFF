@@ -98,7 +98,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public BufferedImage getBufferedImage() {
-		Mat frame = getMatFrame();
+		final Mat frame = getMatFrame();
 
 		if (frame == null) {
 			return null;
@@ -112,12 +112,9 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		if (isOpen())
 			return true;
 
-		boolean open;
+		final boolean open = camera.open(cameraIndex);
 
-		open = camera.open(cameraIndex);
-
-		if (open)
-		{
+		if (open) {
 			// Set the max FPS to 60. If we don't set this it defaults
 			// to 30, which unnecessarily hampers higher end cameras
 			camera.set(5, 60);
@@ -135,8 +132,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public synchronized void close() {
-		if (isOpen())
-		{
+		if (isOpen()) {
 			resetExposure();
 			camera.release();
 		}
@@ -190,6 +186,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			}
 
 		}
+		
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 	}
@@ -208,18 +205,15 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		if (origExposure.isPresent())
 			return true;
 		
-		double exp = camera.get(CV_CAP_PROP_EXPOSURE);
+		final double exp = camera.get(CV_CAP_PROP_EXPOSURE);
 
-		logger.info("Initial camera exposure {}", exp);
+		if (logger.isInfoEnabled()) logger.info("Initial camera exposure {}", exp);
 		
-		if (exp == 0)
-			return false;
+		if (exp == 0) return false;
 		
 		origExposure = Optional.of(exp);
 
-		boolean res = decreaseExposure();
-		if (!res)
-		{
+		if (!decreaseExposure()) {
 			resetExposure();
 			origExposure = Optional.empty();
 			return false;
@@ -238,22 +232,23 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		
 		// In any case, if exposure doesn't change in the same direction when we change it, fail out.
 		final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
-		double newExp = 0;
+		final double newExp;
 		if (curExp <= -10.0) {
 			newExp = curExp + (.1 * curExp);
 		} else {
 			newExp = curExp - (.1 * curExp);
 		}
-		logger.debug("curExp[ {} newExp {}", curExp, newExp);
+		
+		if (logger.isDebugEnabled()) logger.debug("curExp[ {} newExp {}", curExp, newExp);
 		
 		// If they don't have the same sign, ABORT
-		if (!((curExp<0) == (newExp<0)) || curExp == newExp)
+		if (!((curExp<0) == (newExp<0)) || Math.abs(curExp - newExp) < .001f)
 			return false;
-		
 		
 		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
 		
-		logger.info("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
+		if (logger.isInfoEnabled()) 
+			logger.info("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
 
 		if (curExp <= -10.0)
 			return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
