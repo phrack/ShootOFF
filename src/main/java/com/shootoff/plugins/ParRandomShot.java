@@ -75,12 +75,16 @@ public class ParRandomShot extends ParForScore {
 	}
 
 	@Override
-	protected void doRound() throws Exception {
+	protected void doRound() {
 		pickSubtarget();
 		saySubtarget();
 		pauseShotDetection(false);
 		startRoundTimer();
-		Thread.sleep((long) (parTime * 1000.));
+		try {
+			Thread.sleep((long) (parTime * 1000.));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		TrainingExerciseBase.playSound("sounds/chime.wav");
 		pauseShotDetection(true);
 		countScore = false;

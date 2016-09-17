@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -112,29 +111,31 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		super.destroy();
 	}
 
-	protected class SetupWait implements Callable<Void> {
+	protected class SetupWait implements Runnable {
 		@Override
-		public Void call() {
+		public void run() {
+			if (!repeatExercise) return;
+			
 			pauseShotDetection(true);
 			playSound(new File("sounds/voice/shootoff-makeready.wav"));
 			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
 			if (repeatExercise) executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 
-			return null;
+			return;
 		}
 	}
 
-	protected class Round implements Callable<Void> {
+	protected class Round implements Runnable {
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			if (repeatExercise) {
 				int randomDelay = setupRound();
 				doRound();
 				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 			}
 
-			return null;
+			return;
 		}
 	}
 
@@ -151,6 +152,9 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 				executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);
 			}
 		});
+		
+		addShootOFFButton("Clear Shots", (event) -> super.clearShots());
+		
 		addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
 	}
 
@@ -174,7 +178,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		return randomDelay;
 	}
 
-	protected void doRound() throws Exception {
+	protected void doRound() {
 		playSound("sounds/beep.wav");
 		pauseShotDetection(false);
 		startRoundTimer();

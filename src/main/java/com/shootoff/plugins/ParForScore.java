@@ -84,9 +84,13 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 	}
 
 	@Override
-	protected void doRound() throws Exception {
+	protected void doRound() {
 		super.doRound();
-		Thread.sleep((long) (parTime * 1000.));
+		try {
+			Thread.sleep((long) (parTime * 1000.));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		TrainingExerciseBase.playSound("sounds/chime.wav");
 		pauseShotDetection(true);
 		countScore = false;
