@@ -494,13 +494,41 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return cameraTabPane.getTabs().add(cameraTab);
 	}
 	
-	public void addCameraView(String name, Node content, CanvasManager canvasManager, boolean select) {
+	public void addNonCameraView(String name, Pane content, CanvasManager canvasManager, boolean select, boolean maximizeView) {
 		final Tab viewTab = new Tab(name, content);
 		cameraTabPane.getTabs().add(viewTab);
 		installDebugCoordDisplay(canvasManager);
 		
 		if (select) {
 			cameraTabPane.getSelectionModel().selectLast();
+		}
+
+		// Keep aspect ratio but always match size to the width of the tab
+		if (maximizeView) {
+			final Runnable translatePosition = () -> {
+				content.setTranslateX(
+						(content.getBoundsInParent().getWidth() - content.getBoundsInLocal().getWidth()) / 2);
+				content.setTranslateY(
+						(content.getBoundsInParent().getHeight() - content.getBoundsInLocal().getHeight()) / 2);
+			};
+			
+			// Delay to give auto-placement and calibration a chance to finish
+			TimerPool.schedule(() -> {
+				final double initialScale = cameraTabPane.getBoundsInLocal().getWidth()
+						/ content.getBoundsInLocal().getWidth();
+				content.setScaleX(initialScale);
+				content.setScaleY(initialScale);
+
+				translatePosition.run();
+			}, 2000);
+			
+			cameraTabPane.widthProperty().addListener((observable, oldValue, newValue) -> {
+				final double scale = newValue.doubleValue() / content.getBoundsInLocal().getWidth();
+				content.setScaleX(scale);
+				content.setScaleY(scale);
+
+				translatePosition.run();
+			});
 		}
 	}
 	

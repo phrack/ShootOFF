@@ -18,7 +18,6 @@ import com.shootoff.targets.CameraViews;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -132,7 +131,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			// happens to the other
 			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer,
 					config, resetter, cameraViews.getShotTimerModel()); 
-			cameraViews.addCameraView("Arena", new ScrollPane(arenaTabPane), arenaTabPane.getCanvasManager(), true);
+			
+			cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
 			
 			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
 			arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
