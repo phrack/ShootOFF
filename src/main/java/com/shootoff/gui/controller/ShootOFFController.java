@@ -98,6 +98,7 @@ import javafx.stage.Stage;
 
 public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews, Closeable, Resetter, ExerciseListener {
 	private Stage shootOFFStage;
+	@FXML private VBox shootOffContainer;
 	@FXML private HBox controlsContainer;
 	@FXML private VBox bodyContainer;
 	@FXML private TabPane cameraTabPane;
@@ -136,6 +137,28 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		
 		shootOFFStage = (Stage) controlsContainer.getScene().getWindow();
 
+		
+		shootOFFStage.setOnShown((event) -> {
+			final ObservableList<Screen> shootOffScreens = Screen.getScreensForRectangle(shootOFFStage.getX(),
+					shootOFFStage.getY(), 1, 1);
+
+			// Automatically maximize ShootOFF on smaller screens
+			if (shootOffScreens.size() > 0) {
+				final Screen shootOffScreen = shootOffScreens.get(0);
+
+				if (shootOffScreen.getBounds().getWidth() <= 1280 || shootOffScreen.getBounds().getHeight() <= 800) {
+					shootOFFStage.setMaximized(true);
+
+					// If the screen has an unusually short display for
+					// a modern system, add a scroll bar to the body
+					if (shootOffScreen.getBounds().getHeight() < 800) {
+						shootOffContainer.getChildren().remove(bodyContainer);
+						shootOffContainer.getChildren().add(new ScrollPane(bodyContainer));
+					}
+				}
+			}
+		});
+		
 		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);		
 		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this, config);
 		projectorSlide = new ProjectorSlide(controlsContainer, bodyContainer, config, this, shootOFFStage, 

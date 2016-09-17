@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
+<VBox fx:id="shootOffContainer" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
    <children>
       <HBox fx:id="controlsContainer" alignment="TOP_CENTER" minHeight="160.0" prefWidth="200.0" spacing="175.0">
          <children>
