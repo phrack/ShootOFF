@@ -136,25 +136,28 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		this.camerasSupervisor = new CamerasSupervisor(config);
 		
 		shootOFFStage = (Stage) controlsContainer.getScene().getWindow();
-
 		
 		shootOFFStage.setOnShown((event) -> {
 			final ObservableList<Screen> shootOffScreens = Screen.getScreensForRectangle(shootOFFStage.getX(),
 					shootOFFStage.getY(), 1, 1);
 
+			final Screen shootOffScreen;
+
 			// Automatically maximize ShootOFF on smaller screens
 			if (shootOffScreens.size() > 0) {
-				final Screen shootOffScreen = shootOffScreens.get(0);
+				shootOffScreen = shootOffScreens.get(0);
+			} else {
+				shootOffScreen = Screen.getPrimary();
+			}
 
-				if (shootOffScreen.getBounds().getWidth() <= 1280 || shootOffScreen.getBounds().getHeight() <= 800) {
-					shootOFFStage.setMaximized(true);
+			if (shootOffScreen.getBounds().getWidth() <= 1280 || shootOffScreen.getBounds().getHeight() <= 800) {
+				shootOFFStage.setMaximized(true);
 
-					// If the screen has an unusually short display for
-					// a modern system, add a scroll bar to the body
-					if (shootOffScreen.getBounds().getHeight() < 800) {
-						shootOffContainer.getChildren().remove(bodyContainer);
-						shootOffContainer.getChildren().add(new ScrollPane(bodyContainer));
-					}
+				// If the screen has an unusually short display for
+				// a modern system, add a scroll bar to the body
+				if (shootOffScreen.getBounds().getHeight() < 800) {
+					shootOffContainer.getChildren().remove(bodyContainer);
+					shootOffContainer.getChildren().add(new ScrollPane(bodyContainer));
 				}
 			}
 		});
