@@ -166,6 +166,7 @@ public class TrainingExerciseBase {
 	private static class DelayPane extends GridPane {
 		public DelayPane(DelayedStartListener listener) {
 			this.getColumnConstraints().add(new ColumnConstraints(100));
+			this.setVgap(5);
 			
 			final Label instructionsLabel = new Label("Set interval within which a beep will sound\n"
 					+ "to signal the start of a round.\nDefault: A round starts after a random wait\n"
