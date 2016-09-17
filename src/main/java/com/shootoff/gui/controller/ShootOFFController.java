@@ -180,11 +180,32 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			close();
 		});
 		
-		shootOFFStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-			trainingExerciseScrollPane.setPrefHeight(trainingExerciseScrollPane.getLayoutBounds().getHeight() + 
-					(newValue.doubleValue() - oldValue.doubleValue()));
-		});
+		// This delay is to give the window time to fully show for the first
+		// time. If we don't do this, the newValues in the listeners will end
+		// up very high initially, making the controls too big. Using
+		// Stage.setOnShow doesn't solve the problem because the size will
+		// still change after the first call to the listener.
+		TimerPool.schedule(() -> {
+			shootOFFStage.widthProperty().addListener((observable, oldValue, newValue) -> {
+				if (!shootOFFStage.isShowing()) return;
 
+				final double d = newValue.doubleValue() - oldValue.doubleValue();
+
+				cameraTabPane.setPrefWidth(cameraTabPane.getLayoutBounds().getWidth() + d * .35);
+				shotTimerTable.setPrefWidth(shotTimerTable.getLayoutBounds().getWidth() + d * .65);
+			});
+			
+			shootOFFStage.heightProperty().addListener((observable, oldValue, newValue) -> {
+				if (!shootOFFStage.isShowing()) return;
+				
+				final double d = newValue.doubleValue() - oldValue.doubleValue();
+				
+				cameraTabPane.setPrefHeight(cameraTabPane.getLayoutBounds().getHeight() + d * .25);
+				trainingExerciseScrollPane.setPrefHeight(trainingExerciseScrollPane.getLayoutBounds().getHeight()
+						+ d * .75);
+			});
+		}, 2000);
+		
 		if (config.getWebcams().isEmpty()) {
 			Optional<Camera> defaultCamera = CameraFactory.getDefault();
 			if (defaultCamera.isPresent()) {
@@ -452,8 +473,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			return false;
 		}
 
-		Tab cameraTab = new Tab(webcamName);
-		Group cameraCanvasGroup = new Group();
+		final Tab cameraTab = new Tab(webcamName);
+		final Group cameraCanvasGroup = new Group();
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
