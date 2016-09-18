@@ -39,18 +39,23 @@ def version = extProp["version"]
 
 def username = ''                                           // Username for GitHub (will request JIT via console input)
 def password = ''                                           // Password for GitHub (will request JIT via console input)
+def gh = null
 def grgit = null
 
 def dist = 'build/dist/'
 def archivePath = dist + 'ShootOFF.jar'
 def libTempDir = dist + 'libs'                              // Location of ShootOFF's dependencies staged for release
 def webstartDir = "${project.buildDir}/webstart/"           // The staging area for the JWS release
+
+def bundleDir = "${project.buildDir}/deploy/" 				// Here be bundles
+
 def jwsDir = 'jws/'
 def mainClassName = 'com.shootoff.Main'
 def writableResources = 'shootoff-writable-resources.jar'   // JAR to contain files that should be writable (targets, settings, etc.) for JWS
 def writableResourcesMetadata = 'shootoff-writable-resources.xml'
 def diagnosticsJar = 'ShootOFF-diagnostics.jar'
 def releaseZip = 'shootoff-' + version + '-final.zip'
+def releaseMsi = 'ShootOFF' + '-' + version + '.msi'
 def license = 'GPLv3'
 
 def keyStore = 'shootoff_cs.jks'
@@ -252,6 +257,41 @@ task zipRelease(type: Zip) {
     destinationDir = file(dist)
 }
 
+task getDiagnosticJar() {
+    def diagnosticTool = new File(dist + diagnosticsJar)
+    if (!diagnosticTool.exists()) {
+    
+        if (username == '' && password == '') {
+            username = System.console().readLine('\nPlease enter GitHub username: ')
+            password = System.console().readPassword('Please enter GitHub password: ')
+            password = new String(password)
+        }
+
+        gh = GitHub.connectUsingPassword(username, password)
+
+        if (!gh.isCredentialValid()) {
+            throw new InvalidUserDataException('Incorrect GitHub credentials')
+        }
+    
+    
+        def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
+        def diagReleases = ghDiagRepo.listReleases().asList()
+
+        def newestRelease = diagReleases.get(0)
+        
+        for (release in diagReleases.subList(1, diagReleases.size())) {
+            if (!release.isDraft() && !release.isPrerelease()) {
+                if (release.getTagName() > newestRelease.getTagName()) {
+                    newestRelease = release
+                }
+            }
+        }
+
+        new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
+            .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
+        }
+}
+
 // 1. Add latest version of diagnostic tool to release zip
 // 2. Create release on GH and upload the zip
 // 3. Upload the xml file that contains version metadata to let users know a new version is out
@@ -259,6 +299,8 @@ task pushZipRelease(dependsOn: zipRelease) {
     description 'Add diagnostic tool to release zip, create GitHub release and upload ' +
 		'the zip, and update and commit new version metadata to gh-pages'
     group 'Release' 
+    
+    dependsOn(getDiagnosticJar)
 
     doLast{
         if (username == '' && password == '') {
@@ -267,32 +309,12 @@ task pushZipRelease(dependsOn: zipRelease) {
             password = new String(password)
         }
 
-        def gh = GitHub.connectUsingPassword(username, password)
+        if (!gh) gh = GitHub.connectUsingPassword(username, password)
 
         if (!gh.isCredentialValid()) {
             throw new InvalidUserDataException('Incorrect GitHub credentials')
         }
 
-        // Add latest version of diagnostic tool to release zip
-
-        def diagnosticTool = new File(dist + diagnosticsJar)
-        if (!diagnosticTool.exists()) {
-            def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
-            def diagReleases = ghDiagRepo.listReleases().asList()
-
-            def newestRelease = diagReleases.get(0)
-            
-            for (release in diagReleases.subList(1, diagReleases.size())) {
-                if (!release.isDraft() && !release.isPrerelease()) {
-                    if (release.getTagName() > newestRelease.getTagName()) {
-                        newestRelease = release
-                    }
-                }
-            }
-
-            new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
-                .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
-        }
 
         ant.zip(update: "true", 
                 basedir: "${dist}", 
@@ -311,6 +333,14 @@ task pushZipRelease(dependsOn: zipRelease) {
         repoReleaseBuilder.name('shootoff-' + version + '-final')
         def repoRelease = repoReleaseBuilder.create()
         repoRelease.uploadAsset(new File(dist + releaseZip), 'application/zip')
+        
+        
+        // Upload MSI if it exists
+        def msiFile = new File(bundleDir + 'bundles/' + releaseMsi)
+        if (msiFile.exists())
+        {
+        	repoRelease.uploadAsset(msiFile, 'application/msi')
+        }
 
         // Update version metadata
 
@@ -374,6 +404,106 @@ task fxJarWritableResources() {
     }
 }
 
+task msiRelease() {
+    dependsOn(fxJar)
+    dependsOn('updateJars')
+    dependsOn(getDiagnosticJar)
+
+    def antfx = NamespaceBuilder.newInstance(
+            ant,
+            'javafx:com.sun.javafx.tools.ant')
+
+    doLast {
+        antfx.deploy(
+        		verbose: true,
+                outdir: bundleDir,
+                outfile: 'ShootOFF',
+                offlineAllowed: true,
+                nativeBundles: 'msi',
+        ) {
+            antfx.application(
+                mainClass: mainClassName,
+                name: 'ShootOFF',
+                toolkit: 'fx',
+                version: version
+            )
+            
+            antfx.preferences(
+            	install: false,
+            	menu: true,
+            	shortcut: true
+            )
+
+            antfx.platform(
+                javafx: '8.0+',
+                j2se: '1.8+',
+            )
+
+            antfx.info(
+                title: project.name,
+                vendor: "ShootOFF",
+                description: 'A virtual shooting range to enhance laser dry fire training.'
+            ) {
+                antfx.icon(
+                    kind: 'default',
+                    href: 'windows_icon.ico',
+                    width: '256', 
+                    height: '256'
+                )
+            }
+
+            antfx.resources {
+                antfx.fileset(
+                    dir: 'build/dist/',
+                    includes: 'ShootOFF.jar'
+                )
+                
+                antfx.fileset(
+                    dir: '',
+                    includes: 'shootoff.properties'
+                )
+                
+                antfx.fileset(
+                	dir: 'build/dist/',
+                	includes: diagnosticsJar
+                )
+                
+                antfx.fileset(
+                    dir: '',
+                    includes: 'LICENSE'
+                )
+                
+                antfx.fileset(
+                    dir: '',
+        			includes: 'targets/**',
+                )
+                
+                antfx.fileset(
+                    dir: '',
+        			includes: 'courses/**',
+                )
+                
+                antfx.fileset(
+                    dir: '',
+       			 	includes: 'sounds/**',
+                )
+                antfx.fileset(
+                    dir: 'build/dist/',
+                    includes: 'libs/*.jar'
+                )
+                
+                
+                antfx.fileset(
+                    type: 'icon',
+                    dir: 'src/main/resources/images/',
+                    includes: 'windows_icon.ico'
+                )
+            }
+        }
+    }
+}
+
+
 task fxWebstartSignedJar() {
     dependsOn(fxJar)
     dependsOn('updateJars')
@@ -430,7 +560,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
         antfx.deploy(
                 codebase: "http://shootoffapp.com/jws/",
                 outdir: webstartDir,
-                outfile: project.name
+                outfile: project.name,
         ) {
             antfx.application(
                 mainClass: mainClassName,
@@ -557,6 +687,16 @@ task release() {
                 'todo list for remaining tasks'
     group 'Release'
 
+    dependsOn(pushZipRelease)
+    dependsOn(pushFxRelease)
+}
+
+task releaseWithMsi() {
+    description 'Perform all automated tasks to release a new version of ShootOFF and print ' +
+                'todo list for remaining tasks'
+    group 'Release'
+
+    dependsOn(msiRelease)
     dependsOn(pushZipRelease)
     dependsOn(pushFxRelease)
 }
