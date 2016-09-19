@@ -42,6 +42,7 @@ import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
 import com.shootoff.camera.cameratypes.CameraEventListener;
+import com.shootoff.camera.cameratypes.PS3EyeCamera;
 import com.shootoff.camera.cameratypes.SarxosCaptureCamera;
 import com.shootoff.camera.processors.DeduplicationProcessor;
 import com.shootoff.camera.recorders.RollingRecorder;
@@ -129,6 +130,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	private CameraCalibrationListener cameraCalibrationListener;
 
+	static private Thread cameraThread;
+
 	public void setCalibrationManager(CameraCalibrationListener calibrationManager) {
 		this.cameraCalibrationListener = calibrationManager;
 	}
@@ -214,7 +217,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			if (logger.isDebugEnabled()) logger.debug("starting camera thread {}", camera.getName());
 			final String threadName = String.format("Shot detection %s %s", camera.getName(), 
 					shotDetector.getClass().getName());
-			new Thread(camera, threadName).start();
+			cameraThread = new Thread(camera, threadName);
+			cameraThread.start();
 		
 		}
 
@@ -286,6 +290,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		setStreaming(false);
 		setCameraState(CameraState.CLOSED);
 		camera.close();
+		cameraThread.stop();
 		if (recordingStream)
 			stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
@@ -736,6 +741,9 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	public void launchCameraSettings() {
 		if (camera instanceof SarxosCaptureCamera) {
 			((SarxosCaptureCamera) camera).launchCameraSettings();
+		}
+		if (camera instanceof PS3EyeCamera){
+			((PS3EyeCamera) camera).launchCameraSettings();
 		}
 	}
 
