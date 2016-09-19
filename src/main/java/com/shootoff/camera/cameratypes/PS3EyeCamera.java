@@ -114,7 +114,7 @@ public class PS3EyeCamera implements Camera {
 
 	static Label fpsValue = new Label("0");
 	static Stage stage = new Stage();
-	
+
 	public void launchCameraSettings() {
 
 		logger.debug("launch camera settings called");
@@ -144,11 +144,9 @@ public class PS3EyeCamera implements Camera {
 		final Label autoGainCaption = new Label("Auto Gain:");
 		final Label fpsCaption = new Label("FPS: ");
 
-		final Label gainValue = new Label(Integer.toString((int)gain.getValue()));
-		final Label exposureValue = new Label(Integer.toString((int)exposure.getValue()));
-		
+		final Label gainValue = new Label(Integer.toString((int) gain.getValue()));
+		final Label exposureValue = new Label(Integer.toString((int) exposure.getValue()));
 
-		
 		Group root = new Group();
 		Scene scene = new Scene(root, 425, 200);
 		stage.setScene(scene);
@@ -172,7 +170,7 @@ public class PS3EyeCamera implements Camera {
 
 		GridPane.setConstraints(autoGainCaption, 0, 4);
 		grid.getChildren().add(autoGainCaption);
-		
+
 		GridPane.setConstraints(fpsCaption, 0, 5);
 		grid.getChildren().add(fpsCaption);
 
@@ -189,12 +187,11 @@ public class PS3EyeCamera implements Camera {
 		exposureValue.setTextFill(textColor);
 		GridPane.setConstraints(exposureValue, 2, 2);
 		grid.getChildren().add(exposureValue);
-		
+
 		GridPane.setConstraints(fpsValue, 1, 5);
 		grid.getChildren().add(fpsValue);
-		
-		configIsOpen = true;
 
+		configIsOpen = true;
 
 		gain.valueProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
@@ -248,7 +245,7 @@ public class PS3EyeCamera implements Camera {
 		});
 
 		stage.show();
-		
+
 		stage.setOnCloseRequest((e) -> {
 			configIsOpen = false;
 		});
@@ -300,7 +297,7 @@ public class PS3EyeCamera implements Camera {
 	}
 
 	public static void closeMe() {
-		if(configIsOpen){
+		if (configIsOpen) {
 			configIsOpen = false;
 			stage.close();
 		}
@@ -439,11 +436,10 @@ public class PS3EyeCamera implements Camera {
 			return new OptiTrackShotDetector(cameraManager, config, cameraView);
 		else if (NativeShotDetector.isSystemSupported())
 			return new NativeShotDetector(cameraManager, config, cameraView);
-		else if (JavaShotDetector.isSystemSupported()){
+		else if (JavaShotDetector.isSystemSupported()) {
 			logger.debug("starting javaShotDetector");
 			return new JavaShotDetector(cameraManager, config, cameraView);
-		}
-		else
+		} else
 			return null;
 	}
 
@@ -452,6 +448,7 @@ public class PS3EyeCamera implements Camera {
 	}
 
 	static boolean configIsOpen = false;
+
 	@Override
 	public void run() {
 
@@ -462,10 +459,10 @@ public class PS3EyeCamera implements Camera {
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
 			}
-			
-			if(configIsOpen){
+
+			if (configIsOpen) {
 				Platform.runLater(() -> {
-					fpsValue.setText(Double.toString(getFPS() ) );
+					fpsValue.setText(Double.toString(getFPS()));
 				});
 			}
 
