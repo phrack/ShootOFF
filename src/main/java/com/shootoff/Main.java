@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.cameratypes.OptiTrackCamera;
-import com.shootoff.camera.cameratypes.PS3EyeCamera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -681,8 +680,6 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		OptiTrackCamera.init();
-		PS3EyeCamera.init();
-		
 		
 		this.primaryStage = primaryStage;
 

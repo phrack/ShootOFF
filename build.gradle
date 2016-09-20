@@ -273,6 +273,7 @@ task getDiagnosticJar() {
             throw new InvalidUserDataException('Incorrect GitHub credentials')
         }
     
+    
         def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
         def diagReleases = ghDiagRepo.listReleases().asList()
 
@@ -286,8 +287,8 @@ task getDiagnosticJar() {
             }
         }
 
-        //new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
-        //    .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
+        new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
+            .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
         }
 }
 
