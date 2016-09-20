@@ -34,12 +34,31 @@ public abstract class CalculatedFPSCamera implements Camera {
 	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
 
 	public void setCameraEventListener(CameraEventListener cameraEventListener) {
-		this.cameraEventListener = Optional.of(cameraEventListener);
+		this.cameraEventListener = Optional.ofNullable(cameraEventListener);
 	}
 
 	public boolean setState(CameraState cameraState) {
-		this.cameraState = cameraState;
+		
+		switch (cameraState) {
+			case CLOSED:
+				if (this.cameraState != CameraState.CLOSED)
+				{
+					this.cameraState = cameraState;
+					close();
+				}
+				break;
+			default:
+				this.cameraState = cameraState;
+				break;
+		}
+		
+
+		
 		return true;
+	}
+	public CameraState getState()
+	{
+		return cameraState;
 	}
 
 	public long getCurrentFrameTimestamp() {

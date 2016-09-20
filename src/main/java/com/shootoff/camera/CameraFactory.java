@@ -150,7 +150,8 @@ public final class CameraFactory {
 
 	public static void openCamerasAdd(Camera camera) {
 		synchronized (openCameras) {
-			openCameras.add(camera);
+			if (!openCameras.contains(camera))
+				openCameras.add(camera);
 		}
 	}
 

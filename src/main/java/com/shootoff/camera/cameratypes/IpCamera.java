@@ -125,9 +125,10 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	public synchronized boolean open() {
-		if (isOpen())
+		if (isOpen() && !closing)
 			return true;
 
+		closing = false;
 		boolean open = false;
 		try {
 			open = ipcam.open();
@@ -142,18 +143,21 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	public synchronized void close() {
-		if (!isOpen())
+		if (!isOpen() || closing)
 			return;
 
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().cameraClosed();
+
+		closing = true;
+		
 		if (CameraFactory.isMac()) {
 			new Thread(() -> {
 				ipcam.close();
 			}, "CloseMacOSXWebcam").start();
-			closing = true;
 			return;
 		} else {
 			ipcam.close();
-			closing = true;
 			return;
 		}
 	}
@@ -205,8 +209,9 @@ public class IpCamera extends CalculatedFPSCamera {
 			}
 
 		}
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
+		
+		if (!closing)
+			close();
 	}
 
 	public boolean supportsExposureAdjustment() {

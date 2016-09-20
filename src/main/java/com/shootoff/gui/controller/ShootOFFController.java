@@ -23,8 +23,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -445,12 +449,44 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	}
 
 	private void addConfiguredCameras() {
-		cameraTabPane.getTabs().clear();
-		camerasSupervisor.clearManagers();
+		Optional<Camera> defaultCam = Optional.empty();
+		if (config.getWebcams().isEmpty())
+			defaultCam = CameraFactory.getDefault();
+		
+		for (Iterator<Entry<Tab, CameraManager>> it = CameraManagerTabs.entrySet().iterator(); it.hasNext();)
+		{
+			Entry<Tab, CameraManager> next = it.next();
+			if (config.getWebcams().isEmpty())
+			{
+				if (!defaultCam.isPresent() || next.getValue().getCamera() != defaultCam.get())
+				{
+					cameraTabPane.getTabs().remove(next.getKey());
+					camerasSupervisor.clearManager(next.getValue());
+					it.remove();
+				}
+			}
+			else
+			{
+				boolean remove = true;
+				for (String webcamName : config.getWebcams().keySet())
+				{
+					final Camera webcam = config.getWebcams().get(webcamName);
+					if (next.getValue().getCamera() == webcam && webcam.isOpen())
+						remove = false;
+				}
+				if (remove)
+				{
+					cameraTabPane.getTabs().remove(next.getKey());
+					camerasSupervisor.clearManager(next.getValue());
+					it.remove();
+				}
+			}
+		}
 
 		if (config.getWebcams().isEmpty()) {
-			Optional<Camera> defaultCam = CameraFactory.getDefault();
-
+			if (camerasSupervisor.getCameraManagers().size() > 0)
+				return;
+			
 			if (defaultCam.isPresent()) {
 				if (!addCameraTab("Default", defaultCam.get())) showCameraLockError(defaultCam.get(), true);
 			} else {
@@ -458,10 +494,16 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				Main.closeNoCamera();
 			}
 		} else {
+			if (camerasSupervisor.getCameraManagers().size() == config.getWebcams().size())
+				return;
+			
 			int failureCount = 0;
 
 			for (String webcamName : config.getWebcams().keySet()) {
-				Camera webcam = config.getWebcams().get(webcamName);
+				final Camera webcam = config.getWebcams().get(webcamName);
+				
+				if (camerasSupervisor.getCameraManager(webcam) != null)
+					continue;
 
 				if (!addCameraTab(webcamName, webcam)) {
 					failureCount++;
@@ -471,6 +513,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 
+	private Map<Tab, CameraManager> CameraManagerTabs = new HashMap<>();
 	private boolean addCameraTab(String webcamName, Camera cameraInterface) {
 		if (cameraInterface.isLocked() && !cameraInterface.isOpen()) {
 			return false;
@@ -484,6 +527,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, this, webcamName, shotEntries);
 		CameraManager cameraManager = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
 
+		CameraManagerTabs.put(cameraTab, cameraManager);
+		
 		if (config.getRecordingCameras().contains(cameraInterface)) {
 			config.registerRecordingCameraManager(cameraManager);
 		}

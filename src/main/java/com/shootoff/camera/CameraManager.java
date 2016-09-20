@@ -74,6 +74,7 @@ import javafx.scene.paint.Color;
  * @author phrack and dmaul
  */
 public class CameraManager implements ObservableCloseable, CameraEventListener, CameraCalibrationListener {
+	private static final int MAXIMUM_CONSECUTIVE_CAMERA_ERRORS = 5;
 	private static final Logger logger = LoggerFactory.getLogger(CameraManager.class);
 	public static final int DEFAULT_FEED_WIDTH = 640;
 	public static final int DEFAULT_FEED_HEIGHT = 480;
@@ -284,8 +285,11 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		getCameraView().close();
 		setDetecting(false);
 		setStreaming(false);
+
+		camera.setCameraEventListener(null);
+		
 		setCameraState(CameraState.CLOSED);
-		camera.close();
+				
 		if (recordingStream)
 			stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
@@ -507,17 +511,42 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			logger.warn("Invalid frame yielded from {}", camera.getName());
 	}
 
+	private int consecutiveCameraErrors = 0;
 	private boolean handleFrame(Mat currentFrame) {
+		boolean cameraError = false;
+		
 		if (currentFrame == null && !camera.isOpen()) {
 			// Camera appears to have closed
 			if (isStreaming.get() && cameraErrorView.isPresent())
 				cameraErrorView.get().showMissingCameraError(camera);
 
-			return false;
+			cameraError = true;
 		} else if (currentFrame == null && camera.isOpen()) {
 			// Camera appears to be open but got a null frame
 			logger.warn("Null frame from camera: {}", camera.getName());
+			cameraError = true;
+		} else if ((currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth) && camera.isOpen())
+		{
+			// Camera appears to be open but got an invalid size frame
+			logger.warn("Invalid frame size from camera: {} gave {} expecting {},{}", camera.getName(), currentFrame.size(), feedWidth, feedHeight);
+			cameraError = true;
+		}
+		
+		if (cameraError)
+		{
+			consecutiveCameraErrors++;
+			if (consecutiveCameraErrors > MAXIMUM_CONSECUTIVE_CAMERA_ERRORS)
+			{
+				if (isStreaming.get() && cameraErrorView.isPresent())
+					cameraErrorView.get().showMissingCameraError(camera);
+				
+				camera.close();
+			}
 			return false;
+		}
+		else
+		{
+			consecutiveCameraErrors = 0;
 		}
 
 		BufferedImage currentImage = processFrame(currentFrame);
@@ -764,6 +793,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	@Override
 	public void cameraClosed() {
+		setCameraState(CameraState.CLOSED);
 		close();
 	}
 
