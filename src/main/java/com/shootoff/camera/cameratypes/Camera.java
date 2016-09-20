@@ -51,6 +51,7 @@ public interface Camera extends Runnable, Closeable {
 	// Return false if the state change is not allowed
 	// for possible future use
 	boolean setState(CameraState state);
+	CameraState getState();
 
 	void setCameraEventListener(CameraEventListener cameraEventListener);
 

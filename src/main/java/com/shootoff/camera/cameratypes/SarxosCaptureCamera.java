@@ -45,6 +45,8 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
+	
+	private boolean closing = false;
 
 	// For testing
 	protected SarxosCaptureCamera() {
@@ -83,7 +85,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	public Mat getMatFrame() {
 		final Mat frame = new Mat();
 		try {
-			if (!isOpen() || !camera.read(frame) || frame.size().height == 0)
+			if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0)
 				return null;
 		} catch (Exception e) {
 			// Sometimes there is a race condition on closing the camera vs.
@@ -109,8 +111,13 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public synchronized boolean open() {
-		if (isOpen())
+		logger.trace("{} - open request isOpen {} closing {}", getName(), isOpen(), closing);
+
+		
+		if (isOpen() && !closing)
 			return true;
+		
+		closing = false;
 
 		final boolean open = camera.open(cameraIndex);
 
@@ -132,14 +139,28 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public synchronized void close() {
-		if (isOpen()) {
+		logger.trace("{} - close request isOpen {} closing {}", getName(), isOpen(), closing);
+		
+		if (isOpen() && !closing) {
+			closing = true;
 			resetExposure();
 			camera.release();
+			
 		}
+		else if (isOpen() && closing)
+		{
+			return;
+		}
+		else if (!isOpen())
+		{
+			closing = false;
+		}
+		
+		CameraFactory.openCamerasRemove(this);
 
-		if (!isOpen())
-			CameraFactory.openCamerasRemove(this);
-
+		if (cameraEventListener.isPresent())
+			cameraEventListener.get().cameraClosed();
+		
 		return;
 	}
 
@@ -177,7 +198,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public void run() {
-		while (isOpen()) {
+		while (isOpen() && !closing) {
 			if (cameraEventListener.isPresent())
 				cameraEventListener.get().newFrame(getMatFrame());
 
@@ -187,8 +208,10 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 		}
 		
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
+		logger.trace("{} camera closed during run thread isOpen {} closing {}", getName(), isOpen(), closing);
+		
+		if (!closing)
+			close();
 	}
 
 	@Override

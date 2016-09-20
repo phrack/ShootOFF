@@ -73,7 +73,6 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	public boolean setState(CameraState cameraState) {
-		this.cameraState = cameraState;
 		switch (cameraState) {
 		case DETECTING:
 			// TODO: If 780nm, enable.  If visible, keep disabled
@@ -85,18 +84,28 @@ public class OptiTrackCamera implements Camera {
 				toggleIRFilter();
 			break;
 		case CLOSED:
-			close();
+			if (this.cameraState != CameraState.CLOSED)
+			{
+				this.cameraState = cameraState;
+				close();
+			}
 			break;
 		case NORMAL:
 		default:
 			break;
 
 		}
+		this.cameraState = cameraState;
+
 		return true;
+	}
+	public CameraState getState()
+	{
+		return cameraState;
 	}
 
 	public void setCameraEventListener(CameraEventListener cameraEventListener) {
-		this.cameraEventListener = Optional.of(cameraEventListener);
+		this.cameraEventListener = Optional.ofNullable(cameraEventListener);
 	}
 
 	public long getCurrentFrameTimestamp() {
@@ -213,7 +222,9 @@ public class OptiTrackCamera implements Camera {
 	private void cameraClosed() {
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
-		close();
+		
+		if (isOpen())
+			close();
 	}
 
 	@Override

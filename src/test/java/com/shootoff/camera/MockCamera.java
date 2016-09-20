@@ -194,6 +194,10 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	public boolean setState(CameraState state) {
 		return true;
 	}
+	public CameraState getState()
+	{
+		return CameraState.DETECTING;
+	}
 
 	@Override
 	public boolean supportsExposureAdjustment() {
