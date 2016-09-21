@@ -80,6 +80,7 @@ public class OptiTrackCamera implements Camera {
 				 toggleIRFilter();
 			break;
 		case CALIBRATING:
+			resetExposure();
 			if (getIRFilterState())
 				toggleIRFilter();
 			break;
