@@ -132,10 +132,10 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer,
 					config, resetter, cameraViews.getShotTimerModel()); 
 			
-			cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
-			
 			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
 			arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
+			
+			cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
 			
 			arenaPane.setArenaPaneMirror(arenaTabPane);
 			

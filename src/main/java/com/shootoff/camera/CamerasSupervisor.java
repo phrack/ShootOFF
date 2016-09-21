@@ -19,10 +19,7 @@
 package com.shootoff.camera;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.shootoff.camera.cameratypes.Camera;
