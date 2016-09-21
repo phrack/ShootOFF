@@ -1,4 +1,43 @@
-//written by ifly53e
+/*
+ * ShootOFF - Software for Laser Dry Fire Training
+ * Copyright (C) 2016 phrack
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * eyecam.dll was compiled by ifly53e using the source from
+ * https://github.com/inspirit/PS3EYEDriver
+ *
+ *Follow the instructions to install the proper PS3Eye usb driver from this link:
+ *https://github.com/cboulay/psmove-ue4/wiki/Windows-PSEye-Setup
+ *
+ *You will need a program called Zadig to help install the usb driver:
+ *http://zadig.akeo.ie/downloads/zadig_2.2.exe
+ *
+ *Missing from the Zadig instructions is to click on the Options menu and
+ *click "List All Devices" so that you can see the PS3Eye camera in the first place.
+ *
+ *Test your setup with ps3eye_sdl.exe found at:
+ *https://github.com/cboulay/psmove-ue4/tree/master/Binaries/Win64
+ *
+ *Start ShootOFF and it should see the PS3Eye.
+ *
+ *You can right click on the feed to bring up the configure camera menu
+ *and adjust the gain and exposure.  You can also toggle "auto gain"
+ *on and off and see the current FPS there.
+ */
 
 package com.shootoff.camera.cameratypes;
 
@@ -37,34 +76,29 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
-import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class PS3EyeCamera implements Camera {
+public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 	private static final Logger logger = LoggerFactory.getLogger(PS3EyeCamera.class);
 
 	private static boolean initialized = false;
-	protected CameraState cameraState;
-	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
-	protected long currentFrameTimestamp = -1;
 	private Dimension dimension = null;
-	private int viewWidth = 0;
-	private int viewHeight = 0;
 
-	static int size_x = 640;
-	static int size_y = 480;
+	public static final int viewWidth = 640;
+	public static final int viewHeight = 480;
 
-	static eyecam.ps3eye_t ps3ID = null;
-	static boolean opened = false;
-	static int frameCount = 0;
-	static boolean closed = true;
-	static double ps3FPS = 30;
-	private long lastCameraTimestamp = -1;
-	private long lastFrameCount = 0;
+	public static eyecam.ps3eye_t ps3ID = null;
+	private static boolean opened = false;
+	private static boolean closed = true;
 
-	static eyecam eyecamLib = (eyecam) Native.loadLibrary("eyecam", eyecam.class);
-	static byte[] ba = new byte[size_x * size_y * 4];
+	private Optional<Integer> origExposure = Optional.empty();
+	private static boolean configIsOpen = false;
+
+	public static eyecam eyecamLib;
+	private static byte[] ba = new byte[getViewWidth() * getViewHeight() * 4];
+	public static Label fpsValue = new Label("0");
+	public static Stage stage = new Stage();
 
 	public PS3EyeCamera() {
 		if (!initialized) {
@@ -77,18 +111,28 @@ public class PS3EyeCamera implements Camera {
 		if (initialized)
 			return;
 
+		try {
+
+			eyecamLib = (eyecam) Native.loadLibrary("eyecam", eyecam.class);
+
+		} catch (UnsatisfiedLinkError exception) {
+
+			initialized = false;
+		}
+
 		eyecamLib.ps3eye_init();
 
 		if (eyecamLib.ps3eye_count_connected() == 1) {
-			logger.debug("Opening ps3eye");
-			ps3ID = eyecamLib.ps3eye_open(0, size_x, size_y, 75, eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
+			logger.debug("Found the PS3EYE camera");
+			ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
+					eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
 			if (ps3ID != null) {
-				logger.debug("Received a PS3ID");
+				logger.debug("Communications with PS3Eye camera established");
 				closed = false;
 				opened = true;
 				initialized = true;
 			} else {
-				logger.debug("Did not receive a PS3ID");
+				logger.debug("Communications with PS3Eye camera NOT established");
 				closed = true;
 				opened = false;
 				initialized = false;
@@ -99,23 +143,33 @@ public class PS3EyeCamera implements Camera {
 		}
 
 		if (initialized()) {
-			logger.debug("Registering PS3Eye camera");
+
+			eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN,15);
+			eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE,30);
 			CameraFactory.registerCamera(new PS3EyeCamera());
+			logger.debug("PS3Eye camera adjusted and registered");
 		}
 	}
 
-	static Label fpsValue = new Label("0");
-	static Stage stage = new Stage();
-
 	public void launchCameraSettings() {
 
-		logger.debug("launch camera settings called");
+		logger.trace("launch camera settings called");
+		final CheckBox autoGain = new CheckBox("AutoGain");
+		boolean isAutoGainSet = false;
 		final Color textColor = Color.BLACK;
 
 		final Slider gain = new Slider(0, 63,
 				eyecamLib.ps3eye_get_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN));
 		final Slider exposure = new Slider(0, 255,
 				eyecamLib.ps3eye_get_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE));
+
+		final Label gainCaption = new Label("Gain:");
+		final Label exposureCaption = new Label("Exposure:");
+		final Label autoGainCaption = new Label("Auto Gain:");
+		final Label fpsCaption = new Label("FPS: ");
+
+		final Label gainValue = new Label(Integer.toString((int) gain.getValue()));
+		final Label exposureValue = new Label(Integer.toString((int) exposure.getValue()));
 
 		gain.setShowTickLabels(true);
 		gain.setShowTickMarks(true);
@@ -130,14 +184,6 @@ public class PS3EyeCamera implements Camera {
 		exposure.setMinorTickCount(25);
 		exposure.setBlockIncrement(1);
 		exposure.setSnapToTicks(true);
-
-		final Label gainCaption = new Label("Gain:");
-		final Label exposureCaption = new Label("Exposure:");
-		final Label autoGainCaption = new Label("Auto Gain:");
-		final Label fpsCaption = new Label("FPS: ");
-
-		final Label gainValue = new Label(Integer.toString((int) gain.getValue()));
-		final Label exposureValue = new Label(Integer.toString((int) exposure.getValue()));
 
 		Group root = new Group();
 		Scene scene = new Scene(root, 425, 200);
@@ -187,7 +233,7 @@ public class PS3EyeCamera implements Camera {
 
 		gain.valueProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
-				logger.debug("gain set to: " + Math.round(new_val.doubleValue()));
+				logger.trace("gain set to: " + Math.round(new_val.doubleValue()));
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN,
 						(int) Math.round(new_val.doubleValue()));
 				gainValue.setText(String.format("%d", (int) Math.round(new_val.doubleValue())));
@@ -198,13 +244,11 @@ public class PS3EyeCamera implements Camera {
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE,
 						(int) Math.round(new_val.doubleValue()));
-				logger.debug("exposure level set to: " + Math.round(new_val.doubleValue()));
+				logger.trace("exposure level set to: " + Math.round(new_val.doubleValue()));
 				exposureValue.setText(String.format("%d", (int) Math.round(new_val.doubleValue())));
 			}
 		});
 
-		final CheckBox autoGain = new CheckBox("AutoGain");
-		boolean isAutoGainSet = false;
 		if (eyecamLib.ps3eye_get_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_AUTO_GAIN) == 0) {
 			isAutoGainSet = false;
 			autoGain.setText("Off");
@@ -248,56 +292,16 @@ public class PS3EyeCamera implements Camera {
 
 	}// end launchcamerasettings
 
-	public boolean setState(CameraState cameraState) {
-		this.cameraState = cameraState;
-		switch (cameraState) {
-		case DETECTING:
-			break;
-		case CALIBRATING:
-			break;
-		case CLOSED:
-			close();
-			break;
-		case NORMAL:
-		default:
-			break;
-
-		}
-
-		this.cameraState = cameraState;
-
-		return true;
-	}
-
-	public CameraState getState() {
-
-		return cameraState;
-	}
-
-	public void setCameraEventListener(CameraEventListener cameraEventListener) {
-		this.cameraEventListener = Optional.ofNullable(cameraEventListener);
-	}
-
-	public long getCurrentFrameTimestamp() {
-		return currentFrameTimestamp;
-	}
-
 	public String getName() {
 		return "PS3Eye";
 	}
 
-	private native static void initialize();
-
-	private static boolean cameraAvailableNative() {
-		return initialized;
+	private static int getViewWidth() {
+		return viewWidth;
 	}
 
-	private int getViewWidth() {
-		return 640;
-	}
-
-	private int getViewHeight() {
-		return 480;
+	private static int getViewHeight() {
+		return viewHeight;
 	}
 
 	public static void closeMe() {
@@ -310,7 +314,7 @@ public class PS3EyeCamera implements Camera {
 
 		eyecamLib.ps3eye_close(ps3ID);
 		eyecamLib.ps3eye_uninit();
-		logger.debug("ps3eye closed and uninit called");
+		logger.debug("PS3Eye camera closed");
 		ps3ID = null;
 		closed = true;
 		opened = false;
@@ -324,7 +328,7 @@ public class PS3EyeCamera implements Camera {
 		} else {
 			eyecamLib.ps3eye_close(ps3ID);
 			eyecamLib.ps3eye_uninit();
-			logger.debug("ps3eye closed and uninit called");
+			logger.debug("PS3Eye camera closed");
 			ps3ID = null;
 		}
 	}
@@ -339,40 +343,6 @@ public class PS3EyeCamera implements Camera {
 		}
 	}
 
-	@Override
-	public double getFPS() {
-		return ps3FPS;
-	}
-
-	protected void setFPS(double newFPS) {
-		// This just tells us if it's the first FPS estimate
-		if (getFrameCount() > 30)
-			ps3FPS = ((ps3FPS * 4.0) + newFPS) / 5.0;
-		else
-			ps3FPS = newFPS;
-	}
-
-	public void estimateCameraFPS() {
-		if (lastCameraTimestamp > -1) {
-			double estimateFPS = ((double) getFrameCount() - (double) lastFrameCount)
-					/ (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
-
-			setFPS(estimateFPS);
-
-			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFPS(ps3FPS);
-		}
-
-		lastCameraTimestamp = System.currentTimeMillis();
-		lastFrameCount = getFrameCount();
-
-	}
-
-	@Override
-	public int getFrameCount() {
-		return frameCount;
-	}
-
 	public void setViewSize(final Dimension size) {
 		return;
 	}
@@ -381,7 +351,7 @@ public class PS3EyeCamera implements Camera {
 		if (dimension != null)
 			return dimension;
 
-		dimension = new Dimension(size_x, size_y);
+		dimension = new Dimension(getViewWidth(), getViewHeight());
 
 		return dimension;
 	}
@@ -395,10 +365,8 @@ public class PS3EyeCamera implements Camera {
 	}
 
 	public Mat translateCameraArrayToMat(byte[] imageBuffer) {
-		viewHeight = size_y;
-		viewWidth = size_x;
 
-		Mat mat = new Mat(viewHeight, viewWidth, CvType.CV_8UC3);
+		Mat mat = new Mat(getViewHeight(), getViewWidth(), CvType.CV_8UC3);
 
 		mat.put(0, 0, imageBuffer);
 		return mat;
@@ -407,7 +375,7 @@ public class PS3EyeCamera implements Camera {
 	public synchronized boolean open() {
 		if (opened)
 			return true;
-		ps3ID = eyecamLib.ps3eye_open(0, size_x, size_y, 75, eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
+		ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75, eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
 		if (isOpen())
 			closed = false;
 		return isOpen();
@@ -431,12 +399,10 @@ public class PS3EyeCamera implements Camera {
 	@Override
 	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
 			final CameraView cameraView) {
-		if (OptiTrackShotDetector.isSystemSupported())
-			return new OptiTrackShotDetector(cameraManager, config, cameraView);
-		else if (NativeShotDetector.isSystemSupported())
+		if (NativeShotDetector.isSystemSupported()) {
 			return new NativeShotDetector(cameraManager, config, cameraView);
-		else if (JavaShotDetector.isSystemSupported()) {
-			logger.debug("starting javaShotDetector for PS3Eye");
+		} else if (JavaShotDetector.isSystemSupported()) {
+			logger.trace("starting javaShotDetector for PS3Eye");
 			return new JavaShotDetector(cameraManager, config, cameraView);
 		} else
 			return null;
@@ -445,8 +411,6 @@ public class PS3EyeCamera implements Camera {
 	public static boolean initialized() {
 		return initialized;
 	}
-
-	static boolean configIsOpen = false;
 
 	@Override
 	public void run() {
@@ -461,7 +425,9 @@ public class PS3EyeCamera implements Camera {
 
 			if (configIsOpen) {
 				Platform.runLater(() -> {
-					fpsValue.setText((Double.toString(getFPS()).substring(0, 5)));
+					String theFPS = Double.toString(getFPS());
+					if (theFPS.length() >= 6)
+						fpsValue.setText((Double.toString(getFPS()).substring(0, 5)));
 				});
 			}
 
@@ -480,8 +446,6 @@ public class PS3EyeCamera implements Camera {
 	public boolean isLocked() {
 		return false;
 	}
-
-	private Optional<Integer> origExposure = Optional.empty();
 
 	private int getExposure() {
 		return eyecamLib.ps3eye_get_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE);
@@ -502,13 +466,13 @@ public class PS3EyeCamera implements Camera {
 	public boolean decreaseExposure() {
 		final int curExp = getExposure();
 		final int newExp = (int) (curExp - (.1 * (double) curExp));
-		logger.debug("curExp[ {} newExp {}", curExp, newExp);
+		logger.trace("curExp[ {} newExp {}", curExp, newExp);
 
-		if (newExp < 20)
+		if (newExp < 17)
 			return false;
 
 		setExposure(newExp);
-		logger.debug("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
+		logger.trace("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
 		return (getExposure() == newExp);
 	}
 
@@ -518,7 +482,7 @@ public class PS3EyeCamera implements Camera {
 	}
 
 	public boolean limitsFrames() {
-		return true;
+		return false;
 	}
 
 	public interface eyecam extends Library {
@@ -613,7 +577,7 @@ public class PS3EyeCamera implements Camera {
 		 **/
 		int ps3eye_get_parameter(ps3eye_t eye, int ps3eyeGain);
 
-		// a test returns 85
+		// a test inserted by ifly53e returns 85
 		int hello();
 
 	}// end eyecam interface
