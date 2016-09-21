@@ -472,7 +472,7 @@ body {
 
 .a-title{font-weight:300;text-align:center;}
 
-.a-sub-title{text-align:center;font-size: 14px;}
+.a-sub-title{text-align:center;font-size: 14px;line-height:inherit;}
 .a-separator{width:50px;height:4px;background:#7a922d;margin:0 auto;margin-bottom:60px;}
 .a-t{padding-top:60px;}
 
