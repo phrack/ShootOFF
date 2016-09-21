@@ -47,6 +47,8 @@ public abstract class CalculatedFPSCamera implements Camera {
 					close();
 				}
 				break;
+			case CALIBRATING:
+				resetExposure();
 			default:
 				this.cameraState = cameraState;
 				break;
