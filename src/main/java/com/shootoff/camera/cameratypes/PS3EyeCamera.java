@@ -114,42 +114,49 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		try {
 
 			eyecamLib = (eyecam) Native.loadLibrary("eyecam", eyecam.class);
-			eyecamLib.ps3eye_init();
-
-			if (eyecamLib.ps3eye_count_connected() == 1) {
-				logger.debug("Found the PS3EYE camera");
-				ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
-						eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
-				if (ps3ID != null) {
-					logger.debug("Communications with PS3Eye camera established");
-					closed = false;
-					opened = true;
-					initialized = true;
-				} else {
-					logger.debug("Communications with PS3Eye camera NOT established");
-					closed = true;
-					opened = false;
-					initialized = false;
-				}
-
-			} else {
-				initialized = false;
-			}
-
-			if (initialized()) {
-
-				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN, 15);
-				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE, 30);
-				CameraFactory.registerCamera(new PS3EyeCamera());
-				logger.debug("PS3Eye camera adjusted and registered");
-			}
 
 		} catch (UnsatisfiedLinkError exception) {
 
 			initialized = false;
+			return;
 		}
 
-	}
+		if (eyecamLib == null) {
+			initialized = false;
+			return;
+		}
+
+		eyecamLib.ps3eye_init();
+
+		if (eyecamLib.ps3eye_count_connected() == 1) {
+			logger.debug("Found the PS3EYE camera");
+			ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
+					eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
+			if (ps3ID != null) {
+				logger.debug("Communications with PS3Eye camera established");
+				closed = false;
+				opened = true;
+				initialized = true;
+			} else {
+				logger.debug("Communications with PS3Eye camera NOT established");
+				closed = true;
+				opened = false;
+				initialized = false;
+			}
+
+		} else {
+			initialized = false;
+		}
+
+		if (initialized()) {
+
+			eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN, 15);
+			eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE, 30);
+			CameraFactory.registerCamera(new PS3EyeCamera());
+			logger.debug("PS3Eye camera adjusted and registered");
+		}
+
+	}// end init
 
 	public void launchCameraSettings() {
 
