@@ -258,38 +258,41 @@ task zipRelease(type: Zip) {
 }
 
 task getDiagnosticJar() {
-    def diagnosticTool = new File(dist + diagnosticsJar)
-    if (!diagnosticTool.exists()) {
-    
-        if (username == '' && password == '') {
-            username = System.console().readLine('\nPlease enter GitHub username: ')
-            password = System.console().readPassword('Please enter GitHub password: ')
-            password = new String(password)
-        }
-
-        gh = GitHub.connectUsingPassword(username, password)
-
-        if (!gh.isCredentialValid()) {
-            throw new InvalidUserDataException('Incorrect GitHub credentials')
-        }
-    
-    
-        def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
-        def diagReleases = ghDiagRepo.listReleases().asList()
-
-        def newestRelease = diagReleases.get(0)
-        
-        for (release in diagReleases.subList(1, diagReleases.size())) {
-            if (!release.isDraft() && !release.isPrerelease()) {
-                if (release.getTagName() > newestRelease.getTagName()) {
-                    newestRelease = release
-                }
-            }
-        }
-
-        new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
-            .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
-        }
+	doFirst
+	{
+	    def diagnosticTool = new File(dist + diagnosticsJar)
+	    if (!diagnosticTool.exists()) {
+	    
+	        if (username == '' && password == '') {
+	            username = System.console().readLine('\nPlease enter GitHub username: ')
+	            password = System.console().readPassword('Please enter GitHub password: ')
+	            password = new String(password)
+	        }
+	
+	        gh = GitHub.connectUsingPassword(username, password)
+	
+	        if (!gh.isCredentialValid()) {
+	            throw new InvalidUserDataException('Incorrect GitHub credentials')
+	        }
+	    
+	    
+	        def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
+	        def diagReleases = ghDiagRepo.listReleases().asList()
+	
+	        def newestRelease = diagReleases.get(0)
+	        
+	        for (release in diagReleases.subList(1, diagReleases.size())) {
+	            if (!release.isDraft() && !release.isPrerelease()) {
+	                if (release.getTagName() > newestRelease.getTagName()) {
+	                    newestRelease = release
+	                }
+	            }
+	        }
+	
+	        new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
+	            .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
+	       }
+      }
 }
 
 // 1. Add latest version of diagnostic tool to release zip
@@ -405,6 +408,8 @@ task fxJarWritableResources() {
 }
 
 task msiRelease() {
+    group 'Release' 
+
     dependsOn(fxJar)
     dependsOn('updateJars')
     dependsOn(getDiagnosticJar)
@@ -442,7 +447,7 @@ task msiRelease() {
             antfx.info(
                 title: project.name,
                 vendor: "ShootOFF",
-                description: 'A virtual shooting range to enhance laser dry fire training.'
+                description: 'A virtual shooting range to enhance laser dry fire training'
             ) {
                 antfx.icon(
                     kind: 'default',
