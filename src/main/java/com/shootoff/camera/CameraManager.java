@@ -71,7 +71,7 @@ import javafx.scene.paint.Color;
  * This class is responsible for fetching frames from its assigned camera and
  * preprocessing them for shot detection. It also ensures the view showing the
  * camera frames is aware of any new frames from the camera.
- * 
+ *
  * @author phrack and dmaul
  */
 public class CameraManager implements ObservableCloseable, CameraEventListener, CameraCalibrationListener {
@@ -131,8 +131,6 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	private CameraCalibrationListener cameraCalibrationListener;
 
-	static private Thread cameraThread;
-
 	public void setCalibrationManager(CameraCalibrationListener calibrationManager) {
 		this.cameraCalibrationListener = calibrationManager;
 	}
@@ -182,45 +180,44 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 				sectorStatuses[y][x] = true;
 			}
 		}
-		
+
 		synchronized(camera) {
 			if (!camera.isOpen()) {
 				camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
-	
+
 				if (!camera.open()) {
 					cameraErrorView.get().showCameraLockError(camera, true);
 					return;
 				}
-	
+
 				final Dimension openDimension = camera.getViewSize();
-	
+
 				if ((int) openDimension.getWidth() != getFeedWidth()
 						|| (int) openDimension.getHeight() != getFeedHeight()) {
 					if (openDimension.getWidth() == -1) {
 						cameraErrorView.get().showCameraLockError(camera, true);
 						return;
 					}
-	
+
 					if (logger.isWarnEnabled()) {
 						logger.warn("Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
 								getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
 								(int) openDimension.getHeight());
 					}
-	
+
 					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 					shotDetector.setFrameSize((int) openDimension.getWidth(), (int) openDimension.getHeight());
 				} else {
 					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 				}
 			}
-			
-	
+
+
 			if (logger.isDebugEnabled()) logger.debug("starting camera thread {}", camera.getName());
-			final String threadName = String.format("Shot detection %s %s", camera.getName(), 
+			final String threadName = String.format("Shot detection %s %s", camera.getName(),
 					shotDetector.getClass().getName());
-			cameraThread = new Thread(camera, threadName);
-			cameraThread.start();
-		
+			new Thread(camera, threadName).start();
+
 		}
 
 		if (shotDetector instanceof ShotYieldingShotDetector)
@@ -278,7 +275,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private void resetStartTime() {
 		startTime = System.currentTimeMillis();
 	}
-	
+
 	@Override
 	public void setOnCloseListener(CloseListener closeListener) {
 		this.closeListener = Optional.of(closeListener);
@@ -291,14 +288,9 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		setStreaming(false);
 
 		camera.setCameraEventListener(null);
-		
+
 		setCameraState(CameraState.CLOSED);
-<<<<<<< HEAD
-		camera.close();
-		cameraThread.stop();
-=======
-				
->>>>>>> refs/remotes/phrack/master
+
 		if (recordingStream)
 			stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
@@ -306,7 +298,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		if (recordingCalibratedArea)
 			stopRecordingCalibratedArea();
-		
+
 		if (closeListener.isPresent()) closeListener.get().closing();
 	}
 
@@ -523,7 +515,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private int consecutiveCameraErrors = 0;
 	private boolean handleFrame(Mat currentFrame) {
 		boolean cameraError = false;
-		
+
 		if (currentFrame == null && !camera.isOpen()) {
 			// Camera appears to have closed
 			if (isStreaming.get() && cameraErrorView.isPresent())
@@ -540,7 +532,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			logger.warn("Invalid frame size from camera: {} gave {} expecting {},{}", camera.getName(), currentFrame.size(), feedWidth, feedHeight);
 			cameraError = true;
 		}
-		
+
 		if (cameraError)
 		{
 			consecutiveCameraErrors++;
@@ -548,7 +540,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			{
 				if (isStreaming.get() && cameraErrorView.isPresent())
 					cameraErrorView.get().showMissingCameraError(camera);
-				
+
 				camera.close();
 			}
 			return false;
@@ -774,8 +766,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	public void launchCameraSettings() {
 		if (camera instanceof SarxosCaptureCamera) {
 			((SarxosCaptureCamera) camera).launchCameraSettings();
-		}
-		if (camera instanceof PS3EyeCamera){
+		}else if (camera instanceof PS3EyeCamera) {
 			((PS3EyeCamera) camera).launchCameraSettings();
 		}
 	}
