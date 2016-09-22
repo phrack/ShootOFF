@@ -78,11 +78,18 @@ public abstract class ShotDetector {
 
 		if (scaleShot && (cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
-
 			final Bounds b = cameraManager.getProjectionBounds().get();
-
-			shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), getShotTimestamp(), cameraManager.getFrameCount(),
+			
+			if (this.handlesBounds())
+			{
+				shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), getShotTimestamp(), cameraManager.getFrameCount(),
 					config.getMarkerRadius());
+			} else {
+				if (cameraManager.isLimitingDetectionToProjection() && !b.contains(x,y))
+						return false;
+				shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(), config.getMarkerRadius());
+			}
+			
 		} else {
 			shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(), config.getMarkerRadius());
 		}
@@ -135,4 +142,12 @@ public abstract class ShotDetector {
 	private long getShotTimestamp() {
 		return cameraManager.getCurrentFrameTimestamp();
 	}
+	
+	
+	/**
+	 * 
+	 * @return True if this shot detector only returns shots in bounds
+	 * and offset within the bounds according to the settings in CameraManager
+	 */
+	protected abstract boolean handlesBounds();
 }

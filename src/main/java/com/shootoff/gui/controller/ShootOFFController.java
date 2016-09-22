@@ -68,6 +68,7 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -246,15 +247,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			addConfiguredCameras();
 		}
 
-		TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
+		final TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
 		timeCol.setMinWidth(85);
 		timeCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>("timestamp"));
 
-		TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<ShotEntry, ShotEntry.SplitData>("Split");
+		final TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<ShotEntry, ShotEntry.SplitData>("Split");
 		splitCol.setMinWidth(85);
 		splitCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, ShotEntry.SplitData>("split"));
 
-		TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
+		final TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
 		laserCol.setMinWidth(85);
 		laserCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>("color"));
 
@@ -550,30 +551,29 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		// Keep aspect ratio but always match size to the width of the tab
 		if (maximizeView) {
-			final Runnable translatePosition = () -> {
+			final Runnable translateTabContents = () -> {
+				final double scale = cameraTabPane.getBoundsInLocal().getWidth() / content.getBoundsInLocal().getWidth();
+				content.setScaleX(scale);
+				content.setScaleY(scale);
+
 				content.setTranslateX(
 						(content.getBoundsInParent().getWidth() - content.getBoundsInLocal().getWidth()) / 2);
 				content.setTranslateY(
 						(content.getBoundsInParent().getHeight() - content.getBoundsInLocal().getHeight()) / 2);
 			};
-			
+						
 			// Delay to give auto-placement and calibration a chance to finish
-			TimerPool.schedule(() -> {
-				final double initialScale = cameraTabPane.getBoundsInLocal().getWidth()
-						/ content.getBoundsInLocal().getWidth();
-				content.setScaleX(initialScale);
-				content.setScaleY(initialScale);
-
-				translatePosition.run();
-			}, 2000);
+			TimerPool.schedule(translateTabContents, 2000);
 			
-			cameraTabPane.widthProperty().addListener((observable, oldValue, newValue) -> {
-				final double scale = newValue.doubleValue() / content.getBoundsInLocal().getWidth();
-				content.setScaleX(scale);
-				content.setScaleY(scale);
+			final ChangeListener<? super Number> widthListener = (observable, oldValue, newValue) -> {
+				translateTabContents.run();
+			};
 
-				translatePosition.run();
-			});
+			content.widthProperty().addListener(widthListener);
+			content.heightProperty().addListener(widthListener);
+
+			cameraTabPane.widthProperty().addListener(widthListener);
+			cameraTabPane.heightProperty().addListener(widthListener);
 		}
 	}
 	

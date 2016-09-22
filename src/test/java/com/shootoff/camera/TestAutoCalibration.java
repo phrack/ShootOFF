@@ -344,8 +344,8 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		MockCameraManager result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e-2.mp4");
 		assertEquals(true, result.cameraAutoCalibrated);
 		
-		assertEquals(77.05, result.getACM().getPaperDimensions().get().getWidth(), 1);
-		assertEquals(57.36, result.getACM().getPaperDimensions().get().getHeight(), 1);
+		assertEquals(76.80, result.getACM().getPaperDimensions().get().getWidth(), 1);
+		assertEquals(58.15, result.getACM().getPaperDimensions().get().getHeight(), 1);
 		
 	}
 	
@@ -358,7 +358,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-paper.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
-		acm.processFrame(Camera.bufferedImageToMat(testFrame));
+		acm.processFrame(Camera.bufferedImageToMat(testFrame), 2000);
 
 		Optional<Bounds> calibrationBounds = Optional.of(acm.getBoundsResult());
 

@@ -19,10 +19,7 @@
 package com.shootoff.camera;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.shootoff.camera.cameratypes.Camera;
@@ -59,7 +56,7 @@ public class CamerasSupervisor {
 
 		managers.clear();
 	}
-	
+
 	public void clearManager(CameraManager manager) {
 		manager.close();
 		managers.remove(manager);
@@ -114,11 +111,10 @@ public class CamerasSupervisor {
 	public CameraManager getCameraManager(final int index) {
 		return managers.get(index);
 	}
-	
+
 	public CameraManager getCameraManager(final Camera camera) {
 		for (final CameraManager manager : managers) {
-			if (manager.getCamera() == camera)
-				return manager;
+			if (manager.getCamera() == camera) return manager;
 		}
 		return null;
 	}
@@ -136,8 +132,5 @@ public class CamerasSupervisor {
 	public CameraView getCameraView(final int index) {
 		return managers.get(index).getCameraView();
 	}
-
-
-
 
 }

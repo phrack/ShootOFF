@@ -181,7 +181,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			}
 		}
 
-		synchronized(camera) {
+		synchronized (camera) {
 			if (!camera.isOpen()) {
 				camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 
@@ -200,7 +200,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 					}
 
 					if (logger.isWarnEnabled()) {
-						logger.warn("Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
+						logger.warn(
+								"Camera {} dimension differs from requested dimensions, requested {} {} actual {} {}",
 								getName(), getFeedWidth(), getFeedHeight(), (int) openDimension.getWidth(),
 								(int) openDimension.getHeight());
 					}
@@ -211,7 +212,6 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 					setFeedResolution((int) openDimension.getWidth(), (int) openDimension.getHeight());
 				}
 			}
-
 
 			if (logger.isDebugEnabled()) logger.debug("starting camera thread {}", camera.getName());
 			final String threadName = String.format("Shot detection %s %s", camera.getName(),
@@ -230,8 +230,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public void setSectorStatuses(boolean[][] sectorStatuses) {
-		if (sectorStatuses == null)
-			return;
+		if (sectorStatuses == null) return;
 
 		this.sectorStatuses = new boolean[sectorStatuses.length][sectorStatuses[0].length];
 
@@ -291,13 +290,11 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		setCameraState(CameraState.CLOSED);
 
-		if (recordingStream)
-			stopRecordingStream();
+		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);
 		TimerPool.cancelTimer(motionDiagnosticFuture);
 
-		if (recordingCalibratedArea)
-			stopRecordingCalibratedArea();
+		if (recordingCalibratedArea) stopRecordingCalibratedArea();
 
 		if (closeListener.isPresent()) closeListener.get().closing();
 	}
@@ -319,9 +316,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	private void setCameraState(CameraState state) {
-		if (camera.setState(state))
-			for (CameraStateListener csl : cameraStateListeners)
-				csl.cameraStateChange(state);
+		if (camera.setState(state)) for (CameraStateListener csl : cameraStateListeners)
+			csl.cameraStateChange(state);
 	}
 
 	public void setDetecting(boolean isDetecting) {
@@ -387,8 +383,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public void startRecordingStream(File videoFile) {
-		if (logger.isDebugEnabled())
-			logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
+		if (logger.isDebugEnabled()) logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
 		videoWriterStream = ToolFactory.makeWriter(videoFile.getName());
 		videoWriterStream.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, getFeedWidth(), getFeedHeight());
 		recordingStartTime = System.currentTimeMillis();
@@ -491,8 +486,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private boolean recordingCalibratedArea;
 
 	public void startRecordingCalibratedArea(File videoFile, int width, int height) {
-		if (logger.isDebugEnabled())
-			logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
+		if (logger.isDebugEnabled()) logger.debug("Writing Video Feed To: {}", videoFile.getAbsoluteFile());
 		videoWriterCalibratedArea = ToolFactory.makeWriter(videoFile.getName());
 		videoWriterCalibratedArea.addVideoStream(0, 0, ICodec.ID.CODEC_ID_H264, width, height);
 		recordingCalibratedAreaStartTime = System.currentTimeMillis();
@@ -508,45 +502,41 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	@Override
 	public void newFrame(Mat frame) {
-		if (!handleFrame(frame))
-			logger.warn("Invalid frame yielded from {}", camera.getName());
+		if (!handleFrame(frame)) logger.warn("Invalid frame yielded from {}", camera.getName());
 	}
 
 	private int consecutiveCameraErrors = 0;
+
 	private boolean handleFrame(Mat currentFrame) {
 		boolean cameraError = false;
 
 		if (currentFrame == null && !camera.isOpen()) {
 			// Camera appears to have closed
-			if (isStreaming.get() && cameraErrorView.isPresent())
-				cameraErrorView.get().showMissingCameraError(camera);
+			if (isStreaming.get() && cameraErrorView.isPresent()) cameraErrorView.get().showMissingCameraError(camera);
 
 			cameraError = true;
 		} else if (currentFrame == null && camera.isOpen()) {
 			// Camera appears to be open but got a null frame
 			logger.warn("Null frame from camera: {}", camera.getName());
 			cameraError = true;
-		} else if ((currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth) && camera.isOpen())
-		{
+		} else if ((currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth)
+				&& camera.isOpen()) {
 			// Camera appears to be open but got an invalid size frame
-			logger.warn("Invalid frame size from camera: {} gave {} expecting {},{}", camera.getName(), currentFrame.size(), feedWidth, feedHeight);
+			logger.warn("Invalid frame size from camera: {} gave {} expecting {},{}", camera.getName(),
+					currentFrame.size(), feedWidth, feedHeight);
 			cameraError = true;
 		}
 
-		if (cameraError)
-		{
+		if (cameraError) {
 			consecutiveCameraErrors++;
-			if (consecutiveCameraErrors > MAXIMUM_CONSECUTIVE_CAMERA_ERRORS)
-			{
+			if (consecutiveCameraErrors > MAXIMUM_CONSECUTIVE_CAMERA_ERRORS) {
 				if (isStreaming.get() && cameraErrorView.isPresent())
 					cameraErrorView.get().showMissingCameraError(camera);
 
 				camera.close();
 			}
 			return false;
-		}
-		else
-		{
+		} else {
 			consecutiveCameraErrors = 0;
 		}
 
@@ -607,8 +597,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	protected BufferedImage processFrame(Mat currentFrame) {
-		if (isAutoCalibrating.get() && (camera.limitsFrames() || ((camera.getFrameCount() % Math.min(camera.getFPS(), 3)) == 0))) {
-			acm.processFrame(currentFrame);
+		if (isAutoCalibrating.get()) {
+			acm.processFrame(currentFrame, camera.getCurrentFrameTimestamp());
 			return Camera.matToBufferedImage(currentFrame);
 		}
 
@@ -673,8 +663,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		if (cameraFPS < MIN_SHOT_DETECTION_FPS && !showedFPSWarning) {
 			logger.warn("[{}] Current webcam FPS is {}, which is too low for reliable shot detection", camera.getName(),
 					getFPS());
-			if (cameraErrorView.isPresent())
-				cameraErrorView.get().showFPSWarning(camera, getFPS());
+			if (cameraErrorView.isPresent()) cameraErrorView.get().showFPSWarning(camera, getFPS());
 			showedFPSWarning = true;
 		}
 	}
@@ -697,8 +686,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		if (!shownBrightnessWarning) {
 			shownBrightnessWarning = true;
-			if (cameraErrorView.isPresent())
-				cameraErrorView.get().showBrightnessWarning(camera);
+			if (cameraErrorView.isPresent()) cameraErrorView.get().showBrightnessWarning(camera);
 		}
 	}
 
@@ -742,8 +730,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public void enableAutoCalibration(boolean calculateFrameDelay) {
-		if (acm == null)
-			acm = new AutoCalibrationManager(this, camera, calculateFrameDelay);
+		if (acm == null) acm = new AutoCalibrationManager(this, camera, calculateFrameDelay);
 		isAutoCalibrating.set(true);
 		cameraAutoCalibrated = false;
 
@@ -766,7 +753,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	public void launchCameraSettings() {
 		if (camera instanceof SarxosCaptureCamera) {
 			((SarxosCaptureCamera) camera).launchCameraSettings();
-		}else if (camera instanceof PS3EyeCamera) {
+		} else if (camera instanceof PS3EyeCamera) {
 			((PS3EyeCamera) camera).launchCameraSettings();
 		}
 	}
@@ -780,16 +767,14 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public long getCurrentFrameTimestamp() {
-		if (startTime == 0)
-			resetStartTime();
+		if (startTime == 0) resetStartTime();
 
 		return System.currentTimeMillis() - startTime;
 	}
 
 	@Override
 	public void newFPS(double cameraFPS) {
-		if (debuggerListener.isPresent())
-			debuggerListener.get().updateFeedData(cameraFPS);
+		if (debuggerListener.isPresent()) debuggerListener.get().updateFeedData(cameraFPS);
 
 		checkIfMinimumFPS(cameraFPS);
 	}

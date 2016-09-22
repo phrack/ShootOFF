@@ -467,4 +467,9 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			Highgui.imwrite(filename, debugFrame);
 		}
 	}
+
+	@Override
+	protected boolean handlesBounds() {
+		return true;
+	}
 }
