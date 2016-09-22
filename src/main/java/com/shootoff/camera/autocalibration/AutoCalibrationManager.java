@@ -128,6 +128,9 @@ public class AutoCalibrationManager {
 	}
 
 	public Mat preProcessFrame(final Mat mat) {
+		if (mat.channels() == 1)
+			return mat.clone();
+		
 		Mat newMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1);
 		
 		Imgproc.cvtColor(mat, newMat, Imgproc.COLOR_BGR2GRAY);
@@ -186,9 +189,11 @@ public class AutoCalibrationManager {
 
 	class StepFindBounds implements AutoCalStep {
 		public Bounds boundsResult = null;
+		private long lastFrameCheck = 0;
 
 		public void reset() {
 			boundsResult = null;
+			lastFrameCheck = 0;
 		}
 
 		public boolean enabled() {
@@ -200,6 +205,11 @@ public class AutoCalibrationManager {
 		}
 
 		public void process(Mat mat) {
+			if (System.currentTimeMillis() - lastFrameCheck < 1000)
+				return;
+			
+			lastFrameCheck = System.currentTimeMillis();
+			
 			Imgproc.equalizeHist(mat, mat);
 			
 			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);

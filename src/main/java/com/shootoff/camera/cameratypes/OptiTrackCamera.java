@@ -48,9 +48,11 @@ public class OptiTrackCamera implements Camera {
 	private Dimension dimension = null;
 	private int viewWidth = 0;
 	private int viewHeight = 0;
+	private static final int MAXIMUM_EXPOSURE = 480;
 
 	public OptiTrackCamera() {
 		if (!initialized) init();
+		setExposure(MAXIMUM_EXPOSURE);
 	}
 
 	public static void init() {

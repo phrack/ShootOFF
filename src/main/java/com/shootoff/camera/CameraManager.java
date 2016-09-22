@@ -597,8 +597,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	protected BufferedImage processFrame(Mat currentFrame) {
-		if (isAutoCalibrating.get()
-				&& (camera.limitsFrames() || ((camera.getFrameCount() % Math.min(camera.getFPS(), 3)) == 0))) {
+		if (isAutoCalibrating.get()) {
 			acm.processFrame(currentFrame);
 			return Camera.matToBufferedImage(currentFrame);
 		}
