@@ -6,8 +6,8 @@
   <plugin name="Clay Buster" version="1.0" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Clay-Buster/releases/download/v1.0-FINAL/ShootOFF-Clay-Buster.jar" 
     description="Practice shooting clays with a new clay launched every 7 seconds." />
-  <plugin name="Cowboy Fast Draw" version="1.0" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
-    creator="phrack" download="https://github.com/phrack/ShootOFF-Cowboy-Fast-Draw/releases/download/v1.0-FINAL/ShootOFF-Cowboy-Fast-Draw.jar" 
+  <plugin name="Cowboy Fast Draw" version="1.1" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Cowboy-Fast-Draw/releases/download/v1.1-FINAL/ShootOFF-Cowboy-Fast-Draw.jar" 
     description="Simulates Cowboy Fast Draw #3B targets and timers in practice mode." />
   <plugin name="Pistol Isometrics" version="1.4" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Pistol-Isometrics/releases/download/v1.4-FINAL/ShootOFF-Pistol-Isometrics.jar" 
