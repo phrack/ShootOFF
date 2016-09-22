@@ -29,6 +29,8 @@ public class PreferencesSlide extends Slide {
 			hide();
 		});
 		
+		preferencesController.prepareToShow();
+		
 		addBodyNode(preferencesController.getPane());
 	}
 	

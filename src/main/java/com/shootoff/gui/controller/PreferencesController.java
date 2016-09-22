@@ -100,6 +100,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 	private final Set<Camera> recordingCameras = new HashSet<>();
 	private final List<Camera> configuredCameras = new ArrayList<>();
 	private final List<String> configuredNames = new ArrayList<>();
+	private final Set<Camera> camerasOnShown = new HashSet<>();
 	private final ObservableList<String> cameras = FXCollections.observableArrayList();
 
 	public void setConfig(Stage parent, Configuration config, CalibrationConfigurator calibrationConfigurator,
@@ -209,6 +210,12 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		}
 		
 		cameraConfigChanged = true;
+	}
+	
+	public void prepareToShow() {
+		cameraConfigChanged = false;
+		camerasOnShown.clear();
+		camerasOnShown.addAll(configuredCameras);
 	}
 	
 	public Node getPane() {
@@ -383,6 +390,20 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		configuredNames.removeAll(removedCameraNames);
 		cameras.removeAll(removedCameraNames);
 	}
+	
+	private boolean cameraListChanged() {
+		for (Camera c : configuredCameras) {
+			// Tried to remove a camera that is in the new
+			// list but that wasn't in the list when the
+			// GUI was shown
+			if (!camerasOnShown.remove(c)) return true;
+		}
+
+		// If the list is not empty by the time we get here,
+		// there was a camera configured when the GUI was 
+		// started that isn't configured now
+		return !camerasOnShown.isEmpty();
+	}
 
 	public void save() throws ConfigurationException, IOException {
 		config.setWebcams(configuredNames, configuredCameras);
@@ -403,7 +424,9 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 		if (config.writeConfigurationFile()) {
 			calibrationConfigurator.calibratedFeedBehaviorsChanged();
-			if (cameraConfigChanged) cameraConfigListener.cameraConfigUpdated();
+			if (cameraConfigChanged && cameraListChanged()) {
+				cameraConfigListener.cameraConfigUpdated();
+			}
 		}
 	}
 }
