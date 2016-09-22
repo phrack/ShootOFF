@@ -1,14 +1,14 @@
 import groovyx.gpars.GParsPool
 import groovy.xml.NamespaceBuilder
 import org.kohsuke.github.GitHub
-import org.ajoberstar.grgit.Grgit
+import org.ajoberstar.grgit.Grgit 
 import org.ajoberstar.grgit.Credentials
 
 buildscript {
     repositories {
         jcenter()
         maven {
-            url  "http://repo.jenkins-ci.org/releases/"
+            url  "http://repo.jenkins-ci.org/releases/" 
         }
     }
     dependencies {
@@ -68,7 +68,7 @@ repositories {
     // because it makes it easier to get the smallest set of marytts that
     // meets our needs without missing the freetts dependency
     maven {
-        url  "http://dl.bintray.com/marytts/marytts/"
+        url  "http://dl.bintray.com/marytts/marytts/" 
     }
     maven {
         url "https://dl.bintray.com/phrack/maven/"
@@ -85,7 +85,7 @@ configurations {
 
 dependencies {
     jfxant files("$javaHome" + "/../lib/ant-javafx.jar")
-
+    
     // FindBugs annotations to suppress warnings
     compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.+'
 
@@ -98,7 +98,7 @@ dependencies {
 
     // bridj is here because webcam-capture depends on it but fetches 0.6.2, which
     // does not play nicely with stackguard in newer versions of the JVM.
-    compile group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'
+    compile group: 'com.nativelibs4java', name: 'bridj', version: '0.7.0'    
     compile group: 'com.github.sarxos', name: 'webcam-capture', version: '0.3.+'
     compile group: 'com.github.sarxos', name: 'webcam-capture-driver-ipcam', version: '0.3.+'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.+'
@@ -115,20 +115,20 @@ dependencies {
 
     // JSON
     compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1+'
-
+    
     // OpenImaj
     compile('org.openimaj:core:1.+') {
         // OpenImaj transitive dependency that we don't need and that doesn't seem to exist in
         // repos anymore
         exclude group: 'vigna.dsi.unimi.it'
     }
-
+    
     //OpenCV
     compile 'org.openpnp:opencv:2.4.+'
-
+    
     // OSHI to collect HW and system state data
     compile group: 'com.github.dblock', name: 'oshi-core', version: '3.+'
-
+    
     // JSoup to get processor benchmark data
     compile group: 'org.jsoup', name: 'jsoup', version: '1.+'
 
@@ -144,10 +144,6 @@ test {
     testLogging {
         exceptionFormat = 'full'
     }
-}
-
-task copyEyeCam(type:Copy) {
-    from 'eyecam.dll' into 'build/dist'
 }
 
 task copyConfig(type:Copy) {
@@ -187,7 +183,7 @@ task updateJars() {
                 delegate.manifest {
                     attribute(name: 'Trusted-Library', value: 'true')
                 }
-            }
+            } 
         }
     }
 }
@@ -198,7 +194,6 @@ task fxJar(dependsOn: build) {
     dependsOn('copyCourses')
     dependsOn('copySounds')
     dependsOn('copyLibs')
-    dependsOn('copyEyeCam')
 
     description 'Create a runnable jar for ShootOFF'
     group 'Package'
@@ -267,25 +262,25 @@ task getDiagnosticJar() {
 	{
 	    def diagnosticTool = new File(dist + diagnosticsJar)
 	    if (!diagnosticTool.exists()) {
-
+	    
 	        if (username == '' && password == '') {
 	            username = System.console().readLine('\nPlease enter GitHub username: ')
 	            password = System.console().readPassword('Please enter GitHub password: ')
 	            password = new String(password)
 	        }
-
+	
 	        gh = GitHub.connectUsingPassword(username, password)
-
+	
 	        if (!gh.isCredentialValid()) {
 	            throw new InvalidUserDataException('Incorrect GitHub credentials')
 	        }
-
-
+	    
+	    
 	        def ghDiagRepo = gh.getRepository('phrack/ShootOFF-diagnostics')
 	        def diagReleases = ghDiagRepo.listReleases().asList()
-
+	
 	        def newestRelease = diagReleases.get(0)
-
+	        
 	        for (release in diagReleases.subList(1, diagReleases.size())) {
 	            if (!release.isDraft() && !release.isPrerelease()) {
 	                if (release.getTagName() > newestRelease.getTagName()) {
@@ -293,7 +288,7 @@ task getDiagnosticJar() {
 	                }
 	            }
 	        }
-
+	
 	        new URL(newestRelease.getAssets().get(0).getBrowserDownloadUrl())
 	            .withInputStream{ i -> diagnosticTool.withOutputStream{ it << i }}
 	       }
@@ -306,8 +301,8 @@ task getDiagnosticJar() {
 task pushZipRelease(dependsOn: zipRelease) {
     description 'Add diagnostic tool to release zip, create GitHub release and upload ' +
 		'the zip, and update and commit new version metadata to gh-pages'
-    group 'Release'
-
+    group 'Release' 
+    
     dependsOn(getDiagnosticJar)
 
     doLast{
@@ -324,9 +319,9 @@ task pushZipRelease(dependsOn: zipRelease) {
         }
 
 
-        ant.zip(update: "true",
-                basedir: "${dist}",
-                destfile: "${dist}/${releaseZip}",
+        ant.zip(update: "true", 
+                basedir: "${dist}", 
+                destfile: "${dist}/${releaseZip}", 
                 includes: "${diagnosticsJar}"
                )
 
@@ -341,8 +336,8 @@ task pushZipRelease(dependsOn: zipRelease) {
         repoReleaseBuilder.name('shootoff-' + version + '-final')
         def repoRelease = repoReleaseBuilder.create()
         repoRelease.uploadAsset(new File(dist + releaseZip), 'application/zip')
-
-
+        
+        
         // Upload MSI if it exists
         def msiFile = new File(bundleDir + 'bundles/' + releaseMsi)
         if (msiFile.exists())
@@ -357,7 +352,7 @@ task pushZipRelease(dependsOn: zipRelease) {
 
         def versionMetadata = '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n' +
             '<stableRelease version=\"' + version + '\" ' +
-            'download=\"https://github.com/phrack/ShootOFF/releases/download/v' + version +
+            'download=\"https://github.com/phrack/ShootOFF/releases/download/v' + version + 
                 '-FINAL/' + releaseZip + '\" />'
 
         def versionFile = new File('shootoff-version.xml')
@@ -375,8 +370,8 @@ task fxSignedJar(dependsOn: fxJar) {
     description 'Digitally sign ShootOFF.jar (generated by fxJar task)'
     group 'Package'
 
-    doFirst {
-        assert file(keyStore).exists()
+    doFirst { 
+        assert file(keyStore).exists() 
     }
 
     doLast {
@@ -413,7 +408,7 @@ task fxJarWritableResources() {
 }
 
 task msiRelease() {
-    group 'Release'
+    group 'Release' 
 
     dependsOn(fxJar)
     dependsOn('updateJars')
@@ -437,7 +432,7 @@ task msiRelease() {
                 toolkit: 'fx',
                 version: version
             )
-
+            
             antfx.preferences(
             	install: false,
             	menu: true,
@@ -457,7 +452,7 @@ task msiRelease() {
                 antfx.icon(
                     kind: 'default',
                     href: 'windows_icon.ico',
-                    width: '256',
+                    width: '256', 
                     height: '256'
                 )
             }
@@ -467,32 +462,32 @@ task msiRelease() {
                     dir: 'build/dist/',
                     includes: 'ShootOFF.jar'
                 )
-
+                
                 antfx.fileset(
                     dir: '',
                     includes: 'shootoff.properties'
                 )
-
+                
                 antfx.fileset(
                 	dir: 'build/dist/',
                 	includes: diagnosticsJar
                 )
-
+                
                 antfx.fileset(
                     dir: '',
                     includes: 'LICENSE'
                 )
-
+                
                 antfx.fileset(
                     dir: '',
         			includes: 'targets/**',
                 )
-
+                
                 antfx.fileset(
                     dir: '',
         			includes: 'courses/**',
                 )
-
+                
                 antfx.fileset(
                     dir: '',
        			 	includes: 'sounds/**',
@@ -501,8 +496,8 @@ task msiRelease() {
                     dir: 'build/dist/',
                     includes: 'libs/*.jar'
                 )
-
-
+                
+                
                 antfx.fileset(
                     type: 'icon',
                     dir: 'src/main/resources/images/',
@@ -519,8 +514,8 @@ task fxWebstartSignedJar() {
     dependsOn('updateJars')
     dependsOn(fxJarWritableResources)
 
-    doFirst {
-        assert file(keyStore).exists()
+    doFirst { 
+        assert file(keyStore).exists() 
     }
 
     doLast {
@@ -547,7 +542,7 @@ task fxWebstartSignedJar() {
         }
 
         GParsPool.withPool {
-            path.list().eachParallel { f ->
+            path.list().eachParallel { f ->       
                 def antLocal = project.createAntBuilder()
                 antLocal.signjar(
                         jar: f,
@@ -593,7 +588,7 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
                 antfx.icon(
                     kind: 'shortcut',
                     href: 'icon_32x32.png',
-                    width: '32',
+                    width: '32', 
                     height: '32'
                 )
             }
@@ -629,12 +624,12 @@ task fxRelease(dependsOn: fxWebstartSignedJar) {
         }
 
         def jnlpPath = webstartDir + project.name + '.jnlp'
-        String contents = new File(jnlpPath).getText('UTF-8')
-
+        String contents = new File(jnlpPath).getText('UTF-8') 
+        
         // Can't update HREF in jnlp tag with antfx
-        contents = contents.replace('href=\"ShootOFF.jnlp\">',
+        contents = contents.replace('href=\"ShootOFF.jnlp\">', 
             'href=\"http://shootoffapp.com/jws/ShootOFF.jnlp\">')
-
+        
         // antfx.icon is not working for jnlp
         contents = contents.replace('<offline-allowed/>',
             '<icon href=\"icon_32x32.png\" width=\"32\" height=\"32\" />\n    <offline-allowed/>')
@@ -714,11 +709,11 @@ task releaseWithMsi() {
 release.doLast {
     // Some of these are worth trying to automate later!
     print("-----------------------------------------\n" +
-          "REMAINING RELEASE TASKS\n" +
+          "REMAINING RELEASE TASKS\n" + 
           "-----------------------------------------\n\n" +
-          "- Publish release draft\n" +
-          "- Update website\n" +
-          "- Make Reddit release post\n" +
-          "- Make Twitter release post\n" +
+          "- Publish release draft\n" + 
+          "- Update website\n" + 
+          "- Make Reddit release post\n" + 
+          "- Make Twitter release post\n" + 
           "- Make release email")
 }
