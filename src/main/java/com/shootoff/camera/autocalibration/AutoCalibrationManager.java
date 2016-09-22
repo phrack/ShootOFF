@@ -74,6 +74,8 @@ public class AutoCalibrationManager {
 	// 11/168 = 0.06547619047619047619047619047619
 	// Maybe I should have made it divisible...
 	private static final double BORDER_FACTOR = 0.065476;
+	
+	protected long lastFrameTimestamp = 0;
 
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 60, 0.0001);
 
@@ -122,6 +124,7 @@ public class AutoCalibrationManager {
 		boundsRect = null;
 		boundingBox = null;
 		perspMat = null;
+		lastFrameTimestamp = 0;
 		for (AutoCalStep step : steps)
 			if (step.enabled())
 				step.reset();
@@ -153,7 +156,8 @@ public class AutoCalibrationManager {
 		return true;
 	}
 
-	public void processFrame(final Mat mat) {
+	public void processFrame(final Mat mat, final long frameTimestamp) {
+		lastFrameTimestamp = frameTimestamp;
 		Mat grayMat = preProcessFrame(mat);
 		for (AutoCalStep step : steps) {
 			if (step.enabled() && !step.completed()) {
@@ -189,6 +193,7 @@ public class AutoCalibrationManager {
 
 	class StepFindBounds implements AutoCalStep {
 		public Bounds boundsResult = null;
+		private static final long minimumInterval = 250;
 		private long lastFrameCheck = 0;
 
 		public void reset() {
@@ -205,10 +210,10 @@ public class AutoCalibrationManager {
 		}
 
 		public void process(Mat mat) {
-			if (System.currentTimeMillis() - lastFrameCheck < 1000)
+			if (lastFrameTimestamp - lastFrameCheck < minimumInterval)
 				return;
 			
-			lastFrameCheck = System.currentTimeMillis();
+			lastFrameCheck = lastFrameTimestamp;
 			
 			Imgproc.equalizeHist(mat, mat);
 			
