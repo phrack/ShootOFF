@@ -247,13 +247,13 @@ public class OptiTrackCamera implements Camera {
 	public boolean decreaseExposure() {
 		final int curExp = getExposure();
 		final int newExp = (int) (curExp - (.1 * (double) curExp));
-		logger.debug("curExp[ {} newExp {}", curExp, newExp);
+		logger.trace("curExp[ {} newExp {}", curExp, newExp);
 		
 		if (newExp < 20)
 			return false;
 		
 		setExposure(newExp);
-		logger.debug("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
+		logger.trace("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
 		return (getExposure() == newExp);
 	}
 	

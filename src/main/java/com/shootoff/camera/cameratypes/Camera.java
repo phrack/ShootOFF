@@ -91,8 +91,9 @@ public interface Camera extends Runnable, Closeable {
 
 	double getFPS();
 	
-	// Does the camera limit the number of frames that are
-	// delivered to CameraManager?
+	/** @return True if the camera limits the number of frames that are
+	 * delivered to CameraManager
+	 */
 	boolean limitsFrames();
 
 }
