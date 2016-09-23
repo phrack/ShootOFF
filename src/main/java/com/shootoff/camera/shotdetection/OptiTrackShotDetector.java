@@ -97,4 +97,9 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 		startDetectionModeNative();
 		enableDetection();
 	}
+	
+	@Override
+	protected boolean handlesBounds() {
+		return false;
+	}
 }

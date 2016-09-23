@@ -51,6 +51,7 @@ public interface Camera extends Runnable, Closeable {
 	// Return false if the state change is not allowed
 	// for possible future use
 	boolean setState(CameraState state);
+
 	CameraState getState();
 
 	void setCameraEventListener(CameraEventListener cameraEventListener);
@@ -69,7 +70,9 @@ public interface Camera extends Runnable, Closeable {
 	Dimension getViewSize();
 
 	boolean supportsExposureAdjustment();
+
 	boolean decreaseExposure();
+
 	void resetExposure();
 
 	static BufferedImage matToBufferedImage(Mat matBGR) {
@@ -90,9 +93,11 @@ public interface Camera extends Runnable, Closeable {
 	}
 
 	double getFPS();
-	
-	// Does the camera limit the number of frames that are
-	// delivered to CameraManager?
+
+	/**
+	 * @return True if the camera limits the number of frames that are delivered
+	 *         to CameraManager
+	 */
 	boolean limitsFrames();
 
 }

@@ -24,7 +24,7 @@ import com.shootoff.config.Configuration;
 
 public abstract class ShotYieldingShotDetector extends ShotDetector {
 
-	// TODO: Handle projector bound sizing
+
 	public ShotYieldingShotDetector(CameraManager cameraManager, Configuration config, CameraView cameraView) {
 		super(cameraManager, config, cameraView);
 	}

@@ -40,8 +40,10 @@ public class ShotEntry {
 
 		if (shot.getColor().equals(Color.RED)) {
 			color = "red";
-		} else {
+		} else if (shot.getColor().equals(Color.GREEN)) {
 			color = "green";
+		} else {
+			color = "infrared";
 		}
 
 		this.rowColor = rowColor;

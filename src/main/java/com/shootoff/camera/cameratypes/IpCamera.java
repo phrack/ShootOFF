@@ -125,8 +125,7 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	public synchronized boolean open() {
-		if (isOpen() && !closing)
-			return true;
+		if (isOpen() && !closing) return true;
 
 		closing = false;
 		boolean open = false;
@@ -143,14 +142,12 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	public synchronized void close() {
-		if (!isOpen() || closing)
-			return;
+		if (!isOpen() || closing) return;
 
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
+		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
 
 		closing = true;
-		
+
 		if (CameraFactory.isMac()) {
 			new Thread(() -> {
 				ipcam.close();
@@ -198,20 +195,17 @@ public class IpCamera extends CalculatedFPSCamera {
 
 	public void run() {
 		while (isOpen() && !closing) {
-			if (!isImageNew())
-				continue;
+			if (!isImageNew()) continue;
 
-			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFrame(getMatFrame());
+			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getMatFrame());
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
 			}
 
 		}
-		
-		if (!closing)
-			close();
+
+		if (!closing) close();
 	}
 
 	public boolean supportsExposureAdjustment() {
@@ -221,9 +215,8 @@ public class IpCamera extends CalculatedFPSCamera {
 	public boolean decreaseExposure() {
 		return false;
 	}
-	
-	public void resetExposure()
-	{
+
+	public void resetExposure() {
 		return;
 	}
 
@@ -235,22 +228,17 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (!super.equals(obj)) return false;
+		if (getClass() != obj.getClass()) return false;
 		IpCamera other = (IpCamera) obj;
 		if (ipcam == null) {
-			if (other.ipcam != null)
-				return false;
-		} else if (!ipcam.equals(other.ipcam))
-			return false;
+			if (other.ipcam != null) return false;
+		} else if (!ipcam.equals(other.ipcam)) return false;
 		return true;
 	}
-	
-	public boolean limitsFrames(){
+
+	public boolean limitsFrames() {
 		return false;
 	}
 }

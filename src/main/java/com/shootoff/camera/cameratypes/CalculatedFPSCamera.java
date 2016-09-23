@@ -38,28 +38,25 @@ public abstract class CalculatedFPSCamera implements Camera {
 	}
 
 	public boolean setState(CameraState cameraState) {
-		
-		switch (cameraState) {
-			case CLOSED:
-				if (this.cameraState != CameraState.CLOSED)
-				{
-					this.cameraState = cameraState;
-					close();
-				}
-				break;
-			case CALIBRATING:
-				resetExposure();
-			default:
-				this.cameraState = cameraState;
-				break;
-		}
-		
 
-		
+		switch (cameraState) {
+		case CLOSED:
+			if (this.cameraState != CameraState.CLOSED) {
+				this.cameraState = cameraState;
+				close();
+			}
+			break;
+		case CALIBRATING:
+			resetExposure();
+		default:
+			this.cameraState = cameraState;
+			break;
+		}
+
 		return true;
 	}
-	public CameraState getState()
-	{
+
+	public CameraState getState() {
 		return cameraState;
 	}
 
@@ -90,8 +87,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 
 			setFPS(estimateFPS);
 
-			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFPS(webcamFPS);
+			if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(webcamFPS);
 		}
 
 		lastCameraTimestamp = System.currentTimeMillis();
@@ -107,15 +103,11 @@ public abstract class CalculatedFPSCamera implements Camera {
 	}
 
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		Camera other = (Camera) obj;
-		if (!this.getName().equals(other.getName()))
-			return false;
+		if (!this.getName().equals(other.getName())) return false;
 		return true;
 	}
 

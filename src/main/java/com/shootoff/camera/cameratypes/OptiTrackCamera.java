@@ -48,15 +48,15 @@ public class OptiTrackCamera implements Camera {
 	private Dimension dimension = null;
 	private int viewWidth = 0;
 	private int viewHeight = 0;
+	private static final int MAXIMUM_EXPOSURE = 480;
 
 	public OptiTrackCamera() {
-		if (!initialized)
-			init();
+		if (!initialized) init();
+		setExposure(MAXIMUM_EXPOSURE);
 	}
 
 	public static void init() {
-		if (initialized)
-			return;
+		if (initialized) return;
 
 		try {
 			File lib = new File(System.mapLibraryName("OptiTrackCamera"));
@@ -75,18 +75,15 @@ public class OptiTrackCamera implements Camera {
 	public boolean setState(CameraState cameraState) {
 		switch (cameraState) {
 		case DETECTING:
-			// TODO: If 780nm, enable.  If visible, keep disabled
-			 if (!getIRFilterState())
-				 toggleIRFilter();
+			// TODO: If 780nm, enable. If visible, keep disabled
+			if (!getIRFilterState()) toggleIRFilter();
 			break;
 		case CALIBRATING:
 			resetExposure();
-			if (getIRFilterState())
-				toggleIRFilter();
+			if (getIRFilterState()) toggleIRFilter();
 			break;
 		case CLOSED:
-			if (this.cameraState != CameraState.CLOSED)
-			{
+			if (this.cameraState != CameraState.CLOSED) {
 				this.cameraState = cameraState;
 				close();
 			}
@@ -100,8 +97,8 @@ public class OptiTrackCamera implements Camera {
 
 		return true;
 	}
-	public CameraState getState()
-	{
+
+	public CameraState getState() {
 		return cameraState;
 	}
 
@@ -152,8 +149,7 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	public Dimension getViewSize() {
-		if (dimension != null)
-			return dimension;
+		if (dimension != null) return dimension;
 
 		dimension = new Dimension(getViewWidth(), getViewHeight());
 
@@ -161,10 +157,8 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	public Mat translateCameraArrayToMat(byte[] imageBuffer) {
-		if (viewHeight == 0)
-			viewHeight = getViewHeight();
-		if (viewWidth == 0)
-			viewWidth = getViewWidth();
+		if (viewHeight == 0) viewHeight = getViewHeight();
+		if (viewWidth == 0) viewWidth = getViewWidth();
 
 		Mat mat = new Mat(viewHeight, viewWidth, CvType.CV_8UC1);
 		Mat dst = new Mat(viewHeight, viewWidth, CvType.CV_8UC3);
@@ -204,28 +198,24 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	@Override
-	public void run() {
-	}
+	public void run() {}
 
 	// TODO: Switch timestamps to optitrack internal timestamps
 	private void receiveFrame(byte[] frame) {
 		currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
-		
+
 		if (cameraEventListener.isPresent()) {
 			cameraEventListener.get().newFrame(mat);
 		}
 
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().newFPS(getFPS());
+		if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(getFPS());
 	}
 
 	private void cameraClosed() {
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
-		
-		if (isOpen())
-			close();
+		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
+
+		if (isOpen()) close();
 	}
 
 	@Override
@@ -235,11 +225,9 @@ public class OptiTrackCamera implements Camera {
 
 	private Optional<Integer> origExposure = Optional.empty();
 
-	
 	@Override
 	public boolean supportsExposureAdjustment() {
-		if (!origExposure.isPresent())
-			origExposure = Optional.of(getExposure());
+		if (!origExposure.isPresent()) origExposure = Optional.of(getExposure());
 		return true;
 	}
 
@@ -247,24 +235,20 @@ public class OptiTrackCamera implements Camera {
 	public boolean decreaseExposure() {
 		final int curExp = getExposure();
 		final int newExp = (int) (curExp - (.1 * (double) curExp));
-		logger.debug("curExp[ {} newExp {}", curExp, newExp);
-		
-		if (newExp < 20)
-			return false;
-		
+		logger.trace("curExp[ {} newExp {}", curExp, newExp);
+
+		if (newExp < 20) return false;
+
 		setExposure(newExp);
-		logger.debug("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
+		logger.trace("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
 		return (getExposure() == newExp);
 	}
-	
-	public void resetExposure()
-	{
-		if (origExposure.isPresent())
-			setExposure(origExposure.get());
+
+	public void resetExposure() {
+		if (origExposure.isPresent()) setExposure(origExposure.get());
 	}
-	
-	public boolean limitsFrames()
-	{
+
+	public boolean limitsFrames() {
 		return true;
 	}
 
