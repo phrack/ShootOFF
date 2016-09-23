@@ -66,6 +66,12 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 		super.addShotTimerColumn(HIT_COL_NAME, HIT_COL_WIDTH);
 		super.showTextOnFeed("left score: 0\nright score: 0");
+		
+		super.pauseShotDetection(true);
+		executorService.schedule(() -> {
+			super.pauseShotDetection(false);
+			TrainingExerciseBase.playSound("sounds/beep.wav");
+		}, NEW_ROUND_DELAY, TimeUnit.SECONDS);
 	}
 
 	private boolean findTargets(List<Target> targets) {
@@ -165,8 +171,12 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 	private void roundOver() {
 		if (continueExercise) {
+			TrainingExerciseBase.playSound("sounds/beep.wav");
 			thisSuper.showTextOnFeed(String.format("left score: %d%nright score: %d", leftScore, rightScore));
 			super.pauseShotDetection(true);
+			isResetting = true;
+			thisSuper.reset();
+			isResetting = false;
 			executorService.schedule(new NewRound(), NEW_ROUND_DELAY, TimeUnit.SECONDS);
 		}
 	}
@@ -174,9 +184,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	private class NewRound implements Runnable {
 		@Override
 		public void run() {
-			isResetting = true;
-			thisSuper.reset();
-			isResetting = false;
+			TrainingExerciseBase.playSound("sounds/beep.wav");
 			thisSuper.pauseShotDetection(false);
 		}
 	}
