@@ -85,60 +85,55 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 	private static boolean initialized = false;
 	private Dimension dimension = null;
 
-	public static final int viewWidth = 640;
-	public static final int viewHeight = 480;
+	private static final int VIEW_WIDTH = 640;
+	private static final int VIEW_HEIGHT = 480;
 
-	public static eyecam.ps3eye_t ps3ID = null;
+	private static eyecam.ps3eye_t ps3ID = null;
 	private static boolean opened = false;
 	private static boolean closed = true;
 
 	private Optional<Integer> origExposure = Optional.empty();
 	private static boolean configIsOpen = false;
 
-	public static eyecam eyecamLib;
+	private static eyecam eyecamLib;
 	private static byte[] ba = new byte[getViewWidth() * getViewHeight() * 4];
-	public static Label fpsValue = new Label("0");
-	public static Stage stage = new Stage();
+	private static Label fpsValue = new Label("0");
+	private static Stage ps3eyeSettingsStage = new Stage();
 
 	public PS3EyeCamera() {
 		if (!initialized) {
-
 			init();
 		}
 	}
 
 	public static void init() {
-		if (initialized)
-			return;
+		if (initialized) return;
 
 		try {
+			final String architecture = System.getProperty("os.arch");
 
-			String architecture = System.getProperty("os.arch");
+			if (logger.isDebugEnabled()) logger.debug("OS type is: {}", architecture);
 
-			logger.debug("OS type is: " + architecture);
-
-			if (architecture.equalsIgnoreCase("amd64") || architecture.equalsIgnoreCase("x86_64")) {
-				logger.debug("Trying to load eyeCam64.dll");
+			if (architecture != null
+					&& (architecture.equalsIgnoreCase("amd64") || architecture.equalsIgnoreCase("x86_64"))) {
+				logger.trace("Trying to load eyeCam64.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam64", eyecam.class);
-				logger.debug("Successfully loaded eyeCam64.dll");
-			} else if (architecture.equalsIgnoreCase("i386") || architecture.equalsIgnoreCase("i686")
-					|| architecture.equalsIgnoreCase("x86")) {
-				logger.debug("Trying to load eyeCam32.dll");
+				logger.trace("Successfully loaded eyeCam64.dll");
+			} else if (architecture != null && (architecture.equalsIgnoreCase("i386")
+					|| architecture.equalsIgnoreCase("i686") || architecture.equalsIgnoreCase("x86"))) {
+				logger.trace("Trying to load eyeCam32.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam32", eyecam.class);
-				logger.debug("Successfully loaded eyeCam32.dll");
+				logger.trace("Successfully loaded eyeCam32.dll");
 			}
-
 		} catch (UnsatisfiedLinkError exception) {
-
-			logger.trace("PS3EyeCamera eyecam ULE: " + exception);
-			logger.debug(
-					"Can't find the eyeCamXX.dll or " + "the Visual Studio Visual C++ runtime files are not installed");
+			logger.error("PS3EyeCamera eyecam ULE, Can't find the eyeCamXX.dll or "
+					+ "the Visual Studio Visual C++ runtime files are not installed: ", exception);
 			initialized = false;
 			return;
 		}
 
 		if (eyecamLib == null) {
-			logger.trace("architecture not accounted for so PS3Eye not loaded");
+			logger.info("Architecture not accounted for, PS3Eye not loaded");
 			initialized = false;
 			return;
 		}
@@ -146,16 +141,16 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		eyecamLib.ps3eye_init();
 
 		if (eyecamLib.ps3eye_count_connected() >= 1) {
-			logger.debug("Found a PS3EYE camera...setting up communications with it");
+			logger.trace("Found a PS3EYE camera, setting up communications with it");
 			ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
 					eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
 			if (ps3ID != null) {
-				logger.debug("Communications with PS3Eye camera established");
+				logger.trace("Communications with PS3Eye camera established");
 				closed = false;
 				opened = true;
 				initialized = true;
 			} else {
-				logger.debug("Communications with PS3Eye camera NOT established");
+				logger.trace("Communications with PS3Eye camera NOT established");
 				closed = true;
 				opened = false;
 				initialized = false;
@@ -166,24 +161,23 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		}
 
 		if (initialized()) {
-
 			if (eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN, 16) == -1) {
-				logger.debug("error setting gain on PS3Eye during initialization..."
+				logger.error("Error setting gain on PS3Eye during initialization,"
 						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
 			}
 			if (eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE, 50) == -1) {
-				logger.debug("error setting exposure on PS3Eye during initialization..."
+				logger.error("Error setting exposure on PS3Eye during initialization,"
 						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
 			}
+			
 			CameraFactory.registerCamera(new PS3EyeCamera());
-			logger.debug("PS3Eye adjusted and registered");
+			logger.trace("PS3Eye adjusted and registered");
 		}
 
 	}// end init
 
 	public void launchCameraSettings() {
-
-		logger.trace("launch camera settings called");
+		logger.trace("Launch camera settings called");
 		final CheckBox autoGain = new CheckBox("AutoGain");
 		boolean isAutoGainSet = false;
 		final Color textColor = Color.BLACK;
@@ -215,13 +209,13 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		exposure.setBlockIncrement(1);
 		exposure.setSnapToTicks(true);
 
-		Group root = new Group();
-		Scene scene = new Scene(root, 425, 200);
-		stage.setScene(scene);
-		stage.setTitle("PS3EYE Configuration");
+		final Group root = new Group();
+		final Scene scene = new Scene(root, 425, 200);
+		ps3eyeSettingsStage.setScene(scene);
+		ps3eyeSettingsStage.setTitle("PS3EYE Configuration");
 		scene.setFill(Color.WHITESMOKE);
 
-		GridPane grid = new GridPane();
+		final GridPane grid = new GridPane();
 		grid.setPadding(new Insets(10, 10, 10, 10));
 		grid.setVgap(10);
 		grid.setHgap(70);
@@ -263,7 +257,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 
 		gain.valueProperty().addListener(new ChangeListener<Number>() {
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
-				logger.trace("gain set to: " + Math.round(new_val.doubleValue()));
+				if (logger.isTraceEnabled()) logger.trace("gain set to: {}", Math.round(new_val.doubleValue()));
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN,
 						(int) Math.round(new_val.doubleValue()));
 				gainValue.setText(String.format("%d", (int) Math.round(new_val.doubleValue())));
@@ -274,7 +268,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE,
 						(int) Math.round(new_val.doubleValue()));
-				logger.trace("exposure level set to: " + Math.round(new_val.doubleValue()));
+				if (logger.isTraceEnabled()) logger.trace("exposure level set to: {}", Math.round(new_val.doubleValue()));
 				exposureValue.setText(String.format("%d", (int) Math.round(new_val.doubleValue())));
 			}
 		});
@@ -284,13 +278,13 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 			autoGain.setText("Off");
 			gain.setDisable(false);
 			exposure.setDisable(false);
-
 		} else {
 			isAutoGainSet = true;
 			autoGain.setText("On");
 			gain.setDisable(true);
 			exposure.setDisable(true);
 		}
+		
 		autoGain.setSelected(isAutoGainSet);
 
 		GridPane.setConstraints(autoGain, 1, 4);
@@ -314,12 +308,11 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 			}
 		});
 
-		stage.show();
+		ps3eyeSettingsStage.show();
 
-		stage.setOnCloseRequest((e) -> {
+		ps3eyeSettingsStage.setOnCloseRequest((e) -> {
 			configIsOpen = false;
 		});
-
 	}// end launchcamerasettings
 
 	public String getName() {
@@ -327,17 +320,17 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 	}
 
 	private static int getViewWidth() {
-		return viewWidth;
+		return VIEW_WIDTH;
 	}
 
 	private static int getViewHeight() {
-		return viewHeight;
+		return VIEW_HEIGHT;
 	}
 
 	public static void closeMe() {
 		if (configIsOpen) {
 			configIsOpen = false;
-			stage.close();
+			ps3eyeSettingsStage.close();
 		}
 		if (closed)
 			return;
@@ -387,16 +380,13 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 	}
 
 	private byte[] getImageNative() {
-
 		eyecamLib.ps3eye_grab_frame(ps3ID, ba);
 
 		return ba;
-
 	}
 
 	public Mat translateCameraArrayToMat(byte[] imageBuffer) {
-
-		Mat mat = new Mat(getViewHeight(), getViewWidth(), CvType.CV_8UC3);
+		final Mat mat = new Mat(getViewHeight(), getViewWidth(), CvType.CV_8UC3);
 
 		mat.put(0, 0, imageBuffer);
 		return mat;
@@ -412,18 +402,16 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 	}
 
 	public Mat getMatFrame() {
-		byte[] frame = getImageNative();
+		final byte[] frame = getImageNative();
 		currentFrameTimestamp = System.currentTimeMillis();
-		Mat mat = translateCameraArrayToMat(frame);
+		final Mat mat = translateCameraArrayToMat(frame);
 		frameCount++;
 		return mat;
 	}
 
 	@Override
 	public BufferedImage getBufferedImage() {
-
 		return Camera.matToBufferedImage(getMatFrame());
-
 	}
 
 	@Override
@@ -444,7 +432,6 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 
 	@Override
 	public void run() {
-
 		while (isOpen()) {
 			if (cameraEventListener.isPresent())
 				cameraEventListener.get().newFrame(getMatFrame());
@@ -460,8 +447,8 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 						fpsValue.setText((Double.toString(getFPS()).substring(0, 5)));
 				});
 			}
-
 		}
+		
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 	}
@@ -510,7 +497,6 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 	}
 
 	public interface eyecam extends Library {
-
 		public static class ps3eye_t extends PointerType {
 			public ps3eye_t() {
 			}
@@ -602,5 +588,4 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		int ps3eye_get_parameter(ps3eye_t eye, int ps3eyeGain);
 
 	}// end eyecam interface
-
 }
