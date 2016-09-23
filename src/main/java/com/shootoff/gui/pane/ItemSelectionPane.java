@@ -26,13 +26,13 @@ public class ItemSelectionPane<T> extends ScrollPane {
 	private static final int DEFAULT_COLUMNS = 6;
 	// Above MAX_COLUMNS and you end up having to move your mouse side to side
 	// too much
-	private static final int MAX_COLUMNS = 8; 
+	private static final int MAX_COLUMNS = 8;
 	private static final int ITEM_DIMS = 150;
 
 	private final Map<Object, ButtonBase> items = new HashMap<>();
 	private final TilePane subContainer = new TilePane(30, 30);
 	private boolean toggleable;
-	
+
 	private ToggleGroup toggleGroup = null;
 	private T defaultSelection = null;
 	private T currentSelection = null;
@@ -51,16 +51,16 @@ public class ItemSelectionPane<T> extends ScrollPane {
 
 		subContainer.setPrefColumns(DEFAULT_COLUMNS);
 		subContainer.setPadding(new Insets(0, 65, 65, 65));
-		
+
 		this.widthProperty().addListener((observable, oldValue, newValue) -> {
 			final Insets padding = subContainer.getPadding();
 			final int hgap = (int) subContainer.getHgap();
-			final int columnCount = (newValue.intValue() - (int) (padding.getLeft() + padding.getRight()) + hgap) / 
+			final int columnCount = (newValue.intValue() - (int) (padding.getLeft() + padding.getRight()) + hgap) /
 					(ITEM_DIMS + hgap);
-			
+
 			if (columnCount <= MAX_COLUMNS) subContainer.setPrefColumns(columnCount);
 		});
-		
+
 		this.setStyle(
 				"-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
 		this.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
@@ -72,10 +72,10 @@ public class ItemSelectionPane<T> extends ScrollPane {
 
 	public ItemSelectionPane(ToggleGroup toggleGroup, ItemSelectionListener<T> itemListener) {
 		this(true, itemListener);
-		
+
 		this.toggleGroup = toggleGroup;
 	}
-	
+
 	public ButtonBase addButton(T ref, String text, Optional<Node> graphic, Optional<Tooltip> tooltip) {
 		final ButtonBase button;
 		if (toggleable) {
@@ -146,7 +146,7 @@ public class ItemSelectionPane<T> extends ScrollPane {
 		if (toggleable && ref == defaultSelection) {
 			defaultSelection = null;
 		}
-		
+
 		if (toggleable && ref == currentSelection && defaultSelection != null) {
 			currentSelection = defaultSelection;
 			itemListener.onItemClicked(currentSelection);
@@ -161,7 +161,7 @@ public class ItemSelectionPane<T> extends ScrollPane {
 	public ToggleGroup getToggleGroup() {
 		return toggleGroup;
 	}
-	
+
 	public void setSelection(T ref) {
 		if (items.containsKey(ref)) {
 			currentSelection = ref;
