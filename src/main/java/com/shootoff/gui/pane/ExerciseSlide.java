@@ -193,6 +193,10 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		projectorPane.setExpanded(!isDisabled);
 	}
 	
+	public ExerciseListener getExerciseListener() {
+		return exerciseListener;
+	}
+	
 	private void startRecordingSession() {
 		config.setSessionRecorder(new SessionRecorder());
 

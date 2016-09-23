@@ -167,7 +167,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaStage.setScene(new Scene(arenaPane));
 			arenaStage.setFullScreenExitHint("");
 			
-			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, cameraViews));
+			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, 
+					cameraViews, exerciseSlide.getExerciseListener()));
 			
 			calibrationManager.get().addCalibrationListener(new CalibrationListener() {
 				@Override

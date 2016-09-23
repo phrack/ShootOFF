@@ -85,7 +85,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 					
 					@Override
 					public void calibratedFeedBehaviorsChanged() {}
-				}, cameraManager, pac, null));
+				}, cameraManager, pac, null, null));
 		cameraManager.enableAutoCalibration(false);
 
 		cameraManager.setDetecting(false);

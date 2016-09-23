@@ -936,8 +936,17 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			config.setExercise(newExercise);
 
-			((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
-			newExercise.init();
+			
+			final Runnable initExercise = () -> {
+				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
+				newExercise.init();
+			};
+			
+			if (Platform.isFxApplicationThread()) {
+				initExercise.run();
+			} else {
+				Platform.runLater(initExercise);
+			}
 		} catch (ReflectiveOperationException e) {
 			ExerciseMetadata metadata = exercise.getInfo();
 			logger.error("Failed to start exercise " + metadata.getName() + " " + metadata.getVersion(), e);
@@ -960,8 +969,17 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			config.setExercise(newExercise);
 
-			((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaPane());
-			newExercise.init();
+			final Runnable initExercise = () -> {
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaPane());
+				newExercise.init();
+			};
+			
+			if (Platform.isFxApplicationThread()) {
+				initExercise.run();
+			} else {
+				Platform.runLater(initExercise);
+			}
+
 		} catch (ReflectiveOperationException e) {
 			ExerciseMetadata metadata = exercise.getInfo();
 			logger.error("Failed to start projector exercise " + metadata.getName() + " " + metadata.getVersion(), e);

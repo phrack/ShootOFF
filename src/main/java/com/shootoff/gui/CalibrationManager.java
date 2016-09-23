@@ -32,7 +32,10 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
+import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.plugins.ProjectorTrainingExerciseBase;
+import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -54,11 +57,14 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final CameraManager calibratingCameraManager;
 	private final CanvasManager calibratingCanvasManager;
 	private final CameraViews cameraViews;
+	private final Configuration config;
+	private final ExerciseListener exerciseListener;
 	private final List<CalibrationListener> calibrationListeners = new ArrayList<>();
 	private final ProjectorArenaPane arenaPane;
 
 	private ScheduledFuture<?> autoCalibrationFuture = null;
 
+	private Optional<TrainingExercise> savedExercise = Optional.empty();
 	private Optional<TargetView> calibrationTarget = Optional.empty();
 	private Optional<Dimension2D> perspectivePaperDims = Optional.empty();
 
@@ -66,13 +72,15 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
 
 	public CalibrationManager(CalibrationConfigurator calibrationConfigurator, CameraManager calibratingCameraManager,
-			ProjectorArenaPane arenaPane, CameraViews cameraViews) {
+			ProjectorArenaPane arenaPane, CameraViews cameraViews, ExerciseListener exerciseListener) {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
 		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
 		calibrationListeners.add((CalibrationListener) arenaPane);
 		this.arenaPane = arenaPane;
 		this.cameraViews = cameraViews;
+		this.config = exerciseListener.getConfiguration();
+		this.exerciseListener = exerciseListener;
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
 		calibratingCameraManager.setCalibrationManager(this);
@@ -86,6 +94,15 @@ public class CalibrationManager implements CameraCalibrationListener {
 	}
 
 	public void enableCalibration() {
+		// Projector exercises can alter what is on the arena, thereby
+		// interfearing with calibration. Thus, if an projector exercise
+		// is set, we unset it for calibration, and reset it afterwards.
+		if (config.getExercise().isPresent() && 
+				config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
+			savedExercise = config.getExercise();
+			exerciseListener.setExercise(null);
+		}
+		
 		isCalibrating.set(true);
 
 		calibrationConfigurator.toggleCalibrating();
@@ -156,6 +173,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 		// than just the arena. I don't think that should be a problem?
 		calibratingCameraManager.setDetecting(false);
 		TimerPool.schedule(() -> calibratingCameraManager.setDetecting(true), 600);
+		
+		if (savedExercise.isPresent()) exerciseListener.setProjectorExercise(savedExercise.get());
 	}
 
 	@Override
