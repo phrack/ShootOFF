@@ -147,7 +147,7 @@ test {
 }
 
 task copyEyeCam(type:Copy) {
-    from 'eyecam.dll' into 'build/dist'
+    from 'eyeCam.dll' into 'build/dist'
 }
 
 task copyConfig(type:Copy) {
