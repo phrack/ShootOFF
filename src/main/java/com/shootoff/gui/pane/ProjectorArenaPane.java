@@ -734,7 +734,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		recalibrationAlert.setHeaderText("Critical Distance Data Missing!");
 		recalibrationAlert.setResizable(true);
 		recalibrationAlert.setContentText(message);
-		recalibrationAlert.initOwner(arenaStage);
+		if (shootOffStage != null) recalibrationAlert.initOwner(shootOffStage);
 		recalibrationAlert.showAndWait();
 		
 		showedRecalibrationMessage = true;
