@@ -147,7 +147,8 @@ test {
 }
 
 task copyEyeCam(type:Copy) {
-    from 'eyecam.dll' into 'build/dist'
+    from 'eyeCam32.dll' into 'build/dist'
+    from 'eyeCam64.dll' into 'build/dist'
 }
 
 task copyConfig(type:Copy) {
@@ -256,6 +257,8 @@ task zipRelease(type: Zip) {
         include 'libs/**/*.jar'
         include 'shootoff.properties'
         include 'ShootOFF.jar'
+        include 'eyeCam32.dll'
+        include 'eyeCam64.dll'
     }
 
     archiveName = releaseZip
