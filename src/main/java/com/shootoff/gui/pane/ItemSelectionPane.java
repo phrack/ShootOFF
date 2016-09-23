@@ -167,7 +167,7 @@ public class ItemSelectionPane<T> extends ScrollPane {
 			currentSelection = ref;
 			toggleGroup.selectToggle((Toggle) items.get(currentSelection));
 		} else {
-			logger.error("setSelection on non-existing ref - %s", ref);
+			if (logger.isWarnEnabled()) logger.warn("setSelection on non-existing ref - {}", ref);
 		}
 	}
 }
