@@ -770,6 +770,11 @@ public class Main extends Application {
 					if (preload == null || !preload.contains(v4lCompat.getPath())) {
 						closeNoV4lCompat(v4lCompat);
 					}
+				} else {
+					logger.warn("This system is running Linux, and likely therefore also v4l. "
+							+ "If ShootOFF fails to run, it's likely because you need to preload "
+							+ "v4l1compat using: "
+							+ "export LD_PRELOAD=path_to_v4l1compat; java -jar ShootOFF.jar");
 				}
 			}
 		}
