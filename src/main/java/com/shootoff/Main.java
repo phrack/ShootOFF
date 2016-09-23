@@ -681,13 +681,16 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		OptiTrackCamera.init();
-		PS3EyeCamera.init();
 		
 		this.primaryStage = primaryStage;
 
 		final String os = System.getProperty("os.name");
-		if (os != null && "Mac OS X".equals(os) && CameraFactory.getWebcams().isEmpty()) {
-			closeNoCamera();
+		if (os != null) {
+			if ("Mac OS X".equals(os) && CameraFactory.getWebcams().isEmpty()) {
+				closeNoCamera();
+			} else if (os.startsWith("Windows")) {
+				PS3EyeCamera.init();
+			}
 		}
 
 		if (System.getProperty("javawebstart.version", null) != null) {
