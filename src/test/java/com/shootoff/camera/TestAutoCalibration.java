@@ -27,8 +27,11 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
+import com.shootoff.gui.ExerciseListener;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.plugins.engine.PluginEngine;
 
 public class TestAutoCalibration implements VideoFinishedListener {
 	private AutoCalibrationManager acm;
@@ -85,7 +88,23 @@ public class TestAutoCalibration implements VideoFinishedListener {
 					
 					@Override
 					public void calibratedFeedBehaviorsChanged() {}
-				}, cameraManager, pac, null, null));
+				}, cameraManager, pac, null, new ExerciseListener() {
+					@Override
+					public void setProjectorExercise(TrainingExercise exercise) {}
+					
+					@Override
+					public void setExercise(TrainingExercise exercise) {}
+					
+					@Override
+					public PluginEngine getPluginEngine() {
+						return null;
+					}
+					
+					@Override
+					public Configuration getConfiguration() {
+						return null;
+					}
+				}));
 		cameraManager.enableAutoCalibration(false);
 
 		cameraManager.setDetecting(false);
