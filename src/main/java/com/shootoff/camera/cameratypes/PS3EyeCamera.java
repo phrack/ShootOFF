@@ -169,9 +169,11 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 
 			if (eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN, 16) == -1) {
 				logger.debug("error setting gain on PS3Eye during initialization..."
+						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
 			}
 			if (eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE, 50) == -1) {
 				logger.debug("error setting exposure on PS3Eye during initialization..."
+						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
 			}
 			CameraFactory.registerCamera(new PS3EyeCamera());
 			logger.debug("PS3Eye adjusted and registered");
