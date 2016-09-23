@@ -423,6 +423,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		config.setMalfunctionsProbability((float) malfunctionsSlider.getValue());
 		config.setCalibratedFeedBehavior(CalibrationOption.fromString(calibratedOptionsChoiceBox.getValue()));
 		config.setShowArenaShotMarkers(showArenaShotMarkersCheckBox.isSelected());
+		config.setAutoAdjustExposure(autoAdjustExposureCheckBox.isSelected());
 
 		if (config.writeConfigurationFile()) {
 			calibrationConfigurator.calibratedFeedBehaviorsChanged();

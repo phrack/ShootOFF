@@ -818,7 +818,7 @@ public class Configuration {
 	}
 	
 
-	private void setAutoAdjustExposure(boolean autoAdjust) {
+	public void setAutoAdjustExposure(boolean autoAdjust) {
 		autoAdjustExposure = autoAdjust;
 	}
 
