@@ -17,20 +17,20 @@
  */
 
 /*
- * eyecam.dll was compiled by ifly53e using the source from
- * https://github.com/inspirit/PS3EYEDriver
+ * eyeCam32.dll and eyeCam64.dll were compiled by ifly53e using the source from
+ * https:\\github.com\inspirit\PS3EYEDriver
  *
  *Follow the instructions to install the proper PS3Eye usb driver from this link:
- *https://github.com/cboulay/psmove-ue4/wiki/Windows-PSEye-Setup
+ *https:\\github.com\cboulay\psmove-ue4\wiki\Windows-PSEye-Setup
  *
  *You will need a program called Zadig to help install the usb driver:
- *http://zadig.akeo.ie/downloads/zadig_2.2.exe
+ *http:\\zadig.akeo.ie\downloads\zadig_2.2.exe
  *
  *Missing from the Zadig instructions is to click on the Options menu and
  *click "List All Devices" so that you can see the PS3Eye camera in the first place.
  *
  *Test your setup with ps3eye_sdl.exe found at:
- *https://github.com/cboulay/psmove-ue4/tree/master/Binaries/Win64
+ *https:\\github.com\cboulay\psmove-ue4\tree\master\Binaries\Win64
  *
  *Start ShootOFF and it should see the PS3Eye.
  *
@@ -113,23 +113,40 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 
 		try {
 
-			eyecamLib = (eyecam) Native.loadLibrary("eyecam", eyecam.class);
+			String architecture = System.getProperty("os.arch");
+
+			logger.debug("OS type is: " + architecture);
+
+			if (architecture.equalsIgnoreCase("amd64") || architecture.equalsIgnoreCase("x86_64")) {
+				logger.debug("Trying to load eyeCam64.dll");
+				eyecamLib = (eyecam) Native.loadLibrary("eyeCam64", eyecam.class);
+				logger.debug("Successfully loaded eyeCam64.dll");
+			} else if (architecture.equalsIgnoreCase("i386") || architecture.equalsIgnoreCase("i686")
+					|| architecture.equalsIgnoreCase("x86")) {
+				logger.debug("Trying to load eyeCam32.dll");
+				eyecamLib = (eyecam) Native.loadLibrary("eyeCam32", eyecam.class);
+				logger.debug("Successfully loaded eyeCam32.dll");
+			}
 
 		} catch (UnsatisfiedLinkError exception) {
 
+			logger.trace("PS3EyeCamera eyecam ULE: " + exception);
+			logger.debug(
+					"Can't find the eyeCamXX.dll or " + "the Visual Studio Visual C++ runtime files are not installed");
 			initialized = false;
 			return;
 		}
 
 		if (eyecamLib == null) {
+			logger.trace("architecture not accounted for so PS3Eye not loaded");
 			initialized = false;
 			return;
 		}
 
 		eyecamLib.ps3eye_init();
 
-		if (eyecamLib.ps3eye_count_connected() == 1) {
-			logger.debug("Found the PS3EYE camera");
+		if (eyecamLib.ps3eye_count_connected() >= 1) {
+			logger.debug("Found a PS3EYE camera...setting up communications with it");
 			ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
 					eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
 			if (ps3ID != null) {
@@ -150,10 +167,16 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 
 		if (initialized()) {
 
-			eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN, 15);
-			eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE, 30);
+			if (eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN, 16) == -1) {
+				logger.debug("error setting gain on PS3Eye during initialization..."
+						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
+			}
+			if (eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE, 50) == -1) {
+				logger.debug("error setting exposure on PS3Eye during initialization..."
+						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
+			}
 			CameraFactory.registerCamera(new PS3EyeCamera());
-			logger.debug("PS3Eye camera adjusted and registered");
+			logger.debug("PS3Eye adjusted and registered");
 		}
 
 	}// end init
@@ -441,12 +464,6 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		}
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
-	}
-
-	private void cameraClosed() {
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
-		close();
 	}
 
 	@Override
