@@ -38,7 +38,7 @@
                         <TableView fx:id="shotTimerTable" minHeight="0.0" minWidth="0.0" />
                      </content>
                   </ScrollPane>
-                  <TabPane fx:id="cameraTabPane" prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER" />
+                  <TabPane fx:id="cameraTabPane" minHeight="480.0" minWidth="640.0" prefHeight="480.0" prefWidth="640.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="NEVER" />
                   <VBox fx:id="buttonsContainer" alignment="CENTER" spacing="30.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#resetClicked" prefHeight="100.0" prefWidth="150.0" text="Reset" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
