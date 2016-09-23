@@ -6,7 +6,6 @@ import javafx.geometry.Bounds;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.cameratypes.CameraEventListener;
-import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 
 public class MockCameraManager extends CameraManager implements CameraEventListener {
@@ -17,10 +16,10 @@ public class MockCameraManager extends CameraManager implements CameraEventListe
 		super();
 	}
 	
-	protected MockCameraManager(MockCamera camera, CanvasManager canvas, Configuration config,
+	protected MockCameraManager(MockCamera camera, CanvasManager canvas,
 			boolean[][] sectorStatuses, Optional<Bounds> projectionBounds, VideoFinishedListener videoFinishedListener) {
 		
-		super(camera, null, canvas, config);
+		super(camera, null, canvas);
 
 		this.cameraView.setCameraManager(this);
 

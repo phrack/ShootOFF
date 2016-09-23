@@ -98,6 +98,8 @@
                         <ChoiceBox fx:id="calibratedOptionsChoiceBox" prefWidth="300.0" GridPane.columnIndex="2" GridPane.rowIndex="0" />
                         <CheckBox fx:id="showArenaShotMarkersCheckBox" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                         <Label text="Show Shot Markers On Arena:" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="autoAdjustExposureCheckBox" mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Label text="Auto adjust camera exposure for arena:" GridPane.rowIndex="2" />
                      </children>
                      <padding>
                         <Insets left="30.0" right="30.0" top="30.0" bottom="30.0" />

@@ -101,7 +101,8 @@ public class Configuration {
 	private static final String MUTED_CHIME_MESSAGES = "shootoff.diagnosticmessages.chime.muted";
 	private static final String PERSPECTIVE_WEBCAM_DISTANCES = WEBCAMS_PROP + ".distances";
 	private static final String CALIBRATED_FEED_BEHAVIOR_PROP = "shootoff.arena.calibrated.behavior";
-	private static final String SHOW_ARENA_SHOT_MARKERS = "shootoff.arenra.show.markers";
+	private static final String SHOW_ARENA_SHOT_MARKERS = "shootoff.arena.show.markers";
+	private static final String CALIBRATE_AUTO_ADJUST_EXPOSURE = "shootoff.arena.calibrated.exposure";
 
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
@@ -160,18 +161,28 @@ public class Configuration {
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
 	private boolean showArenaShotMarkers = false;
+	private boolean autoAdjustExposure = true;
+	
+	private static Configuration config = null;
+	public static Configuration getConfig()
+	{
+		return config;
+	}
 	
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		readConfigurationFile();
+		
+		config = this;
 
 	}
 
-	public Configuration(String name) throws IOException, ConfigurationException {
+	protected Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
 
+		config = this;
 	}
 
 	protected Configuration(InputStream configInputStream, String name, String[] args)
@@ -183,6 +194,7 @@ public class Configuration {
 		parseCmdLine(args); // Parse twice so that we guarantee debug is set and
 							// override config file
 
+		config = this;
 	}
 
 	/**
@@ -204,11 +216,14 @@ public class Configuration {
 		readConfigurationFile();
 		parseCmdLine(args);
 
+		config = this;
 	}
 
 	public Configuration(String[] args) throws ConfigurationException {
 		configName = DEFAULT_CONFIG_FILE;
 		parseCmdLine(args);
+		
+		config = this;
 	}
 
 	private void readConfigurationFile() throws ConfigurationException, IOException {
@@ -362,8 +377,13 @@ public class Configuration {
 			setShowArenaShotMarkers(Boolean.parseBoolean(prop.getProperty(SHOW_ARENA_SHOT_MARKERS)));
 		}
 
+		if (prop.contains(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
+			setAutoAdjustExposure(Boolean.parseBoolean(CALIBRATE_AUTO_ADJUST_EXPOSURE));
+		}
+		
 		validateConfiguration();
 	}
+
 
 	public boolean writeConfigurationFile() throws ConfigurationException, IOException {
 		validateConfiguration();
@@ -453,6 +473,7 @@ public class Configuration {
 		prop.setProperty(PERSPECTIVE_WEBCAM_DISTANCES, cameraDistancesList.toString());
 		prop.setProperty(CALIBRATED_FEED_BEHAVIOR_PROP, calibratedFeedBehavior.name());
 		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
+		prop.setProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE, String.valueOf(autoAdjustExposure));
 		
 		OutputStream outputStream = new FileOutputStream(configName);
 
@@ -795,6 +816,11 @@ public class Configuration {
 	public void setShowArenaShotMarkers(boolean showMarkers) {
 		showArenaShotMarkers = showMarkers;
 	}
+	
+
+	private void setAutoAdjustExposure(boolean autoAdjust) {
+		autoAdjustExposure = autoAdjust;
+	}
 
 	public Set<Camera> getRecordingCameras() {
 		return recordingCameras;
@@ -960,5 +986,9 @@ public class Configuration {
 	
 	public boolean showArenaShotMarkers() {
 		return showArenaShotMarkers;
+	}
+	
+	public boolean autoAdjustExposure() {
+		return autoAdjustExposure;
 	}
 }

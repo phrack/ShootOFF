@@ -96,7 +96,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private Optional<CloseListener> closeListener = Optional.empty();
 
 	protected final CameraView cameraView;
-	protected final Configuration config;
+	protected final Configuration config = Configuration.getConfig();
 	private final Object projectionBoundsLock = new Object();
 	protected Optional<Bounds> projectionBounds = Optional.empty();
 
@@ -143,18 +143,15 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		this.camera = null;
 		this.cameraErrorView = Optional.empty();
 		this.cameraView = null;
-		this.config = null;
 		this.shotDetector = null;
 	}
 
-	public CameraManager(Camera cameraInterface, CameraErrorView cameraErrorView, CameraView view,
-			Configuration config) {
+	public CameraManager(Camera cameraInterface, CameraErrorView cameraErrorView, CameraView view) {
 
 		this.camera = cameraInterface;
 
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
 		this.cameraView = view;
-		this.config = config;
 
 		this.cameraView.setCameraManager(this);
 

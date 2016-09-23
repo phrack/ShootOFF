@@ -38,7 +38,7 @@ public class CamerasSupervisor {
 
 	public CameraManager addCameraManager(Camera cameraInterface, CameraErrorView cameraErrorView,
 			CameraView cameraView) {
-		final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView, config);
+		final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView);
 		managers.add(manager);
 		allDetecting.set(true);
 		manager.start();

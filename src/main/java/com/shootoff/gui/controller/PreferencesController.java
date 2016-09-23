@@ -91,6 +91,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 	@FXML private Label malfunctionsLabel;
 	@FXML private ChoiceBox<String> calibratedOptionsChoiceBox;
 	@FXML private CheckBox showArenaShotMarkersCheckBox;
+	@FXML private CheckBox autoAdjustExposureCheckBox;
 
 	private Stage parent;
 	private Configuration config;
@@ -171,6 +172,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		malfunctionsSlider.setDisable(!config.useMalfunctions());
 		calibratedOptionsChoiceBox.setValue(config.getCalibratedFeedBehavior().toString());
 		showArenaShotMarkersCheckBox.setSelected(config.showArenaShotMarkers());
+		autoAdjustExposureCheckBox.setSelected(config.autoAdjustExposure());
 	}
 
 	private void linkSliderToLabel(final Slider slider, final Label label) {

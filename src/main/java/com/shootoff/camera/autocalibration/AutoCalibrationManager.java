@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.cameratypes.Camera;
+import com.shootoff.config.Configuration;
 
 public class AutoCalibrationManager {
 	private static final Logger logger = LoggerFactory.getLogger(AutoCalibrationManager.class);
@@ -429,7 +430,7 @@ public class AutoCalibrationManager {
 
 		@Override
 		public boolean enabled() {
-			return camera.supportsExposureAdjustment();
+			return Configuration.getConfig().autoAdjustExposure() && camera.supportsExposureAdjustment();
 		}
 
 		@Override

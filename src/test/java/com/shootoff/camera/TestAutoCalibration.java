@@ -68,7 +68,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		File videoFile = new File(TestAutoCalibration.class.getResource(videoPath).getFile());
 
 		MockCameraManager cameraManager;
-		cameraManager = new MockCameraManager(new MockCamera(videoFile), mockCanvasManager, config, sectorStatuses,
+		cameraManager = new MockCameraManager(new MockCamera(videoFile), mockCanvasManager, sectorStatuses,
 				Optional.empty(), this);
 
 		mockCanvasManager.setCameraManager(cameraManager);

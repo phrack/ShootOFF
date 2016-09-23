@@ -129,7 +129,7 @@ public class ShotDetectionTestor implements VideoFinishedListener {
 			Configuration config, boolean[][] sectorStatuses) {
 		
 		File videoFile = new File(ShotDetectionTestor.class.getResource(videoPath).getFile());
-		MockCameraManager cameraManager = new MockCameraManager(new MockCamera(videoFile), mockManager, config,
+		MockCameraManager cameraManager = new MockCameraManager(new MockCamera(videoFile), mockManager, 
 				sectorStatuses, projectionBounds, this);
 		
 		cameraManager.start();
