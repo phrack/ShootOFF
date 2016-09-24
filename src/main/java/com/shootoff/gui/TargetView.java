@@ -581,7 +581,11 @@ public class TargetView implements Target {
 
 	private void mouseDragged() {
 		targetGroup.setOnMouseDragged((event) -> {
+			
 			if (!resize && !move) return;
+			
+			boolean fixedAspectRatioResize = false;
+			double aspectScaleDelta = 0.0;
 
 			if (move) {
 				if (config.isPresent() && config.get().inDebugMode() && (event.isControlDown() || event.isShiftDown()))
@@ -609,6 +613,9 @@ public class TargetView implements Target {
 
 				return;
 			}
+			
+			if ((top || bottom) && (left || right) && event.isControlDown())
+				fixedAspectRatioResize = true;
 
 			if (left || right) {
 				double gap; // The gap between the mouse and nearest
@@ -622,7 +629,12 @@ public class TargetView implements Target {
 
 				double currentWidth = targetGroup.getBoundsInParent().getWidth();
 				double newWidth = currentWidth + gap;
+				
+				
 				double scaleDelta = (newWidth - currentWidth) / currentWidth;
+				
+				if (fixedAspectRatioResize)
+					aspectScaleDelta = scaleDelta;
 
 				double currentOriginX = targetGroup.getBoundsInParent().getMinX();
 				double newOriginX;
@@ -654,6 +666,7 @@ public class TargetView implements Target {
 					// Target went out of bounds, so go back to the old size
 					targetGroup.setLayoutX(oldLayoutX);
 					targetGroup.setScaleX(oldScaleX);
+					
 				} else {
 					// Target stayed in bounds so make sure that unresizable
 					// target regions stay the same size
@@ -667,7 +680,7 @@ public class TargetView implements Target {
 					}
 				}
 			}
-
+			
 			if (top || bottom) {
 				double gap;
 
@@ -676,9 +689,19 @@ public class TargetView implements Target {
 				} else {
 					gap = (event.getY() - targetGroup.getLayoutBounds().getMinY()) * targetGroup.getScaleY();
 				}
+									
 
 				double currentHeight = targetGroup.getBoundsInParent().getHeight();
 				double newHeight = currentHeight + gap;
+				
+				if (fixedAspectRatioResize) 
+				{
+					if ((left && bottom) || (right && top))
+						aspectScaleDelta *= -1.0;
+					
+					newHeight = currentHeight + (currentHeight * aspectScaleDelta);
+				}
+				
 				double scaleDelta = (newHeight - currentHeight) / currentHeight;
 
 				double currentOriginY = targetGroup.getBoundsInParent().getMinY();
