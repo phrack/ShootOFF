@@ -74,7 +74,6 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.cameratypes.PS3EyeCamera.eyecam;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
@@ -116,11 +115,11 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 			if (logger.isDebugEnabled())
 				logger.debug("OS type is: {}", architecture);
 
-			if (architecture != null && (architecture.equalsIgnoreCase("64"))) {
+			if (architecture != null && "64".equals(architecture)) {
 				logger.trace("Trying to load eyeCam64.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam64", eyecam.class);
 				logger.trace("Successfully loaded eyeCam64.dll");
-			} else if (architecture != null && (architecture.equalsIgnoreCase("32"))) {
+			} else if (architecture != null && "64".equals(architecture)) {
 				logger.trace("Trying to load eyeCam32.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam32", eyecam.class);
 				logger.trace("Successfully loaded eyeCam32.dll");
