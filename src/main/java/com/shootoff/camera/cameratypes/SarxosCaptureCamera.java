@@ -40,12 +40,12 @@ import com.shootoff.config.Configuration;
 
 public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(SarxosCaptureCamera.class);
-	
+
 	public static final int CV_CAP_PROP_EXPOSURE = 15;
 
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
-	
+
 	private boolean closing = false;
 
 	// For testing
@@ -64,8 +64,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			}
 		}
 
-		if (cameraIndex < 0)
-			throw new IllegalArgumentException("Camera not found: " + cameraName);
+		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
 
 		camera = new VideoCapture();
 		this.cameraIndex = cameraIndex;
@@ -73,8 +72,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	}
 
 	public SarxosCaptureCamera(final String cameraName, int cameraIndex) {
-		if (cameraIndex < 0)
-			throw new IllegalArgumentException("Camera not found: " + cameraName);
+		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
 
 		camera = new VideoCapture();
 		this.cameraIndex = cameraIndex;
@@ -85,8 +83,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	public Mat getMatFrame() {
 		final Mat frame = new Mat();
 		try {
-			if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0)
-				return null;
+			if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0) return null;
 		} catch (Exception e) {
 			// Sometimes there is a race condition on closing the camera vs.
 			// read()
@@ -113,10 +110,8 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	public synchronized boolean open() {
 		logger.trace("{} - open request isOpen {} closing {}", getName(), isOpen(), closing);
 
-		
-		if (isOpen() && !closing)
-			return true;
-		
+		if (isOpen() && !closing) return true;
+
 		closing = false;
 
 		final boolean open = camera.open(cameraIndex);
@@ -140,27 +135,22 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public synchronized void close() {
 		logger.trace("{} - close request isOpen {} closing {}", getName(), isOpen(), closing);
-		
+
 		if (isOpen() && !closing) {
 			closing = true;
 			resetExposure();
 			camera.release();
-			
-		}
-		else if (isOpen() && closing)
-		{
+
+		} else if (isOpen() && closing) {
 			return;
-		}
-		else if (!isOpen())
-		{
+		} else if (!isOpen()) {
 			closing = false;
 		}
-		
+
 		CameraFactory.openCamerasRemove(this);
 
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
-		
+		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
+
 		return;
 	}
 
@@ -199,19 +189,17 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public void run() {
 		while (isOpen() && !closing) {
-			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFrame(getMatFrame());
+			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getMatFrame());
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
 			}
 
 		}
-		
+
 		logger.trace("{} camera closed during run thread isOpen {} closing {}", getName(), isOpen(), closing);
-		
-		if (!closing)
-			close();
+
+		if (!closing) close();
 	}
 
 	@Override
@@ -223,17 +211,16 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public boolean supportsExposureAdjustment() {
-		// If we already verified that it works, 
+		// If we already verified that it works,
 		// we have an origExposure value set
-		if (origExposure.isPresent())
-			return true;
-		
+		if (origExposure.isPresent()) return true;
+
 		final double exp = camera.get(CV_CAP_PROP_EXPOSURE);
 
 		if (logger.isInfoEnabled()) logger.info("Initial camera exposure {}", exp);
-		
+
 		if (exp == 0) return false;
-		
+
 		origExposure = Optional.of(exp);
 
 		if (!decreaseExposure()) {
@@ -250,10 +237,13 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	public boolean decreaseExposure() {
 		// Logic:
 		// If camera exposure is positive, decrease towards zero
-		// If camera exposure is negative and between -9.9 and 0, increase towards zero (Logitech c270)
-		// If camera exposure is negative and less than -10, decrease away from zero (oCam)
-		
-		// In any case, if exposure doesn't change in the same direction when we change it, fail out.
+		// If camera exposure is negative and between -9.9 and 0, increase
+		// towards zero (Logitech c270)
+		// If camera exposure is negative and less than -10, decrease away from
+		// zero (oCam)
+
+		// In any case, if exposure doesn't change in the same direction when we
+		// change it, fail out.
 		final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
 		final double newExp;
 		if (curExp <= -10.0) {
@@ -261,17 +251,16 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		} else {
 			newExp = curExp - (.1 * curExp);
 		}
-		
+
 		if (logger.isTraceEnabled()) logger.trace("curExp[ {} newExp {}", curExp, newExp);
-		
+
 		// If they don't have the same sign, ABORT
-		if (!((curExp<0) == (newExp<0)) || Math.abs(curExp - newExp) < .001f)
-			return false;
-		
+		if (!((curExp < 0) == (newExp < 0)) || Math.abs(curExp - newExp) < .001f) return false;
+
 		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
-		
-		if (logger.isTraceEnabled()) 
-			logger.trace("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
+
+		if (logger.isTraceEnabled()) logger.trace("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp,
+				camera.get(CV_CAP_PROP_EXPOSURE));
 
 		if (curExp <= -10.0)
 			return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
@@ -280,11 +269,10 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	}
 
 	public void resetExposure() {
-		if (origExposure.isPresent())
-			camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
+		if (origExposure.isPresent()) camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
 	}
 
-	public boolean limitsFrames(){
+	public boolean limitsFrames() {
 		return false;
 	}
 }
