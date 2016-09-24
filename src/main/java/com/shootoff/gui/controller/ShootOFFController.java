@@ -454,29 +454,25 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		if (config.getWebcams().isEmpty())
 			defaultCam = CameraFactory.getDefault();
 		
-		for (Iterator<Entry<Tab, CameraManager>> it = CameraManagerTabs.entrySet().iterator(); it.hasNext();)
-		{
-			Entry<Tab, CameraManager> next = it.next();
-			if (config.getWebcams().isEmpty())
-			{
-				if (!defaultCam.isPresent() || next.getValue().getCamera() != defaultCam.get())
-				{
+		for (Iterator<Entry<Tab, CameraManager>> it = CameraManagerTabs.entrySet().iterator(); it.hasNext();) {
+			final Entry<Tab, CameraManager> next = it.next();
+			if (config.getWebcams().isEmpty()) {
+				if (!defaultCam.isPresent() || next.getValue().getCamera() != defaultCam.get()) {
 					cameraTabPane.getTabs().remove(next.getKey());
 					camerasSupervisor.clearManager(next.getValue());
 					it.remove();
 				}
-			}
-			else
-			{
+			} else {
 				boolean remove = true;
-				for (String webcamName : config.getWebcams().keySet())
-				{
+				for (String webcamName : config.getWebcams().keySet()) {
 					final Camera webcam = config.getWebcams().get(webcamName);
-					if (next.getValue().getCamera() == webcam && webcam.isOpen())
+					if (next.getValue().getCamera() == webcam && webcam.isOpen()) {
+						// Webcam name may have changed, so update it
+						next.getKey().setText(webcamName);
 						remove = false;
+					}
 				}
-				if (remove)
-				{
+				if (remove) {
 					cameraTabPane.getTabs().remove(next.getKey());
 					camerasSupervisor.clearManager(next.getValue());
 					it.remove();
@@ -502,9 +498,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			for (String webcamName : config.getWebcams().keySet()) {
 				final Camera webcam = config.getWebcams().get(webcamName);
-				
-				if (camerasSupervisor.getCameraManager(webcam) != null)
-					continue;
+
+				if (camerasSupervisor.getCameraManager(webcam) != null) continue;
 
 				if (!addCameraTab(webcamName, webcam)) {
 					failureCount++;

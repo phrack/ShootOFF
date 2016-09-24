@@ -98,6 +98,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 	private CalibrationConfigurator calibrationConfigurator;
 	private CameraConfigListener cameraConfigListener;
 	private boolean cameraConfigChanged = false;
+	private boolean cameraRenamed = false;
 	private final Set<Camera> recordingCameras = new HashSet<>();
 	private final List<Camera> configuredCameras = new ArrayList<>();
 	private final List<String> configuredNames = new ArrayList<>();
@@ -149,7 +150,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		}
 		
 		for (Camera c : CameraFactory.getWebcams()) {
-			if (!cameras.contains(c.getName())) cameras.add(c.getName());
+			if (!configuredCameras.contains(c)) cameras.add(c.getName());
 		}
 		
 		webcamListView.setItems(cameras);
@@ -209,13 +210,13 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		
 		if (oldIndex > -1) {
 			configuredNames.set(oldIndex, newName);
+			cameraRenamed = true;
 		}
-		
-		cameraConfigChanged = true;
 	}
 	
 	public void prepareToShow() {
 		cameraConfigChanged = false;
+		cameraRenamed = false;
 		camerasOnShown.clear();
 		camerasOnShown.addAll(configuredCameras);
 	}
@@ -424,10 +425,11 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		config.setCalibratedFeedBehavior(CalibrationOption.fromString(calibratedOptionsChoiceBox.getValue()));
 		config.setShowArenaShotMarkers(showArenaShotMarkersCheckBox.isSelected());
 		config.setAutoAdjustExposure(autoAdjustExposureCheckBox.isSelected());
-
+		
 		if (config.writeConfigurationFile()) {
 			calibrationConfigurator.calibratedFeedBehaviorsChanged();
-			if (cameraConfigChanged && cameraListChanged()) {
+
+			if (cameraRenamed || (cameraConfigChanged && cameraListChanged())) {
 				cameraConfigListener.cameraConfigUpdated();
 			}
 		}

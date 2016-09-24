@@ -55,9 +55,8 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private final List<Camera> configuredCameras;
 	private final Optional<Set<Camera>> recordingCameras;
 
-	public CheckableImageListCell(List<Camera> webcams, List<String> configuredNames,
-			List<Camera> configuredCameras, CameraRenamedListener cameraRenamedListener, 
-			final DesignateShotRecorderListener designatedListener,
+	public CheckableImageListCell(List<Camera> webcams, List<String> configuredNames, List<Camera> configuredCameras,
+			CameraRenamedListener cameraRenamedListener, final DesignateShotRecorderListener designatedListener,
 			final Optional<Set<Camera>> recordingCameras) {
 		this.webcams = new ArrayList<>(webcams);
 		this.configuredNames = configuredNames;
@@ -65,34 +64,45 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		this.recordingCameras = recordingCameras;
 
 		this.setConverter(new DefaultStringConverter());
-		
+
 		this.itemProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (oldValue == null || newValue == null) return;
-				
+
 				final Optional<Pane> webcamContainer = fetchWebcamControls(oldValue);
 
 				if (webcamContainer.isPresent()) {
 					setGraphic(webcamContainer.get());
 				}
-				
+
 				cameraRenamedListener.cameraRenamed(oldValue, newValue);
 			}
 		});
 
 		if (designatedListener != null) {
 			this.setOnMouseClicked((event) -> {
+				if (!fetchWebcamChecked(getText())) {
+					this.setEditable(false);
+					return;
+				}
+
+				if (event.getClickCount() > 1 && fetchWebcamChecked(getText())) {
+					this.setEditable(true);
+					startEdit();
+				}
+
 				if (!event.isAltDown()) return;
 
 				cancelEdit();
 
-				// If camera is not checked, don't designate it and start editing
+				// If camera is not checked, don't designate it and start
+				// editing
 				if (!fetchWebcamChecked(getText())) {
 					startEdit();
 					return;
 				}
-			
+
 				if (getStyle().isEmpty()) {
 					setStyle("-fx-background-color: green");
 					designatedListener.registerShotRecorder(getText());
@@ -102,7 +112,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 				}
 
 				final Optional<Pane> webcamContainer = fetchWebcamControls(CheckableImageListCell.this.getText());
-				
+
 				if (webcamContainer.isPresent()) {
 					setGraphic(webcamContainer.get());
 				}
@@ -249,31 +259,27 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	private static Optional<Image> fetchWebcamImage(Camera webcam) {
 		boolean cameraOpened = false;
 
-		synchronized(webcam)
-		{
-		
+		synchronized (webcam) {
 			if (!webcam.isOpen()) {
 				webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
 				webcam.open();
 				cameraOpened = true;
 			}
-	
+
 			Image webcamImg = null;
 			if (webcam.isOpen()) {
 				BufferedImage img = webcam.getBufferedImage();
-	
+
 				if (img != null) {
 					webcamImg = SwingFXUtils.toFXImage(img, null);
 				}
 			}
-	
+
 			if (cameraOpened == true) {
 				webcam.close();
 			}
-			
+
 			return Optional.ofNullable(webcamImg);
 		}
-
-
 	}
 }
