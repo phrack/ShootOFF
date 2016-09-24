@@ -79,7 +79,7 @@ import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.shootoff.config.Configuration;
 
-public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
+public class PS3EyeCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(PS3EyeCamera.class);
 
 	private static boolean initialized = false;

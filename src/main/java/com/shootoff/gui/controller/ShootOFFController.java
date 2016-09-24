@@ -454,7 +454,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		if (config.getWebcams().isEmpty())
 			defaultCam = CameraFactory.getDefault();
 		
-		for (Iterator<Entry<Tab, CameraManager>> it = CameraManagerTabs.entrySet().iterator(); it.hasNext();) {
+		for (Iterator<Entry<Tab, CameraManager>> it = cameraManagerTabs.entrySet().iterator(); it.hasNext();) {
 			final Entry<Tab, CameraManager> next = it.next();
 			if (config.getWebcams().isEmpty()) {
 				if (!defaultCam.isPresent() || next.getValue().getCamera() != defaultCam.get()) {
@@ -509,7 +509,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 
-	private Map<Tab, CameraManager> CameraManagerTabs = new HashMap<>();
+	private final Map<Tab, CameraManager> cameraManagerTabs = new HashMap<>();
 	private boolean addCameraTab(String webcamName, Camera cameraInterface) {
 		if (cameraInterface.isLocked() && !cameraInterface.isOpen()) {
 			return false;
@@ -523,7 +523,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, config, this, webcamName, shotEntries);
 		CameraManager cameraManager = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
 
-		CameraManagerTabs.put(cameraTab, cameraManager);
+		cameraManagerTabs.put(cameraTab, cameraManager);
 		
 		if (config.getRecordingCameras().contains(cameraInterface)) {
 			config.registerRecordingCameraManager(cameraManager);
