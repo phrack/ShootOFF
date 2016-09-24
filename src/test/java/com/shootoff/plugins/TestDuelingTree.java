@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 
@@ -26,8 +27,10 @@ import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.TargetView;
+import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
@@ -80,7 +83,9 @@ public class TestDuelingTree {
 		config.setDebugMode(true);
 
 		dt = new DuelingTree(targets);
-		dt.init(config, new CamerasSupervisor(config), null, null, null);
+		CanvasManager arenaCanvas = new CanvasManager(new Group(), config, null, "arena", null);
+		arenaCanvas.addTarget(duelTreeTarget);
+		dt.init(config, new CamerasSupervisor(config), null, null, new ProjectorArenaPane(config, arenaCanvas));
 
 		config.setExercise(dt);
 
@@ -131,7 +136,9 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
-		assertEquals(String.format("left score: 1%n") + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
+		assertEquals(String.format("sounds/beep.wav%n") + 
+				String.format("left score: 1%n") + 
+				String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 
 		dt.destroy();
@@ -152,7 +159,9 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
-		assertEquals(String.format("left score: 1%n") + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
+		assertEquals(String.format("sounds/beep.wav%n") + 
+				String.format("left score: 1%n") + 
+				String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 
 		dt.reset(targets);
@@ -165,7 +174,9 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
 		}
 
-		assertEquals(String.format("left score: 0%n") + String.format("right score: 1%n"), stringOut.toString("UTF-8"));
+		assertEquals(String.format("sounds/beep.wav%n") + 
+				String.format("left score: 0%n") + 
+				String.format("right score: 1%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
 
 		dt.destroy();
