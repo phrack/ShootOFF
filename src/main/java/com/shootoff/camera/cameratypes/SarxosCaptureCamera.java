@@ -262,7 +262,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			newExp = curExp - (.1 * curExp);
 		}
 		
-		if (logger.isDebugEnabled()) logger.debug("curExp[ {} newExp {}", curExp, newExp);
+		if (logger.isTraceEnabled()) logger.trace("curExp[ {} newExp {}", curExp, newExp);
 		
 		// If they don't have the same sign, ABORT
 		if (!((curExp<0) == (newExp<0)) || Math.abs(curExp - newExp) < .001f)
@@ -270,8 +270,8 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		
 		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
 		
-		if (logger.isInfoEnabled()) 
-			logger.info("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
+		if (logger.isTraceEnabled()) 
+			logger.trace("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp, camera.get(CV_CAP_PROP_EXPOSURE));
 
 		if (curExp <= -10.0)
 			return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
