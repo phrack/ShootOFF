@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.cameratypes.PS3EyeCamera.eyecam;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
@@ -112,15 +113,14 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 		try {
 			final String architecture = System.getProperty("sun.arch.data.model");
 
-			if (logger.isDebugEnabled()) logger.debug("OS type is: {}", architecture);
+			if (logger.isDebugEnabled())
+				logger.debug("OS type is: {}", architecture);
 
-			if (architecture != null
-					&& (architecture.equalsIgnoreCase("64"))){// || architecture.equalsIgnoreCase("x86_64"))) {
+			if (architecture != null && (architecture.equalsIgnoreCase("64"))) {
 				logger.trace("Trying to load eyeCam64.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam64", eyecam.class);
 				logger.trace("Successfully loaded eyeCam64.dll");
-			} else if (architecture != null && (architecture.equalsIgnoreCase("32"))){
-					//|| architecture.equalsIgnoreCase("i686") || architecture.equalsIgnoreCase("x86"))) {
+			} else if (architecture != null && (architecture.equalsIgnoreCase("32"))) {
 				logger.trace("Trying to load eyeCam32.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam32", eyecam.class);
 				logger.trace("Successfully loaded eyeCam32.dll");
@@ -169,7 +169,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 				logger.error("Error setting exposure on PS3Eye during initialization,"
 						+ "shutdown ShootOFF and unplug and re-plug in the PS3Eye to the usb port");
 			}
-			
+
 			CameraFactory.registerCamera(new PS3EyeCamera());
 			logger.trace("PS3Eye adjusted and registered");
 		}
@@ -284,7 +284,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 			gain.setDisable(true);
 			exposure.setDisable(true);
 		}
-		
+
 		autoGain.setSelected(isAutoGainSet);
 
 		GridPane.setConstraints(autoGain, 1, 4);
@@ -448,7 +448,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 				});
 			}
 		}
-		
+
 		if (cameraEventListener.isPresent())
 			cameraEventListener.get().cameraClosed();
 	}
