@@ -481,7 +481,7 @@ public class CanvasManager implements CameraView {
 					sb.append(",");
 				}
 
-				sb.append(r.getCameraName());
+				sb.append(r.getCameraName().replaceAll(":", "-"));
 				sb.append(":");
 				sb.append(r.getRelativeVideoFile().getPath());
 			}
