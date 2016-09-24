@@ -119,7 +119,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera implements Camera {
 				logger.trace("Trying to load eyeCam64.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam64", eyecam.class);
 				logger.trace("Successfully loaded eyeCam64.dll");
-			} else if (architecture != null && "64".equals(architecture)) {
+			} else if (architecture != null && "32".equals(architecture)) {
 				logger.trace("Trying to load eyeCam32.dll");
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam32", eyecam.class);
 				logger.trace("Successfully loaded eyeCam32.dll");
