@@ -387,7 +387,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	 */
 	public void saveCurrentBackground() {
 		if (background.isPresent()) {
-			savedBackground = background;
+			savedBackground = Optional.of(background.get());
 		}
 	}
 
@@ -578,8 +578,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		calibrated = true;
 		setCalibrationMessageVisible(false);
 		setTargetsVisible(true);
-		restoreCurrentBackground();
-
+		
 		cursorWarningToggle(false);
 
 		this.perspectiveManager = perspectiveManager;

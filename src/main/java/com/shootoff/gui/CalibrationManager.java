@@ -163,6 +163,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		for (CalibrationListener c : calibrationListeners)
 			c.calibrated(Optional.ofNullable(pm));
+		
+		arenaPane.restoreCurrentBackground();
 
 		calibratingCameraManager.setCalibrating(false);
 
