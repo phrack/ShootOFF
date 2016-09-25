@@ -95,9 +95,10 @@ public final class CameraFactory {
 		Camera defaultCam;
 
 		if (isMac) {
-			if (defaultWebcam == null) defaultCam = null;
-
-			defaultCam = new SarxosCaptureCamera(defaultWebcam.getName());
+			if (defaultWebcam == null) 
+				defaultCam = null;
+			else
+				defaultCam = new SarxosCaptureCamera(defaultWebcam.getName());
 		} else {
 			final Webcam cam = Webcam.getDefault();
 
