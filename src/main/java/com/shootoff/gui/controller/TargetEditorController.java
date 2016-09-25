@@ -791,7 +791,7 @@ public class TargetEditorController {
 		if (!tagsButton.isSelected() && tagEditor.isPresent()) {
 			// Close the tag editor
 			TagEditorPane editor = tagEditor.get();
-			targetEditorPane.getChildren().remove(editor);
+			canvasPane.getChildren().remove(editor);
 			tagEditor = Optional.empty();
 
 			if (cursorRegion.isPresent()) {
@@ -822,8 +822,8 @@ public class TargetEditorController {
 
 		// Show the tag editor
 		tagEditor = Optional.of(editor);
-		targetEditorPane.getChildren().add(editor);
-		editor.setLayoutX(tagsButton.getLayoutX() + tagsButton.getPadding().getLeft() - 2);
-		editor.setLayoutY(tagsButton.getLayoutY() + tagsButton.getHeight() + tagsButton.getPadding().getBottom() + 2);
+		canvasPane.getChildren().add(editor);
+		
+		editor.setLayoutX(512);
 	}
 }
