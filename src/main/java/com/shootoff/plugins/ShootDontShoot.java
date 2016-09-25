@@ -54,6 +54,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private int badHits = 0;
 	private List<Target> shootTargets = new ArrayList<Target>();
 	private List<Target> dontShootTargets = new ArrayList<Target>();
+	private NewRound currentRound;
 
 	private Random rng = new Random();
 
@@ -89,7 +90,8 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		addTargets(dontShootTargets, "targets/shoot_dont_shoot/dont_shoot.target");
 		super.showTextOnFeed("missed targets: 0\nbad hits: 0");
 
-		executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+		currentRound = new NewRound();
+		executorService.schedule(currentRound, ROUND_DURATION, TimeUnit.SECONDS);
 	}
 
 	// Used to call NewRound from a test
@@ -103,9 +105,11 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	private class NewRound implements Runnable {
+		private boolean cancelled = false;
+		
 		@Override
 		public void run() {
-			if (!continueExercise.get()) return;
+			if (cancelled || !continueExercise.get()) return;
 
 			missedTargets += shootTargets.size();
 
@@ -131,8 +135,14 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 			thisSuper.clearShots();
 
-			if (continueExercise.get() && !testRun)
-				executorService.schedule(new NewRound(), ROUND_DURATION, TimeUnit.SECONDS);
+			if (continueExercise.get() && !testRun) {
+				currentRound = new NewRound();
+				executorService.schedule(currentRound, ROUND_DURATION, TimeUnit.SECONDS);
+			}
+		}
+		
+		public void cancel() {
+			cancelled = true;
 		}
 	}
 
@@ -184,6 +194,12 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 				case "shoot": {
 					removeTarget(shootTargets, r);
 					super.setShotTimerColumnText(TARGET_COL_NAME, "shoot");
+					
+					if (shootTargets.isEmpty()) {
+						currentRound.cancel();
+						currentRound = new NewRound();
+						currentRound.run();
+					}
 				}
 					break;
 
