@@ -946,10 +946,12 @@ body {
 
 
 /* Modal Form */
-.m-form{margin: 0 auto;text-align: center;}
+.m-form{margin: 0 auto;text-align: center; -ms-overflow-style: auto;}
 .question{margin-top:15px;}
 .question p{font-size: 16px;}
 .m-input{text-align:center;width:60%;height:35px;}
 .years{margin-top:15px;}
 .years p{font-size: 16px;}
 /* Modal Form */
+
+@-ms-viewport{ width: auto !important; }
