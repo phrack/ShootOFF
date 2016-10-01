@@ -64,7 +64,6 @@ public class Shot {
 		this.frame = 0;
 	}
 
-	
 	public Optional<Shot> getMirroredShot() {
 		return mirroredShot;
 	}
