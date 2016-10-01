@@ -138,7 +138,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		this.widthProperty().addListener((e) -> {
 			// This can happen because the mirrored pane in the tab will
-			// grow the scroll pane it is in. This stretches the background
+			// grow the pane it is in. This stretches the background
 			// in weird ways when a target goes off screen. This condition
 			// ensures the scroll pane never gets bigger than the separate
 			// window that is the real arena.
