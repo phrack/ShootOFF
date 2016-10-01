@@ -280,10 +280,20 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				while (change.next()) {
 					for (ShotEntry unselected : change.getRemoved()) {
 						unselected.getShot().getMarker().setFill(unselected.getShot().getColor());
+						
+						if (unselected.getShot().getMirroredShot().isPresent()) {
+							unselected.getShot().getMirroredShot().get().getMarker().setFill(unselected.getShot().getColor());
+						}
 					}
 
 					for (ShotEntry selected : change.getAddedSubList()) {
+						if (selected == null) continue;
+						
 						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
+						
+						if (selected.getShot().getMirroredShot().isPresent()) {
+							selected.getShot().getMirroredShot().get().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
+						}
 
 						// Move all selected shots to top the of their z-stack
 						// to ensure visibility

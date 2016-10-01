@@ -164,8 +164,10 @@ public class MirroredCanvasManager extends CanvasManager {
 	
 	@Override
 	public void addShot(Shot shot, boolean isMirroredShot) {
-		mirroredManager.mirrorAddShot(
-				new Shot(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp(), (int) shot.getMarker().getRadiusX()));
+		final Shot mirroredShot = new Shot(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp(), (int) shot.getMarker().getRadiusX());
+		shot.setMirroredShot(mirroredShot);
+		mirroredShot.setMirroredShot(shot);
+		mirroredManager.mirrorAddShot(mirroredShot);
 		super.addShot(shot, isMirroredShot);
 	}
 	

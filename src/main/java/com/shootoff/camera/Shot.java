@@ -18,6 +18,8 @@
 
 package com.shootoff.camera;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,7 @@ public class Shot {
 	private final int frame;
 
 	private Ellipse marker;
+	private Optional<Shot> mirroredShot = Optional.empty();
 
 	public Shot(Color color, double x, double y, long timestamp, int frame, int markerRadius) {
 		this.color = color;
@@ -61,6 +64,15 @@ public class Shot {
 		this.frame = 0;
 	}
 
+	
+	public Optional<Shot> getMirroredShot() {
+		return mirroredShot;
+	}
+	
+	public void setMirroredShot(Shot mirroredShot) {
+		this.mirroredShot = Optional.of(mirroredShot);
+	}
+	
 	public Color getColor() {
 		return color;
 	}
