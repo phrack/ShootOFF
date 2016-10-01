@@ -15,4 +15,7 @@
   <plugin name="Shot to Click" version="1.6" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Shot-to-Click/releases/download/v1.6-FINAL/ShootOFF-Shot-to-Click.jar" 
     description="Play click-based Flash games using this exercise, which converts a shot on the arena to a mouse click on the screen the arena was calibrated on." />
+  <plugin name="Stop Shooting" version="1.0" minShootOFFVersion="3.9" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Stop-Shooting/releases/download/v1.0-FINAL/ShootOFF-Stop-Shooting.jar" 
+    description="Shoot each target until it turns red. If you shoot a red target, you have to start over again." />
 </plugins>
