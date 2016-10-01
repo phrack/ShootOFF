@@ -121,10 +121,9 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.trainingExerciseContainer = trainingExerciseContainer;
 		
 		if (shotTimerModel == null) {
-			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena", null, this);
+			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, resetter, "arena", null, this);
 		} else {
-			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, config, resetter, "arena",
-					shotTimerModel, this);
+			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, resetter, "arena", shotTimerModel, this);
 		}
 
 		this.setPrefSize(640, 480);

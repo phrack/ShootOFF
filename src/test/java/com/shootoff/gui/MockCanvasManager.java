@@ -24,7 +24,7 @@ public class MockCanvasManager extends CanvasManager {
 	private final boolean useShotProcessors;
 
 	public MockCanvasManager(Configuration config) {
-		super(new Group(), config, new ShootOFFController(), String.format("%d", System.nanoTime()),
+		super(new Group(), new ShootOFFController(), String.format("%d", System.nanoTime()),
 				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;
@@ -33,7 +33,7 @@ public class MockCanvasManager extends CanvasManager {
 	}
 
 	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
-		super(new Group(), config, new ShootOFFController(), String.format("%d", System.nanoTime()),
+		super(new Group(), new ShootOFFController(), String.format("%d", System.nanoTime()),
 				FXCollections.observableArrayList());
 		new JFXPanel(); // Initialize the JFX toolkit
 		this.config = config;

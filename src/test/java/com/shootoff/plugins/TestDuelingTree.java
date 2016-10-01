@@ -83,7 +83,7 @@ public class TestDuelingTree {
 		config.setDebugMode(true);
 
 		dt = new DuelingTree(targets);
-		CanvasManager arenaCanvas = new CanvasManager(new Group(), config, null, "arena", null);
+		CanvasManager arenaCanvas = new CanvasManager(new Group(), null, "arena", null);
 		arenaCanvas.addTarget(duelTreeTarget);
 		dt.init(config, new CamerasSupervisor(config), null, null, new ProjectorArenaPane(config, arenaCanvas));
 

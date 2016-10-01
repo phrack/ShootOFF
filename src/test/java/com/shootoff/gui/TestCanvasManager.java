@@ -43,7 +43,7 @@ public class TestCanvasManager {
 
 		config = new Configuration(new String[0]);
 		CamerasSupervisor cs = new CamerasSupervisor(config);
-		cm = new CanvasManager(new Group(), config, new ShootOFFController(), "test", shotEntries);
+		cm = new CanvasManager(new Group(), new ShootOFFController(), "test", shotEntries);
 		CameraManager cameraManager = cs.addCameraManager(new MockCamera(), null, cm);
 		cs.setDetectingAll(false);
 		cm.setCameraManager(cameraManager);
