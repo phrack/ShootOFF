@@ -290,9 +290,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						for (CameraView cv : camerasSupervisor.getCameraViews()) {
 							CanvasManager cm = (CanvasManager) cv;
 
-							Shape marker = selected.getShot().getMarker();
-							if (cm.getCanvasGroup().getChildren()
-									.indexOf(marker) < cm.getCanvasGroup().getChildren().size() - 1) {
+							final Shape marker = selected.getShot().getMarker();
+							final int shotIndex = cm.getCanvasGroup().getChildren().indexOf(marker);
+							
+							if (shotIndex >= 0 && shotIndex < cm.getCanvasGroup().getChildren().size() - 1) {
 								cm.getCanvasGroup().getChildren().remove(marker);
 								cm.getCanvasGroup().getChildren().add(cm.getCanvasGroup().getChildren().size(), marker);
 							}
