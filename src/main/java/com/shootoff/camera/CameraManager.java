@@ -19,6 +19,7 @@
 package com.shootoff.camera;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -157,7 +158,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		camera.setCameraEventListener(this);
 
-		this.shotDetector = camera.getPreferredShotDetector(this, config, view);
+		this.shotDetector = camera.getPreferredShotDetector(this, view);
 
 		if (this.shotDetector == null)
 			logger.error("No suitable shot detector found for camera {}", this.camera.getName());
@@ -499,12 +500,17 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	@Override
 	public void newFrame(Mat frame) {
-		if (!handleFrame(frame)) logger.warn("Invalid frame yielded from {}", camera.getName());
+		newFrame(frame, true);
+	}
+	
+	@Override
+	public void newFrame(Mat frame, boolean shouldDedistort) {
+		if (!handleFrame(frame, shouldDedistort)) logger.warn("Invalid frame yielded from {}", camera.getName());
 	}
 
 	private int consecutiveCameraErrors = 0;
 
-	private boolean handleFrame(Mat currentFrame) {
+	private boolean handleFrame(Mat currentFrame, boolean shouldDedistort) {
 		boolean cameraError = false;
 
 		if (currentFrame == null && !camera.isOpen()) {
@@ -537,7 +543,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			consecutiveCameraErrors = 0;
 		}
 
-		BufferedImage currentImage = processFrame(currentFrame);
+		BufferedImage currentImage = processFrame(currentFrame, shouldDedistort);
 
 		Bounds b;
 
@@ -593,7 +599,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		return true;
 	}
 
-	protected BufferedImage processFrame(Mat currentFrame) {
+	protected BufferedImage processFrame(Mat currentFrame, boolean shouldDedistort) {
 		if (isAutoCalibrating.get()) {
 			acm.processFrame(currentFrame, camera.getCurrentFrameTimestamp());
 			return Camera.matToBufferedImage(currentFrame);
@@ -612,7 +618,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		}
 
 		if (cameraAutoCalibrated && projectionBounds != null) {
-			if (acm != null) {
+			if (shouldDedistort && acm != null) {
 				// MUST BE IN BGR pixel format.
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
@@ -786,6 +792,12 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims, boolean calibratedFromCanvas,
 			long delay) {
 		autoCalibrateSuccess(arenaBounds, perspectivePaperDims, delay);
+	}
+
+	public Point undistortCoords(int x, int y) {
+		if (acm == null)
+			return new Point(x,y);
+		return acm.undistortCoords(x,y);
 	}
 
 }

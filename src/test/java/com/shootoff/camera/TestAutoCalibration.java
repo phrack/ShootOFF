@@ -352,7 +352,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		assertEquals(true, result.cameraAutoCalibrated);
 		
 		assertEquals(76.84, result.getACM().getPaperDimensions().get().getWidth(), 1);
-		assertEquals(56.00, result.getACM().getPaperDimensions().get().getHeight(), 1);
+		assertEquals(57.00, result.getACM().getPaperDimensions().get().getHeight(), 1);
 
 	
 	}

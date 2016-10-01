@@ -39,6 +39,7 @@ import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
+import org.opencv.photo.Photo;
 import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -407,7 +408,7 @@ public class AutoCalibrationManager {
 	
 	class StepAdjustExposure implements AutoCalStep {
 		private static final int TARGET_THRESH = 80;
-		private static final int SAMPLE_DELAY = 150;
+		private static final int SAMPLE_DELAY = 100;
 		private static final int NUM_TRIES = 6;
 		private boolean completed = false;
 		private int tries = 0;
@@ -541,7 +542,13 @@ public class AutoCalibrationManager {
 		// For debugging
 		Mat traceMat = null;
 		if (logger.isTraceEnabled()) {
-			traceMat = mat.clone();
+			if (mat.channels() == 3)
+				traceMat = mat.clone();
+			else
+			{
+				traceMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC3);
+				Imgproc.cvtColor(mat, traceMat, Imgproc.COLOR_GRAY2BGR);
+			}
 		}
 
 		// Turn the chessboard into corners
@@ -652,10 +659,17 @@ public class AutoCalibrationManager {
 
 		// Establishes a search region
 		long region = mat.total() / 19200;
+		
+		
+		Mat denoisedMat = new Mat(mat.size(), CvType.CV_8UC1);
+		Photo.fastNlMeansDenoising(mat, denoisedMat, 21f, 7, 21);
+		
+        Imgproc.GaussianBlur(denoisedMat, mat, new Size(0,0), 10);
+        Core.addWeighted(denoisedMat, 1.5, mat, -0.5, 0, mat);
 
+		
 		Mat tempMat = null;
 		if (logger.isTraceEnabled()) {
-
 			tempMat = new Mat(mat.size(), CvType.CV_8UC3);
 			Imgproc.cvtColor(mat, tempMat, Imgproc.COLOR_GRAY2BGR);
 		}
@@ -663,7 +677,7 @@ public class AutoCalibrationManager {
 		int i = 0;
 		for (Point pt : estimatedPoints) {
 			MatOfPoint tempCorners = new MatOfPoint();
-
+			
 			mask = Mat.zeros(mat.size(), CvType.CV_8UC1);
 
 			Point leftpt = new Point(pt.x - region, pt.y - region);
@@ -1079,7 +1093,14 @@ public class AutoCalibrationManager {
 		warpInitialized = true;
 
 		if (logger.isTraceEnabled()) {
-			Mat debugFrame = frame.clone();
+			Mat debugFrame = null;
+			if (frame.channels() == 3)
+				debugFrame = frame.clone();
+			else
+			{
+				debugFrame = new Mat(frame.rows(), frame.cols(), CvType.CV_8UC3);
+				Imgproc.cvtColor(frame, debugFrame, Imgproc.COLOR_GRAY2BGR);
+			}
 
 			Core.circle(debugFrame, new Point(sourceCorners.get(0, 0)[0], sourceCorners.get(0, 0)[1]), 1,
 					new Scalar(255, 0, 255), -1);
@@ -1271,5 +1292,18 @@ public class AutoCalibrationManager {
 		centroid.x = moments.get_m10() / moments.get_m00();
 		centroid.y = moments.get_m01() / moments.get_m00();
 		return centroid;
+	}
+
+	public java.awt.Point undistortCoords(int x, int y) {
+		if (!warpInitialized)
+			return new java.awt.Point(x,y);
+		
+		MatOfPoint2f point = new MatOfPoint2f();
+		point.alloc(1);
+		point.put(0, 0, new double[] { x, y } );
+		
+		Core.perspectiveTransform(point, point, perspMat);
+		
+		return new java.awt.Point((int)point.get(0, 0)[0], (int)point.get(0, 0)[1]);
 	}
 }

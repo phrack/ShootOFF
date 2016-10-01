@@ -22,12 +22,11 @@ import org.opencv.core.Mat;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.config.Configuration;
 
 public abstract class FrameProcessingShotDetector extends ShotDetector {
 
-	public FrameProcessingShotDetector(CameraManager cameraManager, Configuration config, CameraView cameraView) {
-		super(cameraManager, config, cameraView);
+	public FrameProcessingShotDetector(CameraManager cameraManager, CameraView cameraView) {
+		super(cameraManager, cameraView);
 	}
 
 	/**

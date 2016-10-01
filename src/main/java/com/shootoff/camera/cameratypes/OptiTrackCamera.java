@@ -36,7 +36,6 @@ import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
-import com.shootoff.config.Configuration;
 
 public class OptiTrackCamera implements Camera {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackCamera.class);
@@ -75,7 +74,7 @@ public class OptiTrackCamera implements Camera {
 	public boolean setState(CameraState cameraState) {
 		switch (cameraState) {
 		case DETECTING:
-			// TODO: If 780nm, enable. If visible, keep disabled
+			// TODO: If 780nm, enable. If visible, disable
 			if (!getIRFilterState()) toggleIRFilter();
 			break;
 		case CALIBRATING:
@@ -181,14 +180,13 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView cameraView) {
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager,	final CameraView cameraView) {
 		if (OptiTrackShotDetector.isSystemSupported())
-			return new OptiTrackShotDetector(cameraManager, config, cameraView);
+			return new OptiTrackShotDetector(cameraManager, cameraView);
 		else if (NativeShotDetector.isSystemSupported())
-			return new NativeShotDetector(cameraManager, config, cameraView);
+			return new NativeShotDetector(cameraManager, cameraView);
 		else if (JavaShotDetector.isSystemSupported())
-			return new JavaShotDetector(cameraManager, config, cameraView);
+			return new JavaShotDetector(cameraManager, cameraView);
 		else
 			return null;
 	}
@@ -206,7 +204,8 @@ public class OptiTrackCamera implements Camera {
 		Mat mat = translateCameraArrayToMat(frame);
 
 		if (cameraEventListener.isPresent()) {
-			cameraEventListener.get().newFrame(mat);
+			final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;
+			cameraEventListener.get().newFrame(mat, shouldDedistort);
 		}
 
 		if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(getFPS());

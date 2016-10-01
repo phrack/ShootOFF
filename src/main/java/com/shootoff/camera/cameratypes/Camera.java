@@ -28,7 +28,6 @@ import com.shootoff.Closeable;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.ShotDetector;
-import com.shootoff.config.Configuration;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 public interface Camera extends Runnable, Closeable {
@@ -60,8 +59,7 @@ public interface Camera extends Runnable, Closeable {
 
 	int getFrameCount();
 
-	ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView cameraView);
+	ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView);
 
 	boolean isLocked();
 

@@ -20,13 +20,12 @@ package com.shootoff.camera.shotdetection;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.config.Configuration;
 
 public abstract class ShotYieldingShotDetector extends ShotDetector {
 
 
-	public ShotYieldingShotDetector(CameraManager cameraManager, Configuration config, CameraView cameraView) {
-		super(cameraManager, config, cameraView);
+	public ShotYieldingShotDetector(CameraManager cameraManager, CameraView cameraView) {
+		super(cameraManager, cameraView);
 	}
 
 	public abstract void startDetecting();

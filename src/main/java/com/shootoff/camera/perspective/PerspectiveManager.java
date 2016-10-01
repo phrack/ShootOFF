@@ -146,11 +146,15 @@ public class PerspectiveManager {
 		this.setProjectorResolution(projectorRes);
 
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
+		
+		calculateRealWorldSize();
 	}
 
 	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes) {
 		this(cameraName, feedDims, arenaBounds);
 		this.setProjectorResolution(projectorRes);
+		
+		calculateRealWorldSize();
 	}
 
 	public PerspectiveManager(String cameraName, Dimension2D resolution, Bounds arenaBounds) {
@@ -181,6 +185,8 @@ public class PerspectiveManager {
 		// shooter distance
 		if (shooterDistance == -1)
 			shooterDistance = cameraDistance;
+		
+		calculateRealWorldSize();
 	}
 
 	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
@@ -360,8 +366,9 @@ public class PerspectiveManager {
 	protected double getSensorHeight() {
 		return sensorHeight;
 	}
-
-	protected void calculateUnknown() {
+	
+	protected int getUnknownCount()
+	{
 		int unknownCount = 0;
 
 		final double wValues[] = { focalLength, patternWidth, cameraWidth, projectionWidth, sensorWidth, cameraDistance,
@@ -374,6 +381,12 @@ public class PerspectiveManager {
 				unknownCount++;
 			}
 		}
+		
+		return unknownCount;
+	}
+
+	protected void calculateUnknown() {
+		int unknownCount = getUnknownCount();
 
 		if (unknownCount > 1) {
 			// We're okay with two unknowns if they're these two.
@@ -433,15 +446,23 @@ public class PerspectiveManager {
 
 		else {
 			logger.error("Unknown not supported");
-			return;
 		}
-
-		pxPerMMwide = ((double) projectorResWidth / (double) projectionWidth);
-		pxPerMMhigh = ((double) projectorResHeight / (double) projectionHeight);
+		
+		calculateRealWorldSize();
 
 		if (logger.isTraceEnabled())
 			logger.trace("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
 	}
+	
+	void calculateRealWorldSize()
+	{
+		if (projectorResWidth > -1 && projectionWidth > -1)
+		{
+			pxPerMMwide = ((double) projectorResWidth / (double) projectionWidth);
+			pxPerMMhigh = ((double) projectorResHeight / (double) projectionHeight);
+		}
+	}
+	
 
 	/**
 	 * Starting with a target's real world width and height in mm, as it appears
@@ -501,8 +522,7 @@ public class PerspectiveManager {
 	}
 
 	public boolean isInitialized() {
-		return projectionWidth > -1 && projectionHeight > -1 && shooterDistance > -1 && cameraDistance > -1 &&
-				pxPerMMhigh > -1;
+		return projectionWidth > -1 && projectionHeight > -1 && shooterDistance > -1 && pxPerMMhigh > -1;
 	}
 
 	public boolean isCameraParamsKnown() {

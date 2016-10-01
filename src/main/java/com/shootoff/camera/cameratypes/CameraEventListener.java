@@ -22,6 +22,8 @@ import org.opencv.core.Mat;
 
 public interface CameraEventListener {
 	public void newFrame(Mat frame);
+	
+	public void newFrame(Mat frame, boolean shouldDedistort);
 
 	public void newFPS(double cameraFPS);
 

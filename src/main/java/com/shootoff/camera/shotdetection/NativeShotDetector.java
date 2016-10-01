@@ -6,13 +6,10 @@ import org.opencv.core.Mat;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.config.Configuration;
-
 import javafx.scene.paint.Color;
 
 public class NativeShotDetector extends FrameProcessingShotDetector {
 	private final CameraManager cameraManager;
-	private final Configuration config;
 
 	public static boolean loadNativeShotDetector() {
 		if (!isSystemSupported())
@@ -37,12 +34,10 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 		return USE_NATIVE_DETECTION && arch.contains("64") && (os.contains("Windows") || os.contains("Linux"));
 	}
 
-	public NativeShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView cameraView) {
-		super(cameraManager, config, cameraView);
+	public NativeShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
+		super(cameraManager, cameraView);
 
 		this.cameraManager = cameraManager;
-		this.config = config;
 	}
 
 	private native void analyzeFrame(long frameBGR);

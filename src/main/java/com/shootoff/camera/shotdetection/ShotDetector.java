@@ -19,16 +19,15 @@ public abstract class ShotDetector {
 	private static final Logger logger = LoggerFactory.getLogger(ShotDetector.class);
 
 	private final CameraManager cameraManager;
-	private final Configuration config;
+	private final Configuration config = Configuration.getConfig();
 	private final CameraView cameraView;
 
 	public static boolean isSystemSupported() {
 		return false;
 	}
 
-	public ShotDetector(final CameraManager cameraManager, final Configuration config, final CameraView cameraView) {
+	public ShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
 		this.cameraManager = cameraManager;
-		this.config = config;
 		this.cameraView = cameraView;
 	}
 

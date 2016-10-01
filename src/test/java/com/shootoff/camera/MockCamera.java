@@ -13,7 +13,6 @@ import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.CameraEventListener;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
-import com.shootoff.config.Configuration;
 import com.xuggle.mediatool.IMediaListener;
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
@@ -160,10 +159,9 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	}
 
 	@Override
-	public ShotDetector getPreferredShotDetector(CameraManager cameraManager, Configuration config,
-			CameraView cameraView) {
+	public ShotDetector getPreferredShotDetector(CameraManager cameraManager, CameraView cameraView) {
 		if (JavaShotDetector.isSystemSupported())
-			return new JavaShotDetector(cameraManager, config, cameraView);
+			return new JavaShotDetector(cameraManager, cameraView);
 		else
 			return null;
 	}

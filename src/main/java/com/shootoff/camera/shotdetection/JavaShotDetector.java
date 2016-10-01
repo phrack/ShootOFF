@@ -51,8 +51,6 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 
 	private final CameraManager cameraManager;
 
-	private final Configuration config;
-
 	private boolean filtersInitialized = false;
 
 	private int[][] lumsMovingAverage;
@@ -101,9 +99,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		return true;
 	}
 
-	public JavaShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView cameraView) {
-		super(cameraManager, config, cameraView);
+	public JavaShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
+		super(cameraManager, cameraView);
 
 		GlobalExecutorPool.getPool().setRejectedExecutionHandler((r, p) -> {
 			if (!p.isShutdown()) {
@@ -112,7 +109,6 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		});
 
 		this.cameraManager = cameraManager;
-		this.config = config;
 
 		setFrameSize(cameraManager.getFeedWidth(), cameraManager.getFeedHeight());
 
@@ -441,7 +437,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		final double x = pc.centerPixelX;
 		final double y = pc.centerPixelY;
 
-		if (super.addShot(color.get(), x, y, true) && config.isDebugShotsRecordToFiles()) {
+		if (super.addShot(color.get(), x, y, true) && Configuration.getConfig().isDebugShotsRecordToFiles()) {
 			final Mat debugFrame = new Mat();
 			Imgproc.cvtColor(workingFrame, debugFrame, Imgproc.COLOR_HSV2BGR);
 

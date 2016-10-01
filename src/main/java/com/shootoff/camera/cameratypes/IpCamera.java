@@ -42,7 +42,6 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
-import com.shootoff.config.Configuration;
 
 public class IpCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(IpCamera.class);
@@ -185,10 +184,9 @@ public class IpCamera extends CalculatedFPSCamera {
 		return ipcam.getViewSize();
 	}
 
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView cameraView) {
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
 		if (JavaShotDetector.isSystemSupported())
-			return new JavaShotDetector(cameraManager, config, cameraView);
+			return new JavaShotDetector(cameraManager, cameraView);
 		else
 			return null;
 	}

@@ -77,7 +77,6 @@ import com.shootoff.camera.CameraView;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
-import com.shootoff.config.Configuration;
 
 public class PS3EyeCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(PS3EyeCamera.class);
@@ -414,13 +413,12 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	}
 
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final Configuration config,
-			final CameraView cameraView) {
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
 		if (NativeShotDetector.isSystemSupported()) {
-			return new NativeShotDetector(cameraManager, config, cameraView);
+			return new NativeShotDetector(cameraManager, cameraView);
 		} else if (JavaShotDetector.isSystemSupported()) {
 			logger.trace("starting javaShotDetector for PS3Eye");
-			return new JavaShotDetector(cameraManager, config, cameraView);
+			return new JavaShotDetector(cameraManager, cameraView);
 		} else
 			return null;
 	}
