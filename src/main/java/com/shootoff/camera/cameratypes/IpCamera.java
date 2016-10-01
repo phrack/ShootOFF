@@ -191,7 +191,7 @@ public class IpCamera extends CalculatedFPSCamera {
 			return null;
 	}
 
-	public void run() {
+	public synchronized void run() {
 		while (isOpen() && !closing) {
 			if (!isImageNew()) continue;
 

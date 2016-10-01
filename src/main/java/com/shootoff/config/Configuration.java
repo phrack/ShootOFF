@@ -162,27 +162,30 @@ public class Configuration {
 	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
 	private boolean showArenaShotMarkers = false;
 	private boolean autoAdjustExposure = true;
-	
+
 	private static Configuration config = null;
-	public static Configuration getConfig()
-	{
+
+	public static Configuration getConfig() {
 		return config;
 	}
-	
+
+	private static void setConfig(Configuration config) {
+		Configuration.config = config;
+	}
+
 	protected Configuration(InputStream configInputStream, String name) throws IOException, ConfigurationException {
 		configInput = configInputStream;
 		configName = name;
 		readConfigurationFile();
-		
-		config = this;
 
+		setConfig(this);
 	}
 
 	protected Configuration(String name) throws IOException, ConfigurationException {
 		configName = name;
 		readConfigurationFile();
 
-		config = this;
+		setConfig(this);
 	}
 
 	protected Configuration(InputStream configInputStream, String name, String[] args)
@@ -194,7 +197,7 @@ public class Configuration {
 		parseCmdLine(args); // Parse twice so that we guarantee debug is set and
 							// override config file
 
-		config = this;
+		setConfig(this);
 	}
 
 	/**
@@ -216,14 +219,14 @@ public class Configuration {
 		readConfigurationFile();
 		parseCmdLine(args);
 
-		config = this;
+		setConfig(this);
 	}
 
 	public Configuration(String[] args) throws ConfigurationException {
 		configName = DEFAULT_CONFIG_FILE;
 		parseCmdLine(args);
-		
-		config = this;
+
+		setConfig(this);
 	}
 
 	private void readConfigurationFile() throws ConfigurationException, IOException {
@@ -284,8 +287,7 @@ public class Configuration {
 
 			for (Camera webcam : CameraFactory.getWebcams()) {
 				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
-				if (cameraIndex >= 0)
-					webcams.put(webcamNames.get(cameraIndex), webcam);
+				if (cameraIndex >= 0) webcams.put(webcamNames.get(cameraIndex), webcam);
 
 			}
 		}
@@ -367,12 +369,11 @@ public class Configuration {
 				muteMessageChime(message);
 			}
 		}
-		
+
 		if (prop.containsKey(CALIBRATED_FEED_BEHAVIOR_PROP)) {
-			setCalibratedFeedBehavior(
-					CalibrationOption.valueOf(prop.getProperty(CALIBRATED_FEED_BEHAVIOR_PROP)));
+			setCalibratedFeedBehavior(CalibrationOption.valueOf(prop.getProperty(CALIBRATED_FEED_BEHAVIOR_PROP)));
 		}
-		
+
 		if (prop.containsKey(SHOW_ARENA_SHOT_MARKERS)) {
 			setShowArenaShotMarkers(Boolean.parseBoolean(prop.getProperty(SHOW_ARENA_SHOT_MARKERS)));
 		}
@@ -380,10 +381,9 @@ public class Configuration {
 		if (prop.contains(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
 			setAutoAdjustExposure(Boolean.parseBoolean(CALIBRATE_AUTO_ADJUST_EXPOSURE));
 		}
-		
+
 		validateConfiguration();
 	}
-
 
 	public boolean writeConfigurationFile() throws ConfigurationException, IOException {
 		validateConfiguration();
@@ -474,7 +474,7 @@ public class Configuration {
 		prop.setProperty(CALIBRATED_FEED_BEHAVIOR_PROP, calibratedFeedBehavior.name());
 		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
 		prop.setProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE, String.valueOf(autoAdjustExposure));
-		
+
 		OutputStream outputStream = new FileOutputStream(configName);
 
 		try {
@@ -767,10 +767,11 @@ public class Configuration {
 			// noisy and doesn't output information we care about.
 			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
-			
+
 			// Drop WebcamDiscoveryService even lower because it is extremely
 			// noisy
-			Logger webcamDiscoveryLogger = (Logger) loggerContext.getLogger("com.github.sarxos.webcam.WebcamDiscoveryService");
+			Logger webcamDiscoveryLogger = (Logger) loggerContext
+					.getLogger("com.github.sarxos.webcam.WebcamDiscoveryService");
 			webcamDiscoveryLogger.setLevel(Level.WARN);
 		} else {
 			rootLogger.setLevel(Level.WARN);
@@ -808,15 +809,14 @@ public class Configuration {
 	public void unmuteMessageChime(String message) {
 		messagesChimeMuted.remove(message);
 	}
-	
+
 	public void setCalibratedFeedBehavior(CalibrationOption calibrationOption) {
 		calibratedFeedBehavior = calibrationOption;
 	}
-	
+
 	public void setShowArenaShotMarkers(boolean showMarkers) {
 		showArenaShotMarkers = showMarkers;
 	}
-	
 
 	public void setAutoAdjustExposure(boolean autoAdjust) {
 		autoAdjustExposure = autoAdjust;
@@ -847,7 +847,7 @@ public class Configuration {
 
 		currentExercise = exercise;
 	}
-	
+
 	public void setPlugin(Plugin plugin) {
 		currentPlugin = plugin;
 	}
@@ -955,7 +955,7 @@ public class Configuration {
 	public Optional<TrainingExercise> getExercise() {
 		return Optional.ofNullable(currentExercise);
 	}
-	
+
 	public Optional<Plugin> getPlugin() {
 		return Optional.ofNullable(currentPlugin);
 	}
@@ -979,15 +979,15 @@ public class Configuration {
 	public boolean isChimeMuted(String message) {
 		return messagesChimeMuted.contains(message);
 	}
-	
+
 	public CalibrationOption getCalibratedFeedBehavior() {
 		return calibratedFeedBehavior;
 	}
-	
+
 	public boolean showArenaShotMarkers() {
 		return showArenaShotMarkers;
 	}
-	
+
 	public boolean autoAdjustExposure() {
 		return autoAdjustExposure;
 	}

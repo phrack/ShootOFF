@@ -67,6 +67,7 @@ import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -136,6 +137,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return dpiScaleFactor;
 	}
 
+
+	@SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
 	public void init(Configuration config) throws IOException {
 		this.config = config;
 		this.camerasSupervisor = new CamerasSupervisor(config);
@@ -316,7 +319,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 			}
 		});
-
+		
 		splitCol.setCellFactory(column -> {
 			return new TableCell<ShotEntry, ShotEntry.SplitData>() {
 				@Override

@@ -112,6 +112,13 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 		}
 	}
 	
+	private static final FileFilter FOLDER_FILTER = new FileFilter() {
+		@Override
+		public boolean accept(File path) {
+			return path.isDirectory();
+		}
+	};
+	
 	private Pane buildCoursePanes() {
 		final File coursesDirectory = new File(System.getProperty("shootoff.courses"));
 		
@@ -120,14 +127,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 				new TitledPane("Uncategorized Courses", uncategorizedPane));
 		categoryMap.put(coursesDirectory.getPath(), uncategorizedPane);
 		
-		final FileFilter folderFilter = new FileFilter() {
-			@Override
-			public boolean accept(File path) {
-				return path.isDirectory();
-			}
-		};
-		
-		final File[] courseFolders = coursesDirectory.listFiles(folderFilter);
+		final File[] courseFolders = coursesDirectory.listFiles(FOLDER_FILTER);
 		
 		if (courseFolders != null) {
 			for (File courseFolder : courseFolders) {
@@ -141,18 +141,18 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 		return coursePanes;
 	}
 	
+	private static final FilenameFilter COURSE_FILTER = new FilenameFilter() {
+		@Override
+		public boolean accept(File directory, String fileName) {
+			return fileName.endsWith(".course");
+		}
+	};
+	
 	private ItemSelectionPane<File> buildCategoryPane(File path) {
 		final ItemSelectionPane<File> itemPane = new ItemSelectionPane<>(false, this);
 		categoryMap.put(path.getPath(), itemPane);
-		
-		final FilenameFilter courseFilter = new FilenameFilter() {
-			@Override
-			public boolean accept(File directory, String fileName) {
-				return fileName.endsWith(".course");
-			}
-		};
 
-		final File[] courseFiles = path.listFiles(courseFilter);
+		final File[] courseFiles = path.listFiles(COURSE_FILTER);
 		
 		if (courseFiles != null) {
 			for (File f : courseFiles) {

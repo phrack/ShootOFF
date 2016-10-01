@@ -185,7 +185,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	}
 
 	@Override
-	public void run() {
+	public synchronized void run() {
 		while (isOpen() && !closing) {
 			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getMatFrame());
 
