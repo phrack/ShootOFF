@@ -121,7 +121,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 			thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", missedTargets, badHits));
 
-			if (!testRun) {
+			if (!testRun && continueExercise.get()) {
 				for (Target target : shootTargets)
 					thisSuper.removeTarget(target);
 				shootTargets.clear();

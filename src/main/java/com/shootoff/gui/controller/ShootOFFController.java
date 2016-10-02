@@ -919,24 +919,25 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public void setExercise(TrainingExercise exercise) {
 		try {
-			if (exercise == null)
-			{
-				config.setExercise(null);
-				return;
-			}
-			
-			Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+			// If there is a current exercise, ensure it is destroyed
+			// before starting an new one in case it's a projector
+			// exercise that added targets that need to be removed.
+			config.setExercise(null);
 
-			List<Target> knownTargets = new ArrayList<Target>();
+			if (exercise == null) return;
+
+			final Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+
+			final List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
 			if (projectorSlide.getArenaPane() != null) {
 				knownTargets.addAll(projectorSlide.getArenaPane().getCanvasManager().getTargets());
 			}
 
-			TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
+			final TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(knownTargets);
 
-			Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+			final Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
 			if (plugin.isPresent()) {
 				config.setPlugin(plugin.get());
 			} else {
@@ -965,11 +966,13 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public void setProjectorExercise(TrainingExercise exercise) {
 		try {
-			Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
-			TrainingExercise newExercise = (TrainingExercise) ctor
+			config.setExercise(null);
+			
+			final Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+			final TrainingExercise newExercise = (TrainingExercise) ctor
 					.newInstance(projectorSlide.getArenaPane().getCanvasManager().getTargets());
 
-			Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+			final Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
 			if (plugin.isPresent()) {
 				config.setPlugin(plugin.get());
 			} else {

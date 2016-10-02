@@ -41,7 +41,6 @@ import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.TargetView;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Target;
@@ -345,7 +344,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 				.calculateObjectSize(currentRealWidth, currentRealHeight, desiredDistance);
 
 		if (targetDimensions.isPresent()) {
-			Dimension2D d = targetDimensions.get();
+			final Dimension2D d = targetDimensions.get();
 			target.setDimensions(d.getWidth(), d.getHeight());
 
 			return true;
@@ -357,14 +356,14 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	@Override
 	public void destroy() {
 		for (Target target : targets)
-			arenaPane.getCanvasManager().removeTarget((TargetView) target);
+			arenaPane.getCanvasManager().removeTarget(target);
 
+		targets.clear();
+		
 		Platform.runLater(() -> {
 			if (arenaPane != null)
 				arenaPane.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel);
 		});
-
-		targets.clear();
 
 		super.destroy();
 	}
