@@ -50,7 +50,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.WindowEvent;
 
 public class CalibrationManager implements CameraCalibrationListener {
-	private static final int MAX_AUTO_CALIBRATION_TIME = 10 * 1000;
+	private static final int MAX_AUTO_CALIBRATION_TIME = 12 * 1000;
 	private static final Logger logger = LoggerFactory.getLogger(CalibrationManager.class);
 
 	private final CalibrationConfigurator calibrationConfigurator;

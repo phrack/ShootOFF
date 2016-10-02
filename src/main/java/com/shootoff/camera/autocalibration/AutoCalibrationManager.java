@@ -53,8 +53,12 @@ public class AutoCalibrationManager {
 
 	private static final int PATTERN_WIDTH = 9;
 	private static final int PATTERN_HEIGHT = 6;
-	private static final double PAPER_MARGIN_WIDTH = 1.048;
-	private static final double PAPER_MARGIN_HEIGHT = 1.063;
+	
+	// These are slightly fudged
+	// 11/10.65 = 1.032.  With 1/4" margins this should be 11/10.5, but OpenCV reads the pattern a bit big
+	private static final double PAPER_MARGIN_WIDTH = 1.032;
+	// 8.5/8.25 = 1.030.
+	private static final double PAPER_MARGIN_HEIGHT = 1.03;
 	private static final Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
 	private CameraCalibrationListener calibrationListener;
@@ -226,7 +230,7 @@ public class AutoCalibrationManager {
 
 			Optional<Dimension2D> paperRes = findPaperPattern(mat, listPatterns);
 			if (paperRes.isPresent())
-				((StepFindPaperPattern) stepFindPaperPattern).addPaperDimensions(paperRes.get(), false);
+				((StepFindPaperPattern) stepFindPaperPattern).addPaperDimensions(paperRes.get(), true);
 
 			if (listPatterns.isEmpty())
 				return;
@@ -388,18 +392,13 @@ public class AutoCalibrationManager {
 		}
 
 		public void addPaperDimensions(Dimension2D newPaperDimensions, boolean averagePatterns) {
-			if (!paperDimensions.isPresent()) {
+			if (!paperDimensions.isPresent() || !averagePatterns) {
 				paperDimensions = Optional.of(newPaperDimensions);
 
-				logger.debug("Found paper dimensions {}", paperDimensions.get());
+				logger.trace("Found paper dimensions {}", paperDimensions.get());
 			} else if (paperDimensions.isPresent() && averagePatterns) {
 				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
 				logger.trace("Averaged paper dimensions {}", paperDimensions.get());
-
-			} else {
-				paperDimensions = Optional.of(newPaperDimensions);
-
-				logger.debug("Found paper dimensions {}", paperDimensions.get());
 			}
 		}
 
@@ -582,8 +581,8 @@ public class AutoCalibrationManager {
 			return Optional.empty();
 		}
 
-		if (logger.isDebugEnabled())
-			logger.debug("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
+		if (logger.isTraceEnabled())
+			logger.trace("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
 					boundingBox.getHeight());
 
 		if (logger.isTraceEnabled()) {
@@ -764,10 +763,8 @@ public class AutoCalibrationManager {
 				rect_width = height;
 			}
 
-			width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1)) * PAPER_MARGIN_WIDTH
-					* 1 + (BORDER_FACTOR / PATTERN_WIDTH));
-			height = ((double) height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1))
-					* PAPER_MARGIN_HEIGHT * 1 + (BORDER_FACTOR / PATTERN_HEIGHT));
+			width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1)) * PAPER_MARGIN_WIDTH);
+			height = ((double) height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGIN_HEIGHT);
 
 			final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
 			if (width > PAPER_PATTERN_SIZE_THRESHOLD * mat.cols()

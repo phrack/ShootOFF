@@ -55,6 +55,8 @@ public class PerspectiveManager {
 
 	private final static int US_LETTER_WIDTH_MM = 279;
 	private final static int US_LETTER_HEIGHT_MM = 216;
+	
+	private final static int DEFAULT_SHOOTER_DISTANCE = 3000;
 
 	private String calibratedCameraName;
 
@@ -146,13 +148,25 @@ public class PerspectiveManager {
 		this.setProjectorResolution(projectorRes);
 
 		setProjectionSizeFromLetterPaperPixels(paperBounds);
+
+		if (cameraDistance == -1)
+			cameraDistance = DEFAULT_SHOOTER_DISTANCE;
+		if (shooterDistance == -1)
+			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
 		
 		calculateRealWorldSize();
+		
 	}
 
 	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes) {
 		this(cameraName, feedDims, arenaBounds);
 		this.setProjectorResolution(projectorRes);
+		
+		if (cameraDistance == -1)
+			cameraDistance = DEFAULT_SHOOTER_DISTANCE;
+		if (shooterDistance == -1)
+			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
+
 		
 		calculateRealWorldSize();
 	}
@@ -168,6 +182,7 @@ public class PerspectiveManager {
 		}
 
 		setCameraFeedSize(resolution);
+
 	}
 
 	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D paperBounds,
@@ -179,12 +194,10 @@ public class PerspectiveManager {
 		// Camera distance is unknown
 		calculateUnknown();
 
-		// This makes things work easier if the user doesn't really know to set
-		// shooter distance
-		// or the user starts an exercise that uses perspective but didn't set
-		// shooter distance
+		if (cameraDistance == -1)
+			cameraDistance = DEFAULT_SHOOTER_DISTANCE;
 		if (shooterDistance == -1)
-			shooterDistance = cameraDistance;
+			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
 		
 		calculateRealWorldSize();
 	}
@@ -395,7 +408,7 @@ public class PerspectiveManager {
 				return;
 			}
 		} else if (unknownCount == 0) {
-			logger.error("No unknown found");
+			// TODO: Update highest error unknown if this is the case
 			return;
 		}
 
@@ -511,9 +524,9 @@ public class PerspectiveManager {
 		final double adjWidthpx = adjWidthmm * pxPerMMwide;
 		final double adjHeightpx = adjHeightmm * pxPerMMhigh;
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("real w {} h {} d {}", realWidth, realHeight, desiredDistance);
-			logger.trace("sD {} dR {} - adjmm {} {} adjpx {} {}", shooterDistance, distRatio, adjWidthmm, adjHeightmm,
+		if (logger.isDebugEnabled()) {
+			logger.debug("real w {} h {} d {}", realWidth, realHeight, desiredDistance);
+			logger.debug("sD {} dR {} - adjmm {} {} adjpx {} {}", shooterDistance, distRatio, adjWidthmm, adjHeightmm,
 					adjWidthpx, adjHeightpx);
 
 		}

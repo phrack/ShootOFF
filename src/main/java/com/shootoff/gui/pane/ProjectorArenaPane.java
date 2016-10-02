@@ -686,8 +686,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 			PerspectiveManager pm = perspectiveManager.get();
 
-			if (pm.getShooterDistance() == -1) pm.setShooterDistance(pm.getCameraDistance());
-
 			if (pm.isInitialized()) {
 				int width = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
 				int height = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
