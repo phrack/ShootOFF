@@ -823,9 +823,14 @@ public class CanvasManager implements CameraView {
 
 		targets.add(newTarget);
 
-		Optional<TrainingExercise> enabledExercise = config.getExercise();
-		if (enabledExercise.isPresent())
-			enabledExercise.get().targetUpdate(newTarget, TrainingExercise.TargetChange.ADDED);
+		// If this is a mirrored canvas, only alert exercises of target updates
+		// from the arena window, not the tab
+		if (!(this instanceof MirroredCanvasManager)
+				|| ((this instanceof MirroredCanvasManager) && cameraManager == null)) {
+			final Optional<TrainingExercise> enabledExercise = config.getExercise();
+			if (enabledExercise.isPresent())
+				enabledExercise.get().targetUpdate(newTarget, TrainingExercise.TargetChange.ADDED);
+		}
 
 		return newTarget;
 	}
@@ -846,9 +851,14 @@ public class CanvasManager implements CameraView {
 
 		targets.remove(target);
 
-		Optional<TrainingExercise> enabledExercise = config.getExercise();
-		if (enabledExercise.isPresent())
-			enabledExercise.get().targetUpdate(target, TrainingExercise.TargetChange.REMOVED);
+		// If this is a mirrored canvas, only alert exercises of target updates
+		// from the arena window, not the tab
+		if (!(this instanceof MirroredCanvasManager)
+				|| ((this instanceof MirroredCanvasManager) && cameraManager == null)) {
+			final Optional<TrainingExercise> enabledExercise = config.getExercise();
+			if (enabledExercise.isPresent())
+				enabledExercise.get().targetUpdate(target, TrainingExercise.TargetChange.REMOVED);
+		}
 	}
 
 	public void clearTargets() {
