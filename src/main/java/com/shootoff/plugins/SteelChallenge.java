@@ -239,7 +239,10 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 				String roundAnnouncement;
 
-				if (roundTargets.size() > 0) {
+				if (roundTargets.size() == 1) {
+					roundAnnouncement = String.format("Your time was %s seconds. You missed one target!",
+							elapsedTimeSeconds);
+				} else if (roundTargets.size() > 1) {
 					roundAnnouncement = String.format("Your time was %s seconds. You missed %d targets!",
 							elapsedTimeSeconds, roundTargets.size());
 				} else {
