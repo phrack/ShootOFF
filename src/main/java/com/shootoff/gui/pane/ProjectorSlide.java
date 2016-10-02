@@ -55,13 +55,13 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private ProjectorArenaPane arenaPane;
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 	
-	public ProjectorSlide(Pane parentControls, Pane parentBody, Configuration config, CameraViews cameraViews,
-			Stage shootOffStage, Pane trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
+	public ProjectorSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews, Stage shootOffStage, 
+			Pane trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
 		super(parentControls, parentBody);
 		
 		this.parentControls = parentControls;
 		this.parentBody = parentBody;
-		this.config = config;
+		this.config = Configuration.getConfig();
 		this.cameraViews = cameraViews;
 		this.shootOffStage = shootOffStage;
 		this.trainingExerciseContainer = trainingExerciseContainer;

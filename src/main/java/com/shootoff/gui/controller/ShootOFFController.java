@@ -171,8 +171,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		});
 		
 		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);		
-		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this, config);
-		projectorSlide = new ProjectorSlide(controlsContainer, bodyContainer, config, this, shootOFFStage, 
+		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this);
+		projectorSlide = new ProjectorSlide(controlsContainer, bodyContainer, this, shootOFFStage, 
 				trainingExerciseContainer, this, exerciseSlide);
 
 		pluginEngine = new PluginEngine(exerciseSlide);
