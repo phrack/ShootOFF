@@ -216,7 +216,7 @@ public class TargetView implements Target {
 		double currentWidth = targetGroup.getBoundsInParent().getWidth();
 		double currentHeight = targetGroup.getBoundsInParent().getHeight();
 
-		if (currentWidth != newWidth) {
+		if (Math.abs(currentWidth - newWidth) > .001) {
 			double scaleXDelta = 1.0 + ((newWidth - currentWidth) / currentWidth);
 			targetGroup.setScaleX(targetGroup.getScaleX() * scaleXDelta);
 
@@ -233,7 +233,7 @@ public class TargetView implements Target {
 			}
 		}
 
-		if (Math.abs(currentHeight - newHeight) > .0000001) {
+		if (Math.abs(currentHeight - newHeight) > .001) {
 			double scaleYDelta = 1.0 + ((newHeight - currentHeight) / currentHeight);
 			targetGroup.setScaleY(targetGroup.getScaleY() * scaleYDelta);
 
@@ -243,7 +243,7 @@ public class TargetView implements Target {
 
 				if (r.tagExists(Target.TAG_RESIZABLE) && !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
 					double height = n.getBoundsInParent().getHeight();
-					double scaledPercentChange = (height / (height * targetGroup.getScaleX()));
+					double scaledPercentChange = (height / (height * targetGroup.getScaleY()));
 
 					n.setScaleY(scaledPercentChange);
 				}
