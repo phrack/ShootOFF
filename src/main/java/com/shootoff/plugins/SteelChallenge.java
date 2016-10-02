@@ -99,6 +99,13 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 			break;
 		case REMOVED:
 			targets.remove(target);
+			
+			if (repeatExercise && targets.isEmpty()) {
+				repeatExercise = false;
+			} else if (repeatExercise && isStopTarget(target) && !hasStopTarget()) {
+				repeatExercise = false;
+			}
+			
 			break;
 		}
 	}
@@ -114,13 +121,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	private boolean checkTargets(final List<Target> targets) {
-		boolean hasStopTarget = false;
-
-		for (final Target t : targets) {
-			hasStopTarget = isStopTarget(t);
-
-			if (hasStopTarget) break;
-		}
+		boolean hasStopTarget = hasStopTarget();
 
 		if (!hasStopTarget) {
 			List<File> errorMessages = new ArrayList<File>();
@@ -131,6 +132,14 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		}
 
 		return hasStopTarget;
+	}
+	
+	private boolean hasStopTarget() {
+		for (final Target t : targets) {
+			if (isStopTarget(t)) return true;
+		}
+		
+		return false;
 	}
 
 	private void startRound() {
@@ -157,7 +166,6 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 			} else {
 				new Standby().run();
 			}
-
 		}
 	}
 
