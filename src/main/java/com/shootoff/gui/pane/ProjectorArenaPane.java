@@ -83,7 +83,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private Point2D arenaScreenOrigin = new Point2D(0, 0);
 	private Screen arenaHome;
 
-	private boolean calibrated = false;
 	private CalibrationManager calibrationManager;
 	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
 	private Pair<Target, TargetDistancePane> openDistancePane;
@@ -136,21 +135,12 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			canvasManager.toggleTargetSelection(Optional.empty());
 		});
 
-		this.widthProperty().addListener((e) -> {
-			// This can happen because the mirrored pane in the tab will
-			// grow the pane it is in. This stretches the background
-			// in weird ways when a target goes off screen. This condition
-			// ensures the scroll pane never gets bigger than the separate
-			// window that is the real arena.
-			if (calibrated && getWidth() != arenaStage.getWidth()) return;
-			
-			canvasManager.setBackgroundFit(getWidth(), getHeight());
+		arenaStage.widthProperty().addListener((e) -> {
+			canvasManager.setBackgroundFit(arenaStage.getWidth(), arenaStage.getHeight());
 		});
 
-		this.heightProperty().addListener((e) -> {
-			if (calibrated && getHeight() != arenaStage.getHeight()) return;
-			
-			canvasManager.setBackgroundFit(getWidth(), getHeight());
+		arenaStage.heightProperty().addListener((e) -> {
+			canvasManager.setBackgroundFit(arenaStage.getWidth(), arenaStage.getHeight());
 		});
 
 		this.setStyle("-fx-background-color: #333333;");
@@ -510,7 +500,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	
 	@Override
 	public void startCalibration() {
-		calibrated = false;
 		setTargetsVisible(false);
 		
 		if (mirroredArenaPane != null) mirroredArenaPane.mirroredStartCalibration();
@@ -574,7 +563,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 	@Override
 	public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
-		calibrated = true;
 		setCalibrationMessageVisible(false);
 		setTargetsVisible(true);
 		
