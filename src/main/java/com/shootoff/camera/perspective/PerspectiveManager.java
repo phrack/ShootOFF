@@ -524,9 +524,9 @@ public class PerspectiveManager {
 		final double adjWidthpx = adjWidthmm * pxPerMMwide;
 		final double adjHeightpx = adjHeightmm * pxPerMMhigh;
 
-		if (logger.isDebugEnabled()) {
-			logger.debug("real w {} h {} d {}", realWidth, realHeight, desiredDistance);
-			logger.debug("sD {} dR {} - adjmm {} {} adjpx {} {}", shooterDistance, distRatio, adjWidthmm, adjHeightmm,
+		if (logger.isTraceEnabled()) {
+			logger.trace("real w {} h {} d {}", realWidth, realHeight, desiredDistance);
+			logger.trace("sD {} dR {} - adjmm {} {} adjpx {} {}", shooterDistance, distRatio, adjWidthmm, adjHeightmm,
 					adjWidthpx, adjHeightpx);
 
 		}
