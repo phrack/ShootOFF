@@ -34,6 +34,7 @@ import com.github.sarxos.webcam.Webcam;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
@@ -80,7 +81,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	}
 
 	@Override
-	public Mat getMatFrame() {
+	public Frame getFrame() {
 		final Mat frame = new Mat();
 		try {
 			if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0) return null;
@@ -89,20 +90,20 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			// read()
 			return null;
 		}
-
+		
+		final long currentFrameTimestamp = System.currentTimeMillis();
 		frameCount++;
-		currentFrameTimestamp = System.currentTimeMillis();
-		return frame;
+		return new Frame(frame, currentFrameTimestamp);
 	}
 
 	@Override
 	public BufferedImage getBufferedImage() {
-		final Mat frame = getMatFrame();
+		final Frame frame = getFrame();
 
 		if (frame == null) {
 			return null;
 		} else {
-			return Camera.matToBufferedImage(getMatFrame());
+			return frame.getOriginalBufferedImage();
 		}
 	}
 
@@ -188,7 +189,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	@Override
 	public void run() {
 		while (isOpen() && !closing.get()) {
-			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getMatFrame());
+			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getFrame());
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();

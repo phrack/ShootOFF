@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
@@ -399,17 +400,17 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		return isOpen();
 	}
 
-	public Mat getMatFrame() {
+	public Frame getFrame() {
 		final byte[] frame = getImageNative();
-		currentFrameTimestamp = System.currentTimeMillis();
+		long currentFrameTimestamp = System.currentTimeMillis();
 		final Mat mat = translateCameraArrayToMat(frame);
 		frameCount++;
-		return mat;
+		return new Frame(mat, currentFrameTimestamp);
 	}
 
 	@Override
 	public BufferedImage getBufferedImage() {
-		return Camera.matToBufferedImage(getMatFrame());
+		return getFrame().getOriginalBufferedImage();
 	}
 
 	@Override
@@ -431,7 +432,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	public void run() {
 		while (isOpen()) {
 			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFrame(getMatFrame());
+				cameraEventListener.get().newFrame(getFrame());
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();

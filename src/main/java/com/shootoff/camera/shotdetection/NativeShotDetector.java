@@ -2,10 +2,10 @@ package com.shootoff.camera.shotdetection;
 
 import java.io.File;
 
-import org.opencv.core.Mat;
-
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
+
 import javafx.scene.paint.Color;
 
 public class NativeShotDetector extends FrameProcessingShotDetector {
@@ -43,9 +43,9 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	private native void analyzeFrame(long frameBGR);
 
 	@Override
-	public void processFrame(Mat frameBGR, boolean isDetecting) {
+	public void processFrame(Frame frame, boolean isDetecting) {
 		if (isDetecting)
-			analyzeFrame(frameBGR.getNativeObjAddr());
+			analyzeFrame(frame.getOriginalMat().getNativeObjAddr());
 	}
 
 	@Override
@@ -60,13 +60,15 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	 *            the x coordinate of the new shot
 	 * @param y
 	 *            the y coordinate of the new shot
+	 * @param timestamp
+	 *            the timestamp of the new shot, not adjusted for the shot timer
 	 * @param rgb
 	 *            the rgb color of the new shot
 	 */
-	public void foundShot(int x, int y, int rgb) {
+	public void foundShot(int x, int y, long timestamp, int rgb) {
 		Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
 
-		super.addShot(c, x, y, true);
+		super.addShot(c, x, y, timestamp, true);
 	}
 	
 	@Override

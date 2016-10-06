@@ -33,6 +33,8 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackShotDetector.class);
 	
 	private final CameraManager cameraManager;
+	
+	private final long startTime = System.currentTimeMillis();
 
 	public OptiTrackShotDetector(final CameraManager cameraManager,	final CameraView cameraView) {
 		super(cameraManager, cameraView);
@@ -49,7 +51,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	public void cameraStateChange(CameraState state) {
 		if (logger.isDebugEnabled()) logger.debug("got state change {}", state);
 		switch (state) {
-		case DETECTING:
+		case DETECTING_CALIBRATED:
 			enableDetection();
 			break;
 		default:
@@ -67,7 +69,6 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 
 	@Override
 	public void setFrameSize(int width, int height) {
-		// TODO: Should this be a noop for optitrack shot detection?
 	}
 
 	/**
@@ -77,22 +78,24 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	 *            the x coordinate of the new shot
 	 * @param y
 	 *            the y coordinate of the new shot
+	 * @param timestamp
+	 *            the timestamp of the shot not adjusted for the shot timer
 	 * @param rgb
 	 *            the rgb color of the new shot
 	 */
-	public void foundShot(int x, int y, int rgb) {
+	public void foundShot(int x, int y, long timestamp, int rgb) {
+		
 		if (!cameraManager.isDetecting()) return;
 
 		final Point undist = cameraManager.undistortCoords(x,y);
 		
 		if (logger.isTraceEnabled()) logger.trace("Translation: {} {} to {}", x, y, undist);
 
-		super.addShot(Color.RED, undist.x, undist.y, true);
+		super.addShot(Color.BLACK, undist.x, undist.y, startTime+timestamp, true);
 	}
 
 	@Override
 	public void startDetecting() {
-		logger.debug("start");
 		startDetectionModeNative();
 		enableDetection();
 	}

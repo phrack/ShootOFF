@@ -27,15 +27,16 @@ import org.opencv.core.Mat;
 import com.shootoff.Closeable;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
 import com.shootoff.camera.shotdetection.ShotDetector;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 public interface Camera extends Runnable, Closeable {
 	public enum CameraState {
-		CLOSED, NORMAL, DETECTING, CALIBRATING
+		CLOSED, NORMAL, DETECTING, DETECTING_CALIBRATED, CALIBRATING
 	};
 
-	Mat getMatFrame();
+	Frame getFrame();
 
 	BufferedImage getBufferedImage();
 
@@ -54,8 +55,6 @@ public interface Camera extends Runnable, Closeable {
 	CameraState getState();
 
 	void setCameraEventListener(CameraEventListener cameraEventListener);
-
-	long getCurrentFrameTimestamp();
 
 	int getFrameCount();
 

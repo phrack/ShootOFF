@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
 import com.shootoff.config.Configuration;
 
 public final class JavaShotDetector extends FrameProcessingShotDetector {
@@ -57,6 +58,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private int[][] colorDistanceFromRed;
 
 	private int avgThresholdPixels = -1;
+	
+	private int initialFrameCount = -1;
 
 	private final static int INIT_FRAME_COUNT = 5;
 	private int movingAveragePeriod = INIT_FRAME_COUNT;
@@ -204,20 +207,15 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	}
 
 	/**
-	 * Use and HSV copy of the current camera frame to detect shots and use a
-	 * BGR copy to draw bright pixels as red and high motion pixels as blue. The
-	 * BGR copy is what ShootOFF shows
-	 * 
-	 * @param frameHSV
-	 * 
-	 * @param frameBGR
-	 *            a blue, green, red copy of the current frame for drawing
-	 *            bright/high motion pixels
+	 * Frame is modified to have red pixels for brightness and blue for motion
+	 * at the conclusion of shot detection
+	 * @param frame
+	 *            a Frame object
 	 * @param detectShots
 	 *            whether or not to detect a shot
 	 */
 	@Override
-	public void processFrame(final Mat frameBGR, final boolean detectShots) {
+	public void processFrame(final Frame frame, final boolean detectShots) {
 		updateMovingAveragePeriod();
 
 		// Must reset before every updateFilter loop
@@ -230,14 +228,14 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		// show
 		// the user where bright/high motion pixels are
 		final Mat frameHSV = new Mat();
-		Imgproc.cvtColor(frameBGR, frameHSV, Imgproc.COLOR_BGR2HSV);
+		Imgproc.cvtColor(frame.getOriginalMat(), frameHSV, Imgproc.COLOR_BGR2HSV);
 
 		final Set<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(frameHSV,
 				(detectShots && filtersInitialized));
 
 		int thresholdPixelsSize = thresholdPixels.size();
 
-		if (logger.isTraceEnabled()) {
+		if (logger.isTraceEnabled() && checkIfInitialized()) {
 			if (thresholdPixelsSize >= 1)
 				logger.trace("thresholdPixels {} getMinimumShotDimension {}", thresholdPixelsSize,
 						getMinimumShotDimension());
@@ -259,7 +257,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			if (shouldShowBrightnessWarning()) {
 				cameraManager.showBrightnessWarning();
 			}
-
+			
 			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
 				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels,
 						getMinimumShotDimension());
@@ -269,7 +267,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 					logger.trace("clusters {}", clusters.size());
 				}
 
-				detectShots(frameHSV, clusters);
+				detectShots(new Frame(frameHSV, frame.getTimestamp()), clusters);
 			}
 
 			// Moved to after detectShots because otherwise we'll have changed
@@ -277,9 +275,9 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			else if (isExcessiveMotion(thresholdPixelsSize)) {
 				if (shouldShowMotionWarning(thresholdPixelsSize))
 					cameraManager.showMotionWarning();
-
+				
 				for (final Pixel pixel : thresholdPixels) {
-					frameBGR.put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
+					frame.getOriginalMat().put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
 				}
 			}
 
@@ -288,7 +286,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 				// problem pixels are
 				synchronized(brightPixels) {
 					for (final Pixel pixel : brightPixels) {
-						frameBGR.put(pixel.y, pixel.x, RED_MAT_PIXEL);
+						frame.getOriginalMat().put(pixel.y, pixel.x, RED_MAT_PIXEL);
 					}
 				}
 			}
@@ -300,7 +298,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			movingAveragePeriod = Math.max((int) (cameraManager.getFPS() / 5.0), INIT_FRAME_COUNT);
 	}
 
-	private void detectShots(final Mat workingFrame, final Set<PixelCluster> clusters) {
+	private void detectShots(final Frame workingFrame, final Set<PixelCluster> clusters) {
 		for (final PixelCluster cluster : clusters) {
 			addShot(workingFrame, cluster);
 		}
@@ -312,10 +310,10 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 
 	private boolean shouldShowMotionWarning(final int thresholdPixels) {
 		final boolean showWarning = avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD
-				&& cameraManager.getFrameCount() > MOTION_WARNING_FRAMECOUNT;
+				&& cameraManager.getFrameCount()-initialFrameCount > MOTION_WARNING_FRAMECOUNT;
 
 		if (showWarning && logger.isTraceEnabled())
-			logger.trace("HIGH MOTION - avgThresholdPixels {} thresholdPixels {}", avgThresholdPixels, thresholdPixels);
+			logger.trace("HIGH MOTION - avgThresholdPixels {} thresholdPixels {} frameCount {}", avgThresholdPixels, thresholdPixels, cameraManager.getFrameCount() );
 
 		return showWarning;
 	}
@@ -325,7 +323,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
-				&& cameraManager.getFrameCount() > BRIGHTNESS_WARNING_FRAMECOUNT) {
+				&& cameraManager.getFrameCount()-initialFrameCount > BRIGHTNESS_WARNING_FRAMECOUNT) {
 			if (logger.isTraceEnabled())
 				logger.trace("HIGH BRIGHTNESS - avgBrightPixels {}", avgBrightPixels);
 
@@ -339,7 +337,10 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	}
 
 	private boolean checkIfInitialized() {
-		return cameraManager.getFrameCount() > INIT_FRAME_COUNT;
+		if (initialFrameCount == -1)
+			initialFrameCount = cameraManager.getFrameCount();
+		
+		return cameraManager.getFrameCount()-initialFrameCount > INIT_FRAME_COUNT;
 	}
 
 	private Set<Pixel> findThresholdPixelsAndUpdateFilter(final Mat workingFrame, final boolean detectShots) {
@@ -425,8 +426,8 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 				: MINIMUM_SHOT_DIMENSION;
 	}
 
-	private void addShot(Mat workingFrame, PixelCluster pc) {
-		final Optional<Color> color = pc.getColor(workingFrame, colorDistanceFromRed);
+	private void addShot(Frame workingFrame, PixelCluster pc) {
+		final Optional<Color> color = pc.getColor(workingFrame.getOriginalMat(), colorDistanceFromRed);
 
 		if (!color.isPresent()) {
 			if (logger.isDebugEnabled())
@@ -437,9 +438,9 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		final double x = pc.centerPixelX;
 		final double y = pc.centerPixelY;
 
-		if (super.addShot(color.get(), x, y, true) && Configuration.getConfig().isDebugShotsRecordToFiles()) {
+		if (super.addShot(color.get(), x, y, workingFrame.getTimestamp(), true) && Configuration.getConfig().isDebugShotsRecordToFiles()) {
 			final Mat debugFrame = new Mat();
-			Imgproc.cvtColor(workingFrame, debugFrame, Imgproc.COLOR_HSV2BGR);
+			Imgproc.cvtColor(workingFrame.getOriginalMat(), debugFrame, Imgproc.COLOR_HSV2BGR);
 
 			String filename = String.format("shot-%d-%d-%d_orig.png", cameraManager.getFrameCount(),
 					(int) pc.centerPixelX, (int) pc.centerPixelY);
