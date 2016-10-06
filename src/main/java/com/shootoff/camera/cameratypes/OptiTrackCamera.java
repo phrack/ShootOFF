@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.OptiTrackShotDetector;
@@ -73,12 +74,15 @@ public class OptiTrackCamera implements Camera {
 
 	public boolean setState(CameraState cameraState) {
 		switch (cameraState) {
-		case DETECTING:
-			// TODO: If 780nm, enable. If visible, disable
+		case DETECTING_CALIBRATED:
 			if (!getIRFilterState()) toggleIRFilter();
 			break;
 		case CALIBRATING:
 			resetExposure();
+			if (getIRFilterState()) toggleIRFilter();
+			break;
+		case DETECTING:
+			// This camera does not detect when not calibrated, intentionally
 			if (getIRFilterState()) toggleIRFilter();
 			break;
 		case CLOSED:
@@ -167,16 +171,16 @@ public class OptiTrackCamera implements Camera {
 		return dst;
 	}
 
-	public Mat getMatFrame() {
+	public Frame getFrame() {
 		byte[] frame = getImageNative();
-		currentFrameTimestamp = System.currentTimeMillis();
+		long currentFrameTimestamp = System.currentTimeMillis();
 		Mat mat = translateCameraArrayToMat(frame);
-		return mat;
+		return new Frame(mat, currentFrameTimestamp);
 	}
 
 	@Override
 	public BufferedImage getBufferedImage() {
-		return Camera.matToBufferedImage(getMatFrame());
+		return getFrame().getOriginalBufferedImage();
 	}
 
 	@Override
@@ -199,13 +203,12 @@ public class OptiTrackCamera implements Camera {
 	public void run() {}
 
 	// TODO: Switch timestamps to optitrack internal timestamps
-	private void receiveFrame(byte[] frame) {
-		currentFrameTimestamp = System.currentTimeMillis();
-		Mat mat = translateCameraArrayToMat(frame);
+	private void receiveFrame(byte[] framebytes) {
+		Frame frame = new Frame(translateCameraArrayToMat(framebytes), System.currentTimeMillis());
 
 		if (cameraEventListener.isPresent()) {
 			final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;
-			cameraEventListener.get().newFrame(mat, shouldDedistort);
+			cameraEventListener.get().newFrame(frame, shouldDedistort);
 		}
 
 		if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(getFPS());

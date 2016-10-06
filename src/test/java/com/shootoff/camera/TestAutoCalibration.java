@@ -20,7 +20,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
-import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -377,7 +376,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibrate-projection-paper.png"));
 		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
 
-		acm.processFrame(Camera.bufferedImageToMat(testFrame), 2000);
+		acm.processFrame(new Frame(testFrame, 2000));
 
 		Optional<Bounds> calibrationBounds = Optional.of(acm.getBoundsResult());
 

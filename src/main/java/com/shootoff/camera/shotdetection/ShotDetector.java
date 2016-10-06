@@ -62,6 +62,8 @@ public abstract class ShotDetector {
 	 * @param y
 	 *            the exact y coordinate of the shot in the video frame it was
 	 *            detected in
+	 * @param timestamp
+	 *            the timestamp of the shot not adjusted for the shot timer
 	 * @param scaleShot
 	 *            <code>true</code> if the shot needs to be scaled if the
 	 *            display resolution differs from the webcam's resolution. This
@@ -69,7 +71,7 @@ public abstract class ShotDetector {
 	 * @return <code>true</code> if the shot wasn't rejected during
 	 *         preprocessing
 	 */
-	public boolean addShot(Color color, double x, double y, boolean scaleShot) {
+	public boolean addShot(Color color, double x, double y, long timestamp, boolean scaleShot) {
 		if (!checkIgnoreColor(color))
 			return false;
 
@@ -81,16 +83,16 @@ public abstract class ShotDetector {
 			
 			if (this.handlesBounds())
 			{
-				shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), getShotTimestamp(), cameraManager.getFrameCount(),
+				shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(),
 					config.getMarkerRadius());
 			} else {
 				if (cameraManager.isLimitingDetectionToProjection() && !b.contains(x,y))
 						return false;
-				shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(), config.getMarkerRadius());
+				shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(), config.getMarkerRadius());
 			}
 			
 		} else {
-			shot = new Shot(color, x, y, getShotTimestamp(), cameraManager.getFrameCount(), config.getMarkerRadius());
+			shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(), config.getMarkerRadius());
 		}
 
 		// If the shot didn't come from click to shoot (cameFromCanvas) and the
@@ -138,11 +140,6 @@ public abstract class ShotDetector {
 		return true;
 	}
 
-	private long getShotTimestamp() {
-		return cameraManager.getCurrentFrameTimestamp();
-	}
-	
-	
 	/**
 	 * 
 	 * @return True if this shot detector only returns shots in bounds

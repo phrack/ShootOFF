@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraCalibrationListener;
+import com.shootoff.camera.Frame;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 
@@ -80,8 +81,6 @@ public class AutoCalibrationManager {
 	// 11/168 = 0.06547619047619047619047619047619
 	// Maybe I should have made it divisible...
 	private static final double BORDER_FACTOR = 0.065476;
-	
-	protected long lastFrameTimestamp = 0;
 
 	private final TermCriteria term = new TermCriteria(TermCriteria.EPS | TermCriteria.MAX_ITER, 60, 0.0001);
 
@@ -130,7 +129,6 @@ public class AutoCalibrationManager {
 		boundsRect = null;
 		boundingBox = null;
 		perspMat = null;
-		lastFrameTimestamp = 0;
 		for (AutoCalStep step : steps)
 			if (step.enabled())
 				step.reset();
@@ -162,12 +160,11 @@ public class AutoCalibrationManager {
 		return true;
 	}
 
-	public void processFrame(final Mat mat, final long frameTimestamp) {
-		lastFrameTimestamp = frameTimestamp;
-		Mat grayMat = preProcessFrame(mat);
+	public void processFrame(final Frame frame) {
+		Mat grayMat = preProcessFrame(frame.getOriginalMat());
 		for (AutoCalStep step : steps) {
 			if (step.enabled() && !step.completed()) {
-				step.process(grayMat);
+				step.process(new Frame(grayMat, frame.getTimestamp()));
 				break;
 			}
 		}
@@ -194,7 +191,7 @@ public class AutoCalibrationManager {
 
 		boolean completed();
 
-		void process(Mat mat);
+		void process(Frame frame);
 	}
 
 	class StepFindBounds implements AutoCalStep {
@@ -215,20 +212,20 @@ public class AutoCalibrationManager {
 			return !(boundsResult == null);
 		}
 
-		public void process(Mat mat) {
-			if (lastFrameTimestamp - lastFrameCheck < minimumInterval)
+		public void process(Frame frame) {
+			if (frame.getTimestamp() - lastFrameCheck < minimumInterval)
 				return;
 			
-			lastFrameCheck = lastFrameTimestamp;
+			lastFrameCheck = frame.getTimestamp();
 			
-			Imgproc.equalizeHist(mat, mat);
+			Imgproc.equalizeHist(frame.getOriginalMat(), frame.getOriginalMat());
 			
-			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
+			List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
 			
 			if (listPatterns.isEmpty())
 				return;
 
-			Optional<Dimension2D> paperRes = findPaperPattern(mat, listPatterns);
+			Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
 			if (paperRes.isPresent())
 				((StepFindPaperPattern) stepFindPaperPattern).addPaperDimensions(paperRes.get(), true);
 
@@ -238,7 +235,7 @@ public class AutoCalibrationManager {
 			// Technically there could still be more than one pattern
 			// or even a pattern that is much too small
 			// But damn if we're gonna fix every problem the user gives us
-			Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), mat);
+			Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), frame.getOriginalMat());
 
 			if (bounds.isPresent()) {
 				boundsResult = bounds.get();
@@ -283,15 +280,15 @@ public class AutoCalibrationManager {
 			return !(frameTimestampBeforeFrameChange == -1 || completed());
 		}
 
-		public void process(Mat mat) {
+		public void process(Frame frame) {
 			if (!inStepTwo()) {
 				logger.debug("Step two: Checking frame delay");
 
-				checkForFrameChange(mat);
-				frameTimestampBeforeFrameChange = camera.getCurrentFrameTimestamp();
+				checkForFrameChange(frame);
+				frameTimestampBeforeFrameChange = frame.getTimestamp();
 				calibrationListener.setArenaBackground(null);
 			} else {
-				final Optional<Long> frameDelay = checkForFrameChange(mat);
+				final Optional<Long> frameDelay = checkForFrameChange(frame);
 
 				if (frameDelay.isPresent()) {
 					frameDelayResult = frameDelay.get();
@@ -304,10 +301,10 @@ public class AutoCalibrationManager {
 			}
 		}
 
-		private Optional<Long> checkForFrameChange(Mat mat) {
-			mat = undistortFrame(mat);
+		private Optional<Long> checkForFrameChange(Frame frame) {
+			frame = undistortFrame(frame);
 
-			final double[] pixel = getFrameDelayPixel(mat);
+			final double[] pixel = getFrameDelayPixel(frame.getOriginalMat());
 
 			// Initialize
 			if (patternLuminosity[0] == -1) {
@@ -321,7 +318,7 @@ public class AutoCalibrationManager {
 
 			Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
 
-			final long change = camera.getCurrentFrameTimestamp() - frameTimestampBeforeFrameChange;
+			final long change = frame.getTimestamp() - frameTimestampBeforeFrameChange;
 
 			if (tempMat.get(0, 1)[2] < .9 * tempMat.get(0, 0)[2]) {
 				return Optional.of(change);
@@ -365,19 +362,19 @@ public class AutoCalibrationManager {
 		}
 
 		@Override
-		public void process(Mat mat) {
+		public void process(Frame frame) {
 			stepThreeAttempts++;
 
 			calibrationListener.setArenaBackground(null);
 
-			mat = undistortFrame(mat);
+			frame = undistortFrame(frame);
 
-			List<MatOfPoint2f> listPatterns = findPatterns(mat, true);
+			List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
 
 			if (listPatterns.isEmpty())
 				return;
 
-			Optional<Dimension2D> paperRes = findPaperPattern(mat, listPatterns);
+			Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
 
 			if (paperRes.isPresent()) {
 				addPaperDimensions(paperRes.get(), false);
@@ -434,7 +431,7 @@ public class AutoCalibrationManager {
 		}
 
 		@Override
-		public void process(Mat mat) {
+		public void process(Frame frame) {
 			if (!patternSet)
 			{
 				calibrationListener.setArenaBackground("white.png");
@@ -446,7 +443,7 @@ public class AutoCalibrationManager {
 			if (completed || (System.currentTimeMillis() - lastSample) < SAMPLE_DELAY)
 				return;
 			
-			Scalar mean = Core.mean(mat);
+			Scalar mean = Core.mean(frame.getOriginalMat());
 			if (origMean == 0)
 				origMean = mean.val[0];
 			
@@ -465,7 +462,7 @@ public class AutoCalibrationManager {
 				String filename = String.format("exposure-%d.png", lastSample);
 				File file = new File(filename);
 				filename = file.toString();
-				Highgui.imwrite(filename, mat);
+				Highgui.imwrite(filename, frame.getOriginalMat());
 			}
 
 			tries++;
@@ -869,19 +866,28 @@ public class AutoCalibrationManager {
 			logger.trace("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);
 	}
 
-	public BufferedImage undistortFrame(BufferedImage frame) {
+	public Frame undistortFrame(Frame frame) {
 		if (isCalibrated) {
-			final Mat mat = Camera.bufferedImageToMat(frame);
-
-			frame = Camera.matToBufferedImage(warpPerspective(mat));
+			frame.setMat(warpPerspective(frame.getOriginalMat()));
 		} else {
 			logger.warn("undistortFrame called when isCalibrated is false");
 		}
 
 		return frame;
 	}
+	
+	// Used in tests
+	public BufferedImage undistortFrame(BufferedImage bimg) {
+		if (!isCalibrated) {
+			logger.warn("undistortFrame called when isCalibrated is false");
+			return bimg;
+		}
 
-	// MUST BE IN BGR pixel format.
+		return Camera.matToBufferedImage(warpPerspective(Camera.bufferedImageToMat(bimg)));
+	}
+
+
+	// MUST BE IN BGR pixel format
 	public Mat undistortFrame(Mat mat) {
 		if (!isCalibrated) {
 			logger.warn("undistortFrame called when isCalibrated is false");

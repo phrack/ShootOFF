@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +40,7 @@ import com.github.sarxos.webcam.ds.ipcam.IpCamMode;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 
@@ -113,9 +113,8 @@ public class IpCamera extends CalculatedFPSCamera {
 		return IpCamDeviceRegistry.unregister(cameraName);
 	}
 
-	public Mat getMatFrame() {
-
-		return Camera.bufferedImageToMat(getBufferedImage());
+	public Frame getFrame() {
+		return new Frame(getBufferedImage(), currentFrameTimestamp);
 	}
 
 	public BufferedImage getBufferedImage() {
@@ -196,7 +195,7 @@ public class IpCamera extends CalculatedFPSCamera {
 		while (isOpen() && !closing.get()) {
 			if (!isImageNew()) continue;
 
-			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getMatFrame());
+			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getFrame());
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();

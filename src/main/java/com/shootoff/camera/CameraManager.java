@@ -220,6 +220,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		if (shotDetector instanceof ShotYieldingShotDetector)
 			((ShotYieldingShotDetector) shotDetector).startDetecting();
+		
+		setDetecting(true);
 
 	}
 
@@ -255,7 +257,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	// Used by click-to-shoot and tests to inject a shot via the shot detector
 	public void injectShot(Color color, double x, double y, boolean scaleShot) {
-		shotDetector.addShot(color, x, y, scaleShot);
+		shotDetector.addShot(color, x, y, getCurrentFrameTimestamp(), scaleShot);
 	}
 
 	public void clearShots() {
@@ -334,7 +336,9 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		if (logger.isTraceEnabled())
 			logger.trace("setDetecting was {} now {} for {}", this.isDetecting, isDetecting, getName());
 
-		if (isDetecting == true)
+		if (isDetecting && projectionBounds.isPresent())
+			setCameraState(CameraState.DETECTING_CALIBRATED);
+		else if (isDetecting)
 			setCameraState(CameraState.DETECTING);
 		else
 			setCameraState(CameraState.NORMAL);
@@ -499,18 +503,18 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	@Override
-	public void newFrame(Mat frame) {
+	public void newFrame(Frame frame) {
 		newFrame(frame, true);
 	}
 	
 	@Override
-	public void newFrame(Mat frame, boolean shouldDedistort) {
+	public void newFrame(Frame frame, boolean shouldDedistort) {
 		if (!handleFrame(frame, shouldDedistort)) logger.warn("Invalid frame yielded from {}", camera.getName());
 	}
 
 	private int consecutiveCameraErrors = 0;
 
-	private boolean handleFrame(Mat currentFrame, boolean shouldDedistort) {
+	private boolean handleFrame(Frame currentFrame, boolean shouldDedistort) {
 		boolean cameraError = false;
 
 		if (currentFrame == null && !camera.isOpen()) {
@@ -589,20 +593,19 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			videoWriterStream.encodeVideo(0, frame);
 		}
 
-		final BufferedImage frame = currentImage;
 		if (cropFeedToProjection && projectionBounds.isPresent()) {
-			cameraView.updateBackground(frame, projectionBounds);
+			cameraView.updateBackground(currentImage, projectionBounds);
 		} else {
-			cameraView.updateBackground(frame, Optional.empty());
+			cameraView.updateBackground(currentImage, Optional.empty());
 		}
 
 		return true;
 	}
 
-	protected BufferedImage processFrame(Mat currentFrame, boolean shouldDedistort) {
+	protected BufferedImage processFrame(Frame currentFrame, boolean shouldDedistort) {
 		if (isAutoCalibrating.get()) {
-			acm.processFrame(currentFrame, camera.getCurrentFrameTimestamp());
-			return Camera.matToBufferedImage(currentFrame);
+			acm.processFrame(currentFrame);
+			return currentFrame.getOriginalBufferedImage();
 		}
 
 		Mat submatFrameBGR = null;
@@ -623,7 +626,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
+			submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 					(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			if (recordingCalibratedArea) {
@@ -647,19 +650,19 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
 			if (submatFrameBGR == null)
-				submatFrameBGR = currentFrame.submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
+				submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
 						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			if (shotDetector instanceof FrameProcessingShotDetector)
-				((FrameProcessingShotDetector) shotDetector).processFrame(submatFrameBGR, isDetecting.get());
+				((FrameProcessingShotDetector) shotDetector).processFrame(new Frame(submatFrameBGR, currentFrame.getTimestamp()), isDetecting.get());
 		} else {
 			if (shotDetector instanceof FrameProcessingShotDetector)
 				((FrameProcessingShotDetector) shotDetector).processFrame(currentFrame, isDetecting.get());
 		}
 
-		// matFrameBGR is showing the colored pixels for brightness and motion,
+		// currentFrame is showing the colored pixels for brightness and motion,
 		// hence why we need to return the converted version
-		return Camera.matToBufferedImage(currentFrame);
+		return currentFrame.getOriginalBufferedImage();
 	}
 
 	private void checkIfMinimumFPS(double cameraFPS) {
@@ -774,6 +777,12 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		return System.currentTimeMillis() - startTime;
 	}
+	
+	public long cameraTimeToShotTime(long timestamp) {
+		if (startTime == 0) resetStartTime();
+
+		return timestamp - startTime;
+	}
 
 	@Override
 	public void newFPS(double cameraFPS) {
@@ -799,5 +808,11 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			return new Point(x,y);
 		return acm.undistortCoords(x,y);
 	}
+
+	public boolean isCalibrated() {
+		return projectionBounds.isPresent();
+	}
+
+
 
 }

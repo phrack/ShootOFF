@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
 
-import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +103,7 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 		lastVideoTimestamp = event.getTimeStamp();
 
 		if (cameraEventListener.isPresent())
-			cameraEventListener.get().newFrame(Camera.bufferedImageToMat(currentFrame));
+			cameraEventListener.get().newFrame(new Frame(Camera.bufferedImageToMat(currentFrame), currentFrameTimestamp));
 		
 		frameCount++;
 	}
@@ -124,7 +123,7 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	}
 
 	@Override
-	public Mat getMatFrame() {
+	public Frame getFrame() {
 		return null;
 	}
 
@@ -146,11 +145,6 @@ public class MockCamera extends MediaListenerAdapter implements Camera {
 	@Override
 	public void setCameraEventListener(CameraEventListener cameraEventListener) {
 		this.cameraEventListener = Optional.of(cameraEventListener);
-	}
-
-	@Override
-	public long getCurrentFrameTimestamp() {
-		return currentFrameTimestamp;
 	}
 
 	@Override
