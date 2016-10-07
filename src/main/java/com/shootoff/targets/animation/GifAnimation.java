@@ -68,7 +68,7 @@ public class GifAnimation extends SpriteAnimation {
 		int width = -1;
 		int height = -1;
 
-		final ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName("gif").next();
+		final ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
 		reader.setInput(ImageIO.createImageInputStream(stream));
 		final IIOMetadata metadata = reader.getStreamMetadata();
 		if (metadata != null) {

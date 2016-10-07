@@ -73,7 +73,7 @@ public class DeduplicationProcessor implements ShotProcessor {
 			// The Size area for a dupe decreases from 1 * distanceThreshold to
 			// .5 distanceThreshold
 			// over the time period
-			final double dynamicDistancePercentage = (int) ((1 - ((.5 * timeDiff) / (double) timestampThreshold))
+			final double dynamicDistancePercentage = (int) ((1 - ((.5 * timeDiff) / timestampThreshold))
 					* distanceThreshold);
 
 			if (logger.isTraceEnabled()) {

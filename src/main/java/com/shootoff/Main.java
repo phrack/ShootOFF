@@ -342,14 +342,14 @@ public class Main extends Application {
 					Enumeration<JarEntry> enumEntries = jar.entries();
 					int fileCount = 0;
 					while (enumEntries.hasMoreElements()) {
-						final JarEntry entry = (JarEntry) enumEntries.nextElement();
+						final JarEntry entry = enumEntries.nextElement();
 						if (!entry.getName().startsWith("META-INF") && !entry.isDirectory()) fileCount++;
 					}
 
 					enumEntries = jar.entries();
 					int currentCount = 0;
 					while (enumEntries.hasMoreElements()) {
-						final JarEntry entry = (JarEntry) enumEntries.nextElement();
+						final JarEntry entry = enumEntries.nextElement();
 
 						if (entry.getName().startsWith("META-INF")) continue;
 

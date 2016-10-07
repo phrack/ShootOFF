@@ -329,8 +329,8 @@ public class AutoCalibrationManager {
 		}
 
 		private double[] getFrameDelayPixel(Mat mat) {
-			final double squareHeight = getBoundsResult().getHeight() / (double) (PATTERN_HEIGHT + 1);
-			final double squareWidth = getBoundsResult().getWidth() / (double) (PATTERN_WIDTH + 1);
+			final double squareHeight = getBoundsResult().getHeight() / (PATTERN_HEIGHT + 1);
+			final double squareWidth = getBoundsResult().getWidth() / (PATTERN_WIDTH + 1);
 
 			final int secondSquareCenterX = (int) (getBoundsResult().getMinX() + (squareWidth * 1.5));
 			final int secondSquareCenterY = (int) (getBoundsResult().getMinY() + (squareHeight * .5));
@@ -588,8 +588,8 @@ public class AutoCalibrationManager {
 
 			// findColors(undistorted, warpedBoardCorners);
 
-			final double squareHeight = boundingBox.getHeight() / (double) (PATTERN_HEIGHT + 1);
-			final double squareWidth = boundingBox.getWidth() / (double) (PATTERN_WIDTH + 1);
+			final double squareHeight = boundingBox.getHeight() / (PATTERN_HEIGHT + 1);
+			final double squareWidth = boundingBox.getWidth() / (PATTERN_WIDTH + 1);
 
 			final int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
 			final int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
@@ -736,9 +736,9 @@ public class AutoCalibrationManager {
 				rect_width = height;
 			}
 
-			width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
+			width = (width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
 					* PAPER_MARGIN_WIDTH);
-			height = ((double) height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1))
+			height = (height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1))
 					* PAPER_MARGIN_HEIGHT);
 
 			final double PAPER_PATTERN_SIZE_THRESHOLD = .25;

@@ -327,7 +327,7 @@ public class CanvasManager implements CameraView {
 			background.setX(0);
 			background.setY(0);
 
-			img = SwingFXUtils.toFXImage(resize(frame, (int) config.getDisplayWidth(), (int) config.getDisplayHeight()),
+			img = SwingFXUtils.toFXImage(resize(frame, config.getDisplayWidth(), config.getDisplayHeight()),
 					null);
 		}
 

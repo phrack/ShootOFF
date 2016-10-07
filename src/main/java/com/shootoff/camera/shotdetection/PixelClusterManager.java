@@ -189,7 +189,7 @@ public class PixelClusterManager {
 
 			final double r = (double) (shotWidth + shotHeight) / 4.0f;
 			final double circleArea = Math.PI * r * r;
-			final double density = (double) (clustersize) / circleArea;
+			final double density = (clustersize) / circleArea;
 
 			if (logger.isTraceEnabled())
 				logger.trace("Cluster {}: density {} {} - {} {} - {}", i, shotWidth, shotHeight, circleArea,

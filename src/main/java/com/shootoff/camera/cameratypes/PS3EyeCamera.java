@@ -480,7 +480,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	@Override
 	public boolean decreaseExposure() {
 		final int curExp = getExposure();
-		final int newExp = (int) (curExp - (.1 * (double) curExp));
+		final int newExp = (int) (curExp - (.1 * curExp));
 		logger.trace("curExp[ {} newExp {}", curExp, newExp);
 
 		if (newExp < 17)

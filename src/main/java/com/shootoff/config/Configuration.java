@@ -764,12 +764,12 @@ public class Configuration {
 
 			// Ensure webcam-capture logger stays at info because it is quite
 			// noisy and doesn't output information we care about.
-			final Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
+			final Logger webcamCaptureLogger = loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
 
 			// Drop WebcamDiscoveryService even lower because it is extremely
 			// noisy
-			final Logger webcamDiscoveryLogger = (Logger) loggerContext
+			final Logger webcamDiscoveryLogger = loggerContext
 					.getLogger("com.github.sarxos.webcam.WebcamDiscoveryService");
 			webcamDiscoveryLogger.setLevel(Level.WARN);
 		} else {

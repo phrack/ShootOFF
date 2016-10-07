@@ -43,14 +43,14 @@ public class TagEditorPane extends Pane {
 		nameCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("name"));
 		nameCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		nameCol.setOnEditCommit((t) -> {
-			((Tag) t.getTableView().getItems().get(t.getTablePosition().getRow())).setName(t.getNewValue());
+			t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue());
 		});
 
 		final TableColumn<Tag, String> valueCol = new TableColumn<Tag, String>("Value");
 		valueCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		valueCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("value"));
 		valueCol.setOnEditCommit((t) -> {
-			((Tag) t.getTableView().getItems().get(t.getTablePosition().getRow())).setValue(t.getNewValue());
+			t.getTableView().getItems().get(t.getTablePosition().getRow()).setValue(t.getNewValue());
 		});
 
 		tagTable.getColumns().addAll(nameCol, valueCol);

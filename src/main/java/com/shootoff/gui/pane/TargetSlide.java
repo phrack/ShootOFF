@@ -156,7 +156,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 	@Override
 	public void onItemClicked(File ref) {
 		if (Mode.ADD.equals(mode)) {
-			cameraViews.getSelectedCameraView().addTarget((File)ref);
+			cameraViews.getSelectedCameraView().addTarget(ref);
 			hide();
 		} else {
 			final Optional<FXMLLoader> loader = createTargetEditorStage();
@@ -165,7 +165,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 				final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
 				final Image currentFrame = currentCamera.getCurrentFrame();
 				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
-				editorController.init(currentFrame, this, (File)ref);
+				editorController.init(currentFrame, this, ref);
 				
 				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
 				targetEditorSlide.showControls();

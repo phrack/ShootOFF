@@ -110,7 +110,7 @@ public class TrainingExerciseBase {
 
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
-		this.cameraViews = (CameraViews) controller;
+		this.cameraViews = controller;
 		this.trainingExerciseContainer = controller.getTrainingExerciseContainer();
 		
 		if (cameraViews.getArenaView().isPresent()) {

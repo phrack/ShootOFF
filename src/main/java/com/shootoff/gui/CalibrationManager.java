@@ -76,7 +76,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
 		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
-		calibrationListeners.add((CalibrationListener) arenaPane);
+		calibrationListeners.add(arenaPane);
 		this.arenaPane = arenaPane;
 		this.cameraViews = cameraViews;
 		this.config = exerciseListener.getConfiguration();

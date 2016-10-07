@@ -271,8 +271,8 @@ public class PerspectiveManager {
 
 		// Calculate the size of the whole camera feed using the size of the
 		// letter
-		final double cameraFeedWidthMM = ((double) cameraWidth / letterDims.getWidth()) * US_LETTER_WIDTH_MM;
-		final double cameraFeedHeightMM = ((double) cameraHeight / letterDims.getHeight()) * US_LETTER_HEIGHT_MM;
+		final double cameraFeedWidthMM = (cameraWidth / letterDims.getWidth()) * US_LETTER_WIDTH_MM;
+		final double cameraFeedHeightMM = (cameraHeight / letterDims.getHeight()) * US_LETTER_HEIGHT_MM;
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("{} = ({} / {}) * {}", cameraFeedWidthMM, cameraWidth, letterDims.getWidth(),
@@ -414,9 +414,9 @@ public class PerspectiveManager {
 
 		if (projectionWidth == -1) {
 			projectionWidth = (int) (((double) cameraDistance * (double) patternWidth * sensorWidth)
-					/ (focalLength * (double) cameraWidth));
+					/ (focalLength * cameraWidth));
 			projectionHeight = (int) (((double) cameraDistance * (double) patternHeight * sensorHeight)
-					/ (focalLength * (double) cameraHeight));
+					/ (focalLength * cameraHeight));
 
 			if (logger.isTraceEnabled())
 				logger.trace("({} *  {} * {}) / ({} * {})", cameraDistance, patternWidth, sensorWidth, focalLength,
@@ -429,9 +429,9 @@ public class PerspectiveManager {
 			if (focalLength == -1)
 				focalLength = 4;
 
-			sensorWidth = ((projectionWidth * focalLength * (double) cameraWidth)
+			sensorWidth = ((projectionWidth * focalLength * cameraWidth)
 					/ ((double) cameraDistance * (double) patternWidth));
-			sensorHeight = ((projectionHeight * focalLength * (double) cameraHeight)
+			sensorHeight = ((projectionHeight * focalLength * cameraHeight)
 					/ ((double) cameraDistance * (double) patternHeight));
 
 			if (logger.isTraceEnabled()) {
@@ -442,10 +442,10 @@ public class PerspectiveManager {
 					focalLength, sensorWidth, sensorHeight, cameraWidth, cameraHeight);
 
 		} else if (cameraDistance == -1) {
-			final int cameraDistanceH = (int) (((double) projectionHeight * focalLength * (double) cameraHeight)
-					/ ((double) patternHeight * sensorHeight));
-			final int cameraDistanceW = (int) (((double) projectionWidth * focalLength * (double) cameraWidth)
-					/ ((double) patternWidth * sensorWidth));
+			final int cameraDistanceH = (int) ((projectionHeight * focalLength * cameraHeight)
+					/ (patternHeight * sensorHeight));
+			final int cameraDistanceW = (int) ((projectionWidth * focalLength * cameraWidth)
+					/ (patternWidth * sensorWidth));
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("{} = ({} * {} * {}) / ({} *  {})", cameraDistanceH, projectionHeight, focalLength,

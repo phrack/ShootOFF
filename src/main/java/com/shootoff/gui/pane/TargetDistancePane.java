@@ -197,7 +197,7 @@ public class TargetDistancePane extends Pane {
 			invalidDataAlert.setHeaderText("Target Distance Cannot Be Zero");
 			invalidDataAlert.setResizable(true);
 			invalidDataAlert.setContentText(message);
-			invalidDataAlert.initOwner((Stage) this.getScene().getWindow());
+			invalidDataAlert.initOwner(this.getScene().getWindow());
 			invalidDataAlert.showAndWait();
 			
 			isValid = false;
