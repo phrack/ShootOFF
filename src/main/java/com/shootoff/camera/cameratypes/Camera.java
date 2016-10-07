@@ -74,7 +74,7 @@ public interface Camera extends Runnable, Closeable {
 	void resetExposure();
 
 	static BufferedImage matToBufferedImage(Mat matBGR) {
-		BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
+		final BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
 		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 		matBGR.get(0, 0, targetPixels);
 
@@ -82,9 +82,9 @@ public interface Camera extends Runnable, Closeable {
 	}
 
 	static Mat bufferedImageToMat(BufferedImage frame) {
-		BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
-		Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
+		final BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+		final byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
+		final Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
 		mat.put(0, 0, pixels);
 
 		return mat;

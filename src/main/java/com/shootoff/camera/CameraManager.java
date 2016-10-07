@@ -317,7 +317,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	private void setCameraState(CameraState state) {
-		if (camera.setState(state)) for (CameraStateListener csl : cameraStateListeners)
+		if (camera.setState(state)) for (final CameraStateListener csl : cameraStateListeners)
 			csl.cameraStateChange(state);
 	}
 
@@ -413,7 +413,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		if (config.getSessionRecorder().isPresent()) {
 			sessionName = config.getSessionRecorder().get().getSessionName();
 
-			File sessionVideoFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions"
+			final File sessionVideoFolder = new File(System.getProperty("shootoff.home") + File.separator + "sessions"
 					+ File.separator + config.getSessionRecorder().get().getSessionName());
 
 			if (!sessionVideoFolder.exists() && !sessionVideoFolder.mkdirs()) {
@@ -423,7 +423,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		String cameraName = "UNNAMED";
 
-		Optional<String> userCameraName = config.getWebcamsUserName(camera);
+		final Optional<String> userCameraName = config.getWebcamsUserName(camera);
 
 		if (userCameraName.isPresent()) {
 			cameraName = userCameraName.get();
@@ -439,7 +439,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	public void stopRecordingShots() {
 		recordingShots = false;
-		for (ShotRecorder r : shotRecorders.values())
+		for (final ShotRecorder r : shotRecorders.values())
 			r.close();
 		shotRecorders.clear();
 		if (rollingRecorder != null) {
@@ -482,7 +482,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
-	private boolean recordCalibratedArea = false;
+	private final boolean recordCalibratedArea = false;
 	private IMediaWriter videoWriterCalibratedArea;
 	private long recordingCalibratedAreaStartTime;
 	private boolean isFirstCalibratedAreaFrame;
@@ -568,8 +568,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		if (recordingShots) {
 			rollingRecorder.recordFrame(currentImage);
 
-			List<Shot> removeKeys = new ArrayList<Shot>();
-			for (Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
+			final List<Shot> removeKeys = new ArrayList<Shot>();
+			for (final Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
 				if (r.getValue().isComplete()) {
 					r.getValue().close();
 					removeKeys.add(r.getKey());
@@ -578,15 +578,15 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 				}
 			}
 
-			for (Shot s : removeKeys)
+			for (final Shot s : removeKeys)
 				shotRecorders.remove(s);
 		}
 
 		if (recordingStream) {
-			BufferedImage image = ConverterFactory.convertToType(currentImage, BufferedImage.TYPE_3BYTE_BGR);
-			IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+			final BufferedImage image = ConverterFactory.convertToType(currentImage, BufferedImage.TYPE_3BYTE_BGR);
+			final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-			IVideoPicture frame = converter.toPicture(image, (System.currentTimeMillis() - recordingStartTime) * 1000);
+			final IVideoPicture frame = converter.toPicture(image, (System.currentTimeMillis() - recordingStartTime) * 1000);
 			frame.setKeyFrame(isFirstStreamFrame);
 			frame.setQuality(0);
 			isFirstStreamFrame = false;
@@ -631,11 +631,11 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 					(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
 
 			if (recordingCalibratedArea) {
-				BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
+				final BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
 						BufferedImage.TYPE_3BYTE_BGR);
-				IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+				final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-				IVideoPicture frame = converter.toPicture(image,
+				final IVideoPicture frame = converter.toPicture(image,
 						(System.currentTimeMillis() - recordingCalibratedAreaStartTime) * 1000);
 				frame.setKeyFrame(isFirstCalibratedAreaFrame);
 				frame.setQuality(0);

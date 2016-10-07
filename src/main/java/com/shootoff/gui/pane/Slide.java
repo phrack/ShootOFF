@@ -66,7 +66,7 @@ public abstract class Slide {
 			final int sizeDelta = MAX_CONTROL_BUTTONS - controlNodes.size();
 			
 			for (int i = 0; i < sizeDelta; i++) {
-				Pane placeHolderPane = new Pane();
+				final Pane placeHolderPane = new Pane();
 				placeHolderPane.setPrefSize(CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT);
 				controlNodes.add(placeHolderPane);
 			}

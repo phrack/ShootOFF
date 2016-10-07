@@ -78,7 +78,7 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 	@Override
 	protected int setupRound() {
 		countScore = true;
-		int delay = super.setupRound();
+		final int delay = super.setupRound();
 
 		return delay;
 	}
@@ -88,7 +88,7 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 		super.doRound();
 		try {
 			Thread.sleep((long) (parTime * 1000.));
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 		TrainingExerciseBase.playSound("sounds/chime.wav");
@@ -105,7 +105,7 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 
 		if (!hit.isPresent() || !countScore) return;
 
-		TargetRegion r = hit.get().getHitRegion();
+		final TargetRegion r = hit.get().getHitRegion();
 		if (r.tagExists("points")) {
 			setPoints(shot.getColor(), r.getTag("points"));
 		}

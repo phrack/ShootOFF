@@ -139,7 +139,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		linkSliderToLabel(virtualMagazineSlider, virtualMagazineLabel);
 		linkSliderToLabel(malfunctionsSlider, malfunctionsLabel);
 
-		for (String webcamName : config.getWebcams().keySet()) {
+		for (final String webcamName : config.getWebcams().keySet()) {
 			final Camera c = config.getWebcams().get(webcamName);
 			
 			configuredNames.add(webcamName);
@@ -149,7 +149,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 			CheckableImageListCell.getCameraCheckBoxes().get(c).setSelected(true);
 		}
 		
-		for (Camera c : CameraFactory.getWebcams()) {
+		for (final Camera c : CameraFactory.getWebcams()) {
 			if (!configuredCameras.contains(c)) cameras.add(c.getName());
 		}
 		
@@ -195,7 +195,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 			configuredCameras.add(camera);
 			configuredNames.add(camera.getName());
 		} else if (!isSelected) {
-			int cameraIndex = configuredCameras.indexOf(camera);
+			final int cameraIndex = configuredCameras.indexOf(camera);
 			
 			if (cameraIndex > -1) {
 				configuredCameras.remove(cameraIndex);
@@ -208,7 +208,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 	
 	@Override
 	public void cameraRenamed(String oldName, String newName) {
-		int oldIndex = configuredNames.indexOf(oldName);
+		final int oldIndex = configuredNames.indexOf(oldName);
 		
 		if (oldIndex > -1) {
 			configuredNames.set(oldIndex, newName);
@@ -229,7 +229,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 	@Override
 	public void registerShotRecorder(String webcamName) {
-		for (Camera c : configuredCameras) {
+		for (final Camera c : configuredCameras) {
 			if (c.getName().equals(webcamName)) {
 				cameraConfigChanged = recordingCameras.add(c);
 				break;
@@ -239,7 +239,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 	@Override
 	public void unregisterShotRecorder(String webcamName) {
-		for (Camera c : configuredCameras) {
+		for (final Camera c : configuredCameras) {
 			if (c.getName().equals(webcamName)) {
 				cameraConfigChanged = recordingCameras.remove(c);
 				break;
@@ -261,18 +261,18 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 	@FXML
 	public void redLaserSoundButtonClicked(ActionEvent event) {
-		Optional<File> soundFile = selectSoundFile();
+		final Optional<File> soundFile = selectSoundFile();
 		if (soundFile.isPresent()) redLaserSoundTextField.setText(soundFile.get().getPath());
 	}
 
 	@FXML
 	public void greenLaserSoundButtonClicked(ActionEvent event) {
-		Optional<File> soundFile = selectSoundFile();
+		final Optional<File> soundFile = selectSoundFile();
 		if (soundFile.isPresent()) greenLaserSoundTextField.setText(soundFile.get().getPath());
 	}
 
 	private Optional<File> selectSoundFile() {
-		FileChooser fileChooser = new FileChooser();
+		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select Shot Sound");
 		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "sounds"));
 		fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Sound File", "*.mp3", "*.wav"));
@@ -344,7 +344,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 				password = Optional.of(passwordField.getText());
 			}
 
-			Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText(), username,
+			final Optional<Camera> cam = config.registerIpCam(nameTextField.getText(), urlTextField.getText(), username,
 					password);
 
 			if (cam.isPresent()) {
@@ -377,7 +377,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 		final List<String> removedCameraNames = new ArrayList<String>();
 
-		for (String webcamName : selectedNames) {
+		for (final String webcamName : selectedNames) {
 			if (config.getRegistedIpCams().containsKey(webcamName)) {
 				config.unregisterIpCam(webcamName);
 				removedCameraNames.add(webcamName);
@@ -397,7 +397,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 	}
 	
 	private boolean cameraListChanged() {
-		for (Camera c : configuredCameras) {
+		for (final Camera c : configuredCameras) {
 			// Tried to remove a camera that is in the new
 			// list but that wasn't in the list when the
 			// GUI was shown

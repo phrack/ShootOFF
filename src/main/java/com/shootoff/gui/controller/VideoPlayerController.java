@@ -100,8 +100,8 @@ public class VideoPlayerController implements PlaybackListener {
 	}
 
 	private void setTime(long timestamp /* ms */) {
-		Date date = new Date(timestamp);
-		DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
+		final Date date = new Date(timestamp);
+		final DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
 		timeLabel.setText(formatter.format(date));
 	}
 
@@ -146,13 +146,13 @@ public class VideoPlayerController implements PlaybackListener {
 
 		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
-			long currentTimestamp = event.getTimeStamp(TimeUnit.MILLISECONDS);
+			final long currentTimestamp = event.getTimeStamp(TimeUnit.MILLISECONDS);
 
 			if (doDelay) {
 				try {
-					long delay = currentTimestamp - lastTimestamp;
+					final long delay = currentTimestamp - lastTimestamp;
 					Thread.sleep(delay);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
 					logger.error("Error while reading video frames", e);
 				}
 			}
@@ -217,11 +217,11 @@ public class VideoPlayerController implements PlaybackListener {
 	}
 
 	private void createTabs(Map<String, File> videos) {
-		for (Entry<String, File> video : videos.entrySet()) {
-			Tab videoTab = new Tab(video.getKey());
+		for (final Entry<String, File> video : videos.entrySet()) {
+			final Tab videoTab = new Tab(video.getKey());
 			videoTabPane.getTabs().add(videoTab);
 
-			PlaybackContext context = new PlaybackContext(video.getValue(), this);
+			final PlaybackContext context = new PlaybackContext(video.getValue(), this);
 			videoTab.setContent(context.getImageView());
 			contexts.put(video.getKey(), context);
 		}

@@ -47,7 +47,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("ShootDontShootExercise"));
 
-	private AtomicBoolean continueExercise = new AtomicBoolean(true);
+	private final AtomicBoolean continueExercise = new AtomicBoolean(true);
 	private boolean testRun = false;
 	private ProjectorTrainingExerciseBase thisSuper;
 	private int missedTargets = 0;
@@ -99,7 +99,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		try {
 			testRun = true;
 			new NewRound().run();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -122,10 +122,10 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 			thisSuper.showTextOnFeed(String.format("missed targets: %d%nbad hits: %d", missedTargets, badHits));
 
 			if (!testRun && continueExercise.get()) {
-				for (Target target : shootTargets)
+				for (final Target target : shootTargets)
 					thisSuper.removeTarget(target);
 				shootTargets.clear();
-				for (Target target : dontShootTargets)
+				for (final Target target : dontShootTargets)
 					thisSuper.removeTarget(target);
 				dontShootTargets.clear();
 
@@ -159,22 +159,22 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	protected void addTargets(List<Target> targets, String target) {
-		int count = rng.nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1) + MIN_TARGETS_PER_ROUND;
+		final int count = rng.nextInt((MAX_TARGETS_PER_ROUND - MIN_TARGETS_PER_ROUND) + 1) + MIN_TARGETS_PER_ROUND;
 
 		for (int i = 0; i < count; i++) {
-			int x = rng.nextInt(((int) super.getArenaWidth() - 100) + 1) + 0;
-			int y = rng.nextInt(((int) super.getArenaHeight() - 100) + 1) + 0;
+			final int x = rng.nextInt(((int) super.getArenaWidth() - 100) + 1) + 0;
+			final int y = rng.nextInt(((int) super.getArenaHeight() - 100) + 1) + 0;
 
-			Optional<Target> newTarget = super.addTarget(new File(target), x, y);
+			final Optional<Target> newTarget = super.addTarget(new File(target), x, y);
 			if (newTarget.isPresent()) targets.add(newTarget.get());
 		}
 	}
 
 	protected void removeTarget(List<Target> targets, TargetRegion region) {
-		Iterator<Target> it = targets.iterator();
+		final Iterator<Target> it = targets.iterator();
 
 		while (it.hasNext()) {
-			Target target = it.next();
+			final Target target = it.next();
 
 			if (target.hasRegion(region)) {
 				super.removeTarget(target);
@@ -187,7 +187,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 	@Override
 	public void shotListener(Shot shot, Optional<Hit> hit) {
 		if (hit.isPresent()) {
-			TargetRegion r = hit.get().getHitRegion();
+			final TargetRegion r = hit.get().getHitRegion();
 
 			if (r.tagExists("subtarget")) {
 				switch (r.getTag("subtarget")) {
@@ -223,10 +223,10 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		missedTargets = 0;
 		badHits = 0;
 
-		for (Target target : shootTargets)
+		for (final Target target : shootTargets)
 			super.removeTarget(target);
 		shootTargets.clear();
-		for (Target target : dontShootTargets)
+		for (final Target target : dontShootTargets)
 			super.removeTarget(target);
 		dontShootTargets.clear();
 

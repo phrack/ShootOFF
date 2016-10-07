@@ -109,7 +109,7 @@ public class SessionViewerController {
 			public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
 				if (isPlaying) togglePlaybackButton.fire();
 
-				Optional<SessionRecorder> session = SessionIO.loadSession(new File(System.getProperty("shootoff.home")
+				final Optional<SessionRecorder> session = SessionIO.loadSession(new File(System.getProperty("shootoff.home")
 						+ File.separator + "sessions" + File.separator + newFile.getName()));
 
 				if (session.isPresent()) {
@@ -120,10 +120,10 @@ public class SessionViewerController {
 					currentSession = session.get();
 					updateCameraTabs();
 
-					Tab selectedTab = cameraTabPane.getSelectionModel().getSelectedItem();
+					final Tab selectedTab = cameraTabPane.getSelectionModel().getSelectedItem();
 
 					if (selectedTab != null) {
-						String cameraName = selectedTab.getText();
+						final String cameraName = selectedTab.getText();
 						listCameraEvents(cameraName);
 					} else {
 						eventEntries.clear();
@@ -143,7 +143,7 @@ public class SessionViewerController {
 
 				listCameraEvents(newTab.getText());
 
-				List<Event> cameraEvents = currentSession.getCameraEvents(newTab.getText());
+				final List<Event> cameraEvents = currentSession.getCameraEvents(newTab.getText());
 				refreshFromSlider = false;
 				timeSlider.setValue(0);
 				timeSlider.setMax(cameraEvents.get(cameraEvents.size() - 1).getTimestamp());
@@ -168,8 +168,8 @@ public class SessionViewerController {
 
 				if (!refreshFromSelection) return;
 
-				int oldIndex = eventEntries.indexOf(oldEvent);
-				int newIndex = eventEntries.indexOf(newEvent);
+				final int oldIndex = eventEntries.indexOf(oldEvent);
+				final int newIndex = eventEntries.indexOf(newEvent);
 
 				if (oldIndex <= newIndex) {
 					updateEvents(oldIndex, newIndex, EventsUpdate.DO);
@@ -182,23 +182,23 @@ public class SessionViewerController {
 		eventsListView.setOnMouseClicked((event) -> {
 			if (event.getClickCount() < 2) return;
 
-			Event selectedEvent = eventEntries.get(eventsListView.getSelectionModel().getSelectedIndex());
+			final Event selectedEvent = eventEntries.get(eventsListView.getSelectionModel().getSelectedIndex());
 			if (selectedEvent instanceof ShotEvent) {
-				ShotEvent se = (ShotEvent) selectedEvent;
+				final ShotEvent se = (ShotEvent) selectedEvent;
 
 				if (!se.getVideoString().isPresent()) return;
 
-				FXMLLoader loader = new FXMLLoader(
+				final FXMLLoader loader = new FXMLLoader(
 						getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
 				try {
 					loader.load();
-				} catch (IOException ioe) {
+				} catch (final IOException ioe) {
 					ioe.printStackTrace();
 				}
 
-				Stage videoPlayerStage = new Stage();
+				final Stage videoPlayerStage = new Stage();
 
-				VideoPlayerController controller = (VideoPlayerController) loader.getController();
+				final VideoPlayerController controller = (VideoPlayerController) loader.getController();
 				controller.init(se.getVideos());
 
 				videoPlayerStage.setTitle("Video Player");
@@ -230,10 +230,10 @@ public class SessionViewerController {
 
 				if (!refreshFromSlider) return;
 
-				List<Event> reversedEntries = new ArrayList<Event>(eventEntries);
+				final List<Event> reversedEntries = new ArrayList<Event>(eventEntries);
 				Collections.reverse(reversedEntries);
 
-				for (Event e : reversedEntries) {
+				for (final Event e : reversedEntries) {
 					if (e.getTimestamp() <= newValue.longValue()) {
 						eventsListView.getSelectionModel().select(e);
 						break;
@@ -244,8 +244,8 @@ public class SessionViewerController {
 	}
 
 	private void setTime(long timestamp /* ms */) {
-		Date date = new Date(timestamp);
-		DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
+		final Date date = new Date(timestamp);
+		final DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
 		timeLabel.setText(formatter.format(date));
 	}
 
@@ -258,10 +258,10 @@ public class SessionViewerController {
 			return sessions;
 		}
 
-		File[] sessionFiles = sessionsFolder.listFiles(new FileFilter("xml"));
+		final File[] sessionFiles = sessionsFolder.listFiles(new FileFilter("xml"));
 
 		if (sessionFiles != null) {
-			for (File file : sessionFiles) {
+			for (final File file : sessionFiles) {
 				sessions.add(new File(file.getName()));
 			}
 		} else {
@@ -277,15 +277,15 @@ public class SessionViewerController {
 		cameraGroups.clear();
 		eventSelectionsPerTab.clear();
 
-		for (String cameraName : currentSession.getEvents().keySet()) {
-			Group canvas = new Group();
-			ScrollPane scrollPane = new ScrollPane(canvas);
+		for (final String cameraName : currentSession.getEvents().keySet()) {
+			final Group canvas = new Group();
+			final ScrollPane scrollPane = new ScrollPane(canvas);
 			scrollPane.setPrefSize(cameraTabPane.getPrefWidth(), cameraTabPane.getPrefHeight());
 			scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
 			scrollPane.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 			cameraGroups.put(cameraName, new SessionCanvasManager(canvas, config));
 
-			Tab cameraTab = new Tab(cameraName);
+			final Tab cameraTab = new Tab(cameraName);
 			cameraTab.setContent(scrollPane);
 			cameraTabPane.getTabs().add(cameraTab);
 		}
@@ -310,10 +310,10 @@ public class SessionViewerController {
 			Collections.reverse(events);
 		}
 
-		SessionCanvasManager currentCanvasManager = cameraGroups
+		final SessionCanvasManager currentCanvasManager = cameraGroups
 				.get(cameraTabPane.getSelectionModel().getSelectedItem().getText());
 
-		for (Event e : events) {
+		for (final Event e : events) {
 			if (updateType == EventsUpdate.DO) {
 				currentCanvasManager.doEvent(e);
 			} else {
@@ -360,7 +360,7 @@ public class SessionViewerController {
 		@Override
 		public Void call() throws Exception {
 			if (isPlaying) {
-				double currentTime = timeSlider.getValue();
+				final double currentTime = timeSlider.getValue();
 
 				Platform.runLater(() -> {
 					if (currentTime + 100 > timeSlider.getMax()) togglePlaybackButton.fire();

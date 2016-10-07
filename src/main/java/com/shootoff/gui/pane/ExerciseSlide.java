@@ -91,10 +91,10 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		this.config = Configuration.getConfig();
 		
 		addSlideControlButton("Get Exercises", (event) -> {
-			Optional<FXMLLoader> loader = createPluginManagerStage();
+			final Optional<FXMLLoader> loader = createPluginManagerStage();
 
 			if (loader.isPresent()) {
-				PluginManagerController pluginManagerController = (PluginManagerController) loader.get().getController();
+				final PluginManagerController pluginManagerController = (PluginManagerController) loader.get().getController();
 				pluginManagerController.init(exerciseListener.getPluginEngine(), (Stage) parentControls.getScene().getWindow());
 				
 				final PluginManagerSlide pluginViewerSlide = new PluginManagerSlide(parentControls, parentBody, pluginManagerController);
@@ -118,10 +118,10 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		});
 		
 		addSlideControlButton("View Sessions", (event) -> {
-			Optional<FXMLLoader> loader = createSessionViewerStage();
+			final Optional<FXMLLoader> loader = createSessionViewerStage();
 
 			if (loader.isPresent()) {
-				SessionViewerController sessionViewerController = (SessionViewerController) loader.get().getController();
+				final SessionViewerController sessionViewerController = (SessionViewerController) loader.get().getController();
 				sessionViewerController.init(exerciseListener.getConfiguration());
 				
 				final SessionViewerSlide sessionViewerSlide = new SessionViewerSlide(parentControls, parentBody, sessionViewerController);
@@ -147,7 +147,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	}
 
 	private ToggleButton addNoneButton() {
-		ToggleButton noneButton = (ToggleButton) exerciseItemPane.addButton(noneExercise, "None");
+		final ToggleButton noneButton = (ToggleButton) exerciseItemPane.addButton(noneExercise, "None");
 		noneButton.setSelected(true);
 		exerciseItemPane.setDefault(noneExercise);
 		
@@ -159,7 +159,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 				getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
 		try {
 			loader.load();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Cannot load SessionViewer.fxml", e);
 			return Optional.empty();
 		}
@@ -169,11 +169,11 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	
 	
 	private Optional<FXMLLoader> createPluginManagerStage() {
-		FXMLLoader loader = new FXMLLoader(
+		final FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/PluginManager.fxml"));
 		try {
 			loader.load();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Cannot load SessionViewer.fxml", e);
 			return Optional.empty();
 		}
@@ -218,13 +218,13 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	private void startRecordingSession() {
 		config.setSessionRecorder(new SessionRecorder());
 
-		for (CameraManager cm : config.getRecordingManagers()) {
+		for (final CameraManager cm : config.getRecordingManagers()) {
 			cm.startRecordingShots();
 		}
 	}
 	
 	public void stopRecordingSession() {
-		for (CameraManager cm : config.getRecordingManagers()) {
+		for (final CameraManager cm : config.getRecordingManagers()) {
 			cm.stopRecordingShots();
 		}
 

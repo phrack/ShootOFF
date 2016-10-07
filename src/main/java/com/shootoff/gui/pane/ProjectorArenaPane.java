@@ -172,7 +172,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			final Iterator<Screen> it = Screen.getScreens().iterator();
 
 			while (it.hasNext()) {
-				Screen s = it.next();
+				final Screen s = it.next();
 
 				message.append(String.format("(w = %f, h = %f, x = %f, y = %f, dpi = %f)", s.getBounds().getWidth(),
 						s.getBounds().getHeight(), s.getBounds().getMinX(), s.getBounds().getMinY(), s.getDpi()));
@@ -223,7 +223,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			if (!screens.isEmpty()) {
 				
 				boolean matchedOriginal = false;
-				for (Screen screen : screens)
+				for (final Screen screen : screens)
 				{
 					if (originalArenaHomeScreen.equals(screen))
 					{
@@ -263,7 +263,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 			final Screen shootOFFScreen = homeScreen.get();
 
-			for (Screen screen : Screen.getScreens()) {
+			for (final Screen screen : Screen.getScreens()) {
 				if (!screen.equals(shootOFFScreen)) {
 					projector = Optional.of(screen);
 					break;
@@ -275,7 +275,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			Screen smallest = null;
 
 			// Find screen with the smallest area
-			for (Screen screen : Screen.getScreens()) {
+			for (final Screen screen : Screen.getScreens()) {
 				if (smallest == null) {
 					smallest = screen;
 				} else {
@@ -410,7 +410,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		canvasManager.clearTargets();
 
-		boolean scaleCourse = course.getResolution().isPresent()
+		final boolean scaleCourse = course.getResolution().isPresent()
 				&& (Math.abs(course.getResolution().get().getWidth() - getWidth()) > .0001
 						|| Math.abs(course.getResolution().get().getHeight() - getHeight()) > .0001);
 
@@ -422,7 +422,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			heightScaleFactor = getHeight() / course.getResolution().get().getHeight();
 		}
 
-		for (Target t : course.getTargets()) {
+		for (final Target t : course.getTargets()) {
 			if (scaleCourse) {
 				final double newWidth = t.getDimension().getWidth() * widthScaleFactor;
 				final double widthDelta = newWidth - t.getDimension().getWidth();
@@ -444,7 +444,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	public void canvasKeyPressed(KeyEvent event) {
-		boolean macFullscreen = event.getCode() == KeyCode.F && event.isControlDown() && event.isShortcutDown();
+		final boolean macFullscreen = event.getCode() == KeyCode.F && event.isControlDown() && event.isShortcutDown();
 		if (event.getCode() == KeyCode.F11 || macFullscreen) {
 			toggleFullScreen();
 
@@ -490,7 +490,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	public void setTargetsVisible(final boolean visible) {
-		for (Target t : canvasManager.getTargets())
+		for (final Target t : canvasManager.getTargets())
 			t.setVisible(visible);
 	}
 
@@ -550,7 +550,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 					// false shots being detected when the mouse moves
 					try {
 						Thread.sleep(500 /* ms */);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						logger.error("Exception thrown when re-enabling shot detection due to mouse leaving arena", e);
 					}
 
@@ -574,7 +574,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		// go through all current arena targets and try to resize them
 		// to their default real world heights
 		if (perspectiveManager.isPresent()) {
-			for (Target t : canvasManager.getTargets()) {
+			for (final Target t : canvasManager.getTargets()) {
 				resizeTargetToDefaultPerspective(t);
 			}
 			
@@ -684,17 +684,17 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)
 				&& target.tagExists(Target.TAG_DEFAULT_PERCEIVED_DISTANCE)) {
 
-			PerspectiveManager pm = perspectiveManager.get();
+			final PerspectiveManager pm = perspectiveManager.get();
 
 			if (pm.isInitialized()) {
-				int width = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
-				int height = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
-				int distance = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_DISTANCE));
+				final int width = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
+				final int height = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
+				final int distance = Integer.parseInt(target.getTag(Target.TAG_DEFAULT_PERCEIVED_DISTANCE));
 
-				Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, distance);
+				final Optional<Dimension2D> targetDimensions = pm.calculateObjectSize(width, height, distance);
 
 				if (targetDimensions.isPresent()) {
-					Dimension2D d = targetDimensions.get();
+					final Dimension2D d = targetDimensions.get();
 					target.setDimensions(d.getWidth(), d.getHeight());
 				}
 			}
@@ -706,7 +706,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		
 		final Alert recalibrationAlert = new Alert(AlertType.ERROR);
 
-		String message = "Data required to set a target's distance is missing and there is no way "
+		final String message = "Data required to set a target's distance is missing and there is no way "
 				+ "to determine the correct values unless you recalibrate the arena with the perspective "
 				+ "calibration pattern.\n\nPlease print out this file and tape it to your wall or "
 				+ "projector screen in view of the camera pointed at your projection:\n\n"

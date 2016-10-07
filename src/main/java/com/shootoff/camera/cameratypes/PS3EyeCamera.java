@@ -124,7 +124,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 				eyecamLib = (eyecam) Native.loadLibrary("eyeCam32", eyecam.class);
 				logger.trace("Successfully loaded eyeCam32.dll");
 			}
-		} catch (UnsatisfiedLinkError exception) {
+		} catch (final UnsatisfiedLinkError exception) {
 			logger.error("PS3EyeCamera eyecam ULE, Can't find the eyeCamXX.dll or "
 					+ "the Visual Studio Visual C++ runtime files are not installed: ", exception);
 			initialized = false;
@@ -412,7 +412,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	@Override
 	public Frame getFrame() {
 		final byte[] frame = getImageNative();
-		long currentFrameTimestamp = System.currentTimeMillis();
+		final long currentFrameTimestamp = System.currentTimeMillis();
 		final Mat mat = translateCameraArrayToMat(frame);
 		frameCount++;
 		return new Frame(mat, currentFrameTimestamp);
@@ -450,7 +450,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 			if (configIsOpen) {
 				Platform.runLater(() -> {
-					String theFPS = Double.toString(getFPS());
+					final String theFPS = Double.toString(getFPS());
 					if (theFPS.length() >= 6)
 						fpsValue.setText((Double.toString(getFPS()).substring(0, 5)));
 				});

@@ -48,7 +48,7 @@ public class ShotEntry {
 
 		this.rowColor = rowColor;
 
-		float timestampS = ((float) shot.getTimestamp()) / (float) 1000;
+		final float timestampS = ((float) shot.getTimestamp()) / (float) 1000;
 		timestamp = String.format("%.2f", timestampS);
 
 		String split;

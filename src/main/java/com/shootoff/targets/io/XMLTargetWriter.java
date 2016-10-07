@@ -32,14 +32,14 @@ public class XMLTargetWriter implements RegionVisitor {
 	private final Logger logger = LoggerFactory.getLogger(XMLTargetWriter.class);
 
 	private final File targetFile;
-	private StringBuilder xmlBody = new StringBuilder();
+	private final StringBuilder xmlBody = new StringBuilder();
 
 	public XMLTargetWriter(File targetFile) {
 		this.targetFile = targetFile;
 	}
 
 	private void addTags(Map<String, String> tags) {
-		for (Entry<String, String> entry : tags.entrySet()) {
+		for (final Entry<String, String> entry : tags.entrySet()) {
 			xmlBody.append(String.format(Locale.US, "\t\t<tag name=\"%s\" value=\"%s\" />%n", entry.getKey(),
 					entry.getValue()));
 		}
@@ -99,12 +99,12 @@ public class XMLTargetWriter implements RegionVisitor {
 	@Override
 	public void visitEnd(Map<String, String> targetTags) {
 		try {
-			PrintWriter out = new PrintWriter(targetFile, "UTF-8");
+			final PrintWriter out = new PrintWriter(targetFile, "UTF-8");
 
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			
-			StringBuilder targetAttributes = new StringBuilder();
-			for (Entry<String, String> entry : targetTags.entrySet()) {
+			final StringBuilder targetAttributes = new StringBuilder();
+			for (final Entry<String, String> entry : targetTags.entrySet()) {
 				if (targetAttributes.length() > 0) targetAttributes.append(" ");
 				
 				targetAttributes.append(entry.getKey());
@@ -124,7 +124,7 @@ public class XMLTargetWriter implements RegionVisitor {
 
 			out.close();
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error writing XML target", e);
 		}
 	}

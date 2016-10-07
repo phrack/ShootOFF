@@ -130,7 +130,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 		final File[] courseFolders = coursesDirectory.listFiles(FOLDER_FILTER);
 		
 		if (courseFolders != null) {
-			for (File courseFolder : courseFolders) {
+			for (final File courseFolder : courseFolders) {
 				coursePanes.getChildren().add(
 						new TitledPane(courseFolder.getName().replaceAll("_", "") + " Courses", buildCategoryPane(courseFolder)));
 			}
@@ -155,7 +155,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 		final File[] courseFiles = path.listFiles(COURSE_FILTER);
 		
 		if (courseFiles != null) {
-			for (File f : courseFiles) {
+			for (final File f : courseFiles) {
 				addCourseButton(itemPane, f);
 			}
 		} else {
@@ -201,7 +201,7 @@ public class ArenaCoursesSlide extends Slide implements ItemSelectionListener<Fi
 				courseGroup.getChildren().add(backgroundImageView);
 			}
 			
-			for (Target t : c.getTargets()) {
+			for (final Target t : c.getTargets()) {
 				courseGroup.getChildren().add(((TargetView) t).getTargetGroup());
 			}
 			

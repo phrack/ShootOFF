@@ -119,7 +119,7 @@ public final class CameraFactory {
 		final List<Camera> webcams = new ArrayList<>();
 
 		int cameraIndex = 0;
-		for (Webcam w : Webcam.getWebcams()) {
+		for (final Webcam w : Webcam.getWebcams()) {
 			final Camera c;
 			if (w.getDevice() instanceof IpCamDevice)
 				c = new IpCamera(w);

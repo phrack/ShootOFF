@@ -233,7 +233,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		final Set<Pixel> thresholdPixels = findThresholdPixelsAndUpdateFilter(frameHSV,
 				(detectShots && filtersInitialized));
 
-		int thresholdPixelsSize = thresholdPixels.size();
+		final int thresholdPixelsSize = thresholdPixels.size();
 
 		if (logger.isTraceEnabled() && checkIfInitialized()) {
 			if (thresholdPixelsSize >= 1)

@@ -168,7 +168,7 @@ public class Main extends Application {
 		try {
 			final String metadataXML = new String(Files.readAllBytes(metadataFile.toPath()), "UTF-8");
 			return deserializeMetadataXML(metadataXML);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error reading metadata XML for JNLP", e);
 		}
 
@@ -182,13 +182,13 @@ public class Main extends Application {
 		try {
 			connection = (HttpURLConnection) new URL(metadataAddress).openConnection();
 			stream = connection.getInputStream();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			if (logger.isErrorEnabled())
 				logger.error("Could not connect to remote host " + e.getMessage() + " to download writable resources.",
 						e);
 			tryRunningShootOFF();
 			return Optional.empty();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			if (connection != null) connection.disconnect();
 
 			logger.error("Error downloading writable resources file", e);
@@ -196,7 +196,7 @@ public class Main extends Application {
 			return Optional.empty();
 		}
 
-		StringBuilder metadataXML = new StringBuilder();
+		final StringBuilder metadataXML = new StringBuilder();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
 			String line;
@@ -204,7 +204,7 @@ public class Main extends Application {
 				if (metadataXML.length() > 0) metadataXML.append("\n");
 				metadataXML.append(line);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			connection.disconnect();
 
 			logger.error("Failed to read resources metadata", e);
@@ -237,11 +237,11 @@ public class Main extends Application {
 		try {
 			connection = (HttpURLConnection) new URL(fileAddress).openConnection();
 			stream = connection.getInputStream();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			logger.error("Could not connect to remote host " + e.getMessage() + " to download writable resources.", e);
 			tryRunningShootOFF();
 			return;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			if (connection != null) connection.disconnect();
 
 			logger.error("Failed to get stream to download writable resources file", e);
@@ -249,7 +249,7 @@ public class Main extends Application {
 			return;
 		}
 
-		long remoteFileLength = ri.getFileSize();
+		final long remoteFileLength = ri.getFileSize();
 
 		if (remoteFileLength == 0) {
 			logger.error("Remote writable resources file query returned 0 len.");
@@ -262,13 +262,13 @@ public class Main extends Application {
 		final Task<Boolean> task = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws InterruptedException {
-				BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
+				final BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
 
 				try (FileOutputStream fileOutputStream = new FileOutputStream(resourcesJARFile)) {
 
 					long totalDownloaded = 0;
 					int count;
-					byte buffer[] = new byte[1024];
+					final byte buffer[] = new byte[1024];
 
 					while ((count = bufferedInputStream.read(buffer, 0, buffer.length)) != -1) {
 						fileOutputStream.write(buffer, 0, count);
@@ -277,7 +277,7 @@ public class Main extends Application {
 					}
 
 					updateProgress(100, 100);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Failed to download writable resources file", e);
 					return false;
 				}
@@ -294,10 +294,10 @@ public class Main extends Application {
 			con.disconnect();
 			if (task.getValue()) {
 				try {
-					PrintWriter out = new PrintWriter(resourcesMetadataFile, "UTF-8");
+					final PrintWriter out = new PrintWriter(resourcesMetadataFile, "UTF-8");
 					out.print(ri.getXML());
 					out.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					if (logger.isErrorEnabled()) logger.error("Could't update metadata file: " + e.getMessage(), e);
 				}
 
@@ -316,7 +316,7 @@ public class Main extends Application {
 	 */
 	private void tryRunningShootOFF() {
 		if (!new File(System.getProperty("shootoff.home") + File.separator + "shootoff.properties").exists()) {
-			Alert resourcesAlert = new Alert(AlertType.ERROR);
+			final Alert resourcesAlert = new Alert(AlertType.ERROR);
 			resourcesAlert.setTitle("Missing Resources");
 			resourcesAlert.setHeaderText("Missing Required Resources!");
 			resourcesAlert.setResizable(true);
@@ -342,27 +342,27 @@ public class Main extends Application {
 					Enumeration<JarEntry> enumEntries = jar.entries();
 					int fileCount = 0;
 					while (enumEntries.hasMoreElements()) {
-						JarEntry entry = (JarEntry) enumEntries.nextElement();
+						final JarEntry entry = (JarEntry) enumEntries.nextElement();
 						if (!entry.getName().startsWith("META-INF") && !entry.isDirectory()) fileCount++;
 					}
 
 					enumEntries = jar.entries();
 					int currentCount = 0;
 					while (enumEntries.hasMoreElements()) {
-						JarEntry entry = (JarEntry) enumEntries.nextElement();
+						final JarEntry entry = (JarEntry) enumEntries.nextElement();
 
 						if (entry.getName().startsWith("META-INF")) continue;
 
-						File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
+						final File f = new File(System.getProperty("shootoff.home") + File.separator + entry.getName());
 						if (entry.isDirectory()) {
 							if (!f.exists() && !f.mkdir()) {
-								IOException e = new IOException(
+								final IOException e = new IOException(
 										"Failed to make directory while extracting JAR: " + entry.getName());
 								logger.error("Error making directory to extract writable JAR contents", e);
 								throw e;
 							}
 						} else {
-							InputStream is = jar.getInputStream(entry);
+							final InputStream is = jar.getInputStream(entry);
 							try (FileOutputStream fos = new FileOutputStream(f)) {
 								while (is.available() > 0) {
 									fos.write(is.read());
@@ -376,13 +376,13 @@ public class Main extends Application {
 					}
 
 					updateProgress(100, 100);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Error extracting writable resources file for JNLP", e);
 					return false;
 				} finally {
 					try {
 						if (jar != null) jar.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						logger.error("Error closing writable resources file for JNLP", e);
 					}
 				}
@@ -457,17 +457,17 @@ public class Main extends Application {
 		try {
 			connection = (HttpURLConnection) new URL(versionAddress).openConnection();
 			stream = connection.getInputStream();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			logger.error("Could not connect to remote host " + e.getMessage() + " to download version metadata.", e);
 			return Optional.empty();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			if (connection != null) connection.disconnect();
 
 			logger.error("Error downloading version metadata", e);
 			return Optional.empty();
 		}
 
-		StringBuilder versionXML = new StringBuilder();
+		final StringBuilder versionXML = new StringBuilder();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
 
@@ -476,7 +476,7 @@ public class Main extends Application {
 				if (versionXML.length() > 0) versionXML.append("\n");
 				versionXML.append(line);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			connection.disconnect();
 
 			logger.error("Failed to read version metadata", e);
@@ -517,7 +517,7 @@ public class Main extends Application {
 				final Hyperlink lnk = new Hyperlink(link);
 
 				lnk.setOnAction((event) -> {
-					HostServicesDelegate hostServices = HostServicesFactory.getInstance(this);
+					final HostServicesDelegate hostServices = HostServicesFactory.getInstance(this);
 					hostServices.showDocument(link);
 					lnk.setVisited(true);
 				});
@@ -583,7 +583,7 @@ public class Main extends Application {
 			final ShootOFFController controller = (ShootOFFController) loader.getController();
 			controller.init(config);
 			primaryStage.show();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error loading ShootOFF FXML file", e);
 			return;
 		}
@@ -695,7 +695,7 @@ public class Main extends Application {
 
 		if (System.getProperty("javawebstart.version", null) != null) {
 			isJWS = true;
-			File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
+			final File shootoffHome = new File(System.getProperty("user.home") + File.separator + ".shootoff");
 
 			if (!shootoffHome.exists() && !shootoffHome.mkdirs()) {
 				final Alert homeAlert = new Alert(AlertType.ERROR);
@@ -790,7 +790,7 @@ public class Main extends Application {
 		try (InputStream inputStream = Main.class.getResourceAsStream("/version.properties")) {
 			prop.load(inputStream);
 			version = Optional.of(prop.getProperty("version"));
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			logger.error("Couldn't read version properties", ioe);
 		}
 

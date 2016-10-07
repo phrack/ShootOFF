@@ -121,7 +121,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	}
 
 	public static void createImageCache(List<Camera> webcams, CameraSelectionListener listener) {
-		for (Camera c : webcams) {
+		for (final Camera c : webcams) {
 			if (containerCache.containsKey(c)) continue;
 
 			cacheCamera(c, listener);
@@ -139,7 +139,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		}
 
 		if (recordingCameras.isPresent()) {
-			for (Camera recordingCamera : recordingCameras.get()) {
+			for (final Camera recordingCamera : recordingCameras.get()) {
 				if (recordingCamera.getName().equals(item)) {
 					setStyle("-fx-background-color: green");
 					break;
@@ -162,7 +162,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		iv.setFitHeight(75);
 		
 		new Thread(() -> {
-			Optional<Image> img = fetchWebcamImage(c);
+			final Optional<Image> img = fetchWebcamImage(c);
 
 			if (img.isPresent()) {
 				iv.setImage(img.get());
@@ -199,13 +199,13 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			webcamContainer = fetchUnrenamedWebcamControls(webcamName);
 		} else {
 			try {
-				int cameraIndex = configuredNames.indexOf(webcamName);
+				final int cameraIndex = configuredNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
 					webcamContainer = Optional.of(containerCache.get(configuredCameras.get(cameraIndex)));
 				} else {
 					webcamContainer = fetchUnrenamedWebcamControls(webcamName);
 				}
-			} catch (NullPointerException e) {
+			} catch (final NullPointerException e) {
 				logger.error("Error fetching cached controls for configured camera: " + webcamName, e);
 				throw e;
 			}
@@ -215,7 +215,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	}
 	
 	private Optional<Pane> fetchUnrenamedWebcamControls(String webcamName) {
-		for (Camera webcam : webcams) {
+		for (final Camera webcam : webcams) {
 			if (webcam.getName().equals(webcamName)) {
 				return Optional.of(containerCache.get(webcam));
 			}
@@ -231,13 +231,13 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 			isChecked = fetchUnrenamedWebcamChecked(webcamName);
 		} else {
 			try {
-				int cameraIndex = configuredNames.indexOf(webcamName);
+				final int cameraIndex = configuredNames.indexOf(webcamName);
 				if (cameraIndex >= 0) {
 					isChecked = checkCache.get(configuredCameras.get(cameraIndex)).isSelected();
 				} else {
 					isChecked = fetchUnrenamedWebcamChecked(webcamName);
 				}
-			} catch (NullPointerException e) {
+			} catch (final NullPointerException e) {
 				logger.error("Error fetching cached check state for configured camera: " + webcamName, e);
 				throw e;
 			}
@@ -247,7 +247,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 	}
 	
 	private boolean fetchUnrenamedWebcamChecked(String webcamName) {
-		for (Camera webcam : webcams) {
+		for (final Camera webcam : webcams) {
 			if (webcam.getName().equals(webcamName)) {
 				return checkCache.get(webcam).isSelected();
 			}
@@ -268,7 +268,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 
 			Image webcamImg = null;
 			if (webcam.isOpen()) {
-				BufferedImage img = webcam.getBufferedImage();
+				final BufferedImage img = webcam.getBufferedImage();
 
 				if (img != null) {
 					webcamImg = SwingFXUtils.toFXImage(img, null);

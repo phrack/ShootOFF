@@ -121,10 +121,10 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	}
 
 	private boolean checkTargets(final List<Target> targets) {
-		boolean hasStopTarget = hasStopTarget();
+		final boolean hasStopTarget = hasStopTarget();
 
 		if (!hasStopTarget) {
-			List<File> errorMessages = new ArrayList<File>();
+			final List<File> errorMessages = new ArrayList<File>();
 			errorMessages.add(new File("sounds/voice/shootoff-lay-out-own-course.wav"));
 			errorMessages.add(new File("sounds/voice/shootoff-add-stop-target.wav"));
 

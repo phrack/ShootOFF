@@ -203,7 +203,7 @@ public class PerspectiveManager {
 	}
 
 	public static boolean isCameraSupported(final String cameraName, Dimension2D desiredResolution) {
-		for (CameraParameters cam : cameraParameters) {
+		for (final CameraParameters cam : cameraParameters) {
 			if (cameraName.contains(cam.getName())
 					&& Math.abs(cam.getValidDimensions().getWidth() - desiredResolution.getWidth()) < .001
 					&& Math.abs(cam.getValidDimensions().getHeight() - desiredResolution.getHeight()) < .001) {
@@ -215,7 +215,7 @@ public class PerspectiveManager {
 	}
 
 	private boolean setCameraParameters(final String cameraName, Dimension2D desiredResolution) {
-		for (CameraParameters cam : cameraParameters) {
+		for (final CameraParameters cam : cameraParameters) {
 			if (cameraName.contains(cam.getName())
 					&& Math.abs(cam.getValidDimensions().getWidth() - desiredResolution.getWidth()) < .001
 					&& Math.abs(cam.getValidDimensions().getHeight() - desiredResolution.getHeight()) < .001) {
@@ -399,7 +399,7 @@ public class PerspectiveManager {
 	}
 
 	protected void calculateUnknown() {
-		int unknownCount = getUnknownCount();
+		final int unknownCount = getUnknownCount();
 
 		if (unknownCount > 1) {
 			// We're okay with two unknowns if they're these two.
@@ -516,7 +516,7 @@ public class PerspectiveManager {
 		// Make it appropriate size for the desired distance
 		// Should just cap the result dimensions at the size of the projector
 
-		double distRatio = shooterDistance / desiredDistance;
+		final double distRatio = shooterDistance / desiredDistance;
 
 		final double adjWidthmm = realWidth * distRatio;
 		final double adjHeightmm = realHeight * distRatio;

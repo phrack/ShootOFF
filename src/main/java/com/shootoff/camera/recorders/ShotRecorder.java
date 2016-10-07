@@ -59,12 +59,12 @@ public class ShotRecorder implements Closeable {
 	}
 
 	public void recordFrame(BufferedImage frame) {
-		BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+		final BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+		final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-		long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
+		final long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
 
-		IVideoPicture f = converter.toPicture(image, timestamp * 1000);
+		final IVideoPicture f = converter.toPicture(image, timestamp * 1000);
 		f.setKeyFrame(isFirstShotFrame);
 		f.setQuality(0);
 		isFirstShotFrame = false;

@@ -68,7 +68,7 @@ public class ExerciseMetadata {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		ExerciseMetadata other = (ExerciseMetadata) obj;
+		final ExerciseMetadata other = (ExerciseMetadata) obj;
 		if (creator == null) {
 			if (other.creator != null) return false;
 		} else if (!creator.equals(other.creator)) return false;

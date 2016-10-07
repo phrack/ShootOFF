@@ -56,7 +56,7 @@ public class Plugin {
 			try {
 				return new URLClassLoader(new URL[] { jarPath.toUri().toURL() },
 						Thread.currentThread().getContextClassLoader());
-			} catch (MalformedURLException e) {
+			} catch (final MalformedURLException e) {
 				logger.error("Malformed jarPath", e);
 			}
 			return null;
@@ -107,7 +107,7 @@ public class Plugin {
 				final Class<?> exerciseClass;
 				try {
 					exerciseClass = loader.loadClass(mainClassName);
-				} catch (ClassNotFoundException e) {
+				} catch (final ClassNotFoundException e) {
 					logger.error("Configured exerciseClass ({}) was not found", mainClassName);
 					return;
 				}
@@ -181,7 +181,7 @@ public class Plugin {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		Plugin other = (Plugin) obj;
+		final Plugin other = (Plugin) obj;
 		if (jarPath == null) {
 			if (other.jarPath != null) return false;
 		} else if (!jarPath.equals(other.jarPath)) return false;

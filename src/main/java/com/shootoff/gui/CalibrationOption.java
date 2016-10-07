@@ -18,7 +18,7 @@ public enum CalibrationOption {
 	
 	public static CalibrationOption fromString(String text) {
 		if (text != null) {
-			for (CalibrationOption o : CalibrationOption.values()) {
+			for (final CalibrationOption o : CalibrationOption.values()) {
 				if (o.text.equalsIgnoreCase(text)) {
 					return o;
 				}

@@ -57,30 +57,32 @@ public class JSONSessionReader {
 	}
 
 	public Map<String, List<Event>> load() {
-		Map<String, List<Event>> events = new HashMap<String, List<Event>>();
+		final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
 
 		try {
-			JSONObject session = (JSONObject) new JSONParser()
+			final JSONObject session = (JSONObject) new JSONParser()
 					.parse(new InputStreamReader(new FileInputStream(sessionFile), "UTF-8"));
 
-			JSONArray cameras = (JSONArray) session.get("cameras");
+			final JSONArray cameras = (JSONArray) session.get("cameras");
 			@SuppressWarnings("unchecked")
+			final
 			Iterator<JSONObject> itCameras = cameras.iterator();
 
 			while (itCameras.hasNext()) {
-				JSONObject camera = itCameras.next();
+				final JSONObject camera = itCameras.next();
 
-				String cameraName = (String) camera.get("name");
+				final String cameraName = (String) camera.get("name");
 				events.put(cameraName, new ArrayList<Event>());
 
-				JSONArray cameraEvents = (JSONArray) camera.get("events");
+				final JSONArray cameraEvents = (JSONArray) camera.get("events");
 				@SuppressWarnings("unchecked")
+				final
 				Iterator<JSONObject> itEvents = cameraEvents.iterator();
 
 				while (itEvents.hasNext()) {
-					JSONObject event = itEvents.next();
+					final JSONObject event = itEvents.next();
 
-					String eventType = (String) event.get("type");
+					final String eventType = (String) event.get("type");
 
 					switch (eventType) {
 					case "shot":
@@ -92,12 +94,12 @@ public class JSONSessionReader {
 							c = Color.GREEN;
 						}
 
-						Shot shot = new Shot(c, (double) event.get("x"), (double) event.get("y"),
+						final Shot shot = new Shot(c, (double) event.get("x"), (double) event.get("y"),
 								(Long) event.get("shotTimestamp"), ((Long) event.get("markerRadius")).intValue());
 
-						boolean isMalfunction = (boolean) event.get("isMalfunction");
+						final boolean isMalfunction = (boolean) event.get("isMalfunction");
 
-						boolean isReload = (boolean) event.get("isReload");
+						final boolean isReload = (boolean) event.get("isReload");
 
 						Optional<Integer> targetIndex;
 						int index = ((Long) event.get("targetIndex")).intValue();
@@ -115,7 +117,7 @@ public class JSONSessionReader {
 							hitRegionIndex = Optional.of(index);
 						}
 
-						Optional<String> videoString = Optional.ofNullable((String) event.get("videos"));
+						final Optional<String> videoString = Optional.ofNullable((String) event.get("videos"));
 
 						events.get(cameraName).add(new ShotEvent(cameraName, (Long) event.get("timestamp"), shot,
 								isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));

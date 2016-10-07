@@ -25,8 +25,8 @@ public class VersionChecker {
 	public static int compareVersions(String version1, String version2) {
 		if (version1.equals(version2)) return 0;
 		
-		String[] version1Components = version1.split("\\.");
-		String[] version2Components = version2.split("\\.");
+		final String[] version1Components = version1.split("\\.");
+		final String[] version2Components = version2.split("\\.");
 		
 		for (int i = 0; i < Math.max(version1Components.length, version2Components.length); i++) {
 			int comp1;

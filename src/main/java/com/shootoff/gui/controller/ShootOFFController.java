@@ -218,7 +218,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}, 2000);
 		
 		if (config.getWebcams().isEmpty()) {
-			Optional<Camera> defaultCamera = CameraFactory.getDefault();
+			final Optional<Camera> defaultCamera = CameraFactory.getDefault();
 			if (defaultCamera.isPresent()) {
 				if (!addCameraTab("Default", defaultCamera.get())) {
 					// Failed to open the default camera. This sometimes happens
@@ -227,12 +227,12 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					// actually present. This seems to happen sometimes with TV
 					// tuners and buggy camera drivers. As a workaround, try to
 					// fall back to using a different camera as the default.
-					List<Camera> allCameras = CameraFactory.getWebcams();
+					final List<Camera> allCameras = CameraFactory.getWebcams();
 
 					if (allCameras.size() <= 1) {
 						showCameraLockError(defaultCamera.get(), true);
 					} else {
-						for (Camera c : allCameras) {
+						for (final Camera c : allCameras) {
 							if (!c.equals(defaultCamera.get())) {
 								if (!addCameraTab("Default", c)) {
 									showCameraLockError(c, true);
@@ -278,7 +278,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			@Override
 			public void onChanged(Change<? extends ShotEntry> change) {
 				while (change.next()) {
-					for (ShotEntry unselected : change.getRemoved()) {
+					for (final ShotEntry unselected : change.getRemoved()) {
 						unselected.getShot().getMarker().setFill(unselected.getShot().getColor());
 						
 						if (unselected.getShot().getMirroredShot().isPresent()) {
@@ -286,7 +286,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						}
 					}
 
-					for (ShotEntry selected : change.getAddedSubList()) {
+					for (final ShotEntry selected : change.getAddedSubList()) {
 						if (selected == null) continue;
 						
 						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
@@ -297,8 +297,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 						// Move all selected shots to top the of their z-stack
 						// to ensure visibility
-						for (CameraView cv : camerasSupervisor.getCameraViews()) {
-							CanvasManager cm = (CanvasManager) cv;
+						for (final CameraView cv : camerasSupervisor.getCameraViews()) {
+							final CanvasManager cm = (CanvasManager) cv;
 
 							final Shape marker = selected.getShot().getMarker();
 							final int shotIndex = cm.getCanvasGroup().getChildren().indexOf(marker);
@@ -375,7 +375,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		projectorSlide.closeArena();
 
-		for (Stage streamDebuggerStage : streamDebuggerStages) {
+		for (final Stage streamDebuggerStage : streamDebuggerStages) {
 			streamDebuggerStage.close();
 		}
 
@@ -387,7 +387,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		GlobalExecutorPool.getPool().shutdownNow();
 
 		if (!config.getVideoPlayers().isEmpty()) {
-			for (VideoPlayerController videoPlayer : config.getVideoPlayers()) {
+			for (final VideoPlayerController videoPlayer : config.getVideoPlayers()) {
 				videoPlayer.getStage().close();
 			}
 		}
@@ -470,7 +470,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		if (config.getWebcams().isEmpty())
 			defaultCam = CameraFactory.getDefault();
 		
-		for (Iterator<Entry<Tab, CameraManager>> it = cameraManagerTabs.entrySet().iterator(); it.hasNext();) {
+		for (final Iterator<Entry<Tab, CameraManager>> it = cameraManagerTabs.entrySet().iterator(); it.hasNext();) {
 			final Entry<Tab, CameraManager> next = it.next();
 			if (config.getWebcams().isEmpty()) {
 				if (!defaultCam.isPresent() || next.getValue().getCamera() != defaultCam.get()) {
@@ -480,7 +480,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 			} else {
 				boolean remove = true;
-				for (String webcamName : config.getWebcams().keySet()) {
+				for (final String webcamName : config.getWebcams().keySet()) {
 					final Camera webcam = config.getWebcams().get(webcamName);
 					if (next.getValue().getCamera() == webcam && webcam.isOpen()) {
 						// Webcam name may have changed, so update it
@@ -512,7 +512,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			
 			int failureCount = 0;
 
-			for (String webcamName : config.getWebcams().keySet()) {
+			for (final String webcamName : config.getWebcams().keySet()) {
 				final Camera webcam = config.getWebcams().get(webcamName);
 
 				if (camerasSupervisor.getCameraManager(webcam) != null) continue;
@@ -536,8 +536,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		// 640 x 480
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
-		CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, this, webcamName, shotEntries);
-		CameraManager cameraManager = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
+		final CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, this, webcamName, shotEntries);
+		final CameraManager cameraManager = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
 
 		cameraManagerTabs.put(cameraTab, cameraManager);
 		
@@ -593,7 +593,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	public void removeCameraView(String name) {
 		Tab viewTab = null;
 		
-		for (Tab t : cameraTabPane.getTabs()) {
+		for (final Tab t : cameraTabPane.getTabs()) {
 			if (t.getText().equals(name)) {
 				viewTab = t;
 				break;
@@ -617,16 +617,16 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	}
 
 	private ContextMenu createContextMenu() {
-		ContextMenu contextMenu = new ContextMenu();
+		final ContextMenu contextMenu = new ContextMenu();
 
-		MenuItem toggleDetectionSectors = new MenuItem("Toggle Shot Detection Sectors");
+		final MenuItem toggleDetectionSectors = new MenuItem("Toggle Shot Detection Sectors");
 
 		toggleDetectionSectors.setOnAction((event) -> {
-			AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
+			final AnchorPane tabAnchor = (AnchorPane) cameraTabPane.getSelectionModel().getSelectedItem().getContent();
 
 			// Only add the pane if it isn't already open
 			boolean hasPane = false;
-			for (Node node : tabAnchor.getChildren()) {
+			for (final Node node : tabAnchor.getChildren()) {
 				if (node instanceof ShotSectorPane) {
 					hasPane = true;
 					break;
@@ -634,7 +634,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			}
 
 			if (!hasPane) {
-				CameraManager cameraManager = camerasSupervisor
+				final CameraManager cameraManager = camerasSupervisor
 						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 				new ShotSectorPane(tabAnchor, cameraManager);
 			}
@@ -649,7 +649,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			final MenuItem cameraMenuItem = new MenuItem("Configure Camera");
 
 			cameraMenuItem.setOnAction((event) -> {
-				CameraManager cameraManager = camerasSupervisor
+				final CameraManager cameraManager = camerasSupervisor
 						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 
 				cameraManager.launchCameraSettings();
@@ -659,25 +659,25 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 		
 		if (config.inDebugMode()) {
-			MenuItem startStreamDebuggerMenuItem = new MenuItem("Start Stream Debugger");
+			final MenuItem startStreamDebuggerMenuItem = new MenuItem("Start Stream Debugger");
 
 			startStreamDebuggerMenuItem.setOnAction((event) -> {
-				FXMLLoader loader = new FXMLLoader(
+				final FXMLLoader loader = new FXMLLoader(
 						getClass().getClassLoader().getResource("com/shootoff/gui/StreamDebugger.fxml"));
 				try {
 					loader.load();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					logger.error("Error loading StreamDebugger FXML file", e);
 				}
 
-				Stage streamDebuggerStage = new Stage();
+				final Stage streamDebuggerStage = new Stage();
 				streamDebuggerStages.add(streamDebuggerStage);
 
-				String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
+				final String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
 				streamDebuggerStage.setTitle(String.format("Stream Debugger -- %s", tabName));
 				streamDebuggerStage.setScene(new Scene(loader.getRoot()));
 				streamDebuggerStage.show();
-				CameraManager cameraManager = camerasSupervisor
+				final CameraManager cameraManager = camerasSupervisor
 						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 				((StreamDebuggerController) loader.getController()).init(cameraManager);
 
@@ -692,17 +692,17 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			contextMenu.getItems().add(startStreamDebuggerMenuItem);
 
-			MenuItem recordMenuItem = new MenuItem("Start Recording");
+			final MenuItem recordMenuItem = new MenuItem("Start Recording");
 
 			recordMenuItem.setOnAction((event) -> {
-				CameraManager cameraManager = camerasSupervisor
+				final CameraManager cameraManager = camerasSupervisor
 						.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 
 				if (recordMenuItem.getText().equals("Start Recording")) {
 					recordMenuItem.setText("Stop Recording");
 
-					String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
-					String videoName = tabName + ".mp4";
+					final String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
+					final String videoName = tabName + ".mp4";
 					cameraManager.startRecordingStream(new File(videoName));
 				} else {
 					recordMenuItem.setText("Start Recording");
@@ -758,7 +758,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		camerasSupervisor.reset();
 
 		if (config.getExercise().isPresent()) {
-			List<Target> knownTargets = new ArrayList<Target>();
+			final List<Target> knownTargets = new ArrayList<Target>();
 			knownTargets.addAll(getTargets());
 
 			if (projectorSlide.getArenaPane() != null) {
@@ -782,15 +782,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		// Keep track of cameras that already had shot detection off so that
 		// we can ensure they stay off when we re-enable shot detection
-		Set<CameraManager> alreadyOff = new HashSet<>();
+		final Set<CameraManager> alreadyOff = new HashSet<>();
 
-		for (CameraManager cm : camerasSupervisor.getCameraManagers()) {
+		for (final CameraManager cm : camerasSupervisor.getCameraManagers()) {
 			if (!cm.isDetecting()) alreadyOff.add(cm);
 		}
 
 		camerasSupervisor.setDetectingAll(false);
 
-		Runnable restartDetection = () -> {
+		final Runnable restartDetection = () -> {
 			final Optional<CalibrationManager> calibrationManager = projectorSlide.getCalibrationManager();
 			
 			if (!calibrationManager.isPresent()
@@ -798,7 +798,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				if (alreadyOff.isEmpty()) {
 					camerasSupervisor.setDetectingAll(true);
 				} else {
-					for (CameraManager cm : camerasSupervisor.getCameraManagers()) {
+					for (final CameraManager cm : camerasSupervisor.getCameraManagers()) {
 						if (!alreadyOff.contains(cm)) cm.setDetecting(true);
 					}
 				}
@@ -813,7 +813,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public void showCameraLockError(Camera webcam, boolean allCamerasFailed) {
 		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.ERROR);
+			final Alert cameraAlert = new Alert(AlertType.ERROR);
 			cameraAlert.setTitle("Webcam Locked");
 			cameraAlert.setHeaderText("Cannot Open Webcam");
 			cameraAlert.setResizable(true);
@@ -831,7 +831,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						+ "have ShootOFF open more than once.";
 			}
 
-			Optional<String> webcamName = config.getWebcamsUserName(webcam);
+			final Optional<String> webcamName = config.getWebcamsUserName(webcam);
 
 			cameraAlert.setContentText(
 					String.format(messageFormat, webcamName.isPresent() ? webcamName.get() : webcam.getName()));
@@ -848,10 +848,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public void showMissingCameraError(Camera webcam) {
 		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.ERROR);
+			final Alert cameraAlert = new Alert(AlertType.ERROR);
 
-			Optional<String> cameraName = config.getWebcamsUserName(webcam);
-			String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
+			final Optional<String> cameraName = config.getWebcamsUserName(webcam);
+			final String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
 			String message;
 			if (cameraName.isPresent()) {
 				message = String.format(messageFormat, cameraName.get());
@@ -871,10 +871,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public void showFPSWarning(Camera webcam, double fps) {
 		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.WARNING);
+			final Alert cameraAlert = new Alert(AlertType.WARNING);
 
-			Optional<String> cameraName = config.getWebcamsUserName(webcam);
-			String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
+			final Optional<String> cameraName = config.getWebcamsUserName(webcam);
+			final String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
 					+ " shots may be missed. You may be able to raise the FPS by closing other applications.";
 			String message;
 			if (cameraName.isPresent()) {
@@ -895,10 +895,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@Override
 	public void showBrightnessWarning(Camera webcam) {
 		Platform.runLater(() -> {
-			Alert brightnessAlert = new Alert(AlertType.WARNING);
+			final Alert brightnessAlert = new Alert(AlertType.WARNING);
 
-			Optional<String> cameraName = config.getWebcamsUserName(webcam);
-			String messageFormat = "The camera %s is streaming frames that are very bright. "
+			final Optional<String> cameraName = config.getWebcamsUserName(webcam);
+			final String messageFormat = "The camera %s is streaming frames that are very bright. "
 					+ " This will increase the odds of shots falsely being detected."
 					+ " For best results, please do any mix of the following:%n%n"
 					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness%n"
@@ -961,8 +961,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			} else {
 				Platform.runLater(initExercise);
 			}
-		} catch (ReflectiveOperationException e) {
-			ExerciseMetadata metadata = exercise.getInfo();
+		} catch (final ReflectiveOperationException e) {
+			final ExerciseMetadata metadata = exercise.getInfo();
 			logger.error("Failed to start exercise " + metadata.getName() + " " + metadata.getVersion(), e);
 		}
 	}
@@ -996,8 +996,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				Platform.runLater(initExercise);
 			}
 
-		} catch (ReflectiveOperationException e) {
-			ExerciseMetadata metadata = exercise.getInfo();
+		} catch (final ReflectiveOperationException e) {
+			final ExerciseMetadata metadata = exercise.getInfo();
 			logger.error("Failed to start projector exercise " + metadata.getName() + " " + metadata.getVersion(), e);
 		}
 	}

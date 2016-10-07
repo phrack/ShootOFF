@@ -65,7 +65,7 @@ public class JSONSessionWriter implements EventVisitor {
 	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
 			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 
-		JSONObject event = new JSONObject();
+		final JSONObject event = new JSONObject();
 		event.put("type", "shot");
 		event.put("timestamp", timestamp);
 		event.put("color", shot.getColor().toString());
@@ -98,7 +98,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitTargetAdd(long timestamp, String targetName) {
-		JSONObject event = new JSONObject();
+		final JSONObject event = new JSONObject();
 		event.put("type", "targetAdded");
 		event.put("timestamp", timestamp);
 		event.put("name", targetName);
@@ -109,7 +109,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitTargetRemove(long timestamp, int targetIndex) {
-		JSONObject event = new JSONObject();
+		final JSONObject event = new JSONObject();
 		event.put("type", "targetRemoved");
 		event.put("timestamp", timestamp);
 		event.put("index", targetIndex);
@@ -120,7 +120,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitTargetResize(long timestamp, int targetIndex, double newWidth, double newHeight) {
-		JSONObject event = new JSONObject();
+		final JSONObject event = new JSONObject();
 		event.put("type", "targetResized");
 		event.put("timestamp", timestamp);
 		event.put("index", targetIndex);
@@ -133,7 +133,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitTargetMove(long timestamp, int targetIndex, int newX, int newY) {
-		JSONObject event = new JSONObject();
+		final JSONObject event = new JSONObject();
 		event.put("type", "targetMoved");
 		event.put("timestamp", timestamp);
 		event.put("index", targetIndex);
@@ -146,7 +146,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitExerciseFeedMessage(long timestamp, String message) {
-		JSONObject event = new JSONObject();
+		final JSONObject event = new JSONObject();
 		event.put("type", "exerciseFeedMessage");
 		event.put("timestamp", timestamp);
 		event.put("message", message);
@@ -157,7 +157,7 @@ public class JSONSessionWriter implements EventVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void visitEnd() {
-		JSONObject session = new JSONObject();
+		final JSONObject session = new JSONObject();
 		session.put("cameras", cameras);
 
 		Writer file = null;
@@ -166,12 +166,12 @@ public class JSONSessionWriter implements EventVisitor {
 			file = new OutputStreamWriter(new FileOutputStream(sessionFile), "UTF-8");
 			file.write(session.toJSONString());
 			file.flush();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error writing JSON session", e);
 		} finally {
 			try {
 				if (file != null) file.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				logger.error("Error closing JSON session", e);
 			}
 

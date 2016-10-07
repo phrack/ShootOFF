@@ -63,21 +63,21 @@ public class GifAnimation extends SpriteAnimation {
 
 	// This method is from http://stackoverflow.com/a/17269591
 	private static ImageFrame[] readGif(InputStream stream) throws IOException {
-		ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
+		final ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
 
 		int width = -1;
 		int height = -1;
 
-		ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName("gif").next();
+		final ImageReader reader = (ImageReader) ImageIO.getImageReadersByFormatName("gif").next();
 		reader.setInput(ImageIO.createImageInputStream(stream));
-		IIOMetadata metadata = reader.getStreamMetadata();
+		final IIOMetadata metadata = reader.getStreamMetadata();
 		if (metadata != null) {
-			IIOMetadataNode globalRoot = (IIOMetadataNode) metadata.getAsTree(metadata.getNativeMetadataFormatName());
+			final IIOMetadataNode globalRoot = (IIOMetadataNode) metadata.getAsTree(metadata.getNativeMetadataFormatName());
 
-			NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
+			final NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
 
 			if (globalScreenDescriptor.getLength() > 0) {
-				IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
+				final IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
 
 				if (screenDescriptor != null) {
 					width = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenWidth"));
@@ -93,7 +93,7 @@ public class GifAnimation extends SpriteAnimation {
 			BufferedImage image;
 			try {
 				image = reader.read(frameIndex);
-			} catch (IndexOutOfBoundsException io) {
+			} catch (final IndexOutOfBoundsException io) {
 				break;
 			}
 
@@ -102,11 +102,11 @@ public class GifAnimation extends SpriteAnimation {
 				height = image.getHeight();
 			}
 
-			IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex)
+			final IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex)
 					.getAsTree("javax_imageio_gif_image_1.0");
-			IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
-			int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
-			String disposal = gce.getAttribute("disposalMethod");
+			final IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
+			final int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
+			final String disposal = gce.getAttribute("disposalMethod");
 
 			int x = 0;
 			int y = 0;
@@ -116,11 +116,11 @@ public class GifAnimation extends SpriteAnimation {
 				masterGraphics = master.createGraphics();
 				masterGraphics.setBackground(new Color(0, 0, 0, 0));
 			} else {
-				NodeList children = root.getChildNodes();
+				final NodeList children = root.getChildNodes();
 				for (int nodeIndex = 0; nodeIndex < children.getLength(); nodeIndex++) {
-					Node nodeItem = children.item(nodeIndex);
+					final Node nodeItem = children.item(nodeIndex);
 					if (nodeItem.getNodeName().equals("ImageDescriptor")) {
-						NamedNodeMap map = nodeItem.getAttributes();
+						final NamedNodeMap map = nodeItem.getAttributes();
 						x = Integer.parseInt(map.getNamedItem("imageLeftPosition").getNodeValue());
 						y = Integer.parseInt(map.getNamedItem("imageTopPosition").getNodeValue());
 					}
@@ -128,7 +128,7 @@ public class GifAnimation extends SpriteAnimation {
 			}
 			masterGraphics.drawImage(image, x, y, null);
 
-			BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null),
+			final BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null),
 					master.isAlphaPremultiplied(), null);
 			frames.add(new ImageFrame(copy, delay, disposal));
 

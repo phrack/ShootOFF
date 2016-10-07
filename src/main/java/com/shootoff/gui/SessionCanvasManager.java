@@ -97,17 +97,17 @@ public class SessionCanvasManager {
 				se.getShot().getMarker().setOnMouseClicked((event) -> {
 					if (event.getClickCount() < 2) return;
 
-					FXMLLoader loader = new FXMLLoader(
+					final FXMLLoader loader = new FXMLLoader(
 							getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
 					try {
 						loader.load();
-					} catch (IOException ioe) {
+					} catch (final IOException ioe) {
 						ioe.printStackTrace();
 					}
 
-					Stage videoPlayerStage = new Stage();
+					final Stage videoPlayerStage = new Stage();
 
-					VideoPlayerController controller = (VideoPlayerController) loader.getController();
+					final VideoPlayerController controller = (VideoPlayerController) loader.getController();
 					controller.init(se.getVideos());
 
 					videoPlayerStage.setTitle("Video Player");
@@ -293,7 +293,7 @@ public class SessionCanvasManager {
 				new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
 
 		if (targetComponents.isPresent()) {
-			TargetComponents tc = targetComponents.get();
+			final TargetComponents tc = targetComponents.get();
 			
 			canvas.getChildren().add(tc.getTargetGroup());
 			final TargetView targetContainer = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);

@@ -39,7 +39,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 	private static final int NEW_ROUND_DELAY = 5; // s
 	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+	private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
 			new NamedThreadFactory("DuelingTreeExercise"));
 	private TrainingExerciseBase thisSuper;
 
@@ -47,8 +47,8 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	private boolean isResetting = false;
 	private int leftScore = 0;
 	private int rightScore = 0;
-	private List<TargetRegion> paddlesOnLeft = new ArrayList<TargetRegion>();
-	private List<TargetRegion> paddlesOnRight = new ArrayList<TargetRegion>();
+	private final List<TargetRegion> paddlesOnLeft = new ArrayList<TargetRegion>();
+	private final List<TargetRegion> paddlesOnRight = new ArrayList<TargetRegion>();
 
 	public DuelingTree() {}
 
@@ -79,10 +79,10 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 		// Find the first target with directional subtargets and gets its
 		// regions
-		for (Target target : targets) {
+		for (final Target target : targets) {
 			if (foundTarget) break;
 
-			for (TargetRegion region : target.getRegions()) {
+			for (final TargetRegion region : target.getRegions()) {
 				if (isLeftPaddle(region)) {
 					paddlesOnLeft.add(region);
 					foundTarget = true;
@@ -115,7 +115,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	public void targetUpdate(Target target, TargetChange change) {
 		if (TargetChange.REMOVED.equals(change)) return;
 		
-		for (TargetRegion r : target.getRegions()) {
+		for (final TargetRegion r : target.getRegions()) {
 			if (isLeftPaddle(r) || isRightPaddle(r)) {
 				continueExercise = findTargets(Arrays.asList(target));
 				break;
@@ -137,7 +137,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 		if (!continueExercise) return;
 
 		if (hit.isPresent()) {
-			TargetRegion r = hit.get().getHitRegion();
+			final TargetRegion r = hit.get().getHitRegion();
 
 			if (r.tagExists("subtarget") && (r.getTag("subtarget").startsWith("left_paddle")
 					|| r.getTag("subtarget").startsWith("right_paddle"))) {

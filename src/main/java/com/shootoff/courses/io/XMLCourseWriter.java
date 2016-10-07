@@ -30,7 +30,7 @@ public class XMLCourseWriter implements CourseVisitor {
 	private static final Logger logger = LoggerFactory.getLogger(XMLCourseWriter.class);
 
 	private final File courseFile;
-	private StringBuilder xmlBody = new StringBuilder();
+	private final StringBuilder xmlBody = new StringBuilder();
 
 	public XMLCourseWriter(File courseFile) {
 		this.courseFile = courseFile;
@@ -56,7 +56,7 @@ public class XMLCourseWriter implements CourseVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			PrintWriter out = new PrintWriter(courseFile, "UTF-8");
+			final PrintWriter out = new PrintWriter(courseFile, "UTF-8");
 
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			out.println("<course>");
@@ -65,7 +65,7 @@ public class XMLCourseWriter implements CourseVisitor {
 
 			out.close();
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error writing XML course", e);
 		}
 	}

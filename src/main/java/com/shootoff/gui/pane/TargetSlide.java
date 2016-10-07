@@ -65,7 +65,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 		});
 		
 		addSlideControlButton("Create Target", (event) -> {
-			Optional<FXMLLoader> loader = createTargetEditorStage();
+			final Optional<FXMLLoader> loader = createTargetEditorStage();
 
 			if (loader.isPresent()) {
 				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
@@ -104,13 +104,13 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 	}
 
 	private void findTargets() {
-		File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
+		final File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
 
-		File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
+		final File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
 
 		if (targetFiles != null) {
 			Arrays.sort(targetFiles);
-			for (File file : targetFiles) {
+			for (final File file : targetFiles) {
 				newTarget(file);
 			}
 		} else {
@@ -141,11 +141,11 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 	}
 
 	private Optional<FXMLLoader> createTargetEditorStage() {
-		FXMLLoader loader = new FXMLLoader(
+		final FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
 		try {
 			loader.load();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Cannot load TargetEditor.fxml", e);
 			return Optional.empty();
 		}

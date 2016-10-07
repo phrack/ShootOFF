@@ -47,7 +47,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	private int cameraIndex = -1;
 	private final VideoCapture camera;
 
-	private AtomicBoolean closing = new AtomicBoolean(false);
+	private final AtomicBoolean closing = new AtomicBoolean(false);
 
 	// For testing
 	protected SarxosCaptureCamera() {
@@ -85,7 +85,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 		final Mat frame = new Mat();
 		try {
 			if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0) return null;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			// Sometimes there is a race condition on closing the camera vs.
 			// read()
 			return null;

@@ -37,7 +37,7 @@ import com.shootoff.targets.TargetRegion;
  */
 public class ParRandomShot extends ParForScore {
 	private final List<String> subtargets = new ArrayList<String>();
-	private Random rng = new Random();
+	private final Random rng = new Random();
 	private boolean foundTarget;
 	private int currentSubtarget;
 
@@ -82,7 +82,7 @@ public class ParRandomShot extends ParForScore {
 		startRoundTimer();
 		try {
 			Thread.sleep((long) (parTime * 1000.));
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 		TrainingExerciseBase.playSound("sounds/chime.wav");
@@ -96,10 +96,10 @@ public class ParRandomShot extends ParForScore {
 
 		if (!foundTarget || !hit.isPresent() || !countScore) return;
 
-		String subtarget = subtargets.get(currentSubtarget);
-		String hitTarget = getSubtarget(Optional.of(hit.get().getHitRegion()));
+		final String subtarget = subtargets.get(currentSubtarget);
+		final String hitTarget = getSubtarget(Optional.of(hit.get().getHitRegion()));
 		if (subtarget.equals(hitTarget)) {
-			String points = getPoints(Optional.of(hit.get().getHitRegion()));
+			final String points = getPoints(Optional.of(hit.get().getHitRegion()));
 			setPoints(shot.getColor(), points);
 		}
 	}
@@ -107,7 +107,7 @@ public class ParRandomShot extends ParForScore {
 	@Override
 	protected void resetValues() {
 		super.resetValues();
-		List<Target> targets = super.getCurrentTargets();
+		final List<Target> targets = super.getCurrentTargets();
 		fetchSubtargets(targets);
 	}
 
@@ -115,7 +115,7 @@ public class ParRandomShot extends ParForScore {
 		String points = "1";
 
 		if (hitRegion.isPresent()) {
-			TargetRegion region = hitRegion.get();
+			final TargetRegion region = hitRegion.get();
 			if (region.getAllTags().containsKey("points")) {
 				points = region.getTag("points");
 			}
@@ -128,7 +128,7 @@ public class ParRandomShot extends ParForScore {
 		String subtargetName = null;
 
 		if (hitRegion.isPresent()) {
-			TargetRegion region = hitRegion.get();
+			final TargetRegion region = hitRegion.get();
 			if (region.getAllTags().containsKey("subtarget")) {
 				subtargetName = region.getTag("subtarget");
 			}
@@ -146,8 +146,8 @@ public class ParRandomShot extends ParForScore {
 		subtargets.clear();
 
 		foundTarget = false;
-		for (Target target : targets) {
-			for (TargetRegion region : target.getRegions()) {
+		for (final Target target : targets) {
+			for (final TargetRegion region : target.getRegions()) {
 				if (region.getAllTags().containsKey("subtarget")) {
 					subtargets.add(region.getTag("subtarget"));
 					foundTarget = true;
@@ -170,8 +170,8 @@ public class ParRandomShot extends ParForScore {
 
 	private void saySubtarget() {
 		if (foundTarget) {
-			String subValue = subtargets.get(currentSubtarget);
-			File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subValue));
+			final String subValue = subtargets.get(currentSubtarget);
+			final File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subValue));
 
 			if (targetNameSound.exists()) {
 				playSound(targetNameSound);

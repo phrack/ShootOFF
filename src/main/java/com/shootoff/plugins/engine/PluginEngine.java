@@ -64,7 +64,7 @@ public class PluginEngine implements Runnable {
 	private final WatchService watcher = FileSystems.getDefault().newWatchService();
 	private final Set<Plugin> plugins = new HashSet<Plugin>();
 
-	private AtomicBoolean watching = new AtomicBoolean(false);
+	private final AtomicBoolean watching = new AtomicBoolean(false);
 
 	public PluginEngine(final PluginListener pluginListener) throws IOException {
 		if (pluginListener == null) {
@@ -112,7 +112,7 @@ public class PluginEngine implements Runnable {
 
 		try {
 			registeringPlugin = new Plugin(jarPath);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			logger.error("Error creating new plugin", e);
 			return false;
 		}
@@ -120,10 +120,10 @@ public class PluginEngine implements Runnable {
 		// If the plugin already exists and the new plugin is newer,
 		// unregister the old plugin before registering the new one.
 		// If the new plugin is actually older, don't load it
-		Optional<Plugin> existingPlugin = findPlugin(registeringPlugin);
+		final Optional<Plugin> existingPlugin = findPlugin(registeringPlugin);
 
 		if (existingPlugin.isPresent()) {
-			Plugin existing = existingPlugin.get();
+			final Plugin existing = existingPlugin.get();
 			
 			final ExerciseMetadata existingMetadata = existing.getExercise().getInfo();
 			final ExerciseMetadata registeringMetadata = registeringPlugin.getExercise().getInfo();
@@ -174,13 +174,13 @@ public class PluginEngine implements Runnable {
 					registerPlugin(filePath);
 				}
 			});
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error enumerating existing external plugins", e);
 		}
 	}
 	
 	private Optional<Plugin> findPlugin(Plugin plugin) {
-		for (Plugin p : plugins) {
+		for (final Plugin p : plugins) {
 			final ExerciseMetadata existingMetadata = p.getExercise().getInfo();
 			final ExerciseMetadata newMetadata = plugin.getExercise().getInfo();
 			
@@ -200,7 +200,7 @@ public class PluginEngine implements Runnable {
 	}
 	
 	public Optional<Plugin> getPlugin(TrainingExercise trainingExercise) {
-		for (Plugin p : plugins) {
+		for (final Plugin p : plugins) {
 			if (p.getExercise().getInfo().equals(trainingExercise.getInfo())) return Optional.of(p);
 		}
 		
@@ -234,7 +234,7 @@ public class PluginEngine implements Runnable {
 				key = watcher.poll(1, TimeUnit.SECONDS);
 
 				if (key == null) continue;
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				logger.error("Plugin watcher service was interrupted", e);
 				return;
 			}
@@ -282,7 +282,7 @@ public class PluginEngine implements Runnable {
 
 		try {
 			watcher.close();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error when stopping plugins directory watcher", e);
 		}
 		

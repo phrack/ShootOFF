@@ -110,12 +110,12 @@ public class TargetIO {
 			}
 				break;
 			case POLYGON: {
-				PolygonRegion pol = (PolygonRegion) node;
+				final PolygonRegion pol = (PolygonRegion) node;
 
-				Double[] points = new Double[pol.getPoints().size()];
+				final Double[] points = new Double[pol.getPoints().size()];
 
 				for (int i = 0; i < pol.getPoints().size(); i += 2) {
-					Point2D p = pol.localToParent(pol.getPoints().get(i), pol.getPoints().get(i + 1));
+					final Point2D p = pol.localToParent(pol.getPoints().get(i), pol.getPoints().get(i + 1));
 
 					points[i] = p.getX();
 					points[i + 1] = p.getY();

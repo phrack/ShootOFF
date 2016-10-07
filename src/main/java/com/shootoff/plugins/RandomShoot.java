@@ -71,7 +71,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 			// Didn't previously have a usable target, if we do now
 			// start the exercise
 			if (selectedTarget == null) {
-				for (TargetRegion region : target.getRegions()) {
+				for (final TargetRegion region : target.getRegions()) {
 					if (region.tagExists("subtarget")) {
 						if (fetchSubtargets(Arrays.asList(target))) startRound();
 						break;
@@ -134,8 +134,8 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 		currentSubtargets.clear();
 
 		boolean foundTarget = false;
-		for (Target target : targets) {
-			for (TargetRegion region : target.getRegions()) {
+		for (final Target target : targets) {
+			for (final TargetRegion region : target.getRegions()) {
 				if (region.getAllTags().containsKey("subtarget")) {
 					subtargets.add(region.getTag("subtarget"));
 					foundTarget = true;
@@ -159,28 +159,28 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	private void pickSubtargets() {
 		currentSubtargets.clear();
 
-		int count = rng.nextInt((subtargets.size() - 1) + 1) + 1;
-		for (int i : rng.ints(count, 0, subtargets.size()).toArray()) {
+		final int count = rng.nextInt((subtargets.size() - 1) + 1) + 1;
+		for (final int i : rng.ints(count, 0, subtargets.size()).toArray()) {
 			currentSubtargets.push(Integer.valueOf(i));
 		}
 	}
 
 	private void saySubtargets() {
-		List<File> soundFiles = new ArrayList<File>();
+		final List<File> soundFiles = new ArrayList<File>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
-		Stack<Integer> temp = new Stack<Integer>();
+		final Stack<Integer> temp = new Stack<Integer>();
 		temp.addAll(currentSubtargets);
 		Collections.reverse(temp);
-		Iterator<Integer> it = temp.iterator();
+		final Iterator<Integer> it = temp.iterator();
 
 		while (it.hasNext()) {
-			Integer index = it.next();
+			final Integer index = it.next();
 
 			if (!it.hasNext() && currentSubtargets.size() > 1)
 				soundFiles.add(new File("sounds/voice/shootoff-and.wav"));
 
-			File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subtargets.get(index)));
+			final File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subtargets.get(index)));
 
 			if (targetNameSound.exists()) {
 				soundFiles.add(targetNameSound);
@@ -197,7 +197,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	private void saySubtargetsTTS() {
-		StringBuilder sentence = new StringBuilder("shoot subtarget ");
+		final StringBuilder sentence = new StringBuilder("shoot subtarget ");
 
 		sentence.append(subtargets.get(currentSubtargets.get(currentSubtargets.size() - 1)));
 
@@ -210,10 +210,10 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	private void sayCurrentSubtarget() {
-		List<File> soundFiles = new ArrayList<File>();
+		final List<File> soundFiles = new ArrayList<File>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
-		int subtargetIndex = currentSubtargets.peek();
+		final int subtargetIndex = currentSubtargets.peek();
 		
 		if (subtargets.size() == 0 || subtargetIndex > subtargets.size()) {
 			// Error condition, there are no subtargets left or the index indicates
@@ -222,7 +222,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 			return;
 		}
 		
-		File targetNameSound = new File(
+		final File targetNameSound = new File(
 				String.format("sounds/voice/shootoff-%s.wav", subtargets.get(subtargetIndex)));
 
 		if (targetNameSound.exists()) {
@@ -236,7 +236,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	private void sayCurrentSubtargetTTS() {
-		String sentence = "shoot " + subtargets.get(currentSubtargets.peek());
+		final String sentence = "shoot " + subtargets.get(currentSubtargets.peek());
 		TextToSpeech.say(sentence);
 	}
 
@@ -255,7 +255,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 		if (currentSubtargets.isEmpty()) return;
 
 		if (hit.isPresent()) {
-			String subtargetValue = hit.get().getHitRegion().getTag("subtarget");
+			final String subtargetValue = hit.get().getHitRegion().getTag("subtarget");
 			if (subtargetValue != null && subtargetValue.equals(subtargets.get(currentSubtargets.peek()))) {
 				currentSubtargets.pop();
 			} else {

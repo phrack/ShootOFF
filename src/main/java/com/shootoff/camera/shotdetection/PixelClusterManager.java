@@ -125,7 +125,7 @@ public class PixelClusterManager {
 
 			double avgconnectedness = 0;
 
-			for (Entry<Pixel, Integer> pixelEntry : pixelMapping.entrySet()) {
+			for (final Entry<Pixel, Integer> pixelEntry : pixelMapping.entrySet()) {
 				if (pixelEntry.getValue() == i) {
 					final Pixel nextPixel = pixelEntry.getKey();
 

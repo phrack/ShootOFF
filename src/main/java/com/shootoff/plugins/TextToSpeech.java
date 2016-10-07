@@ -49,7 +49,7 @@ public final class TextToSpeech {
 
 	private static void init() throws MaryConfigurationException {
 		marytts = new LocalMaryInterface();
-		Set<String> voices = marytts.getAvailableVoices();
+		final Set<String> voices = marytts.getAvailableVoices();
 		marytts.setVoice(voices.iterator().next());
 		inited = true;
 	}

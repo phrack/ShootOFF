@@ -48,11 +48,11 @@ public class HardwareData {
 		final JSONParser parser = new JSONParser();
 
 		try {
-			JSONObject jsonObject = (JSONObject) parser.parse(cpuData);
-			JSONObject scoreData = (JSONObject) jsonObject.values().toArray()[0];
+			final JSONObject jsonObject = (JSONObject) parser.parse(cpuData);
+			final JSONObject scoreData = (JSONObject) jsonObject.values().toArray()[0];
 
 			return Optional.of(Integer.parseInt((String) scoreData.get("Score")));
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			return Optional.empty();
 		}
 	}
@@ -76,14 +76,14 @@ public class HardwareData {
 	 */
 
 	private static String getCpuByUrl(String url) {
-		String jsonString = getCpuInfo(url);
+		final String jsonString = getCpuInfo(url);
 		return jsonString;
 	}
 
 	// Uses cpubenchmark.net's zoom zearch and returns cpu's
 	// benhmark/information url.
 	private static String searchCpuByName(String cpuName) {
-		String encodedName = encodeToUrl(cpuName);
+		final String encodedName = encodeToUrl(cpuName);
 		Document html = null;
 		String url = null;
 		try {
@@ -91,7 +91,7 @@ public class HardwareData {
 			// benhmarks section.
 			html = Jsoup.connect("https://www.passmark.com/search/zoomsearch.php?zoom_sort=0&zoom_query=" + encodedName
 					+ "&zoom_cat%5B%5D=5").get();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.warn("Connection throws an exception: " + e);
 		}
 
@@ -119,7 +119,7 @@ public class HardwareData {
 		String infoArray[];
 		try {
 			html = Jsoup.connect(url).get();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.warn("Connection to: " + url + " ,throws an exception: " + e);
 		}
 
@@ -143,24 +143,24 @@ public class HardwareData {
 	private static String parseHtmlForInfo(Document html) {
 		// Instead of parsing the the whole html page everytime, only useful
 		// table section is used.
-		Element table = html.select("table.desc").first();
+		final Element table = html.select("table.desc").first();
 		// <span> containing the name is clearly labeled as cpuname.
-		String cpuName = table.select("span.cpuname").text();
+		final String cpuName = table.select("span.cpuname").text();
 		// Score is the last one to use <span> tag and will be parsed to int.
-		int cpuScore = Integer.parseInt(table.select("span").last().text());
+		final int cpuScore = Integer.parseInt(table.select("span").last().text());
 		// There are 2 <em> tags containing information. First one has
 		// description and second one has "Other names" eg.alternative name.
-		String description = table.select("em").first().text();
-		String altName = table.select("em").last().text();
+		final String description = table.select("em").first().text();
+		final String altName = table.select("em").last().text();
 		// Name -> Score -> possible description -> AltName.
-		String infoString = cpuName + ",Score:" + cpuScore + "," + description + ",AltName:" + altName;
+		final String infoString = cpuName + ",Score:" + cpuScore + "," + description + ",AltName:" + altName;
 		return infoString;
 	}
 
 	// Splits the infoString into array by using regex split.
 	private static String[] parseStringToArray(String infoString) {
 		// Splits the String everytime it founds comma or semicolon.
-		String[] infoArray = infoString.split("[,:]");
+		final String[] infoArray = infoString.split("[,:]");
 		return infoArray;
 	}
 
@@ -169,11 +169,11 @@ public class HardwareData {
 	@SuppressWarnings("unchecked")
 	private static String convertArrayToJsonString(String[] infoArray) {
 		// Depending on prefered formating, use of temp is not necessary.
-		JSONObject temp = new JSONObject();
-		JSONObject jObj = new JSONObject();
-		int length = infoArray.length;
+		final JSONObject temp = new JSONObject();
+		final JSONObject jObj = new JSONObject();
+		final int length = infoArray.length;
 		for (int i = 1; i < length - 1; i += 2) {
-			int y = i + 1;
+			final int y = i + 1;
 			temp.put(infoArray[i].trim(), infoArray[y].trim());
 		}
 		// Name of the cpu is always located first in the array.
@@ -185,7 +185,7 @@ public class HardwareData {
 		String encodedUrl = null;
 		try {
 			encodedUrl = encode(string, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			logger.warn("Encoding not supported: " + e);
 		}
 		return encodedUrl;

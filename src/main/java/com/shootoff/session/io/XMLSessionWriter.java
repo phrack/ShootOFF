@@ -32,7 +32,7 @@ import com.shootoff.camera.Shot;
 public class XMLSessionWriter implements EventVisitor {
 	private final Logger logger = LoggerFactory.getLogger(XMLSessionWriter.class);
 	private final File sessionFile;
-	private StringBuilder xmlBody = new StringBuilder();
+	private final StringBuilder xmlBody = new StringBuilder();
 
 	public XMLSessionWriter(File sessionFile) {
 		this.sessionFile = sessionFile;
@@ -117,14 +117,14 @@ public class XMLSessionWriter implements EventVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
+			final File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
 			if (!sessionsFolder.exists()) {
 				if (!sessionsFolder.mkdir()) {
 					logger.error("Failed to make directory to store sessions: {}", sessionsFolder.getPath());
 				}
 			}
 
-			PrintWriter out = new PrintWriter(sessionFile, "UTF-8");
+			final PrintWriter out = new PrintWriter(sessionFile, "UTF-8");
 
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 			out.println("<session>");
@@ -133,7 +133,7 @@ public class XMLSessionWriter implements EventVisitor {
 
 			out.close();
 
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Error writing XML session", e);
 		}
 	}

@@ -137,7 +137,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		PerspectiveManager pm = null;
 
-		Dimension2D feedDim = new Dimension2D(calibratingCameraManager.getFeedWidth(),
+		final Dimension2D feedDim = new Dimension2D(calibratingCameraManager.getFeedWidth(),
 				calibratingCameraManager.getFeedHeight());
 
 		if (calibratingCameraManager.getProjectionBounds().isPresent()) {
@@ -161,7 +161,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 			}
 		}
 
-		for (CalibrationListener c : calibrationListeners)
+		for (final CalibrationListener c : calibrationListeners)
 			c.calibrated(Optional.ofNullable(pm));
 		
 		arenaPane.restoreCurrentBackground();
@@ -306,7 +306,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private void enableAutoCalibration() {
 		logger.trace("enableAutoCalibration");
 
-		for (CalibrationListener c : calibrationListeners)
+		for (final CalibrationListener c : calibrationListeners)
 			c.startCalibration();
 		arenaPane.setCalibrationMessageVisible(false);
 		// We may already be calibrating if the user decided to move the arena
@@ -341,8 +341,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 	@Override
 	public void setArenaBackground(String resourceFilename) {
 		if (resourceFilename != null) {
-			InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
-			LocatedImage img = new LocatedImage(is, resourceFilename);
+			final InputStream is = this.getClass().getClassLoader().getResourceAsStream(resourceFilename);
+			final LocatedImage img = new LocatedImage(is, resourceFilename);
 			arenaPane.setArenaBackground(img);
 		} else {
 			arenaPane.setArenaBackground(null);

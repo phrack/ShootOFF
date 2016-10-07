@@ -116,7 +116,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		final Optional<Target> newTarget = arenaPane.getCanvasManager().addTarget(target, false);
 
 		if (newTarget.isPresent()) {
-			Target t = newTarget.get();
+			final Target t = newTarget.get();
 			
 			t.setPosition(x, y);
 			
@@ -284,7 +284,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * @since 3.8
 	 */
 	public List<Target> setCourse(File courseFile) {
-		Optional<Course> newCourse = CourseIO.loadCourse(arenaPane, courseFile);
+		final Optional<Course> newCourse = CourseIO.loadCourse(arenaPane, courseFile);
 		arenaPane.setCourse(newCourse.get());
 		return newCourse.get().getTargets();
 	}
@@ -341,7 +341,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			 int desiredDistance) {
 		if (!isPerspectiveInitialized()) return false;
 
-		Optional<Dimension2D> targetDimensions = arenaPane.getPerspectiveManager().get()
+		final Optional<Dimension2D> targetDimensions = arenaPane.getPerspectiveManager().get()
 				.calculateObjectSize(currentRealWidth, currentRealHeight, desiredDistance);
 
 		if (targetDimensions.isPresent()) {
@@ -356,7 +356,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 	@Override
 	public void destroy() {
-		for (Target target : targets)
+		for (final Target target : targets)
 			arenaPane.getCanvasManager().removeTarget(target);
 
 		targets.clear();

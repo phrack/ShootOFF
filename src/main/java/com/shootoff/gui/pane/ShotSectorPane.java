@@ -31,12 +31,12 @@ public class ShotSectorPane extends BorderPane {
 	private final CheckBox[][] sectors;
 
 	public ShotSectorPane(Pane parent, CameraManager cameraManager) {
-		GridPane checkboxGrid = new GridPane();
+		final GridPane checkboxGrid = new GridPane();
 		sectors = new CheckBox[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
 		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
 			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
-				CheckBox sector = new CheckBox();
+				final CheckBox sector = new CheckBox();
 				sectors[y][x] = sector;
 				sector.setSelected(cameraManager.isSectorOn(x, y));
 
@@ -48,7 +48,7 @@ public class ShotSectorPane extends BorderPane {
 			}
 		}
 
-		Button doneButton = new Button("Done");
+		final Button doneButton = new Button("Done");
 
 		doneButton.setOnAction((event) -> {
 			parent.getChildren().remove(this);
@@ -61,7 +61,7 @@ public class ShotSectorPane extends BorderPane {
 	}
 
 	private boolean[][] getSectorStatuses() {
-		boolean[][] sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
+		final boolean[][] sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
 		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
 			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {

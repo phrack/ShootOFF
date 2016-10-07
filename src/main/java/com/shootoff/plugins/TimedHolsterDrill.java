@@ -87,7 +87,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	}
 
 	protected void setLength() {
-		float drawShotLength = (float) (System.currentTimeMillis() - beepTime) / (float) 1000; // s
+		final float drawShotLength = (float) (System.currentTimeMillis() - beepTime) / (float) 1000; // s
 		setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
 	}
 
@@ -118,7 +118,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 			
 			pauseShotDetection(true);
 			playSound(new File("sounds/voice/shootoff-makeready.wav"));
-			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+			final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
 			if (repeatExercise) executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 
@@ -130,7 +130,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		@Override
 		public void run() {
 			if (repeatExercise) {
-				int randomDelay = setupRound();
+				final int randomDelay = setupRound();
 				doRound();
 				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 			}
@@ -141,7 +141,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 
 	protected void initUI() {
 		this.pauseResumeButton = addShootOFFButton(PAUSE, (event) -> {
-			Button pauseResumeButton = (Button) event.getSource();
+			final Button pauseResumeButton = (Button) event.getSource();
 			if (PAUSE.equals(pauseResumeButton.getText())) {
 				pauseResumeButton.setText("Resume");
 				repeatExercise = false;
@@ -174,7 +174,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 
 		coloredRows = !coloredRows;
 
-		int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+		final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 		return randomDelay;
 	}
 

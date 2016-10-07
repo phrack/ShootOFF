@@ -116,7 +116,7 @@ public class TrainingExerciseBase {
 		if (cameraViews.getArenaView().isPresent()) {
 			final Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
-			CameraView arenaView = cameraViews.getArenaView().get();
+			final CameraView arenaView = cameraViews.getArenaView().get();
 			arenaView.addChild(exerciseLabel);
 			exerciseLabels.put(arenaView, exerciseLabel);
 		}
@@ -291,7 +291,7 @@ public class TrainingExerciseBase {
 	 */
 	public Button addShootOFFButton(final String text, final EventHandler<ActionEvent> eventHandler) {
 		final Button exerciseButton = new Button(text);
-		Button resetButton = (Button) buttonsContainer.getChildren().get(0);
+		final Button resetButton = (Button) buttonsContainer.getChildren().get(0);
 		exerciseButton.setOnAction(eventHandler);
 		exerciseButton.setPrefSize(resetButton.getPrefWidth(), resetButton.getPrefHeight());
 		exerciseButtons.add(exerciseButton);
@@ -349,7 +349,7 @@ public class TrainingExerciseBase {
 	 */
 	public void setShotTimerColumnText(final String name, final String value) {
 		if (shotTimerTable != null && shotTimerTable.getItems() != null) {
-			Runnable shotTimerColumnTextSetter = () -> {
+			final Runnable shotTimerColumnTextSetter = () -> {
 				if (shotTimerTable.getItems().size() == 0) {
 					logger.error("Trying to set shot timer column text on an empty shot timer list", 
 							new AssertionError("Shot timer table is empty"));
@@ -396,7 +396,7 @@ public class TrainingExerciseBase {
 		}
 
 		Platform.runLater(() -> {
-			for (Label exerciseLabel : exerciseLabels.values()) {
+			for (final Label exerciseLabel : exerciseLabels.values()) {
 				exerciseLabel.setText(message);
 			}
 		});
@@ -517,7 +517,7 @@ public class TrainingExerciseBase {
 						e.getLine().close();
 						try {
 							audioInputStream.close();
-						} catch (Exception e1) {
+						} catch (final Exception e1) {
 							logger.error("Error closing audio input stream", e1);
 						}
 					}
@@ -527,11 +527,11 @@ public class TrainingExerciseBase {
 			final SourceDataLine sourceLine = line;
 			new Thread(() -> {
 				int nBytesRead = 0;
-				byte[] abData = new byte[1024];
+				final byte[] abData = new byte[1024];
 				while (nBytesRead != -1) {
 					try {
 						nBytesRead = audioInputStream.read(abData, 0, abData.length);
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						logger.error("Error playing sound clip", e);
 					}
 					if (nBytesRead >= 0) {
@@ -542,7 +542,7 @@ public class TrainingExerciseBase {
 				sourceLine.drain();
 				sourceLine.close();
 			}).start();
-		} catch (LineUnavailableException e) {
+		} catch (final LineUnavailableException e) {
 			if (line != null) line.close();
 			logger.error("Error playing sound clip", e);
 		}
@@ -593,7 +593,7 @@ public class TrainingExerciseBase {
 		}
 
 		if (shotTimerTable != null) {
-			for (TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
+			for (final TableColumn<ShotEntry, String> column : exerciseColumns.values()) {
 				shotTimerTable.getColumns().remove(column);
 			}
 		}

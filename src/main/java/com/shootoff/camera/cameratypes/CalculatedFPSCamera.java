@@ -87,7 +87,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 
 	protected void estimateCameraFPS() {
 		if (lastCameraTimestamp > -1) {
-			double estimateFPS = ((double) getFrameCount() - (double) lastFrameCount)
+			final double estimateFPS = ((double) getFrameCount() - (double) lastFrameCount)
 					/ (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
 
 			setFPS(estimateFPS);
@@ -113,7 +113,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		Camera other = (Camera) obj;
+		final Camera other = (Camera) obj;
 		if (!this.getName().equals(other.getName())) return false;
 		return true;
 	}

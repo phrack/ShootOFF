@@ -50,10 +50,10 @@ public class ShotEvent implements Event {
 		this.videoString = videoString;
 
 		if (videoString.isPresent()) {
-			String[] videoSet = videoString.get().split(",");
+			final String[] videoSet = videoString.get().split(",");
 
-			for (String video : videoSet) {
-				String[] v = video.split(":");
+			for (final String video : videoSet) {
+				final String[] v = video.split(":");
 				videos.put(v[0], new File("sessions" + File.separator + v[1]));
 			}
 		}

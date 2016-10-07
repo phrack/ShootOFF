@@ -160,9 +160,9 @@ public class TargetDistancePane extends Pane {
 		
 		persistSettings();
 		
-		int width = Integer.parseInt(targetWidth.getText());
-		int height = Integer.parseInt(targetHeight.getText());
-		int distance = Integer.parseInt(targetDistance.getText());
+		final int width = Integer.parseInt(targetWidth.getText());
+		final int height = Integer.parseInt(targetHeight.getText());
+		final int distance = Integer.parseInt(targetDistance.getText());
 
 		if (logger.isTraceEnabled()) {
 			logger.trace(
@@ -171,10 +171,10 @@ public class TargetDistancePane extends Pane {
 					width, height, originalTargetDistance, distance);
 		}
 
-		Optional<Dimension2D> targetDimensions = perspectiveManager.calculateObjectSize(width, height, distance);
+		final Optional<Dimension2D> targetDimensions = perspectiveManager.calculateObjectSize(width, height, distance);
 
 		if (targetDimensions.isPresent()) {
-			Dimension2D d = targetDimensions.get();
+			final Dimension2D d = targetDimensions.get();
 			target.setDimensions(d.getWidth(), d.getHeight());
 		}
 	}
@@ -189,9 +189,9 @@ public class TargetDistancePane extends Pane {
 		if (!isValid) return isValid;
 		
 		if ("0".equals(targetDistance.getText())) {
-			Alert invalidDataAlert = new Alert(AlertType.ERROR);
+			final Alert invalidDataAlert = new Alert(AlertType.ERROR);
 
-			String message = "Target Distance cannot be 0, please set a value greater than 0.";
+			final String message = "Target Distance cannot be 0, please set a value greater than 0.";
 
 			invalidDataAlert.setTitle("Invalid Target Distance");
 			invalidDataAlert.setHeaderText("Target Distance Cannot Be Zero");
@@ -220,7 +220,7 @@ public class TargetDistancePane extends Pane {
 	}
 		
 	private void persistSettings() {
-		Map<String, String> tags = target.getAllTags();
+		final Map<String, String> tags = target.getAllTags();
 		if (!targetWidth.getText().isEmpty()) {
 			tags.put(Target.TAG_DEFAULT_PERCEIVED_WIDTH, targetWidth.getText());
 		}

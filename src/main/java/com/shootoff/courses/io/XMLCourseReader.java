@@ -64,8 +64,8 @@ public class XMLCourseReader {
 		InputStream xmlInput = null;
 		try {
 			xmlInput = new FileInputStream(courseFile);
-			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-			CourseXMLHandler handler = new CourseXMLHandler();
+			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+			final CourseXMLHandler handler = new CourseXMLHandler();
 			saxParser.parse(xmlInput, handler);
 
 			Course c;
@@ -85,7 +85,7 @@ public class XMLCourseReader {
 			if (xmlInput != null) {
 				try {
 					xmlInput.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Error closing XML course opened for reading", e);
 				}
 			}
@@ -116,12 +116,12 @@ public class XMLCourseReader {
 				throws SAXException {
 			switch (qName) {
 			case "background": {
-				boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
+				final boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
 
 				LocatedImage background;
 
 				if (isResource) {
-					InputStream is = this.getClass().getResourceAsStream(attributes.getValue("url"));
+					final InputStream is = this.getClass().getResourceAsStream(attributes.getValue("url"));
 					background = new LocatedImage(is, attributes.getValue("url"));
 				} else {
 					background = new LocatedImage(attributes.getValue("url"));
@@ -132,13 +132,13 @@ public class XMLCourseReader {
 				break;
 
 			case "target": {
-				File targetFile = new File(attributes.getValue("file"));
-				Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
+				final File targetFile = new File(attributes.getValue("file"));
+				final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
 
 				if (targetComponents.isPresent()) {
-					TargetComponents tc = targetComponents.get();
+					final TargetComponents tc = targetComponents.get();
 
-					TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
+					final TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
 							arenaPane.getConfiguration(), arenaPane.getCanvasManager(), true);
 
 					t.setPosition(Double.parseDouble(attributes.getValue("x")),
@@ -164,9 +164,9 @@ public class XMLCourseReader {
 
 		private void showTargetError(String targetPath) {
 			Platform.runLater(() -> {
-				Alert targetAlert = new Alert(AlertType.ERROR);
+				final Alert targetAlert = new Alert(AlertType.ERROR);
 
-				String message = String.format(
+				final String message = String.format(
 						"The course %s requires the target %s, but the "
 								+ "target file is missing. This target will not appear in your projector arena.",
 						courseFile.getName(), targetPath);

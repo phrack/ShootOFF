@@ -171,9 +171,9 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	}
 
 	private void updateTargets() {
-		for (BouncingTarget b : shootTargets)
+		for (final BouncingTarget b : shootTargets)
 			b.moveTarget();
-		for (BouncingTarget b : dontShootTargets)
+		for (final BouncingTarget b : dontShootTargets)
 			b.moveTarget();
 	}
 
@@ -185,7 +185,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		public BouncingTarget(Target target) {
 			this.target = target;
 
-			Random r = new Random();
+			final Random r = new Random();
 
 			dx = r.nextInt(maxVelocity + 1) + 1;
 			dy = r.nextInt(maxVelocity + 1) + 1;
@@ -212,7 +212,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 				collisionList = dontShootTargets;
 			}
 
-			for (BouncingTarget b : collisionList) {
+			for (final BouncingTarget b : collisionList) {
 				if (b.getTarget().equals(target)) continue;
 
 				final Bounds bBounds = b.getTarget().getBoundsInParent();
@@ -243,10 +243,10 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		public void moveTarget() {
 			if (maxVelocity == 0) return;
 
-			Bounds b = target.getBoundsInParent();
-			Point2D p = target.getPosition();
-			Dimension2D d = target.getDimension();
-			CollisionType ct = checkCollision();
+			final Bounds b = target.getBoundsInParent();
+			final Point2D p = target.getPosition();
+			final Dimension2D d = target.getDimension();
+			final CollisionType ct = checkCollision();
 
 			if (b.getMinX() <= 1 || b.getMinX() + d.getWidth() > thisSuper.getArenaWidth()
 					|| ct == CollisionType.COLLISION_X || ct == CollisionType.COLLISION_BOTH) {
@@ -264,15 +264,15 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 	private void addTargets(List<BouncingTarget> targets, String target, int count) {
 		for (int i = 0; i < count; i++) {
-			Optional<Target> newTarget = super.addTarget(new File(target), 0, 0);
+			final Optional<Target> newTarget = super.addTarget(new File(target), 0, 0);
 
 			if (newTarget.isPresent()) {
 				// Randomly place the target
-				int maxX = (int) (super.getArenaWidth() - newTarget.get().getDimension().getWidth() - 50);
-				int x = new Random().nextInt(maxX + 1) + 1;
+				final int maxX = (int) (super.getArenaWidth() - newTarget.get().getDimension().getWidth() - 50);
+				final int x = new Random().nextInt(maxX + 1) + 1;
 
-				int maxY = (int) (super.getArenaHeight() - newTarget.get().getDimension().getHeight() - 50);
-				int y = new Random().nextInt(maxY + 1) + 1;
+				final int maxY = (int) (super.getArenaHeight() - newTarget.get().getDimension().getHeight() - 50);
+				final int y = new Random().nextInt(maxY + 1) + 1;
 
 				newTarget.get().setPosition(x, y);
 
@@ -334,10 +334,10 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	private void stopExercise() {
 		targetAnimation.stop();
 
-		for (BouncingTarget b : shootTargets)
+		for (final BouncingTarget b : shootTargets)
 			super.removeTarget(b.getTarget());
 		shootTargets.clear();
-		for (BouncingTarget b : dontShootTargets)
+		for (final BouncingTarget b : dontShootTargets)
 			super.removeTarget(b.getTarget());
 		dontShootTargets.clear();
 

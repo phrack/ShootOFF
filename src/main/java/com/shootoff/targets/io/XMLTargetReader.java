@@ -66,7 +66,7 @@ public class XMLTargetReader implements TargetReader {
 
 		try (InputStream is = new FileInputStream(targetFile)) {
 			load(is);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.error("Problem initializing target reader from file", e);
 		}
 	}
@@ -95,8 +95,8 @@ public class XMLTargetReader implements TargetReader {
 
 	private void load(InputStream targetStream) {
 		try {
-			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-			TargetXMLHandler handler = new TargetXMLHandler();
+			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+			final TargetXMLHandler handler = new TargetXMLHandler();
 			saxParser.parse(targetStream, handler);
 
 			targetNodes.addAll(handler.getRegions());
@@ -109,7 +109,7 @@ public class XMLTargetReader implements TargetReader {
 			if (targetStream != null) {
 				try {
 					targetStream.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Error closing XMl target opened for reading", e);
 				}
 			}
@@ -140,8 +140,8 @@ public class XMLTargetReader implements TargetReader {
 			case "target":
 				if (attributes.getLength() > 0) {
 					for (int i = 0; i < attributes.getLength(); i++) {
-						String key = attributes.getQName(i);
-						String value = attributes.getValue(key);
+						final String key = attributes.getQName(i);
+						final String value = attributes.getValue(key);
 						targetTags.put(key, value);
 					}
 				}
@@ -151,7 +151,7 @@ public class XMLTargetReader implements TargetReader {
 			case "image":
 				currentTags = new HashMap<String, String>();
 
-				File savedFile = new File(attributes.getValue("file"));
+				final File savedFile = new File(attributes.getValue("file"));
 
 				InputStream imageStream = null;
 				if ('@' == savedFile.toString().charAt(0) && loader.isPresent()) {
@@ -174,23 +174,23 @@ public class XMLTargetReader implements TargetReader {
 					try {
 						imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
 								Double.parseDouble(attributes.getValue("y")), imageFile);
-					} catch (FileNotFoundException e) {
+					} catch (final FileNotFoundException e) {
 						logger.error("Failed to load target image from file: {}", e);
 						return;
 					}
 				}
 
 				try {
-					int firstDot = imageFile.getName().indexOf('.') + 1;
-					String extension = imageFile.getName().substring(firstDot);
+					final int firstDot = imageFile.getName().indexOf('.') + 1;
+					final String extension = imageFile.getName().substring(firstDot);
 
 					if (extension.endsWith("gif") && '@' == savedFile.toString().charAt(0) && loader.isPresent()) {
-						InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
-						GifAnimation gif = new GifAnimation(imageRegion, gifStream);
+						final InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
+						final GifAnimation gif = new GifAnimation(imageRegion, gifStream);
 						imageRegion.setImage(gif.getFirstFrame());
 						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
 					} else if (extension.endsWith("gif")) {
-						GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
+						final GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
 						imageRegion.setImage(gif.getFirstFrame());
 						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
 					}
@@ -206,7 +206,7 @@ public class XMLTargetReader implements TargetReader {
 
 						animation.play();
 					}
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Error reading animation from XML target", e);
 				}
 
@@ -247,7 +247,7 @@ public class XMLTargetReader implements TargetReader {
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			switch (qName) {
 			case "polygon":
-				double[] points = new double[polygonPoints.size()];
+				final double[] points = new double[polygonPoints.size()];
 
 				for (int i = 0; i < polygonPoints.size(); i++)
 					points[i] = polygonPoints.get(i);

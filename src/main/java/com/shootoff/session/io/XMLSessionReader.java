@@ -65,8 +65,8 @@ public class XMLSessionReader {
 		InputStream xmlInput = null;
 		try {
 			xmlInput = new FileInputStream(sessionFile);
-			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-			SessionXMLHandler handler = new SessionXMLHandler();
+			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+			final SessionXMLHandler handler = new SessionXMLHandler();
 			saxParser.parse(xmlInput, handler);
 
 			return handler.getEvents();
@@ -76,7 +76,7 @@ public class XMLSessionReader {
 			if (xmlInput != null) {
 				try {
 					xmlInput.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Error closing XML session opened for reading", e);
 				}
 			}
@@ -112,14 +112,14 @@ public class XMLSessionReader {
 					c = Color.GREEN;
 				}
 
-				Shot shot = new Shot(c, Double.parseDouble(attributes.getValue("x")),
+				final Shot shot = new Shot(c, Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")),
 						Long.parseLong(attributes.getValue("shotTimestamp")),
 						Integer.parseInt(attributes.getValue("markerRadius")));
 
-				boolean isMalfunction = Boolean.parseBoolean(attributes.getValue("isMalfunction"));
+				final boolean isMalfunction = Boolean.parseBoolean(attributes.getValue("isMalfunction"));
 
-				boolean isReload = Boolean.parseBoolean(attributes.getValue("isReload"));
+				final boolean isReload = Boolean.parseBoolean(attributes.getValue("isReload"));
 
 				Optional<Integer> targetIndex;
 				int index = Integer.parseInt(attributes.getValue("targetIndex"));
@@ -137,7 +137,7 @@ public class XMLSessionReader {
 					hitRegionIndex = Optional.of(index);
 				}
 
-				Optional<String> videoString = Optional.ofNullable(attributes.getValue("videos"));
+				final Optional<String> videoString = Optional.ofNullable(attributes.getValue("videos"));
 
 				events.get(currentCameraName)
 						.add(new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot,

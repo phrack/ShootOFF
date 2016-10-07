@@ -52,11 +52,11 @@ public class FileSlide extends Slide {
 		
 		addSlideControlButton("Preferences", (event) -> {
 			if (preferencesController == null) {
-				FXMLLoader loader = new FXMLLoader(
+				final FXMLLoader loader = new FXMLLoader(
 						getClass().getClassLoader().getResource("com/shootoff/gui/Preferences.fxml"));
 				try {
 					loader.load();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Cannot load Preferences.fxml", e);
 					return;
 				}
@@ -86,7 +86,7 @@ public class FileSlide extends Slide {
 			final File feedFile = fileChooser.showSaveDialog(parentControls.getScene().getWindow());
 
 			if (feedFile != null) {
-				String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
+				final String extension = fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(2);
 				File imageFile;
 
 				if (feedFile.getPath().endsWith(extension)) {
@@ -97,7 +97,7 @@ public class FileSlide extends Slide {
 
 				try {
 					ImageIO.write(renderedImage, extension, imageFile);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Error saving feed image", e);
 				}
 			}

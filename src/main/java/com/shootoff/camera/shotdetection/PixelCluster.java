@@ -80,7 +80,7 @@ public class PixelCluster extends HashSet<Pixel> {
 
 						// && !this.contains(nearPoint)
 						if (!visited.containsKey(nearPoint)) {
-							byte[] np = { 0, 0, 0 };
+							final byte[] np = { 0, 0, 0 };
 							workingFrame.get(ry, rx, np);
 
 							final int npSaturation = np[1] & 0xFF;
@@ -106,13 +106,13 @@ public class PixelCluster extends HashSet<Pixel> {
 		int redSum = 0;
 		int greenSum = 0;
 		int colorDistance = 0;
-		int colorDistanceFromRedSum = 0;
+		final int colorDistanceFromRedSum = 0;
 		int avgColorDistance = 0;
 		int tempColorDistance = 0;
 
 		for (final Entry<Pixel, byte[]> pixelEntry : visited.entrySet()) {
 
-			byte[] np = pixelEntry.getValue();
+			final byte[] np = pixelEntry.getValue();
 
 			if (logger.isTraceEnabled() && debugColorsToFile) {
 
@@ -164,11 +164,11 @@ public class PixelCluster extends HashSet<Pixel> {
 
 			System.out.println(String.format("x %d y %d pc %d", (int) centerPixelX, (int) centerPixelY, pixelCount));
 
-			Mat testMat = new Mat();
+			final Mat testMat = new Mat();
 			Imgproc.cvtColor(traceMat, testMat, Imgproc.COLOR_HSV2BGR);
 
 			String filename = String.format("shot-colors-%d-%d.png", (int) centerPixelX, (int) centerPixelY);
-			File file = new File(filename);
+			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, testMat);
 		}

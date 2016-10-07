@@ -213,20 +213,20 @@ public class TargetView implements Target {
 
 	@Override
 	public void setDimensions(double newWidth, double newHeight) {
-		double currentWidth = targetGroup.getBoundsInParent().getWidth();
-		double currentHeight = targetGroup.getBoundsInParent().getHeight();
+		final double currentWidth = targetGroup.getBoundsInParent().getWidth();
+		final double currentHeight = targetGroup.getBoundsInParent().getHeight();
 
 		if (Math.abs(currentWidth - newWidth) > .001) {
-			double scaleXDelta = 1.0 + ((newWidth - currentWidth) / currentWidth);
+			final double scaleXDelta = 1.0 + ((newWidth - currentWidth) / currentWidth);
 			targetGroup.setScaleX(targetGroup.getScaleX() * scaleXDelta);
 
 			// Keep unresizable regions the same size
-			for (Node n : targetGroup.getChildren()) {
-				TargetRegion r = (TargetRegion) n;
+			for (final Node n : targetGroup.getChildren()) {
+				final TargetRegion r = (TargetRegion) n;
 
 				if (r.tagExists(Target.TAG_RESIZABLE) && !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
-					double width = n.getBoundsInParent().getWidth();
-					double scaledPercentChange = (width / (width * targetGroup.getScaleX()));
+					final double width = n.getBoundsInParent().getWidth();
+					final double scaledPercentChange = (width / (width * targetGroup.getScaleX()));
 
 					n.setScaleX(scaledPercentChange);
 				}
@@ -234,16 +234,16 @@ public class TargetView implements Target {
 		}
 
 		if (Math.abs(currentHeight - newHeight) > .001) {
-			double scaleYDelta = 1.0 + ((newHeight - currentHeight) / currentHeight);
+			final double scaleYDelta = 1.0 + ((newHeight - currentHeight) / currentHeight);
 			targetGroup.setScaleY(targetGroup.getScaleY() * scaleYDelta);
 
 			// Keep unresizable regions the same size
-			for (Node n : targetGroup.getChildren()) {
-				TargetRegion r = (TargetRegion) n;
+			for (final Node n : targetGroup.getChildren()) {
+				final TargetRegion r = (TargetRegion) n;
 
 				if (r.tagExists(Target.TAG_RESIZABLE) && !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
-					double height = n.getBoundsInParent().getHeight();
-					double scaledPercentChange = (height / (height * targetGroup.getScaleY()));
+					final double height = n.getBoundsInParent().getHeight();
+					final double scaledPercentChange = (height / (height * targetGroup.getScaleY()));
 
 					n.setScaleY(scaledPercentChange);
 				}
@@ -279,11 +279,11 @@ public class TargetView implements Target {
 	protected static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
 		if (!region.tagExists("command")) return;
 
-		String commandsSource = region.getTag("command");
-		List<String> commands = Arrays.asList(commandsSource.split(";"));
+		final String commandsSource = region.getTag("command");
+		final List<String> commands = Arrays.asList(commandsSource.split(";"));
 
-		for (String command : commands) {
-			int openParen = command.indexOf('(');
+		for (final String command : commands) {
+			final int openParen = command.indexOf('(');
 			String commandName;
 			List<String> args;
 
@@ -301,9 +301,9 @@ public class TargetView implements Target {
 
 	protected static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region,
 			String name) {
-		for (Target target : targets) {
+		for (final Target target : targets) {
 			if (target.hasRegion(region)) {
-				for (TargetRegion r : target.getRegions()) {
+				for (final TargetRegion r : target.getRegions()) {
 					if (r.tagExists("name") && r.getTag("name").equals(name)) return Optional.of(r);
 				}
 			}
@@ -346,7 +346,7 @@ public class TargetView implements Target {
 		if (!imageRegion.onFirstFrame()) return;
 
 		if (imageRegion.getAnimation().isPresent()) {
-			SpriteAnimation animation = imageRegion.getAnimation().get();
+			final SpriteAnimation animation = imageRegion.getAnimation().get();
 			animation.play();
 
 			if (resetAfterAnimation) {
@@ -367,9 +367,9 @@ public class TargetView implements Target {
 			return;
 		}
 
-		ImageRegion imageRegion = (ImageRegion) region;
+		final ImageRegion imageRegion = (ImageRegion) region;
 		if (imageRegion.getAnimation().isPresent()) {
-			SpriteAnimation animation = imageRegion.getAnimation().get();
+			final SpriteAnimation animation = imageRegion.getAnimation().get();
 
 			if (animation.getStatus() == Status.RUNNING) {
 				animation.setOnFinished((e) -> {
@@ -387,10 +387,10 @@ public class TargetView implements Target {
 	public void toggleSelected() {
 		isSelected = !isSelected;
 
-		Color stroke = isSelected ? TargetRegion.SELECTED_STROKE_COLOR : TargetRegion.UNSELECTED_STROKE_COLOR;
+		final Color stroke = isSelected ? TargetRegion.SELECTED_STROKE_COLOR : TargetRegion.UNSELECTED_STROKE_COLOR;
 
-		for (Node node : getTargetGroup().getChildren()) {
-			TargetRegion region = (TargetRegion) node;
+		for (final Node node : getTargetGroup().getChildren()) {
+			final TargetRegion region = (TargetRegion) node;
 			if (region.getType() != RegionType.IMAGE) {
 				((Shape) region).setStroke(stroke);
 			}
@@ -446,7 +446,7 @@ public class TargetView implements Target {
 		final RectangleRegion anchor = new RectangleRegion(x, y, ANCHOR_WIDTH, ANCHOR_HEIGHT);
 
 		// Make the anchor regions unshootable and unresizable
-		Map<String, String> regionTags = ((TargetRegion) anchor).getAllTags();
+		final Map<String, String> regionTags = ((TargetRegion) anchor).getAllTags();
 		regionTags.put(TargetView.TAG_IGNORE_HIT, "true");
 		regionTags.put(TargetView.TAG_RESIZABLE, "false");
 
@@ -458,12 +458,12 @@ public class TargetView implements Target {
 		// Ensure anchors appear the intended visual size even if the target
 		// has been scaled
 		if (targetGroup.getScaleX() != 1.0f) {
-			double scaledPercentChange = (ANCHOR_WIDTH / (ANCHOR_WIDTH * targetGroup.getScaleX()));
+			final double scaledPercentChange = (ANCHOR_WIDTH / (ANCHOR_WIDTH * targetGroup.getScaleX()));
 			anchor.setScaleX(scaledPercentChange);
 		}
 
 		if (targetGroup.getScaleY() != 1.0f) {
-			double scaledPercentChange = (ANCHOR_HEIGHT / (ANCHOR_HEIGHT * targetGroup.getScaleY()));
+			final double scaledPercentChange = (ANCHOR_HEIGHT / (ANCHOR_HEIGHT * targetGroup.getScaleY()));
 			anchor.setScaleY(scaledPercentChange);
 		}
 
@@ -477,9 +477,9 @@ public class TargetView implements Target {
 		if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {
 			// Target was hit, see if a specific region was hit
 			for (int i = targetGroup.getChildren().size() - 1; i >= 0; i--) {
-				Node node = targetGroup.getChildren().get(i);
+				final Node node = targetGroup.getChildren().get(i);
 
-				Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
+				final Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
 				final int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
 				final int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
@@ -499,7 +499,7 @@ public class TargetView implements Target {
 						// original size. We need to resize it if it has
 						// changed size to accurately determine if a pixel
 						// is transparent
-						Image currentImage = ((ImageRegion) region).getImage();
+						final Image currentImage = ((ImageRegion) region).getImage();
 
 						if (adjustedX < 0 || adjustedY < 0) {
 							logger.debug(
@@ -513,14 +513,14 @@ public class TargetView implements Target {
 						if (Math.abs(currentImage.getWidth() - nodeBounds.getWidth()) > .0000001
 								|| Math.abs(currentImage.getHeight() - nodeBounds.getHeight()) > .0000001) {
 
-							BufferedImage bufferedOriginal = SwingFXUtils.fromFXImage(currentImage, null);
+							final BufferedImage bufferedOriginal = SwingFXUtils.fromFXImage(currentImage, null);
 
-							java.awt.Image tmp = bufferedOriginal.getScaledInstance((int) nodeBounds.getWidth(),
+							final java.awt.Image tmp = bufferedOriginal.getScaledInstance((int) nodeBounds.getWidth(),
 									(int) nodeBounds.getHeight(), java.awt.Image.SCALE_SMOOTH);
-							BufferedImage bufferedResized = new BufferedImage((int) nodeBounds.getWidth(),
+							final BufferedImage bufferedResized = new BufferedImage((int) nodeBounds.getWidth(),
 									(int) nodeBounds.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
-							Graphics2D g2d = bufferedResized.createGraphics();
+							final Graphics2D g2d = bufferedResized.createGraphics();
 							g2d.drawImage(tmp, 0, 0, null);
 							g2d.dispose();
 
@@ -529,8 +529,8 @@ public class TargetView implements Target {
 										|| bufferedResized.getRGB(adjustedX, adjustedY) >> 24 == 0) {
 									continue;
 								}
-							} catch (ArrayIndexOutOfBoundsException e) {
-								String message = String.format(
+							} catch (final ArrayIndexOutOfBoundsException e) {
+								final String message = String.format(
 										"Index out of bounds while trying to find adjusted coordinate (%d, %d) "
 												+ "from original (%.2f, %.2f) in adjusted BufferedImage for target %s "
 												+ "with width = %d, height = %d",
@@ -551,7 +551,7 @@ public class TargetView implements Target {
 						// fill otherwise we can get a shot detected where
 						// there isn't actually
 						// a region showing
-						Point2D localCoords = targetGroup.parentToLocal(shot.getX(), shot.getY());
+						final Point2D localCoords = targetGroup.parentToLocal(shot.getX(), shot.getY());
 						if (!node.contains(localCoords)) continue;
 					}
 
@@ -591,8 +591,8 @@ public class TargetView implements Target {
 				if (config.isPresent() && config.get().inDebugMode() && (event.isControlDown() || event.isShiftDown()))
 					return;
 
-				double deltaX = event.getX() - x;
-				double deltaY = event.getY() - y;
+				final double deltaX = event.getX() - x;
+				final double deltaY = event.getY() - y;
 
 				if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + deltaX >= 0
 						&& targetGroup.getBoundsInParent().getMaxX() + deltaX <= config.get().getDisplayWidth())) {
@@ -627,8 +627,8 @@ public class TargetView implements Target {
 					gap = (event.getX() - targetGroup.getLayoutBounds().getMinX()) * targetGroup.getScaleX();
 				}
 
-				double currentWidth = targetGroup.getBoundsInParent().getWidth();
-				double newWidth = currentWidth + gap;
+				final double currentWidth = targetGroup.getBoundsInParent().getWidth();
+				final double newWidth = currentWidth + gap;
 				
 				
 				double scaleDelta = (newWidth - currentWidth) / currentWidth;
@@ -636,7 +636,7 @@ public class TargetView implements Target {
 				if (fixedAspectRatioResize)
 					aspectScaleDelta = scaleDelta;
 
-				double currentOriginX = targetGroup.getBoundsInParent().getMinX();
+				final double currentOriginX = targetGroup.getBoundsInParent().getMinX();
 				double newOriginX;
 
 				if (right) {
@@ -650,9 +650,9 @@ public class TargetView implements Target {
 
 				if (right) originXDelta *= -1.0;
 
-				double oldLayoutX = targetGroup.getLayoutX();
-				double oldScaleX = targetGroup.getScaleX();
-				double newScaleX = oldScaleX * (1.0 - scaleDelta);
+				final double oldLayoutX = targetGroup.getLayoutX();
+				final double oldScaleX = targetGroup.getScaleX();
+				final double newScaleX = oldScaleX * (1.0 - scaleDelta);
 
 				// If we scale too small the target can do weird things
 				if (newScaleX < 0.001 || Double.isNaN(newScaleX) || Double.isInfinite(newScaleX)) return;
@@ -670,8 +670,8 @@ public class TargetView implements Target {
 				} else {
 					// Target stayed in bounds so make sure that unresizable
 					// target regions stay the same size
-					for (Node n : targetGroup.getChildren()) {
-						TargetRegion r = (TargetRegion) n;
+					for (final Node n : targetGroup.getChildren()) {
+						final TargetRegion r = (TargetRegion) n;
 
 						if (r.tagExists(Target.TAG_RESIZABLE)
 								&& !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
@@ -691,7 +691,7 @@ public class TargetView implements Target {
 				}
 									
 
-				double currentHeight = targetGroup.getBoundsInParent().getHeight();
+				final double currentHeight = targetGroup.getBoundsInParent().getHeight();
 				double newHeight = currentHeight + gap;
 				
 				if (fixedAspectRatioResize) 
@@ -704,7 +704,7 @@ public class TargetView implements Target {
 				
 				double scaleDelta = (newHeight - currentHeight) / currentHeight;
 
-				double currentOriginY = targetGroup.getBoundsInParent().getMinY();
+				final double currentOriginY = targetGroup.getBoundsInParent().getMinY();
 				double newOriginY;
 
 				if (bottom) {
@@ -718,9 +718,9 @@ public class TargetView implements Target {
 
 				if (bottom) originYDelta *= -1.0;
 
-				double oldLayoutY = targetGroup.getLayoutY();
-				double oldScaleY = targetGroup.getScaleY();
-				double newScaleY = oldScaleY * (1.0 - scaleDelta);
+				final double oldLayoutY = targetGroup.getLayoutY();
+				final double oldScaleY = targetGroup.getScaleY();
+				final double newScaleY = oldScaleY * (1.0 - scaleDelta);
 
 				// If we scale too small the target can do weird things
 				if (newScaleY < 0.001 || Double.isNaN(newScaleY) || Double.isInfinite(newScaleY)) return;
@@ -737,8 +737,8 @@ public class TargetView implements Target {
 				} else {
 					// Target stayed in bounds so make sure that unresizable
 					// target regions stay the same size
-					for (Node n : targetGroup.getChildren()) {
-						TargetRegion r = (TargetRegion) n;
+					for (final Node n : targetGroup.getChildren()) {
+						final TargetRegion r = (TargetRegion) n;
 
 						if (r.tagExists(Target.TAG_RESIZABLE)
 								&& !Boolean.parseBoolean(r.getTag(Target.TAG_RESIZABLE))) {
@@ -797,8 +797,8 @@ public class TargetView implements Target {
 
 	private void keyPressed() {
 		targetGroup.setOnKeyPressed((event) -> {
-			double currentWidth = targetGroup.getBoundsInParent().getWidth();
-			double currentHeight = targetGroup.getBoundsInParent().getHeight();
+			final double currentWidth = targetGroup.getBoundsInParent().getWidth();
+			final double currentHeight = targetGroup.getBoundsInParent().getHeight();
 
 			switch (event.getCode()) {
 			case DELETE:
@@ -808,8 +808,8 @@ public class TargetView implements Target {
 
 			case LEFT: {
 				if (event.isShiftDown()) {
-					double newWidth = currentWidth - SCALE_DELTA;
-					double scaleDelta = (newWidth - currentWidth) / currentWidth;
+					final double newWidth = currentWidth - SCALE_DELTA;
+					final double scaleDelta = (newWidth - currentWidth) / currentWidth;
 
 					targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
 
@@ -837,8 +837,8 @@ public class TargetView implements Target {
 
 			case RIGHT: {
 				if (event.isShiftDown()) {
-					double newWidth = currentWidth + SCALE_DELTA;
-					double scaleDelta = (newWidth - currentWidth) / currentWidth;
+					final double newWidth = currentWidth + SCALE_DELTA;
+					final double scaleDelta = (newWidth - currentWidth) / currentWidth;
 
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + (SCALE_DELTA / 2) >= 0
 							&& targetGroup.getBoundsInParent().getMaxX() + (SCALE_DELTA / 2) <= config.get()
@@ -870,8 +870,8 @@ public class TargetView implements Target {
 
 			case UP: {
 				if (event.isShiftDown()) {
-					double newHeight = currentHeight - SCALE_DELTA;
-					double scaleDelta = (newHeight - currentHeight) / currentHeight;
+					final double newHeight = currentHeight - SCALE_DELTA;
+					final double scaleDelta = (newHeight - currentHeight) / currentHeight;
 
 					targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 
@@ -883,7 +883,7 @@ public class TargetView implements Target {
 
 					// Scale up proportionally if ctrl is down
 					if (event.isControlDown()) {
-						KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, true, true, false,
+						final KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, true, true, false,
 								false);
 
 						targetGroup.fireEvent(ke);
@@ -907,8 +907,8 @@ public class TargetView implements Target {
 
 			case DOWN: {
 				if (event.isShiftDown()) {
-					double newHeight = currentHeight + SCALE_DELTA;
-					double scaleDelta = (newHeight - currentHeight) / currentHeight;
+					final double newHeight = currentHeight + SCALE_DELTA;
+					final double scaleDelta = (newHeight - currentHeight) / currentHeight;
 
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + (SCALE_DELTA / 2) >= 0
 							&& targetGroup.getBoundsInParent().getMaxY() + (SCALE_DELTA / 2) <= config.get()
@@ -924,7 +924,7 @@ public class TargetView implements Target {
 
 					// Scale down proportionally if ctrl is down
 					if (event.isControlDown()) {
-						KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.RIGHT, true, true, false,
+						final KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.RIGHT, true, true, false,
 								false);
 
 						targetGroup.fireEvent(ke);

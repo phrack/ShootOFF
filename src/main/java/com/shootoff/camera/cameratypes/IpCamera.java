@@ -48,7 +48,7 @@ public class IpCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(IpCamera.class);
 	private final Webcam ipcam;
 
-	private AtomicBoolean closing = new AtomicBoolean(false);
+	private final AtomicBoolean closing = new AtomicBoolean(false);
 
 	public IpCamera(final Webcam ipcam) {
 		this.ipcam = ipcam;
@@ -73,7 +73,7 @@ public class IpCamera extends CalculatedFPSCamera {
 		try {
 			IpCamDevice ipcam;
 			if (username.isPresent() && password.isPresent()) {
-				IpCamAuth auth = new IpCamAuth(username.get(), password.get());
+				final IpCamAuth auth = new IpCamAuth(username.get(), password.get());
 				ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH, auth));
 			} else {
 				ipcam = IpCamDeviceRegistry.register(new IpCamDevice(cameraName, cameraURL, IpCamMode.PUSH));
@@ -82,12 +82,12 @@ public class IpCamera extends CalculatedFPSCamera {
 			// If a camera can't be reached, webcam capture seems to freeze
 			// indefinitely. This is done
 			// to add an artificial timeout.
-			Thread t = new Thread(() -> ipcam.getResolution(), "GetIPcamResolution");
+			final Thread t = new Thread(() -> ipcam.getResolution(), "GetIPcamResolution");
 			t.start();
 			final int ipcamTimeout = 6000;
 			try {
 				t.join(ipcamTimeout);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				logger.error("Error connecting to webcam", e);
 			}
 
@@ -97,8 +97,8 @@ public class IpCamera extends CalculatedFPSCamera {
 			}
 
 			return new IpCamera(Webcam.getWebcamByName(cameraName));
-		} catch (WebcamException we) {
-			Throwable cause = we.getCause();
+		} catch (final WebcamException we) {
+			final Throwable cause = we.getCause();
 
 			if (cause instanceof UnknownHostException) {
 				throw (UnknownHostException) cause;
@@ -133,7 +133,7 @@ public class IpCamera extends CalculatedFPSCamera {
 		boolean open = false;
 		try {
 			open = ipcam.open();
-		} catch (WebcamException we) {
+		} catch (final WebcamException we) {
 			open = false;
 		}
 		return open;
@@ -183,7 +183,7 @@ public class IpCamera extends CalculatedFPSCamera {
 			ipcam.setCustomViewSizes(new Dimension[] { size });
 
 			ipcam.setViewSize(size);
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			logger.error(String.format("Failed to set dimensions for camera: camera.getName() = %s", getName()), e);
 		}
 	}
@@ -245,7 +245,7 @@ public class IpCamera extends CalculatedFPSCamera {
 		if (this == obj) return true;
 		if (!super.equals(obj)) return false;
 		if (getClass() != obj.getClass()) return false;
-		IpCamera other = (IpCamera) obj;
+		final IpCamera other = (IpCamera) obj;
 		if (ipcam == null) {
 			if (other.ipcam != null) return false;
 		} else if (!ipcam.equals(other.ipcam)) return false;

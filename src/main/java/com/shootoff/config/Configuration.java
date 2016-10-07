@@ -120,13 +120,13 @@ public class Configuration {
 	private static final int DEFAULT_DISPLAY_HEIGHT = 480;
 
 	private InputStream configInput;
-	private String configName;
+	private final String configName;
 
 	private boolean isFirstRun = false;
 	private boolean useErrorReporting = true;
-	private Map<String, URL> ipcams = new HashMap<>();
-	private Map<String, String> ipcamCredentials = new HashMap<>();
-	private Map<String, Camera> webcams = new HashMap<>();
+	private final Map<String, URL> ipcams = new HashMap<>();
+	private final Map<String, String> ipcamCredentials = new HashMap<>();
+	private final Map<String, Camera> webcams = new HashMap<>();
 	private int markerRadius = 4;
 	private boolean ignoreLaserColor = false;
 	private String ignoreLaserColorName = "None";
@@ -140,21 +140,21 @@ public class Configuration {
 	private float malfunctionsProbability = (float) 10.0;
 	private boolean debugMode = false;
 	private Set<Camera> recordingCameras = new HashSet<>();
-	private Set<CameraManager> recordingManagers = new HashSet<>();
-	private Set<VideoPlayerController> videoPlayers = new HashSet<>();
+	private final Set<CameraManager> recordingManagers = new HashSet<>();
+	private final Set<VideoPlayerController> videoPlayers = new HashSet<>();
 	private Optional<SessionRecorder> sessionRecorder = Optional.empty();
 	private TrainingExercise currentExercise = null;
 	private Plugin currentPlugin = null;
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
-	private Map<String, Integer> cameraDistances = new HashMap<>();
-	private Set<String> messagesChimeMuted = new HashSet<String>();
+	private final Map<String, Integer> cameraDistances = new HashMap<>();
+	private final Set<String> messagesChimeMuted = new HashSet<String>();
 
 	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
 
 	private int displayHeight = DEFAULT_DISPLAY_HEIGHT;
 
-	private boolean debugShotsRecordToFiles = false;
+	private final boolean debugShotsRecordToFiles = false;
 
 	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
 	private VirtualMagazineProcessor magazineProcessor = null;
@@ -237,7 +237,7 @@ public class Configuration {
 		} else {
 			try {
 				inputStream = new FileInputStream(configName);
-			} catch (FileNotFoundException e) {
+			} catch (final FileNotFoundException e) {
 				throw new FileNotFoundException("Could not read configuration file " + configName);
 			}
 		}
@@ -246,7 +246,7 @@ public class Configuration {
 
 		try {
 			prop.load(inputStream);
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			throw ioe;
 		} finally {
 			inputStream.close();
@@ -263,8 +263,8 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(IPCAMS_PROP)) {
-			for (String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
-				String[] names = nameString.split("\\|");
+			for (final String nameString : prop.getProperty(IPCAMS_PROP).split(",")) {
+				final String[] names = nameString.split("\\|");
 				if (names.length == 2) {
 					registerIpCam(names[0], names[1], Optional.empty(), Optional.empty());
 				} else if (names.length > 2) {
@@ -274,28 +274,28 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(WEBCAMS_PROP)) {
-			List<String> webcamNames = new ArrayList<String>();
-			List<String> webcamInternalNames = new ArrayList<String>();
+			final List<String> webcamNames = new ArrayList<String>();
+			final List<String> webcamInternalNames = new ArrayList<String>();
 
-			for (String nameString : prop.getProperty(WEBCAMS_PROP).split(",")) {
-				String[] names = nameString.split(":");
+			for (final String nameString : prop.getProperty(WEBCAMS_PROP).split(",")) {
+				final String[] names = nameString.split(":");
 				if (names.length > 1) {
 					webcamNames.add(names[0]);
 					webcamInternalNames.add(names[1]);
 				}
 			}
 
-			for (Camera webcam : CameraFactory.getWebcams()) {
-				int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
+			for (final Camera webcam : CameraFactory.getWebcams()) {
+				final int cameraIndex = webcamInternalNames.indexOf(webcam.getName());
 				if (cameraIndex >= 0) webcams.put(webcamNames.get(cameraIndex), webcam);
 
 			}
 		}
 
-		Set<Camera> recordingCameras = new HashSet<Camera>();
+		final Set<Camera> recordingCameras = new HashSet<Camera>();
 		if (prop.containsKey(RECORDING_WEBCAMS_PROP)) {
-			for (String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP).split(",")) {
-				for (Camera webcam : webcams.values()) {
+			for (final String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP).split(",")) {
+				for (final Camera webcam : webcams.values()) {
 					if (webcam.getName().equals(nameString)) {
 						recordingCameras.add(webcam);
 						continue;
@@ -310,7 +310,7 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(IGNORE_LASER_COLOR_PROP)) {
-			String colorName = prop.getProperty(IGNORE_LASER_COLOR_PROP);
+			final String colorName = prop.getProperty(IGNORE_LASER_COLOR_PROP);
 
 			if (!colorName.equals("None")) {
 				setIgnoreLaserColor(true);
@@ -356,8 +356,8 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(PERSPECTIVE_WEBCAM_DISTANCES)) {
-			for (String distanceString : prop.getProperty(PERSPECTIVE_WEBCAM_DISTANCES).split(",")) {
-				String[] distanceComponents = distanceString.split("\\|");
+			for (final String distanceString : prop.getProperty(PERSPECTIVE_WEBCAM_DISTANCES).split(",")) {
+				final String[] distanceComponents = distanceString.split("\\|");
 				if (distanceComponents.length == 2) {
 					cameraDistances.put(distanceComponents[0], Integer.parseInt(distanceComponents[1]));
 				}
@@ -365,7 +365,7 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(MUTED_CHIME_MESSAGES)) {
-			for (String message : prop.getProperty(MUTED_CHIME_MESSAGES).split("\\|")) {
+			for (final String message : prop.getProperty(MUTED_CHIME_MESSAGES).split("\\|")) {
 				muteMessageChime(message);
 			}
 		}
@@ -389,7 +389,7 @@ public class Configuration {
 		validateConfiguration();
 
 		if (!new File(configName).canWrite()) {
-			Alert writeAlert = new Alert(AlertType.ERROR);
+			final Alert writeAlert = new Alert(AlertType.ERROR);
 			writeAlert.setTitle("Cannot Persist Preferences");
 			writeAlert.setHeaderText("Configuration File Unwritable!");
 			writeAlert.setResizable(true);
@@ -406,7 +406,7 @@ public class Configuration {
 		final Properties prop = new Properties();
 
 		final StringBuilder ipcamList = new StringBuilder();
-		for (Entry<String, URL> entry : ipcams.entrySet()) {
+		for (final Entry<String, URL> entry : ipcams.entrySet()) {
 			if (ipcamList.length() > 0) ipcamList.append(",");
 			ipcamList.append(entry.getKey());
 			ipcamList.append("|");
@@ -419,7 +419,7 @@ public class Configuration {
 		}
 
 		final StringBuilder webcamList = new StringBuilder();
-		for (Entry<String, Camera> entry : webcams.entrySet()) {
+		for (final Entry<String, Camera> entry : webcams.entrySet()) {
 			if (webcamList.length() > 0) webcamList.append(",");
 			webcamList.append(entry.getKey());
 			webcamList.append(":");
@@ -427,19 +427,19 @@ public class Configuration {
 		}
 
 		final StringBuilder recordingWebcamList = new StringBuilder();
-		for (Camera c : recordingCameras) {
+		for (final Camera c : recordingCameras) {
 			if (recordingWebcamList.length() > 0) recordingWebcamList.append(",");
 			recordingWebcamList.append(c.getName());
 		}
 
 		final StringBuilder mutedChimeMessages = new StringBuilder();
-		for (String m : messagesChimeMuted) {
+		for (final String m : messagesChimeMuted) {
 			if (mutedChimeMessages.length() > 0) mutedChimeMessages.append("|");
 			mutedChimeMessages.append(m);
 		}
 
 		final StringBuilder cameraDistancesList = new StringBuilder();
-		for (Entry<String, Integer> distanceEntry : cameraDistances.entrySet()) {
+		for (final Entry<String, Integer> distanceEntry : cameraDistances.entrySet()) {
 			if (cameraDistancesList.length() > 0) cameraDistancesList.append(",");
 			cameraDistancesList.append(distanceEntry.getKey());
 			cameraDistancesList.append("|");
@@ -464,7 +464,7 @@ public class Configuration {
 		prop.setProperty(MUTED_CHIME_MESSAGES, mutedChimeMessages.toString());
 
 		if (getArenaPosition().isPresent()) {
-			Point2D arenaPosition = getArenaPosition().get();
+			final Point2D arenaPosition = getArenaPosition().get();
 
 			prop.setProperty(ARENA_POSITION_X_PROP, String.valueOf(arenaPosition.getX()));
 			prop.setProperty(ARENA_POSITION_Y_PROP, String.valueOf(arenaPosition.getY()));
@@ -475,12 +475,12 @@ public class Configuration {
 		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
 		prop.setProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE, String.valueOf(autoAdjustExposure));
 
-		OutputStream outputStream = new FileOutputStream(configName);
+		final OutputStream outputStream = new FileOutputStream(configName);
 
 		try {
 			prop.store(outputStream, "ShootOFF Configuration");
 			outputStream.flush();
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			throw ioe;
 		} finally {
 			outputStream.close();
@@ -490,7 +490,7 @@ public class Configuration {
 	}
 
 	private void parseCmdLine(String[] args) throws ConfigurationException {
-		Options options = new Options();
+		final Options options = new Options();
 
 		options.addOption("d", "debug", false, "turn on debug log messages");
 		options.addOption("m", "marker-radius", true, "sets the radius of shot markers in pixels [1,20]");
@@ -503,8 +503,8 @@ public class Configuration {
 				"turns on malfunctions and sets the probability of them happening");
 
 		try {
-			CommandLineParser parser = new DefaultParser();
-			CommandLine cmd = parser.parse(options, args);
+			final CommandLineParser parser = new DefaultParser();
+			final CommandLine cmd = parser.parse(options, args);
 
 			if (cmd.hasOption("d")) setDebugMode(true);
 
@@ -524,9 +524,9 @@ public class Configuration {
 				setMalfunctions(true);
 				setMalfunctionsProbability(Float.parseFloat(cmd.getOptionValue("f")));
 			}
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			System.err.println(e.getMessage());
-			HelpFormatter formatter = new HelpFormatter();
+			final HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("com.shootoff.Main", options);
 			Main.forceClose(-1);
 		}
@@ -596,8 +596,8 @@ public class Configuration {
 	}
 
 	public static void disableErrorReporting() {
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		final Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		setLogConsoleAppender(rootLogger, loggerContext);
 	}
 
@@ -616,8 +616,8 @@ public class Configuration {
 	public Optional<Camera> registerIpCam(String cameraName, String cameraURL, Optional<String> username,
 			Optional<String> password) {
 		try {
-			URL url = new URL(cameraURL);
-			Camera cam = IpCamera.registerIpCamera(cameraName, url, username, password);
+			final URL url = new URL(cameraURL);
+			final Camera cam = IpCamera.registerIpCamera(cameraName, url, username, password);
 			ipcams.put(cameraName, url);
 
 			if (username.isPresent() && password.isPresent()) {
@@ -626,14 +626,14 @@ public class Configuration {
 
 			return Optional.of(cam);
 		} catch (MalformedURLException | URISyntaxException ue) {
-			Alert ipcamURLAlert = new Alert(AlertType.ERROR);
+			final Alert ipcamURLAlert = new Alert(AlertType.ERROR);
 			ipcamURLAlert.setTitle("Malformed URL");
 			ipcamURLAlert.setHeaderText("IPCam URL is Malformed!");
 			ipcamURLAlert.setResizable(true);
 			ipcamURLAlert.setContentText("IPCam URL is not valid: \n\n" + ue.getMessage());
 			ipcamURLAlert.showAndWait();
-		} catch (UnknownHostException uhe) {
-			Alert ipcamHostAlert = new Alert(AlertType.ERROR);
+		} catch (final UnknownHostException uhe) {
+			final Alert ipcamHostAlert = new Alert(AlertType.ERROR);
 			ipcamHostAlert.setTitle("Unknown Host");
 			ipcamHostAlert.setHeaderText("IPCam URL Unknown!");
 			ipcamHostAlert.setResizable(true);
@@ -641,8 +641,8 @@ public class Configuration {
 					+ " cannot be resolved. Ensure the URL is correct "
 					+ "and that you are either connected to the internet or on the same network as the camera.");
 			ipcamHostAlert.showAndWait();
-		} catch (TimeoutException te) {
-			Alert ipcamTimeoutAlert = new Alert(AlertType.ERROR);
+		} catch (final TimeoutException te) {
+			final Alert ipcamTimeoutAlert = new Alert(AlertType.ERROR);
 			ipcamTimeoutAlert.setTitle("IPCam Timeout");
 			ipcamTimeoutAlert.setHeaderText("Connection to IPCam Reached Timeout!");
 			ipcamTimeoutAlert.setResizable(true);
@@ -751,10 +751,10 @@ public class Configuration {
 			setFirstRun(false);
 		}
 
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		final Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 
 		if (debugMode) {
-			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+			final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 			setLogConsoleAppender(rootLogger, loggerContext);
 
 			if (rootLogger.getLevel().equals(Level.TRACE)) {
@@ -765,12 +765,12 @@ public class Configuration {
 
 			// Ensure webcam-capture logger stays at info because it is quite
 			// noisy and doesn't output information we care about.
-			Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
+			final Logger webcamCaptureLogger = (Logger) loggerContext.getLogger("com.github.sarxos");
 			webcamCaptureLogger.setLevel(Level.INFO);
 
 			// Drop WebcamDiscoveryService even lower because it is extremely
 			// noisy
-			Logger webcamDiscoveryLogger = (Logger) loggerContext
+			final Logger webcamDiscoveryLogger = (Logger) loggerContext
 					.getLogger("com.github.sarxos.webcam.WebcamDiscoveryService");
 			webcamDiscoveryLogger.setLevel(Level.WARN);
 		} else {
@@ -779,12 +779,12 @@ public class Configuration {
 	}
 
 	private static void setLogConsoleAppender(Logger rootLogger, LoggerContext loggerContext) {
-		PatternLayoutEncoder ple = new PatternLayoutEncoder();
+		final PatternLayoutEncoder ple = new PatternLayoutEncoder();
 
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
 		ple.setContext(loggerContext);
 		ple.start();
-		ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+		final ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
 		consoleAppender.setEncoder(ple);
 		consoleAppender.setContext(loggerContext);
 		consoleAppender.start();
@@ -869,7 +869,7 @@ public class Configuration {
 	}
 
 	public Optional<String> getWebcamsUserName(Camera webcam) {
-		for (Entry<String, Camera> entry : webcams.entrySet()) {
+		for (final Entry<String, Camera> entry : webcams.entrySet()) {
 			if (entry.getValue().equals(webcam)) return Optional.of(entry.getKey());
 		}
 

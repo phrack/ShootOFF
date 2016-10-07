@@ -226,7 +226,7 @@ public class CanvasManager implements CameraView {
 
 			try {
 				config.writeConfigurationFile();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				logger.error("Failed persisting message's (" + message + ") chime mute settings.", e);
 			}
 		});
@@ -235,6 +235,7 @@ public class CanvasManager implements CameraView {
 
 		if (chimeDelay > 0 && !config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
 			@SuppressWarnings("unchecked")
+			final
 			ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
 			diagnosticFutures.put(diagnosticLabel, chimeFuture);
@@ -265,7 +266,7 @@ public class CanvasManager implements CameraView {
 
 	private void jdk8094135Warning() {
 		Platform.runLater(() -> {
-			Alert cameraAlert = new Alert(AlertType.ERROR);
+			final Alert cameraAlert = new Alert(AlertType.ERROR);
 			cameraAlert.setTitle("Internal Error");
 			cameraAlert.setHeaderText("Internal Error -- Likely Too Many false Shots");
 			cameraAlert.setResizable(true);
@@ -316,7 +317,7 @@ public class CanvasManager implements CameraView {
 
 		Image img;
 		if (projectionBounds.isPresent()) {
-			Bounds translatedBounds = translateCameraToCanvas(projectionBounds.get());
+			final Bounds translatedBounds = translateCameraToCanvas(projectionBounds.get());
 			background.setX(translatedBounds.getMinX());
 			background.setY(translatedBounds.getMinY());
 
@@ -355,8 +356,8 @@ public class CanvasManager implements CameraView {
 	private BufferedImage resize(BufferedImage source, int width, int height) {
 		if (source.getWidth() == width && source.getHeight() == height) return source;
 
-		BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g2 = tmp.createGraphics();
+		final BufferedImage tmp = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		final Graphics2D g2 = tmp.createGraphics();
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		g2.drawImage(source, 0, 0, width, height, null);
 		g2.dispose();
@@ -365,7 +366,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	public BufferedImage getBufferedImage() {
-		BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
+		final BufferedImage projectedScene = SwingFXUtils.fromFXImage(canvasGroup.getScene().snapshot(null), null);
 		return projectedScene;
 	}
 
@@ -374,13 +375,13 @@ public class CanvasManager implements CameraView {
 				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
 			return bounds;
 
-		double scaleX = (double) config.getDisplayWidth() / (double) cameraManager.getFeedWidth();
-		double scaleY = (double) config.getDisplayHeight() / (double) cameraManager.getFeedHeight();
+		final double scaleX = (double) config.getDisplayWidth() / (double) cameraManager.getFeedWidth();
+		final double scaleY = (double) config.getDisplayHeight() / (double) cameraManager.getFeedHeight();
 
-		double minX = (bounds.getMinX() * scaleX);
-		double minY = (bounds.getMinY() * scaleY);
-		double width = (bounds.getWidth() * scaleX);
-		double height = (bounds.getHeight() * scaleY);
+		final double minX = (bounds.getMinX() * scaleX);
+		final double minY = (bounds.getMinY() * scaleY);
+		final double width = (bounds.getWidth() * scaleX);
+		final double height = (bounds.getHeight() * scaleY);
 
 		logger.trace("translateCameraToCanvas {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
@@ -393,13 +394,13 @@ public class CanvasManager implements CameraView {
 				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
 			return bounds;
 
-		double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
-		double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
+		final double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
+		final double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
 
-		double minX = (bounds.getMinX() * scaleX);
-		double minY = (bounds.getMinY() * scaleY);
-		double width = (bounds.getWidth() * scaleX);
-		double height = (bounds.getHeight() * scaleY);
+		final double minX = (bounds.getMinX() * scaleX);
+		final double minY = (bounds.getMinY() * scaleY);
+		final double width = (bounds.getWidth() * scaleX);
+		final double height = (bounds.getHeight() * scaleY);
 
 		logger.trace("translateCanvasToCamera {} {} {} {} - {} {} {} {}", bounds.getMinX(), bounds.getMinY(),
 				bounds.getWidth(), bounds.getHeight(), minX, minY, width, height);
@@ -414,14 +415,14 @@ public class CanvasManager implements CameraView {
 	@Override
 	public void clearShots() {
 		final Runnable clearShotsAction = () -> {
-			for (Shot shot : shots) {
+			for (final Shot shot : shots) {
 				canvasGroup.getChildren().remove(shot.getMarker());
 			}
 
 			shots.clear();
 			try {
 				if (shotEntries != null) shotEntries.clear();
-			} catch (NullPointerException npe) {
+			} catch (final NullPointerException npe) {
 				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
@@ -438,8 +439,8 @@ public class CanvasManager implements CameraView {
 	@Override
 	public void reset() {
 		// Reset animations
-		for (Target target : targets) {
-			for (TargetRegion region : target.getRegions()) {
+		for (final Target target : targets) {
+			for (final TargetRegion region : target.getRegions()) {
 				if (region.getType() == RegionType.IMAGE) ((ImageRegion) region).reset();
 			}
 		}
@@ -458,7 +459,7 @@ public class CanvasManager implements CameraView {
 
 	public void setShowShots(boolean showShots) {
 		if (this.showShots != showShots) {
-			for (Shot shot : shots)
+			for (final Shot shot : shots)
 				shot.getMarker().setVisible(showShots);
 		}
 
@@ -467,7 +468,7 @@ public class CanvasManager implements CameraView {
 
 	private void notifyShot(Shot shot) {
 		if (config.getSessionRecorder().isPresent()) {
-			for (CameraManager cm : config.getRecordingManagers())
+			for (final CameraManager cm : config.getRecordingManagers())
 				cm.notifyShot(shot);
 		}
 	}
@@ -476,8 +477,8 @@ public class CanvasManager implements CameraView {
 		if (config.getSessionRecorder().isPresent() && !config.getRecordingManagers().isEmpty()) {
 			final StringBuilder sb = new StringBuilder();
 
-			for (CameraManager cm : config.getRecordingManagers()) {
-				ShotRecorder r = cm.getRevelantRecorder(shot);
+			for (final CameraManager cm : config.getRecordingManagers()) {
+				final ShotRecorder r = cm.getRevelantRecorder(shot);
 
 				if (sb.length() > 0) {
 					sb.append(",");
@@ -498,7 +499,7 @@ public class CanvasManager implements CameraView {
 
 		Optional<ShotProcessor> rejectingProcessor = Optional.empty();
 
-		for (ShotProcessor processor : config.getShotProcessors()) {
+		for (final ShotProcessor processor : config.getShotProcessors()) {
 			if (!processor.processShot(shot)) {
 				if (processor instanceof MalfunctionsProcessor) {
 					hadMalfunction = true;
@@ -521,7 +522,7 @@ public class CanvasManager implements CameraView {
 
 		notifyShot(shot);
 
-		Optional<String> videoString = createVideoString(shot);
+		final Optional<String> videoString = createVideoString(shot);
 
 		if (rejectingProcessor instanceof MalfunctionsProcessor) {
 			config.getSessionRecorder().get().recordShot(cameraName, shot, true, false, Optional.empty(),
@@ -540,7 +541,7 @@ public class CanvasManager implements CameraView {
 	@Override
 	public void addShot(Shot shot, boolean isMirroredShot) {
 		if (!isMirroredShot) {
-			Optional<ShotProcessor> rejectingProcessor = processShot(shot);
+			final Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 			if (rejectingProcessor.isPresent()) {
 				recordRejectedShot(shot, rejectingProcessor.get());
 				return;
@@ -578,7 +579,7 @@ public class CanvasManager implements CameraView {
 	
 			try {
 				shotEntries.add(shotEntry);
-			} catch (NullPointerException npe) {
+			} catch (final NullPointerException npe) {
 				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
@@ -627,8 +628,8 @@ public class CanvasManager implements CameraView {
 		shots.add(shot);
 		drawShot(shot);
 
-		Optional<TrainingExercise> currentExercise = config.getExercise();
-		Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
+		final Optional<TrainingExercise> currentExercise = config.getExercise();
+		final Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
 			executeRegionCommands(hit.get());
 		}
@@ -644,7 +645,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	private void drawShot(Shot shot) {
-		Runnable drawShotAction  = () -> {
+		final Runnable drawShotAction  = () -> {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
 		};
@@ -660,20 +661,20 @@ public class CanvasManager implements CameraView {
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
-		for (ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
-			Target target = li.previous();
+		for (final ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
+			final Target target = li.previous();
 
-			Optional<Hit> hit = target.isHit(shot);
+			final Optional<Hit> hit = target.isHit(shot);
 
 			if (hit.isPresent()) {
-				TargetRegion region = hit.get().getHitRegion();
+				final TargetRegion region = hit.get().getHitRegion();
 
 				if (config.inDebugMode()) {
-					Map<String, String> tags = region.getAllTags();
+					final Map<String, String> tags = region.getAllTags();
 
-					StringBuilder tagList = new StringBuilder();
-					for (Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
-						Entry<String, String> entry = it.next();
+					final StringBuilder tagList = new StringBuilder();
+					for (final Iterator<Entry<String, String>> it = tags.entrySet().iterator(); it.hasNext();) {
+						final Entry<String, String> entry = it.next();
 						tagList.append(entry.getKey());
 						tagList.append(":");
 						tagList.append(entry.getValue());
@@ -723,7 +724,7 @@ public class CanvasManager implements CameraView {
 				// if it's an image region that is down and if so, don't
 				// play the sound
 				if (args.size() == 2) {
-					Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets, hit.getHitRegion(),
+					final Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets, hit.getHitRegion(),
 							args.get(1));
 					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
 						if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
@@ -734,9 +735,9 @@ public class CanvasManager implements CameraView {
 				// load the sound as a resource from the current exercises
 				// JAR file. This indicates that the target is from
 				// a modular exercise
-				String soundPath = args.get(0);
+				final String soundPath = args.get(0);
 				if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
-					InputStream is = config.getExercise().get().getClass().getResourceAsStream(soundPath.substring(1));
+					final InputStream is = config.getExercise().get().getClass().getResourceAsStream(soundPath.substring(1));
 					TrainingExerciseBase.playSound(new BufferedInputStream(is));
 				} else if ('@' != soundPath.charAt(0)) {
 					TrainingExerciseBase.playSound(soundPath);
@@ -759,9 +760,9 @@ public class CanvasManager implements CameraView {
 						+ "exist for the target.");
 			}
 
-			ClassLoader loader = config.getPlugin().get().getLoader();
+			final ClassLoader loader = config.getPlugin().get().getLoader();
 
-			InputStream resourceTargetStream = loader
+			final InputStream resourceTargetStream = loader
 					.getResourceAsStream(targetFile.toString().substring(1).replace("\\", "/"));
 			if (resourceTargetStream != null) {
 				targetComponents = TargetIO.loadTarget(resourceTargetStream, playAnimations, loader);
@@ -778,11 +779,11 @@ public class CanvasManager implements CameraView {
 	}
 	
 	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
-		Optional<TargetComponents> targetComponents = loadTarget(targetFile, playAnimations);
+		final Optional<TargetComponents> targetComponents = loadTarget(targetFile, playAnimations);
 
 		if (targetComponents.isPresent()) {
-			TargetComponents tc = targetComponents.get();
-			Optional<Target> target = Optional.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
+			final TargetComponents tc = targetComponents.get();
+			final Optional<Target> target = Optional.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
 
 			if (config.getSessionRecorder().isPresent() && target.isPresent()) {
 				config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
@@ -862,7 +863,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	public void clearTargets() {
-		for (Target t : new ArrayList<Target>(targets)) {
+		for (final Target t : new ArrayList<Target>(targets)) {
 			removeTarget(t);
 		}
 	}

@@ -45,40 +45,40 @@ public class SessionIO {
 			return;
 		}
 
-		for (String cameraName : sessionRecorder.getEvents().keySet()) {
+		for (final String cameraName : sessionRecorder.getEvents().keySet()) {
 			visitor.visitCamera(cameraName);
 
-			for (Event e : sessionRecorder.getCameraEvents(cameraName)) {
+			for (final Event e : sessionRecorder.getCameraEvents(cameraName)) {
 				switch (e.getType()) {
 				case SHOT:
-					ShotEvent se = (ShotEvent) e;
+					final ShotEvent se = (ShotEvent) e;
 					visitor.visitShot(se.getTimestamp(), se.getShot(), se.isMalfunction(), se.isReload(),
 							se.getTargetIndex(), se.getHitRegionIndex(), se.getVideoString());
 					break;
 
 				case TARGET_ADDED:
-					TargetAddedEvent tae = (TargetAddedEvent) e;
+					final TargetAddedEvent tae = (TargetAddedEvent) e;
 					visitor.visitTargetAdd(tae.getTimestamp(), tae.getTargetName());
 					break;
 
 				case TARGET_REMOVED:
-					TargetRemovedEvent tre = (TargetRemovedEvent) e;
+					final TargetRemovedEvent tre = (TargetRemovedEvent) e;
 					visitor.visitTargetRemove(tre.getTimestamp(), tre.getTargetIndex());
 					break;
 
 				case TARGET_RESIZED:
-					TargetResizedEvent trre = (TargetResizedEvent) e;
+					final TargetResizedEvent trre = (TargetResizedEvent) e;
 					visitor.visitTargetResize(trre.getTimestamp(), trre.getTargetIndex(), trre.getNewWidth(),
 							trre.getNewHeight());
 					break;
 
 				case TARGET_MOVED:
-					TargetMovedEvent tme = (TargetMovedEvent) e;
+					final TargetMovedEvent tme = (TargetMovedEvent) e;
 					visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());
 					break;
 
 				case EXERCISE_FEED_MESSAGE:
-					ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
+					final ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
 					visitor.visitExerciseFeedMessage(pfme.getTimestamp(), pfme.getMessage());
 					break;
 				}
@@ -105,7 +105,7 @@ public class SessionIO {
 		if (events == null) {
 			return Optional.empty();
 		} else {
-			SessionRecorder sessionRecorder = new SessionRecorder();
+			final SessionRecorder sessionRecorder = new SessionRecorder();
 			sessionRecorder.addEvents(events);
 			return Optional.of(sessionRecorder);
 		}

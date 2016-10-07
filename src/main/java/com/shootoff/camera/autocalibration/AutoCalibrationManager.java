@@ -63,9 +63,9 @@ public class AutoCalibrationManager {
 	private static final double PAPER_MARGIN_HEIGHT = 1.03;
 	private static final Size boardSize = new Size(PATTERN_WIDTH, PATTERN_HEIGHT);
 
-	private CameraCalibrationListener calibrationListener;
+	private final CameraCalibrationListener calibrationListener;
 
-	private Camera camera;
+	private final Camera camera;
 
 	// Stores the transformation matrix
 	private Mat perspMat = null;
@@ -130,20 +130,20 @@ public class AutoCalibrationManager {
 		boundsRect = null;
 		boundingBox = null;
 		perspMat = null;
-		for (AutoCalStep step : steps)
+		for (final AutoCalStep step : steps)
 			if (step.enabled()) step.reset();
 	}
 
 	public Mat preProcessFrame(final Mat mat) {
 		if (mat.channels() == 1) return mat.clone();
 
-		Mat newMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1);
+		final Mat newMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1);
 
 		Imgproc.cvtColor(mat, newMat, Imgproc.COLOR_BGR2GRAY);
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("grayscale.png");
-			File file = new File(filename);
+			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, newMat);
 		}
@@ -152,14 +152,14 @@ public class AutoCalibrationManager {
 	}
 
 	private boolean isFinished() {
-		for (AutoCalStep step : steps)
+		for (final AutoCalStep step : steps)
 			if (step.enabled() && !step.completed()) return false;
 		return true;
 	}
 
 	public void processFrame(final Frame frame) {
-		Mat grayMat = preProcessFrame(frame.getOriginalMat());
-		for (AutoCalStep step : steps) {
+		final Mat grayMat = preProcessFrame(frame.getOriginalMat());
+		for (final AutoCalStep step : steps) {
 			if (step.enabled() && !step.completed()) {
 				step.process(new Frame(grayMat, frame.getTimestamp()));
 				break;
@@ -173,7 +173,7 @@ public class AutoCalibrationManager {
 
 	// FOR TESTS ONLY
 	public Mat prepTestFrame(BufferedImage frame) {
-		Mat mat = preProcessFrame(Camera.bufferedImageToMat(frame));
+		final Mat mat = preProcessFrame(Camera.bufferedImageToMat(frame));
 		Imgproc.equalizeHist(mat, mat);
 		return mat;
 	}
@@ -217,11 +217,11 @@ public class AutoCalibrationManager {
 
 			Imgproc.equalizeHist(frame.getOriginalMat(), frame.getOriginalMat());
 
-			List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
+			final List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
 
 			if (listPatterns.isEmpty()) return;
 
-			Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
+			final Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
 			if (paperRes.isPresent())
 				((StepFindPaperPattern) stepFindPaperPattern).addPaperDimensions(paperRes.get(), true);
 
@@ -230,7 +230,7 @@ public class AutoCalibrationManager {
 			// Technically there could still be more than one pattern
 			// or even a pattern that is much too small
 			// But damn if we're gonna fix every problem the user gives us
-			Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), frame.getOriginalMat());
+			final Optional<Bounds> bounds = calibrateFrame(listPatterns.get(0), frame.getOriginalMat());
 
 			if (bounds.isPresent()) {
 				boundsResult = bounds.get();
@@ -367,11 +367,11 @@ public class AutoCalibrationManager {
 
 			frame = undistortFrame(frame);
 
-			List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
+			final List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
 
 			if (listPatterns.isEmpty()) return;
 
-			Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
+			final Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
 
 			if (paperRes.isPresent()) {
 				addPaperDimensions(paperRes.get(), false);
@@ -438,7 +438,7 @@ public class AutoCalibrationManager {
 
 			if (completed || (System.currentTimeMillis() - lastSample) < SAMPLE_DELAY) return;
 
-			Scalar mean = Core.mean(frame.getOriginalMat());
+			final Scalar mean = Core.mean(frame.getOriginalMat());
 			if (origMean == 0) origMean = mean.val[0];
 
 			logger.trace("{} {}", mean.val[0], TARGET_THRESH);
@@ -451,7 +451,7 @@ public class AutoCalibrationManager {
 
 			if (logger.isTraceEnabled()) {
 				String filename = String.format("exposure-%d.png", lastSample);
-				File file = new File(filename);
+				final File file = new File(filename);
 				filename = file.toString();
 				Highgui.imwrite(filename, frame.getOriginalMat());
 			}
@@ -474,11 +474,11 @@ public class AutoCalibrationManager {
 	}
 
 	private List<MatOfPoint2f> findPatterns(Mat mat, boolean findMultiple) {
-		List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
+		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
 
 		int count = 0;
 		while (true) {
-			Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
+			final Optional<MatOfPoint2f> boardCorners = findChessboard(mat);
 
 			if (boardCorners.isPresent()) {
 				patternList.add(boardCorners.get());
@@ -491,7 +491,7 @@ public class AutoCalibrationManager {
 
 				if (logger.isTraceEnabled()) {
 					String filename = String.format("blanked-box-%d.png", count);
-					File file = new File(filename);
+					final File file = new File(filename);
 					filename = file.toString();
 					Highgui.imwrite(filename, mat);
 
@@ -531,7 +531,7 @@ public class AutoCalibrationManager {
 		final MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
 
 		// Estimate the pattern corners
-		MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect);
+		final MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect);
 
 		// More definitively find corners using goodFeaturesToTrack
 		final Optional<Point[]> corners = findCorners(boardRect, mat, estimatedPatternRect);
@@ -539,7 +539,7 @@ public class AutoCalibrationManager {
 		if (!corners.isPresent()) return Optional.empty();
 
 		// Creates sorted cornerArray for warp perspective
-		MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect, corners.get());
+		final MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect, corners.get());
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("calibrate-dist.png");
@@ -568,7 +568,7 @@ public class AutoCalibrationManager {
 			filename = file.toString();
 			Highgui.imwrite(filename, undistorted);
 
-			Mat undistortedCropped = undistorted.submat((int) boundingBox.getMinY(), (int) boundingBox.getMaxY(),
+			final Mat undistortedCropped = undistorted.submat((int) boundingBox.getMinY(), (int) boundingBox.getMaxY(),
 					(int) boundingBox.getMinX(), (int) boundingBox.getMaxX());
 
 			filename = String.format("calibrate-undist-cropped.png");
@@ -589,8 +589,8 @@ public class AutoCalibrationManager {
 			final double squareHeight = boundingBox.getHeight() / (double) (PATTERN_HEIGHT + 1);
 			final double squareWidth = boundingBox.getWidth() / (double) (PATTERN_WIDTH + 1);
 
-			int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
-			int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
+			final int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
+			final int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
 
 			if (logger.isDebugEnabled()) logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX,
 					secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
@@ -601,15 +601,15 @@ public class AutoCalibrationManager {
 	}
 
 	private MatOfPoint2f sortPointsForWarpPerspective(final MatOfPoint2f boardRect, final Point[] corners) {
-		Point[] cornerArray = new Point[4];
-		Double[] cornerED = new Double[4];
-		Point[] boardRectArray = boardRect.toArray();
+		final Point[] cornerArray = new Point[4];
+		final Double[] cornerED = new Double[4];
+		final Point[] boardRectArray = boardRect.toArray();
 		for (int i = 0; i < 4; i++)
 			cornerED[i] = -1.0;
-		for (Point cpt : corners) {
+		for (final Point cpt : corners) {
 			for (int i = 0; i < 4; i++) {
 
-				double tempED = euclideanDistance(cpt, boardRectArray[i]);
+				final double tempED = euclideanDistance(cpt, boardRectArray[i]);
 				if (cornerED[i] == -1.0 || tempED < cornerED[i]) {
 					cornerArray[i] = cpt;
 					cornerED[i] = tempED;
@@ -617,23 +617,23 @@ public class AutoCalibrationManager {
 			}
 		}
 
-		MatOfPoint2f corners2f = new MatOfPoint2f();
+		final MatOfPoint2f corners2f = new MatOfPoint2f();
 		corners2f.fromArray(cornerArray);
 		return corners2f;
 	}
 
 	private Optional<Point[]> findCorners(MatOfPoint2f boardRect, Mat mat, MatOfPoint2f estimatedPatternRect) {
 
-		Point[] cornerArray = new Point[4];
+		final Point[] cornerArray = new Point[4];
 
 		Mat mask;
 
 		final Point[] estimatedPoints = estimatedPatternRect.toArray();
 
 		// Establishes a search region
-		long region = mat.total() / 19200;
+		final long region = mat.total() / 19200;
 
-		Mat denoisedMat = new Mat(mat.size(), CvType.CV_8UC1);
+		final Mat denoisedMat = new Mat(mat.size(), CvType.CV_8UC1);
 		Photo.fastNlMeansDenoising(mat, denoisedMat, 21f, 7, 21);
 
 		Imgproc.GaussianBlur(denoisedMat, mat, new Size(0, 0), 10);
@@ -646,19 +646,19 @@ public class AutoCalibrationManager {
 		}
 
 		int i = 0;
-		for (Point pt : estimatedPoints) {
-			MatOfPoint tempCorners = new MatOfPoint();
+		for (final Point pt : estimatedPoints) {
+			final MatOfPoint tempCorners = new MatOfPoint();
 
 			mask = Mat.zeros(mat.size(), CvType.CV_8UC1);
 
-			Point leftpt = new Point(pt.x - region, pt.y - region);
-			Point rightpt = new Point(pt.x + region, pt.y + region);
+			final Point leftpt = new Point(pt.x - region, pt.y - region);
+			final Point rightpt = new Point(pt.x + region, pt.y + region);
 
 			Core.rectangle(mask, leftpt, rightpt, new Scalar(255), -1);
 
 			if (logger.isTraceEnabled()) {
 				String filename = String.format("mask-%d.png", i);
-				File file = new File(filename);
+				final File file = new File(filename);
 				filename = file.toString();
 				Highgui.imwrite(filename, mask);
 			}
@@ -670,8 +670,8 @@ public class AutoCalibrationManager {
 			Point res = null;
 			long dist = mat.total();
 
-			for (Point p : tempCorners.toArray()) {
-				long tempDist = (long) (Math.min(mat.width() - p.x, p.x) + Math.min(mat.height() - p.y, p.y));
+			for (final Point p : tempCorners.toArray()) {
+				final long tempDist = (long) (Math.min(mat.width() - p.x, p.x) + Math.min(mat.height() - p.y, p.y));
 				if (tempDist < dist) {
 					dist = tempDist;
 					res = p;
@@ -691,7 +691,7 @@ public class AutoCalibrationManager {
 		if (logger.isTraceEnabled()) {
 
 			String filename = String.format("corners.png");
-			File file = new File(filename);
+			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, tempMat);
 
@@ -716,7 +716,7 @@ public class AutoCalibrationManager {
 		for (; index < patternList.size(); index++) {
 			boardCorners = patternList.get(index);
 
-			RotatedRect rect = getPatternDimensions(boardCorners);
+			final RotatedRect rect = getPatternDimensions(boardCorners);
 
 			// OpenCV gives us the checkerboard corners, not the outside
 			// dimension
@@ -770,21 +770,21 @@ public class AutoCalibrationManager {
 
 	// What a stupid function, can't be the best way
 	private void blankRotatedRect(Mat mat, final RotatedRect rect) {
-		Mat tempMat = Mat.zeros(mat.size(), CvType.CV_8UC1);
+		final Mat tempMat = Mat.zeros(mat.size(), CvType.CV_8UC1);
 
-		Point points[] = new Point[4];
+		final Point points[] = new Point[4];
 		rect.points(points);
 		for (int i = 0; i < 4; ++i) {
 			Core.line(tempMat, points[i], points[(i + 1) % 4], new Scalar(255, 255, 255));
 		}
 
-		Mat tempMask = Mat.zeros((mat.rows() + 2), (mat.cols() + 2), CvType.CV_8UC1);
+		final Mat tempMask = Mat.zeros((mat.rows() + 2), (mat.cols() + 2), CvType.CV_8UC1);
 		Imgproc.floodFill(tempMat, tempMask, rect.center, new Scalar(255, 255, 255), null, new Scalar(0, 0, 0),
 				new Scalar(254, 254, 254), 4);
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("poly.png");
-			File file = new File(filename);
+			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, tempMat);
 		}
@@ -980,8 +980,8 @@ public class AutoCalibrationManager {
 		if (logger.isTraceEnabled()) {
 			logger.trace("points {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
 
-			double angle = Math.atan((topRight.y - topLeft.y) / (topRight.x - topLeft.x)) * 180 / Math.PI;
-			double angle2 = Math.atan((bottomRight.y - bottomLeft.y) / (bottomRight.x - bottomLeft.x)) * 180 / Math.PI;
+			final double angle = Math.atan((topRight.y - topLeft.y) / (topRight.x - topLeft.x)) * 180 / Math.PI;
+			final double angle2 = Math.atan((bottomRight.y - bottomLeft.y) / (bottomRight.x - bottomLeft.x)) * 180 / Math.PI;
 
 			logger.trace("square size {} {} - angle {}", topWidth / (PATTERN_WIDTH - 1),
 					leftHeight / (PATTERN_HEIGHT - 1), angle);
@@ -992,16 +992,16 @@ public class AutoCalibrationManager {
 		// Estimate the square widths, that is what we base the estimate of the
 		// real corners on
 
-		double squareTopWidth = (1 + BORDER_FACTOR) * (topWidth / (PATTERN_WIDTH - 1));
-		double squareLeftHeight = (1 + BORDER_FACTOR) * (leftHeight / (PATTERN_HEIGHT - 1));
-		double squareBottomWidth = (1 + BORDER_FACTOR) * (bottomWidth / (PATTERN_WIDTH - 1));
-		double squareRightHeight = (1 + BORDER_FACTOR) * (rightHeight / (PATTERN_HEIGHT - 1));
+		final double squareTopWidth = (1 + BORDER_FACTOR) * (topWidth / (PATTERN_WIDTH - 1));
+		final double squareLeftHeight = (1 + BORDER_FACTOR) * (leftHeight / (PATTERN_HEIGHT - 1));
+		final double squareBottomWidth = (1 + BORDER_FACTOR) * (bottomWidth / (PATTERN_WIDTH - 1));
+		final double squareRightHeight = (1 + BORDER_FACTOR) * (rightHeight / (PATTERN_HEIGHT - 1));
 
 		// The estimations
-		double[] newTopLeft = { topLeft.x - squareTopWidth, topLeft.y - squareLeftHeight };
-		double[] newBottomLeft = { bottomLeft.x - squareBottomWidth, bottomLeft.y + squareLeftHeight };
-		double[] newTopRight = { topRight.x + squareTopWidth, topRight.y - squareRightHeight };
-		double[] newBottomRight = { bottomRight.x + squareBottomWidth, bottomRight.y + squareRightHeight };
+		final double[] newTopLeft = { topLeft.x - squareTopWidth, topLeft.y - squareLeftHeight };
+		final double[] newBottomLeft = { bottomLeft.x - squareBottomWidth, bottomLeft.y + squareLeftHeight };
+		final double[] newTopRight = { topRight.x + squareTopWidth, topRight.y - squareRightHeight };
+		final double[] newBottomRight = { bottomRight.x + squareBottomWidth, bottomRight.y + squareRightHeight };
 
 		// Populate the result
 		result.put(0, 0, newTopLeft);
@@ -1104,7 +1104,7 @@ public class AutoCalibrationManager {
 					new Point(boundingBox.getMinX(), boundingBox.getMaxY()), new Scalar(0, 255, 0));
 
 			String filename = String.format("calibrate-transformation.png");
-			File file = new File(filename);
+			final File file = new File(filename);
 			filename = file.toString();
 			Highgui.imwrite(filename, debugFrame);
 		}
@@ -1143,9 +1143,9 @@ public class AutoCalibrationManager {
 
 	public Optional<MatOfPoint2f> findChessboard(Mat mat) {
 
-		MatOfPoint2f imageCorners = new MatOfPoint2f();
+		final MatOfPoint2f imageCorners = new MatOfPoint2f();
 
-		boolean found = Calib3d.findChessboardCorners(mat, boardSize, imageCorners,
+		final boolean found = Calib3d.findChessboardCorners(mat, boardSize, imageCorners,
 				Calib3d.CALIB_CB_ADAPTIVE_THRESH | Calib3d.CALIB_CB_NORMALIZE_IMAGE);
 
 		logger.trace("found {}", found);
@@ -1162,18 +1162,18 @@ public class AutoCalibrationManager {
 
 	// converts the chessboard corners into a quadrilateral
 	private MatOfPoint2f calcBoardRectFromCorners(MatOfPoint2f corners) {
-		MatOfPoint2f result = new MatOfPoint2f();
+		final MatOfPoint2f result = new MatOfPoint2f();
 		result.alloc(4);
 
-		Point topLeft = new Point(corners.get(0, 0)[0], corners.get(0, 0)[1]);
-		Point topRight = new Point(corners.get(PATTERN_WIDTH - 1, 0)[0], corners.get(PATTERN_WIDTH - 1, 0)[1]);
-		Point bottomRight = new Point(corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[0],
+		final Point topLeft = new Point(corners.get(0, 0)[0], corners.get(0, 0)[1]);
+		final Point topRight = new Point(corners.get(PATTERN_WIDTH - 1, 0)[0], corners.get(PATTERN_WIDTH - 1, 0)[1]);
+		final Point bottomRight = new Point(corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[0],
 				corners.get(PATTERN_WIDTH * PATTERN_HEIGHT - 1, 0)[1]);
-		Point bottomLeft = new Point(corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0],
+		final Point bottomLeft = new Point(corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[0],
 				corners.get(PATTERN_WIDTH * (PATTERN_HEIGHT - 1), 0)[1]);
 
-		Point[] unsorted = { topLeft, topRight, bottomLeft, bottomRight };
-		Point[] sorted = sortCorners(unsorted);
+		final Point[] unsorted = { topLeft, topRight, bottomLeft, bottomRight };
+		final Point[] sorted = sortCorners(unsorted);
 
 		result.fromArray(sorted);
 
@@ -1193,10 +1193,10 @@ public class AutoCalibrationManager {
 	// | |
 	// 4th-------3rd
 	private Point[] sortCorners(Point[] corners) {
-		Point[] result = new Point[4];
+		final Point[] result = new Point[4];
 
-		Point center = new Point(0, 0);
-		for (Point corner : corners) {
+		final Point center = new Point(0, 0);
+		for (final Point corner : corners) {
 			center.x += corner.x;
 			center.y += corner.y;
 		}
@@ -1204,8 +1204,8 @@ public class AutoCalibrationManager {
 		center.x *= (1.0 / corners.length);
 		center.y *= (1.0 / corners.length);
 
-		List<Point> top = new ArrayList<Point>();
-		List<Point> bot = new ArrayList<Point>();
+		final List<Point> top = new ArrayList<Point>();
+		final List<Point> bot = new ArrayList<Point>();
 
 		for (int i = 0; i < corners.length; i++) {
 			if (corners[i].y < center.y)
@@ -1271,7 +1271,7 @@ public class AutoCalibrationManager {
 	public java.awt.Point undistortCoords(int x, int y) {
 		if (!warpInitialized) return new java.awt.Point(x, y);
 
-		MatOfPoint2f point = new MatOfPoint2f();
+		final MatOfPoint2f point = new MatOfPoint2f();
 		point.alloc(1);
 		point.put(0, 0, new double[] { x, y });
 

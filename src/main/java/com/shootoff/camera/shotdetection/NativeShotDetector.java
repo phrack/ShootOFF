@@ -15,7 +15,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 		if (!isSystemSupported())
 			return false;
 
-		File lib = new File(System.mapLibraryName("NativeShotDetector"));
+		final File lib = new File(System.mapLibraryName("NativeShotDetector"));
 		System.load(lib.getAbsolutePath());
 
 		return true;
@@ -23,7 +23,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 
 	public static boolean isSystemSupported() {
 		// TODO: Remove this flag when no longer loading dummy detector
-		boolean USE_NATIVE_DETECTION = false;
+		final boolean USE_NATIVE_DETECTION = false;
 
 		final String os = System.getProperty("os.name");
 		// Do to an oddity in the JVM, this is actually the JRE bitness,
@@ -66,7 +66,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, long timestamp, int rgb) {
-		Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
+		final Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
 
 		super.addShot(c, x, y, timestamp, true);
 	}

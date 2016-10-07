@@ -61,8 +61,8 @@ public class RollingRecorder implements Closeable {
 
 	private final List<IVideoPicture> bufferedFrames = new ArrayList<IVideoPicture>();
 
-	private int recordWidth;
-	private int recordHeight;
+	private final int recordWidth;
+	private final int recordHeight;
 
 	public RollingRecorder(ICodec.ID codec, String extension, String sessionName, String cameraName,
 			CameraManager cameraManager) {
@@ -86,12 +86,12 @@ public class RollingRecorder implements Closeable {
 	}
 
 	public void recordFrame(BufferedImage frame) {
-		BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+		final BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+		final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
 		timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
 
-		IVideoPicture f = converter.toPicture(image, timestamp * 1000);
+		final IVideoPicture f = converter.toPicture(image, timestamp * 1000);
 		f.setKeyFrame(isFirstShotFrame);
 		f.setQuality(0);
 
@@ -130,13 +130,13 @@ public class RollingRecorder implements Closeable {
 			relativeVideoFile = new File(sessionName + File.separator + String.valueOf(System.nanoTime()) + extension);
 		}
 
-		File videoFile = new File(
+		final File videoFile = new File(
 				System.getProperty("shootoff.sessions") + File.separator + relativeVideoFile.getPath());
 
-		IMediaReader reader = ToolFactory.makeReader(this.videoFile.getPath());
+		final IMediaReader reader = ToolFactory.makeReader(this.videoFile.getPath());
 		reader.open();
-		long startCutTimestamp = (reader.getContainer().getDuration() / 1000) - ShotRecorder.RECORD_LENGTH;
-		Cutter cutter = new Cutter(videoFile, codec, startCutTimestamp, recordWidth, recordHeight);
+		final long startCutTimestamp = (reader.getContainer().getDuration() / 1000) - ShotRecorder.RECORD_LENGTH;
+		final Cutter cutter = new Cutter(videoFile, codec, startCutTimestamp, recordWidth, recordHeight);
 		reader.addListener(cutter);
 
 		logger.debug("Forking video file {} to {}, keepOld = {}, start cutting at = {} ms",
@@ -145,21 +145,21 @@ public class RollingRecorder implements Closeable {
 		while (reader.readPacket() == null)
 			;
 
-		ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getLastTimestamp(),
+		final ForkContext context = new ForkContext(relativeVideoFile, videoFile, cutter.getLastTimestamp(),
 				cutter.getMediaWriter());
 
 		if (keepOld) {
 			// We aren't rolling this file because it got too big,
 			// the video is being forked (probably because there was
 			// a shot)
-			File rollingRelativeVideoFile = new File(
+			final File rollingRelativeVideoFile = new File(
 					sessionName + File.separator + "rolling" + String.valueOf(System.nanoTime()) + extension);
-			File rollingVideoFile = new File(
+			final File rollingVideoFile = new File(
 					System.getProperty("shootoff.sessions") + File.separator + rollingRelativeVideoFile.getPath());
 
-			IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
+			final IMediaReader r = ToolFactory.makeReader(this.videoFile.getPath());
 			r.open();
-			Cutter copy = new Cutter(rollingVideoFile, codec, 0, recordWidth, recordHeight);
+			final Cutter copy = new Cutter(rollingVideoFile, codec, 0, recordWidth, recordHeight);
 			r.addListener(copy);
 			while (r.readPacket() == null)
 				;
@@ -192,7 +192,7 @@ public class RollingRecorder implements Closeable {
 		}
 
 		synchronized (bufferedFrames) {
-			Iterator<IVideoPicture> it = bufferedFrames.iterator();
+			final Iterator<IVideoPicture> it = bufferedFrames.iterator();
 
 			while (it.hasNext()) {
 				synchronized (videoWriterLock) {
@@ -210,7 +210,7 @@ public class RollingRecorder implements Closeable {
 	}
 
 	public ShotRecorder fork() {
-		ForkContext context = fork(true);
+		final ForkContext context = fork(true);
 		return new ShotRecorder(context.getRelativeVideoFile(), context.getVideoFile(), context.getLastTimestamp(),
 				context.getVideoWriter(), cameraName);
 	}
@@ -271,7 +271,7 @@ public class RollingRecorder implements Closeable {
 			// < 0 means the file we are rolling off of has < RECORD_LENGTH
 			// seconds of footage
 			if (event.getTimeStamp() >= startingTimestamp || startingTimestamp < 0) {
-				IVideoPicture picture = event.getPicture();
+				final IVideoPicture picture = event.getPicture();
 
 				if (startTimestamp == -1) {
 					startTimestamp = picture.getTimeStamp();

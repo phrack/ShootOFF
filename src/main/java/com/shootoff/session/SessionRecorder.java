@@ -44,10 +44,10 @@ public class SessionRecorder {
 	private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
 	private final Map<String, Set<Target>> seenTargets = new HashMap<String, Set<Target>>();
 
-	private AtomicBoolean ignoreTargetCheck = new AtomicBoolean(false);
+	private final AtomicBoolean ignoreTargetCheck = new AtomicBoolean(false);
 
 	public SessionRecorder() {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+		final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
 		sessionName = dateFormat.format(new Date());
 		startTime = System.currentTimeMillis();
 	}
@@ -68,7 +68,7 @@ public class SessionRecorder {
 		if (events.containsKey(cameraName)) {
 			return events.get(cameraName);
 		} else {
-			List<Event> eventList = new ArrayList<Event>();
+			final List<Event> eventList = new ArrayList<Event>();
 			events.put(cameraName, eventList);
 			return eventList;
 		}
@@ -88,9 +88,9 @@ public class SessionRecorder {
 			ignoreTargetCheck.set(true);
 
 			recordTargetAdded(cameraName, target);
-			Point2D p = target.getPosition();
+			final Point2D p = target.getPosition();
 			recordTargetMoved(cameraName, target, (int) p.getX(), (int) p.getY());
-			Dimension2D d = target.getDimension();
+			final Dimension2D d = target.getDimension();
 			recordTargetResized(cameraName, target, d.getWidth(), d.getHeight());
 
 			ignoreTargetCheck.set(false);
@@ -106,7 +106,7 @@ public class SessionRecorder {
 			if (!ignoreTargetCheck.get()) checkTarget(cameraName, target.get());
 		}
 
-		long timestamp = System.currentTimeMillis() - startTime;
+		final long timestamp = System.currentTimeMillis() - startTime;
 
 		getCameraEvents(cameraName).add(new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex,
 				hitRegionIndex, videoString));
@@ -140,10 +140,10 @@ public class SessionRecorder {
 	}
 
 	private void collapseTargetEvents(String cameraName, EventType type, Target target) {
-		ListIterator<Event> it = getCameraEvents(cameraName).listIterator(getCameraEvents(cameraName).size());
+		final ListIterator<Event> it = getCameraEvents(cameraName).listIterator(getCameraEvents(cameraName).size());
 
 		while (it.hasPrevious()) {
-			Event e = it.previous();
+			final Event e = it.previous();
 
 			if (e.getType() != EventType.TARGET_RESIZED && e.getType() != EventType.TARGET_MOVED) {
 				break;
@@ -183,7 +183,7 @@ public class SessionRecorder {
 
 	public void recordExerciseFeedMessage(String message) {
 		// Add an event for this message to each camera
-		for (String cameraName : seenTargets.keySet()) {
+		for (final String cameraName : seenTargets.keySet()) {
 			getCameraEvents(cameraName)
 					.add(new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
 		}

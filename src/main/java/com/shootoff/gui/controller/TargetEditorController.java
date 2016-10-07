@@ -162,12 +162,12 @@ public class TargetEditorController {
 		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
 
 		if (targetComponents.isPresent()) {
-			TargetComponents tc = targetComponents.get();
+			final TargetComponents tc = targetComponents.get();
 
 			targetTags.putAll(tc.getTargetTags());
 			targetRegions.addAll(tc.getTargetGroup().getChildren());
 
-			for (Node region : tc.getTargetGroup().getChildren()) {
+			for (final Node region : tc.getTargetGroup().getChildren()) {
 				region.setOnMouseClicked((e) -> {
 					regionClicked(e);
 				});
@@ -386,7 +386,7 @@ public class TargetEditorController {
 		if (freeformPoints.size() > 0) {
 			final double lastX = freeformPoints.get(freeformPoints.size() - 2);
 			final double lastY = freeformPoints.get(freeformPoints.size() - 1);
-			Line edge = new Line(lastX, lastY, event.getX(), event.getY());
+			final Line edge = new Line(lastX, lastY, event.getX(), event.getY());
 
 			freeformShapes.push(edge);
 			canvasPane.getChildren().add(edge);
@@ -552,7 +552,7 @@ public class TargetEditorController {
 					imageRegion = Optional.of(newPNGRegion);
 					break;
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				logger.error("Error drawing target image region", e);
 			}
 		}
@@ -658,7 +658,7 @@ public class TargetEditorController {
 					lastMouseY + 0.331 * AQT_SCALE, lastMouseX + -7.726 * AQT_SCALE, lastMouseY + 1.147 * AQT_SCALE,
 					lastMouseX + -7.726 * AQT_SCALE, lastMouseY + 3.418 * AQT_SCALE);
 		} else if (freeformButton.isSelected()) {
-			double[] points = new double[freeformPoints.size()];
+			final double[] points = new double[freeformPoints.size()];
 
 			for (int i = 0; i < freeformPoints.size(); i++) {
 				points[i] = freeformPoints.get(i);
@@ -790,7 +790,7 @@ public class TargetEditorController {
 	private void toggleTagEditor() {
 		if (!tagsButton.isSelected() && tagEditor.isPresent()) {
 			// Close the tag editor
-			TagEditorPane editor = tagEditor.get();
+			final TagEditorPane editor = tagEditor.get();
 			canvasPane.getChildren().remove(editor);
 			tagEditor = Optional.empty();
 

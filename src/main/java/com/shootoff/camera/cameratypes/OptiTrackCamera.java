@@ -59,11 +59,11 @@ public class OptiTrackCamera implements Camera {
 		if (initialized) return;
 
 		try {
-			File lib = new File(System.mapLibraryName("OptiTrackCamera"));
+			final File lib = new File(System.mapLibraryName("OptiTrackCamera"));
 			System.load(lib.getAbsolutePath());
 			initialize();
 			initialized = true;
-		} catch (UnsatisfiedLinkError exception) {
+		} catch (final UnsatisfiedLinkError exception) {
 			initialized = false;
 		}
 
@@ -172,8 +172,8 @@ public class OptiTrackCamera implements Camera {
 		if (viewHeight == 0) viewHeight = getViewHeight();
 		if (viewWidth == 0) viewWidth = getViewWidth();
 
-		Mat mat = new Mat(viewHeight, viewWidth, CvType.CV_8UC1);
-		Mat dst = new Mat(viewHeight, viewWidth, CvType.CV_8UC3);
+		final Mat mat = new Mat(viewHeight, viewWidth, CvType.CV_8UC1);
+		final Mat dst = new Mat(viewHeight, viewWidth, CvType.CV_8UC3);
 
 		mat.put(0, 0, imageBuffer);
 		Imgproc.cvtColor(mat, dst, Imgproc.COLOR_GRAY2BGR);
@@ -182,9 +182,9 @@ public class OptiTrackCamera implements Camera {
 
 	@Override
 	public Frame getFrame() {
-		byte[] frame = getImageNative();
-		long currentFrameTimestamp = System.currentTimeMillis();
-		Mat mat = translateCameraArrayToMat(frame);
+		final byte[] frame = getImageNative();
+		final long currentFrameTimestamp = System.currentTimeMillis();
+		final Mat mat = translateCameraArrayToMat(frame);
 		return new Frame(mat, currentFrameTimestamp);
 	}
 
@@ -214,7 +214,7 @@ public class OptiTrackCamera implements Camera {
 
 	// TODO: Switch timestamps to optitrack internal timestamps
 	private void receiveFrame(byte[] framebytes) {
-		Frame frame = new Frame(translateCameraArrayToMat(framebytes), System.currentTimeMillis());
+		final Frame frame = new Frame(translateCameraArrayToMat(framebytes), System.currentTimeMillis());
 
 		if (cameraEventListener.isPresent()) {
 			final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;

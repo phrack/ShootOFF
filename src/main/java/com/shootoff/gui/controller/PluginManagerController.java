@@ -178,7 +178,7 @@ public class PluginManagerController {
 	}
 
 	private class ActionTableCell extends TableCell<PluginMetadata, String> {
-		private TableColumn<PluginMetadata, String> actionColumn;
+		private final TableColumn<PluginMetadata, String> actionColumn;
 		private Optional<Task<Boolean>> downloadTask = Optional.empty();
 
 		public ActionTableCell(TableColumn<PluginMetadata, String> actionColumn) {
@@ -198,12 +198,12 @@ public class PluginManagerController {
 						downloadTask.get().cancel();
 						downloadTask = Optional.empty();
 					} else {
-						Optional<Plugin> installedPlugin = metadata.findInstalledPlugin(pluginEngine.getPlugins());
+						final Optional<Plugin> installedPlugin = metadata.findInstalledPlugin(pluginEngine.getPlugins());
 
 						if (installedPlugin.isPresent()) {
 							if (uninstallPlugin(installedPlugin.get())) actionButton.setText("Install");
 						} else {
-							ProgressIndicator progress = new ProgressIndicator();
+							final ProgressIndicator progress = new ProgressIndicator();
 							progress.setPrefHeight(actionButton.getHeight() - 2);
 							progress.setPrefWidth(actionButton.getHeight() - 2);
 							progress.setOnMouseClicked((event) -> actionButton.fire());
@@ -237,10 +237,10 @@ public class PluginManagerController {
 		try {
 			connection = (HttpURLConnection) new URL(metadata.getDownload()).openConnection();
 			stream = connection.getInputStream();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			logger.error("Could not connect to remote host " + e.getMessage() + " to download plugin.", e);
 			return Optional.empty();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			if (connection != null) connection.disconnect();
 
 			logger.error("Failed to get stream to download plugin.", e);
@@ -252,19 +252,19 @@ public class PluginManagerController {
 		final File downloadedFile = new File(String.format("%s%s%s-%s-%s.jar", System.getProperty("shootoff.home"),
 				File.separator, metadata.getName().replaceAll("\\s", "_"), metadata.getVersion(),
 				metadata.getCreator()));
-		Task<Boolean> downloadTask = new Task<Boolean>() {
+		final Task<Boolean> downloadTask = new Task<Boolean>() {
 			@Override
 			public Boolean call() throws InterruptedException {
 				final BufferedInputStream bufferedInputStream = new BufferedInputStream(remoteStream);
 
 				try (FileOutputStream fileOutputStream = new FileOutputStream(downloadedFile)) {
 					int count;
-					byte buffer[] = new byte[1024];
+					final byte buffer[] = new byte[1024];
 
 					while (!isCancelled() && (count = bufferedInputStream.read(buffer, 0, buffer.length)) != -1) {
 						fileOutputStream.write(buffer, 0, count);
 					}
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					logger.error("Failed to download plugin", e);
 					return false;
 				}
@@ -289,12 +289,12 @@ public class PluginManagerController {
 
 			con.disconnect();
 
-			File pluginFile = new File(
+			final File pluginFile = new File(
 					System.getProperty("shootoff.plugins") + File.separator + downloadedFile.getName());
 
 			try {
 				Files.move(downloadedFile, pluginFile);
-			} catch (Exception e1) {
+			} catch (final Exception e1) {
 				logger.error("Failed to move {} to {} after downloading plugin.", downloadedFile.getPath(),
 						pluginFile.getPath());
 			}
@@ -321,17 +321,17 @@ public class PluginManagerController {
 		try {
 			connection = (HttpURLConnection) new URL(metadataAddress).openConnection();
 			stream = connection.getInputStream();
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			logger.error("Could not connect to remote host " + e.getMessage() + " to download plugin metadata.", e);
 			return Optional.empty();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			if (connection != null) connection.disconnect();
 
 			logger.error("Error downloading plugin metadata", e);
 			return Optional.empty();
 		}
 
-		StringBuilder versionXML = new StringBuilder();
+		final StringBuilder versionXML = new StringBuilder();
 
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
 
@@ -340,7 +340,7 @@ public class PluginManagerController {
 				if (versionXML.length() > 0) versionXML.append("\n");
 				versionXML.append(line);
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			connection.disconnect();
 
 			logger.error("Failed to fetch plugin metadata", e);
@@ -353,7 +353,7 @@ public class PluginManagerController {
 	}
 
 	protected Set<PluginMetadata> parsePluginMetadata(final String pluginMedata) {
-		PluginMetadataXMLHandler handler = new PluginMetadataXMLHandler();
+		final PluginMetadataXMLHandler handler = new PluginMetadataXMLHandler();
 
 		try (InputStream xmlInput = new ByteArrayInputStream(pluginMedata.getBytes("UTF-8"))) {
 			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();

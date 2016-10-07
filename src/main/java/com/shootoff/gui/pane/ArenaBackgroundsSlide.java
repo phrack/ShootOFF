@@ -58,7 +58,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream("/images/blank_page.png");
 		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
 		
-		ToggleButton noneButton = (ToggleButton) itemPane.addButton(none, "None", 
+		final ToggleButton noneButton = (ToggleButton) itemPane.addButton(none, "None", 
 				Optional.of(thumbnailView), Optional.empty());
 		noneButton.setSelected(true);
 		itemPane.setDefault(none);
@@ -97,7 +97,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 		final File backgroundFile = fileChooser.showOpenDialog(shootOffStage);
 
 		if (backgroundFile != null) {
-			LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
+			final LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
 			arenaPane.setArenaBackground(img);
 		}
 	}

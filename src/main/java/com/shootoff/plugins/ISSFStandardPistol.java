@@ -59,7 +59,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private int round = 1;
 	private int shotCount = 0;
 	private int runningScore = 0;
-	private Map<Integer, Integer> sessionScores = new HashMap<Integer, Integer>();
+	private final Map<Integer, Integer> sessionScores = new HashMap<Integer, Integer>();
 	private int delayMin = 4;
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
@@ -83,7 +83,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		shotCount = 0;
 		runningScore = 0;
 
-		for (int time : ROUND_TIMES) {
+		for (final int time : ROUND_TIMES) {
 			sessionScores.put(time, 0);
 		}
 	}
@@ -169,7 +169,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 			thisSuper.pauseShotDetection(true);
 			TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-roundover.wav"));
 
-			int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+			final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
 			if (round < 4) {
 				// Go to next round
@@ -214,7 +214,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		int hitScore = 0;
 
 		if (hit.isPresent()) {
-			TargetRegion r = hit.get().getHitRegion();
+			final TargetRegion r = hit.get().getHitRegion();
 
 			if (r.tagExists("points")) {
 				hitScore = Integer.parseInt(r.getTag("points"));
@@ -223,16 +223,16 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 				runningScore += hitScore;
 			}
 
-			StringBuilder message = new StringBuilder();
+			final StringBuilder message = new StringBuilder();
 
-			for (Integer time : ROUND_TIMES) {
+			for (final Integer time : ROUND_TIMES) {
 				message.append(String.format("%ss score: %d%n", time, sessionScores.get(time)));
 			}
 
 			super.showTextOnFeed(message.toString() + "total score: " + runningScore);
 		}
 
-		String currentRound = String.format("R%d (%ds)", round, ROUND_TIMES[roundTimeIndex]);
+		final String currentRound = String.format("R%d (%ds)", round, ROUND_TIMES[roundTimeIndex]);
 		super.setShotTimerColumnText(SCORE_COL_NAME, String.valueOf(hitScore));
 		super.setShotTimerColumnText(ROUND_COL_NAME, currentRound);
 
@@ -241,7 +241,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 				thisSuper.pauseShotDetection(true);
 				endRound.cancel(true);
 				new EndRound().run();
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				logger.error("Error ending current ISSF round (five shots detected)", e);
 			}
 		}

@@ -31,7 +31,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Pane;
 
 public class TagEditorPane extends Pane {
-	private TableView<Tag> tagTable = new TableView<Tag>();
+	private final TableView<Tag> tagTable = new TableView<Tag>();
 
 	@SuppressWarnings("unchecked")
 	public TagEditorPane(Map<String, String> tags) {
@@ -39,14 +39,14 @@ public class TagEditorPane extends Pane {
 		tagTable.setPrefHeight(200);
 		tagTable.setPrefWidth(200);
 
-		TableColumn<Tag, String> nameCol = new TableColumn<Tag, String>("Name");
+		final TableColumn<Tag, String> nameCol = new TableColumn<Tag, String>("Name");
 		nameCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("name"));
 		nameCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		nameCol.setOnEditCommit((t) -> {
 			((Tag) t.getTableView().getItems().get(t.getTablePosition().getRow())).setName(t.getNewValue());
 		});
 
-		TableColumn<Tag, String> valueCol = new TableColumn<Tag, String>("Value");
+		final TableColumn<Tag, String> valueCol = new TableColumn<Tag, String>("Value");
 		valueCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		valueCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("value"));
 		valueCol.setOnEditCommit((t) -> {
@@ -54,9 +54,9 @@ public class TagEditorPane extends Pane {
 		});
 
 		tagTable.getColumns().addAll(nameCol, valueCol);
-		ObservableList<Tag> data = FXCollections.observableArrayList();
+		final ObservableList<Tag> data = FXCollections.observableArrayList();
 
-		for (Entry<String, String> entry : tags.entrySet())
+		for (final Entry<String, String> entry : tags.entrySet())
 			data.add(new Tag(entry.getKey(), entry.getValue()));
 
 		tagTable.setItems(data);
@@ -71,11 +71,11 @@ public class TagEditorPane extends Pane {
 	}
 
 	public Map<String, String> getTags() {
-		ObservableList<Tag> tags = tagTable.getItems();
+		final ObservableList<Tag> tags = tagTable.getItems();
 
-		Map<String, String> tagMap = new HashMap<String, String>();
+		final Map<String, String> tagMap = new HashMap<String, String>();
 
-		for (Tag tag : tags) {
+		for (final Tag tag : tags) {
 			if (!tag.getName().isEmpty() && !tag.getValue().isEmpty()) {
 				tagMap.put(tag.getName(), tag.getValue());
 			}
