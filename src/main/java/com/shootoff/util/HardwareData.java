@@ -1,13 +1,10 @@
 package com.shootoff.util;
 
+import static java.net.URLEncoder.encode;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Optional;
-
-import static java.net.URLEncoder.encode;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -16,6 +13,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import oshi.SystemInfo;
 

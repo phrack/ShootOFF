@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javafx.scene.paint.Color;
-
 import com.shootoff.camera.Shot;
+
+import javafx.scene.paint.Color;
 
 public class ShotEntry {
 	private final Shot shot;

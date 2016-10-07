@@ -23,7 +23,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 
 	public static boolean isSystemSupported() {
 		// TODO: Remove this flag when no longer loading dummy detector
-		final boolean USE_NATIVE_DETECTION = false;
+		boolean USE_NATIVE_DETECTION = false;
 
 		final String os = System.getProperty("os.name");
 		// Do to an oddity in the JVM, this is actually the JRE bitness,

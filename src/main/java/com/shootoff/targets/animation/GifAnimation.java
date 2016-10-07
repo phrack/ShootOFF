@@ -28,9 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import javafx.scene.image.ImageView;
-import javafx.util.Duration;
-
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
@@ -39,6 +36,9 @@ import javax.imageio.metadata.IIOMetadataNode;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javafx.scene.image.ImageView;
+import javafx.util.Duration;
 
 public class GifAnimation extends SpriteAnimation {
 	private static ImageFrame[] frames;

@@ -21,10 +21,10 @@ package com.shootoff.courses;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.geometry.Dimension2D;
-
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.targets.Target;
+
+import javafx.geometry.Dimension2D;
 
 public class Course {
 	private final Optional<LocatedImage> background;

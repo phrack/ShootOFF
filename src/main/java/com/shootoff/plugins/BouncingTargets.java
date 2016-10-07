@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import com.shootoff.camera.Shot;
+import com.shootoff.targets.Hit;
+import com.shootoff.targets.Target;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -38,10 +42,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
-
-import com.shootoff.camera.Shot;
-import com.shootoff.targets.Hit;
-import com.shootoff.targets.Target;
 
 public class BouncingTargets extends ProjectorTrainingExerciseBase implements TrainingExercise {
 	private int shootCount = 4;

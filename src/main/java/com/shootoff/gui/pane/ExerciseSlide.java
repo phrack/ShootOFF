@@ -42,9 +42,9 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Button;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;

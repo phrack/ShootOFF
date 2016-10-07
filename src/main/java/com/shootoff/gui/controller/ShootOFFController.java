@@ -62,8 +62,8 @@ import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.plugins.engine.PluginEngine;
-import com.shootoff.targets.Target;
 import com.shootoff.targets.CameraViews;
+import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.TimerPool;
 

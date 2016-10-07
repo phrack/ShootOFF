@@ -41,8 +41,23 @@
 
 package com.shootoff.camera.cameratypes;
 
-import com.sun.jna.Library;
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.util.Optional;
 
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.shootoff.camera.CameraFactory;
+import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Frame;
+import com.shootoff.camera.shotdetection.JavaShotDetector;
+import com.shootoff.camera.shotdetection.NativeShotDetector;
+import com.shootoff.camera.shotdetection.ShotDetector;
+import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
@@ -59,25 +74,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-
-import java.util.Optional;
-
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.shootoff.camera.CameraFactory;
-import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.CameraView;
-import com.shootoff.camera.Frame;
-import com.shootoff.camera.shotdetection.JavaShotDetector;
-import com.shootoff.camera.shotdetection.NativeShotDetector;
-import com.shootoff.camera.shotdetection.ShotDetector;
 
 public class PS3EyeCamera extends CalculatedFPSCamera {
 	private static final Logger logger = LoggerFactory.getLogger(PS3EyeCamera.class);

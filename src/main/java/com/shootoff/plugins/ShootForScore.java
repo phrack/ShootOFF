@@ -21,12 +21,12 @@ package com.shootoff.plugins;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.scene.paint.Color;
-
 import com.shootoff.camera.Shot;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
+
+import javafx.scene.paint.Color;
 
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
 	private final static String POINTS_COL_NAME = "Score";

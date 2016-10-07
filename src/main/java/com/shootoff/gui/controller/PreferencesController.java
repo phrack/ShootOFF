@@ -34,10 +34,10 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CameraConfigListener;
-import com.shootoff.gui.DesignateShotRecorderListener;
 import com.shootoff.gui.CheckableImageListCell;
 import com.shootoff.gui.CheckableImageListCell.CameraRenamedListener;
 import com.shootoff.gui.CheckableImageListCell.CameraSelectionListener;
+import com.shootoff.gui.DesignateShotRecorderListener;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;

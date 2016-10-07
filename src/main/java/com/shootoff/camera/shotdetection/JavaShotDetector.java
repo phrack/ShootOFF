@@ -24,8 +24,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import javafx.scene.paint.Color;
-
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
@@ -39,6 +37,8 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Frame;
 import com.shootoff.config.Configuration;
+
+import javafx.scene.paint.Color;
 
 public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private static final Logger logger = LoggerFactory.getLogger(JavaShotDetector.class);

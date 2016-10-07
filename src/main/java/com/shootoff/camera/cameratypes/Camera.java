@@ -21,6 +21,7 @@ package com.shootoff.camera.cameratypes;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 

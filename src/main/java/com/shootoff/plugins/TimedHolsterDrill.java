@@ -26,14 +26,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.control.Button;
-import javafx.scene.paint.Color;
-
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.util.NamedThreadFactory;
+
+import javafx.scene.control.Button;
+import javafx.scene.paint.Color;
 
 public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private final static String LENGTH_COL_NAME = "Length";

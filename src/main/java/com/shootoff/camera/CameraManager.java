@@ -31,9 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.geometry.Bounds;
-import javafx.geometry.Dimension2D;
-
 import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +61,8 @@ import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Bounds;
+import javafx.geometry.Dimension2D;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -482,7 +481,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private ScheduledFuture<?> brightnessDiagnosticFuture = null;
 	private ScheduledFuture<?> motionDiagnosticFuture = null;
 
-	private final boolean recordCalibratedArea = false;
+	private boolean recordCalibratedArea = false;
 	private IMediaWriter videoWriterCalibratedArea;
 	private long recordingCalibratedAreaStartTime;
 	private boolean isFirstCalibratedAreaFrame;

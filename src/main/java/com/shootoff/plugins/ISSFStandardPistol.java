@@ -32,14 +32,14 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.paint.Color;
-
 import com.shootoff.camera.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
+
+import javafx.scene.paint.Color;
 
 public class ISSFStandardPistol extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
 	private static final Logger logger = LoggerFactory.getLogger(ISSFStandardPistol.class);

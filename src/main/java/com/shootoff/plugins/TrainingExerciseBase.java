@@ -49,8 +49,8 @@ import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.controller.ShootOFFController;
-import com.shootoff.targets.Target;
 import com.shootoff.targets.CameraViews;
+import com.shootoff.targets.Target;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;

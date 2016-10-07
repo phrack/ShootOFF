@@ -23,6 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.config.Configuration;
+import com.shootoff.courses.Course;
+import com.shootoff.courses.io.CourseIO;
+import com.shootoff.gui.LocatedImage;
+import com.shootoff.gui.ShotEntry;
+import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.targets.Target;
+
 import javafx.application.Platform;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -35,15 +45,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import com.shootoff.camera.CamerasSupervisor;
-import com.shootoff.config.Configuration;
-import com.shootoff.courses.Course;
-import com.shootoff.courses.io.CourseIO;
-import com.shootoff.gui.LocatedImage;
-import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.controller.ShootOFFController;
-import com.shootoff.gui.pane.ProjectorArenaPane;
-import com.shootoff.targets.Target;
 
 /**
  * The API for training exercises that only work on the projector arena.

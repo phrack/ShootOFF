@@ -27,6 +27,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
 import com.shootoff.camera.cameratypes.OptiTrackCamera;
+
 import javafx.scene.paint.Color;
 
 public class OptiTrackShotDetector extends ShotYieldingShotDetector implements CameraStateListener {
