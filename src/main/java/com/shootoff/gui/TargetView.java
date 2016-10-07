@@ -78,7 +78,7 @@ public class TargetView implements Target {
 	private final File targetFile;
 	private final Group targetGroup;
 	private final Map<String, String> targetTags;
-	private final Set<Node> resizeAnchors = new HashSet<Node>();
+	private final Set<Node> resizeAnchors = new HashSet<>();
 	private final Optional<Configuration> config;
 	private final Optional<CanvasManager> parent;
 	private final Optional<List<Target>> targets;
@@ -175,7 +175,7 @@ public class TargetView implements Target {
 
 	@Override
 	public List<TargetRegion> getRegions() {
-		final List<TargetRegion> regions = new ArrayList<TargetRegion>();
+		final List<TargetRegion> regions = new ArrayList<>();
 
 		for (final Node n : getTargetGroup().getChildren()) {
 			if (n instanceof TargetRegion) regions.add((TargetRegion) n);
@@ -292,7 +292,7 @@ public class TargetView implements Target {
 				args = Arrays.asList(command.substring(openParen + 1, command.indexOf(')')).split(","));
 			} else {
 				commandName = command;
-				args = new ArrayList<String>();
+				args = new ArrayList<>();
 			}
 
 			commandProcessor.process(commands, commandName, args);

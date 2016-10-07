@@ -86,8 +86,8 @@ public class SessionViewerController {
 	private ScheduledExecutorService executorService;
 	private final ObservableList<File> sessionEntries = FXCollections.observableArrayList();
 	private final ObservableList<Event> eventEntries = FXCollections.observableArrayList();
-	private final Map<String, SessionCanvasManager> cameraGroups = new HashMap<String, SessionCanvasManager>();
-	private final Map<Tab, Integer> eventSelectionsPerTab = new HashMap<Tab, Integer>();
+	private final Map<String, SessionCanvasManager> cameraGroups = new HashMap<>();
+	private final Map<Tab, Integer> eventSelectionsPerTab = new HashMap<>();
 
 	private boolean isPlaying = false;
 	private boolean refreshFromSlider = true;
@@ -230,7 +230,7 @@ public class SessionViewerController {
 
 				if (!refreshFromSlider) return;
 
-				final List<Event> reversedEntries = new ArrayList<Event>(eventEntries);
+				final List<Event> reversedEntries = new ArrayList<>(eventEntries);
 				Collections.reverse(reversedEntries);
 
 				for (final Event e : reversedEntries) {
@@ -251,7 +251,7 @@ public class SessionViewerController {
 
 	private List<File> findSessions() {
 		final File sessionsFolder = new File(System.getProperty("shootoff.sessions"));
-		final List<File> sessions = new ArrayList<File>();
+		final List<File> sessions = new ArrayList<>();
 
 		if (!sessionsFolder.exists()) {
 			logger.debug("No sessions folder available");
@@ -304,9 +304,9 @@ public class SessionViewerController {
 		List<Event> events;
 
 		if (updateType == EventsUpdate.DO) {
-			events = new ArrayList<Event>(eventEntries.subList(oldIndex + 1, newIndex + 1));
+			events = new ArrayList<>(eventEntries.subList(oldIndex + 1, newIndex + 1));
 		} else {
-			events = new ArrayList<Event>(eventEntries.subList(newIndex + 1, oldIndex + 1));
+			events = new ArrayList<>(eventEntries.subList(newIndex + 1, oldIndex + 1));
 			Collections.reverse(events);
 		}
 

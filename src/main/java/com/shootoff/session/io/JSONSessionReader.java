@@ -57,7 +57,7 @@ public class JSONSessionReader {
 	}
 
 	public Map<String, List<Event>> load() {
-		final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
+		final Map<String, List<Event>> events = new HashMap<>();
 
 		try {
 			final JSONObject session = (JSONObject) new JSONParser()

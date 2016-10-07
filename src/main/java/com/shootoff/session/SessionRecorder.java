@@ -41,8 +41,8 @@ import javafx.geometry.Point2D;
 public class SessionRecorder {
 	private final long startTime;
 	private final String sessionName;
-	private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
-	private final Map<String, Set<Target>> seenTargets = new HashMap<String, Set<Target>>();
+	private final Map<String, List<Event>> events = new HashMap<>();
+	private final Map<String, Set<Target>> seenTargets = new HashMap<>();
 
 	private final AtomicBoolean ignoreTargetCheck = new AtomicBoolean(false);
 
@@ -68,7 +68,7 @@ public class SessionRecorder {
 		if (events.containsKey(cameraName)) {
 			return events.get(cameraName);
 		} else {
-			final List<Event> eventList = new ArrayList<Event>();
+			final List<Event> eventList = new ArrayList<>();
 			events.put(cameraName, eventList);
 			return eventList;
 		}

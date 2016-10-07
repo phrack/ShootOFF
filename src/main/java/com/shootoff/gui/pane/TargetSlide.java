@@ -47,7 +47,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 	private final Pane parentBody;
 	private final CameraViews cameraViews;
 	
-	private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<File>(false, this);
+	private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<>(false, this);
 	
 	private enum Mode { ADD, EDIT };
 	

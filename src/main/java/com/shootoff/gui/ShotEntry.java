@@ -32,7 +32,7 @@ public class ShotEntry {
 	private final String color;
 	private final Optional<Color> rowColor;
 	private final SplitData split;
-	private final Map<String, String> exerciseData = new HashMap<String, String>();
+	private final Map<String, String> exerciseData = new HashMap<>();
 
 	public ShotEntry(Shot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
 			boolean hadReload) {

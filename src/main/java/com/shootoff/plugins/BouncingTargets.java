@@ -49,8 +49,8 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 	private static int maxVelocity = 10;
 	private boolean removeShootTargets = false;
 
-	private static final List<BouncingTarget> shootTargets = new ArrayList<BouncingTarget>();
-	private static final List<BouncingTarget> dontShootTargets = new ArrayList<BouncingTarget>();
+	private static final List<BouncingTarget> shootTargets = new ArrayList<>();
+	private static final List<BouncingTarget> dontShootTargets = new ArrayList<>();
 
 	private static ProjectorTrainingExerciseBase thisSuper;
 	private Timeline targetAnimation;
@@ -121,7 +121,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		final ObservableList<String> targetCounts = FXCollections.observableArrayList();
 		for (int i = 1; i <= MAX_TARGETS; i++)
 			targetCounts.add(Integer.toString(i));
-		final ComboBox<String> shootTargetsComboBox = new ComboBox<String>(targetCounts);
+		final ComboBox<String> shootTargetsComboBox = new ComboBox<>(targetCounts);
 		shootTargetsComboBox.getSelectionModel().select(SHOOT_DEFAULT_COUNT);
 		shootTargetsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
 			shootCount = Integer.parseInt(newValue);
@@ -131,7 +131,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		bouncingTargetsPane.add(new Label("Shoot Targets:"), 0, 0);
 		bouncingTargetsPane.add(shootTargetsComboBox, 1, 0);
 
-		final ComboBox<String> dontShootTargetsComboBox = new ComboBox<String>(targetCounts);
+		final ComboBox<String> dontShootTargetsComboBox = new ComboBox<>(targetCounts);
 		dontShootTargetsComboBox.getSelectionModel().select(DONT_SHOOT_DEFAULT_COUNT);
 		dontShootTargetsComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
 			dontShootCount = Integer.parseInt(newValue);
@@ -144,7 +144,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 		final ObservableList<String> maxVelocity = FXCollections.observableArrayList();
 		for (int i = 1; i <= MAX_VELOCITY; i++)
 			maxVelocity.add(Integer.toString(i));
-		final ComboBox<String> maxVelocityComboBox = new ComboBox<String>(maxVelocity);
+		final ComboBox<String> maxVelocityComboBox = new ComboBox<>(maxVelocity);
 		maxVelocityComboBox.getSelectionModel().select(DEFAULT_MAX_VELOCITY - 1);
 		maxVelocityComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
 			BouncingTargets.maxVelocity = Integer.parseInt(newValue);

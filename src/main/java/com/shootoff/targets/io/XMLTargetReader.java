@@ -118,7 +118,7 @@ public class XMLTargetReader implements TargetReader {
 
 	private class TargetXMLHandler extends DefaultHandler {
 		private final Map<String, String> targetTags = new HashMap<>();
-		private final List<Node> regions = new ArrayList<Node>();
+		private final List<Node> regions = new ArrayList<>();
 		private TargetRegion currentRegion;
 		private List<Double> polygonPoints = null;
 		private Color polygonFill = null;
@@ -149,7 +149,7 @@ public class XMLTargetReader implements TargetReader {
 				break;
 
 			case "image":
-				currentTags = new HashMap<String, String>();
+				currentTags = new HashMap<>();
 
 				final File savedFile = new File(attributes.getValue("file"));
 
@@ -214,14 +214,14 @@ public class XMLTargetReader implements TargetReader {
 
 				break;
 			case "rectangle":
-				currentTags = new HashMap<String, String>();
+				currentTags = new HashMap<>();
 				currentRegion = new RectangleRegion(Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")), Double.parseDouble(attributes.getValue("width")),
 						Double.parseDouble(attributes.getValue("height")));
 				((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
 				break;
 			case "ellipse":
-				currentTags = new HashMap<String, String>();
+				currentTags = new HashMap<>();
 				currentRegion = new EllipseRegion(Double.parseDouble(attributes.getValue("centerX")),
 						Double.parseDouble(attributes.getValue("centerY")),
 						Double.parseDouble(attributes.getValue("radiusX")),
@@ -229,8 +229,8 @@ public class XMLTargetReader implements TargetReader {
 				((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
 				break;
 			case "polygon":
-				currentTags = new HashMap<String, String>();
-				polygonPoints = new ArrayList<Double>();
+				currentTags = new HashMap<>();
+				polygonPoints = new ArrayList<>();
 				polygonFill = TargetEditorController.createColor(attributes.getValue("fill"));
 				break;
 			case "point":

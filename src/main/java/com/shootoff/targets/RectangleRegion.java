@@ -24,7 +24,7 @@ import java.util.Map;
 import javafx.scene.shape.Rectangle;
 
 public class RectangleRegion extends Rectangle implements TargetRegion {
-	private final Map<String, String> tags = new HashMap<String, String>();
+	private final Map<String, String> tags = new HashMap<>();
 
 	public RectangleRegion(final double x, final double y, final double width, final double height) {
 		super(x, y, width, height);

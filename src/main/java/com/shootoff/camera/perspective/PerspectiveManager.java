@@ -61,7 +61,7 @@ public class PerspectiveManager {
 	private String calibratedCameraName;
 
 	// Key = camera name
-	private static final List<CameraParameters> cameraParameters = new ArrayList<CameraParameters>();
+	private static final List<CameraParameters> cameraParameters = new ArrayList<>();
 
 	// All in millimeters
 	private double focalLength = -1;

@@ -78,7 +78,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		testing = true;
 		thisSuper = super.getInstance();
 
-		targets = new ArrayList<Target>();
+		targets = new ArrayList<>();
 		targets.addAll(course.getTargets());
 
 		repeatExercise = checkTargets(targets);
@@ -124,7 +124,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		final boolean hasStopTarget = hasStopTarget();
 
 		if (!hasStopTarget) {
-			final List<File> errorMessages = new ArrayList<File>();
+			final List<File> errorMessages = new ArrayList<>();
 			errorMessages.add(new File("sounds/voice/shootoff-lay-out-own-course.wav"));
 			errorMessages.add(new File("sounds/voice/shootoff-add-stop-target.wav"));
 
@@ -145,7 +145,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	private void startRound() {
 		if (!repeatExercise) return;
 
-		roundTargets = new HashSet<Target>(targets);
+		roundTargets = new HashSet<>(targets);
 		
 		if (testing) {
 			new AreYouReady().run();

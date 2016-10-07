@@ -28,7 +28,7 @@ import com.shootoff.config.Configuration;
 
 public class CamerasSupervisor {
 	private final Configuration config;
-	private final List<CameraManager> managers = new ArrayList<CameraManager>();
+	private final List<CameraManager> managers = new ArrayList<>();
 
 	private final AtomicBoolean allDetecting = new AtomicBoolean(true);
 
@@ -120,7 +120,7 @@ public class CamerasSupervisor {
 	}
 
 	public List<CameraView> getCameraViews() {
-		final List<CameraView> cameraViews = new ArrayList<CameraView>();
+		final List<CameraView> cameraViews = new ArrayList<>();
 
 		for (final CameraManager manager : managers) {
 			cameraViews.add(manager.getCameraView());

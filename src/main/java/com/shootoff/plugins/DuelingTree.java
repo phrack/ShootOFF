@@ -47,8 +47,8 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	private boolean isResetting = false;
 	private int leftScore = 0;
 	private int rightScore = 0;
-	private final List<TargetRegion> paddlesOnLeft = new ArrayList<TargetRegion>();
-	private final List<TargetRegion> paddlesOnRight = new ArrayList<TargetRegion>();
+	private final List<TargetRegion> paddlesOnLeft = new ArrayList<>();
+	private final List<TargetRegion> paddlesOnRight = new ArrayList<>();
 
 	public DuelingTree() {}
 

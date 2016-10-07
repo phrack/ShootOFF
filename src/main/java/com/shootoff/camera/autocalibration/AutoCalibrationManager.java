@@ -97,7 +97,7 @@ public class AutoCalibrationManager {
 	protected AutoCalStep stepFindDelay = null;
 	protected AutoCalStep stepFindPaperPattern = null;
 	protected AutoCalStep stepAdjustExposure = null;
-	List<AutoCalStep> steps = new ArrayList<AutoCalStep>();
+	List<AutoCalStep> steps = new ArrayList<>();
 
 	public AutoCalibrationManager(final CameraCalibrationListener calibrationListener, final Camera camera,
 			final boolean calculateFrameDelay) {
@@ -476,7 +476,7 @@ public class AutoCalibrationManager {
 	}
 
 	private List<MatOfPoint2f> findPatterns(Mat mat, boolean findMultiple) {
-		final List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
+		final List<MatOfPoint2f> patternList = new ArrayList<>();
 
 		int count = 0;
 		while (true) {
@@ -1206,8 +1206,8 @@ public class AutoCalibrationManager {
 		center.x *= (1.0 / corners.length);
 		center.y *= (1.0 / corners.length);
 
-		final List<Point> top = new ArrayList<Point>();
-		final List<Point> bot = new ArrayList<Point>();
+		final List<Point> top = new ArrayList<>();
+		final List<Point> bot = new ArrayList<>();
 
 		for (int i = 0; i < corners.length; i++) {
 			if (corners[i].y < center.y)

@@ -62,7 +62,7 @@ public class VideoPlayerController implements PlaybackListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(VideoPlayerController.class);
 
-	private final Map<String, PlaybackContext> contexts = new HashMap<String, PlaybackContext>();
+	private final Map<String, PlaybackContext> contexts = new HashMap<>();
 	private PlaybackContext currentContext;
 
 	public void init(Map<String, File> videos) {

@@ -62,7 +62,7 @@ public class PluginEngine implements Runnable {
 	private final PluginListener pluginListener;
 	private final PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:*.jar");
 	private final WatchService watcher = FileSystems.getDefault().newWatchService();
-	private final Set<Plugin> plugins = new HashSet<Plugin>();
+	private final Set<Plugin> plugins = new HashSet<>();
 
 	private final AtomicBoolean watching = new AtomicBoolean(false);
 

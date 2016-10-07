@@ -36,8 +36,8 @@ import com.shootoff.targets.TargetRegion;
 public class RandomShoot extends TrainingExerciseBase implements TrainingExercise {
 	private List<Target> targets;
 	private Target selectedTarget = null;
-	private final List<String> subtargets = new ArrayList<String>();
-	private final Stack<Integer> currentSubtargets = new Stack<Integer>();
+	private final List<String> subtargets = new ArrayList<>();
+	private final Stack<Integer> currentSubtargets = new Stack<>();
 	private Random rng = new Random();
 
 	public RandomShoot() {}
@@ -166,10 +166,10 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	private void saySubtargets() {
-		final List<File> soundFiles = new ArrayList<File>();
+		final List<File> soundFiles = new ArrayList<>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
-		final Stack<Integer> temp = new Stack<Integer>();
+		final Stack<Integer> temp = new Stack<>();
 		temp.addAll(currentSubtargets);
 		Collections.reverse(temp);
 		final Iterator<Integer> it = temp.iterator();
@@ -210,7 +210,7 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 	}
 
 	private void sayCurrentSubtarget() {
-		final List<File> soundFiles = new ArrayList<File>();
+		final List<File> soundFiles = new ArrayList<>();
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
 		final int subtargetIndex = currentSubtargets.peek();

@@ -32,7 +32,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class ImageRegion extends ImageView implements TargetRegion {
-	private final Map<String, String> tags = new HashMap<String, String>();
+	private final Map<String, String> tags = new HashMap<>();
 	private final File imageFile;
 
 	private Optional<SpriteAnimation> animation = Optional.empty();

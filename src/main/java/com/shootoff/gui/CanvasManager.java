@@ -91,7 +91,7 @@ public class CanvasManager implements CameraView {
 	private static final int DIAGNOSTIC_CHIME_DELAY = 5000; // ms
 	private final ScheduledExecutorService diagnosticExecutorService = Executors
 			.newScheduledThreadPool(DIAGNOSTIC_POOL_SIZE);
-	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<Label, ScheduledFuture<Void>>();
+	private final Map<Label, ScheduledFuture<Void>> diagnosticFutures = new HashMap<>();
 	private final Image muteImage = new Image(CanvasManager.class.getResourceAsStream("/images/mute.png"));
 	private final Image soundImage = new Image(CanvasManager.class.getResourceAsStream("/images/sound.png"));
 
@@ -100,7 +100,7 @@ public class CanvasManager implements CameraView {
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
 	private final List<Shot> shots;
-	private final List<Target> targets = new ArrayList<Target>();
+	private final List<Target> targets = new ArrayList<>();
 
 	private ProgressIndicator progress;
 	private Optional<ContextMenu> contextMenu = Optional.empty();
@@ -863,7 +863,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	public void clearTargets() {
-		for (final Target t : new ArrayList<Target>(targets)) {
+		for (final Target t : new ArrayList<>(targets)) {
 			removeTarget(t);
 		}
 	}

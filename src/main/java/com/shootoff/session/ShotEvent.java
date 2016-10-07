@@ -36,7 +36,7 @@ public class ShotEvent implements Event {
 	private final Optional<Integer> targetIndex;
 	private final Optional<Integer> hitRegionIndex;
 	private final Optional<String> videoString;
-	private final Map<String, File> videos = new HashMap<String, File>();
+	private final Map<String, File> videos = new HashMap<>();
 
 	public ShotEvent(String cameraName, long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
 			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {

@@ -117,7 +117,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	protected boolean recordingShots = false;
 	protected RollingRecorder rollingRecorder;
-	protected Map<Shot, ShotRecorder> shotRecorders = new ConcurrentHashMap<Shot, ShotRecorder>();
+	protected Map<Shot, ShotRecorder> shotRecorders = new ConcurrentHashMap<>();
 
 	protected boolean[][] sectorStatuses;
 
@@ -309,7 +309,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		isDetectionLocked.set(isLocked);
 	}
 
-	List<CameraStateListener> cameraStateListeners = new ArrayList<CameraStateListener>();
+	List<CameraStateListener> cameraStateListeners = new ArrayList<>();
 
 	public void registerCameraStateListener(CameraStateListener csl) {
 		cameraStateListeners.add(csl);
@@ -567,7 +567,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		if (recordingShots) {
 			rollingRecorder.recordFrame(currentImage);
 
-			final List<Shot> removeKeys = new ArrayList<Shot>();
+			final List<Shot> removeKeys = new ArrayList<>();
 			for (final Entry<Shot, ShotRecorder> r : shotRecorders.entrySet()) {
 				if (r.getValue().isComplete()) {
 					r.getValue().close();

@@ -63,7 +63,7 @@ public class GifAnimation extends SpriteAnimation {
 
 	// This method is from http://stackoverflow.com/a/17269591
 	private static ImageFrame[] readGif(InputStream stream) throws IOException {
-		final ArrayList<ImageFrame> frames = new ArrayList<ImageFrame>(2);
+		final ArrayList<ImageFrame> frames = new ArrayList<>(2);
 
 		int width = -1;
 		int height = -1;

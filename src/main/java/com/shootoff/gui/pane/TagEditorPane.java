@@ -31,7 +31,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Pane;
 
 public class TagEditorPane extends Pane {
-	private final TableView<Tag> tagTable = new TableView<Tag>();
+	private final TableView<Tag> tagTable = new TableView<>();
 
 	@SuppressWarnings("unchecked")
 	public TagEditorPane(Map<String, String> tags) {
@@ -39,14 +39,14 @@ public class TagEditorPane extends Pane {
 		tagTable.setPrefHeight(200);
 		tagTable.setPrefWidth(200);
 
-		final TableColumn<Tag, String> nameCol = new TableColumn<Tag, String>("Name");
+		final TableColumn<Tag, String> nameCol = new TableColumn<>("Name");
 		nameCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("name"));
 		nameCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		nameCol.setOnEditCommit((t) -> {
 			t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(t.getNewValue());
 		});
 
-		final TableColumn<Tag, String> valueCol = new TableColumn<Tag, String>("Value");
+		final TableColumn<Tag, String> valueCol = new TableColumn<>("Value");
 		valueCol.setCellFactory(TextFieldTableCell.<Tag> forTableColumn());
 		valueCol.setCellValueFactory(new PropertyValueFactory<Tag, String>("value"));
 		valueCol.setOnEditCommit((t) -> {
@@ -73,7 +73,7 @@ public class TagEditorPane extends Pane {
 	public Map<String, String> getTags() {
 		final ObservableList<Tag> tags = tagTable.getItems();
 
-		final Map<String, String> tagMap = new HashMap<String, String>();
+		final Map<String, String> tagMap = new HashMap<>();
 
 		for (final Tag tag : tags) {
 			if (!tag.getName().isEmpty() && !tag.getValue().isEmpty()) {

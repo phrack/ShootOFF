@@ -59,7 +59,7 @@ public class PixelCluster extends HashSet<Pixel> {
 			traceMat = Mat.zeros(workingFrame.size(), workingFrame.type());
 		}
 
-		final Map<Pixel, byte[]> visited = new HashMap<Pixel, byte[]>();
+		final Map<Pixel, byte[]> visited = new HashMap<>();
 		int avgSaturation = 0;
 		int avgLum = 0;
 

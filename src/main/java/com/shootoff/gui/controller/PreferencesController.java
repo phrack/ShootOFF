@@ -375,7 +375,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 		if (selectedNames.isEmpty()) return;
 
-		final List<String> removedCameraNames = new ArrayList<String>();
+		final List<String> removedCameraNames = new ArrayList<>();
 
 		for (final String webcamName : selectedNames) {
 			if (config.getRegistedIpCams().containsKey(webcamName)) {

@@ -86,7 +86,7 @@ public class PluginManagerController {
 
 		this.pluginEngine = pluginEngine;
 
-		final TableColumn<PluginMetadata, String> actionCol = new TableColumn<PluginMetadata, String>("Action");
+		final TableColumn<PluginMetadata, String> actionCol = new TableColumn<>("Action");
 		actionCol.setMinWidth(90);
 
 		actionCol
@@ -97,19 +97,19 @@ public class PluginManagerController {
 					}
 				});
 
-		final TableColumn<PluginMetadata, String> nameCol = new TableColumn<PluginMetadata, String>("Name");
+		final TableColumn<PluginMetadata, String> nameCol = new TableColumn<>("Name");
 		nameCol.setMinWidth(160);
 		nameCol.setCellValueFactory(new PropertyValueFactory<PluginMetadata, String>("Name"));
 
-		final TableColumn<PluginMetadata, String> versionCol = new TableColumn<PluginMetadata, String>("Version");
+		final TableColumn<PluginMetadata, String> versionCol = new TableColumn<>("Version");
 		versionCol.setMinWidth(85);
 		versionCol.setCellValueFactory(new PropertyValueFactory<PluginMetadata, String>("Version"));
 
-		final TableColumn<PluginMetadata, String> creatorCol = new TableColumn<PluginMetadata, String>("Creator");
+		final TableColumn<PluginMetadata, String> creatorCol = new TableColumn<>("Creator");
 		creatorCol.setMinWidth(85);
 		creatorCol.setCellValueFactory(new PropertyValueFactory<PluginMetadata, String>("Creator"));
 
-		final TableColumn<PluginMetadata, String> descriptionCol = new TableColumn<PluginMetadata, String>(
+		final TableColumn<PluginMetadata, String> descriptionCol = new TableColumn<>(
 				"Description");
 		descriptionCol.prefWidthProperty().bind(pluginsTableView.widthProperty()
 				.subtract(actionCol.getWidth() + nameCol.getWidth() + versionCol.getWidth() + creatorCol.getWidth()));
@@ -440,7 +440,7 @@ public class PluginManagerController {
 	}
 
 	private static class PluginMetadataXMLHandler extends DefaultHandler {
-		private final Set<PluginMetadata> pluginMetadata = new HashSet<PluginMetadata>();
+		private final Set<PluginMetadata> pluginMetadata = new HashSet<>();
 
 		public Set<PluginMetadata> getPluginMetada() {
 			return pluginMetadata;

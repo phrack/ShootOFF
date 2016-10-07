@@ -36,7 +36,7 @@ import com.shootoff.targets.TargetRegion;
  *
  */
 public class ParRandomShot extends ParForScore {
-	private final List<String> subtargets = new ArrayList<String>();
+	private final List<String> subtargets = new ArrayList<>();
 	private final Random rng = new Random();
 	private boolean foundTarget;
 	private int currentSubtarget;

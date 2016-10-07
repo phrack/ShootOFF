@@ -59,7 +59,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaPane arenaPane;
-	private final List<Target> targets = new ArrayList<Target>();
+	private final List<Target> targets = new ArrayList<>();
 	private final Label exerciseLabel = new Label();
 
 	// Only exists to make it easy to call getInfo without having

@@ -56,7 +56,7 @@ public final class CameraFactory {
 	// because they are non-UVC cameras with no webcam-capture driver (e.g.
 	// Omnitrack). Adding such cameras to this list ensures they are returned
 	// by CameraFactory.getWebcams().
-	private final static List<Camera> registeredCameras = new ArrayList<Camera>();
+	private final static List<Camera> registeredCameras = new ArrayList<>();
 
 	public static void registerCamera(Camera camera) {
 		registeredCameras.add(camera);

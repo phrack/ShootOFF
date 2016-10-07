@@ -147,7 +147,7 @@ public class Configuration {
 	private Optional<Color> shotRowColor = Optional.empty();
 	private Optional<Point2D> arenaPosition = Optional.empty();
 	private final Map<String, Integer> cameraDistances = new HashMap<>();
-	private final Set<String> messagesChimeMuted = new HashSet<String>();
+	private final Set<String> messagesChimeMuted = new HashSet<>();
 
 	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
 
@@ -155,7 +155,7 @@ public class Configuration {
 
 	private final boolean debugShotsRecordToFiles = false;
 
-	private final Set<ShotProcessor> shotProcessors = new HashSet<ShotProcessor>();
+	private final Set<ShotProcessor> shotProcessors = new HashSet<>();
 	private VirtualMagazineProcessor magazineProcessor = null;
 	private MalfunctionsProcessor malfunctionsProcessor = null;
 	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
@@ -273,8 +273,8 @@ public class Configuration {
 		}
 
 		if (prop.containsKey(WEBCAMS_PROP)) {
-			final List<String> webcamNames = new ArrayList<String>();
-			final List<String> webcamInternalNames = new ArrayList<String>();
+			final List<String> webcamNames = new ArrayList<>();
+			final List<String> webcamInternalNames = new ArrayList<>();
 
 			for (final String nameString : prop.getProperty(WEBCAMS_PROP).split(",")) {
 				final String[] names = nameString.split(":");
@@ -291,7 +291,7 @@ public class Configuration {
 			}
 		}
 
-		final Set<Camera> recordingCameras = new HashSet<Camera>();
+		final Set<Camera> recordingCameras = new HashSet<>();
 		if (prop.containsKey(RECORDING_WEBCAMS_PROP)) {
 			for (final String nameString : prop.getProperty(RECORDING_WEBCAMS_PROP).split(",")) {
 				for (final Camera webcam : webcams.values()) {
@@ -783,7 +783,7 @@ public class Configuration {
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
 		ple.setContext(loggerContext);
 		ple.start();
-		final ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<ILoggingEvent>();
+		final ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
 		consoleAppender.setEncoder(ple);
 		consoleAppender.setContext(loggerContext);
 		consoleAppender.start();

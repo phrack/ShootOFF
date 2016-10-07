@@ -60,9 +60,9 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	private final ToggleButton noneButton;
 	
 	private final ItemSelectionPane<TrainingExercise> exerciseItemPane = 
-			new ItemSelectionPane<TrainingExercise>(true, this);
+			new ItemSelectionPane<>(true, this);
 	private final ItemSelectionPane<TrainingExercise> projectorExerciseItemPane = 
-			new ItemSelectionPane<TrainingExercise>(exerciseItemPane.getToggleGroup(), this);
+			new ItemSelectionPane<>(exerciseItemPane.getToggleGroup(), this);
 	
 	private static final TrainingExercise noneExercise = new TrainingExercise() {
 		@Override

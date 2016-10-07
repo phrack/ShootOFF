@@ -61,12 +61,12 @@ import javafx.stage.Stage;
 public class SessionCanvasManager {
 	private final Group canvas;
 	private final Label exerciseLabel = new Label();
-	private final Map<Event, TargetView> eventToContainer = new HashMap<Event, TargetView>();
-	private final Map<Event, Point2D> eventToPosition = new HashMap<Event, Point2D>();
-	private final Map<Event, String> eventToExerciseMessage = new HashMap<Event, String>();
-	private final Map<Event, Dimension2D> eventToDimension = new HashMap<Event, Dimension2D>();
-	private final List<TargetView> targetViews = new ArrayList<TargetView>();
-	private final List<Target> targets = new ArrayList<Target>();
+	private final Map<Event, TargetView> eventToContainer = new HashMap<>();
+	private final Map<Event, Point2D> eventToPosition = new HashMap<>();
+	private final Map<Event, String> eventToExerciseMessage = new HashMap<>();
+	private final Map<Event, Dimension2D> eventToDimension = new HashMap<>();
+	private final List<TargetView> targetViews = new ArrayList<>();
+	private final List<Target> targets = new ArrayList<>();
 	private final Configuration config;
 
 	public SessionCanvasManager(final Group canvas, final Configuration config) {

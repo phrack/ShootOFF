@@ -96,7 +96,7 @@ public class XMLCourseReader {
 
 	private class CourseXMLHandler extends DefaultHandler {
 		private Optional<LocatedImage> background = Optional.empty();
-		private final List<Target> targets = new ArrayList<Target>();
+		private final List<Target> targets = new ArrayList<>();
 		private Optional<Dimension2D> resolution = Optional.empty();
 
 		public Optional<LocatedImage> getBackground() {

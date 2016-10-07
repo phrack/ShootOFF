@@ -59,7 +59,7 @@ public class RollingRecorder implements Closeable {
 	private boolean forking = false;
 	private boolean recording = true;
 
-	private final List<IVideoPicture> bufferedFrames = new ArrayList<IVideoPicture>();
+	private final List<IVideoPicture> bufferedFrames = new ArrayList<>();
 
 	private final int recordWidth;
 	private final int recordHeight;

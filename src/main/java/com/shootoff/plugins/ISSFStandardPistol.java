@@ -59,7 +59,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 	private int round = 1;
 	private int shotCount = 0;
 	private int runningScore = 0;
-	private final Map<Integer, Integer> sessionScores = new HashMap<Integer, Integer>();
+	private final Map<Integer, Integer> sessionScores = new HashMap<>();
 	private int delayMin = 4;
 	private int delayMax = 8;
 	private boolean repeatExercise = true;

@@ -82,11 +82,11 @@ public class XMLSessionReader {
 			}
 		}
 
-		return new HashMap<String, List<Event>>();
+		return new HashMap<>();
 	}
 
 	private class SessionXMLHandler extends DefaultHandler {
-		private final Map<String, List<Event>> events = new HashMap<String, List<Event>>();
+		private final Map<String, List<Event>> events = new HashMap<>();
 		private String currentCameraName = "";
 
 		public Map<String, List<Event>> getEvents() {

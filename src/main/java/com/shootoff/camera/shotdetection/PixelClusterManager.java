@@ -58,7 +58,7 @@ public class PixelClusterManager {
 	}
 
 	private int preprocessClusterablePixels(Set<Pixel> clusterablePixels, Map<Pixel, Integer> pixelMapping) {
-		final Stack<Pixel> mustExamine = new Stack<Pixel>();
+		final Stack<Pixel> mustExamine = new Stack<>();
 		int numberOfRegions = -1;
 
 		for (final Pixel pixel : clusterablePixels) {
@@ -107,11 +107,11 @@ public class PixelClusterManager {
 	}
 
 	public Set<PixelCluster> clusterPixels(Set<Pixel> clusterablePixels, int minimumShotDimension) {
-		final Map<Pixel, Integer> pixelMapping = new HashMap<Pixel, Integer>();
+		final Map<Pixel, Integer> pixelMapping = new HashMap<>();
 
 		final int numberOfRegions = preprocessClusterablePixels(clusterablePixels, pixelMapping);
 
-		final Set<PixelCluster> clusters = new HashSet<PixelCluster>();
+		final Set<PixelCluster> clusters = new HashSet<>();
 
 		for (int i = 0; i <= numberOfRegions; i++) {
 			final PixelCluster cluster = new PixelCluster();

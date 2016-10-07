@@ -28,7 +28,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.shape.Polygon;
 
 public class PolygonRegion extends Polygon implements TargetRegion {
-	private final Map<String, String> tags = new HashMap<String, String>();
+	private final Map<String, String> tags = new HashMap<>();
 
 	public PolygonRegion(double... points) {
 		super(points);
@@ -37,7 +37,7 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	@Override
 	public void changeWidth(final double widthDelta) {
 		final ObservableList<Double> points = this.getPoints();
-		final List<Double> pointsX = new ArrayList<Double>();
+		final List<Double> pointsX = new ArrayList<>();
 
 		for (int i = 0; i < points.size(); i += 2) {
 			pointsX.add(points.get(i));
@@ -52,7 +52,7 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	@Override
 	public void changeHeight(final double heightDelta) {
 		final ObservableList<Double> points = this.getPoints();
-		final List<Double> pointsY = new ArrayList<Double>();
+		final List<Double> pointsY = new ArrayList<>();
 
 		for (int i = 1; i < points.size(); i += 2) {
 			pointsY.add(points.get(i));

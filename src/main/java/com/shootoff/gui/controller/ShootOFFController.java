@@ -123,7 +123,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private PluginEngine pluginEngine;
 	private static final Logger logger = LoggerFactory.getLogger(ShootOFFController.class);
 	private final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
-	private final List<Stage> streamDebuggerStages = new ArrayList<Stage>();
+	private final List<Stage> streamDebuggerStages = new ArrayList<>();
 	
 	static public double getDpiScaleFactorForScreen() {
 		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
@@ -250,15 +250,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			addConfiguredCameras();
 		}
 
-		final TableColumn<ShotEntry, String> timeCol = new TableColumn<ShotEntry, String>("Time");
+		final TableColumn<ShotEntry, String> timeCol = new TableColumn<>("Time");
 		timeCol.setMinWidth(85);
 		timeCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>("timestamp"));
 
-		final TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<ShotEntry, ShotEntry.SplitData>("Split");
+		final TableColumn<ShotEntry, ShotEntry.SplitData> splitCol = new TableColumn<>("Split");
 		splitCol.setMinWidth(85);
 		splitCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, ShotEntry.SplitData>("split"));
 
-		final TableColumn<ShotEntry, String> laserCol = new TableColumn<ShotEntry, String>("Laser");
+		final TableColumn<ShotEntry, String> laserCol = new TableColumn<>("Laser");
 		laserCol.setMinWidth(85);
 		laserCol.setCellValueFactory(new PropertyValueFactory<ShotEntry, String>("color"));
 
@@ -718,7 +718,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@Override
 	public List<Target> getTargets() {
-		final List<Target> targets = new ArrayList<Target>();
+		final List<Target> targets = new ArrayList<>();
 
 		for (final CameraManager manager : camerasSupervisor.getCameraManagers()) {
 			targets.addAll(((CanvasManager) manager.getCameraView()).getTargets());
@@ -758,7 +758,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		camerasSupervisor.reset();
 
 		if (config.getExercise().isPresent()) {
-			final List<Target> knownTargets = new ArrayList<Target>();
+			final List<Target> knownTargets = new ArrayList<>();
 			knownTargets.addAll(getTargets());
 
 			if (projectorSlide.getArenaPane() != null) {
@@ -932,7 +932,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			final Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
 
-			final List<Target> knownTargets = new ArrayList<Target>();
+			final List<Target> knownTargets = new ArrayList<>();
 			knownTargets.addAll(getTargets());
 
 			if (projectorSlide.getArenaPane() != null) {

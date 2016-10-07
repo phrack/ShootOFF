@@ -323,7 +323,7 @@ public class TrainingExerciseBase {
 	 * @since 1.3
 	 */
 	public void addShotTimerColumn(String name, int width) {
-		final TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
+		final TableColumn<ShotEntry, String> newCol = new TableColumn<>(name);
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
 			@Override
