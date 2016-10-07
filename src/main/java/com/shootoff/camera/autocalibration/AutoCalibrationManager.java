@@ -1209,11 +1209,11 @@ public class AutoCalibrationManager {
 		final List<Point> top = new ArrayList<>();
 		final List<Point> bot = new ArrayList<>();
 
-		for (int i = 0; i < corners.length; i++) {
-			if (corners[i].y < center.y)
-				top.add(corners[i]);
+		for (Point corner : corners) {
+			if (corner.y < center.y)
+				top.add(corner);
 			else
-				bot.add(corners[i]);
+				bot.add(corner);
 		}
 
 		result[0] = top.get(0).x > top.get(1).x ? top.get(1) : top.get(0);
