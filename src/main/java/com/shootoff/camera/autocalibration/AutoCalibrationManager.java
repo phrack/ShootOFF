@@ -54,9 +54,10 @@ public class AutoCalibrationManager {
 
 	private static final int PATTERN_WIDTH = 9;
 	private static final int PATTERN_HEIGHT = 6;
-	
+
 	// These are slightly fudged
-	// 11/10.65 = 1.032.  With 1/4" margins this should be 11/10.5, but OpenCV reads the pattern a bit big
+	// 11/10.65 = 1.032. With 1/4" margins this should be 11/10.5, but OpenCV
+	// reads the pattern a bit big
 	private static final double PAPER_MARGIN_WIDTH = 1.032;
 	// 8.5/8.25 = 1.030.
 	private static final double PAPER_MARGIN_HEIGHT = 1.03;
@@ -130,18 +131,15 @@ public class AutoCalibrationManager {
 		boundingBox = null;
 		perspMat = null;
 		for (AutoCalStep step : steps)
-			if (step.enabled())
-				step.reset();
+			if (step.enabled()) step.reset();
 	}
 
 	public Mat preProcessFrame(final Mat mat) {
-		if (mat.channels() == 1)
-			return mat.clone();
-		
-		Mat newMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1);
-		
-		Imgproc.cvtColor(mat, newMat, Imgproc.COLOR_BGR2GRAY);
+		if (mat.channels() == 1) return mat.clone();
 
+		Mat newMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1);
+
+		Imgproc.cvtColor(mat, newMat, Imgproc.COLOR_BGR2GRAY);
 
 		if (logger.isTraceEnabled()) {
 			String filename = String.format("grayscale.png");
@@ -155,8 +153,7 @@ public class AutoCalibrationManager {
 
 	private boolean isFinished() {
 		for (AutoCalStep step : steps)
-			if (step.enabled() && !step.completed())
-				return false;
+			if (step.enabled() && !step.completed()) return false;
 		return true;
 	}
 
@@ -168,21 +165,18 @@ public class AutoCalibrationManager {
 				break;
 			}
 		}
-		if (isFinished())
-			calibrationListener.calibrate(((StepFindBounds) stepFindBounds).boundsResult,
-					((StepFindPaperPattern) stepFindPaperPattern).paperDimensions, false,
-					((StepFindDelay) stepFindDelay).frameDelayResult);
+		if (isFinished()) calibrationListener.calibrate(((StepFindBounds) stepFindBounds).boundsResult,
+				((StepFindPaperPattern) stepFindPaperPattern).paperDimensions, false,
+				((StepFindDelay) stepFindDelay).frameDelayResult);
 
 	}
-	
+
 	// FOR TESTS ONLY
-	public Mat prepTestFrame(BufferedImage frame)
-	{
+	public Mat prepTestFrame(BufferedImage frame) {
 		Mat mat = preProcessFrame(Camera.bufferedImageToMat(frame));
 		Imgproc.equalizeHist(mat, mat);
 		return mat;
 	}
-	
 
 	interface AutoCalStep {
 		void reset();
@@ -217,24 +211,21 @@ public class AutoCalibrationManager {
 
 		@Override
 		public void process(Frame frame) {
-			if (frame.getTimestamp() - lastFrameCheck < minimumInterval)
-				return;
-			
+			if (frame.getTimestamp() - lastFrameCheck < minimumInterval) return;
+
 			lastFrameCheck = frame.getTimestamp();
-			
+
 			Imgproc.equalizeHist(frame.getOriginalMat(), frame.getOriginalMat());
-			
+
 			List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
-			
-			if (listPatterns.isEmpty())
-				return;
+
+			if (listPatterns.isEmpty()) return;
 
 			Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
 			if (paperRes.isPresent())
 				((StepFindPaperPattern) stepFindPaperPattern).addPaperDimensions(paperRes.get(), true);
 
-			if (listPatterns.isEmpty())
-				return;
+			if (listPatterns.isEmpty()) return;
 
 			// Technically there could still be more than one pattern
 			// or even a pattern that is much too small
@@ -378,8 +369,7 @@ public class AutoCalibrationManager {
 
 			List<MatOfPoint2f> listPatterns = findPatterns(frame.getOriginalMat(), true);
 
-			if (listPatterns.isEmpty())
-				return;
+			if (listPatterns.isEmpty()) return;
 
 			Optional<Dimension2D> paperRes = findPaperPattern(frame.getOriginalMat(), listPatterns);
 
@@ -407,8 +397,7 @@ public class AutoCalibrationManager {
 		}
 
 	}
-	
-	
+
 	class StepAdjustExposure implements AutoCalStep {
 		private static final int TARGET_THRESH = 80;
 		private static final int SAMPLE_DELAY = 100;
@@ -418,7 +407,7 @@ public class AutoCalibrationManager {
 		private boolean patternSet = false;
 		private long lastSample = 0;
 		private double origMean = 0;
-		
+
 		@Override
 		public void reset() {
 			completed = false;
@@ -440,33 +429,27 @@ public class AutoCalibrationManager {
 
 		@Override
 		public void process(Frame frame) {
-			if (!patternSet)
-			{
+			if (!patternSet) {
 				calibrationListener.setArenaBackground("white.png");
 				patternSet = true;
 				lastSample = System.currentTimeMillis();
 				return;
 			}
-			
-			if (completed || (System.currentTimeMillis() - lastSample) < SAMPLE_DELAY)
-				return;
-			
+
+			if (completed || (System.currentTimeMillis() - lastSample) < SAMPLE_DELAY) return;
+
 			Scalar mean = Core.mean(frame.getOriginalMat());
-			if (origMean == 0)
-				origMean = mean.val[0];
-			
+			if (origMean == 0) origMean = mean.val[0];
+
 			logger.trace("{} {}", mean.val[0], TARGET_THRESH);
-			
-			if (mean.val[0] > TARGET_THRESH)
-			{
-				if (!camera.decreaseExposure())
-					completed = true;
+
+			if (mean.val[0] > TARGET_THRESH) {
+				if (!camera.decreaseExposure()) completed = true;
 			} else {
 				completed = true;
 			}
-			
-			if (logger.isTraceEnabled())
-			{
+
+			if (logger.isTraceEnabled()) {
 				String filename = String.format("exposure-%d.png", lastSample);
 				File file = new File(filename);
 				filename = file.toString();
@@ -474,30 +457,21 @@ public class AutoCalibrationManager {
 			}
 
 			tries++;
-			if (tries == NUM_TRIES)
-				completed = true;
-			
-			if (completed)
-			{
-				if (mean.val[0] > origMean || mean.val[0] < .6 * TARGET_THRESH)
-				{
+			if (tries == NUM_TRIES) completed = true;
+
+			if (completed) {
+				if (mean.val[0] > origMean || mean.val[0] < .6 * TARGET_THRESH) {
 					camera.resetExposure();
 					logger.info("Failed to adjust exposure, mean originally {} lowest {}", origMean, mean.val[0]);
-				}
-				else
-				{
+				} else {
 					logger.info("Exposure lowered to {} mean from {}", mean.val[0], origMean);
 				}
 			}
-			
 
 			lastSample = System.currentTimeMillis();
 		}
 
 	}
-
-	
-	
 
 	private List<MatOfPoint2f> findPatterns(Mat mat, boolean findMultiple) {
 		List<MatOfPoint2f> patternList = new ArrayList<MatOfPoint2f>();
@@ -509,8 +483,7 @@ public class AutoCalibrationManager {
 			if (boardCorners.isPresent()) {
 				patternList.add(boardCorners.get());
 
-				if (!findMultiple)
-					break;
+				if (!findMultiple) break;
 
 				final RotatedRect rect = getPatternDimensions(boardCorners.get());
 
@@ -548,8 +521,7 @@ public class AutoCalibrationManager {
 		if (logger.isTraceEnabled()) {
 			if (mat.channels() == 3)
 				traceMat = mat.clone();
-			else
-			{
+			else {
 				traceMat = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC3);
 				Imgproc.cvtColor(mat, traceMat, Imgproc.COLOR_GRAY2BGR);
 			}
@@ -564,8 +536,7 @@ public class AutoCalibrationManager {
 		// More definitively find corners using goodFeaturesToTrack
 		final Optional<Point[]> corners = findCorners(boardRect, mat, estimatedPatternRect);
 
-		if (!corners.isPresent())
-			return Optional.empty();
+		if (!corners.isPresent()) return Optional.empty();
 
 		// Creates sorted cornerArray for warp perspective
 		MatOfPoint2f corners2f = sortPointsForWarpPerspective(boardRect, corners.get());
@@ -586,9 +557,8 @@ public class AutoCalibrationManager {
 			return Optional.empty();
 		}
 
-		if (logger.isTraceEnabled())
-			logger.trace("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(), boundingBox.getWidth(),
-					boundingBox.getHeight());
+		if (logger.isTraceEnabled()) logger.trace("bounds {} {} {} {}", boundingBox.getMinX(), boundingBox.getMinY(),
+				boundingBox.getWidth(), boundingBox.getHeight());
 
 		if (logger.isTraceEnabled()) {
 			final Mat undistorted = warpPerspective(mat);
@@ -622,9 +592,8 @@ public class AutoCalibrationManager {
 			int secondSquareCenterX = (int) (boundingBox.getMinX() + (squareWidth * 1.5));
 			int secondSquareCenterY = (int) (boundingBox.getMinY() + (squareHeight * .5));
 
-			if (logger.isDebugEnabled())
-				logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX, secondSquareCenterY,
-						undistorted.get(secondSquareCenterY, secondSquareCenterX));
+			if (logger.isDebugEnabled()) logger.debug("pF getFrameDelayPixel x {} y {} p {}", secondSquareCenterX,
+					secondSquareCenterY, undistorted.get(secondSquareCenterY, secondSquareCenterX));
 
 		}
 
@@ -663,15 +632,13 @@ public class AutoCalibrationManager {
 
 		// Establishes a search region
 		long region = mat.total() / 19200;
-		
-		
+
 		Mat denoisedMat = new Mat(mat.size(), CvType.CV_8UC1);
 		Photo.fastNlMeansDenoising(mat, denoisedMat, 21f, 7, 21);
-		
-        Imgproc.GaussianBlur(denoisedMat, mat, new Size(0,0), 10);
-        Core.addWeighted(denoisedMat, 1.5, mat, -0.5, 0, mat);
 
-		
+		Imgproc.GaussianBlur(denoisedMat, mat, new Size(0, 0), 10);
+		Core.addWeighted(denoisedMat, 1.5, mat, -0.5, 0, mat);
+
 		Mat tempMat = null;
 		if (logger.isTraceEnabled()) {
 			tempMat = new Mat(mat.size(), CvType.CV_8UC3);
@@ -681,7 +648,7 @@ public class AutoCalibrationManager {
 		int i = 0;
 		for (Point pt : estimatedPoints) {
 			MatOfPoint tempCorners = new MatOfPoint();
-			
+
 			mask = Mat.zeros(mat.size(), CvType.CV_8UC1);
 
 			Point leftpt = new Point(pt.x - region, pt.y - region);
@@ -698,8 +665,7 @@ public class AutoCalibrationManager {
 
 			Imgproc.goodFeaturesToTrack(mat, tempCorners, 2, .10, 0, mask, 3, true, .04);
 
-			if (tempCorners.empty())
-				return Optional.empty();
+			if (tempCorners.empty()) return Optional.empty();
 
 			Point res = null;
 			long dist = mat.total();
@@ -768,8 +734,10 @@ public class AutoCalibrationManager {
 				rect_width = height;
 			}
 
-			width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1)) * PAPER_MARGIN_WIDTH);
-			height = ((double) height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGIN_HEIGHT);
+			width = ((double) width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
+					* PAPER_MARGIN_WIDTH);
+			height = ((double) height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1))
+					* PAPER_MARGIN_HEIGHT);
 
 			final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
 			if (width > PAPER_PATTERN_SIZE_THRESHOLD * mat.cols()
@@ -870,8 +838,7 @@ public class AutoCalibrationManager {
 					(int) bCenter.x + 10));
 		}
 
-		if (logger.isTraceEnabled())
-			logger.trace("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);
+		if (logger.isTraceEnabled()) logger.trace("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);
 	}
 
 	public Frame undistortFrame(Frame frame) {
@@ -883,7 +850,7 @@ public class AutoCalibrationManager {
 
 		return frame;
 	}
-	
+
 	// Used in tests
 	public BufferedImage undistortFrame(BufferedImage bimg) {
 		if (!isCalibrated) {
@@ -893,7 +860,6 @@ public class AutoCalibrationManager {
 
 		return Camera.matToBufferedImage(warpPerspective(Camera.bufferedImageToMat(bimg)));
 	}
-
 
 	// MUST BE IN BGR pixel format
 	public Mat undistortFrame(Mat mat) {
@@ -1094,10 +1060,8 @@ public class AutoCalibrationManager {
 		int height = boundsRect.boundingRect().height;
 
 		// Make them divisible by two for video recording purposes
-		if ((width & 1) == 1)
-			width++;
-		if ((height & 1) == 1)
-			height++;
+		if ((width & 1) == 1) width++;
+		if ((height & 1) == 1) height++;
 
 		boundingBox = new BoundingBox(boundsRect.boundingRect().x, boundsRect.boundingRect().y, width, height);
 
@@ -1107,8 +1071,7 @@ public class AutoCalibrationManager {
 			Mat debugFrame = null;
 			if (frame.channels() == 3)
 				debugFrame = frame.clone();
-			else
-			{
+			else {
 				debugFrame = new Mat(frame.rows(), frame.cols(), CvType.CV_8UC3);
 				Imgproc.cvtColor(frame, debugFrame, Imgproc.COLOR_GRAY2BGR);
 			}
@@ -1306,15 +1269,14 @@ public class AutoCalibrationManager {
 	}
 
 	public java.awt.Point undistortCoords(int x, int y) {
-		if (!warpInitialized)
-			return new java.awt.Point(x,y);
-		
+		if (!warpInitialized) return new java.awt.Point(x, y);
+
 		MatOfPoint2f point = new MatOfPoint2f();
 		point.alloc(1);
-		point.put(0, 0, new double[] { x, y } );
-		
+		point.put(0, 0, new double[] { x, y });
+
 		Core.perspectiveTransform(point, point, perspMat);
-		
-		return new java.awt.Point((int)point.get(0, 0)[0], (int)point.get(0, 0)[1]);
+
+		return new java.awt.Point((int) point.get(0, 0)[0], (int) point.get(0, 0)[1]);
 	}
 }
