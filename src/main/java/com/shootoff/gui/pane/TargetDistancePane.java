@@ -40,7 +40,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
 
 public class TargetDistancePane extends Pane {
 	private final static Logger logger = LoggerFactory.getLogger(TargetDistancePane.class);
