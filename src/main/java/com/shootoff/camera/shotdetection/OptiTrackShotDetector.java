@@ -48,6 +48,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 		return OptiTrackCamera.initialized();
 	}
 
+	@Override
 	public void cameraStateChange(CameraState state) {
 		if (logger.isDebugEnabled()) logger.debug("got state change {}", state);
 		switch (state) {

@@ -93,6 +93,7 @@ public class XMLSessionReader {
 			return events;
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 
@@ -180,6 +181,7 @@ public class XMLSessionReader {
 			}
 		}
 
+		@Override
 		public void characters(char ch[], int start, int length) throws SAXException {
 			if (exerciseFeedMessage) {
 				events.get(currentCameraName).add(

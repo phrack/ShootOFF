@@ -266,6 +266,7 @@ public class RollingRecorder implements Closeable {
 			writer.addVideoStream(0, 0, codec, recordWidth, recordHeight);
 		}
 
+		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
 			// < 0 means the file we are rolling off of has < RECORD_LENGTH
 			// seconds of footage

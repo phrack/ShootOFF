@@ -44,6 +44,7 @@ public interface Camera extends Runnable, Closeable {
 
 	boolean isOpen();
 
+	@Override
 	void close();
 
 	String getName();

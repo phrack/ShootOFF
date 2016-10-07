@@ -199,19 +199,23 @@ public class AutoCalibrationManager {
 		private static final long minimumInterval = 250;
 		private long lastFrameCheck = 0;
 
+		@Override
 		public void reset() {
 			boundsResult = null;
 			lastFrameCheck = 0;
 		}
 
+		@Override
 		public boolean enabled() {
 			return true;
 		}
 
+		@Override
 		public boolean completed() {
 			return !(boundsResult == null);
 		}
 
+		@Override
 		public void process(Frame frame) {
 			if (frame.getTimestamp() - lastFrameCheck < minimumInterval)
 				return;
@@ -270,6 +274,7 @@ public class AutoCalibrationManager {
 			return calculateFrameDelay;
 		}
 
+		@Override
 		public boolean completed() {
 			return frameDelayResult > -1;
 		}
@@ -280,6 +285,7 @@ public class AutoCalibrationManager {
 			return !(frameTimestampBeforeFrameChange == -1 || completed());
 		}
 
+		@Override
 		public void process(Frame frame) {
 			if (!inStepTwo()) {
 				logger.debug("Step two: Checking frame delay");
@@ -352,6 +358,7 @@ public class AutoCalibrationManager {
 			stepThreeAttempts = 0;
 		}
 
+		@Override
 		public boolean completed() {
 			return (stepThreeAttempts >= STEP_THREE_MAX_ATTEMPTS);
 		}
@@ -421,6 +428,7 @@ public class AutoCalibrationManager {
 			tries = 0;
 		}
 
+		@Override
 		public boolean completed() {
 			return completed;
 		}

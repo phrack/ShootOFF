@@ -72,6 +72,7 @@ public class OptiTrackCamera implements Camera {
 		}
 	}
 
+	@Override
 	public boolean setState(CameraState cameraState) {
 		switch (cameraState) {
 		case DETECTING_CALIBRATED:
@@ -101,10 +102,12 @@ public class OptiTrackCamera implements Camera {
 		return true;
 	}
 
+	@Override
 	public CameraState getState() {
 		return cameraState;
 	}
 
+	@Override
 	public void setCameraEventListener(CameraEventListener cameraEventListener) {
 		this.cameraEventListener = Optional.ofNullable(cameraEventListener);
 	}
@@ -113,6 +116,7 @@ public class OptiTrackCamera implements Camera {
 		return currentFrameTimestamp;
 	}
 
+	@Override
 	public String getName() {
 		return "OptiTrack";
 	}
@@ -135,10 +139,13 @@ public class OptiTrackCamera implements Camera {
 
 	private native void setExposure(int exposure);
 
+	@Override
 	public synchronized native void close();
 
+	@Override
 	public synchronized native boolean open();
 
+	@Override
 	public native boolean isOpen();
 
 	@Override
@@ -147,10 +154,12 @@ public class OptiTrackCamera implements Camera {
 	@Override
 	public native int getFrameCount();
 
+	@Override
 	public void setViewSize(final Dimension size) {
 		return;
 	}
 
+	@Override
 	public Dimension getViewSize() {
 		if (dimension != null) return dimension;
 
@@ -171,6 +180,7 @@ public class OptiTrackCamera implements Camera {
 		return dst;
 	}
 
+	@Override
 	public Frame getFrame() {
 		byte[] frame = getImageNative();
 		long currentFrameTimestamp = System.currentTimeMillis();
@@ -246,10 +256,12 @@ public class OptiTrackCamera implements Camera {
 		return (getExposure() == newExp);
 	}
 
+	@Override
 	public void resetExposure() {
 		if (origExposure.isPresent()) setExposure(origExposure.get());
 	}
 
+	@Override
 	public boolean limitsFrames() {
 		return true;
 	}

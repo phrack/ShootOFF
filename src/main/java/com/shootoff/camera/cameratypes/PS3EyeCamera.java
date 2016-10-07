@@ -255,6 +255,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		configIsOpen = true;
 
 		gain.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
 				if (logger.isTraceEnabled()) logger.trace("gain set to: {}", Math.round(new_val.doubleValue()));
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_GAIN,
@@ -264,6 +265,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		});
 
 		exposure.valueProperty().addListener(new ChangeListener<Number>() {
+			@Override
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE,
 						(int) Math.round(new_val.doubleValue()));
@@ -290,6 +292,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		grid.getChildren().add(autoGain);
 
 		autoGain.selectedProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
 			public void changed(ObservableValue<? extends Boolean> ov, Boolean old_val, Boolean new_val) {
 				if (new_val) {
 					autoGain.setText("On");
@@ -314,6 +317,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		});
 	}// end launchcamerasettings
 
+	@Override
 	public String getName() {
 		return "PS3Eye";
 	}
@@ -342,6 +346,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		opened = false;
 	}
 
+	@Override
 	public synchronized void close() {
 
 		closeMe();
@@ -355,6 +360,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		}
 	}
 
+	@Override
 	public boolean isOpen() {
 		if (ps3ID != null) {
 			opened = true;
@@ -365,10 +371,12 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		}
 	}
 
+	@Override
 	public void setViewSize(final Dimension size) {
 		return;
 	}
 
+	@Override
 	public Dimension getViewSize() {
 		if (dimension != null)
 			return dimension;
@@ -391,6 +399,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		return mat;
 	}
 
+	@Override
 	public synchronized boolean open() {
 		if (opened)
 			return true;
@@ -400,6 +409,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		return isOpen();
 	}
 
+	@Override
 	public Frame getFrame() {
 		final byte[] frame = getImageNative();
 		long currentFrameTimestamp = System.currentTimeMillis();
@@ -485,11 +495,13 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		return (getExposure() == newExp);
 	}
 
+	@Override
 	public void resetExposure() {
 		if (origExposure.isPresent())
 			setExposure(origExposure.get());
 	}
 
+	@Override
 	public boolean limitsFrames() {
 		return false;
 	}

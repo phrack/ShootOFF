@@ -436,10 +436,12 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return buttonsContainer;
 	}
 	
+	@Override
 	public ObservableList<ShotEntry> getShotTimerModel() {
 		return shotEntries;
 	}
 	
+	@Override
 	public void selectCameraView(CameraView cameraView) {
 		cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
 	}
@@ -549,6 +551,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return cameraTabPane.getTabs().add(cameraTab);
 	}
 	
+	@Override
 	public void addNonCameraView(String name, Pane content, CanvasManager canvasManager, boolean select, boolean maximizeView) {
 		final Tab viewTab = new Tab(name, content);
 		cameraTabPane.getTabs().add(viewTab);
@@ -586,6 +589,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 	}
 	
+	@Override
 	public void removeCameraView(String name) {
 		Tab viewTab = null;
 		

@@ -105,6 +105,7 @@ public class SessionViewerController {
 				new Image(VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
 
 		sessionListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<File>() {
+			@Override
 			public void changed(ObservableValue<? extends File> ov, File oldFile, File newFile) {
 				if (isPlaying) togglePlaybackButton.fire();
 
@@ -132,6 +133,7 @@ public class SessionViewerController {
 		});
 
 		cameraTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+			@Override
 			public void changed(ObservableValue<? extends Tab> ot, Tab oldTab, Tab newTab) {
 				if (newTab == null) return;
 
@@ -156,6 +158,7 @@ public class SessionViewerController {
 		});
 
 		eventsListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Event>() {
+			@Override
 			public void changed(ObservableValue<? extends Event> oe, Event oldEvent, Event newEvent) {
 				if (newEvent == null) return;
 

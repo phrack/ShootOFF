@@ -268,10 +268,12 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			return (Math.abs(camera.get(CV_CAP_PROP_EXPOSURE)) < Math.abs(curExp));
 	}
 
+	@Override
 	public void resetExposure() {
 		if (origExposure.isPresent()) camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
 	}
 
+	@Override
 	public boolean limitsFrames() {
 		return false;
 	}

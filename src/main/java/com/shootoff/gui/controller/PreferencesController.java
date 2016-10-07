@@ -189,6 +189,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		});
 	}
 	
+	@Override
 	public void cameraSelectionChanged(Camera camera, boolean isSelected) {
 		if (isSelected && !configuredCameras.contains(camera)) {			
 			configuredCameras.add(camera);
@@ -205,6 +206,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		cameraConfigChanged = true;
 	}
 	
+	@Override
 	public void cameraRenamed(String oldName, String newName) {
 		int oldIndex = configuredNames.indexOf(oldName);
 		

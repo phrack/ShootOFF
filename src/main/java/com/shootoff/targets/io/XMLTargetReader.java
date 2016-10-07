@@ -132,6 +132,7 @@ public class XMLTargetReader implements TargetReader {
 			return targetTags;
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 
@@ -242,6 +243,7 @@ public class XMLTargetReader implements TargetReader {
 			}
 		}
 
+		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			switch (qName) {
 			case "polygon":

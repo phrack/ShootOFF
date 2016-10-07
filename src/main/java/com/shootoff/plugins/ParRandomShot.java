@@ -104,6 +104,7 @@ public class ParRandomShot extends ParForScore {
 		}
 	}
 
+	@Override
 	protected void resetValues() {
 		super.resetValues();
 		List<Target> targets = super.getCurrentTargets();

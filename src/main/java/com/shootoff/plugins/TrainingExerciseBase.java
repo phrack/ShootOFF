@@ -326,6 +326,7 @@ public class TrainingExerciseBase {
 		final TableColumn<ShotEntry, String> newCol = new TableColumn<ShotEntry, String>(name);
 		newCol.setPrefWidth(width);
 		newCol.setCellValueFactory(new Callback<CellDataFeatures<ShotEntry, String>, ObservableValue<String>>() {
+			@Override
 			public ObservableValue<String> call(CellDataFeatures<ShotEntry, String> p) {
 				return new SimpleStringProperty(p.getValue().getExerciseValue(name));
 			}

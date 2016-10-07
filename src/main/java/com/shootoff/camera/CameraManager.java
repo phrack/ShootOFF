@@ -249,6 +249,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	// TODO: This doesn't handle potential side effects of modifying the feed
 	// resolution on the fly.
+	@Override
 	public void setFeedResolution(int width, int height) {
 		feedWidth = width;
 		feedHeight = height;
@@ -747,6 +748,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		isAutoCalibrating.set(false);
 	}
 
+	@Override
 	public void setArenaBackground(String resourceFilename) {
 		if (cameraCalibrationListener == null) {
 			logger.error("setArenaBackground called when controller is null");

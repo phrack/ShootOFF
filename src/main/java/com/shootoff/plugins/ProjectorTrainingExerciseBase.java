@@ -255,6 +255,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 * 
 	 * @return the current instance of this class
 	 */
+	@Override
 	public ProjectorTrainingExerciseBase getInstance() {
 		return this;
 	}

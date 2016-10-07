@@ -364,6 +364,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		// In this loop we accomplish both MovingAverage updates AND threshold
 		// pixel detection
 		Parallel.forIndex(0, (SECTOR_ROWS * SECTOR_COLUMNS), 1, new Operation<Integer>() {
+			@Override
 			public void perform(Integer sector) {
 				final int sectorX = sector.intValue() % SECTOR_COLUMNS;
 				final int sectorY = sector.intValue() / SECTOR_ROWS;

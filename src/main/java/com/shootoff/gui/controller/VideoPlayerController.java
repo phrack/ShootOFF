@@ -144,6 +144,7 @@ public class VideoPlayerController implements PlaybackListener {
 			return lastTimestamp;
 		}
 
+		@Override
 		public void onVideoPicture(IVideoPictureEvent event) {
 			long currentTimestamp = event.getTimeStamp(TimeUnit.MILLISECONDS);
 

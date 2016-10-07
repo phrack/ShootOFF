@@ -33,10 +33,12 @@ public abstract class CalculatedFPSCamera implements Camera {
 
 	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
 
+	@Override
 	public void setCameraEventListener(CameraEventListener cameraEventListener) {
 		this.cameraEventListener = Optional.ofNullable(cameraEventListener);
 	}
 
+	@Override
 	public boolean setState(CameraState cameraState) {
 
 		switch (cameraState) {
@@ -56,6 +58,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 		return true;
 	}
 
+	@Override
 	public CameraState getState() {
 		return cameraState;
 	}
@@ -64,10 +67,12 @@ public abstract class CalculatedFPSCamera implements Camera {
 		return currentFrameTimestamp;
 	}
 
+	@Override
 	public int getFrameCount() {
 		return frameCount;
 	}
 
+	@Override
 	public double getFPS() {
 		return webcamFPS;
 	}
@@ -95,6 +100,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = this.getName().hashCode();
@@ -102,6 +108,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;
