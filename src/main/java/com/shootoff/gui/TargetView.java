@@ -390,6 +390,8 @@ public class TargetView implements Target {
 		final Color stroke = isSelected ? TargetRegion.SELECTED_STROKE_COLOR : TargetRegion.UNSELECTED_STROKE_COLOR;
 
 		for (final Node node : getTargetGroup().getChildren()) {
+			if (!(node instanceof TargetRegion)) continue;
+			
 			final TargetRegion region = (TargetRegion) node;
 			if (region.getType() != RegionType.IMAGE) {
 				((Shape) region).setStroke(stroke);
@@ -478,6 +480,8 @@ public class TargetView implements Target {
 			// Target was hit, see if a specific region was hit
 			for (int i = targetGroup.getChildren().size() - 1; i >= 0; i--) {
 				final Node node = targetGroup.getChildren().get(i);
+				
+				if (!(node instanceof TargetRegion)) continue;
 
 				final Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
@@ -671,6 +675,8 @@ public class TargetView implements Target {
 					// Target stayed in bounds so make sure that unresizable
 					// target regions stay the same size
 					for (final Node n : targetGroup.getChildren()) {
+						if (!(n instanceof TargetRegion)) continue;
+						
 						final TargetRegion r = (TargetRegion) n;
 
 						if (r.tagExists(Target.TAG_RESIZABLE)
@@ -738,6 +744,8 @@ public class TargetView implements Target {
 					// Target stayed in bounds so make sure that unresizable
 					// target regions stay the same size
 					for (final Node n : targetGroup.getChildren()) {
+						if (!(n instanceof TargetRegion)) continue;
+						
 						final TargetRegion r = (TargetRegion) n;
 
 						if (r.tagExists(Target.TAG_RESIZABLE)
