@@ -800,49 +800,7 @@ public class AutoCalibrationManager {
 		return Imgproc.minAreaRect(boardRect2f);
 
 	}
-
-	@SuppressWarnings("unused")
-	private void findColors(Mat frame, Mat warpedBoardCorners) {
-		final Point rCenter = findChessBoardSquareCenter(warpedBoardCorners, 2, 3);
-		final Point gCenter = findChessBoardSquareCenter(warpedBoardCorners, 2, 5);
-		final Point bCenter = findChessBoardSquareCenter(warpedBoardCorners, 2, 7);
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("findColors {} {} {}", rCenter, gCenter, bCenter);
-			logger.trace("findColors r {} {} {} {}", (int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
-					(int) rCenter.x + 10);
-		}
-
-		final Scalar rMeanColor = Core.mean(
-				frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10, (int) rCenter.x + 10));
-		final Scalar gMeanColor = Core.mean(
-				frame.submat((int) gCenter.y - 10, (int) gCenter.y + 10, (int) gCenter.x - 10, (int) gCenter.x + 10));
-		final Scalar bMeanColor = Core.mean(
-				frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10, (int) bCenter.x + 10));
-
-		if (logger.isTraceEnabled()) {
-			String filename = String.format("rColor.png");
-			File file = new File(filename);
-			filename = file.toString();
-			Highgui.imwrite(filename, frame.submat((int) rCenter.y - 10, (int) rCenter.y + 10, (int) rCenter.x - 10,
-					(int) rCenter.x + 10));
-
-			filename = String.format("gColor.png");
-			file = new File(filename);
-			filename = file.toString();
-			Highgui.imwrite(filename, frame.submat((int) gCenter.y - 10, (int) gCenter.y + 10, (int) gCenter.x - 10,
-					(int) gCenter.x + 10));
-
-			filename = String.format("bColor.png");
-			file = new File(filename);
-			filename = file.toString();
-			Highgui.imwrite(filename, frame.submat((int) bCenter.y - 10, (int) bCenter.y + 10, (int) bCenter.x - 10,
-					(int) bCenter.x + 10));
-		}
-
-		if (logger.isTraceEnabled()) logger.trace("meanColor {} {} {}", rMeanColor, gMeanColor, bMeanColor);
-	}
-
+	
 	public Frame undistortFrame(Frame frame) {
 		if (isCalibrated) {
 			frame.setMat(warpPerspective(frame.getOriginalMat()));
@@ -1127,23 +1085,6 @@ public class AutoCalibrationManager {
 		}
 	}
 
-	// initializeWarpPerspective MUST BE CALLED first
-	@SuppressWarnings("unused")
-	private Mat warpCorners(MatOfPoint2f imageCorners) {
-		final Mat mat;
-
-		if (warpInitialized) {
-			mat = new Mat();
-			Core.transform(imageCorners, mat, perspMat);
-		} else {
-			mat = null;
-			logger.warn("warpCorners called when warpInitialized is false - {} {} - {}", perspMat, boundingBox,
-					isCalibrated);
-		}
-
-		return mat;
-	}
-
 	public Optional<MatOfPoint2f> findChessboard(Mat mat) {
 
 		final MatOfPoint2f imageCorners = new MatOfPoint2f();
@@ -1223,30 +1164,6 @@ public class AutoCalibrationManager {
 
 		return result;
 
-	}
-
-	private Point findChessBoardSquareCenter(Mat corners, int row, int col) {
-		if (row >= PATTERN_HEIGHT - 1 || col >= PATTERN_WIDTH - 1) {
-			logger.warn("findChessBoardSquareColor invalid row or col {} {}", row, col);
-			return null;
-		}
-
-		final Point topLeft = new Point(corners.get((row * PATTERN_WIDTH - 1) + col, 0)[0],
-				corners.get((row * PATTERN_WIDTH - 1) + col, 0)[1]);
-		final Point bottomRight = new Point(corners.get(((row + 1) * PATTERN_WIDTH - 1) + col + 1, 0)[0],
-				corners.get(((row + 1) * PATTERN_WIDTH - 1) + col + 1, 0)[1]);
-
-		final Point result = new Point((topLeft.x + bottomRight.x) / 2, (topLeft.y + bottomRight.y) / 2);
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("findChessBoardSquareColor {}", corners.size());
-
-			logger.trace("findChessBoardSquareColor {} {}", (row * PATTERN_WIDTH - 1) + col,
-					((row + 1) * PATTERN_WIDTH - 1) + col + 1);
-			logger.trace("findChessBoardSquareColor {} {} {}", topLeft, bottomRight, result);
-		}
-
-		return result;
 	}
 
 	private double euclideanDistance(final Point pt1, final Point pt2) {
