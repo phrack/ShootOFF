@@ -85,11 +85,10 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	private static final int VIEW_HEIGHT = 480;
 
 	private static eyecam.ps3eye_t ps3ID = null;
-	private static boolean opened = false;
 	private static boolean closed = true;
 
 	private Optional<Integer> origExposure = Optional.empty();
-	private static boolean configIsOpen = false;
+	private boolean configIsOpen = false;
 
 	private static eyecam eyecamLib;
 	private static byte[] ba = new byte[getViewWidth() * getViewHeight() * 4];
@@ -108,8 +107,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		try {
 			final String architecture = System.getProperty("sun.arch.data.model");
 
-			if (logger.isDebugEnabled())
-				logger.debug("OS type is: {}", architecture);
+			if (logger.isDebugEnabled()) logger.debug("OS type is: {}", architecture);
 
 			if (architecture != null && "64".equals(architecture)) {
 				logger.trace("Trying to load eyeCam64.dll");
@@ -137,17 +135,12 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 		if (eyecamLib.ps3eye_count_connected() >= 1) {
 			logger.trace("Found a PS3EYE camera, setting up communications with it");
-			ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
-					eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
-			if (ps3ID != null) {
+			
+			if (openPS3Eye()) {
 				logger.trace("Communications with PS3Eye camera established");
-				closed = false;
-				opened = true;
 				initialized = true;
 			} else {
 				logger.trace("Communications with PS3Eye camera NOT established");
-				closed = true;
-				opened = false;
 				initialized = false;
 			}
 
@@ -170,6 +163,15 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		}
 
 	}// end init
+	
+	private static boolean openPS3Eye() {
+		ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75,
+				eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
+		
+		closed = ps3ID == null;
+		
+		return ps3ID != null;
+	}
 
 	public void launchCameraSettings() {
 		logger.trace("Launch camera settings called");
@@ -265,7 +267,8 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 			public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) {
 				eyecamLib.ps3eye_set_parameter(ps3ID, eyecam.ps3eye_parameter.PS3EYE_EXPOSURE,
 						(int) Math.round(new_val.doubleValue()));
-				if (logger.isTraceEnabled()) logger.trace("exposure level set to: {}", Math.round(new_val.doubleValue()));
+				if (logger.isTraceEnabled())
+					logger.trace("exposure level set to: {}", Math.round(new_val.doubleValue()));
 				exposureValue.setText(String.format("%d", (int) Math.round(new_val.doubleValue())));
 			}
 		});
@@ -326,43 +329,33 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		return VIEW_HEIGHT;
 	}
 
-	public static void closeMe() {
-		if (configIsOpen) {
-			configIsOpen = false;
-			ps3eyeSettingsStage.close();
-		}
-		if (closed)
-			return;
+	private static void closeMe() {		
+		if (closed) return;
 
 		eyecamLib.ps3eye_close(ps3ID);
 		eyecamLib.ps3eye_uninit();
 		logger.debug("PS3Eye camera closed");
 		ps3ID = null;
 		closed = true;
-		opened = false;
 	}
 
 	@Override
 	public synchronized void close() {
-
-		closeMe();
-		if (closed) {
-			return;
-		} else {
-			eyecamLib.ps3eye_close(ps3ID);
-			eyecamLib.ps3eye_uninit();
-			logger.debug("PS3Eye camera closed");
-			ps3ID = null;
+		if (configIsOpen) {
+			configIsOpen = false;
+			ps3eyeSettingsStage.close();
 		}
+		
+		closeMe();
 	}
 
 	@Override
 	public boolean isOpen() {
 		if (ps3ID != null) {
-			opened = true;
+			closed = false;
 			return true;
 		} else {
-			opened = false;
+			closed = true;
 			return false;
 		}
 	}
@@ -374,8 +367,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 	@Override
 	public Dimension getViewSize() {
-		if (dimension != null)
-			return dimension;
+		if (dimension != null) return dimension;
 
 		dimension = new Dimension(getViewWidth(), getViewHeight());
 
@@ -397,11 +389,8 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 	@Override
 	public synchronized boolean open() {
-		if (opened)
-			return true;
-		ps3ID = eyecamLib.ps3eye_open(0, getViewWidth(), getViewHeight(), 75, eyecam.ps3eye_format.PS3EYE_FORMAT_BGR);
-		if (isOpen())
-			closed = false;
+		if (!closed) return true;
+		openPS3Eye();
 		return isOpen();
 	}
 
@@ -437,8 +426,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	@Override
 	public void run() {
 		while (isOpen()) {
-			if (cameraEventListener.isPresent())
-				cameraEventListener.get().newFrame(getFrame());
+			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getFrame());
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
@@ -447,14 +435,12 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 			if (configIsOpen) {
 				Platform.runLater(() -> {
 					final String theFPS = Double.toString(getFPS());
-					if (theFPS.length() >= 6)
-						fpsValue.setText((Double.toString(getFPS()).substring(0, 5)));
+					if (theFPS.length() >= 6) fpsValue.setText((Double.toString(getFPS()).substring(0, 5)));
 				});
 			}
 		}
 
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
+		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
 	}
 
 	@Override
@@ -472,8 +458,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 	@Override
 	public boolean supportsExposureAdjustment() {
-		if (!origExposure.isPresent())
-			origExposure = Optional.of(getExposure());
+		if (!origExposure.isPresent()) origExposure = Optional.of(getExposure());
 		return true;
 	}
 
@@ -483,8 +468,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 		final int newExp = (int) (curExp - (.1 * curExp));
 		logger.trace("curExp[ {} newExp {}", curExp, newExp);
 
-		if (newExp < 17)
-			return false;
+		if (newExp < 17) return false;
 
 		setExposure(newExp);
 		logger.trace("curExp[ {} newExp {} res {}", curExp, newExp, getExposure());
@@ -493,8 +477,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 	@Override
 	public void resetExposure() {
-		if (origExposure.isPresent())
-			setExposure(origExposure.get());
+		if (origExposure.isPresent()) setExposure(origExposure.get());
 	}
 
 	@Override
@@ -504,8 +487,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 
 	public interface eyecam extends Library {
 		public static class ps3eye_t extends PointerType {
-			public ps3eye_t() {
-			}
+			public ps3eye_t() {}
 
 			protected ps3eye_t(Pointer ps3eye_t) {
 				super(ps3eye_t);

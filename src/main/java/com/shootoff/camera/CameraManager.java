@@ -526,7 +526,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			// Camera appears to be open but got a null frame
 			logger.warn("Null frame from camera: {}", camera.getName());
 			cameraError = true;
-		} else if ((currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth)
+		} else if (currentFrame != null && 
+				(currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth)
 				&& camera.isOpen()) {
 			// Camera appears to be open but got an invalid size frame
 			logger.warn("Invalid frame size from camera: {} gave {} expecting {},{}", camera.getName(),

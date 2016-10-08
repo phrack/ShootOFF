@@ -392,7 +392,7 @@ public class AutoCalibrationManager {
 				paperDimensions = Optional.of(newPaperDimensions);
 
 				logger.trace("Found paper dimensions {}", paperDimensions.get());
-			} else if (paperDimensions.isPresent() && averagePatterns) {
+			} else if (paperDimensions.isPresent()) {
 				paperDimensions = Optional.of(averageDimensions(paperDimensions.get(), newPaperDimensions));
 				logger.trace("Averaged paper dimensions {}", paperDimensions.get());
 			}
@@ -1130,12 +1130,13 @@ public class AutoCalibrationManager {
 	// initializeWarpPerspective MUST BE CALLED first
 	@SuppressWarnings("unused")
 	private Mat warpCorners(MatOfPoint2f imageCorners) {
-		Mat mat = null;
+		final Mat mat;
 
 		if (warpInitialized) {
 			mat = new Mat();
 			Core.transform(imageCorners, mat, perspMat);
 		} else {
+			mat = null;
 			logger.warn("warpCorners called when warpInitialized is false - {} {} - {}", perspMat, boundingBox,
 					isCalibrated);
 		}
@@ -1150,10 +1151,9 @@ public class AutoCalibrationManager {
 		final boolean found = Calib3d.findChessboardCorners(mat, boardSize, imageCorners,
 				Calib3d.CALIB_CB_ADAPTIVE_THRESH | Calib3d.CALIB_CB_NORMALIZE_IMAGE);
 
-		logger.trace("found {}", found);
+		if (logger.isTraceEnabled()) logger.trace("found chessboard corners {}", found);
 
 		if (found) {
-
 			// optimization
 			Imgproc.cornerSubPix(mat, imageCorners, new Size(1, 1), new Size(-1, -1), term);
 
