@@ -526,8 +526,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			// Camera appears to be open but got a null frame
 			logger.warn("Null frame from camera: {}", camera.getName());
 			cameraError = true;
-		} else if (currentFrame != null && 
-				(currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth)
+		} else if (currentFrame != null
+				&& (currentFrame.size().height != feedHeight || currentFrame.size().width != feedWidth)
 				&& camera.isOpen()) {
 			// Camera appears to be open but got an invalid size frame
 			logger.warn("Invalid frame size from camera: {} gave {} expecting {},{}", camera.getName(),
@@ -586,7 +586,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			final BufferedImage image = ConverterFactory.convertToType(currentImage, BufferedImage.TYPE_3BYTE_BGR);
 			final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-			final IVideoPicture frame = converter.toPicture(image, (System.currentTimeMillis() - recordingStartTime) * 1000);
+			final IVideoPicture frame = converter.toPicture(image,
+					(System.currentTimeMillis() - recordingStartTime) * 1000);
 			frame.setKeyFrame(isFirstStreamFrame);
 			frame.setQuality(0);
 			isFirstStreamFrame = false;
@@ -627,8 +628,9 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
-					(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
+			submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(),
+					(int) projectionBounds.getMaxY(), (int) projectionBounds.getMinX(),
+					(int) projectionBounds.getMaxX());
 
 			if (recordingCalibratedArea) {
 				final BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
@@ -651,11 +653,12 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
 			if (submatFrameBGR == null)
-				submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(), (int) projectionBounds.getMaxY(),
-						(int) projectionBounds.getMinX(), (int) projectionBounds.getMaxX());
+				submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(),
+						(int) projectionBounds.getMaxY(), (int) projectionBounds.getMinX(),
+						(int) projectionBounds.getMaxX());
 
-			if (shotDetector instanceof FrameProcessingShotDetector)
-				((FrameProcessingShotDetector) shotDetector).processFrame(new Frame(submatFrameBGR, currentFrame.getTimestamp()), isDetecting.get());
+			if (shotDetector instanceof FrameProcessingShotDetector) ((FrameProcessingShotDetector) shotDetector)
+					.processFrame(new Frame(submatFrameBGR, currentFrame.getTimestamp()), isDetecting.get());
 		} else {
 			if (shotDetector instanceof FrameProcessingShotDetector)
 				((FrameProcessingShotDetector) shotDetector).processFrame(currentFrame, isDetecting.get());
@@ -806,15 +809,12 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public Point undistortCoords(int x, int y) {
-		if (acm == null)
-			return new Point(x,y);
-		return acm.undistortCoords(x,y);
+		if (acm == null) return new Point(x, y);
+		return acm.undistortCoords(x, y);
 	}
 
 	public boolean isCalibrated() {
 		return projectionBounds.isPresent();
 	}
-
-
 
 }
