@@ -151,11 +151,11 @@ public class TargetEditorController {
 			}
 		});
 	}
-	
+
 	public Pane getPane() {
 		return targetEditorPane;
 	}
-	
+
 	public void init(Image backgroundImg, TargetListener targetListener, File targetFile) {
 		init(backgroundImg, targetListener);
 
@@ -238,7 +238,7 @@ public class TargetEditorController {
 		fileChooser.setTitle("Save Target");
 		fileChooser.setInitialDirectory(new File(System.getProperty("shootoff.home") + File.separator + "targets"));
 		fileChooser.getExtensionFilters()
-				.addAll(new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target"));
+		.addAll(new FileChooser.ExtensionFilter("ShootOFF Target (*.target)", "*.target"));
 		File targetFile = fileChooser.showSaveDialog(canvasPane.getParent().getScene().getWindow());
 
 		if (targetFile != null) {
@@ -253,11 +253,11 @@ public class TargetEditorController {
 			if (isNewTarget) targetListener.newTarget(targetFile);
 		}
 	}
-	
+
 	@FXML
 	public void setBackgroundImage(ActionEvent event) {
 		final File selectedBackground = chooseImageFile();
-		
+
 		if (selectedBackground != null) {
 			backgroundImageView.setImage(new Image(selectedBackground.toURI().toString()));
 			canvasPane.setPrefSize(backgroundImageView.getBoundsInLocal().getWidth(),
@@ -418,7 +418,7 @@ public class TargetEditorController {
 			toggleTagEditor();
 			tagEditorOpen = true;
 		}
-		
+
 		if (cursorRegion.isPresent()) {
 			final Node previous = cursorRegion.get();
 
@@ -519,7 +519,7 @@ public class TargetEditorController {
 				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
 		return fileChooser.showOpenDialog(canvasPane.getParent().getScene().getWindow());
 	}
-	
+
 	@FXML
 	public void openImage(ActionEvent event) {
 		final File imageFile = chooseImageFile();
@@ -803,10 +803,10 @@ public class TargetEditorController {
 
 			return;	
 		}
-		
+
 
 		final TagEditorPane editor;
-		
+
 		if (tagsButton.isSelected()) {
 			if (cursorRegion.isPresent()) {
 				// Edit tags for a selected target region
@@ -823,7 +823,7 @@ public class TargetEditorController {
 		// Show the tag editor
 		tagEditor = Optional.of(editor);
 		canvasPane.getChildren().add(editor);
-		
+
 		editor.setLayoutX(512);
 	}
 }

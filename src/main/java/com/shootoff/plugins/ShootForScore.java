@@ -48,7 +48,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {}
-	
+
 	/**
 	 * Returns the score for the red player. This method exists to make this
 	 * exercise easier to test.

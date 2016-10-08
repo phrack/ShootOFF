@@ -129,7 +129,7 @@ public class XMLCourseReader {
 
 				this.background = Optional.of(background);
 			}
-				break;
+			break;
 
 			case "target": {
 				final File targetFile = new File(attributes.getValue("file"));
@@ -152,13 +152,13 @@ public class XMLCourseReader {
 					showTargetError(targetFile.getPath());
 				}
 			}
-				break;
+			break;
 
 			case "resolution": {
 				resolution = Optional.of(new Dimension2D(Double.parseDouble(attributes.getValue("width")),
 						Double.parseDouble(attributes.getValue("height"))));
 			}
-				break;
+			break;
 			}
 		}
 
@@ -169,7 +169,7 @@ public class XMLCourseReader {
 				final String message = String.format(
 						"The course %s requires the target %s, but the "
 								+ "target file is missing. This target will not appear in your projector arena.",
-						courseFile.getName(), targetPath);
+								courseFile.getName(), targetPath);
 
 				targetAlert.setTitle("Missing Target");
 				targetAlert.setHeaderText("Missing Required Target File");

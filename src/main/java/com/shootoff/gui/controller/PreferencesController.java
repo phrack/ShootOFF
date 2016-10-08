@@ -71,7 +71,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class PreferencesController implements DesignateShotRecorderListener, CameraSelectionListener,
-		CameraRenamedListener {
+CameraRenamedListener {
 	@FXML private ScrollPane preferencesPane;
 	@FXML private ListView<String> webcamListView;
 	@FXML private Slider markerRadiusSlider;
@@ -141,18 +141,18 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 
 		for (final String webcamName : config.getWebcams().keySet()) {
 			final Camera c = config.getWebcams().get(webcamName);
-			
+
 			configuredNames.add(webcamName);
 			configuredCameras.add(c);
 			cameras.add(webcamName);
-			
+
 			CheckableImageListCell.getCameraCheckBoxes().get(c).setSelected(true);
 		}
-		
+
 		for (final Camera c : CameraFactory.getWebcams()) {
 			if (!configuredCameras.contains(c)) cameras.add(c.getName());
 		}
-		
+
 		webcamListView.setItems(cameras);
 
 		markerRadiusSlider.setValue(config.getMarkerRadius());
@@ -188,7 +188,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 			}
 		});
 	}
-	
+
 	@Override
 	public void cameraSelectionChanged(Camera camera, boolean isSelected) {
 		if (isSelected && !configuredCameras.contains(camera)) {			
@@ -196,33 +196,33 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 			configuredNames.add(camera.getName());
 		} else if (!isSelected) {
 			final int cameraIndex = configuredCameras.indexOf(camera);
-			
+
 			if (cameraIndex > -1) {
 				configuredCameras.remove(cameraIndex);
 				configuredNames.remove(cameraIndex);
 			}
 		}
-		
+
 		cameraConfigChanged = true;
 	}
-	
+
 	@Override
 	public void cameraRenamed(String oldName, String newName) {
 		final int oldIndex = configuredNames.indexOf(oldName);
-		
+
 		if (oldIndex > -1) {
 			configuredNames.set(oldIndex, newName);
 			cameraRenamed = true;
 		}
 	}
-	
+
 	public void prepareToShow() {
 		cameraConfigChanged = false;
 		cameraRenamed = false;
 		camerasOnShown.clear();
 		camerasOnShown.addAll(configuredCameras);
 	}
-	
+
 	public Node getPane() {
 		return preferencesPane;
 	}
@@ -383,7 +383,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 				removedCameraNames.add(webcamName);
 			}
 		}
-		
+
 		final Iterator<Camera> it = configuredCameras.iterator();
 		while (it.hasNext()) {
 			final Camera c = it.next();
@@ -395,7 +395,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		configuredNames.removeAll(removedCameraNames);
 		cameras.removeAll(removedCameraNames);
 	}
-	
+
 	private boolean cameraListChanged() {
 		for (final Camera c : configuredCameras) {
 			// Tried to remove a camera that is in the new
@@ -427,7 +427,7 @@ public class PreferencesController implements DesignateShotRecorderListener, Cam
 		config.setCalibratedFeedBehavior(CalibrationOption.fromString(calibratedOptionsChoiceBox.getValue()));
 		config.setShowArenaShotMarkers(showArenaShotMarkersCheckBox.isSelected());
 		config.setAutoAdjustExposure(autoAdjustExposureCheckBox.isSelected());
-		
+
 		if (config.writeConfigurationFile()) {
 			calibrationConfigurator.calibratedFeedBehaviorsChanged();
 

@@ -143,11 +143,11 @@ public class CanvasManager implements CameraView {
 		canvasGroup.setOnMouseClicked((event) -> {
 			if (contextMenu.isPresent() && contextMenu.get().isShowing())
 				contextMenu.get().hide();
-			
+
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
 				final Color shotColor;
-				
+
 				if (event.isShiftDown()) {
 					shotColor = Color.RED;
 				} else if (event.isControlDown()) {
@@ -155,14 +155,14 @@ public class CanvasManager implements CameraView {
 				} else {
 					return;
 				}
-				
+
 				// Skip the camera manager for injected shots made from the
 				// arena tab otherwise they get scaled before the call to
 				// addArenaShot when they go through the arena camera feed's
 				// canvas manager
 				if (this instanceof MirroredCanvasManager) {
 					final long shotTimestamp = cameraManager == null ? 0 : cameraManager.getCurrentFrameTimestamp();
-					
+
 					addShot(
 							new Shot(shotColor, event.getX(), event.getY(), shotTimestamp, config.getMarkerRadius()), 
 							false);
@@ -175,7 +175,7 @@ public class CanvasManager implements CameraView {
 			}
 		});
 	}
-	
+
 	@Override
 	public void close() {
 		diagnosticExecutorService.shutdownNow();
@@ -548,7 +548,7 @@ public class CanvasManager implements CameraView {
 			} else {
 				notifyShot(shot);
 			}
-			
+
 			// TODO: Add separate infrared sound or switch config to read "red/infrared"
 			if (config.useRedLaserSound() && (
 					Color.RED.equals(shot.getColor()) ||
@@ -565,9 +565,9 @@ public class CanvasManager implements CameraView {
 		// table is in use
 		if (shotEntries != null) {
 			Optional<Shot> lastShot = Optional.empty();
-			
+
 			if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
-	
+
 			final ShotEntry shotEntry;
 			if (hadMalfunction || hadReload) {
 				shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), hadMalfunction, hadReload);
@@ -576,7 +576,7 @@ public class CanvasManager implements CameraView {
 			} else {
 				shotEntry = new ShotEntry(shot, lastShot, config.getShotTimerRowColor(), false, false);
 			}
-	
+
 			try {
 				shotEntries.add(shotEntry);
 			} catch (final NullPointerException npe) {
@@ -609,7 +609,7 @@ public class CanvasManager implements CameraView {
 				processedShot = arenaPane.get().getCanvasManager().addArenaShot(arenaShot, videoString, isMirroredShot);
 			}
 		}
-		
+
 		if (currentExercise.isPresent() && !processedShot) {
 			// If the canvas is mirrored, use the one without the camera manager
 			// for exercises because that is the one for the arena window.
@@ -649,7 +649,7 @@ public class CanvasManager implements CameraView {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
 		};
-		
+
 		if (Platform.isFxApplicationThread()) {
 			drawShotAction.run();
 		} else {
@@ -753,7 +753,7 @@ public class CanvasManager implements CameraView {
 
 	protected Optional<TargetComponents> loadTarget(File targetFile, boolean playAnimations) {
 		Optional<TargetComponents> targetComponents;
-		
+
 		if ('@' == targetFile.toString().charAt(0)) {
 			if (!config.getPlugin().isPresent()) {
 				throw new AssertionError("Loaded target from training exercise resources, but a plugin does not "
@@ -777,7 +777,7 @@ public class CanvasManager implements CameraView {
 
 		return targetComponents;
 	}
-	
+
 	public Optional<Target> addTarget(File targetFile, boolean playAnimations) {
 		final Optional<TargetComponents> targetComponents = loadTarget(targetFile, playAnimations);
 
@@ -802,13 +802,13 @@ public class CanvasManager implements CameraView {
 
 	public Target addTarget(File targetFile, Group targetGroup, Map<String, String> targetTags, boolean userDeletable) {
 		final TargetView newTarget;
-		
+
 		if (this instanceof MirroredCanvasManager) {
 			newTarget = new MirroredTarget(targetFile, targetGroup, targetTags, config, this, userDeletable);
 		} else {
 			newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
 		}
-		
+
 		return addTarget(newTarget);
 	}
 

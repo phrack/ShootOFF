@@ -194,7 +194,7 @@ public class Configuration {
 		parseCmdLine(args);
 		readConfigurationFile();
 		parseCmdLine(args); // Parse twice so that we guarantee debug is set and
-							// override config file
+		// override config file
 
 		setConfig(this);
 	}

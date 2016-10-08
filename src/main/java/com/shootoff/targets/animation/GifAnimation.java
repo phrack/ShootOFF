@@ -51,7 +51,7 @@ public class GifAnimation extends SpriteAnimation {
 
 		this.setCycleDuration(Duration.millis(delay));
 	}
-	
+
 	public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
 		super(imageView, readGif(new FileInputStream(gifFile)));
 

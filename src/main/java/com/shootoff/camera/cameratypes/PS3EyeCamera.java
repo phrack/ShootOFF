@@ -516,7 +516,7 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 			public static final int PS3EYE_AUTO_GAIN = 0; // [false, true]
 			public static final int PS3EYE_GAIN = 1; // [0, 63]
 			public static final int PS3EYE_AUTO_WHITEBALANCE = 2; // [false,
-																	// true]
+			// true]
 			public static final int PS3EYE_EXPOSURE = 3; // [0, 255]
 			public static final int PS3EYE_SHARPNESS = 4; // [0 63]
 			public static final int PS3EYE_CONTRAST = 5; // [0, 255]

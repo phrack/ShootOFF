@@ -22,7 +22,7 @@ import com.shootoff.camera.Frame;
 
 public interface CameraEventListener {
 	public void newFrame(Frame frame);
-	
+
 	public void newFrame(Frame frame, boolean shouldDedistort);
 
 	public void newFPS(double cameraFPS);

@@ -99,13 +99,13 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 			break;
 		case REMOVED:
 			targets.remove(target);
-			
+
 			if (repeatExercise && targets.isEmpty()) {
 				repeatExercise = false;
 			} else if (repeatExercise && isStopTarget(target) && !hasStopTarget()) {
 				repeatExercise = false;
 			}
-			
+
 			break;
 		}
 	}
@@ -133,12 +133,12 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 		return hasStopTarget;
 	}
-	
+
 	private boolean hasStopTarget() {
 		for (final Target t : targets) {
 			if (isStopTarget(t)) return true;
 		}
-		
+
 		return false;
 	}
 
@@ -146,7 +146,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 		if (!repeatExercise) return;
 
 		roundTargets = new HashSet<>(targets);
-		
+
 		if (testing) {
 			new AreYouReady().run();
 		} else {
@@ -257,7 +257,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 				}
 
 				TextToSpeech.say(roundAnnouncement);
-				
+
 				if (testing) {
 					startRound();
 				} else {

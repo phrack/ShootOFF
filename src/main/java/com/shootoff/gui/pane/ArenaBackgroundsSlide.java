@@ -36,33 +36,33 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 	private final ItemSelectionPane<LocatedImage> itemPane = new ItemSelectionPane<>(true, this);
 	private final ProjectorArenaPane arenaPane;
 	private final Stage shootOffStage;
-	
+
 	private boolean choseBackground = false;
-	
+
 	public ArenaBackgroundsSlide(Pane parentControls, Pane parentBody, ProjectorArenaPane arenaPane,
 			Stage shootOffStage) {
 		super(parentControls, parentBody);
-		
+
 		this.arenaPane = arenaPane;
 		this.shootOffStage = shootOffStage;
-		
+
 		addNoneButton();
 		initDefaultBackgrounds();
-		
+
 		addBodyNode(itemPane);
 	}
-	
+
 	private ButtonBase addNoneButton() {
 		final LocatedImage none = new LocatedImage("/images/blank_page.png");
-		
+
 		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream("/images/blank_page.png");
 		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
-		
+
 		final ToggleButton noneButton = (ToggleButton) itemPane.addButton(none, "None", 
 				Optional.of(thumbnailView), Optional.empty());
 		noneButton.setSelected(true);
 		itemPane.setDefault(none);
-		
+
 		return noneButton;
 	}
 
@@ -83,7 +83,7 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 		final LocatedImage img = new LocatedImage(is, resourceName);
 		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
 		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
-		
+
 		itemPane.addButton(img, buttonName, Optional.of(thumbnailView), Optional.empty());
 	}
 
@@ -111,16 +111,16 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 		} else {
 			arenaPane.setArenaBackground(selectedImage);	
 		}
-		
+
 		choseBackground = true;
-		
+
 		hide();
 	}
-	
+
 	public void setChoseBackground(boolean choseBackground) {
 		this.choseBackground = choseBackground;
 	}
-	
+
 	public boolean choseBackground() {
 		return choseBackground;
 	}

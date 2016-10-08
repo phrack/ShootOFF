@@ -65,7 +65,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {}
-	
+
 	// For testing
 	protected void init(int shootCount, int dontShootCount, int maxVelocity) {
 		this.shootCount = shootCount;
@@ -127,7 +127,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			shootCount = Integer.parseInt(newValue);
 			stopExercise();
 			startExercise();
-	    });
+		});
 		bouncingTargetsPane.add(new Label("Shoot Targets:"), 0, 0);
 		bouncingTargetsPane.add(shootTargetsComboBox, 1, 0);
 
@@ -137,7 +137,7 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			dontShootCount = Integer.parseInt(newValue);
 			stopExercise();
 			startExercise();
-	    });
+		});
 		bouncingTargetsPane.add(new Label("Don't Shoot Targets:"), 0, 1);
 		bouncingTargetsPane.add(dontShootTargetsComboBox, 1, 1);
 
@@ -150,15 +150,15 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 			BouncingTargets.maxVelocity = Integer.parseInt(newValue);
 			stopExercise();
 			startExercise();
-	    });
+		});
 		bouncingTargetsPane.add(new Label("Max Target Speed:"), 0, 2);
 		bouncingTargetsPane.add(maxVelocityComboBox, 1, 2);
-		
+
 		final CheckBox removeTargets = new CheckBox();
 		removeTargets.setOnAction((event) -> removeShootTargets = removeTargets.isSelected());
 		bouncingTargetsPane.add(new Label("Remove Hit Shoot Targets:"), 0, 3);
 		bouncingTargetsPane.add(removeTargets, 1, 3);
-		
+
 		super.addExercisePane(bouncingTargetsPane);
 	}
 
@@ -299,10 +299,10 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 				case "shoot": {
 					score++;
 					super.showTextOnFeed(String.format("Score: %d", score));
-					
+
 					if (removeShootTargets) {
 						super.removeTarget(hit.get().getTarget());
-						
+
 						if (score == shootTargets.size()) {
 							super.playSound("sounds/beep.wav");
 							TextToSpeech.say(String.format("Your score was %d", score));
@@ -311,12 +311,12 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 						}
 					}
 				}
-					break;
+				break;
 
 				case "dont_shoot": {
 					super.playSound("sounds/beep.wav");
 					TextToSpeech.say(String.format("Your score was %d", score));
-					
+
 					if (removeShootTargets) {
 						stopExercise();
 						startExercise();
@@ -325,12 +325,12 @@ public class BouncingTargets extends ProjectorTrainingExerciseBase implements Tr
 						super.showTextOnFeed("Score: 0");
 					}
 				}
-					break;
+				break;
 				}
 			}
 		}
 	}
-	
+
 	private void stopExercise() {
 		targetAnimation.stop();
 

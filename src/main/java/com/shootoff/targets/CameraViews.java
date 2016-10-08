@@ -14,7 +14,7 @@ import javafx.scene.layout.Pane;
 
 public interface CameraViews {
 	List<Target> getTargets();
-	
+
 	/**
 	 * Add a view to the same GUI widget used to display camera views, but for a
 	 * non-camera view (i.e. an arena tab).
@@ -36,18 +36,18 @@ public interface CameraViews {
 	void addNonCameraView(String name, Pane content, CanvasManager canvasManager, boolean select, boolean maximizeView);
 
 	void removeCameraView(String name);
-	
+
 	boolean isArenaViewSelected();
-	
+
 	Optional<CameraView> getArenaView();
-	
+
 	CameraView getSelectedCameraView();
-	
+
 	CameraManager getSelectedCameraManager();
-	
+
 	Node getSelectedCameraContainer();
-	
+
 	void selectCameraView(CameraView cameraView);
-	
+
 	ObservableList<ShotEntry> getShotTimerModel();
 }

@@ -71,17 +71,17 @@ public class XMLSessionWriter implements EventVisitor {
 					"\t\t<shot timestamp=\"%d\" color=\"%s\""
 							+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" isMalfunction=\"%b\""
 							+ " isReload=\"%b\" targetIndex=\"%d\" hitRegionIndex=\"%d\" videos=\"%s\" />%n",
-					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(),
-					(int) shot.getMarker().getRadiusX(), isMalfunction, isReload, targIndex, hitRegIndex,
-					videoString.get()));
+							timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(),
+							(int) shot.getMarker().getRadiusX(), isMalfunction, isReload, targIndex, hitRegIndex,
+							videoString.get()));
 
 		} else {
 			xmlBody.append(String.format(Locale.US,
 					"\t\t<shot timestamp=\"%d\" color=\"%s\""
 							+ " x=\"%f\" y=\"%f\" shotTimestamp=\"%d\" markerRadius=\"%d\" isMalfunction=\"%b\""
 							+ " isReload=\"%b\" targetIndex=\"%d\" hitRegionIndex=\"%d\" />%n",
-					timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(),
-					(int) shot.getMarker().getRadiusX(), isMalfunction, isReload, targIndex, hitRegIndex));
+							timestamp, shot.getColor().toString(), shot.getX(), shot.getY(), shot.getTimestamp(),
+							(int) shot.getMarker().getRadiusX(), isMalfunction, isReload, targIndex, hitRegIndex));
 		}
 	}
 

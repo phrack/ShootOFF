@@ -131,8 +131,8 @@ public class VideoPlayerController implements PlaybackListener {
 			mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
 			mediaReader.open();
 			duration = mediaReader.getContainer().getDuration() / 1000; // microseconds
-																		// to
-																		// milliseconds
+			// to
+			// milliseconds
 			mediaReader.addListener(this);
 		}
 

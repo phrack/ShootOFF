@@ -64,7 +64,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 		super(targets);
 		this.thisSuper = super.getInstance();
 	}
-	
+
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {}
 
@@ -106,7 +106,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	private class NewRound implements Runnable {
 		private boolean cancelled = false;
-		
+
 		@Override
 		public void run() {
 			if (cancelled || !continueExercise.get()) return;
@@ -140,7 +140,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 				executorService.schedule(currentRound, ROUND_DURATION, TimeUnit.SECONDS);
 			}
 		}
-		
+
 		public void cancel() {
 			cancelled = true;
 		}
@@ -194,14 +194,14 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 				case "shoot": {
 					removeTarget(shootTargets, r);
 					super.setShotTimerColumnText(TARGET_COL_NAME, "shoot");
-					
+
 					if (shootTargets.isEmpty()) {
 						currentRound.cancel();
 						currentRound = new NewRound();
 						currentRound.run();
 					}
 				}
-					break;
+				break;
 
 				case "dont_shoot": {
 					removeTarget(dontShootTargets, r);
@@ -209,7 +209,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 					super.setShotTimerColumnText(TARGET_COL_NAME, "dont_shoot");
 					TextToSpeech.say("Bad shoot!");
 				}
-					break;
+				break;
 				}
 			}
 		}

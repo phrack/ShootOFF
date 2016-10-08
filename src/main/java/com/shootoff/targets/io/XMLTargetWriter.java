@@ -102,23 +102,23 @@ public class XMLTargetWriter implements RegionVisitor {
 			final PrintWriter out = new PrintWriter(targetFile, "UTF-8");
 
 			out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-			
+
 			final StringBuilder targetAttributes = new StringBuilder();
 			for (final Entry<String, String> entry : targetTags.entrySet()) {
 				if (targetAttributes.length() > 0) targetAttributes.append(" ");
-				
+
 				targetAttributes.append(entry.getKey());
 				targetAttributes.append("=\"");
 				targetAttributes.append(entry.getValue());
 				targetAttributes.append("\"");
 			}
-		
+
 			if (targetAttributes.length() > 0) {
 				out.format("<target %s>%n", targetAttributes.toString());
 			} else {
 				out.println("<target>");
 			}
-			
+
 			out.print(xmlBody.toString());
 			out.println("</target>");
 

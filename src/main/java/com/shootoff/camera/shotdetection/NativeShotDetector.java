@@ -70,7 +70,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 
 		super.addShot(c, x, y, timestamp, true);
 	}
-	
+
 	@Override
 	protected boolean handlesBounds() {
 		return false;

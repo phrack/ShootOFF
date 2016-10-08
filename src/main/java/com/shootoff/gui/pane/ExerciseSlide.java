@@ -55,15 +55,15 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 
 	private final Configuration config;
 	private final ExerciseListener exerciseListener;
-	
+
 	private final TitledPane projectorPane;
 	private final ToggleButton noneButton;
-	
+
 	private final ItemSelectionPane<TrainingExercise> exerciseItemPane = 
 			new ItemSelectionPane<>(true, this);
 	private final ItemSelectionPane<TrainingExercise> projectorExerciseItemPane = 
 			new ItemSelectionPane<>(exerciseItemPane.getToggleGroup(), this);
-	
+
 	private static final TrainingExercise noneExercise = new TrainingExercise() {
 		@Override
 		public void init() {}
@@ -83,26 +83,26 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		@Override
 		public void destroy() {}
 	};
-	
+
 	public ExerciseSlide(Pane parentControls, Pane parentBody, ExerciseListener exerciseListener) {
 		super(parentControls, parentBody);
-		
+
 		this.exerciseListener = exerciseListener;
 		this.config = Configuration.getConfig();
-		
+
 		addSlideControlButton("Get Exercises", (event) -> {
 			final Optional<FXMLLoader> loader = createPluginManagerStage();
 
 			if (loader.isPresent()) {
 				final PluginManagerController pluginManagerController = (PluginManagerController) loader.get().getController();
 				pluginManagerController.init(exerciseListener.getPluginEngine(), (Stage) parentControls.getScene().getWindow());
-				
+
 				final PluginManagerSlide pluginViewerSlide = new PluginManagerSlide(parentControls, parentBody, pluginManagerController);
 				pluginViewerSlide.showControls();
 				pluginViewerSlide.showBody();
 			}
 		});
-		
+
 		addSlideControlButton("Record Session", (event) -> {
 			if (config.getSessionRecorder().isPresent()) {
 				stopRecordingSession();
@@ -110,36 +110,36 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 				((Button) event.getSource()).setText("Record Session");
 			} else {
 				startRecordingSession();
-				
+
 				((Button) event.getSource()).setText("Stop Recording");
 			}
-			
+
 			hide();
 		});
-		
+
 		addSlideControlButton("View Sessions", (event) -> {
 			final Optional<FXMLLoader> loader = createSessionViewerStage();
 
 			if (loader.isPresent()) {
 				final SessionViewerController sessionViewerController = (SessionViewerController) loader.get().getController();
 				sessionViewerController.init(exerciseListener.getConfiguration());
-				
+
 				final SessionViewerSlide sessionViewerSlide = new SessionViewerSlide(parentControls, parentBody, sessionViewerController);
 				sessionViewerSlide.showControls();
 				sessionViewerSlide.showBody();
 			}
 		});
-			
+
 		noneButton = addNoneButton();
-		
+
 		final TitledPane universalPane = new TitledPane("Universal Exercises", exerciseItemPane);
 		projectorPane = new TitledPane("Projector Exercises", projectorExerciseItemPane);
 		projectorPane.setDisable(true);
 		projectorPane.setExpanded(false);
-		
+
 		addBodyNode(new VBox(universalPane, projectorPane));
 	}
-	
+
 	@Override
 	public void showControls() {
 		super.showControls();
@@ -150,10 +150,10 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		final ToggleButton noneButton = (ToggleButton) exerciseItemPane.addButton(noneExercise, "None");
 		noneButton.setSelected(true);
 		exerciseItemPane.setDefault(noneExercise);
-		
+
 		return noneButton;
 	}
-	
+
 	private Optional<FXMLLoader> createSessionViewerStage() {
 		final FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/SessionViewer.fxml"));
@@ -166,8 +166,8 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 
 		return Optional.of(loader);
 	}
-	
-	
+
+
 	private Optional<FXMLLoader> createPluginManagerStage() {
 		final FXMLLoader loader = new FXMLLoader(
 				getClass().getClassLoader().getResource("com/shootoff/gui/PluginManager.fxml"));
@@ -206,15 +206,15 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		if (isDisabled) {
 			noneButton.fire();
 		}
-		
+
 		projectorPane.setDisable(isDisabled);
 		projectorPane.setExpanded(!isDisabled);
 	}
-	
+
 	public ExerciseListener getExerciseListener() {
 		return exerciseListener;
 	}
-	
+
 	private void startRecordingSession() {
 		config.setSessionRecorder(new SessionRecorder());
 
@@ -222,7 +222,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 			cm.startRecordingShots();
 		}
 	}
-	
+
 	public void stopRecordingSession() {
 		for (final CameraManager cm : config.getRecordingManagers()) {
 			cm.stopRecordingShots();
@@ -243,7 +243,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		} else {
 			exerciseListener.setExercise(selectedExercise);
 		}
-		
+
 		hide();
 	}
 }

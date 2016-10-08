@@ -144,7 +144,7 @@ public class Plugin {
 					logger.error("Error instantiating configured exerciseClass", e);
 				}
 			}
-				break;
+			break;
 
 			default:
 				logger.warn("Unrecognized exercise settings tag ignored: {}", qName);

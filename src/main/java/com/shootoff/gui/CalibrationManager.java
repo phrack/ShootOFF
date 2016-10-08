@@ -85,10 +85,10 @@ public class CalibrationManager implements CameraCalibrationListener {
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
 		calibratingCameraManager.setCalibrationManager(this);
 		calibratingCameraManager.setOnCloseListener(() -> 
-			Platform.runLater(() -> 
-				arenaPane.fireEvent(new WindowEvent(null, WindowEvent.WINDOW_CLOSE_REQUEST))));
+		Platform.runLater(() -> 
+		arenaPane.fireEvent(new WindowEvent(null, WindowEvent.WINDOW_CLOSE_REQUEST))));
 	}
-	
+
 	public void addCalibrationListener(CalibrationListener calibrationListener) {
 		calibrationListeners.add(calibrationListener);
 	}
@@ -102,7 +102,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 			savedExercise = config.getExercise();
 			exerciseListener.setExercise(null);
 		}
-		
+
 		isCalibrating.set(true);
 
 		calibrationConfigurator.toggleCalibrating();
@@ -163,7 +163,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		for (final CalibrationListener c : calibrationListeners)
 			c.calibrated(Optional.ofNullable(pm));
-		
+
 		arenaPane.restoreCurrentBackground();
 
 		calibratingCameraManager.setCalibrating(false);
@@ -175,7 +175,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		// than just the arena. I don't think that should be a problem?
 		calibratingCameraManager.setDetecting(false);
 		TimerPool.schedule(() -> calibratingCameraManager.setDetecting(true), 600);
-		
+
 		if (savedExercise.isPresent()) exerciseListener.setProjectorExercise(savedExercise.get());
 	}
 
@@ -185,7 +185,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeCalibrationTargetIfPresent();
 
 		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);
-		
+
 		configureArenaCamera(calibrationConfigurator.getCalibratedFeedBehavior(), arenaBounds);
 
 		logger.debug("calibrate {} {} {}", arenaBounds, perspectivePaperDims, calibratedFromCanvas);
@@ -242,7 +242,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		final int DEFAULT_POS = 150;
 
 		removeAutoCalibrationMessage();
-		
+
 		cameraViews.selectCameraView(calibratingCanvasManager);
 
 		showManualCalibrationRequestMessage();

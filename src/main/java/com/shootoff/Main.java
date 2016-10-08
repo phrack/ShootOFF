@@ -681,7 +681,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		OptiTrackCamera.init();
-		
+
 		this.primaryStage = primaryStage;
 
 		final String os = System.getProperty("os.name");

@@ -129,7 +129,7 @@ public class SessionRecorder {
 		}
 
 		getCameraEvents(cameraName)
-				.add(new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
+		.add(new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
 	}
 
 	public void recordTargetRemoved(String cameraName, Target target) {
@@ -185,7 +185,7 @@ public class SessionRecorder {
 		// Add an event for this message to each camera
 		for (final String cameraName : seenTargets.keySet()) {
 			getCameraEvents(cameraName)
-					.add(new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
+			.add(new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
 		}
 	}
 }

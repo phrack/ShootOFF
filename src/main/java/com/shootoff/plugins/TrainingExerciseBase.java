@@ -94,7 +94,7 @@ public class TrainingExerciseBase {
 	private boolean changedRowColor = false;
 	private boolean haveDelayControls = false;
 	private boolean haveParControls = false;
-	
+
 	private final Map<CameraView, Label> exerciseLabels = new HashMap<>();
 	private final List<Pane> exercisePanes = new ArrayList<>();
 	private final Map<String, TableColumn<ShotEntry, String>> exerciseColumns = new HashMap<>();
@@ -112,7 +112,7 @@ public class TrainingExerciseBase {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
 		this.cameraViews = controller;
 		this.trainingExerciseContainer = controller.getTrainingExerciseContainer();
-		
+
 		if (cameraViews.getArenaView().isPresent()) {
 			final Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
@@ -162,27 +162,27 @@ public class TrainingExerciseBase {
 	public TrainingExerciseBase getInstance() {
 		return this;
 	}
-	
+
 	private static class DelayPane extends GridPane {
 		public DelayPane(DelayedStartListener listener) {
 			this.getColumnConstraints().add(new ColumnConstraints(100));
 			this.setVgap(5);
-			
+
 			final Label instructionsLabel = new Label("Set interval within which a beep will sound\n"
 					+ "to signal the start of a round.\nDefault: A round starts after a random wait\n"
 					+ "between 4 and 8 seconds in length.\n");
 			instructionsLabel.setPrefSize(300, 77);
-			
+
 			this.add(instructionsLabel, 0, 0, 2, 3);
 			this.addRow(3, new Label("Min (s)"));
 			this.addRow(4, new Label("Max (s)"));
-			
+
 			final TextField minTextField = new TextField("4");
 			this.add(minTextField, 1, 3);
-			
+
 			final TextField maxTextField = new TextField("8");
 			this.add(maxTextField, 1, 4);
-			
+
 			minTextField.textProperty().addListener((observable, oldValue, newValue) -> {
 				if (!newValue.matches("\\d*")) {
 					minTextField.setText(oldValue);
@@ -218,9 +218,9 @@ public class TrainingExerciseBase {
 	 */
 	public void getDelayedStartInterval(final DelayedStartListener listener) {
 		if (listener == null) throw new IllegalArgumentException("Delayed start listener must be non-null");
-		
+
 		if (haveDelayControls) return;
-		
+
 		final DelayPane delayPane = new DelayPane(listener);
 
 		trainingExerciseContainer.getChildren().add(delayPane);
@@ -236,11 +236,11 @@ public class TrainingExerciseBase {
 	 */
 	public void getParInterval(final ParListener listener) {
 		if (listener == null) throw new IllegalArgumentException("Par listener must be non-null");
-		
+
 		if (haveParControls) return;
-		
+
 		final DelayPane parPane = new DelayPane(listener);
-		
+
 		final TextField parTextField = new TextField("2.0");
 		parPane.addRow(5, new Label("PAR Time (s)"));
 		parPane.add(parTextField, 1, 5);
@@ -256,12 +256,12 @@ public class TrainingExerciseBase {
 				}
 			}
 		});
-		
+
 		trainingExerciseContainer.getChildren().add(parPane);
 		exercisePanes.add(parPane);
 		haveParControls = true;
 	}
-	
+
 	/**
 	 * Add a pane with exercise-specific controls (e.g. to collect user
 	 * settings) to the bottom of the main ShootOFF window.
@@ -274,7 +274,7 @@ public class TrainingExerciseBase {
 		trainingExerciseContainer.getChildren().add(pane);
 		exercisePanes.add(pane);
 	}
-	
+
 	/**
 	 * Adds a button to the right of the reset button on the main ShootOFF
 	 * window with caption <tt>text</tt> and action handler
@@ -355,10 +355,10 @@ public class TrainingExerciseBase {
 							new AssertionError("Shot timer table is empty"));
 					return;
 				}
-				
+
 				shotTimerTable.getItems().get(shotTimerTable.getItems().size() - 1).setExerciseValue(name, value);
 			};
-			
+
 			if (Platform.isFxApplicationThread()) {
 				shotTimerColumnTextSetter.run();
 			} else {
@@ -610,7 +610,7 @@ public class TrainingExerciseBase {
 			trainingExerciseContainer.getChildren().remove(itExercisePanes.next());
 			itExercisePanes.remove();
 		}
-		
+
 		final Iterator<Button> itExerciseButtons = exerciseButtons.iterator();
 
 		while (itExerciseButtons.hasNext()) {

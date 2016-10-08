@@ -78,24 +78,24 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 					}
 				}
 			}
-			
+
 			targets.add(target);
-			
+
 			break;
 		case REMOVED:
 			targets.remove(target);
-			
+
 			if (target.equals(selectedTarget)) {
 				selectedTarget = null;
-				
+
 				// Clear state and state error
 				if (fetchSubtargets(targets)) startRound();
 			}
-			
+
 			break;
 		}
 	}
-	
+
 	private void startRound() {
 		pickSubtargets();
 		saySubtargets();
@@ -214,14 +214,14 @@ public class RandomShoot extends TrainingExerciseBase implements TrainingExercis
 		soundFiles.add(new File("sounds/voice/shootoff-shoot.wav"));
 
 		final int subtargetIndex = currentSubtargets.peek();
-		
+
 		if (subtargets.size() == 0 || subtargetIndex > subtargets.size()) {
 			// Error condition, there are no subtargets left or the index indicates
 			// a target that doesn't exist. Try restarting
 			startRound();
 			return;
 		}
-		
+
 		final File targetNameSound = new File(
 				String.format("sounds/voice/shootoff-%s.wav", subtargets.get(subtargetIndex)));
 

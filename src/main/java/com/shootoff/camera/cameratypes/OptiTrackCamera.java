@@ -52,7 +52,7 @@ public class OptiTrackCamera implements Camera {
 
 	public OptiTrackCamera() {
 		if (!initialized) init();
-		
+
 	}
 
 	public static void init() {

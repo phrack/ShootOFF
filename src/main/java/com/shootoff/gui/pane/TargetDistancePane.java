@@ -43,7 +43,7 @@ import javafx.scene.layout.Pane;
 
 public class TargetDistancePane extends Pane {
 	private final static Logger logger = LoggerFactory.getLogger(TargetDistancePane.class);
-	
+
 	private final Target target;
 	private final PerspectiveManager perspectiveManager;
 	private final Configuration config;
@@ -55,7 +55,7 @@ public class TargetDistancePane extends Pane {
 	private final TextField cameraDistance;
 	private final TextField targetWidth;
 	private final TextField targetHeight;
-	
+
 	private boolean defaultsSet = false;
 
 	public TargetDistancePane(Target target, PerspectiveManager perspectiveManager, Configuration config) {
@@ -63,29 +63,29 @@ public class TargetDistancePane extends Pane {
 		this.perspectiveManager = perspectiveManager;
 		this.config = config;
 		this.cameraName = perspectiveManager.getCalibratedCameraName();
-		
+
 		final Image backgroundImage = new Image(
 				TargetDistancePane.class.getResourceAsStream("/images/perspective_settings.png"));
 		this.getChildren().add(new ImageView(backgroundImage));
-		
+
 		shooterDistance = createDistanceTextField(234, 68);
 		targetDistance = createDistanceTextField(534, 126);
 		cameraDistance = createDistanceTextField(329, 252);
 		targetWidth = createDistanceTextField(745, 48);
 		targetHeight = createDistanceTextField(863, 191);
-		
+
 		this.getChildren().add(shooterDistance);
 		this.getChildren().add(targetDistance);
 		this.getChildren().add(cameraDistance);
 		this.getChildren().add(targetWidth);
 		this.getChildren().add(targetHeight);
-		
+
 		setDefaults();
-		
+
 		originalCameraDistance = cameraDistance.getText();
 		originalTargetDistance = targetDistance.getText();
 	}
-	
+
 	private TextField createDistanceTextField(double x, double y) {
 		final TextField distanceTextField = new TextField();
 		distanceTextField.setPromptText("(mm)");
@@ -94,10 +94,10 @@ public class TargetDistancePane extends Pane {
 		distanceTextField.setPrefWidth(75);
 		distanceTextField.setAlignment(Pos.CENTER);
 		distanceTextField.textProperty().addListener(new NumberOnlyChangeListener(distanceTextField));
-		
+
 		return distanceTextField;
 	}
-	
+
 	private class NumberOnlyChangeListener implements ChangeListener<String> {
 		private final TextField observedTextField;
 
@@ -108,7 +108,7 @@ public class TargetDistancePane extends Pane {
 		@Override
 		public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 			if (!defaultsSet) return;
-			
+
 			if (!newValue.matches("\\d*")) {
 				observedTextField.setText(oldValue);
 				observedTextField.positionCaret(observedTextField.getLength());
@@ -117,7 +117,7 @@ public class TargetDistancePane extends Pane {
 			}
 		}
 	}
-	
+
 	private void setDefaults() {
 		if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)) {
 			targetWidth.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
@@ -126,7 +126,7 @@ public class TargetDistancePane extends Pane {
 		if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)) {
 			targetHeight.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
 		}
-		
+
 		if (target.tagExists(Target.TAG_CURRENT_PERCEIVED_DISTANCE)) {
 			targetDistance.setText(target.getTag(Target.TAG_CURRENT_PERCEIVED_DISTANCE));
 		} else if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_DISTANCE)) {
@@ -150,15 +150,15 @@ public class TargetDistancePane extends Pane {
 		} else if (!cameraDistance.getText().isEmpty()) {
 			shooterDistance.setText(cameraDistance.getText());
 		}
-		
+
 		defaultsSet = true;
 	}
-	
+
 	private void setDistance() {
 		if (!validateDistanceData()) return;
-		
+
 		persistSettings();
-		
+
 		final int width = Integer.parseInt(targetWidth.getText());
 		final int height = Integer.parseInt(targetHeight.getText());
 		final int distance = Integer.parseInt(targetDistance.getText());
@@ -167,7 +167,7 @@ public class TargetDistancePane extends Pane {
 			logger.trace(
 					"New target settings from distance settings pane: current width = {}, "
 							+ "default height = {}, default distance = {}, new distance = {}",
-					width, height, originalTargetDistance, distance);
+							width, height, originalTargetDistance, distance);
 		}
 
 		final Optional<Dimension2D> targetDimensions = perspectiveManager.calculateObjectSize(width, height, distance);
@@ -177,16 +177,16 @@ public class TargetDistancePane extends Pane {
 			target.setDimensions(d.getWidth(), d.getHeight());
 		}
 	}
-	
+
 	private boolean validateDistanceData() {
 		boolean isValid = validateDistanceField(shooterDistance); 
 		isValid = validateDistanceField(targetDistance) && isValid;
 		isValid = validateDistanceField(cameraDistance) && isValid;
 		isValid = validateDistanceField(targetWidth) && isValid;
 		isValid = validateDistanceField(targetHeight) && isValid;
-	
+
 		if (!isValid) return isValid;
-		
+
 		if ("0".equals(targetDistance.getText())) {
 			final Alert invalidDataAlert = new Alert(AlertType.ERROR);
 
@@ -198,26 +198,26 @@ public class TargetDistancePane extends Pane {
 			invalidDataAlert.setContentText(message);
 			invalidDataAlert.initOwner(this.getScene().getWindow());
 			invalidDataAlert.showAndWait();
-			
+
 			isValid = false;
 		}
-		
+
 		return isValid;
 	}
-	
+
 	private boolean validateDistanceField(TextField field) {
 		boolean isValid = true;
-		
+
 		if (field.getText().isEmpty()) {
 			isValid = false;
 			field.setStyle("-fx-text-box-border: red; -fx-focus-color: red;");
 		} else {
 			field.setStyle("");
 		}
-		
+
 		return isValid;
 	}
-		
+
 	private void persistSettings() {
 		final Map<String, String> tags = target.getAllTags();
 		if (!targetWidth.getText().isEmpty()) {

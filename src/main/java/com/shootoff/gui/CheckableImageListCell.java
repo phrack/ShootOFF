@@ -148,7 +148,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		}
 
 		final Optional<Pane> webcamContainer = fetchWebcamControls(item);
-		
+
 		if (webcamContainer.isPresent()) {
 			setGraphic(webcamContainer.get());
 		}
@@ -160,7 +160,7 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		final ImageView iv = new ImageView();
 		iv.setFitWidth(100);
 		iv.setFitHeight(75);
-		
+
 		new Thread(() -> {
 			final Optional<Image> img = fetchWebcamImage(c);
 
@@ -168,26 +168,26 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 				iv.setImage(img.get());
 			}
 		}, "FetchImageCellWebcamImages").start();
-		
+
 		final CheckBox cb = new CheckBox();
 		cb.setOnAction((event) -> {
 			if (listener != null) listener.cameraSelectionChanged(c, cb.isSelected());
 		});
 		checkCache.put(c, cb);
-		
+
 		final HBox webcamContainer = new HBox(cb, iv);
 		webcamContainer.setAlignment(Pos.CENTER);
 		containerCache.put(c, webcamContainer);
 	}
-	
+
 	public interface CameraRenamedListener {
 		void cameraRenamed(String oldName, String newName);
 	}
-	
+
 	public interface CameraSelectionListener {
 		void cameraSelectionChanged(Camera camera, boolean isSelected);
 	}
-	
+
 	public static Map<Camera, CheckBox> getCameraCheckBoxes() {
 		return checkCache;
 	}
@@ -213,17 +213,17 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 
 		return webcamContainer;
 	}
-	
+
 	private Optional<Pane> fetchUnrenamedWebcamControls(String webcamName) {
 		for (final Camera webcam : webcams) {
 			if (webcam.getName().equals(webcamName)) {
 				return Optional.of(containerCache.get(webcam));
 			}
 		}
-		
+
 		return Optional.empty();
 	}
-	
+
 	private boolean fetchWebcamChecked(String webcamName) {
 		boolean isChecked = false;
 
@@ -245,14 +245,14 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 
 		return isChecked;
 	}
-	
+
 	private boolean fetchUnrenamedWebcamChecked(String webcamName) {
 		for (final Camera webcam : webcams) {
 			if (webcam.getName().equals(webcamName)) {
 				return checkCache.get(webcam).isSelected();
 			}
 		}
-		
+
 		return false;
 	}
 

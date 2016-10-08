@@ -73,7 +73,7 @@ public class ISSFStandardPistol extends TrainingExerciseBase implements Training
 		thisSuper = super.getInstance();
 		setInitialValues();
 	}
-	
+
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {}
 

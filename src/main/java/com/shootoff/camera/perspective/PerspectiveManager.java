@@ -55,7 +55,7 @@ public class PerspectiveManager {
 
 	private final static int US_LETTER_WIDTH_MM = 279;
 	private final static int US_LETTER_HEIGHT_MM = 216;
-	
+
 	private final static int DEFAULT_SHOOTER_DISTANCE = 3000;
 
 	private String calibratedCameraName;
@@ -153,21 +153,21 @@ public class PerspectiveManager {
 			cameraDistance = DEFAULT_SHOOTER_DISTANCE;
 		if (shooterDistance == -1)
 			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
-		
+
 		calculateRealWorldSize();
-		
+
 	}
 
 	public PerspectiveManager(String cameraName, Bounds arenaBounds, Dimension2D feedDims, Dimension2D projectorRes) {
 		this(cameraName, feedDims, arenaBounds);
 		this.setProjectorResolution(projectorRes);
-		
+
 		if (cameraDistance == -1)
 			cameraDistance = DEFAULT_SHOOTER_DISTANCE;
 		if (shooterDistance == -1)
 			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
 
-		
+
 		calculateRealWorldSize();
 	}
 
@@ -198,7 +198,7 @@ public class PerspectiveManager {
 			cameraDistance = DEFAULT_SHOOTER_DISTANCE;
 		if (shooterDistance == -1)
 			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
-		
+
 		calculateRealWorldSize();
 	}
 
@@ -379,7 +379,7 @@ public class PerspectiveManager {
 	protected double getSensorHeight() {
 		return sensorHeight;
 	}
-	
+
 	protected int getUnknownCount()
 	{
 		int unknownCount = 0;
@@ -394,7 +394,7 @@ public class PerspectiveManager {
 				unknownCount++;
 			}
 		}
-		
+
 		return unknownCount;
 	}
 
@@ -460,13 +460,13 @@ public class PerspectiveManager {
 		else {
 			logger.error("Unknown not supported");
 		}
-		
+
 		calculateRealWorldSize();
 
 		if (logger.isTraceEnabled())
 			logger.trace("pW {} pH {} - pxW {} pxH {}", projectionWidth, projectionHeight, pxPerMMwide, pxPerMMhigh);
 	}
-	
+
 	void calculateRealWorldSize()
 	{
 		if (projectorResWidth > -1 && projectionWidth > -1)
@@ -475,7 +475,7 @@ public class PerspectiveManager {
 			pxPerMMhigh = ((double) projectorResHeight / (double) projectionHeight);
 		}
 	}
-	
+
 
 	/**
 	 * Starting with a target's real world width and height in mm, as it appears

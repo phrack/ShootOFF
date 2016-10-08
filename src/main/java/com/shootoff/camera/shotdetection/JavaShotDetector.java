@@ -58,7 +58,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private int[][] colorDistanceFromRed;
 
 	private int avgThresholdPixels = -1;
-	
+
 	private int initialFrameCount = -1;
 
 	private final static int INIT_FRAME_COUNT = 5;
@@ -220,7 +220,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 
 		// Must reset before every updateFilter loop
 		brightPixels.clear();
-		
+
 
 		// Create a hue, saturation, value copy of the current frame used to
 		// detect
@@ -257,7 +257,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			if (shouldShowBrightnessWarning()) {
 				cameraManager.showBrightnessWarning();
 			}
-			
+
 			if (thresholdPixelsSize >= getMinimumShotDimension() && !isExcessiveMotion(thresholdPixelsSize)) {
 				final Set<PixelCluster> clusters = pixelClusterManager.clusterPixels(thresholdPixels,
 						getMinimumShotDimension());
@@ -275,7 +275,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			else if (isExcessiveMotion(thresholdPixelsSize)) {
 				if (shouldShowMotionWarning(thresholdPixelsSize))
 					cameraManager.showMotionWarning();
-				
+
 				for (final Pixel pixel : thresholdPixels) {
 					frame.getOriginalMat().put(pixel.y, pixel.x, BLUE_MAT_PIXEL);
 				}
@@ -312,10 +312,10 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 		final boolean showWarning = avgThresholdPixels > MOTION_WARNING_AVG_THRESHOLD
 				&& cameraManager.getFrameCount()-initialFrameCount > MOTION_WARNING_FRAMECOUNT;
 
-		if (showWarning && logger.isTraceEnabled())
-			logger.trace("HIGH MOTION - avgThresholdPixels {} thresholdPixels {} frameCount {}", avgThresholdPixels, thresholdPixels, cameraManager.getFrameCount() );
+				if (showWarning && logger.isTraceEnabled())
+					logger.trace("HIGH MOTION - avgThresholdPixels {} thresholdPixels {} frameCount {}", avgThresholdPixels, thresholdPixels, cameraManager.getFrameCount() );
 
-		return showWarning;
+				return showWarning;
 	}
 
 	private boolean shouldShowBrightnessWarning() {
@@ -339,7 +339,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private boolean checkIfInitialized() {
 		if (initialFrameCount == -1)
 			initialFrameCount = cameraManager.getFrameCount();
-		
+
 		return cameraManager.getFrameCount()-initialFrameCount > INIT_FRAME_COUNT;
 	}
 

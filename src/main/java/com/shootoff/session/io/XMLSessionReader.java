@@ -140,8 +140,8 @@ public class XMLSessionReader {
 				final Optional<String> videoString = Optional.ofNullable(attributes.getValue("videos"));
 
 				events.get(currentCameraName)
-						.add(new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot,
-								isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
+				.add(new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot,
+						isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
 
 				break;
 
@@ -153,26 +153,26 @@ public class XMLSessionReader {
 
 			case "targetRemoved":
 				events.get(currentCameraName)
-						.add(new TargetRemovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
-								Integer.parseInt(attributes.getValue("index"))));
+				.add(new TargetRemovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
+						Integer.parseInt(attributes.getValue("index"))));
 
 				break;
 
 			case "targetResized":
 				events.get(currentCameraName)
-						.add(new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
-								Integer.parseInt(attributes.getValue("index")),
-								Double.parseDouble(attributes.getValue("newWidth")),
-								Double.parseDouble(attributes.getValue("newHeight"))));
+				.add(new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
+						Integer.parseInt(attributes.getValue("index")),
+						Double.parseDouble(attributes.getValue("newWidth")),
+						Double.parseDouble(attributes.getValue("newHeight"))));
 
 				break;
 
 			case "targetMoved":
 				events.get(currentCameraName)
-						.add(new TargetMovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
-								Integer.parseInt(attributes.getValue("index")),
-								Integer.parseInt(attributes.getValue("newX")),
-								Integer.parseInt(attributes.getValue("newY"))));
+				.add(new TargetMovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
+						Integer.parseInt(attributes.getValue("index")),
+						Integer.parseInt(attributes.getValue("newX")),
+						Integer.parseInt(attributes.getValue("newY"))));
 				break;
 
 			case "exerciseFeedMessage":

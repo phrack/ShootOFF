@@ -93,14 +93,14 @@ public class TargetIO {
 				visitor.visitImageRegion(img.getBoundsInParent().getMinX(), img.getBoundsInParent().getMinY(),
 						relativeImageFile, img.getAllTags());
 			}
-				break;
+			break;
 			case RECTANGLE: {
 				final RectangleRegion rec = (RectangleRegion) node;
 				visitor.visitRectangleRegion(rec.getBoundsInParent().getMinX(), rec.getBoundsInParent().getMinY(),
 						rec.getWidth(), rec.getHeight(), TargetEditorController.getColorName((Color) rec.getFill()),
 						rec.getAllTags());
 			}
-				break;
+			break;
 			case ELLIPSE: {
 				final EllipseRegion ell = (EllipseRegion) node;
 				final double absoluteCenterX = ell.getBoundsInParent().getMinX() + ell.getRadiusX();
@@ -108,7 +108,7 @@ public class TargetIO {
 				visitor.visitEllipse(absoluteCenterX, absoluteCenterY, ell.getRadiusX(), ell.getRadiusY(),
 						TargetEditorController.getColorName((Color) ell.getFill()), ell.getAllTags());
 			}
-				break;
+			break;
 			case POLYGON: {
 				final PolygonRegion pol = (PolygonRegion) node;
 
@@ -124,7 +124,7 @@ public class TargetIO {
 				visitor.visitPolygonRegion(points, TargetEditorController.getColorName((Color) pol.getFill()),
 						pol.getAllTags());
 			}
-				break;
+			break;
 			}
 		}
 

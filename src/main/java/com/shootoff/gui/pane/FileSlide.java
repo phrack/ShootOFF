@@ -43,13 +43,13 @@ import javafx.stage.Stage;
 
 public class FileSlide extends Slide {
 	private static final Logger logger = LoggerFactory.getLogger(FileSlide.class);
-	
+
 	private static PreferencesController preferencesController = null;
-			
+
 	public FileSlide(Pane parentControls, Pane parentBody, CalibrationConfigurator calibrationConfigurator, 
 			CameraConfigListener configListener, CameraViews cameraViews, Closeable mainWindow) {
 		super(parentControls, parentBody);
-		
+
 		addSlideControlButton("Preferences", (event) -> {
 			if (preferencesController == null) {
 				final FXMLLoader loader = new FXMLLoader(
@@ -65,13 +65,13 @@ public class FileSlide extends Slide {
 				preferencesController.setConfig((Stage) parentControls.getScene().getWindow(),
 						configListener.getConfiguration(), calibrationConfigurator, configListener);
 			}
-			
+
 			final PreferencesSlide preferencesSlide = new PreferencesSlide(parentControls, parentBody, preferencesController);
 			preferencesSlide.setOnSlideHidden(() -> { if (preferencesSlide.isSaved()) hide(); });
 			preferencesSlide.showControls();
 			preferencesSlide.showBody();
 		});
-		
+
 		addSlideControlButton("Save Feed Image", (event) -> {
 			final Node container = cameraViews.getSelectedCameraContainer();
 			final RenderedImage renderedImage = SwingFXUtils.fromFXImage(container.snapshot(new SnapshotParameters(), null),
@@ -82,7 +82,7 @@ public class FileSlide extends Slide {
 			fileChooser.getExtensionFilters().addAll(
 					new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"),
 					new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"));
-			
+
 			final File feedFile = fileChooser.showSaveDialog(parentControls.getScene().getWindow());
 
 			if (feedFile != null) {
@@ -102,7 +102,7 @@ public class FileSlide extends Slide {
 				}
 			}
 		});
-		
+
 		addSlideControlButton("Exit", (evnet) -> {
 			mainWindow.close();
 		});

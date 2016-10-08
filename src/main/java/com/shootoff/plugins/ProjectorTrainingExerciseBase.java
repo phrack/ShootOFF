@@ -118,13 +118,13 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 
 		if (newTarget.isPresent()) {
 			final Target t = newTarget.get();
-			
+
 			t.setPosition(x, y);
-			
+
 			if (isPerspectiveInitialized()) {
 				arenaPane.resizeTargetToDefaultPerspective(t);
 			}
-			
+
 			targets.add(t);
 		}
 
@@ -171,7 +171,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	public Point2D getArenaScreenOrigin() {
 		return arenaPane.getArenaScreenOrigin();
 	}
-	
+
 	/**
 	 * This function corrects coordinates in the arena area for the DPI of the
 	 * arena screen and relative to the origin.  This is for creating mouse
@@ -190,7 +190,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
 
 		final Point2D origin = arenaPane.getArenaScreenOrigin();
-		
+
 		return new Point2D(origin.getX() + (point.getX() * dpiScaleFactor),
 				origin.getY() + (point.getY() * dpiScaleFactor));
 	}
@@ -339,7 +339,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 	 *         successfully calculated new target dimensions
 	 */
 	public boolean setTargetDistance(Target target, int currentRealWidth, int currentRealHeight,
-			 int desiredDistance) {
+			int desiredDistance) {
 		if (!isPerspectiveInitialized()) return false;
 
 		final Optional<Dimension2D> targetDimensions = arenaPane.getPerspectiveManager().get()
@@ -361,7 +361,7 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 			arenaPane.getCanvasManager().removeTarget(target);
 
 		targets.clear();
-		
+
 		Platform.runLater(() -> {
 			if (arenaPane != null)
 				arenaPane.getCanvasManager().getCanvasGroup().getChildren().remove(exerciseLabel);

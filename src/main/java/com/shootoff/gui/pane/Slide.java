@@ -38,73 +38,73 @@ public abstract class Slide {
 	public static final int MAX_CONTROL_BUTTONS = 4;
 	public static final int CONTROL_BUTTON_WIDTH = 150;
 	public static final int CONTROL_BUTTON_HEIGHT = 100;
-	
+
 	private final List<Node> controlNodes = new ArrayList<>();
 	private final List<Node> bodyNodes = new ArrayList<>();
 	private final List<Node> savedControls = new ArrayList<>();
 	private final List<Node> savedBody = new ArrayList<>();
-	
+
 	private Optional<SlideHiddenListener> slideHiddenListener = Optional.empty();
 	private final Pane parentControls;
 	private final Pane parentBody;
-	
+
 	public Slide(Pane parentControls, Pane parentBody) {
 		this.parentControls = parentControls;
 		this.parentBody = parentBody;
-		
+
 		final ImageView backImage = new ImageView(
 				new Image(Slide.class.getResourceAsStream("/images/back_button.png"), 60.0, 60.0, true, true));
-		 final Button backButton = addSlideControlButton("", (Event) -> hide());
-		 backButton.setGraphic(backImage);
+		final Button backButton = addSlideControlButton("", (Event) -> hide());
+		backButton.setGraphic(backImage);
 	}
-	
+
 	public void showControls() {
 		// If we have less than the maximum number of control buttons
 		// add empty panes as place holders for missing buttons to
 		// ensure control button alignment and size is maintained.
 		if (controlNodes.size() < MAX_CONTROL_BUTTONS) {
 			final int sizeDelta = MAX_CONTROL_BUTTONS - controlNodes.size();
-			
+
 			for (int i = 0; i < sizeDelta; i++) {
 				final Pane placeHolderPane = new Pane();
 				placeHolderPane.setPrefSize(CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT);
 				controlNodes.add(placeHolderPane);
 			}
 		}
-		
+
 		show(parentControls, controlNodes, savedControls);
 	}
-	
+
 	public void showBody() {
 		show(parentBody, bodyNodes, savedBody);
 	}
-	
+
 	public void hide() {
 		hide(parentBody, bodyNodes, savedBody);
 		hide(parentControls, controlNodes, savedControls);
-		
+
 		// Assumption that body will never show without the controls
 		if (slideHiddenListener.isPresent()) slideHiddenListener.get().onSlideHidden();
 	}
-	
+
 	private void show(Pane parentContainer, List<Node> slideList, List<Node> savedList) {
 		// Do not show twice
 		if (!savedList.isEmpty()) return;
-		
+
 		savedList.addAll(parentContainer.getChildren());
 		parentContainer.getChildren().setAll(slideList);
 	}
-	
+
 	private void hide(Pane parentContainer, List<Node> slideList, List<Node> savedList) {
 		parentContainer.getChildren().removeAll(slideList);
 		parentContainer.getChildren().addAll(savedList);
 		savedList.clear();
 	}
-	
+
 	public void setOnSlideHidden(SlideHiddenListener slideHiddenListener) {
 		this.slideHiddenListener = Optional.ofNullable(slideHiddenListener);
 	}
-	
+
 	// This used to add the buttons that appear across the very top row
 	// of the slide. These are intended to control the content
 	// that appears on the rest of the slide
@@ -112,15 +112,15 @@ public abstract class Slide {
 		if (controlNodes.size() >= MAX_CONTROL_BUTTONS) {
 			throw new AssertionError("The slide already has the maximum number of control buttons");
 		}
-		
+
 		final Button controlButton = new Button(text);
 		controlButton.setPrefSize(CONTROL_BUTTON_WIDTH, CONTROL_BUTTON_HEIGHT);
 		controlButton.setOnAction(eventHandler);
 		controlNodes.add(controlButton);
-		
+
 		return controlButton;
 	}
-	
+
 	protected void addBodyNode(Node node) {
 		bodyNodes.add(node);
 	}

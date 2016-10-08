@@ -135,16 +135,16 @@ public class JSONSessionReader {
 
 					case "targetResized":
 						events.get(cameraName)
-								.add(new TargetResizedEvent(cameraName, (Long) event.get("timestamp"),
-										((Long) event.get("index")).intValue(), (Double) event.get("newWidth"),
-										(Double) event.get("newHeight")));
+						.add(new TargetResizedEvent(cameraName, (Long) event.get("timestamp"),
+								((Long) event.get("index")).intValue(), (Double) event.get("newWidth"),
+								(Double) event.get("newHeight")));
 						break;
 
 					case "targetMoved":
 						events.get(cameraName)
-								.add(new TargetMovedEvent(cameraName, (Long) event.get("timestamp"),
-										((Long) event.get("index")).intValue(), ((Long) event.get("newX")).intValue(),
-										((Long) event.get("newY")).intValue()));
+						.add(new TargetMovedEvent(cameraName, (Long) event.get("timestamp"),
+								((Long) event.get("index")).intValue(), ((Long) event.get("newX")).intValue(),
+								((Long) event.get("newY")).intValue()));
 						break;
 
 					case "exerciseFeedMessage":

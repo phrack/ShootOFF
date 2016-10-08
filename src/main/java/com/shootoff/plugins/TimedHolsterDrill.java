@@ -56,7 +56,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	public TimedHolsterDrill(List<Target> targets) {
 		super(targets);
 	}
-	
+
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {}
 
@@ -115,7 +115,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		@Override
 		public void run() {
 			if (!repeatExercise) return;
-			
+
 			pauseShotDetection(true);
 			playSound(new File("sounds/voice/shootoff-makeready.wav"));
 			final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
@@ -152,9 +152,9 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 				executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);
 			}
 		});
-		
+
 		addShootOFFButton("Clear Shots", (event) -> super.clearShots());
-		
+
 		addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
 	}
 

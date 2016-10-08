@@ -42,36 +42,36 @@ import marytts.util.io.FileFilter;
 
 public class TargetSlide extends Slide implements TargetListener, ItemSelectionListener<File> {
 	private static final Logger logger = LoggerFactory.getLogger(TargetSlide.class);
-	
+
 	private final Pane parentControls;
 	private final Pane parentBody;
 	private final CameraViews cameraViews;
-	
+
 	private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<>(false, this);
-	
+
 	private enum Mode { ADD, EDIT };
-	
+
 	private Mode mode;
-	
+
 	public TargetSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews) {
 		super(parentControls, parentBody);
-		
+
 		this.parentControls = parentControls;
 		this.parentBody = parentBody;
-		
+
 		addSlideControlButton("Add Target", (event) -> {
 			mode = Mode.ADD;
 			showBody();
 		});
-		
+
 		addSlideControlButton("Create Target", (event) -> {
 			final Optional<FXMLLoader> loader = createTargetEditorStage();
 
 			if (loader.isPresent()) {
 				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
-				
+
 				final Image currentFrame;
-				
+
 				if (cameraViews.isArenaViewSelected()) {
 					final Pane backgroundPane = new Pane();
 					backgroundPane.setStyle("-fx-background-color: lightgray;");
@@ -81,25 +81,25 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 					final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
 					currentFrame = currentCamera.getCurrentFrame();
 				}
-				
-				
+
+
 				editorController.init(currentFrame, this);
-				
+
 				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
 				targetEditorSlide.showControls();
 				targetEditorSlide.showBody();
 			}
 		});
-		
+
 		addSlideControlButton("Edit Target", (event) -> {
 			mode = Mode.EDIT;
 			showBody();
 		});
-		
+
 		this.cameraViews = cameraViews;		
-		
+
 		addBodyNode(itemPane);
-		
+
 		findTargets();
 	}
 
@@ -126,17 +126,17 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 			logger.error("Notified of a new target that cannot be loaded: {}", targetFile.getAbsolutePath());
 			return;
 		}
-		
+
 		final Image targetImage = targetComponents.get().getTargetGroup().snapshot(new SnapshotParameters(), null);
 		final ImageView targetImageView = new ImageView(targetImage);
 		targetImageView.setFitWidth(60);
 		targetImageView.setFitHeight(60);
 		targetImageView.setPreserveRatio(true);
 		targetImageView.setSmooth(true);
-		
+
 		final String targetPath = targetFile.getPath();
 		final String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
-		
+
 		itemPane.addButton(targetFile, targetName, Optional.of(targetImageView), Optional.empty());
 	}
 
@@ -166,7 +166,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 				final Image currentFrame = currentCamera.getCurrentFrame();
 				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 				editorController.init(currentFrame, this, ref);
-				
+
 				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
 				targetEditorSlide.showControls();
 				targetEditorSlide.showBody();

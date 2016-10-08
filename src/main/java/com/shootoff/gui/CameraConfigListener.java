@@ -22,6 +22,6 @@ import com.shootoff.config.Configuration;
 
 public interface CameraConfigListener {
 	void cameraConfigUpdated();
-	
+
 	Configuration getConfiguration();
 }

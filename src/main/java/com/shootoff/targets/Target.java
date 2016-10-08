@@ -30,7 +30,7 @@ public interface Target {
 	public static final String TAG_DEFAULT_PERCEIVED_DISTANCE = "defaultDistance";
 	public static final String TAG_CURRENT_PERCEIVED_DISTANCE = "currentDistance";
 	public static final String TAG_SHOOTER_DISTANCE = "shooterDistance";
-	
+
 	File getTargetFile();
 
 	int getTargetIndex();
@@ -73,6 +73,6 @@ public interface Target {
 	String getTag(String name);
 
 	Map<String, String> getAllTags();
-	
+
 	void setTargetSelectionListener(TargetSelectionListener selectionListener);
 }

@@ -90,12 +90,12 @@ public class PluginManagerController {
 		actionCol.setMinWidth(90);
 
 		actionCol
-				.setCellFactory(new Callback<TableColumn<PluginMetadata, String>, TableCell<PluginMetadata, String>>() {
-					@Override
-					public TableCell<PluginMetadata, String> call(TableColumn<PluginMetadata, String> p) {
-						return new ActionTableCell(p);
-					}
-				});
+		.setCellFactory(new Callback<TableColumn<PluginMetadata, String>, TableCell<PluginMetadata, String>>() {
+			@Override
+			public TableCell<PluginMetadata, String> call(TableColumn<PluginMetadata, String> p) {
+				return new ActionTableCell(p);
+			}
+		});
 
 		final TableColumn<PluginMetadata, String> nameCol = new TableColumn<>("Name");
 		nameCol.setMinWidth(160);
@@ -115,25 +115,25 @@ public class PluginManagerController {
 				.subtract(actionCol.getWidth() + nameCol.getWidth() + versionCol.getWidth() + creatorCol.getWidth()));
 		descriptionCol.setCellValueFactory(new PropertyValueFactory<PluginMetadata, String>("Description"));
 		descriptionCol
-				.setCellFactory(new Callback<TableColumn<PluginMetadata, String>, TableCell<PluginMetadata, String>>() {
+		.setCellFactory(new Callback<TableColumn<PluginMetadata, String>, TableCell<PluginMetadata, String>>() {
+			@Override
+			public TableCell<PluginMetadata, String> call(TableColumn<PluginMetadata, String> param) {
+				final TableCell<PluginMetadata, String> cell = new TableCell<PluginMetadata, String>() {
 					@Override
-					public TableCell<PluginMetadata, String> call(TableColumn<PluginMetadata, String> param) {
-						final TableCell<PluginMetadata, String> cell = new TableCell<PluginMetadata, String>() {
-							@Override
-							public void updateItem(String item, boolean empty) {
-								super.updateItem(item, empty);
-								if (!isEmpty()) {
-									final Text text = new Text(item);
-									text.wrappingWidthProperty().bind(descriptionCol.widthProperty());
-									setGraphic(text);
-								} else {
-									setGraphic(null);
-								}
-							}
-						};
-						return cell;
+					public void updateItem(String item, boolean empty) {
+						super.updateItem(item, empty);
+						if (!isEmpty()) {
+							final Text text = new Text(item);
+							text.wrappingWidthProperty().bind(descriptionCol.widthProperty());
+							setGraphic(text);
+						} else {
+							setGraphic(null);
+						}
 					}
-				});
+				};
+				return cell;
+			}
+		});
 
 		pluginsTableView.getColumns().add(actionCol);
 		pluginsTableView.getColumns().add(nameCol);
@@ -172,7 +172,7 @@ public class PluginManagerController {
 			metadataAlert.showAndWait();
 
 			pluginManagerStage.getOnCloseRequest()
-					.handle(new WindowEvent(pluginManagerStage, WindowEvent.WINDOW_CLOSE_REQUEST));
+			.handle(new WindowEvent(pluginManagerStage, WindowEvent.WINDOW_CLOSE_REQUEST));
 			pluginManagerStage.close();
 		}
 	}

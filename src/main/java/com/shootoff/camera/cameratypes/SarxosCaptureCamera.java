@@ -90,7 +90,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			// read()
 			return null;
 		}
-		
+
 		final long currentFrameTimestamp = System.currentTimeMillis();
 		frameCount++;
 		return new Frame(frame, currentFrameTimestamp);

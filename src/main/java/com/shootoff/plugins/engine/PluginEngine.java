@@ -124,10 +124,10 @@ public class PluginEngine implements Runnable {
 
 		if (existingPlugin.isPresent()) {
 			final Plugin existing = existingPlugin.get();
-			
+
 			final ExerciseMetadata existingMetadata = existing.getExercise().getInfo();
 			final ExerciseMetadata registeringMetadata = registeringPlugin.getExercise().getInfo();
-			
+
 			final String existingVersion = existing.getExercise().getInfo().getVersion();
 			final String loadedVersion = registeringPlugin.getExercise().getInfo().getVersion();
 			if (VersionChecker.compareVersions(existingVersion, loadedVersion) == -1) {
@@ -150,7 +150,7 @@ public class PluginEngine implements Runnable {
 				return false;
 			}
 		}
-		
+
 		if (plugins.add(registeringPlugin)) {
 			if (PluginType.STANDARD.equals(registeringPlugin.getType())) {
 				pluginListener.registerExercise(registeringPlugin.getExercise());
@@ -161,7 +161,7 @@ public class PluginEngine implements Runnable {
 
 		return true;
 	}
-	
+
 	private void unregisterPlugin(Plugin plugin) {
 		pluginListener.unregisterExercise(plugin.getExercise());
 		plugins.remove(plugin);
@@ -178,12 +178,12 @@ public class PluginEngine implements Runnable {
 			logger.error("Error enumerating existing external plugins", e);
 		}
 	}
-	
+
 	private Optional<Plugin> findPlugin(Plugin plugin) {
 		for (final Plugin p : plugins) {
 			final ExerciseMetadata existingMetadata = p.getExercise().getInfo();
 			final ExerciseMetadata newMetadata = plugin.getExercise().getInfo();
-			
+
 			// Plugins are considered to be the same if they have the
 			// same name and creator
 			if (existingMetadata.getName().equals(newMetadata.getName()) && 
@@ -191,19 +191,19 @@ public class PluginEngine implements Runnable {
 				return Optional.of(p);
 			}
 		}
-		
+
 		return Optional.empty();
 	}
 
 	public Set<Plugin> getPlugins() {
 		return plugins;
 	}
-	
+
 	public Optional<Plugin> getPlugin(TrainingExercise trainingExercise) {
 		for (final Plugin p : plugins) {
 			if (p.getExercise().getInfo().equals(trainingExercise.getInfo())) return Optional.of(p);
 		}
-		
+
 		return Optional.empty();
 	}
 
@@ -285,7 +285,7 @@ public class PluginEngine implements Runnable {
 		} catch (final IOException e) {
 			logger.error("Error when stopping plugins directory watcher", e);
 		}
-		
+
 		logger.debug("Stopped watching plugins directory");
 	}
 }

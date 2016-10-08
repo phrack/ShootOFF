@@ -66,7 +66,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 		super.addShotTimerColumn(HIT_COL_NAME, HIT_COL_WIDTH);
 		super.showTextOnFeed("left score: 0\nright score: 0");
-		
+
 		super.pauseShotDetection(true);
 		executorService.schedule(() -> {
 			super.pauseShotDetection(false);
@@ -114,7 +114,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 	@Override
 	public void targetUpdate(Target target, TargetChange change) {
 		if (TargetChange.REMOVED.equals(change)) return;
-		
+
 		for (final TargetRegion r : target.getRegions()) {
 			if (isLeftPaddle(r) || isRightPaddle(r)) {
 				continueExercise = findTargets(Arrays.asList(target));

@@ -219,7 +219,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		if (shotDetector instanceof ShotYieldingShotDetector)
 			((ShotYieldingShotDetector) shotDetector).startDetecting();
-		
+
 		setDetecting(true);
 
 	}
@@ -506,7 +506,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	public void newFrame(Frame frame) {
 		newFrame(frame, true);
 	}
-	
+
 	@Override
 	public void newFrame(Frame frame, boolean shouldDedistort) {
 		if (!handleFrame(frame, shouldDedistort)) logger.warn("Invalid frame yielded from {}", camera.getName());
@@ -778,7 +778,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		return System.currentTimeMillis() - startTime;
 	}
-	
+
 	public long cameraTimeToShotTime(long timestamp) {
 		if (startTime == 0) resetStartTime();
 
