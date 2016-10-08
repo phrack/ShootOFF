@@ -16,6 +16,7 @@
 .project
 .metadata
 .gradle/**
+build/**
 bin/**
 tmp/**
 tmp/**/*
