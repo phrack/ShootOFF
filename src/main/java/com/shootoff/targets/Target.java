@@ -51,6 +51,8 @@ public interface Target {
 	boolean hasRegion(TargetRegion region);
 
 	void setVisible(boolean isVisible);
+	
+	boolean isVisible();
 
 	void setPosition(double x, double y);
 

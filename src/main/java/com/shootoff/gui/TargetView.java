@@ -193,6 +193,11 @@ public class TargetView implements Target {
 	public void setVisible(boolean isVisible) {
 		getTargetGroup().setVisible(isVisible);
 	}
+	
+	@Override
+	public boolean isVisible() {
+		return getTargetGroup().isVisible();
+	}
 
 	@Override
 	public void setPosition(double x, double y) {
