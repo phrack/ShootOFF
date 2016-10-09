@@ -22,6 +22,8 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -209,25 +211,67 @@ public class OptiTrackCamera implements Camera {
 		return initialized;
 	}
 
+	private final ReentrantLock frameLock = new ReentrantLock(true);
+	private AtomicBoolean frameAvailable = new AtomicBoolean(false);
+	private byte[] frameBytes;
+	private long frameTS;
+	
 	@Override
-	public void run() {}
+	public void run() {
+		while (isOpen())
+		{
+			Frame frame = null;
+			
+			synchronized(frameLock)
+			{
+				try {
+					if (frameAvailable.get() == false)
+					{
+						frameLock.wait();
+					}
+				} catch (InterruptedException e) {
+				}
+				
+				if (frameAvailable.compareAndSet(true, false))
+				{
+					frame = new Frame(translateCameraArrayToMat(frameBytes), frameTS);
+				}
+			}
+			
+			if (frame != null)
+			{
+				if (cameraEventListener.isPresent()) {
+					final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;
+					cameraEventListener.get().newFrame(frame, shouldDedistort);
+				}
 
-	// TODO: Switch timestamps to optitrack internal timestamps
-	private void receiveFrame(byte[] framebytes) {
-		final Frame frame = new Frame(translateCameraArrayToMat(framebytes), System.currentTimeMillis());
+				if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(getFPS());
+			}
+		}
+	}
 
-		if (cameraEventListener.isPresent()) {
-			final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;
-			cameraEventListener.get().newFrame(frame, shouldDedistort);
+	private void receiveFrame(byte[] frameBytes, long frameTS) {
+		synchronized(frameLock)
+		{
+			this.frameBytes = frameBytes;
+			this.frameTS = frameTS;
+			frameLock.notifyAll();
+			frameAvailable.set(true);
 		}
 
-		if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(getFPS());
 	}
 
 	private void cameraClosed() {
 		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
 
+		cameraEventListener = Optional.empty();
+		
 		if (isOpen()) close();
+		
+		synchronized(frameLock)
+		{
+			frameLock.notifyAll();
+		}
 	}
 
 	@Override

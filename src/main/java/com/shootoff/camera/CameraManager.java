@@ -211,8 +211,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			}
 
 			if (logger.isDebugEnabled()) logger.debug("starting camera thread {}", camera.getName());
-			final String threadName = String.format("Shot detection %s %s", camera.getName(),
-					shotDetector.getClass().getName());
+			final String threadName = String.format("Camera %s %s", camera.getName(),
+					shotDetector.getClass().getSimpleName());
 			new Thread(camera, threadName).start();
 
 		}

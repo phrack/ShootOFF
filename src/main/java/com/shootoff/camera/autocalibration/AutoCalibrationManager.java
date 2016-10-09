@@ -247,7 +247,7 @@ public class AutoCalibrationManager {
 		private long frameTimestampBeforeFrameChange = -1;
 		private boolean calculateFrameDelay = false;
 		public long frameDelayResult = -1;
-		private double[] patternLuminosity = { -1, -1, -1 };
+		private double patternLuminosity = -1;
 
 		public StepFindDelay(boolean calculateFrameDelay) {
 			this.calculateFrameDelay = calculateFrameDelay;
@@ -255,9 +255,7 @@ public class AutoCalibrationManager {
 
 		@Override
 		public void reset() {
-			patternLuminosity[0] = -1;
-			patternLuminosity[1] = -1;
-			patternLuminosity[2] = -1;
+			patternLuminosity = 0;
 			frameDelayResult = -1;
 			frameTimestampBeforeFrameChange = -1;
 		}
@@ -281,11 +279,10 @@ public class AutoCalibrationManager {
 		@Override
 		public void process(Frame frame) {
 			if (!inStepTwo()) {
-				logger.debug("Step two: Checking frame delay");
-
+				calibrationListener.setArenaBackground(null);
+				
 				checkForFrameChange(frame);
 				frameTimestampBeforeFrameChange = frame.getTimestamp();
-				calibrationListener.setArenaBackground(null);
 			} else {
 				final Optional<Long> frameDelay = checkForFrameChange(frame);
 
@@ -303,23 +300,21 @@ public class AutoCalibrationManager {
 		private Optional<Long> checkForFrameChange(Frame frame) {
 			frame = undistortFrame(frame);
 
-			final double[] pixel = getFrameDelayPixel(frame.getOriginalMat());
+
+			final double pixel = getFrameDelayPixel(frame.getOriginalMat());
 
 			// Initialize
-			if (patternLuminosity[0] == -1) {
+			if (patternLuminosity == 0) {
 				patternLuminosity = pixel;
 				return Optional.empty();
 			}
 
-			final Mat tempMat = new Mat(1, 2, CvType.CV_8UC3);
-			tempMat.put(0, 0, patternLuminosity);
-			tempMat.put(0, 1, pixel);
-
-			Imgproc.cvtColor(tempMat, tempMat, Imgproc.COLOR_BGR2HSV);
 
 			final long change = frame.getTimestamp() - frameTimestampBeforeFrameChange;
 
-			if (tempMat.get(0, 1)[2] < .9 * tempMat.get(0, 0)[2]) {
+			logger.debug("{} {} {}", pixel, patternLuminosity, change);
+			
+			if (pixel < .9 * patternLuminosity) {
 				return Optional.of(change);
 			} else if (change > 250) {
 				return Optional.of(-1L);
@@ -328,14 +323,14 @@ public class AutoCalibrationManager {
 			return Optional.empty();
 		}
 
-		private double[] getFrameDelayPixel(Mat mat) {
+		private double getFrameDelayPixel(Mat mat) {
 			final double squareHeight = getBoundsResult().getHeight() / (PATTERN_HEIGHT + 1);
 			final double squareWidth = getBoundsResult().getWidth() / (PATTERN_WIDTH + 1);
 
 			final int secondSquareCenterX = (int) (getBoundsResult().getMinX() + (squareWidth * 1.5));
 			final int secondSquareCenterY = (int) (getBoundsResult().getMinY() + (squareHeight * .5));
 
-			return mat.get(secondSquareCenterY, secondSquareCenterX);
+			return mat.get(secondSquareCenterY, secondSquareCenterX)[0];
 		}
 
 	}
@@ -462,7 +457,7 @@ public class AutoCalibrationManager {
 			if (tries == NUM_TRIES) completed = true;
 
 			if (completed) {
-				if (mean.val[0] > origMean || mean.val[0] < .6 * TARGET_THRESH) {
+				if (mean.val[0] > origMean * .95 || mean.val[0] < .6 * TARGET_THRESH) {
 					camera.resetExposure();
 					logger.info("Failed to adjust exposure, mean originally {} lowest {}", origMean, mean.val[0]);
 				} else {
