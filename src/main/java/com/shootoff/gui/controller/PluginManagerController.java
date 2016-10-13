@@ -352,14 +352,17 @@ public class PluginManagerController {
 		return Optional.of(versionXML.toString());
 	}
 
-	protected Set<PluginMetadata> parsePluginMetadata(final String pluginMedata) {
+	protected Set<PluginMetadata> parsePluginMetadata(final String pluginMetadata) {
 		final PluginMetadataXMLHandler handler = new PluginMetadataXMLHandler();
 
-		try (InputStream xmlInput = new ByteArrayInputStream(pluginMedata.getBytes("UTF-8"))) {
+		try (InputStream xmlInput = new ByteArrayInputStream(pluginMetadata.getBytes("UTF-8"))) {
 			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			saxParser.parse(xmlInput, handler);
-		} catch (SAXException | ParserConfigurationException | IOException e) {
+		} catch (ParserConfigurationException | IOException e) {
 			logger.error("Error reading plugin metadata XML file from website", e);
+		} catch (SAXException e) {
+			if (logger.isWarnEnabled()) logger.warn("Failed to download complete plugin metadata, no or "
+					+ "unreliable Internet connection. pluginMetadata = {}", pluginMetadata);
 		}
 
 		return handler.getPluginMetada();
