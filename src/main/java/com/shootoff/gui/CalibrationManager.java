@@ -101,6 +101,11 @@ public class CalibrationManager implements CameraCalibrationListener {
 				config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
 			savedExercise = config.getExercise();
 			exerciseListener.setExercise(null);
+		} else {
+			// CalibrationManager is re-used when the user hits the
+			// calibration button on the projector slide, thus we need
+			// be sure to have clean state
+			savedExercise = Optional.empty();
 		}
 
 		isCalibrating.set(true);
