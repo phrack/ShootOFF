@@ -167,8 +167,8 @@ public class PerspectiveManager {
 		if (shooterDistance == -1)
 			shooterDistance = DEFAULT_SHOOTER_DISTANCE;
 
+		calculateUnknown();
 
-		calculateRealWorldSize();
 	}
 
 	public PerspectiveManager(String cameraName, Dimension2D resolution, Bounds arenaBounds) {
@@ -408,8 +408,8 @@ public class PerspectiveManager {
 				return;
 			}
 		} else if (unknownCount == 0) {
-			// TODO: Update highest error unknown if this is the case
-			return;
+			projectionWidth = -1;
+			projectionHeight = -1;
 		}
 
 		if (projectionWidth == -1) {
@@ -469,6 +469,8 @@ public class PerspectiveManager {
 
 	void calculateRealWorldSize()
 	{
+		logger.debug("calculateRealWorldSize");
+		
 		if (projectorResWidth > -1 && projectionWidth > -1)
 		{
 			pxPerMMwide = ((double) projectorResWidth / (double) projectionWidth);

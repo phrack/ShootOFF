@@ -139,9 +139,8 @@ public class TargetDistancePane extends Pane {
 			cameraDistance.setText(String.valueOf(config.getCameraDistance(cameraName).get()));
 		}
 
-		if (!cameraDistance.getText().isEmpty() && !perspectiveManager.isCameraParamsKnown()
-				&& (perspectiveManager.getProjectionWidth() == -1 || perspectiveManager.getProjectionHeight() == -1)) {
-			throw new AssertionError("The camera parameters and paper dimensions are unknown. We should not have been "
+		if (!cameraDistance.getText().isEmpty() && !perspectiveManager.isInitialized()) {
+			throw new AssertionError("The perspective manager is not initialized. We should not have been "
 					+ "able to get here.");
 		}
 
