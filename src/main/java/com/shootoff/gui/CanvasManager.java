@@ -803,7 +803,7 @@ public class CanvasManager implements CameraView {
 		if (this instanceof MirroredCanvasManager) {
 			newTarget = new MirroredTarget(targetFile, targetGroup, targetTags, config, this, userDeletable);
 		} else {
-			newTarget = new TargetView(targetFile, targetGroup, targetTags, config, this, userDeletable);
+			newTarget = new TargetView(targetFile, targetGroup, targetTags, this, userDeletable);
 		}
 
 		return addTarget(newTarget);

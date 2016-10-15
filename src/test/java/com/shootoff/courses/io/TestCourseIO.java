@@ -56,7 +56,7 @@ public class TestCourseIO {
 
 		File targetFile = new File(targetName);
 		TargetComponents tc = TargetIO.loadTarget(targetFile).get();
-		TargetView target = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(), config,
+		TargetView target = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
 				new MockCanvasManager(config), false);
 		target.setPosition(targetX, targetY);
 		target.setDimensions(targetWidth, targetHeight);

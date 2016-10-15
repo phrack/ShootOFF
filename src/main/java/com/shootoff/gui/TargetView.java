@@ -97,12 +97,12 @@ public class TargetView implements Target {
 
 	private TargetSelectionListener selectionListener;
 
-	public TargetView(File targetFile, Group target, Map<String, String> targetTags, Configuration config,
-			CanvasManager parent, boolean userDeletable) {
+	public TargetView(File targetFile, Group target, Map<String, String> targetTags, CanvasManager parent, 
+			boolean userDeletable) {
 		this.targetFile = targetFile;
 		this.targetGroup = target;
 		this.targetTags = targetTags;
-		this.config = Optional.ofNullable(config);
+		this.config = Optional.ofNullable(Configuration.getConfig());
 		this.parent = Optional.of(parent);
 		this.targets = Optional.empty();
 		this.userDeletable = userDeletable;
@@ -110,7 +110,7 @@ public class TargetView implements Target {
 
 		targetGroup.setOnMouseClicked((event) -> {
 			// Skip target selection if click to shoot is being used
-			if (config != null && config.inDebugMode() && (event.isShiftDown() || event.isControlDown())) return;
+			if (config.isPresent() && config.get().inDebugMode() && (event.isShiftDown() || event.isControlDown())) return;
 
 			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();

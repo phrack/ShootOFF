@@ -17,7 +17,7 @@ public class MirroredTarget extends TargetView {
 
 	public MirroredTarget(File targetFile, Group target, Map<String, String> targetTags, Configuration config,
 			CanvasManager parent, boolean userDeletable) {
-		super(targetFile, target, targetTags, config, parent, userDeletable);
+		super(targetFile, target, targetTags, parent, userDeletable);
 	}
 
 	public void setMirroredTarget(MirroredTarget mirroredTarget) {

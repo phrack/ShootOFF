@@ -139,7 +139,7 @@ public class XMLCourseReader {
 					final TargetComponents tc = targetComponents.get();
 
 					final TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
-							arenaPane.getConfiguration(), arenaPane.getCanvasManager(), true);
+							arenaPane.getCanvasManager(), true);
 
 					t.setPosition(Double.parseDouble(attributes.getValue("x")),
 							Double.parseDouble(attributes.getValue("y")));

@@ -54,7 +54,7 @@ public class TestSessionIO {
 
 		Configuration config = new Configuration(new String[0]);
 		MockCanvasManager canvasManager = new MockCanvasManager(config);
-		TargetView target = new TargetView(new File(targetName), new Group(), new HashMap<String, String>(), config,
+		TargetView target = new TargetView(new File(targetName), new Group(), new HashMap<String, String>(),
 				canvasManager, false);
 		canvasManager.addTarget(target);
 
