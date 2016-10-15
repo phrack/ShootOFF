@@ -158,11 +158,11 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.calibrationManager = calibrationManager;
 	}
 
-
 	private Optional<Screen> getStageHomeScreen(Stage stage) {
 		final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
 
-		final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX() / dpiScaleFactor, stage.getY() / dpiScaleFactor, 1, 1);
+		final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX() / dpiScaleFactor,
+				stage.getY() / dpiScaleFactor, 1, 1);
 
 		if (stageHomeScreens.isEmpty()) {
 			final StringBuilder message = new StringBuilder(
@@ -223,17 +223,14 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			if (!screens.isEmpty()) {
 
 				boolean matchedOriginal = false;
-				for (final Screen screen : screens)
-				{
-					if (originalArenaHomeScreen.equals(screen))
-					{
+				for (final Screen screen : screens) {
+					if (originalArenaHomeScreen.equals(screen)) {
 						logger.debug("Stored arena coordinates are on current home screen");
 						matchedOriginal = true;
 					}
 				}
 
-				if (!matchedOriginal)
-				{
+				if (!matchedOriginal) {
 					arenaStage.setX(arenaPosition.getX());
 					arenaStage.setY(arenaPosition.getY());
 
@@ -281,7 +278,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 				} else {
 					if (screen.getBounds().getHeight()
 							* screen.getBounds().getWidth() < smallest.getBounds().getHeight()
-							* smallest.getBounds().getWidth()) {
+									* smallest.getBounds().getWidth()) {
 						smallest = screen;
 					}
 				}
@@ -334,7 +331,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private void setArenaScreenOrigin(Screen screen) {
 		final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
 		final Rectangle2D arenaScreenBounds = screen.getBounds();
-		arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX() * dpiScaleFactor, arenaScreenBounds.getMinY() * dpiScaleFactor);
+		arenaScreenOrigin = new Point2D(arenaScreenBounds.getMinX() * dpiScaleFactor,
+				arenaScreenBounds.getMinY() * dpiScaleFactor);
 
 		logger.debug("Set arenaScreenOrigin to {}", arenaScreenOrigin);
 	}
@@ -477,7 +475,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		}
 	}
 
-
 	private void toggleFullScreen() {
 		arenaStage.setAlwaysOnTop(!arenaStage.isAlwaysOnTop());
 		arenaStage.setFullScreen(!arenaStage.isFullScreen());
@@ -583,7 +580,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 				final Label successLabel = mirroredArenaPane.getCanvasManager().addDiagnosticMessage(
 						"Perspective Fully Initialized -- Using Real World Distances", -1, Color.LIMEGREEN);
 
-				TimerPool.schedule(() -> mirroredArenaPane.getCanvasManager().removeDiagnosticMessage(successLabel), 5000); 
+				TimerPool.schedule(() -> mirroredArenaPane.getCanvasManager().removeDiagnosticMessage(successLabel),
+						5000);
 			}
 		}
 
@@ -595,12 +593,11 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	/**
-	 * This methods is used by
-	 * {@link com.shootoff.gui.MirroredCanvasArena} to notify the
-	 * arena controller of new targets added to the arena. Without this method
-	 * the targets would be added directly to the arena's canvas manager,
-	 * bypassing the arena controller. Thus, the arena controller would not be
-	 * able to configure arena-specific target operations (e.g. setting a
+	 * This methods is used by {@link com.shootoff.gui.MirroredCanvasArena} to
+	 * notify the arena controller of new targets added to the arena. Without
+	 * this method the targets would be added directly to the arena's canvas
+	 * manager, bypassing the arena controller. Thus, the arena controller would
+	 * not be able to configure arena-specific target operations (e.g. setting a
 	 * targets distance).
 	 * 
 	 * @param target
@@ -617,9 +614,11 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			}
 
 			if (perspectiveManager.isPresent()) {
-				if (openDistancePane != null) trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
+				if (openDistancePane != null)
+					trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 
-				openDistancePane = new Pair<>(target, new TargetDistancePane(toggledTarget, perspectiveManager.get(), config));
+				openDistancePane = new Pair<>(target,
+						new TargetDistancePane(toggledTarget, perspectiveManager.get(), config));
 
 				trainingExerciseContainer.getChildren().add(openDistancePane.getValue());
 			} else {
@@ -635,7 +634,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	public void targetRemoved(Target target) {
-		if (openDistancePane != null && target.equals(openDistancePane.getKey())) 
+		if (openDistancePane != null && target.equals(openDistancePane.getKey()))
 			trainingExerciseContainer.getChildren().remove(openDistancePane.getValue());
 	}
 
@@ -662,8 +661,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 				// allow targets to be moved around on the arena from the
 				// calibrated camera feed.
 				if (event.getScreenX() >= arenaStage.getX() && event.getScreenX() < arenaStage.getX() + getWidth()
-				&& event.getScreenY() >= arenaStage.getY()
-				&& event.getScreenY() < arenaStage.getY() + getHeight()) {
+						&& event.getScreenY() >= arenaStage.getY()
+						&& event.getScreenY() < arenaStage.getY() + getHeight()) {
 					cursorWarningToggle(true);
 				}
 			});

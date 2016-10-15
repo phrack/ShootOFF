@@ -46,7 +46,7 @@ public class FileSlide extends Slide {
 
 	private static PreferencesController preferencesController = null;
 
-	public FileSlide(Pane parentControls, Pane parentBody, CalibrationConfigurator calibrationConfigurator, 
+	public FileSlide(Pane parentControls, Pane parentBody, CalibrationConfigurator calibrationConfigurator,
 			CameraConfigListener configListener, CameraViews cameraViews, Closeable mainWindow) {
 		super(parentControls, parentBody);
 
@@ -66,16 +66,19 @@ public class FileSlide extends Slide {
 						configListener.getConfiguration(), calibrationConfigurator, configListener);
 			}
 
-			final PreferencesSlide preferencesSlide = new PreferencesSlide(parentControls, parentBody, preferencesController);
-			preferencesSlide.setOnSlideHidden(() -> { if (preferencesSlide.isSaved()) hide(); });
+			final PreferencesSlide preferencesSlide = new PreferencesSlide(parentControls, parentBody,
+					preferencesController);
+			preferencesSlide.setOnSlideHidden(() -> {
+				if (preferencesSlide.isSaved()) hide();
+			});
 			preferencesSlide.showControls();
 			preferencesSlide.showBody();
 		});
 
 		addSlideControlButton("Save Feed Image", (event) -> {
 			final Node container = cameraViews.getSelectedCameraContainer();
-			final RenderedImage renderedImage = SwingFXUtils.fromFXImage(container.snapshot(new SnapshotParameters(), null),
-					null);
+			final RenderedImage renderedImage = SwingFXUtils
+					.fromFXImage(container.snapshot(new SnapshotParameters(), null), null);
 
 			final FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle("Save Feed Image");
