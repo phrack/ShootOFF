@@ -221,7 +221,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 					arenaPosition.getY(), 1, 1);
 
 			if (!screens.isEmpty()) {
-
 				boolean matchedOriginal = false;
 				for (final Screen screen : screens) {
 					if (originalArenaHomeScreen.equals(screen)) {
