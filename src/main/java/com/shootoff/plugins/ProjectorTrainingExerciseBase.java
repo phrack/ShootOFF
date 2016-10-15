@@ -19,6 +19,7 @@
 package com.shootoff.plugins;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -274,6 +275,21 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		arenaPane.setArenaBackground(background);
 	}
 
+	/**
+	 * Set the projector arena's background image to one of the default
+	 * backgrounds using its resource path.
+	 * 
+	 * @param defaultResourcePath
+	 *            the resource path to the default ShootOFF background to set.
+	 * 
+	 * @since 3.10
+	 */
+	public void setArenaBackground(String defaultResourcePath) {
+		final InputStream is = ProjectorTrainingExerciseBase.class.getResourceAsStream(defaultResourcePath);
+		final LocatedImage img = new LocatedImage(is, defaultResourcePath);
+		setArenaBackground(img);
+	}
+	
 	/**
 	 * Remove all targets on the arena and replace them with the course
 	 * specified in the file <code>courseFile</code>.
