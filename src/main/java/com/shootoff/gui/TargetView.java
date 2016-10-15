@@ -193,7 +193,7 @@ public class TargetView implements Target {
 	public void setVisible(boolean isVisible) {
 		getTargetGroup().setVisible(isVisible);
 	}
-	
+
 	@Override
 	public boolean isVisible() {
 		return getTargetGroup().isVisible();
@@ -396,7 +396,7 @@ public class TargetView implements Target {
 
 		for (final Node node : getTargetGroup().getChildren()) {
 			if (!(node instanceof TargetRegion)) continue;
-			
+
 			final TargetRegion region = (TargetRegion) node;
 			if (region.getType() != RegionType.IMAGE) {
 				((Shape) region).setStroke(stroke);
@@ -485,7 +485,7 @@ public class TargetView implements Target {
 			// Target was hit, see if a specific region was hit
 			for (int i = targetGroup.getChildren().size() - 1; i >= 0; i--) {
 				final Node node = targetGroup.getChildren().get(i);
-				
+
 				if (!(node instanceof TargetRegion)) continue;
 
 				final Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
@@ -514,8 +514,8 @@ public class TargetView implements Target {
 							logger.debug(
 									"An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
 											+ " nodeBounds.getMin ({}, {})",
-											adjustedX, adjustedY, shot.getX(), shot.getY(), nodeBounds.getMaxX(),
-											nodeBounds.getMinY());
+									adjustedX, adjustedY, shot.getX(), shot.getY(), nodeBounds.getMaxX(),
+									nodeBounds.getMinY());
 							return Optional.empty();
 						}
 
@@ -543,8 +543,8 @@ public class TargetView implements Target {
 										"Index out of bounds while trying to find adjusted coordinate (%d, %d) "
 												+ "from original (%.2f, %.2f) in adjusted BufferedImage for target %s "
 												+ "with width = %d, height = %d",
-												adjustedX, adjustedY, shot.getX(), shot.getY(), getTargetFile().getPath(),
-												bufferedResized.getWidth(), bufferedResized.getHeight());
+										adjustedX, adjustedY, shot.getX(), shot.getY(), getTargetFile().getPath(),
+										bufferedResized.getWidth(), bufferedResized.getHeight());
 								logger.error(message, e);
 								return Optional.empty();
 							}
@@ -623,8 +623,7 @@ public class TargetView implements Target {
 				return;
 			}
 
-			if ((top || bottom) && (left || right) && event.isControlDown())
-				fixedAspectRatioResize = true;
+			if ((top || bottom) && (left || right) && event.isControlDown()) fixedAspectRatioResize = true;
 
 			if (left || right) {
 				double gap; // The gap between the mouse and nearest
@@ -639,11 +638,9 @@ public class TargetView implements Target {
 				final double currentWidth = targetGroup.getBoundsInParent().getWidth();
 				final double newWidth = currentWidth + gap;
 
-
 				double scaleDelta = (newWidth - currentWidth) / currentWidth;
 
-				if (fixedAspectRatioResize)
-					aspectScaleDelta = scaleDelta;
+				if (fixedAspectRatioResize) aspectScaleDelta = scaleDelta;
 
 				final double currentOriginX = targetGroup.getBoundsInParent().getMinX();
 				double newOriginX;
@@ -681,7 +678,7 @@ public class TargetView implements Target {
 					// target regions stay the same size
 					for (final Node n : targetGroup.getChildren()) {
 						if (!(n instanceof TargetRegion)) continue;
-						
+
 						final TargetRegion r = (TargetRegion) n;
 
 						if (r.tagExists(Target.TAG_RESIZABLE)
@@ -701,14 +698,11 @@ public class TargetView implements Target {
 					gap = (event.getY() - targetGroup.getLayoutBounds().getMinY()) * targetGroup.getScaleY();
 				}
 
-
 				final double currentHeight = targetGroup.getBoundsInParent().getHeight();
 				double newHeight = currentHeight + gap;
 
-				if (fixedAspectRatioResize) 
-				{
-					if ((left && bottom) || (right && top))
-						aspectScaleDelta *= -1.0;
+				if (fixedAspectRatioResize) {
+					if ((left && bottom) || (right && top)) aspectScaleDelta *= -1.0;
 
 					newHeight = currentHeight + (currentHeight * aspectScaleDelta);
 				}
@@ -750,7 +744,7 @@ public class TargetView implements Target {
 					// target regions stay the same size
 					for (final Node n : targetGroup.getChildren()) {
 						if (!(n instanceof TargetRegion)) continue;
-						
+
 						final TargetRegion r = (TargetRegion) n;
 
 						if (r.tagExists(Target.TAG_RESIZABLE)
@@ -834,7 +828,7 @@ public class TargetView implements Target {
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() - MOVEMENT_DELTA >= 0
 							&& targetGroup.getBoundsInParent().getMaxX() - MOVEMENT_DELTA <= config.get()
-							.getDisplayWidth())) {
+									.getDisplayWidth())) {
 
 						targetGroup.setLayoutX(targetGroup.getLayoutX() - MOVEMENT_DELTA);
 					}
@@ -846,7 +840,7 @@ public class TargetView implements Target {
 				}
 			}
 
-			break;
+				break;
 
 			case RIGHT: {
 				if (event.isShiftDown()) {
@@ -855,7 +849,7 @@ public class TargetView implements Target {
 
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + (SCALE_DELTA / 2) >= 0
 							&& targetGroup.getBoundsInParent().getMaxX() + (SCALE_DELTA / 2) <= config.get()
-							.getDisplayWidth())) {
+									.getDisplayWidth())) {
 						targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - scaleDelta));
 					}
 
@@ -867,7 +861,7 @@ public class TargetView implements Target {
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinX() + MOVEMENT_DELTA >= 0
 							&& targetGroup.getBoundsInParent().getMaxX() + MOVEMENT_DELTA <= config.get()
-							.getDisplayWidth())) {
+									.getDisplayWidth())) {
 
 						targetGroup.setLayoutX(targetGroup.getLayoutX() + MOVEMENT_DELTA);
 					}
@@ -879,7 +873,7 @@ public class TargetView implements Target {
 				}
 			}
 
-			break;
+				break;
 
 			case UP: {
 				if (event.isShiftDown()) {
@@ -904,7 +898,7 @@ public class TargetView implements Target {
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() - MOVEMENT_DELTA >= 0
 							&& targetGroup.getBoundsInParent().getMaxY() - MOVEMENT_DELTA <= config.get()
-							.getDisplayHeight())) {
+									.getDisplayHeight())) {
 
 						targetGroup.setLayoutY(targetGroup.getLayoutY() - MOVEMENT_DELTA);
 					}
@@ -916,7 +910,7 @@ public class TargetView implements Target {
 				}
 			}
 
-			break;
+				break;
 
 			case DOWN: {
 				if (event.isShiftDown()) {
@@ -925,7 +919,7 @@ public class TargetView implements Target {
 
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + (SCALE_DELTA / 2) >= 0
 							&& targetGroup.getBoundsInParent().getMaxY() + (SCALE_DELTA / 2) <= config.get()
-							.getDisplayHeight())) {
+									.getDisplayHeight())) {
 						targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 					}
 
@@ -945,7 +939,7 @@ public class TargetView implements Target {
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + MOVEMENT_DELTA >= 0
 							&& targetGroup.getBoundsInParent().getMaxY() + MOVEMENT_DELTA <= config.get()
-							.getDisplayHeight())) {
+									.getDisplayHeight())) {
 
 						targetGroup.setLayoutY(targetGroup.getLayoutY() + MOVEMENT_DELTA);
 					}
@@ -957,7 +951,7 @@ public class TargetView implements Target {
 				}
 			}
 
-			break;
+				break;
 
 			default:
 				break;

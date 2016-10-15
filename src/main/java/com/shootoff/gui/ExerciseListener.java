@@ -24,7 +24,10 @@ import com.shootoff.plugins.engine.PluginEngine;
 
 public interface ExerciseListener {
 	public void setProjectorExercise(TrainingExercise exercise);
+
 	public void setExercise(TrainingExercise exercise);
+
 	public Configuration getConfiguration();
+
 	public PluginEngine getPluginEngine();
 }

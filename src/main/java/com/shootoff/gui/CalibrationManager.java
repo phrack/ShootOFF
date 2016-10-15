@@ -105,7 +105,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 			// be sure to have clean state
 			savedExercise = Optional.empty();
 		}
-		
+
 		arenaPane.getCanvasManager().setShowShots(false);
 
 		isCalibrating.set(true);

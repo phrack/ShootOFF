@@ -141,8 +141,7 @@ public class CanvasManager implements CameraView {
 		}
 
 		canvasGroup.setOnMouseClicked((event) -> {
-			if (contextMenu.isPresent() && contextMenu.get().isShowing())
-				contextMenu.get().hide();
+			if (contextMenu.isPresent() && contextMenu.get().isShowing()) contextMenu.get().hide();
 
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
@@ -163,8 +162,7 @@ public class CanvasManager implements CameraView {
 				if (this instanceof MirroredCanvasManager) {
 					final long shotTimestamp = cameraManager == null ? 0 : cameraManager.getCurrentFrameTimestamp();
 
-					addShot(
-							new Shot(shotColor, event.getX(), event.getY(), shotTimestamp, config.getMarkerRadius()), 
+					addShot(new Shot(shotColor, event.getX(), event.getY(), shotTimestamp, config.getMarkerRadius()),
 							false);
 				} else {
 					cameraManager.injectShot(shotColor, event.getX(), event.getY(), false);
@@ -235,8 +233,7 @@ public class CanvasManager implements CameraView {
 
 		if (chimeDelay > 0 && !config.isChimeMuted(message) && !diagnosticExecutorService.isShutdown()) {
 			@SuppressWarnings("unchecked")
-			final
-			ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
+			final ScheduledFuture<Void> chimeFuture = (ScheduledFuture<Void>) diagnosticExecutorService.schedule(
 					() -> TrainingExerciseBase.playSound("sounds/chime.wav"), chimeDelay, TimeUnit.MILLISECONDS);
 			diagnosticFutures.put(diagnosticLabel, chimeFuture);
 		}
@@ -327,8 +324,7 @@ public class CanvasManager implements CameraView {
 			background.setX(0);
 			background.setY(0);
 
-			img = SwingFXUtils.toFXImage(resize(frame, config.getDisplayWidth(), config.getDisplayHeight()),
-					null);
+			img = SwingFXUtils.toFXImage(resize(frame, config.getDisplayWidth(), config.getDisplayHeight()), null);
 		}
 
 		Platform.runLater(() -> background.setImage(img));
@@ -549,11 +545,10 @@ public class CanvasManager implements CameraView {
 				notifyShot(shot);
 			}
 
-			// TODO: Add separate infrared sound or switch config to read "red/infrared"
-			if (config.useRedLaserSound() && (
-					Color.RED.equals(shot.getColor()) ||
-					Color.BLACK.equals(shot.getColor())
-					)) {
+			// TODO: Add separate infrared sound or switch config to read
+			// "red/infrared"
+			if (config.useRedLaserSound()
+					&& (Color.RED.equals(shot.getColor()) || Color.BLACK.equals(shot.getColor()))) {
 				TrainingExerciseBase.playSound(config.getRedLaserSound());
 			} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
 				TrainingExerciseBase.playSound(config.getGreenLaserSound());
@@ -645,7 +640,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	private void drawShot(Shot shot) {
-		final Runnable drawShotAction  = () -> {
+		final Runnable drawShotAction = () -> {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
 		};
@@ -724,8 +719,8 @@ public class CanvasManager implements CameraView {
 				// if it's an image region that is down and if so, don't
 				// play the sound
 				if (args.size() == 2) {
-					final Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets, hit.getHitRegion(),
-							args.get(1));
+					final Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets,
+							hit.getHitRegion(), args.get(1));
 					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
 						if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
 					}
@@ -737,7 +732,8 @@ public class CanvasManager implements CameraView {
 				// a modular exercise
 				final String soundPath = args.get(0);
 				if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
-					final InputStream is = config.getExercise().get().getClass().getResourceAsStream(soundPath.substring(1));
+					final InputStream is = config.getExercise().get().getClass()
+							.getResourceAsStream(soundPath.substring(1));
 					TrainingExerciseBase.playSound(new BufferedInputStream(is));
 				} else if ('@' != soundPath.charAt(0)) {
 					TrainingExerciseBase.playSound(soundPath);
@@ -783,7 +779,8 @@ public class CanvasManager implements CameraView {
 
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
-			final Optional<Target> target = Optional.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
+			final Optional<Target> target = Optional
+					.of(addTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true));
 
 			if (config.getSessionRecorder().isPresent() && target.isPresent()) {
 				config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
