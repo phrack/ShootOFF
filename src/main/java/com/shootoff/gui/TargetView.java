@@ -261,6 +261,23 @@ public class TargetView implements Target {
 	public Dimension2D getDimension() {
 		return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), targetGroup.getBoundsInParent().getHeight());
 	}
+	
+	@Override
+	public void scale(double widthFactor, double heightFactor) {
+		final double newWidth = getDimension().getWidth() * widthFactor;
+		final double widthDelta = newWidth - getDimension().getWidth();
+		final double newX = getBoundsInParent().getMinX() * widthFactor;
+		final double deltaX = newX - getBoundsInParent().getMinX() + (widthDelta / 2);
+
+		final double newHeight = getDimension().getHeight() * heightFactor;
+		final double heightDelta = newHeight - getDimension().getHeight();
+		final double newY = getBoundsInParent().getMinY() * heightFactor;
+		final double deltaY = newY - getBoundsInParent().getMinY() + (heightDelta / 2);
+
+		setPosition(getPosition().getX() + deltaX, getPosition().getY() + deltaY);
+
+		setDimensions(newWidth, newHeight);
+	}
 
 	@Override
 	public Bounds getBoundsInParent() {

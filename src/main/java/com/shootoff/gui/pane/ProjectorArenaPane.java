@@ -421,19 +421,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		for (final Target t : course.getTargets()) {
 			if (scaleCourse) {
-				final double newWidth = t.getDimension().getWidth() * widthScaleFactor;
-				final double widthDelta = newWidth - t.getDimension().getWidth();
-				final double newX = t.getBoundsInParent().getMinX() * widthScaleFactor;
-				final double deltaX = newX - t.getBoundsInParent().getMinX() + (widthDelta / 2);
-
-				final double newHeight = t.getDimension().getHeight() * heightScaleFactor;
-				final double heightDelta = newHeight - t.getDimension().getHeight();
-				final double newY = t.getBoundsInParent().getMinY() * heightScaleFactor;
-				final double deltaY = newY - t.getBoundsInParent().getMinY() + (heightDelta / 2);
-
-				t.setPosition(t.getPosition().getX() + deltaX, t.getPosition().getY() + deltaY);
-
-				t.setDimensions(newWidth, newHeight);
+				t.scale(widthScaleFactor, heightScaleFactor);
 			}
 
 			canvasManager.addTarget(t);

@@ -63,6 +63,8 @@ public interface Target {
 
 	Dimension2D getDimension();
 
+	void scale(double widthFactor, double heightFactor);
+	
 	Bounds getBoundsInParent();
 
 	Point2D parentToLocal(double x, double y);
