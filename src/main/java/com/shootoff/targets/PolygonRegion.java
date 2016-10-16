@@ -24,7 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 
 public class PolygonRegion extends Polygon implements TargetRegion {
@@ -67,6 +69,15 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 	@Override
 	public RegionType getType() {
 		return RegionType.POLYGON;
+	}
+
+	@Override
+	public void setFill(Color fill) {
+		if (Platform.isFxApplicationThread()) {
+			super.setFill(fill);
+		} else {
+			Platform.runLater(() -> super.setFill(fill));
+		}
 	}
 
 	@Override

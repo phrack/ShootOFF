@@ -26,12 +26,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.shootoff.targets.animation.SpriteAnimation;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 
 public class ImageRegion extends ImageView implements TargetRegion {
+	private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
+	
 	private final Map<String, String> tags = new HashMap<>();
 	private final File imageFile;
 
@@ -80,6 +86,11 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	@Override
 	public RegionType getType() {
 		return RegionType.IMAGE;
+	}
+
+	@Override
+	public void setFill(Color fill) {
+		logger.warn("setFill on ImageRegion ignored");
 	}
 
 	@Override
