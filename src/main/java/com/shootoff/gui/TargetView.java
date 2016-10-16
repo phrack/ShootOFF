@@ -55,6 +55,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 /**
@@ -266,6 +267,11 @@ public class TargetView implements Target {
 		return targetGroup.getBoundsInParent();
 	}
 
+	@Override
+	public void setClip(Rectangle clip) {
+		getTargetGroup().setClip(clip);
+	}
+	
 	/**
 	 * Sets whether or not the target should stay in the bounds of its parent.
 	 * 

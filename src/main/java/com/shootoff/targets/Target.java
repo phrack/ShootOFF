@@ -12,6 +12,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.shape.Rectangle;
 
 /**
  * A potentially animated target that the user can shoot, reposition, and
@@ -64,6 +65,8 @@ public interface Target {
 
 	Bounds getBoundsInParent();
 
+	void setClip(Rectangle clip);
+	
 	void animate(TargetRegion region, List<String> args);
 
 	void reverseAnimation(TargetRegion region);

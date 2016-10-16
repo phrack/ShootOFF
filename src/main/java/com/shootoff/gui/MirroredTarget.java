@@ -11,6 +11,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.Rectangle;
 
 public class MirroredTarget extends TargetView {
 	private MirroredTarget mirroredTarget;
@@ -89,4 +90,14 @@ public class MirroredTarget extends TargetView {
 	public void mirrorSetDimensions(double newWidth, double newHeight) {
 		super.setDimensions(newWidth, newHeight);
 	}
+	
+	@Override
+	public void setClip(Rectangle clip) {
+		mirroredTarget.mirrorSetClip(new Rectangle(clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight()));
+		super.setClip(clip);
+	}
+	
+	public void mirrorSetClip(Rectangle clip) {
+		super.setClip(clip);
+	}	
 }
