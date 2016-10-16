@@ -266,6 +266,11 @@ public class TargetView implements Target {
 	public Bounds getBoundsInParent() {
 		return targetGroup.getBoundsInParent();
 	}
+	
+	@Override
+	public Point2D parentToLocal(double x, double y) {
+		return getTargetGroup().parentToLocal(x, y);
+	}
 
 	@Override
 	public void setClip(Rectangle clip) {

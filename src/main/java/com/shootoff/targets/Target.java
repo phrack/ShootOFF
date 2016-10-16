@@ -65,6 +65,8 @@ public interface Target {
 
 	Bounds getBoundsInParent();
 
+	Point2D parentToLocal(double x, double y);
+	
 	void setClip(Rectangle clip);
 	
 	void animate(TargetRegion region, List<String> args);
