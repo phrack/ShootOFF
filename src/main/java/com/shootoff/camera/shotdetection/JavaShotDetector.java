@@ -120,7 +120,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 
 	@Override
 	public void setFrameSize(final int width, final int height) {
-		pixelClusterManager.updateFrameSize(width, height);
+		if (pixelClusterManager != null) pixelClusterManager.updateFrameSize(width, height);
 		
 		lumsMovingAverage = new int[width][height];
 		colorDistanceFromRed = new int[width][height];
