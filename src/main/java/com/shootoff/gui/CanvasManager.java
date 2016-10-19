@@ -584,16 +584,16 @@ public class CanvasManager implements CameraView {
 		drawShot(shot);
 
 		final Optional<String> videoString = createVideoString(shot);
-		final Optional<TrainingExercise> currentExercise = config.getExercise();
-		final Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
-		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 
+		boolean passedToArena = false;
 		boolean processedShot = false;
 
 		if (arenaPane.isPresent() && projectionBounds.isPresent()) {
 			final Bounds b = projectionBounds.get();
 
 			if (b.contains(shot.getX(), shot.getY())) {
+				passedToArena = true;
+				
 				final double x_scale = arenaPane.get().getWidth() / b.getWidth();
 				final double y_scale = arenaPane.get().getHeight() / b.getHeight();
 
@@ -604,6 +604,14 @@ public class CanvasManager implements CameraView {
 				processedShot = arenaPane.get().getCanvasManager().addArenaShot(arenaShot, videoString, isMirroredShot);
 			}
 		}
+		
+		// If the arena canvas handled the shot, we don't need to do anything
+		// else
+		if (passedToArena || processedShot) return;
+
+		final Optional<TrainingExercise> currentExercise = config.getExercise();
+		final Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
+		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
 
 		if (currentExercise.isPresent() && !processedShot) {
 			// If the canvas is mirrored, use the one without the camera manager
