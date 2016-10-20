@@ -144,12 +144,12 @@ public class ItemSelectionPane<T> extends ScrollPane {
 			}
 			defaultSelection = ref;
 		} else
-			logger.error("setDefault on non-existing ref - %s", ref);
+			logger.error("setDefault on non-existing ref - {}", ref);
 	}
 
 	public void removeButton(T ref) {
 		if (!items.containsKey(ref)) {
-			logger.error("removeButton on non-existing ref - %s", ref);
+			logger.error("removeButton on non-existing ref - {}", ref);
 			return;
 		}
 
