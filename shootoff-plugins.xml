@@ -15,6 +15,9 @@
   <plugin name="Running Man" version="1.0" minShootOFFVersion="3.10" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Running-Man/releases/download/v1.0-FINAL/ShootOFF-Running-Man.jar" 
     description="Shoot gray targets as the run across the screen while avoiding red targets." />
+  <plugin name="Shoot Out" version="1.0" minShootOFFVersion="3.10" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Shoot-Out/releases/download/v1.0-FINAL/ShootOFF-Shoot-Out.jar" 
+    description="Gain points by shooting targets as they appear. Shoot them all the configured minimum number of times to move to the next round." />
   <plugin name="Shot to Click" version="1.6" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Shot-to-Click/releases/download/v1.6-FINAL/ShootOFF-Shot-to-Click.jar" 
     description="Play click-based Flash games using this exercise, which converts a shot on the arena to a mouse click on the screen the arena was calibrated on." />
