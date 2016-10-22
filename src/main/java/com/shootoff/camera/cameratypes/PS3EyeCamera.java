@@ -426,7 +426,15 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	@Override
 	public void run() {
 		while (isOpen()) {
-			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getFrame());
+			try {
+				if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getFrame());
+			} catch (Exception e) {
+				// Normally we wouldn't catch such a generic exception,
+				// but OpenCV throws a generic exception with no information
+				// when confronted with a subtly invalid frame. The PS3eye
+				// occasionally produces such frames.
+				logger.warn("Invalid frame from PS3eye could not be converted to OpenCV mat. Skipping frame.");
+			}
 
 			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
 				estimateCameraFPS();
