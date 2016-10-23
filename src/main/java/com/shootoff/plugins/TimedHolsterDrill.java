@@ -48,6 +48,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	private int delayMax = 8;
 	private boolean repeatExercise = true;
 	private long beepTime = 0;
+	private boolean hadShot = false;
 	private boolean coloredRows = false;
 	private Button pauseResumeButton;
 
@@ -82,6 +83,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	@Override
 	public void shotListener(Shot shot, Optional<Hit> hi) {
 		if (repeatExercise) {
+			hadShot = true;
 			setLength();
 		}
 	}
@@ -130,9 +132,8 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 		@Override
 		public void run() {
 			if (repeatExercise) {
-				final int randomDelay = setupRound();
 				doRound();
-				executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
+				executorService.schedule(new Round(), setupRound(), TimeUnit.SECONDS);
 			}
 
 			return;
@@ -166,13 +167,20 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	}
 
 	protected int setupRound() {
+		// Only toggle the color if there was a shot in the last round
+		// otherwise the colors get out of sync if the user misses a
+		// round (thus you can have a string of shots that is all gray
+		// or white even though they were different rounds)
+		if (hadShot) {
+			coloredRows = !coloredRows;
+			hadShot = false;
+		}
+		
 		if (coloredRows) {
 			setShotTimerRowColor(Color.LIGHTGRAY);
 		} else {
 			setShotTimerRowColor(null);
 		}
-
-		coloredRows = !coloredRows;
 
 		final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 		return randomDelay;
