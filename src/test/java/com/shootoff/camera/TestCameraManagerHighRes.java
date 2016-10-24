@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.scene.paint.Color;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -49,11 +48,11 @@ public class TestCameraManagerHighRes extends ShotDetectionTestor {
 		// These coordinates are scaled down to a 640x480 display resolution
 		
 		// Scaled down from 586.30, 395.44
-		requiredShots.add(new Shot(Color.GREEN, 293.14, 263.34, 0, 2));
+		requiredShots.add(new Shot(ShotColor.GREEN, 293.14, 263.34, 0, 2));
 		// Scaled down from 532.16, 347.98
-		requiredShots.add(new Shot(Color.GREEN, 265.61, 231.68, 0, 2));
+		requiredShots.add(new Shot(ShotColor.GREEN, 265.61, 231.68, 0, 2));
 		// Scaled down from 587.80, 396.73
-		requiredShots.add(new Shot(Color.GREEN, 294.02, 264.28, 0, 2));
+		requiredShots.add(new Shot(ShotColor.GREEN, 294.02, 264.28, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 

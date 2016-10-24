@@ -4,10 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.processors.DeduplicationProcessor;
 import com.shootoff.config.ConfigurationException;
-
-import javafx.scene.paint.Color;
 
 public class TestDeduplicationProcessor {
 
@@ -19,7 +18,7 @@ public class TestDeduplicationProcessor {
 
 		assertFalse(deduplicationProcessor.getLastShot().isPresent());
 
-		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);
+		Shot shot = new Shot(ShotColor.GREEN, 0, 0, 0, 0);
 
 		deduplicationProcessor.processShot(shot);
 

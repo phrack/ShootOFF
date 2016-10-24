@@ -36,9 +36,8 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Frame;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
-
-import javafx.scene.paint.Color;
 
 public final class JavaShotDetector extends FrameProcessingShotDetector {
 	private static final Logger logger = LoggerFactory.getLogger(JavaShotDetector.class);
@@ -428,7 +427,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	}
 
 	private void addShot(Frame workingFrame, PixelCluster pc) {
-		final Optional<Color> color = pc.getColor(workingFrame.getOriginalMat(), colorDistanceFromRed);
+		final Optional<ShotColor> color = pc.getColor(workingFrame.getOriginalMat(), colorDistanceFromRed);
 
 		if (!color.isPresent()) {
 			if (logger.isDebugEnabled())

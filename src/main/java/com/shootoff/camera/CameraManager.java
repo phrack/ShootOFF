@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.ObservableCloseable;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
@@ -256,7 +257,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	// Used by click-to-shoot and tests to inject a shot via the shot detector
-	public void injectShot(Color color, double x, double y, boolean scaleShot) {
+	public void injectShot(ShotColor color, double x, double y, boolean scaleShot) {
 		shotDetector.addShot(color, x, y, getCurrentFrameTimestamp(), scaleShot);
 	}
 
@@ -349,8 +350,8 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		this.isCalibrating.set(isCalibrating);
 		if (isCalibrating) {
-			setDetecting(false);
 			setCameraState(CameraState.CALIBRATING);
+			setDetecting(false);
 		}
 	}
 

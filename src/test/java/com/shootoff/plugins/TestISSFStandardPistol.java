@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.JavaFXThreadingRule;
@@ -34,7 +35,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.TableView;
-import javafx.scene.paint.Color;
 
 public class TestISSFStandardPistol {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -75,7 +75,7 @@ public class TestISSFStandardPistol {
 		TableView<ShotEntry> shotTimerTable = new TableView<ShotEntry>();
 		ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 		shotEntries
-				.add(new ShotEntry(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
+				.add(new ShotEntry(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
 		shotTimerTable.setItems(shotEntries);
 		issfExercise.init(config, cs, null, shotTimerTable);
 		issfExercise.init(0, 0);
@@ -118,28 +118,28 @@ public class TestISSFStandardPistol {
 
 		// 150s round 1-4
 		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			// (regionScore * 5 * i) = last round's score
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
@@ -147,28 +147,28 @@ public class TestISSFStandardPistol {
 
 		// 20s round 1-4
 		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			// (regionScore * 5 * i) = last round's score
 			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 2, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 3, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 4, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 5, 0, true, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
@@ -176,29 +176,29 @@ public class TestISSFStandardPistol {
 
 		// 10s round 1-4
 		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			// (regionScore * 5 * i) = last round's score
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore, false,
 					false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 2,
 					false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 3,
 					false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 4,
 					false, false), stringOut.toString("UTF-8"));
 			stringOut.reset();
 
 			boolean gameOver = i == 3;
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 5,
 					true, gameOver), stringOut.toString("UTF-8"));
 			stringOut.reset();
@@ -213,28 +213,28 @@ public class TestISSFStandardPistol {
 
 		// 150s round 1-4
 		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			// (regionScore * 5 * i) = last round's score
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
 
-			issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false),
 					stringOut.toString("UTF-8"));
 			stringOut.reset();
@@ -242,7 +242,7 @@ public class TestISSFStandardPistol {
 
 		issfExercise.reset(targets);
 
-		issfExercise.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+		issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
 		// (regionScore * 5 * i) = last round's score
 		assertEquals(String.format("%n") + getScoreString(regionScore, 0, 0, false, false),
 				stringOut.toString("UTF-8"));

@@ -100,7 +100,7 @@ public class ParRandomShot extends ParForScore {
 		final String hitTarget = getSubtarget(Optional.of(hit.get().getHitRegion()));
 		if (subtarget.equals(hitTarget)) {
 			final String points = getPoints(Optional.of(hit.get().getHitRegion()));
-			setPoints(shot.getColor(), points);
+			setPoints(shot.getPaintColor(), points);
 		}
 	}
 

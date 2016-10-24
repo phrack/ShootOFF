@@ -107,7 +107,7 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 
 		final TargetRegion r = hit.get().getHitRegion();
 		if (r.tagExists("points")) {
-			setPoints(shot.getColor(), r.getTag("points"));
+			setPoints(shot.getPaintColor(), r.getTag("points"));
 		}
 	}
 

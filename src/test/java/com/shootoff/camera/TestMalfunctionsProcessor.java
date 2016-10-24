@@ -1,11 +1,10 @@
 package com.shootoff.camera;
 
 import static org.junit.Assert.*;
-import javafx.scene.paint.Color;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.processors.MalfunctionsProcessor;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.config.Configuration;
@@ -20,7 +19,7 @@ public class TestMalfunctionsProcessor {
 		config = new Configuration(new String[0]);
 		config.setMalfunctions(true);
 
-		shot = new Shot(Color.GREEN, 0, 0, 0, 0);
+		shot = new Shot(ShotColor.GREEN, 0, 0, 0, 0);
 
 		MalfunctionsProcessor.setUseTTS(false);
 	}

@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.processors.MalfunctionsProcessor;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.camera.processors.VirtualMagazineProcessor;
@@ -146,12 +147,12 @@ public class CanvasManager implements CameraView {
 
 			if (config.inDebugMode() && event.getButton() == MouseButton.PRIMARY) {
 				// Click to shoot
-				final Color shotColor;
+				final ShotColor shotColor;
 
 				if (event.isShiftDown()) {
-					shotColor = Color.RED;
+					shotColor = ShotColor.RED;
 				} else if (event.isControlDown()) {
-					shotColor = Color.GREEN;
+					shotColor = ShotColor.GREEN;
 				} else {
 					return;
 				}

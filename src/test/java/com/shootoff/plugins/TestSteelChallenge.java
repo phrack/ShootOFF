@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
@@ -29,7 +30,6 @@ import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 import javafx.scene.Node;
-import javafx.scene.paint.Color;
 
 public class TestSteelChallenge {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -120,7 +120,7 @@ public class TestSteelChallenge {
 				stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
+		targetsSC.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
 
 		assertEquals(String
 				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
@@ -137,7 +137,7 @@ public class TestSteelChallenge {
 				stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
+		targetsSC.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
 
 		assertEquals(String
 				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"
@@ -145,8 +145,8 @@ public class TestSteelChallenge {
 				.replace('/', File.separatorChar), stringOut.toString("UTF-8"));
 		stringOut.reset();
 
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(nonStopRegionHit));
-		targetsSC.shotListener(new Shot(Color.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
+		targetsSC.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 0), Optional.of(nonStopRegionHit));
+		targetsSC.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 0), Optional.of(stopRegionHit));
 
 		assertEquals(String
 				.format("Your time was 0.00 seconds. You missed %d targets!%nsounds/voice/shootoff-are-you-ready.wav%n"

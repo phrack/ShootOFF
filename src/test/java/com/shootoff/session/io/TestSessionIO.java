@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
@@ -25,7 +26,6 @@ import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 
 public class TestSessionIO {
 	private SessionRecorder sessionRecorder;
@@ -47,8 +47,8 @@ public class TestSessionIO {
 		cameraName1 = "Default";
 		cameraName2 = "Another Camera";
 		videoString = "camera1:test/file.mp4,camera2:what/ax.vid";
-		redShot = new Shot(Color.RED, 10, 11, 3, 2);
-		greenShot = new Shot(Color.GREEN, 12, 15, 3, 5);
+		redShot = new Shot(ShotColor.RED, 10, 11, 3, 2);
+		greenShot = new Shot(ShotColor.GREEN, 12, 15, 3, 5);
 		targetName = "bullseye.target";
 		exerciseMessage = "This is a\n\t test";
 
@@ -95,7 +95,7 @@ public class TestSessionIO {
 		assertEquals(3, ((TargetMovedEvent) events.get(CAM1_TARGET_MOVED_INDEX)).getNewY());
 
 		final int CAM1_SHOT_RED_INDEX = 3;
-		assertEquals(Color.RED, ((ShotEvent) events.get(CAM1_SHOT_RED_INDEX)).getShot().getColor());
+		assertEquals(ShotColor.RED, ((ShotEvent) events.get(CAM1_SHOT_RED_INDEX)).getShot().getColor());
 		assertEquals(redShot.getX(), ((ShotEvent) events.get(CAM1_SHOT_RED_INDEX)).getShot().getX(), 1);
 		assertEquals(redShot.getY(), ((ShotEvent) events.get(CAM1_SHOT_RED_INDEX)).getShot().getY(), 1);
 		assertEquals(redShot.getTimestamp(), ((ShotEvent) events.get(CAM1_SHOT_RED_INDEX)).getShot().getTimestamp());
@@ -114,7 +114,7 @@ public class TestSessionIO {
 				((ShotEvent) events.get(CAM1_SHOT_RED_INDEX)).getVideos().get("camera2"));
 
 		final int CAM1_SHOT_GREEN_ONE_INDEX = 4;
-		assertEquals(Color.GREEN, ((ShotEvent) events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getColor());
+		assertEquals(ShotColor.GREEN, ((ShotEvent) events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getColor());
 		assertEquals(greenShot.getX(), ((ShotEvent) events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getX(), 1);
 		assertEquals(greenShot.getY(), ((ShotEvent) events.get(CAM1_SHOT_GREEN_ONE_INDEX)).getShot().getY(), 1);
 		assertEquals(greenShot.getTimestamp(),
@@ -137,7 +137,7 @@ public class TestSessionIO {
 		assertEquals(0, ((TargetRemovedEvent) events.get(CAM1_TARGET_REMOVED_INDEX)).getTargetIndex());
 
 		final int CAM1_SHOT_GREEN_TWO_INDEX = 6;
-		assertEquals(Color.GREEN, ((ShotEvent) events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getColor());
+		assertEquals(ShotColor.GREEN, ((ShotEvent) events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getColor());
 		assertEquals(greenShot.getX(), ((ShotEvent) events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getX(), 1);
 		assertEquals(greenShot.getY(), ((ShotEvent) events.get(CAM1_SHOT_GREEN_TWO_INDEX)).getShot().getY(), 1);
 		assertEquals(greenShot.getTimestamp(),

@@ -18,6 +18,8 @@
 
 package com.shootoff.camera;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -33,8 +35,20 @@ import javafx.scene.shape.Ellipse;
  * @author phrack
  */
 public class Shot {
+	public enum ShotColor {
+		RED, GREEN, INFRARED
+	};
+	static public final Map<ShotColor, Color> colorMap = new HashMap<ShotColor, Color>();
+	static 
+	{
+		colorMap.put(ShotColor.RED, Color.RED);
+		colorMap.put(ShotColor.GREEN, Color.GREEN);
+		colorMap.put(ShotColor.INFRARED, Color.ORANGE);
+	}
+	
+	
 	private static final Logger logger = LoggerFactory.getLogger(Shot.class);
-	private final Color color;
+	private final ShotColor color;
 	private double x;
 	private double y;
 	private final long timestamp;
@@ -44,23 +58,23 @@ public class Shot {
 	private Ellipse marker;
 	private Optional<Shot> mirroredShot = Optional.empty();
 
-	public Shot(Color color, double x, double y, long timestamp, int frame, int markerRadius) {
+	public Shot(ShotColor color, double x, double y, long timestamp, int frame, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
 		this.frame = frame;
 		this.marker = new Ellipse(x, y, markerRadius, markerRadius);
-		this.marker.setFill(color);
+		this.marker.setFill(colorMap.get(color));
 	}
 
-	public Shot(Color color, double x, double y, long timestamp, int markerRadius) {
+	public Shot(ShotColor color, double x, double y, long timestamp, int markerRadius) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
 		this.marker = new Ellipse(x, y, markerRadius, markerRadius);
-		this.marker.setFill(color);
+		this.marker.setFill(colorMap.get(color));
 		this.frame = 0;
 	}
 
@@ -72,9 +86,14 @@ public class Shot {
 		this.mirroredShot = Optional.of(mirroredShot);
 	}
 
-	public Color getColor() {
+	public ShotColor getColor() {
 		return color;
 	}
+	
+	public Color getPaintColor() {
+		return colorMap.get(color);
+	}
+
 
 	public double getX() {
 		return x;
@@ -108,7 +127,7 @@ public class Shot {
 		}
 
 		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
-		marker.setFill(color);
+		marker.setFill(colorMap.get(color));
 
 		x = scaledX;
 		y = scaledY;

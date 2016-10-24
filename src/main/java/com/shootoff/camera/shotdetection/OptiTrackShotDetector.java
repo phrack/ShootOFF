@@ -19,16 +19,17 @@
 package com.shootoff.camera.shotdetection;
 
 import java.awt.Point;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
 import com.shootoff.camera.cameratypes.OptiTrackCamera;
-
-import javafx.scene.paint.Color;
 
 public class OptiTrackShotDetector extends ShotYieldingShotDetector implements CameraStateListener {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackShotDetector.class);
@@ -54,7 +55,14 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 		if (logger.isDebugEnabled()) logger.debug("got state change {}", state);
 		switch (state) {
 		case DETECTING_CALIBRATED:
-			enableDetection();
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+			  @Override
+			  public void run() {
+			    if (cameraManager.isDetecting())
+			    	enableDetection();
+			  }
+			}, 100);
 			break;
 		default:
 			disableDetection();
@@ -93,7 +101,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 		
 		if (logger.isTraceEnabled()) logger.trace("Translation: {} {} to {}", x, y, undist);
 
-		super.addShot(Color.BLACK, undist.x, undist.y, startTime+timestamp, true);
+		super.addShot(ShotColor.INFRARED, undist.x, undist.y, startTime+timestamp, true);
 	}
 
 	@Override

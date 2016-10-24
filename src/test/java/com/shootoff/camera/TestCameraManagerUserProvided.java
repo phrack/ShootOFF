@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.scene.paint.Color;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -44,16 +44,16 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 325.0, 245.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 342.0, 247.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 333.0, 228.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 338.0, 229.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 328.0, 243.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 337.0, 233.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 346.0, 216.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 348.0, 230.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 346.0, 234.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 334.0, 235.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 325.0, 245.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 342.0, 247.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 333.0, 228.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 338.0, 229.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 328.0, 243.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 337.0, 233.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 346.0, 216.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 348.0, 230.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 346.0, 234.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 334.0, 235.0, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 
@@ -68,15 +68,15 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
-		requiredShots.add(new Shot(Color.RED, 340.0, 73.5, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 429.6, 230.0, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 287.6, 403.3, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 171.0, 224.7, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 375.7, 228.6, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 289.1, 144.2, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 200.4, 209.5, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 334.3, 227.3, 0, 2));
-		requiredShots.add(new Shot(Color.RED, 295.6, 352.7, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 340.0, 73.5, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 429.6, 230.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 287.6, 403.3, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 171.0, 224.7, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 375.7, 228.6, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 289.1, 144.2, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 200.4, 209.5, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 334.3, 227.3, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 295.6, 352.7, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 

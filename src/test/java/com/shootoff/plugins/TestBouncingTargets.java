@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.JavaFXThreadingRule;
@@ -29,7 +30,6 @@ import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 import ch.qos.logback.classic.Logger;
-import javafx.scene.paint.Color;
 
 public class TestBouncingTargets {
 	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
@@ -91,23 +91,23 @@ public class TestBouncingTargets {
 		assertEquals("Score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 2\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 3\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 4\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(dontShootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(dontShootRegionHit));
 		assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n",
 				stringOut.toString("UTF-8").replace("\r\n", "\n").replace(File.separatorChar, '/'));
 		stringOut.reset();
@@ -121,12 +121,12 @@ public class TestBouncingTargets {
 		assertEquals("Score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 
 		bt.reset(new ArrayList<Target>());
-		bt.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
 		assertEquals("Score: 0\nScore: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
 		stringOut.reset();
 	}

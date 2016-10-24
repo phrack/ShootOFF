@@ -39,6 +39,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;
@@ -46,8 +47,6 @@ import com.shootoff.session.TargetAddedEvent;
 import com.shootoff.session.TargetMovedEvent;
 import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
-
-import javafx.scene.paint.Color;
 
 public class XMLSessionReader {
 	private final Logger logger = LoggerFactory.getLogger(XMLSessionReader.class);
@@ -104,12 +103,12 @@ public class XMLSessionReader {
 				break;
 
 			case "shot":
-				Color c;
+				ShotColor c;
 
 				if (attributes.getValue("color").equals("0xff0000ff")) {
-					c = Color.RED;
+					c = ShotColor.RED;
 				} else {
-					c = Color.GREEN;
+					c = ShotColor.GREEN;
 				}
 
 				final Shot shot = new Shot(c, Double.parseDouble(attributes.getValue("x")),

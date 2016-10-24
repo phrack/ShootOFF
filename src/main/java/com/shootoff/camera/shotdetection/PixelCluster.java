@@ -31,7 +31,7 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.scene.paint.Color;
+import com.shootoff.camera.Shot.ShotColor;
 
 public class PixelCluster extends HashSet<Pixel> {
 	private static final Logger logger = LoggerFactory.getLogger(PixelCluster.class);
@@ -176,15 +176,13 @@ public class PixelCluster extends HashSet<Pixel> {
 		return colorDistance / pixelCount;
 	}
 
-	public Optional<Color> getColor(final Mat workingFrame, final int[][] colorDistanceFromRed) {
+	public Optional<ShotColor> getColor(final Mat workingFrame, final int[][] colorDistanceFromRed) {
 		final int colorDist = getColorDifference(workingFrame, colorDistanceFromRed);
-
-		// logger.trace("colorDist {}", colorDist);
 
 		// Sometimes it's better to guess than to return nothing
 		if (colorDist < 1000)
-			return Optional.of(Color.RED);
+			return Optional.of(ShotColor.RED);
 		else
-			return Optional.of(Color.GREEN);
+			return Optional.of(ShotColor.GREEN);
 	}
 }

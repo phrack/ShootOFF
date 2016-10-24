@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 
 import javafx.geometry.Bounds;
-import javafx.scene.paint.Color;
 
 /**
  * This interface is implemented by classes that act as the entry point to some
@@ -71,7 +71,7 @@ public abstract class ShotDetector {
 	 * @return <code>true</code> if the shot wasn't rejected during
 	 *         preprocessing
 	 */
-	public boolean addShot(Color color, double x, double y, long timestamp, boolean scaleShot) {
+	public boolean addShot(ShotColor color, double x, double y, long timestamp, boolean scaleShot) {
 		if (!checkIgnoreColor(color))
 			return false;
 
@@ -129,9 +129,9 @@ public abstract class ShotDetector {
 		return true;
 	}
 
-	protected boolean checkIgnoreColor(Color color) {
+	protected boolean checkIgnoreColor(ShotColor color) {
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
-				&& color.equals(config.getIgnoreLaserColor().get())) {
+				&& Shot.colorMap.get(color).equals(config.getIgnoreLaserColor().get())) {
 			if (logger.isDebugEnabled())
 				logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
 						config.getIgnoreLaserColor().get());

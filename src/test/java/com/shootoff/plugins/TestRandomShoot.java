@@ -18,14 +18,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import javafx.scene.paint.Color;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.TargetView;
 import com.shootoff.targets.Hit;
@@ -103,7 +102,7 @@ public class TestRandomShoot {
 
 		// Simulate missing a shot
 
-		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
+		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty());
 
 		assertEquals(String.format("sounds/voice/shootoff-shoot.wav%nsounds/voice/shootoff-%s.wav%n", firstSubtarget),
 				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
@@ -122,7 +121,7 @@ public class TestRandomShoot {
 		int oldSize = rs.getCurrentSubtargets().size();
 		Hit expectedHit = new Hit(bullseyeFiveTarget, expectedRegion, 0, 0);
 
-		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
+		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
 
 		if (oldSize > 1) {
 			assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());
@@ -158,7 +157,7 @@ public class TestRandomShoot {
 
 		// Simulate missing a shot
 
-		rs.shotListener(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty());
+		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty());
 
 		assertEquals(String.format("shoot %s%n", firstSubtarget), stringOut.toString("UTF-8"));
 		stringOut.reset();

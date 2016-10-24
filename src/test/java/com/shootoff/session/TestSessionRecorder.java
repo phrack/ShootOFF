@@ -11,13 +11,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.TargetView;
 
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 
 public class TestSessionRecorder {
 	private SessionRecorder sessionRecorder;
@@ -38,7 +38,7 @@ public class TestSessionRecorder {
 
 		sessionRecorder = new SessionRecorder();
 		cameraName = "Default";
-		shot = new Shot(Color.RED, 0, 0, 0, 2);
+		shot = new Shot(ShotColor.RED, 0, 0, 0, 2);
 
 		targetName1 = "bullseye.target";
 		target1 = new TargetView(new File(targetName1), new Group(), new HashMap<String, String>(), config, canvasManager, false);
@@ -79,7 +79,7 @@ public class TestSessionRecorder {
 		assertEquals(EventType.SHOT, events.get(SHOT_INDEX).getType());
 		assertEquals(cameraName, events.get(SHOT_INDEX).getCameraName());
 		assertEquals(shot, ((ShotEvent) events.get(SHOT_INDEX)).getShot());
-		assertEquals(Color.RED, ((ShotEvent) events.get(SHOT_INDEX)).getShot().getColor());
+		assertEquals(ShotColor.RED, ((ShotEvent) events.get(SHOT_INDEX)).getShot().getColor());
 		assertFalse(((ShotEvent) events.get(SHOT_INDEX)).isMalfunction());
 		assertFalse(((ShotEvent) events.get(SHOT_INDEX)).isReload());
 		assertEquals(targetIndex1, ((ShotEvent) events.get(SHOT_INDEX)).getTargetIndex().get().intValue());
@@ -90,7 +90,7 @@ public class TestSessionRecorder {
 		assertEquals(EventType.SHOT, events.get(SHOT_MALFUNCTION_INDEX).getType());
 		assertEquals(cameraName, events.get(SHOT_MALFUNCTION_INDEX).getCameraName());
 		assertEquals(shot, ((ShotEvent) events.get(SHOT_MALFUNCTION_INDEX)).getShot());
-		assertEquals(Color.RED, ((ShotEvent) events.get(SHOT_MALFUNCTION_INDEX)).getShot().getColor());
+		assertEquals(ShotColor.RED, ((ShotEvent) events.get(SHOT_MALFUNCTION_INDEX)).getShot().getColor());
 		assertTrue(((ShotEvent) events.get(SHOT_MALFUNCTION_INDEX)).isMalfunction());
 		assertFalse(((ShotEvent) events.get(SHOT_MALFUNCTION_INDEX)).isReload());
 		assertEquals(targetIndex1, ((ShotEvent) events.get(SHOT_MALFUNCTION_INDEX)).getTargetIndex().get().intValue());
@@ -102,7 +102,7 @@ public class TestSessionRecorder {
 		assertEquals(EventType.SHOT, events.get(SHOT_RELOAD_INDEX).getType());
 		assertEquals(cameraName, events.get(SHOT_RELOAD_INDEX).getCameraName());
 		assertEquals(shot, ((ShotEvent) events.get(SHOT_RELOAD_INDEX)).getShot());
-		assertEquals(Color.RED, ((ShotEvent) events.get(SHOT_RELOAD_INDEX)).getShot().getColor());
+		assertEquals(ShotColor.RED, ((ShotEvent) events.get(SHOT_RELOAD_INDEX)).getShot().getColor());
 		assertFalse(((ShotEvent) events.get(SHOT_RELOAD_INDEX)).isMalfunction());
 		assertTrue(((ShotEvent) events.get(SHOT_RELOAD_INDEX)).isReload());
 		assertEquals(targetIndex1, ((ShotEvent) events.get(SHOT_RELOAD_INDEX)).getTargetIndex().get().intValue());
@@ -231,7 +231,7 @@ public class TestSessionRecorder {
 
 		assertEquals(EventType.SHOT, events.get(3).getType());
 		assertEquals(shot, ((ShotEvent) events.get(3)).getShot());
-		assertEquals(Color.RED, ((ShotEvent) events.get(3)).getShot().getColor());
+		assertEquals(ShotColor.RED, ((ShotEvent) events.get(3)).getShot().getColor());
 		assertEquals(targetIndex1, ((ShotEvent) events.get(3)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent) events.get(3)).getHitRegionIndex().get().intValue());
 		assertTrue(((ShotEvent) events.get(3)).getVideoString().isPresent());
@@ -309,7 +309,7 @@ public class TestSessionRecorder {
 
 		assertEquals(EventType.SHOT, events.get(3).getType());
 		assertEquals(shot, ((ShotEvent) events.get(3)).getShot());
-		assertEquals(Color.RED, ((ShotEvent) events.get(3)).getShot().getColor());
+		assertEquals(ShotColor.RED, ((ShotEvent) events.get(3)).getShot().getColor());
 		assertEquals(targetIndex1, ((ShotEvent) events.get(3)).getTargetIndex().get().intValue());
 		assertEquals(hitRegionIndex, ((ShotEvent) events.get(3)).getHitRegionIndex().get().intValue());
 		assertFalse(((ShotEvent) events.get(3)).getVideoString().isPresent());

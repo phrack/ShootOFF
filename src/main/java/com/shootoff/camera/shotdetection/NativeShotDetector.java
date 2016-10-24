@@ -5,8 +5,7 @@ import java.io.File;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Frame;
-
-import javafx.scene.paint.Color;
+import com.shootoff.camera.Shot.ShotColor;
 
 public class NativeShotDetector extends FrameProcessingShotDetector {
 	private final CameraManager cameraManager;
@@ -66,9 +65,10 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, long timestamp, int rgb) {
-		final Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
-
-		super.addShot(c, x, y, timestamp, true);
+		//final Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
+		// TODO: Handle colors
+		
+		super.addShot(ShotColor.RED, x, y, timestamp, true);
 	}
 
 	@Override

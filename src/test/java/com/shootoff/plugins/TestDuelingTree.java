@@ -15,8 +15,6 @@ import java.util.Optional;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.paint.Color;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CanvasManager;
@@ -133,7 +132,7 @@ public class TestDuelingTree {
 	@Test
 	public void testOneRoundsLeftWins() throws UnsupportedEncodingException {
 		for (Hit leftPaddleHit : leftPaddlesHits) {
-			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
+			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
 		assertEquals(String.format("sounds/beep.wav%n") + 
@@ -149,14 +148,14 @@ public class TestDuelingTree {
 	@Test
 	public void testTwoSeparateRoundsEachSideWinsOnce() throws UnsupportedEncodingException {
 		// Let right shoot two paddles then have left come in for the win
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
+		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
+		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
 
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
-		dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
+		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
+		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
 
 		for (Hit leftPaddleHit : leftPaddlesHits) {
-			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
+			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
 		assertEquals(String.format("sounds/beep.wav%n") + 
@@ -171,7 +170,7 @@ public class TestDuelingTree {
 
 		// Right pulls out the win with no competition
 		for (Hit rightPaddleHit : rightPaddlesHits) {
-			dt.shotListener(new Shot(Color.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
+			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
 		}
 
 		assertEquals(String.format("sounds/beep.wav%n") + 

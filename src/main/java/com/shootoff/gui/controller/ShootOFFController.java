@@ -279,10 +279,10 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			public void onChanged(Change<? extends ShotEntry> change) {
 				while (change.next()) {
 					for (final ShotEntry unselected : change.getRemoved()) {
-						unselected.getShot().getMarker().setFill(unselected.getShot().getColor());
+						unselected.getShot().getMarker().setFill(unselected.getShot().getPaintColor());
 
 						if (unselected.getShot().getMirroredShot().isPresent()) {
-							unselected.getShot().getMirroredShot().get().getMarker().setFill(unselected.getShot().getColor());
+							unselected.getShot().getMirroredShot().get().getMarker().setFill(unselected.getShot().getPaintColor());
 						}
 					}
 

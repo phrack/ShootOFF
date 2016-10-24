@@ -13,6 +13,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -23,7 +24,6 @@ import com.shootoff.targets.TargetRegion;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class TestCanvasManager {
@@ -54,14 +54,14 @@ public class TestCanvasManager {
 
 	@Test
 	public void testCheckHitMiss() {
-		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), false);
+		Optional<Hit> h = cm.checkHit(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 	}
 
 	@Test
 	public void testCheckHitHit() {
-		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty(), false);
+		Optional<Hit> h = cm.checkHit(new Shot(ShotColor.RED, 150, 150, 0, 2), Optional.empty(), false);
 
 		assertTrue(h.isPresent());
 		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
@@ -70,29 +70,31 @@ public class TestCanvasManager {
 
 	@Test
 	public void testAddShotMissHitMiss() {
-		Optional<Hit> h = cm.checkHit(new Shot(Color.RED, 0, 0, 0, 2), Optional.empty(), false);
+		Optional<Hit> h = cm.checkHit(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 
-		h = cm.checkHit(new Shot(Color.RED, 150, 150, 0, 2), Optional.empty(), false);
+		h = cm.checkHit(new Shot(ShotColor.RED, 150, 150, 0, 2), Optional.empty(), false);
 
 		assertTrue(h.isPresent());
 		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
 		assertEquals(ipscTarget, h.get().getTarget());
 
-		h = cm.checkHit(new Shot(Color.GREEN, 0, 0, 0, 2), Optional.empty(), false);
+		h = cm.checkHit(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 	}
+	
+	// TODO: Add infrared?
 
 	@Test
 	public void testWebCodeRed() {
-		assertEquals("#FF0000", CanvasManager.colorToWebCode(Color.RED));
+		assertEquals("#FF0000", CanvasManager.colorToWebCode(Shot.colorMap.get(ShotColor.RED)));
 	}
 
 	@Test
 	public void testWebCodeGreen() {
-		assertEquals("#008000", CanvasManager.colorToWebCode(Color.GREEN));
+		assertEquals("#008000", CanvasManager.colorToWebCode(Shot.colorMap.get(ShotColor.GREEN)));
 	}
 
 	@Test
@@ -127,7 +129,7 @@ public class TestCanvasManager {
 	public void testAddShot() {
 		assertEquals(0, cm.getShots().size());
 
-		Shot shot = new Shot(Color.RED, 0, 0, 0, 2);		
+		Shot shot = new Shot(ShotColor.RED, 0, 0, 0, 2);		
 		cm.addShot(shot, false);
 
 		assertEquals(1, cm.getShots().size());
@@ -140,7 +142,7 @@ public class TestCanvasManager {
 
 		assertEquals(0, cm.getShots().size());
 		
-		cm.getCameraManager().injectShot(Color.RED, 640, 480, true);
+		cm.getCameraManager().injectShot(ShotColor.RED, 640, 480, true);
 
 		assertEquals(1, cm.getShots().size());
 
@@ -155,7 +157,7 @@ public class TestCanvasManager {
 
 		assertEquals(0, cm.getShots().size());
 
-		cm.getCameraManager().injectShot(Color.RED, 640, 480, true);
+		cm.getCameraManager().injectShot(ShotColor.RED, 640, 480, true);
 
 		assertEquals(1, cm.getShots().size());
 
@@ -169,7 +171,7 @@ public class TestCanvasManager {
 
 		assertEquals(0, cm.getShots().size());
 
-		cm.getCameraManager().injectShot(Color.RED, 320, 240, false);
+		cm.getCameraManager().injectShot(ShotColor.RED, 320, 240, false);
 
 		assertEquals(1, cm.getShots().size());
 

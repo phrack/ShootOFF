@@ -1,11 +1,10 @@
 package com.shootoff.camera;
 
 import static org.junit.Assert.*;
-import javafx.scene.paint.Color;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.camera.processors.VirtualMagazineProcessor;
 import com.shootoff.config.Configuration;
@@ -32,7 +31,7 @@ public class TestVirtualMagazineProcessor {
 
 		magazineProcessor.setUseTTS(false);
 
-		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);
+		Shot shot = new Shot(ShotColor.GREEN, 0, 0, 0, 0);
 
 		// Simulate shooting through two magazine
 
@@ -61,7 +60,7 @@ public class TestVirtualMagazineProcessor {
 
 		magazineProcessor.setUseTTS(false);
 
-		Shot shot = new Shot(Color.GREEN, 0, 0, 0, 0);
+		Shot shot = new Shot(ShotColor.GREEN, 0, 0, 0, 0);
 
 		magazineProcessor.processShot(shot);
 		magazineProcessor.processShot(shot);
