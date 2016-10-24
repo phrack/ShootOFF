@@ -55,7 +55,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	private ProjectorArenaPane arenaPane;
 	private Optional<CalibrationManager> calibrationManager = Optional.empty();
 
-	public ProjectorSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews, Stage shootOffStage, 
+	public ProjectorSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews, Stage shootOffStage,
 			Pane trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
 		super(parentControls, parentBody);
 
@@ -84,8 +84,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		});
 
 		addSlideControlButton("Courses", (event) -> {
-			final ArenaCoursesSlide coursesSlide = new ArenaCoursesSlide(parentControls, 
-					parentBody, arenaPane, shootOffStage);
+			final ArenaCoursesSlide coursesSlide = new ArenaCoursesSlide(parentControls, parentBody, arenaPane,
+					shootOffStage);
 			coursesSlide.setOnSlideHidden(() -> {
 				if (coursesSlide.choseCourse()) {
 					hide();
@@ -101,13 +101,12 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		return config.getCalibratedFeedBehavior();
 	}
 
-	@Override 
+	@Override
 	public void calibratedFeedBehaviorsChanged() {
 		if (calibrationManager.isPresent())
 			calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
 
-		if (arenaPane != null) 
-			arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
+		if (arenaPane != null) arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 	}
 
 	@Override
@@ -134,11 +133,12 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		return calibrationManager;
 	}
 
-	public void startArena() {	
+	public void startArena() {
 		if (arenaPane == null) {
 			final Stage arenaStage = new Stage();
 
-			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, config, resetter, null);
+			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, config, resetter,
+					null);
 
 			// Prepare calibrating manager up front so that we can switch
 			// to the arena tab when it's ready (otherwise
@@ -147,8 +147,8 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 
 			// Mirror panes so that anything that happens to one also
 			// happens to the other
-			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer,
-					config, resetter, cameraViews.getShotTimerModel()); 
+			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage,
+					trainingExerciseContainer, config, resetter, cameraViews.getShotTimerModel());
 
 			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
 			arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
@@ -185,12 +185,12 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			arenaStage.setScene(new Scene(arenaPane));
 			arenaStage.setFullScreenExitHint("");
 
-			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, 
+			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane,
 					cameraViews, exerciseSlide.getExerciseListener()));
 
 			calibrationManager.get().addCalibrationListener(new CalibrationListener() {
 				@Override
-				public void startCalibration() { }
+				public void startCalibration() {}
 
 				@Override
 				public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
@@ -207,12 +207,11 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 			exerciseSlide.toggleProjectorExercises(false);
 			arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
-			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, 
-					parentBody, arenaPane, shootOffStage);
-			backgroundsSlide.setOnSlideHidden(() -> { 
+			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, parentBody, arenaPane, shootOffStage);
+			backgroundsSlide.setOnSlideHidden(() -> {
 				if (backgroundsSlide.choseBackground()) {
 					backgroundsSlide.setChoseBackground(false);
-					hide(); 
+					hide();
 				}
 			});
 

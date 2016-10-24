@@ -21,6 +21,8 @@ package com.shootoff.targets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.application.Platform;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 
 public class EllipseRegion extends Ellipse implements TargetRegion {
@@ -43,6 +45,15 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 	@Override
 	public RegionType getType() {
 		return RegionType.ELLIPSE;
+	}
+
+	@Override
+	public void setFill(Color fill) {
+		if (Platform.isFxApplicationThread()) {
+			super.setFill(fill);
+		} else {
+			Platform.runLater(() -> super.setFill(fill));
+		}
 	}
 
 	@Override

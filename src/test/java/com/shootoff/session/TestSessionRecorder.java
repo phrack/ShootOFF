@@ -41,10 +41,10 @@ public class TestSessionRecorder {
 		shot = new Shot(ShotColor.RED, 0, 0, 0, 2);
 
 		targetName1 = "bullseye.target";
-		target1 = new TargetView(new File(targetName1), new Group(), new HashMap<String, String>(), config, canvasManager, false);
+		target1 = new TargetView(new File(targetName1), new Group(), new HashMap<String, String>(), canvasManager, false);
 
 		targetName2 = "shoot_dont_shoot" + File.separator + " shoot.target";
-		target2 = new TargetView(new File(targetName2), new Group(), new HashMap<String, String>(), config, canvasManager, false);
+		target2 = new TargetView(new File(targetName2), new Group(), new HashMap<String, String>(), canvasManager, false);
 
 		canvasManager.addTarget(target1);
 		canvasManager.addTarget(target2);

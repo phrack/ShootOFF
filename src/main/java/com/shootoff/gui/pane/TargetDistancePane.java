@@ -140,8 +140,8 @@ public class TargetDistancePane extends Pane {
 		}
 
 		if (!cameraDistance.getText().isEmpty() && !perspectiveManager.isInitialized()) {
-			throw new AssertionError("The perspective manager is not initialized. We should not have been "
-					+ "able to get here.");
+			throw new AssertionError(
+					"The perspective manager is not initialized. We should not have been " + "able to get here.");
 		}
 
 		if (target.tagExists(Target.TAG_SHOOTER_DISTANCE)) {
@@ -166,7 +166,7 @@ public class TargetDistancePane extends Pane {
 			logger.trace(
 					"New target settings from distance settings pane: current width = {}, "
 							+ "default height = {}, default distance = {}, new distance = {}",
-							width, height, originalTargetDistance, distance);
+					width, height, originalTargetDistance, distance);
 		}
 
 		final Optional<Dimension2D> targetDimensions = perspectiveManager.calculateObjectSize(width, height, distance);
@@ -178,7 +178,7 @@ public class TargetDistancePane extends Pane {
 	}
 
 	private boolean validateDistanceData() {
-		boolean isValid = validateDistanceField(shooterDistance); 
+		boolean isValid = validateDistanceField(shooterDistance);
 		isValid = validateDistanceField(targetDistance) && isValid;
 		isValid = validateDistanceField(cameraDistance) && isValid;
 		isValid = validateDistanceField(targetWidth) && isValid;

@@ -32,7 +32,9 @@ public interface TargetRegion {
 
 	public RegionType getType();
 
-	public boolean tagExists(String name);
+	public void setFill(Color fill);
+	
+	public boolean tagExists(String name);	
 
 	public String getTag(String name);
 

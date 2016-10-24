@@ -49,7 +49,9 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 
 	private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<>(false, this);
 
-	private enum Mode { ADD, EDIT };
+	private enum Mode {
+		ADD, EDIT
+	};
 
 	private Mode mode;
 
@@ -82,10 +84,10 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 					currentFrame = currentCamera.getCurrentFrame();
 				}
 
-
 				editorController.init(currentFrame, this);
 
-				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
+				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody,
+						editorController);
 				targetEditorSlide.showControls();
 				targetEditorSlide.showBody();
 			}
@@ -96,7 +98,7 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 			showBody();
 		});
 
-		this.cameraViews = cameraViews;		
+		this.cameraViews = cameraViews;
 
 		addBodyNode(itemPane);
 
@@ -135,7 +137,8 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 		targetImageView.setSmooth(true);
 
 		final String targetPath = targetFile.getPath();
-		final String targetName = targetPath.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
+		final String targetName = targetPath
+				.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
 
 		itemPane.addButton(targetFile, targetName, Optional.of(targetImageView), Optional.empty());
 	}
@@ -167,7 +170,8 @@ public class TargetSlide extends Slide implements TargetListener, ItemSelectionL
 				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 				editorController.init(currentFrame, this, ref);
 
-				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody, editorController);
+				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody,
+						editorController);
 				targetEditorSlide.showControls();
 				targetEditorSlide.showBody();
 			}

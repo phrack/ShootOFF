@@ -7,3 +7,7 @@ kiang_west_savanna.gif: https://commons.wikimedia.org/wiki/File:Kiang_West_savan
 Photo by eigenes Bild License: CC-BY-SA 3.0
 
 outdoor_range.gif: https://commons.wikimedia.org/wiki/File:Gun_Range_100_Yards.JPG
+
+Oradour-sur-Glane.gif: https://commons.wikimedia.org/wiki/File:Car_in_Oradour-sur-Glane4.jpg
+
+subterranean_parking_lot.gif: https://commons.wikimedia.org/wiki/File:Subterranean_parking_lot.jpg

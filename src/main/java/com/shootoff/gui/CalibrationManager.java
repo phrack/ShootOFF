@@ -84,9 +84,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
 		calibratingCameraManager.setCalibrationManager(this);
-		calibratingCameraManager.setOnCloseListener(() -> 
-		Platform.runLater(() -> 
-		arenaPane.fireEvent(new WindowEvent(null, WindowEvent.WINDOW_CLOSE_REQUEST))));
+		calibratingCameraManager.setOnCloseListener(() -> Platform
+				.runLater(() -> arenaPane.fireEvent(new WindowEvent(null, WindowEvent.WINDOW_CLOSE_REQUEST))));
 	}
 
 	public void addCalibrationListener(CalibrationListener calibrationListener) {
@@ -97,8 +96,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		// Projector exercises can alter what is on the arena, thereby
 		// interfearing with calibration. Thus, if an projector exercise
 		// is set, we unset it for calibration, and reset it afterwards.
-		if (config.getExercise().isPresent() && 
-				config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
+		if (config.getExercise().isPresent() && config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
 			savedExercise = config.getExercise();
 			exerciseListener.setExercise(null);
 		} else {
@@ -107,6 +105,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 			// be sure to have clean state
 			savedExercise = Optional.empty();
 		}
+
+		arenaPane.getCanvasManager().setShowShots(false);
 
 		isCalibrating.set(true);
 
@@ -176,17 +176,19 @@ public class CalibrationManager implements CameraCalibrationListener {
 		isShowingPattern.set(false);
 
 		// We disable shot detection briefly because the pattern going away can
-		// cause false shots.  This statement applies to all the cam feeds rather
+		// cause false shots. This statement applies to all the cam feeds rather
 		// than just the arena. I don't think that should be a problem?
 		calibratingCameraManager.setDetecting(false);
 		TimerPool.schedule(() -> calibratingCameraManager.setDetecting(true), 600);
+
+		arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
 		if (savedExercise.isPresent()) exerciseListener.setProjectorExercise(savedExercise.get());
 	}
 
 	@Override
-	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims,
-			boolean calibratedFromCanvas, long delay) {
+	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims, boolean calibratedFromCanvas,
+			long delay) {
 		removeCalibrationTargetIfPresent();
 
 		if (!calibratedFromCanvas) arenaBounds = calibratingCanvasManager.translateCameraToCanvas(arenaBounds);

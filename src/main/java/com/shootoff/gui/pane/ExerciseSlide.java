@@ -50,7 +50,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class ExerciseSlide extends Slide implements PluginListener, ItemSelectionListener<TrainingExercise>  {
+public class ExerciseSlide extends Slide implements PluginListener, ItemSelectionListener<TrainingExercise> {
 	private static final Logger logger = LoggerFactory.getLogger(ExerciseSlide.class);
 
 	private final Configuration config;
@@ -59,10 +59,9 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 	private final TitledPane projectorPane;
 	private final ToggleButton noneButton;
 
-	private final ItemSelectionPane<TrainingExercise> exerciseItemPane = 
-			new ItemSelectionPane<>(true, this);
-	private final ItemSelectionPane<TrainingExercise> projectorExerciseItemPane = 
-			new ItemSelectionPane<>(exerciseItemPane.getToggleGroup(), this);
+	private final ItemSelectionPane<TrainingExercise> exerciseItemPane = new ItemSelectionPane<>(true, this);
+	private final ItemSelectionPane<TrainingExercise> projectorExerciseItemPane = new ItemSelectionPane<>(
+			exerciseItemPane.getToggleGroup(), this);
 
 	private static final TrainingExercise noneExercise = new TrainingExercise() {
 		@Override
@@ -72,7 +71,9 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		public void targetUpdate(Target target, TargetChange change) {}
 
 		@Override
-		public ExerciseMetadata getInfo() { return null; }
+		public ExerciseMetadata getInfo() {
+			return null;
+		}
 
 		@Override
 		public void shotListener(Shot shot, Optional<Hit> hit) {}
@@ -94,10 +95,13 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 			final Optional<FXMLLoader> loader = createPluginManagerStage();
 
 			if (loader.isPresent()) {
-				final PluginManagerController pluginManagerController = (PluginManagerController) loader.get().getController();
-				pluginManagerController.init(exerciseListener.getPluginEngine(), (Stage) parentControls.getScene().getWindow());
+				final PluginManagerController pluginManagerController = (PluginManagerController) loader.get()
+						.getController();
+				pluginManagerController.init(exerciseListener.getPluginEngine(),
+						(Stage) parentControls.getScene().getWindow());
 
-				final PluginManagerSlide pluginViewerSlide = new PluginManagerSlide(parentControls, parentBody, pluginManagerController);
+				final PluginManagerSlide pluginViewerSlide = new PluginManagerSlide(parentControls, parentBody,
+						pluginManagerController);
 				pluginViewerSlide.showControls();
 				pluginViewerSlide.showBody();
 			}
@@ -121,10 +125,12 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 			final Optional<FXMLLoader> loader = createSessionViewerStage();
 
 			if (loader.isPresent()) {
-				final SessionViewerController sessionViewerController = (SessionViewerController) loader.get().getController();
+				final SessionViewerController sessionViewerController = (SessionViewerController) loader.get()
+						.getController();
 				sessionViewerController.init(exerciseListener.getConfiguration());
 
-				final SessionViewerSlide sessionViewerSlide = new SessionViewerSlide(parentControls, parentBody, sessionViewerController);
+				final SessionViewerSlide sessionViewerSlide = new SessionViewerSlide(parentControls, parentBody,
+						sessionViewerController);
 				sessionViewerSlide.showControls();
 				sessionViewerSlide.showBody();
 			}
@@ -166,7 +172,6 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 
 		return Optional.of(loader);
 	}
-
 
 	private Optional<FXMLLoader> createPluginManagerStage() {
 		final FXMLLoader loader = new FXMLLoader(

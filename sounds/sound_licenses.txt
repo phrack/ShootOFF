@@ -1,6 +1,7 @@
 all note sounds -- https://www.freesound.org/people/UbikPhonik/sounds/177946/ UbikPhonikn This work is licensed under the Attribution License.
 
 chime.wav -- https://freesound.org/people/Robinhood76/sounds/333927/ Robinhood76 This work is licensed under the Attribution License.
+beep2.wav -- http://soundbible.com/1251-Beep.html License: Attribution 3.0 | Recorded by Mike Koenig
 
 From http://www.stillnorthmedia.com/firearm-sound-library.html:
 

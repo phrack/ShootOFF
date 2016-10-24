@@ -294,7 +294,7 @@ public class SessionCanvasManager {
 
 		if (targetComponents.isPresent()) {
 			final TargetComponents tc = targetComponents.get();
-			
+
 			canvas.getChildren().add(tc.getTargetGroup());
 			final TargetView targetContainer = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
 			eventToContainer.put(e, targetContainer);

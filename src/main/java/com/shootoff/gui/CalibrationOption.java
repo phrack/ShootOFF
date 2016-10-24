@@ -1,9 +1,8 @@
 package com.shootoff.gui;
 
 public enum CalibrationOption {
-	EVERYWHERE("Detect Shots Everywhere"), 
-	ONLY_IN_BOUNDS("Only detect shots in projector bounds"), 
-	CROP("Crop feed to projector bounds");
+	EVERYWHERE("Detect Shots Everywhere"), ONLY_IN_BOUNDS("Only detect shots in projector bounds"), CROP(
+			"Crop feed to projector bounds");
 
 	private final String text;
 

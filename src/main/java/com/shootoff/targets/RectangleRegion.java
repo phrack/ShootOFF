@@ -21,6 +21,8 @@ package com.shootoff.targets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.application.Platform;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class RectangleRegion extends Rectangle implements TargetRegion {
@@ -43,6 +45,15 @@ public class RectangleRegion extends Rectangle implements TargetRegion {
 	@Override
 	public RegionType getType() {
 		return RegionType.RECTANGLE;
+	}
+	
+	@Override
+	public void setFill(Color fill) {
+		if (Platform.isFxApplicationThread()) {
+			super.setFill(fill);
+		} else {
+			Platform.runLater(() -> super.setFill(fill));
+		}
 	}
 
 	@Override

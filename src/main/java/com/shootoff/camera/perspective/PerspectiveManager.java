@@ -506,8 +506,10 @@ public class PerspectiveManager {
 	 *         dimensions and distance
 	 */
 	public Optional<Dimension2D> calculateObjectSize(double realWidth, double realHeight, double desiredDistance) {
-		if (projectionWidth == -1 || projectionHeight == -1 || shooterDistance == -1 || pxPerMMhigh == -1) {
-			logger.error("projectionWidth, projectionHeight, shooterDistance, pxPerMMhigh unknown");
+		if (!isInitialized()) {
+			logger.error("projection manager has unknowns projectionWidth = {}, projectionHeight = {}, "
+					+ "shooterDistance = {}, pxPerMMhigh = {}", projectionWidth, projectionHeight,
+					shooterDistance, pxPerMMhigh);
 			return Optional.empty();
 		}
 

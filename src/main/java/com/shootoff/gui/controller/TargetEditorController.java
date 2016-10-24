@@ -206,7 +206,15 @@ public class TargetEditorController {
 		case "white":
 			return Color.WHITE;
 		default:
-			return Color.CORNSILK;
+			if (name.startsWith("#")) {
+				try {
+					return Color.web(name);
+				} catch (IllegalArgumentException e) {
+					return Color.CORNSILK;
+				}
+			} else {
+				return Color.CORNSILK;	
+			}
 		}
 	}
 

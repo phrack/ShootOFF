@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 public class PixelClusterManager {
 	private static final Logger logger = LoggerFactory.getLogger(PixelClusterManager.class);
 
-	private final int feedWidth;
-	private final int feedHeight;
+	private int feedWidth;
+	private int feedHeight;
 
 	private final static double MINIMUM_CONNECTEDNESS = 3.66f;
 	private final static double MAXIMUM_CONNECTEDNESS_SCALE = 6f;
@@ -53,6 +53,11 @@ public class PixelClusterManager {
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;
 
 	protected PixelClusterManager(int feedWidth, int feedHeight) {
+		this.feedWidth = feedWidth;
+		this.feedHeight = feedHeight;
+	}
+
+	public void updateFrameSize(int feedWidth, int feedHeight) {
 		this.feedWidth = feedWidth;
 		this.feedHeight = feedHeight;
 	}

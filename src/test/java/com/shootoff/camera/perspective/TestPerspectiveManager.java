@@ -176,14 +176,14 @@ public class TestPerspectiveManager {
 		Optional<Dimension2D> dims = pm.calculateObjectSize(279, 216, pm.getCameraDistance());
 
 		assertTrue(dims.isPresent());
-		assertEquals(169.00, dims.get().getWidth(), 1);
+		assertEquals(166.00, dims.get().getWidth(), 1);
 		assertEquals(123.00, dims.get().getHeight(), 1);
 
 		pm.setCameraDistance(-1);
 
 		pm.calculateUnknown();
 
-		assertEquals(3504, pm.getCameraDistance());
+		assertEquals(3502, pm.getCameraDistance());
 		
 		pm = new PerspectiveManager(new BoundingBox(329, 35, 701, 545),
 				new Dimension2D(1280, 720), paperDimensions.get(), new Dimension2D(1024, 768));
