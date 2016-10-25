@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.gui.ParListener;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
@@ -107,16 +108,16 @@ public class ParForScore extends TimedHolsterDrill implements ParListener {
 
 		final TargetRegion r = hit.get().getHitRegion();
 		if (r.tagExists("points")) {
-			setPoints(shot.getPaintColor(), r.getTag("points"));
+			setPoints(shot.getColor(), r.getTag("points"));
 		}
 	}
 
-	protected void setPoints(Color shotColor, String points) {
+	protected void setPoints(ShotColor shotColor, String points) {
 		setShotTimerColumnText(POINTS_COL_NAME, points);
 
-		if (shotColor.equals(Color.RED)) {
+		if (shotColor.equals(ShotColor.RED) || shotColor.equals(ShotColor.INFRARED)) {
 			redScore += Integer.parseInt(points);
-		} else if (shotColor.equals(Color.GREEN)) {
+		} else if (shotColor.equals(ShotColor.GREEN)) {
 			greenScore += Integer.parseInt(points);
 		}
 

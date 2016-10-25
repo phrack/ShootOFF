@@ -46,7 +46,6 @@ public class Shot {
 		colorMap.put(ShotColor.INFRARED, Color.ORANGE);
 	}
 	
-	
 	private static final Logger logger = LoggerFactory.getLogger(Shot.class);
 	private final ShotColor color;
 	private double x;

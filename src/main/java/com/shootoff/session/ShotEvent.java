@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 
 import javafx.scene.paint.Color;
 
@@ -106,8 +107,10 @@ public class ShotEvent implements Event {
 	public String toString() {
 		String colorName;
 
-		if (shot.getColor().equals(Color.RED)) {
+		if (shot.getColor().equals(ShotColor.RED)) {
 			colorName = "red";
+		} else if (shot.getColor().equals(ShotColor.INFRARED)) {
+			colorName = "infrared";
 		} else {
 			colorName = "green";
 		}

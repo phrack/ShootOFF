@@ -549,7 +549,7 @@ public class CanvasManager implements CameraView {
 			// TODO: Add separate infrared sound or switch config to read
 			// "red/infrared"
 			if (config.useRedLaserSound()
-					&& (Color.RED.equals(shot.getColor()) || Color.BLACK.equals(shot.getColor()))) {
+					&& (ShotColor.RED.equals(shot.getColor()) || ShotColor.INFRARED.equals(shot.getColor()))) {
 				TrainingExerciseBase.playSound(config.getRedLaserSound());
 			} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
 				TrainingExerciseBase.playSound(config.getGreenLaserSound());

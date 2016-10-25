@@ -68,7 +68,7 @@ public class JSONSessionWriter implements EventVisitor {
 		final JSONObject event = new JSONObject();
 		event.put("type", "shot");
 		event.put("timestamp", timestamp);
-		event.put("color", shot.getColor().toString());
+		event.put("color", shot.getPaintColor().toString());
 		event.put("x", shot.getX());
 		event.put("y", shot.getY());
 		event.put("shotTimestamp", shot.getTimestamp());

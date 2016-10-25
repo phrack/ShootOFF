@@ -105,8 +105,12 @@ public class XMLSessionReader {
 			case "shot":
 				ShotColor c;
 
-				if (attributes.getValue("color").equals("0xff0000ff")) {
+				if (attributes.getValue("color").equals("0xff0000ff") || attributes.getValue("color").equals("RED")) {
 					c = ShotColor.RED;
+				}
+				else if (attributes.getValue("color").equals("0xffa500ff") || attributes.getValue("color").equals("INFRARED"))
+				{
+					c = ShotColor.INFRARED;
 				} else {
 					c = ShotColor.GREEN;
 				}

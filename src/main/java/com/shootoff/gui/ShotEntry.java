@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 
 import javafx.scene.paint.Color;
 
@@ -38,9 +39,9 @@ public class ShotEntry {
 			boolean hadReload) {
 		this.shot = shot;
 
-		if (shot.getColor().equals(Color.RED)) {
+		if (shot.getColor().equals(ShotColor.RED)) {
 			color = "red";
-		} else if (shot.getColor().equals(Color.GREEN)) {
+		} else if (shot.getColor().equals(ShotColor.GREEN)) {
 			color = "green";
 		} else {
 			color = "infrared";

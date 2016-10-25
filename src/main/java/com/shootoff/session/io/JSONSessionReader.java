@@ -87,8 +87,12 @@ public class JSONSessionReader {
 					case "shot":
 						ShotColor c;
 
-						if (event.get("color").equals("0xff0000ff")) {
+						if (event.get("color").equals("0xff0000ff") || event.get("color").equals("RED")) {
 							c = ShotColor.RED;
+						}
+						else if (event.get("color").equals("0xffa500ff") || event.get("color").equals("INFRARED"))
+						{
+							c = ShotColor.INFRARED;
 						} else {
 							c = ShotColor.GREEN;
 						}

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
+import com.shootoff.camera.Shot.ShotColor;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
@@ -85,9 +86,9 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 		if (r.tagExists("points")) {
 			super.setShotTimerColumnText(POINTS_COL_NAME, r.getTag("points"));
 
-			if (shot.getColor().equals(Color.RED)) {
+			if (shot.getColor().equals(ShotColor.RED) || shot.getColor().equals(ShotColor.INFRARED)) {
 				redScore += Integer.parseInt(r.getTag("points"));
-			} else if (shot.getColor().equals(Color.GREEN)) {
+			} else if (shot.getColor().equals(ShotColor.GREEN)) {
 				greenScore += Integer.parseInt(r.getTag("points"));
 			}
 		}
