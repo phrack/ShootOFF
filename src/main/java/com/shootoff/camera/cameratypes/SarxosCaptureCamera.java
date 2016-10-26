@@ -177,7 +177,7 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 	}
 
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager,	final CameraView cameraView) {
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
 		if (NativeShotDetector.isSystemSupported())
 			return new NativeShotDetector(cameraManager, cameraView);
 		else if (JavaShotDetector.isSystemSupported())

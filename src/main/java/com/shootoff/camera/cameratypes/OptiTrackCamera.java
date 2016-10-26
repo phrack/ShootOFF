@@ -54,7 +54,6 @@ public class OptiTrackCamera implements Camera {
 
 	public OptiTrackCamera() {
 		if (!initialized) init();
-
 	}
 
 	public static void init() {
@@ -196,7 +195,7 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager,	final CameraView cameraView) {
+	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
 		if (OptiTrackShotDetector.isSystemSupported())
 			return new OptiTrackShotDetector(cameraManager, cameraView);
 		else if (NativeShotDetector.isSystemSupported())
@@ -215,31 +214,25 @@ public class OptiTrackCamera implements Camera {
 	private AtomicBoolean frameAvailable = new AtomicBoolean(false);
 	private byte[] frameBytes;
 	private long frameTS;
-	
+
 	@Override
 	public void run() {
-		while (isOpen())
-		{
+		while (isOpen()) {
 			Frame frame = null;
-			
-			synchronized(frameLock)
-			{
+
+			synchronized (frameLock) {
 				try {
-					if (frameAvailable.get() == false)
-					{
+					if (frameAvailable.get() == false) {
 						frameLock.wait();
 					}
-				} catch (InterruptedException e) {
-				}
-				
-				if (frameAvailable.compareAndSet(true, false))
-				{
+				} catch (InterruptedException e) {}
+
+				if (frameAvailable.compareAndSet(true, false)) {
 					frame = new Frame(translateCameraArrayToMat(frameBytes), frameTS);
 				}
 			}
-			
-			if (frame != null)
-			{
+
+			if (frame != null) {
 				if (cameraEventListener.isPresent()) {
 					final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;
 					cameraEventListener.get().newFrame(frame, shouldDedistort);
@@ -251,8 +244,7 @@ public class OptiTrackCamera implements Camera {
 	}
 
 	private void receiveFrame(byte[] frameBytes, long frameTS) {
-		synchronized(frameLock)
-		{
+		synchronized (frameLock) {
 			this.frameBytes = frameBytes;
 			this.frameTS = frameTS;
 			frameLock.notifyAll();
@@ -265,11 +257,10 @@ public class OptiTrackCamera implements Camera {
 		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
 
 		cameraEventListener = Optional.empty();
-		
+
 		if (isOpen()) close();
-		
-		synchronized(frameLock)
-		{
+
+		synchronized (frameLock) {
 			frameLock.notifyAll();
 		}
 	}

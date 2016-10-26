@@ -60,7 +60,7 @@ public class IpCamera extends CalculatedFPSCamera {
 
 	public static IpCamera registerIpCamera(String cameraName, URL cameraURL, Optional<String> username,
 			Optional<String> password)
-					throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
+			throws MalformedURLException, URISyntaxException, UnknownHostException, TimeoutException {
 		// These are here because webcam-capture wraps this exception in a
 		// WebcamException if the
 		// URL has a syntax issue. We don't want to use webcam-capture classes

@@ -28,8 +28,6 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
-import javafx.scene.paint.Color;
-
 /**
  * Merge of TimedHolsterDrill and ShootForScore, with the addition of a PAR
  * interval during which scores are counted.

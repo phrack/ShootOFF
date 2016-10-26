@@ -27,8 +27,6 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
-import javafx.scene.paint.Color;
-
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
 	private final static String POINTS_COL_NAME = "Score";
 	private final static int POINTS_COL_WIDTH = 60;
