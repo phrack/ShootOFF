@@ -135,7 +135,7 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
-		assertEquals(String.format("sounds/beep.wav%n") + 
+		assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + 
 				String.format("left score: 1%n") + 
 				String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
@@ -158,7 +158,7 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
 		}
 
-		assertEquals(String.format("sounds/beep.wav%n") + 
+		assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + 
 				String.format("left score: 1%n") + 
 				String.format("right score: 0%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
@@ -173,7 +173,7 @@ public class TestDuelingTree {
 			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
 		}
 
-		assertEquals(String.format("sounds/beep.wav%n") + 
+		assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + 
 				String.format("left score: 0%n") + 
 				String.format("right score: 1%n"), stringOut.toString("UTF-8"));
 		stringOut.reset();
