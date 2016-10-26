@@ -280,7 +280,7 @@ public class AutoCalibrationManager {
 		public void process(Frame frame) {
 			if (!inStepTwo()) {
 				calibrationListener.setArenaBackground(null);
-				
+
 				checkForFrameChange(frame);
 				frameTimestampBeforeFrameChange = frame.getTimestamp();
 			} else {
@@ -311,7 +311,7 @@ public class AutoCalibrationManager {
 			final long change = frame.getTimestamp() - frameTimestampBeforeFrameChange;
 
 			logger.debug("{} {} {}", pixel, patternLuminosity, change);
-			
+
 			if (pixel < .9 * patternLuminosity) {
 				return Optional.of(change);
 			} else if (change > 250) {
@@ -729,10 +729,8 @@ public class AutoCalibrationManager {
 				rect_width = height;
 			}
 
-			width = (width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1))
-					* PAPER_MARGIN_WIDTH);
-			height = (height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1))
-					* PAPER_MARGIN_HEIGHT);
+			width = (width * ((double) (PATTERN_WIDTH + 1) / (double) (PATTERN_WIDTH - 1)) * PAPER_MARGIN_WIDTH);
+			height = (height * ((double) (PATTERN_HEIGHT + 1) / (double) (PATTERN_HEIGHT - 1)) * PAPER_MARGIN_HEIGHT);
 
 			final double PAPER_PATTERN_SIZE_THRESHOLD = .25;
 			if (width > PAPER_PATTERN_SIZE_THRESHOLD * mat.cols()
@@ -793,7 +791,7 @@ public class AutoCalibrationManager {
 		return Imgproc.minAreaRect(boardRect2f);
 
 	}
-	
+
 	public Frame undistortFrame(Frame frame) {
 		if (isCalibrated) {
 			frame.setMat(warpPerspective(frame.getOriginalMat()));
@@ -934,7 +932,8 @@ public class AutoCalibrationManager {
 			logger.trace("points {} {} {} {}", topLeft, topRight, bottomRight, bottomLeft);
 
 			final double angle = Math.atan((topRight.y - topLeft.y) / (topRight.x - topLeft.x)) * 180 / Math.PI;
-			final double angle2 = Math.atan((bottomRight.y - bottomLeft.y) / (bottomRight.x - bottomLeft.x)) * 180 / Math.PI;
+			final double angle2 = Math.atan((bottomRight.y - bottomLeft.y) / (bottomRight.x - bottomLeft.x)) * 180
+					/ Math.PI;
 
 			logger.trace("square size {} {} - angle {}", topWidth / (PATTERN_WIDTH - 1),
 					leftHeight / (PATTERN_HEIGHT - 1), angle);

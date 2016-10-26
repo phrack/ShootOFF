@@ -38,14 +38,14 @@ public class Shot {
 	public enum ShotColor {
 		RED, GREEN, INFRARED
 	};
+
 	static public final Map<ShotColor, Color> colorMap = new HashMap<ShotColor, Color>();
-	static 
-	{
+	static {
 		colorMap.put(ShotColor.RED, Color.RED);
 		colorMap.put(ShotColor.GREEN, Color.GREEN);
 		colorMap.put(ShotColor.INFRARED, Color.ORANGE);
 	}
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(Shot.class);
 	private final ShotColor color;
 	private double x;
@@ -88,11 +88,10 @@ public class Shot {
 	public ShotColor getColor() {
 		return color;
 	}
-	
+
 	public Color getPaintColor() {
 		return colorMap.get(color);
 	}
-
 
 	public double getX() {
 		return x;

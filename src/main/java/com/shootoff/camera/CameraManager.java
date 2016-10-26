@@ -160,8 +160,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		shotDetector = camera.getPreferredShotDetector(this, view);
 
-		if (shotDetector == null)
-			logger.error("No suitable shot detector found for camera {}", camera.getName());
+		if (shotDetector == null) logger.error("No suitable shot detector found for camera {}", camera.getName());
 
 	}
 
