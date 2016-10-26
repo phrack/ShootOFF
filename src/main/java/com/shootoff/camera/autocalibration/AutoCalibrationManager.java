@@ -300,7 +300,6 @@ public class AutoCalibrationManager {
 		private Optional<Long> checkForFrameChange(Frame frame) {
 			frame = undistortFrame(frame);
 
-
 			final double pixel = getFrameDelayPixel(frame.getOriginalMat());
 
 			// Initialize
@@ -308,7 +307,6 @@ public class AutoCalibrationManager {
 				patternLuminosity = pixel;
 				return Optional.empty();
 			}
-
 
 			final long change = frame.getTimestamp() - frameTimestampBeforeFrameChange;
 

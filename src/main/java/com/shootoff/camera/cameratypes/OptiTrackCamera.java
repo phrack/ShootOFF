@@ -185,8 +185,8 @@ public class OptiTrackCamera implements Camera {
 	@Override
 	public Frame getFrame() {
 		final byte[] frame = getImageNative();
-		final long currentFrameTimestamp = System.currentTimeMillis();
 		final Mat mat = translateCameraArrayToMat(frame);
+		final long currentFrameTimestamp = System.currentTimeMillis();
 		return new Frame(mat, currentFrameTimestamp);
 	}
 

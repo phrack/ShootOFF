@@ -779,13 +779,19 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public long getCurrentFrameTimestamp() {
-		if (startTime == 0) resetStartTime();
+		if (startTime == 0) {
+			resetStartTime();
+			return 0;
+		}
 
 		return System.currentTimeMillis() - startTime;
 	}
 
 	public long cameraTimeToShotTime(long timestamp) {
-		if (startTime == 0) resetStartTime();
+		if (startTime == 0) {
+			resetStartTime();
+			return 0;
+		}
 
 		return timestamp - startTime;
 	}

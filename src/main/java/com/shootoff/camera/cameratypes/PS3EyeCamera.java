@@ -397,9 +397,9 @@ public class PS3EyeCamera extends CalculatedFPSCamera {
 	@Override
 	public Frame getFrame() {
 		final byte[] frame = getImageNative();
-		final long currentFrameTimestamp = System.currentTimeMillis();
 		final Mat mat = translateCameraArrayToMat(frame);
 		frameCount++;
+		final long currentFrameTimestamp = System.currentTimeMillis();
 		return new Frame(mat, currentFrameTimestamp);
 	}
 
