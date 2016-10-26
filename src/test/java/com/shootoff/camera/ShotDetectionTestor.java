@@ -33,6 +33,10 @@ public class ShotDetectionTestor implements VideoFinishedListener {
 
 		nu.pattern.OpenCV.loadShared();
 
+		// Disable all loggers because our output has gotten verbose
+		// enough that Travis-CI kills us. Comment out the lines below
+		// and ensure tests don't call Configuration.setDebugMode(false)
+		// to get debug output for specific tests.
 		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		rootLogger.detachAndStopAllAppenders();
 	}

@@ -27,6 +27,10 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	@Before
 	public void setUp() throws ConfigurationException {
 		config = new Configuration(new String[0]);
+		// Minimize logging attempts because Travis-CI will kill us
+		// due to verbose output. To re-enable log outputs you also
+		// need to comment out the code in ShotDetectionTestor.setUpBaseClass()
+		// that disables all loggers.
 		config.setDebugMode(false);
 		mockManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];

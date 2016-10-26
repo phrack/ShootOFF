@@ -47,9 +47,10 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		nu.pattern.OpenCV.loadShared();
 
 		acm = new AutoCalibrationManager(new MockCameraManager(), mockCamera, false);
-		
 
 		config = new Configuration(new String[0]);
+		// Minimize logging attempts because Travis-CI will kill us
+		// due to verbose output.
 		config.setDebugMode(false);
 		mockCanvasManager = new MockCanvasManager(config, true);
 		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
