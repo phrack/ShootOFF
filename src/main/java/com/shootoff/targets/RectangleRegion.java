@@ -34,12 +34,12 @@ public class RectangleRegion extends Rectangle implements TargetRegion {
 
 	@Override
 	public void changeWidth(final double widthDelta) {
-		this.setWidth(this.getWidth() + widthDelta);
+		setWidth(getWidth() + widthDelta);
 	}
 
 	@Override
 	public void changeHeight(final double heightDelta) {
-		this.setHeight(this.getHeight() + heightDelta);
+		setHeight(getHeight() + heightDelta);
 	}
 
 	@Override

@@ -62,11 +62,11 @@ public class TargetDistancePane extends Pane {
 		this.target = target;
 		this.perspectiveManager = perspectiveManager;
 		this.config = config;
-		this.cameraName = perspectiveManager.getCalibratedCameraName();
+		cameraName = perspectiveManager.getCalibratedCameraName();
 
 		final Image backgroundImage = new Image(
 				TargetDistancePane.class.getResourceAsStream("/images/perspective_settings.png"));
-		this.getChildren().add(new ImageView(backgroundImage));
+		getChildren().add(new ImageView(backgroundImage));
 
 		shooterDistance = createDistanceTextField(234, 68);
 		targetDistance = createDistanceTextField(534, 126);
@@ -74,11 +74,11 @@ public class TargetDistancePane extends Pane {
 		targetWidth = createDistanceTextField(745, 48);
 		targetHeight = createDistanceTextField(863, 191);
 
-		this.getChildren().add(shooterDistance);
-		this.getChildren().add(targetDistance);
-		this.getChildren().add(cameraDistance);
-		this.getChildren().add(targetWidth);
-		this.getChildren().add(targetHeight);
+		getChildren().add(shooterDistance);
+		getChildren().add(targetDistance);
+		getChildren().add(cameraDistance);
+		getChildren().add(targetWidth);
+		getChildren().add(targetHeight);
 
 		setDefaults();
 
@@ -195,7 +195,7 @@ public class TargetDistancePane extends Pane {
 			invalidDataAlert.setHeaderText("Target Distance Cannot Be Zero");
 			invalidDataAlert.setResizable(true);
 			invalidDataAlert.setContentText(message);
-			invalidDataAlert.initOwner(this.getScene().getWindow());
+			invalidDataAlert.initOwner(getScene().getWindow());
 			invalidDataAlert.showAndWait();
 
 			isValid = false;

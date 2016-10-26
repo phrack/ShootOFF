@@ -137,8 +137,8 @@ public class PerspectiveManager {
 	protected PerspectiveManager(Bounds arenaBounds) {
 		if (logger.isTraceEnabled())
 			logger.trace("pattern res w {} h {}", arenaBounds.getWidth(), arenaBounds.getHeight());
-		this.patternWidth = (int) arenaBounds.getWidth();
-		this.patternHeight = (int) arenaBounds.getHeight();
+		patternWidth = (int) arenaBounds.getWidth();
+		patternHeight = (int) arenaBounds.getHeight();
 	}
 
 	public PerspectiveManager(Bounds arenaBounds, Dimension2D feedDims, Dimension2D paperBounds,
@@ -250,8 +250,8 @@ public class PerspectiveManager {
 		if (logger.isTraceEnabled())
 			logger.trace("projection w {} h {}", width, height);
 
-		this.projectionHeight = height;
-		this.projectionWidth = width;
+		projectionHeight = height;
+		projectionWidth = width;
 	}
 
 	/*
@@ -295,8 +295,8 @@ public class PerspectiveManager {
 	public void setCameraFeedSize(int width, int height) {
 		if (logger.isTraceEnabled())
 			logger.trace("camera feed w {} h {}", width, height);
-		this.cameraHeight = height;
-		this.cameraWidth = width;
+		cameraHeight = height;
+		cameraWidth = width;
 	}
 
 	private void setCameraFeedSize(Dimension2D resolution) {
@@ -352,8 +352,8 @@ public class PerspectiveManager {
 	public void setProjectorResolution(int width, int height) {
 		if (logger.isTraceEnabled())
 			logger.trace("projector res w {} h {}", width, height);
-		this.projectorResWidth = width;
-		this.projectorResHeight = height;
+		projectorResWidth = width;
+		projectorResHeight = height;
 	}
 
 	public void setProjectorResolution(Dimension2D dims) {

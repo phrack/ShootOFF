@@ -49,7 +49,7 @@ public class GifAnimation extends SpriteAnimation {
 		int delay = frames[0].getDelay();
 		if (delay < 1) delay = SpriteAnimation.DEFAULT_DELAY;
 
-		this.setCycleDuration(Duration.millis(delay));
+		setCycleDuration(Duration.millis(delay));
 	}
 
 	public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
@@ -58,7 +58,7 @@ public class GifAnimation extends SpriteAnimation {
 		int delay = frames[0].getDelay();
 		if (delay < 1) delay = SpriteAnimation.DEFAULT_DELAY;
 
-		this.setCycleDuration(Duration.millis(delay));
+		setCycleDuration(Duration.millis(delay));
 	}
 
 	// This method is from http://stackoverflow.com/a/17269591

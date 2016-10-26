@@ -79,7 +79,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		calibrationListeners.add(arenaPane);
 		this.arenaPane = arenaPane;
 		this.cameraViews = cameraViews;
-		this.config = exerciseListener.getConfiguration();
+		config = exerciseListener.getConfiguration();
 		this.exerciseListener = exerciseListener;
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
@@ -386,7 +386,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private boolean isFullScreen = false;
 
 	public void setFullScreenStatus(boolean fullScreen) {
-		this.isFullScreen = fullScreen;
+		isFullScreen = fullScreen;
 
 		logger.trace("setFullScreenStatus - {} {}", fullScreen, isCalibrating);
 

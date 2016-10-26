@@ -70,7 +70,7 @@ public class ItemSelectionPane<T> extends ScrollPane {
 		subContainer.setPrefColumns(DEFAULT_COLUMNS);
 		subContainer.setPadding(new Insets(0, 65, 65, 65));
 
-		this.widthProperty().addListener((observable, oldValue, newValue) -> {
+		widthProperty().addListener((observable, oldValue, newValue) -> {
 			final Insets padding = subContainer.getPadding();
 			final int hgap = (int) subContainer.getHgap();
 			final int columnCount = (newValue.intValue() - (int) (padding.getLeft() + padding.getRight()) + hgap)
@@ -79,13 +79,13 @@ public class ItemSelectionPane<T> extends ScrollPane {
 			if (columnCount <= MAX_COLUMNS) subContainer.setPrefColumns(columnCount);
 		});
 
-		this.setStyle(
+		setStyle(
 				"-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
-		this.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
-		this.setHbarPolicy(ScrollBarPolicy.NEVER);
-		this.setFitToHeight(true);
-		this.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		this.setContent(subContainer);
+		setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+		setHbarPolicy(ScrollBarPolicy.NEVER);
+		setFitToHeight(true);
+		setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		setContent(subContainer);
 	}
 
 	public ItemSelectionPane(ToggleGroup toggleGroup, ItemSelectionListener<T> itemListener) {

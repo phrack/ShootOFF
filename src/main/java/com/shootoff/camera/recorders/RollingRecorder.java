@@ -172,7 +172,7 @@ public class RollingRecorder implements Closeable {
 			}
 
 			synchronized (videoWriterLock) {
-				this.videoWriter = copy.getMediaWriter();
+				videoWriter = copy.getMediaWriter();
 			}
 			this.relativeVideoFile = rollingRelativeVideoFile;
 			this.videoFile = rollingVideoFile;

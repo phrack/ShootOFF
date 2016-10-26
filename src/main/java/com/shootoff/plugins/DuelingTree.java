@@ -54,7 +54,7 @@ public class DuelingTree extends ProjectorTrainingExerciseBase implements Traini
 
 	public DuelingTree(List<Target> targets) {
 		super(targets);
-		this.thisSuper = super.getInstance();
+		thisSuper = super.getInstance();
 		findTargets(targets);
 	}
 

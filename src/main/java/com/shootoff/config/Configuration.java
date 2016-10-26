@@ -663,15 +663,15 @@ public class Configuration {
 	}
 
 	public void setWebcams(List<String> webcamNames, List<Camera> configuredCameras) {
-		this.webcams.clear();
+		webcams.clear();
 
 		for (int i = 0; i < webcamNames.size(); i++) {
-			this.webcams.put(webcamNames.get(i), configuredCameras.get(i));
+			webcams.put(webcamNames.get(i), configuredCameras.get(i));
 		}
 	}
 
 	public void setMarkerRadius(int markRadius) {
-		this.markerRadius = markRadius;
+		markerRadius = markRadius;
 	}
 
 	public void setIgnoreLaserColor(boolean ignoreLaserColor) {
@@ -721,7 +721,7 @@ public class Configuration {
 	}
 
 	public void setMalfunctions(boolean injectMalfunctions) {
-		this.useMalfunctions = injectMalfunctions;
+		useMalfunctions = injectMalfunctions;
 
 		if (!useMalfunctions && malfunctionsProcessor != null) {
 			shotProcessors.remove(malfunctionsProcessor);
@@ -730,7 +730,7 @@ public class Configuration {
 	}
 
 	public void setMalfunctionsProbability(float injectMalfunctionsProbability) {
-		this.malfunctionsProbability = injectMalfunctionsProbability;
+		malfunctionsProbability = injectMalfunctionsProbability;
 
 		if (useMalfunctions) {
 			if (malfunctionsProcessor != null) {
@@ -794,7 +794,7 @@ public class Configuration {
 	}
 
 	public void setRecordingCameras(Set<Camera> recordingCameras2) {
-		this.recordingCameras = recordingCameras2;
+		recordingCameras = recordingCameras2;
 	}
 
 	public void setShotTimerRowColor(Color c) {

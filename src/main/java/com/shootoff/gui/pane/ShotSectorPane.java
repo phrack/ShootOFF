@@ -54,8 +54,8 @@ public class ShotSectorPane extends BorderPane {
 			parent.getChildren().remove(this);
 		});
 
-		this.setTop(checkboxGrid);
-		this.setLeft(doneButton);
+		setTop(checkboxGrid);
+		setLeft(doneButton);
 
 		parent.getChildren().add(this);
 	}

@@ -34,8 +34,8 @@ public class LocatedImage extends Image {
 
 	public LocatedImage(InputStream is, String resourceName) {
 		super(is);
-		this.url = resourceName;
-		this.isResource = true;
+		url = resourceName;
+		isResource = true;
 	}
 
 	public String getURL() {

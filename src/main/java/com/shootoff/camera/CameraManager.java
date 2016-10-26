@@ -133,7 +133,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	private CameraCalibrationListener cameraCalibrationListener;
 
 	public void setCalibrationManager(CameraCalibrationListener calibrationManager) {
-		this.cameraCalibrationListener = calibrationManager;
+		cameraCalibrationListener = calibrationManager;
 	}
 
 	public DeduplicationProcessor getDeduplicationProcessor() {
@@ -141,27 +141,27 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public CameraManager() {
-		this.camera = null;
-		this.cameraErrorView = Optional.empty();
-		this.cameraView = null;
-		this.shotDetector = null;
+		camera = null;
+		cameraErrorView = Optional.empty();
+		cameraView = null;
+		shotDetector = null;
 	}
 
 	public CameraManager(Camera cameraInterface, CameraErrorView cameraErrorView, CameraView view) {
 
-		this.camera = cameraInterface;
+		camera = cameraInterface;
 
 		this.cameraErrorView = Optional.ofNullable(cameraErrorView);
-		this.cameraView = view;
+		cameraView = view;
 
-		this.cameraView.setCameraManager(this);
+		cameraView.setCameraManager(this);
 
 		camera.setCameraEventListener(this);
 
-		this.shotDetector = camera.getPreferredShotDetector(this, view);
+		shotDetector = camera.getPreferredShotDetector(this, view);
 
-		if (this.shotDetector == null)
-			logger.error("No suitable shot detector found for camera {}", this.camera.getName());
+		if (shotDetector == null)
+			logger.error("No suitable shot detector found for camera {}", camera.getName());
 
 	}
 
@@ -472,7 +472,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public void setThresholdListener(CameraDebuggerListener thresholdListener) {
-		this.debuggerListener = Optional.ofNullable(thresholdListener);
+		debuggerListener = Optional.ofNullable(thresholdListener);
 	}
 
 	public Optional<CameraDebuggerListener> getDebuggerListener() {

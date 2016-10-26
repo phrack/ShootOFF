@@ -67,7 +67,7 @@ public class TagEditorPane extends Pane {
 			}
 		});
 
-		this.getChildren().add(tagTable);
+		getChildren().add(tagTable);
 	}
 
 	public Map<String, String> getTags() {

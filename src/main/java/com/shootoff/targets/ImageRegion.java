@@ -50,15 +50,15 @@ public class ImageRegion extends ImageView implements TargetRegion {
 	public ImageRegion(final double x, final double y, final File imageFile, final InputStream imageStream) {
 		super();
 
-		this.setLayoutX(x);
-		this.setLayoutY(y);
+		setLayoutX(x);
+		setLayoutY(y);
 		this.imageFile = imageFile;
 
-		this.setImage(new Image(imageStream));
+		setImage(new Image(imageStream));
 	}
 
 	public boolean onFirstFrame() {
-		return animation.isPresent() ? this.getImage().equals(animation.get().getFirstFrame()) : true;
+		return animation.isPresent() ? getImage().equals(animation.get().getFirstFrame()) : true;
 	}
 
 	public File getImageFile() {

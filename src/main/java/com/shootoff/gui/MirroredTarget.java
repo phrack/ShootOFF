@@ -30,39 +30,39 @@ public class MirroredTarget extends TargetView {
 
 	private void mirrorKeyEvents() {
 		final EventHandler<? super KeyEvent> mirroredKeyHandler = mirroredTarget.getTargetGroup().getOnKeyPressed();
-		final EventHandler<? super KeyEvent> thisKeyHandler = this.getTargetGroup().getOnKeyPressed();
+		final EventHandler<? super KeyEvent> thisKeyHandler = getTargetGroup().getOnKeyPressed();
 
 		mirroredTarget.getTargetGroup().setOnKeyPressed((event) -> {
 			mirroredKeyHandler.handle(event);
 			thisKeyHandler.handle(event);
 		});
 
-		this.getTargetGroup().setOnKeyPressed((event) -> {
+		getTargetGroup().setOnKeyPressed((event) -> {
 			thisKeyHandler.handle(event);
 			mirroredKeyHandler.handle(event);
 		});
 	}
 
 	private void mirrorMouseEvents() {
-		final EventHandler<? super MouseEvent> thisMouseDraggedHandler = this.getTargetGroup().getOnMouseDragged();
+		final EventHandler<? super MouseEvent> thisMouseDraggedHandler = getTargetGroup().getOnMouseDragged();
 
-		this.getTargetGroup().setOnMouseDragged((event) -> {
+		getTargetGroup().setOnMouseDragged((event) -> {
 			thisMouseDraggedHandler.handle(event);
 
-			final Dimension2D targetDimension = this.getDimension();
+			final Dimension2D targetDimension = getDimension();
 			mirroredTarget.mirrorSetDimensions(targetDimension.getWidth(), targetDimension.getHeight());
-			final Point2D targetPosition = this.getPosition();
+			final Point2D targetPosition = getPosition();
 			mirroredTarget.mirrorSetPosition(targetPosition.getX(), targetPosition.getY());
 		});
 
-		final EventHandler<? super MouseEvent> thisMouseMovedHandler = this.getTargetGroup().getOnMouseMoved();
+		final EventHandler<? super MouseEvent> thisMouseMovedHandler = getTargetGroup().getOnMouseMoved();
 
-		this.getTargetGroup().setOnMouseMoved((event) -> {
+		getTargetGroup().setOnMouseMoved((event) -> {
 			thisMouseMovedHandler.handle(event);
 
-			final Dimension2D targetDimension = this.getDimension();
+			final Dimension2D targetDimension = getDimension();
 			mirroredTarget.mirrorSetDimensions(targetDimension.getWidth(), targetDimension.getHeight());
-			final Point2D targetPosition = this.getPosition();
+			final Point2D targetPosition = getPosition();
 			mirroredTarget.mirrorSetPosition(targetPosition.getX(), targetPosition.getY());
 		});
 	}

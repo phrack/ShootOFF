@@ -183,7 +183,7 @@ public class PluginManagerController {
 
 		public ActionTableCell(TableColumn<PluginMetadata, String> actionColumn) {
 			this.actionColumn = actionColumn;
-			this.setAlignment(Pos.CENTER);
+			setAlignment(Pos.CENTER);
 		}
 
 		@Override

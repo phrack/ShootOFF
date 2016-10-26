@@ -89,7 +89,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 		super(parentControls, parentBody);
 
 		this.exerciseListener = exerciseListener;
-		this.config = Configuration.getConfig();
+		config = Configuration.getConfig();
 
 		addSlideControlButton("Get Exercises", (event) -> {
 			final Optional<FXMLLoader> loader = createPluginManagerStage();

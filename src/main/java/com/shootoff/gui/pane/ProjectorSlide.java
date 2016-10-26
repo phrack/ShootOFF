@@ -61,7 +61,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 
 		this.parentControls = parentControls;
 		this.parentBody = parentBody;
-		this.config = Configuration.getConfig();
+		config = Configuration.getConfig();
 		this.cameraViews = cameraViews;
 		this.shootOffStage = shootOffStage;
 		this.trainingExerciseContainer = trainingExerciseContainer;

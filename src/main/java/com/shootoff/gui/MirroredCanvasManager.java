@@ -28,7 +28,7 @@ public class MirroredCanvasManager extends CanvasManager {
 			ObservableList<ShotEntry> shotEntries, ProjectorArenaPane arenaPane) {
 		super(canvasGroup, resetter, cameraName, shotEntries);
 
-		this.config = Configuration.getConfig();
+		config = Configuration.getConfig();
 		this.arenaPane = arenaPane;
 	}
 

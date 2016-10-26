@@ -120,13 +120,13 @@ public class CanvasManager implements CameraView {
 	public CanvasManager(Group canvasGroup, Resetter resetter, String cameraName,
 			ObservableList<ShotEntry> shotEntries) {
 		this.canvasGroup = canvasGroup;
-		this.config = Configuration.getConfig();
+		config = Configuration.getConfig();
 		this.resetter = resetter;
 		this.cameraName = cameraName;
 		this.shotEntries = shotEntries;
 		shots = Collections.synchronizedList(new ArrayList<Shot>());
 
-		this.background.setOnMouseClicked((event) -> {
+		background.setOnMouseClicked((event) -> {
 			toggleTargetSelection(Optional.empty());
 		});
 
@@ -285,7 +285,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	public void setContextMenu(ContextMenu menu) {
-		this.contextMenu = Optional.of(menu);
+		contextMenu = Optional.of(menu);
 	}
 
 	public void setBackgroundFit(double width, double height) {

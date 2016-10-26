@@ -34,12 +34,12 @@ public class EllipseRegion extends Ellipse implements TargetRegion {
 
 	@Override
 	public void changeWidth(final double widthDelta) {
-		this.setRadiusX(this.getRadiusX() + widthDelta);
+		setRadiusX(getRadiusX() + widthDelta);
 	}
 
 	@Override
 	public void changeHeight(final double heightDelta) {
-		this.setRadiusY(this.getRadiusY() + heightDelta);
+		setRadiusY(getRadiusY() + heightDelta);
 	}
 
 	@Override

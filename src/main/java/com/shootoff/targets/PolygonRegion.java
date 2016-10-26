@@ -38,7 +38,7 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 
 	@Override
 	public void changeWidth(final double widthDelta) {
-		final ObservableList<Double> points = this.getPoints();
+		final ObservableList<Double> points = getPoints();
 		final List<Double> pointsX = new ArrayList<>();
 
 		for (int i = 0; i < points.size(); i += 2) {
@@ -48,12 +48,12 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 		final double width = Collections.max(pointsX);
 		final double scaleFactor = (width + widthDelta) / width;
 
-		this.setScaleX(this.getScaleX() * scaleFactor);
+		setScaleX(getScaleX() * scaleFactor);
 	}
 
 	@Override
 	public void changeHeight(final double heightDelta) {
-		final ObservableList<Double> points = this.getPoints();
+		final ObservableList<Double> points = getPoints();
 		final List<Double> pointsY = new ArrayList<>();
 
 		for (int i = 1; i < points.size(); i += 2) {
@@ -63,7 +63,7 @@ public class PolygonRegion extends Polygon implements TargetRegion {
 		final double height = Collections.max(pointsY);
 		final double scaleFactor = (height + heightDelta) / height;
 
-		this.setScaleY(this.getScaleY() * scaleFactor);
+		setScaleY(getScaleY() * scaleFactor);
 	}
 
 	@Override

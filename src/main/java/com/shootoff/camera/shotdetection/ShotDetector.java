@@ -81,7 +81,7 @@ public abstract class ShotDetector {
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
-			if (this.handlesBounds())
+			if (handlesBounds())
 			{
 				shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(),
 						config.getMarkerRadius());

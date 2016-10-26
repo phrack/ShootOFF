@@ -234,7 +234,7 @@ public class OptiTrackCamera implements Camera {
 
 			if (frame != null) {
 				if (cameraEventListener.isPresent()) {
-					final boolean shouldDedistort = (this.cameraState == CameraState.NORMAL) ? true : false;
+					final boolean shouldDedistort = (cameraState == CameraState.NORMAL) ? true : false;
 					cameraEventListener.get().newFrame(frame, shouldDedistort);
 				}
 

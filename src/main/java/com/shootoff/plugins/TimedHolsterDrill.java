@@ -141,7 +141,7 @@ public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingE
 	}
 
 	protected void initUI() {
-		this.pauseResumeButton = addShootOFFButton(PAUSE, (event) -> {
+		pauseResumeButton = addShootOFFButton(PAUSE, (event) -> {
 			final Button pauseResumeButton = (Button) event.getSource();
 			if (PAUSE.equals(pauseResumeButton.getText())) {
 				pauseResumeButton.setText("Resume");

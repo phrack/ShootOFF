@@ -30,17 +30,17 @@ public class ImageFrame {
 	private final String disposal;
 
 	public ImageFrame(BufferedImage image, int delay, String disposal) {
-		this.bufferedImage = image;
+		bufferedImage = image;
 		this.image = SwingFXUtils.toFXImage(image, null);
 		this.delay = delay;
 		this.disposal = disposal;
 	}
 
 	public ImageFrame(BufferedImage image) {
-		this.bufferedImage = image;
+		bufferedImage = image;
 		this.image = SwingFXUtils.toFXImage(image, null);
-		this.delay = -1;
-		this.disposal = null;
+		delay = -1;
+		disposal = null;
 	}
 
 	public BufferedImage getBufferedImage() {

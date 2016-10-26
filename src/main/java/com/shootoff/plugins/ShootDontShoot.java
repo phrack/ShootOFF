@@ -62,7 +62,7 @@ public class ShootDontShoot extends ProjectorTrainingExerciseBase implements Tra
 
 	public ShootDontShoot(List<Target> targets) {
 		super(targets);
-		this.thisSuper = super.getInstance();
+		thisSuper = super.getInstance();
 	}
 
 	@Override

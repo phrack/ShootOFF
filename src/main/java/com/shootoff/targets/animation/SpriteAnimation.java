@@ -37,7 +37,7 @@ public class SpriteAnimation extends Transition {
 		this.imageView = imageView;
 		this.frames = new ImageFrame[frames.length];
 		System.arraycopy(frames, 0, this.frames, 0, frames.length);
-		this.count = frames.length;
+		count = frames.length;
 		setInterpolator(Interpolator.LINEAR);
 	}
 
@@ -58,7 +58,7 @@ public class SpriteAnimation extends Transition {
 	}
 
 	public void reset() {
-		if (this.getStatus() == Status.RUNNING) this.stop();
+		if (getStatus() == Status.RUNNING) stop();
 
 		isReversed = false;
 		lastIndex = 0;

@@ -103,7 +103,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = this.getName().hashCode();
+		int result = getName().hashCode();
 		result = prime * result;
 		return result;
 	}
@@ -114,7 +114,7 @@ public abstract class CalculatedFPSCamera implements Camera {
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		final Camera other = (Camera) obj;
-		if (!this.getName().equals(other.getName())) return false;
+		if (!getName().equals(other.getName())) return false;
 		return true;
 	}
 

@@ -94,10 +94,10 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	public ProjectorArenaPane(Configuration config, CanvasManager canvasManager) {
 		this.config = config;
 		this.canvasManager = canvasManager;
-		this.shootOffStage = null;
-		this.trainingExerciseContainer = null;
-		this.arenaCanvasGroup = new Group();
-		this.calibrationLabel = null;
+		shootOffStage = null;
+		trainingExerciseContainer = null;
+		arenaCanvasGroup = new Group();
+		calibrationLabel = null;
 	}
 
 	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Pane trainingExerciseContainer,
@@ -113,7 +113,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		calibrationLabel.setPrefSize(628, 90);
 		calibrationLabel.setAlignment(Pos.CENTER);
 
-		this.getChildren().addAll(arenaCanvasGroup, calibrationLabel);
+		getChildren().addAll(arenaCanvasGroup, calibrationLabel);
 
 		this.shootOffStage = shootOffStage;
 		this.arenaStage = arenaStage;
@@ -125,13 +125,13 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, resetter, "arena", shotTimerModel, this);
 		}
 
-		this.setPrefSize(640, 480);
+		setPrefSize(640, 480);
 
-		this.setOnKeyPressed((event) -> canvasKeyPressed(event));
+		setOnKeyPressed((event) -> canvasKeyPressed(event));
 
-		this.setOnMouseEntered((event) -> requestFocus());
+		setOnMouseEntered((event) -> requestFocus());
 
-		this.setOnMouseClicked((event) -> {
+		setOnMouseClicked((event) -> {
 			canvasManager.toggleTargetSelection(Optional.empty());
 		});
 
@@ -143,7 +143,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 			canvasManager.setBackgroundFit(arenaStage.getWidth(), arenaStage.getHeight());
 		});
 
-		this.setStyle("-fx-background-color: #333333;");
+		setStyle("-fx-background-color: #333333;");
 	}
 
 	public void setArenaPaneMirror(ProjectorArenaPane mirroredArenaPane) {
@@ -639,7 +639,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	 *            projection for the projection arena controlled by this class
 	 */
 	public void setFeedCanvasManager(CanvasManager canvasManager) {
-		this.feedCanvasManager = canvasManager;
+		feedCanvasManager = canvasManager;
 
 		if (arenaStage != null) {
 			arenaStage.getScene().setOnMouseMoved((event) -> {

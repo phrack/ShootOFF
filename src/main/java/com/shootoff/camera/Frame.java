@@ -17,7 +17,7 @@ public class Frame {
 	}
 
 	public Frame(BufferedImage bimg, long timestamp) {
-		this.mat = Camera.bufferedImageToMat(bimg);
+		mat = Camera.bufferedImageToMat(bimg);
 		this.timestamp = timestamp;
 	}
 

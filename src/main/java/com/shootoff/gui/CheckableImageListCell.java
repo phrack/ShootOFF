@@ -63,9 +63,9 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		this.configuredCameras = configuredCameras;
 		this.recordingCameras = recordingCameras;
 
-		this.setConverter(new DefaultStringConverter());
+		setConverter(new DefaultStringConverter());
 
-		this.itemProperty().addListener(new ChangeListener<String>() {
+		itemProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (oldValue == null || newValue == null) return;
@@ -81,14 +81,14 @@ public class CheckableImageListCell extends TextFieldListCell<String> {
 		});
 
 		if (designatedListener != null) {
-			this.setOnMouseClicked((event) -> {
+			setOnMouseClicked((event) -> {
 				if (!fetchWebcamChecked(getText())) {
-					this.setEditable(false);
+					setEditable(false);
 					return;
 				}
 
 				if (event.getClickCount() > 1 && fetchWebcamChecked(getText())) {
-					this.setEditable(true);
+					setEditable(true);
 					startEdit();
 				}
 

@@ -110,8 +110,8 @@ public class TrainingExerciseBase {
 
 	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
 		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
-		this.cameraViews = controller;
-		this.trainingExerciseContainer = controller.getTrainingExerciseContainer();
+		cameraViews = controller;
+		trainingExerciseContainer = controller.getTrainingExerciseContainer();
 
 		if (cameraViews.getArenaView().isPresent()) {
 			final Label exerciseLabel = new Label();
@@ -128,8 +128,8 @@ public class TrainingExerciseBase {
 			final TableView<ShotEntry> shotEntryTable) {
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
-		this.buttonsContainer = buttonsPane;
-		this.shotTimerTable = shotEntryTable;
+		buttonsContainer = buttonsPane;
+		shotTimerTable = shotEntryTable;
 
 		for (final CameraView cv : camerasSupervisor.getCameraViews()) {
 			final Label exerciseLabel = new Label();
@@ -165,8 +165,8 @@ public class TrainingExerciseBase {
 
 	private static class DelayPane extends GridPane {
 		public DelayPane(DelayedStartListener listener) {
-			this.getColumnConstraints().add(new ColumnConstraints(100));
-			this.setVgap(5);
+			getColumnConstraints().add(new ColumnConstraints(100));
+			setVgap(5);
 
 			final Label instructionsLabel = new Label("Set interval within which a beep will sound\n"
 					+ "to signal the start of a round.\nDefault: A round starts after a random wait\n"
@@ -174,8 +174,8 @@ public class TrainingExerciseBase {
 			instructionsLabel.setPrefSize(300, 77);
 
 			this.add(instructionsLabel, 0, 0, 2, 3);
-			this.addRow(3, new Label("Min (s)"));
-			this.addRow(4, new Label("Max (s)"));
+			addRow(3, new Label("Min (s)"));
+			addRow(4, new Label("Max (s)"));
 
 			final TextField minTextField = new TextField("4");
 			this.add(minTextField, 1, 3);

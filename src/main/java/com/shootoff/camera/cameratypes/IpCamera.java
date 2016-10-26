@@ -55,7 +55,7 @@ public class IpCamera extends CalculatedFPSCamera {
 	}
 
 	protected Webcam getWebcam() {
-		return this.ipcam;
+		return ipcam;
 	}
 
 	public static IpCamera registerIpCamera(String cameraName, URL cameraURL, Optional<String> username,

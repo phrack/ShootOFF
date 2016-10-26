@@ -63,8 +63,8 @@ public class Shot {
 		this.y = y;
 		this.timestamp = timestamp;
 		this.frame = frame;
-		this.marker = new Ellipse(x, y, markerRadius, markerRadius);
-		this.marker.setFill(colorMap.get(color));
+		marker = new Ellipse(x, y, markerRadius, markerRadius);
+		marker.setFill(colorMap.get(color));
 	}
 
 	public Shot(ShotColor color, double x, double y, long timestamp, int markerRadius) {
@@ -72,9 +72,9 @@ public class Shot {
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
-		this.marker = new Ellipse(x, y, markerRadius, markerRadius);
-		this.marker.setFill(colorMap.get(color));
-		this.frame = 0;
+		marker = new Ellipse(x, y, markerRadius, markerRadius);
+		marker.setFill(colorMap.get(color));
+		frame = 0;
 	}
 
 	public Optional<Shot> getMirroredShot() {

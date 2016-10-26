@@ -101,13 +101,13 @@ public class TargetView implements Target {
 	public TargetView(File targetFile, Group target, Map<String, String> targetTags, CanvasManager parent, 
 			boolean userDeletable) {
 		this.targetFile = targetFile;
-		this.targetGroup = target;
+		targetGroup = target;
 		this.targetTags = targetTags;
-		this.config = Optional.ofNullable(Configuration.getConfig());
+		config = Optional.ofNullable(Configuration.getConfig());
 		this.parent = Optional.of(parent);
-		this.targets = Optional.empty();
+		targets = Optional.empty();
 		this.userDeletable = userDeletable;
-		this.cameraName = parent.getCameraName();
+		cameraName = parent.getCameraName();
 
 		targetGroup.setOnMouseClicked((event) -> {
 			// Skip target selection if click to shoot is being used
@@ -127,14 +127,14 @@ public class TargetView implements Target {
 
 	// Used by the session viewer, target pane, and for testing
 	public TargetView(Group target, Map<String, String> targetTags, List<Target> targets) {
-		this.targetFile = null;
-		this.targetGroup = target;
+		targetFile = null;
+		targetGroup = target;
 		this.targetTags = targetTags;
-		this.config = Optional.empty();
-		this.parent = Optional.empty();
+		config = Optional.empty();
+		parent = Optional.empty();
 		this.targets = Optional.of(targets);
-		this.userDeletable = false;
-		this.cameraName = null;
+		userDeletable = false;
+		cameraName = null;
 
 		mousePressed();
 		mouseDragged();

@@ -141,7 +141,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	@SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
 	public void init(Configuration config) throws IOException {
 		this.config = config;
-		this.camerasSupervisor = new CamerasSupervisor(config);
+		camerasSupervisor = new CamerasSupervisor(config);
 
 		shootOFFStage = (Stage) controlsContainer.getScene().getWindow();
 
@@ -178,7 +178,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		pluginEngine = new PluginEngine(exerciseSlide);
 		pluginEngine.startWatching();
 
-		this.defaultWindowTitle = shootOFFStage.getTitle();
+		defaultWindowTitle = shootOFFStage.getTitle();
 		shootOFFStage.getIcons().addAll(
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_16x16.png")),
 				new Image(ShootOFFController.class.getResourceAsStream("/images/icon_32x32.png")),

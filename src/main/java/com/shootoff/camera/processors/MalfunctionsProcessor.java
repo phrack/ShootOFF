@@ -32,7 +32,7 @@ public class MalfunctionsProcessor implements ShotProcessor {
 	private final float prob;
 
 	public MalfunctionsProcessor(final Configuration config) {
-		this.prob = config.getMalfunctionsProbability() / 100;
+		prob = config.getMalfunctionsProbability() / 100;
 	}
 
 	public static void setUseTTS(final boolean useTTS) {
