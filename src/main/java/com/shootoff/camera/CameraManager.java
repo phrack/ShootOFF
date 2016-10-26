@@ -257,7 +257,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	// Used by click-to-shoot and tests to inject a shot via the shot detector
 	public void injectShot(ShotColor color, double x, double y, boolean scaleShot) {
-		shotDetector.addShot(color, x, y, getCurrentFrameTimestamp(), scaleShot);
+		shotDetector.addShot(color, x, y, System.currentTimeMillis(), scaleShot);
 	}
 
 	public void clearShots() {
@@ -265,14 +265,14 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 	}
 
 	public void reset() {
-		resetStartTime();
+		resetStartTime(0);
 		shotDetector.reset();
 		deduplicationProcessor.reset();
 		cameraView.reset();
 	}
 
-	private void resetStartTime() {
-		startTime = System.currentTimeMillis();
+	private void resetStartTime(long timestamp) {
+		startTime = timestamp;
 	}
 
 	@Override
@@ -779,7 +779,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	public long getCurrentFrameTimestamp() {
 		if (startTime == 0) {
-			resetStartTime();
+			resetStartTime(System.currentTimeMillis());
 			return 0;
 		}
 
@@ -788,7 +788,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 	public long cameraTimeToShotTime(long timestamp) {
 		if (startTime == 0) {
-			resetStartTime();
+			resetStartTime(timestamp);
 			return 0;
 		}
 
