@@ -161,7 +161,7 @@ public class CanvasManager implements CameraView {
 				// addArenaShot when they go through the arena camera feed's
 				// canvas manager
 				if (this instanceof MirroredCanvasManager) {
-					final long shotTimestamp = cameraManager == null ? 0 : cameraManager.getCurrentFrameTimestamp();
+					final long shotTimestamp = System.currentTimeMillis();
 
 					addShot(new Shot(shotColor, event.getX(), event.getY(), shotTimestamp, config.getMarkerRadius()),
 							false);
