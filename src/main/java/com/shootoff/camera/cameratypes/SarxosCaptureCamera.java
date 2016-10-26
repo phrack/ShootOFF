@@ -109,7 +109,8 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public synchronized boolean open() {
-		logger.trace("{} - open request isOpen {} closing {}", getName(), isOpen(), closing);
+		if (logger.isTraceEnabled())
+			logger.trace("{} - open request isOpen {} closing {}", getName(), isOpen(), closing);
 
 		if (isOpen() && !closing.get()) return true;
 
@@ -135,7 +136,8 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 	@Override
 	public synchronized void close() {
-		logger.trace("{} - close request isOpen {} closing {}", getName(), isOpen(), closing);
+		if (logger.isTraceEnabled())
+			logger.trace("{} - close request isOpen {} closing {}", getName(), isOpen(), closing);
 
 		if (isOpen() && !closing.get()) {
 			closing.set(true);
@@ -197,7 +199,8 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 
 		}
 
-		logger.trace("{} camera closed during run thread isOpen {} closing {}", getName(), isOpen(), closing);
+		if (logger.isTraceEnabled())
+			logger.trace("{} camera closed during run thread isOpen {} closing {}", getName(), isOpen(), closing);
 
 		if (!closing.get()) close();
 	}
