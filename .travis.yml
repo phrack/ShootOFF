@@ -14,8 +14,6 @@ before_script:
   - echo -e "Host dev.shootoffapp.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 before_install:
   - sudo apt-get update -qq
-  # Update Java otherwise (Travis defaults it to 1.8.0_31 does not have Alert class) 
-  - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
   - sudo apt-get install -qq --only-upgrade -y gradle
   # Required by the version of OpenIMAJ used by webcam-capture
   - sudo apt-get install -qq -y libv4l-dev
