@@ -47,6 +47,7 @@ import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.plugins.TextToSpeech;
 import com.shootoff.util.HardwareData;
+import com.shootoff.util.SystemInfo;
 import com.shootoff.util.VersionChecker;
 import com.sun.deploy.uitoolkit.impl.fx.HostServicesFactory;
 import com.sun.javafx.application.HostServicesDelegate;
@@ -684,14 +685,11 @@ public class Main extends Application {
 
 		this.primaryStage = primaryStage;
 
-		final String os = System.getProperty("os.name");
-		if (os != null) {
-			if ("Mac OS X".equals(os) && CameraFactory.getWebcams().isEmpty()) {
+			if (SystemInfo.isMacOsX() && CameraFactory.getWebcams().isEmpty()) {
 				closeNoCamera();
-			} else if (os.startsWith("Windows")) {
+			} else if (SystemInfo.isWindows()) {
 				PS3EyeCamera.init();
 			}
-		}
 
 		if (System.getProperty("javawebstart.version", null) != null) {
 			isJWS = true;
@@ -756,29 +754,24 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		// Check the comment at the top of the Camera class
 		// for more information about this hack
-		final String os = System.getProperty("os.name");
+		if (SystemInfo.isMacOsX()) {
+			nu.pattern.OpenCV.loadShared();
+			CameraFactory.getDefault();
+		} else if (SystemInfo.isLinux()) {
+			// Need to ensure v4l1compat is preloaded if it exists otherwise
+			// OpenCV won't work
+			final File v4lCompat = new File("/usr/lib/libv4l/v4l1compat.so");
 
-		if (os != null) {
-			if ("Mac OS X".equals(os)) {
-				nu.pattern.OpenCV.loadShared();
-				CameraFactory.getDefault();
-			} else if (os.startsWith("Linux")) {
-				// Need to ensure v4l1compat is preloaded if it exists otherwise
-				// OpenCV won't work
-				final File v4lCompat = new File("/usr/lib/libv4l/v4l1compat.so");
+			if (v4lCompat.exists()) {
+				final String preload = System.getenv("LD_PRELOAD");
 
-				if (v4lCompat.exists()) {
-					final String preload = System.getenv("LD_PRELOAD");
-
-					if (preload == null || !preload.contains(v4lCompat.getPath())) {
-						closeNoV4lCompat(v4lCompat);
-					}
-				} else {
-					logger.warn("This system is running Linux, and likely therefore also v4l. "
-							+ "If ShootOFF fails to run, it's likely because you need to preload "
-							+ "v4l1compat using: "
-							+ "export LD_PRELOAD=path_to_v4l1compat; java -jar ShootOFF.jar");
+				if (preload == null || !preload.contains(v4lCompat.getPath())) {
+					closeNoV4lCompat(v4lCompat);
 				}
+			} else {
+				logger.warn("This system is running Linux, and likely therefore also v4l. "
+						+ "If ShootOFF fails to run, it's likely because you need to preload " + "v4l1compat using: "
+						+ "export LD_PRELOAD=path_to_v4l1compat; java -jar ShootOFF.jar");
 			}
 		}
 

@@ -65,6 +65,7 @@ import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.util.SystemInfo;
 import com.shootoff.util.TimerPool;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -642,10 +643,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		contextMenu.getItems().add(toggleDetectionSectors);
 
-		final String os = System.getProperty("os.name");
-
-		if (os != null && os.startsWith("Windows"))
-		{
+		if (SystemInfo.isWindows()) {
 			final MenuItem cameraMenuItem = new MenuItem("Configure Camera");
 
 			cameraMenuItem.setOnAction((event) -> {

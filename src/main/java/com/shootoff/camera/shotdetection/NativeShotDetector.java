@@ -6,6 +6,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Frame;
 import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.util.SystemInfo;
 
 public class NativeShotDetector extends FrameProcessingShotDetector {
 	private final CameraManager cameraManager;
@@ -24,13 +25,12 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 		// TODO: Remove this flag when no longer loading dummy detector
 		boolean USE_NATIVE_DETECTION = false;
 
-		final String os = System.getProperty("os.name");
 		// Do to an oddity in the JVM, this is actually the JRE bitness,
 		// which is what we want in this case
 		final String arch = System.getProperty("os.arch");
 
 		// Only support 64-bit Windows and Linux
-		return USE_NATIVE_DETECTION && arch.contains("64") && (os.contains("Windows") || os.contains("Linux"));
+		return USE_NATIVE_DETECTION && arch.contains("64") && (SystemInfo.isWindows() || SystemInfo.isLinux());
 	}
 
 	public NativeShotDetector(final CameraManager cameraManager, final CameraView cameraView) {

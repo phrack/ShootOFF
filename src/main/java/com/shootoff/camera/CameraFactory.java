@@ -31,9 +31,11 @@ import com.github.sarxos.webcam.WebcamCompositeDriver;
 import com.github.sarxos.webcam.ds.buildin.WebcamDefaultDriver;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDevice;
 import com.github.sarxos.webcam.ds.ipcam.IpCamDriver;
+import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.IpCamera;
 import com.shootoff.camera.cameratypes.SarxosCaptureCamera;
+import com.shootoff.util.SystemInfo;
 
 public final class CameraFactory {
 	private static final Logger logger = LoggerFactory.getLogger(CameraFactory.class);
@@ -65,7 +67,11 @@ public final class CameraFactory {
 	public static class CompositeDriver extends WebcamCompositeDriver {
 		public CompositeDriver() {
 			super();
-			add(new WebcamDefaultDriver());
+			if (SystemInfo.isArm() && SystemInfo.isLinux()) {
+				add(new V4l4jDriver());
+			} else {
+				add(new WebcamDefaultDriver());
+			}
 			add(new IpCamDriver());
 		}
 	}
@@ -73,7 +79,7 @@ public final class CameraFactory {
 	static {
 		Webcam.setDriver(new CompositeDriver());
 
-		if ("Mac OS X".equals(System.getProperty("os.name"))) {
+		if (SystemInfo.isMacOsX()) {
 			isMac = true;
 			defaultWebcam = Webcam.getDefault();
 			knownWebcams = new ArrayList<>();
