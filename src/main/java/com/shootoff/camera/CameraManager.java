@@ -61,7 +61,7 @@ import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
-import javafx.embed.swing.SwingFXUtils;
+import com.shootoff.util.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 import javafx.scene.control.Label;

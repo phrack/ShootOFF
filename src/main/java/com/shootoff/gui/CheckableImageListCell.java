@@ -35,7 +35,7 @@ import com.shootoff.camera.cameratypes.Camera;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingFXUtils;
+import com.shootoff.util.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.cell.TextFieldListCell;

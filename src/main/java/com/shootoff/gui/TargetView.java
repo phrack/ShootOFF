@@ -43,7 +43,7 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.animation.SpriteAnimation;
 
 import javafx.animation.Animation.Status;
-import javafx.embed.swing.SwingFXUtils;
+import com.shootoff.util.SwingFXUtils;
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;

@@ -20,7 +20,7 @@ package com.shootoff.targets.animation;
 
 import java.awt.image.BufferedImage;
 
-import javafx.embed.swing.SwingFXUtils;
+import com.shootoff.util.SwingFXUtils;
 import javafx.scene.image.Image;
 
 public class ImageFrame {
