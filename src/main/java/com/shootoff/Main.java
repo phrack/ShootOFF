@@ -45,6 +45,7 @@ import com.shootoff.camera.cameratypes.PS3EyeCamera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.headless.HeadlessController;
 import com.shootoff.plugins.TextToSpeech;
 import com.shootoff.util.HardwareData;
 import com.shootoff.util.SystemInfo;
@@ -553,7 +554,11 @@ public class Main extends Application {
 		TextToSpeech.say("");
 
 		if (config.isFirstRun()) {
-			config.setUseErrorReporting(showFirstRunMessage());
+			if (config.isHeadless()) {
+				config.setUseErrorReporting(false);
+			} else {
+				config.setUseErrorReporting(showFirstRunMessage());
+			}
 
 			config.setFirstRun(false);
 			try {
@@ -570,6 +575,14 @@ public class Main extends Application {
 			logger.info("Error reporting has been disabled.");
 		}
 
+		if (config.isHeadless()) {
+			new HeadlessController();
+		} else {
+			startGui(config);
+		}
+	}
+
+	private void startGui(Configuration config) {
 		try {
 			final FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
 			loader.load();
@@ -685,11 +698,11 @@ public class Main extends Application {
 
 		this.primaryStage = primaryStage;
 
-			if (SystemInfo.isMacOsX() && CameraFactory.getWebcams().isEmpty()) {
-				closeNoCamera();
-			} else if (SystemInfo.isWindows()) {
-				PS3EyeCamera.init();
-			}
+		if (SystemInfo.isMacOsX() && CameraFactory.getWebcams().isEmpty()) {
+			closeNoCamera();
+		} else if (SystemInfo.isWindows()) {
+			PS3EyeCamera.init();
+		}
 
 		if (System.getProperty("javawebstart.version", null) != null) {
 			isJWS = true;
