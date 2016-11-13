@@ -100,9 +100,9 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		calibrationLabel = null;
 	}
 
-	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Pane trainingExerciseContainer,
-			Configuration config, Resetter resetter, ObservableList<ShotEntry> shotTimerModel) {
-		this.config = config;
+	public ProjectorArenaPane(Stage arenaStage, Stage shootOffStage, Pane trainingExerciseContainer, Resetter resetter,
+			ObservableList<ShotEntry> shotTimerModel) {
+		config = Configuration.getConfig();
 
 		arenaCanvasGroup = new Group();
 		calibrationLabel = new Label("Needs Calibration");
@@ -119,8 +119,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		this.arenaStage = arenaStage;
 		this.trainingExerciseContainer = trainingExerciseContainer;
 
-		if (shotTimerModel == null) {
-			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, resetter, "arena", null, this);
+		if (config.isHeadless()) {
+			canvasManager = new CanvasManager(arenaCanvasGroup, resetter, "arena", null);
 		} else {
 			canvasManager = new MirroredCanvasManager(arenaCanvasGroup, resetter, "arena", shotTimerModel, this);
 		}
@@ -250,7 +250,11 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		Optional<Screen> projector = Optional.empty();
 
-		if (Screen.getScreens().size() == 2) {
+		if (config.isHeadless()) {
+			logger.debug("Headless, assuming smallest display is projector");
+
+			projector = findSmallestScreen();
+		} else if (Screen.getScreens().size() == 2) {
 			logger.debug("Two screens present");
 
 			homeScreen = getStageHomeScreen(shootOffStage);
@@ -268,22 +272,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		} else if (Screen.getScreens().size() > 2) {
 			logger.debug("More than two screens present");
 
-			Screen smallest = null;
-
-			// Find screen with the smallest area
-			for (final Screen screen : Screen.getScreens()) {
-				if (smallest == null) {
-					smallest = screen;
-				} else {
-					if (screen.getBounds().getHeight()
-							* screen.getBounds().getWidth() < smallest.getBounds().getHeight()
-									* smallest.getBounds().getWidth()) {
-						smallest = screen;
-					}
-				}
-			}
-
-			projector = Optional.ofNullable(smallest);
+			projector = findSmallestScreen();
 		}
 
 		if (projector.isPresent()) {
@@ -309,6 +298,24 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		} else {
 			logger.debug("Did not find screen that is a likely projector");
 		}
+	}
+
+	private Optional<Screen> findSmallestScreen() {
+		Screen smallest = null;
+
+		// Find screen with the smallest area
+		for (final Screen screen : Screen.getScreens()) {
+			if (smallest == null) {
+				smallest = screen;
+			} else {
+				if (screen.getBounds().getHeight() * screen.getBounds().getWidth() < smallest.getBounds().getHeight()
+						* smallest.getBounds().getWidth()) {
+					smallest = screen;
+				}
+			}
+		}
+
+		return Optional.ofNullable(smallest);
 	}
 
 	public void toggleArena() {
