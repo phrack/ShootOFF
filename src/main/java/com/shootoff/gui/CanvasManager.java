@@ -551,7 +551,7 @@ public class CanvasManager implements CameraView {
 			if (config.useRedLaserSound()
 					&& (ShotColor.RED.equals(shot.getColor()) || ShotColor.INFRARED.equals(shot.getColor()))) {
 				TrainingExerciseBase.playSound(config.getRedLaserSound());
-			} else if (config.useGreenLaserSound() && Color.GREEN.equals(shot.getColor())) {
+			} else if (config.useGreenLaserSound() && ShotColor.GREEN.equals(shot.getColor())) {
 				TrainingExerciseBase.playSound(config.getGreenLaserSound());
 			}
 		}
