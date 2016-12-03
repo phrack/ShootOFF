@@ -56,6 +56,11 @@ public class ImageRegion extends ImageView implements TargetRegion {
 
 		setImage(new Image(imageStream));
 	}
+	
+	public ImageRegion(Image image) {
+		super(image);
+		this.imageFile = null;
+	}
 
 	public boolean onFirstFrame() {
 		return animation.isPresent() ? getImage().equals(animation.get().getFirstFrame()) : true;

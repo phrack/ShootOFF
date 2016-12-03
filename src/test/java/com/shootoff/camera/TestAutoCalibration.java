@@ -79,7 +79,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		cameraManager.setCalibrationManager(
 				new CalibrationManager(new CalibrationConfigurator() {
 					@Override
-					public void toggleCalibrating() {}
+					public void toggleCalibrating(boolean isCalibrating) {}
 					
 					@Override
 					public CalibrationOption getCalibratedFeedBehavior() {

@@ -18,7 +18,10 @@
 
 package com.shootoff.headless;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,20 +38,32 @@ import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.ExerciseListener;
 import com.shootoff.gui.Resetter;
+import com.shootoff.gui.TargetView;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.headless.protocol.AddTargetMessage;
+import com.shootoff.headless.protocol.Message;
+import com.shootoff.headless.protocol.MessageListener;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginEngine;
+import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.Target;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class HeadlessController implements CameraErrorView, Resetter, ExerciseListener, CalibrationConfigurator {
+public class HeadlessController implements CameraErrorView, Resetter, ExerciseListener, CalibrationConfigurator,
+		QRCodeListener, ConnectionListener, MessageListener {
 	private static final Logger logger = LoggerFactory.getLogger(HeadlessController.class);
 
 	private final Configuration config;
 	private final CamerasSupervisor camerasSupervisor;
+	private final Map<UUID, Target> targets = new HashMap<>();
+	
+	private CanvasManager arenaCanvasManager;
+	private Target qrCodeTarget;
 
 	public HeadlessController() {
 		config = Configuration.getConfig();
@@ -74,6 +89,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			final ProjectorArenaPane arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer,
 					this, null);
 
+			arenaCanvasManager = arenaPane.getCanvasManager();
+
 			arenaStage.setTitle("Projector Arena");
 			arenaStage.setScene(new Scene(arenaPane));
 			arenaStage.setFullScreenExitHint("");
@@ -83,9 +100,9 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 					this);
 
 			arenaPane.setCalibrationManager(calibrationManager);
-
 			arenaPane.toggleArena();
 			arenaPane.autoPlaceArena();
+
 			calibrationManager.enableCalibration();
 		}
 	}
@@ -145,5 +162,41 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	public void calibratedFeedBehaviorsChanged() {}
 
 	@Override
-	public void toggleCalibrating() {}
+	public void toggleCalibrating(boolean isCalibrating) {
+		if (!isCalibrating) {
+			final HeadlessServer headlessServer = new BluetoothServer(this);
+			headlessServer.startReading(this, this);
+		}
+	}
+
+	@Override
+	public void qrCodeCreated(Image qrCodeImage) {
+		final Group targetGroup = new Group();
+		final ImageRegion qrCodeRegion = new ImageRegion(qrCodeImage);
+		qrCodeRegion.getAllTags().put(TargetView.TAG_IGNORE_HIT, "true");
+
+		targetGroup.getChildren().add(qrCodeRegion);
+
+		qrCodeTarget = arenaCanvasManager.addTarget(null, targetGroup, new HashMap<String, String>(), false);
+	}
+
+	@Override
+	public void connectionEstablished() {
+		if (qrCodeTarget != null) {
+			arenaCanvasManager.removeTarget(qrCodeTarget);
+			qrCodeTarget = null;
+		}
+	}
+
+	@Override
+	public void messageReceived(Message message) {
+		if (message instanceof AddTargetMessage) {
+			final AddTargetMessage addTarget = (AddTargetMessage) message;
+			Optional<Target> target = arenaCanvasManager.addTarget(addTarget.getTargetFile());
+			
+			if (target.isPresent()) {
+				targets.put(addTarget.getUuid(), target.get());
+			}
+		}
+	}
 }

@@ -507,7 +507,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private CanvasManager feedCanvasManager;
 
 	private void cursorWarningToggle(boolean mouseEntered) {
-		if (feedCanvasManager == null || calibrationManager.isCalibrating()) return;
+		if (feedCanvasManager == null || calibrationManager == null || 
+				calibrationManager.isCalibrating()) return;
 
 		// If everything is still the same, return
 		if (mouseEntered && showingCursorWarning && !calibrationManager.isCalibrating()) return;

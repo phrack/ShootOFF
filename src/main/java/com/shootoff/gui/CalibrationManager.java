@@ -110,7 +110,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		isCalibrating.set(true);
 
-		calibrationConfigurator.toggleCalibrating();
+		calibrationConfigurator.toggleCalibrating(true);
 
 		// Sets calibrating and not detecting
 		calibratingCameraManager.setCalibrating(true);
@@ -133,7 +133,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		TimerPool.cancelTimer(autoCalibrationFuture);
 
-		calibrationConfigurator.toggleCalibrating();
+		calibrationConfigurator.toggleCalibrating(false);
 
 		removeFullScreenRequest();
 		removeAutoCalibrationMessage();

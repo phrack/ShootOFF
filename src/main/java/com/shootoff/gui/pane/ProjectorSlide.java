@@ -110,9 +110,9 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	}
 
 	@Override
-	public void toggleCalibrating() {
+	public void toggleCalibrating(boolean isCalibrating) {
 		final Runnable toggleCalibrationAction = () -> {
-			if (calibrateButton.getText().equals("Calibrate"))
+			if (isCalibrating)
 				calibrateButton.setText("Stop Calibrating");
 			else
 				calibrateButton.setText("Calibrate");
