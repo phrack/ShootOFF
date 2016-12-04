@@ -43,6 +43,10 @@ import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
+import com.shootoff.headless.protocol.MoveTargetMessage;
+import com.shootoff.headless.protocol.RemoveTargetMessage;
+import com.shootoff.headless.protocol.ResizeTargetMessage;
+import com.shootoff.headless.protocol.TargetMessage;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.targets.ImageRegion;
@@ -61,7 +65,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	private final Configuration config;
 	private final CamerasSupervisor camerasSupervisor;
 	private final Map<UUID, Target> targets = new HashMap<>();
-	
+
 	private CanvasManager arenaCanvasManager;
 	private Target qrCodeTarget;
 
@@ -190,12 +194,39 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void messageReceived(Message message) {
+		if (message instanceof TargetMessage) {
+			handleTargetMessage((TargetMessage) message);
+		}
+	}
+
+	private void handleTargetMessage(TargetMessage message) {
 		if (message instanceof AddTargetMessage) {
 			final AddTargetMessage addTarget = (AddTargetMessage) message;
 			Optional<Target> target = arenaCanvasManager.addTarget(addTarget.getTargetFile());
-			
+
 			if (target.isPresent()) {
 				targets.put(addTarget.getUuid(), target.get());
+			}
+		} else {
+			final UUID targetUuid = message.getUuid();
+			if (!targets.containsKey(targetUuid)) {
+				// TODO: Send error to tablet
+				logger.error("A target with UUID {} does not exist to perform operation {}", targetUuid,
+						message.getClass().getName());
+				return;
+			}
+
+			final Target t = targets.get(targetUuid);
+
+			if (message instanceof MoveTargetMessage) {
+				final MoveTargetMessage moveTarget = (MoveTargetMessage) message;
+				t.setPosition(moveTarget.getNewX(), moveTarget.getNewY());
+			} else if (message instanceof ResizeTargetMessage) {
+				final ResizeTargetMessage resizeTarget = (ResizeTargetMessage) message;
+				t.setDimensions(resizeTarget.getNewWidth(), resizeTarget.getNewHeight());
+			} else if (message instanceof RemoveTargetMessage) {
+				arenaCanvasManager.removeTarget(t);
+				targets.remove(targetUuid);
 			}
 		}
 	}

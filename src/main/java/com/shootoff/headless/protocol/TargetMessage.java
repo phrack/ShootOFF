@@ -18,19 +18,16 @@
 
 package com.shootoff.headless.protocol;
 
-import java.io.File;
 import java.util.UUID;
 
-public class AddTargetMessage extends TargetMessage {
-	private final File targetFile;
+public class TargetMessage extends Message {
+	private final UUID uuid;
 
-	public AddTargetMessage(UUID uuid, File targetFile) {
-		super(uuid);
-		
-		this.targetFile = targetFile;
+	public TargetMessage(UUID uuid) {
+		this.uuid = uuid;
 	}
 
-	public File getTargetFile() {
-		return targetFile;
+	public UUID getUuid() {
+		return uuid;
 	}
 }
