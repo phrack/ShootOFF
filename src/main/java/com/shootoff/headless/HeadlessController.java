@@ -18,6 +18,7 @@
 
 package com.shootoff.headless;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
+import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
@@ -237,6 +239,12 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		config.setMalfunctionsProbability(configurationData.getMalfunctionsProbability());
 
 		config.setShowArenaShotMarkers(configurationData.showArenaShotMarkers());
+
+		try {
+			config.writeConfigurationFile();
+		} catch (ConfigurationException | IOException e) {
+			logger.error("Failed to save headless configuration", e);
+		}
 	}
 
 	private void handleTargetMessage(TargetMessage message) {
