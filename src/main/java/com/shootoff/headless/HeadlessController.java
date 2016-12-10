@@ -82,9 +82,17 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		config = Configuration.getConfig();
 		camerasSupervisor = new CamerasSupervisor(config);
 
-		final Optional<Camera> defaultCamera = CameraFactory.getDefault();
-		if (defaultCamera.isPresent()) {
-			final Camera c = defaultCamera.get();
+		final Map<String, Camera> configuredCameras = config.getWebcams();
+		final Optional<Camera> camera;
+
+		if (configuredCameras.isEmpty()) {
+			camera = CameraFactory.getDefault();
+		} else {
+			camera = Optional.of(configuredCameras.values().iterator().next());
+		}
+
+		if (camera.isPresent()) {
+			final Camera c = camera.get();
 
 			if (c.isLocked() && !c.isOpen()) {
 				logger.error("Default camera is locked, cannot proceed");
