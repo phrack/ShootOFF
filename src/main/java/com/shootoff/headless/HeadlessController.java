@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -59,8 +61,10 @@ import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
 import com.shootoff.headless.protocol.SetConfigurationMessage;
 import com.shootoff.headless.protocol.TargetMessage;
+import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginEngine;
+import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.Target;
 
@@ -77,7 +81,10 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	private final Configuration config;
 	private final CamerasSupervisor camerasSupervisor;
 	private final Map<UUID, Target> targets = new HashMap<>();
+	private final Set<TrainingExercise> trainingExerices = new HashSet<>();
+	private final Set<TrainingExercise> projectorTrainingExercises = new HashSet<>();
 
+	private PluginEngine pluginEngine;
 	private CanvasManager arenaCanvasManager;
 	private Target qrCodeTarget;
 
@@ -96,42 +103,73 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			camera = Optional.of(configuredCameras.values().iterator().next());
 		}
 
-		if (camera.isPresent()) {
-			final Camera c = camera.get();
-
-			if (c.isLocked() && !c.isOpen()) {
-				logger.error("Default camera is locked, cannot proceed");
-				return;
-			}
-
-			final CanvasManager canvasManager = new CanvasManager(new Group(), this, "Default", null);
-			final CameraManager cameraManager = camerasSupervisor.addCameraManager(c, this, canvasManager);
-
-			final Stage arenaStage = new Stage();
-			// TODO: Pass controls added to this pane to the device controlling
-			// SBC
-			final Pane trainingExerciseContainer = new Pane();
-
-			final ProjectorArenaPane arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer,
-					this, null);
-
-			arenaCanvasManager = arenaPane.getCanvasManager();
-
-			arenaStage.setTitle("Projector Arena");
-			arenaStage.setScene(new Scene(arenaPane));
-			arenaStage.setFullScreenExitHint("");
-
-			// TODO: Camera views to non-null value to handle calibration issues
-			final CalibrationManager calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null,
-					this);
-
-			arenaPane.setCalibrationManager(calibrationManager);
-			arenaPane.toggleArena();
-			arenaPane.autoPlaceArena();
-
-			calibrationManager.enableCalibration();
-		} else {
+		if (!camera.isPresent()) {
 			logger.error("There are no cameras attached to the computer.");
+			return;
+		}
+
+		final Camera c = camera.get();
+
+		if (c.isLocked() && !c.isOpen()) {
+			logger.error("Default camera is locked, cannot proceed");
+			return;
+		}
+
+		initializePluginEngine();
+
+		final CanvasManager canvasManager = new CanvasManager(new Group(), this, "Default", null);
+		final CameraManager cameraManager = camerasSupervisor.addCameraManager(c, this, canvasManager);
+
+		final Stage arenaStage = new Stage();
+		// TODO: Pass controls added to this pane to the device controlling
+		// SBC
+		final Pane trainingExerciseContainer = new Pane();
+
+		final ProjectorArenaPane arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this,
+				null);
+
+		arenaCanvasManager = arenaPane.getCanvasManager();
+
+		arenaStage.setTitle("Projector Arena");
+		arenaStage.setScene(new Scene(arenaPane));
+		arenaStage.setFullScreenExitHint("");
+
+		// TODO: Camera views to non-null value to handle calibration issues
+		final CalibrationManager calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null,
+				this);
+
+		arenaPane.setCalibrationManager(calibrationManager);
+		arenaPane.toggleArena();
+		arenaPane.autoPlaceArena();
+
+		calibrationManager.enableCalibration();
+	}
+
+	private void initializePluginEngine() {
+		try {
+			pluginEngine = new PluginEngine(new PluginListener() {
+				@Override
+				public void registerExercise(TrainingExercise exercise) {
+					trainingExerices.add(exercise);
+				}
+
+				@Override
+				public void registerProjectorExercise(TrainingExercise exercise) {
+					projectorTrainingExercises.add(exercise);
+				}
+
+				@Override
+				public void unregisterExercise(TrainingExercise exercise) {
+					if (exercise instanceof ProjectorTrainingExerciseBase) {
+						projectorTrainingExercises.remove(exercise);
+					} else {
+						trainingExerices.remove(exercise);
+					}
+				}
+			});
+			pluginEngine.startWatching();
+		} catch (IOException e) {
+			logger.error("Failed to start plugin engine", e);
 		}
 	}
 
@@ -212,8 +250,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public PluginEngine getPluginEngine() {
-		// TODO: Does this need to be implemented?
-		return null;
+		return pluginEngine;
 	}
 
 	@Override
