@@ -45,6 +45,7 @@ import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
 import com.shootoff.headless.protocol.MoveTargetMessage;
 import com.shootoff.headless.protocol.RemoveTargetMessage;
+import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
 import com.shootoff.headless.protocol.TargetMessage;
 import com.shootoff.plugins.TrainingExercise;
@@ -194,7 +195,9 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void messageReceived(Message message) {
-		if (message instanceof TargetMessage) {
+		if (message instanceof ResetMessage) {
+			reset();
+		} else if (message instanceof TargetMessage) {
 			handleTargetMessage((TargetMessage) message);
 		}
 	}
@@ -202,7 +205,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	private void handleTargetMessage(TargetMessage message) {
 		if (message instanceof AddTargetMessage) {
 			final AddTargetMessage addTarget = (AddTargetMessage) message;
-			Optional<Target> target = arenaCanvasManager.addTarget(addTarget.getTargetFile());
+			final Optional<Target> target = arenaCanvasManager.addTarget(addTarget.getTargetFile());
 
 			if (target.isPresent()) {
 				targets.put(addTarget.getUuid(), target.get());
