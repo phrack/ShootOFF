@@ -179,7 +179,6 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	}
 
 	private void sendCameraError(Camera webcam, String format, Object... args) {
-
 		if (server.isPresent()) {
 			final Optional<String> cameraUserName = config.getWebcamsUserName(webcam);
 			final String cameraName;
