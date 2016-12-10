@@ -26,7 +26,7 @@ public class AddTargetMessage extends TargetMessage {
 
 	public AddTargetMessage(UUID uuid, File targetFile) {
 		super(uuid);
-		
+
 		this.targetFile = targetFile;
 	}
 

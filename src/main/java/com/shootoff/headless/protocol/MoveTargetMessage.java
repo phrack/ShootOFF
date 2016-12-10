@@ -26,7 +26,7 @@ public class MoveTargetMessage extends TargetMessage {
 
 	public MoveTargetMessage(UUID uuid, double newX, double newY) {
 		super(uuid);
-		
+
 		this.newX = newX;
 		this.newY = newY;
 	}

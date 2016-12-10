@@ -41,12 +41,16 @@ import com.shootoff.gui.Resetter;
 import com.shootoff.gui.TargetView;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
+import com.shootoff.headless.protocol.ConfigurationData;
+import com.shootoff.headless.protocol.CurrentConfigurationMessage;
+import com.shootoff.headless.protocol.GetConfigurationMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
 import com.shootoff.headless.protocol.MoveTargetMessage;
 import com.shootoff.headless.protocol.RemoveTargetMessage;
 import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
+import com.shootoff.headless.protocol.SetConfigurationMessage;
 import com.shootoff.headless.protocol.TargetMessage;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.engine.PluginEngine;
@@ -69,6 +73,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	private CanvasManager arenaCanvasManager;
 	private Target qrCodeTarget;
+
+	private Optional<HeadlessServer> server = Optional.empty();
 
 	public HeadlessController() {
 		config = Configuration.getConfig();
@@ -170,6 +176,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	public void toggleCalibrating(boolean isCalibrating) {
 		if (!isCalibrating) {
 			final HeadlessServer headlessServer = new BluetoothServer(this);
+			server = Optional.of(headlessServer);
 			headlessServer.startReading(this, this);
 		}
 	}
@@ -195,11 +202,41 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void messageReceived(Message message) {
-		if (message instanceof ResetMessage) {
+		if (message instanceof GetConfigurationMessage) {
+			sendConfiguration();
+		} else if (message instanceof ResetMessage) {
 			reset();
+		} else if (message instanceof SetConfigurationMessage) {
+			final SetConfigurationMessage configMessage = (SetConfigurationMessage) message;
+			setConfiguration(configMessage.getConfigurationData());
 		} else if (message instanceof TargetMessage) {
 			handleTargetMessage((TargetMessage) message);
 		}
+	}
+
+	private void sendConfiguration() {
+		if (server.isPresent()) {
+			final ConfigurationData configurationData = new ConfigurationData(config.getMarkerRadius(),
+					config.ignoreLaserColor(), config.getIgnoreLaserColorName(), config.useVirtualMagazine(),
+					config.getVirtualMagazineCapacity(), config.useMalfunctions(), config.getMalfunctionsProbability(),
+					config.showArenaShotMarkers());
+			server.get().sendMessage(new CurrentConfigurationMessage(configurationData));
+		}
+	}
+
+	private void setConfiguration(ConfigurationData configurationData) {
+		config.setMarkerRadius(configurationData.getMarkerRadius());
+
+		config.setIgnoreLaserColor(configurationData.isIgnoreLaserColor());
+		config.setIgnoreLaserColorName(configurationData.getIgnoreLaserColorName());
+
+		config.setUseVirtualMagazine(configurationData.useVirtualMagazine());
+		config.setVirtualMagazineCapacity(configurationData.getVirtualMagazineCapacity());
+
+		config.setMalfunctions(configurationData.useMalfunctions());
+		config.setMalfunctionsProbability(configurationData.getMalfunctionsProbability());
+
+		config.setShowArenaShotMarkers(configurationData.showArenaShotMarkers());
 	}
 
 	private void handleTargetMessage(TargetMessage message) {
