@@ -817,7 +817,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			cameraAlert.setResizable(true);
 			cameraAlert.getDialogPane().getScene().getWindow().requestFocus();
 
-			String messageFormat;
+			final String messageFormat;
 
 			if (allCamerasFailed) {
 				messageFormat = "Cannot open the webcam %s. It is being "
@@ -849,7 +849,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			final Alert cameraAlert = new Alert(AlertType.ERROR);
 
 			final Optional<String> cameraName = config.getWebcamsUserName(webcam);
-			final String messageFormat = "ShootOFF can no longer communicate with the webcam %s. Was it unplugged?";
+			final String messageFormat = CameraErrorView.MISSING_ERROR;
 			String message;
 			if (cameraName.isPresent()) {
 				message = String.format(messageFormat, cameraName.get());
@@ -872,9 +872,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			final Alert cameraAlert = new Alert(AlertType.WARNING);
 
 			final Optional<String> cameraName = config.getWebcamsUserName(webcam);
-			final String messageFormat = "The FPS from %s has dropped to %f, which is too low for reliable shot detection. Some"
-					+ " shots may be missed. You may be able to raise the FPS by closing other applications.";
-			String message;
+			final String messageFormat = CameraErrorView.FPS_WARNING;
+			final String message;
 			if (cameraName.isPresent()) {
 				message = String.format(messageFormat, cameraName.get(), fps);
 			} else {
@@ -896,13 +895,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			final Alert brightnessAlert = new Alert(AlertType.WARNING);
 
 			final Optional<String> cameraName = config.getWebcamsUserName(webcam);
-			final String messageFormat = "The camera %s is streaming frames that are very bright. "
-					+ " This will increase the odds of shots falsely being detected."
-					+ " For best results, please do any mix of the following:%n%n"
-					+ "-Turn off auto white balance and auto focus on your webcam and reduce the brightness%n"
-					+ "-Remove any bright light sources in the camera's view%n"
-					+ "-Turn down your projector's brightness and contrast";
-			String message;
+			final String messageFormat = CameraErrorView.BRIGHTNESS_WARNING;
+			final String message;
 			if (cameraName.isPresent()) {
 				message = String.format(messageFormat, cameraName.get());
 			} else {

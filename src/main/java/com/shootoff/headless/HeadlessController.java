@@ -19,7 +19,10 @@
 package com.shootoff.headless;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +48,8 @@ import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
+import com.shootoff.headless.protocol.ErrorMessage;
+import com.shootoff.headless.protocol.ErrorMessage.ErrorType;
 import com.shootoff.headless.protocol.GetConfigurationMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
@@ -125,6 +130,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			arenaPane.autoPlaceArena();
 
 			calibrationManager.enableCalibration();
+		} else {
+			logger.error("There are no cameras attached to the computer.");
 		}
 	}
 
@@ -135,22 +142,58 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void showCameraLockError(Camera webcam, boolean allCamerasFailed) {
-		// TODO: Send to device controlling SBC
+		if (!server.isPresent()) return;
+
+		final String messageFormat;
+
+		if (allCamerasFailed) {
+			messageFormat = "Cannot open the webcam %s. It is being "
+					+ "used by another program or it is an IPCam with the wrong credentials. This "
+					+ "is the only configured camera, thus ShootOFF must close.";
+		} else {
+			messageFormat = "Cannot open the webcam %s. It is being "
+					+ "used by another program, it is an IPCam with the wrong credentials, or you "
+					+ "have ShootOFF open more than once.";
+		}
+
+		final Optional<String> webcamName = config.getWebcamsUserName(webcam);
+		final String message = String.format(messageFormat,
+				webcamName.isPresent() ? webcamName.get() : webcam.getName());
+
+		server.get().sendMessage(new ErrorMessage(message, ErrorType.TARGET));
 	}
 
 	@Override
 	public void showMissingCameraError(Camera webcam) {
-		// TODO: Send to device controlling SBC
+		sendCameraError(webcam, CameraErrorView.MISSING_ERROR);
 	}
 
 	@Override
 	public void showFPSWarning(Camera webcam, double fps) {
-		// TODO: Send to device controlling SBC
+		sendCameraError(webcam, CameraErrorView.FPS_WARNING, fps);
 	}
 
 	@Override
 	public void showBrightnessWarning(Camera webcam) {
-		// TODO: Send to device controlling SBC
+		sendCameraError(webcam, CameraErrorView.BRIGHTNESS_WARNING);
+	}
+
+	private void sendCameraError(Camera webcam, String format, Object... args) {
+
+		if (server.isPresent()) {
+			final Optional<String> cameraUserName = config.getWebcamsUserName(webcam);
+			final String cameraName;
+			if (cameraUserName.isPresent()) {
+				cameraName = cameraUserName.get();
+			} else {
+				cameraName = webcam.getName();
+			}
+
+			final List<Object> argsList = new ArrayList<Object>(Arrays.asList(args));
+			argsList.add(0, cameraName);
+
+			server.get().sendMessage(new ErrorMessage(String.format(format, argsList.toArray()), ErrorType.CAMERA));
+		}
 	}
 
 	@Override
@@ -266,9 +309,15 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		} else {
 			final UUID targetUuid = message.getUuid();
 			if (!targets.containsKey(targetUuid)) {
-				// TODO: Send error to tablet
-				logger.error("A target with UUID {} does not exist to perform operation {}", targetUuid,
+				final String errorMessage = String.format(
+						"A target with UUID {} does not exist to perform operation {}", targetUuid,
 						message.getClass().getName());
+
+				if (server.isPresent()) {
+					server.get().sendMessage(new ErrorMessage(errorMessage, ErrorType.TARGET));
+				}
+
+				logger.error(errorMessage);
 				return;
 			}
 
