@@ -71,9 +71,9 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		super(targets);
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller,
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TrainingExerciseView exerciseView,
 			ProjectorArenaPane arenaPane) {
-		super.init(config, camerasSupervisor, controller);
+		super.init(config, camerasSupervisor, exerciseView);
 		this.config = config;
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaPane = arenaPane;

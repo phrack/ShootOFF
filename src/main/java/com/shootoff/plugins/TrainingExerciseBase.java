@@ -48,8 +48,6 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
 import com.shootoff.gui.ShotEntry;
-import com.shootoff.gui.controller.ShootOFFController;
-import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.Target;
 
 import javafx.application.Platform;
@@ -87,7 +85,7 @@ public class TrainingExerciseBase {
 	@SuppressWarnings("unused") private List<Target> targets;
 	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
-	private CameraViews cameraViews;
+	private TrainingExerciseView exerciseView;
 	private VBox buttonsContainer;
 	private Pane trainingExerciseContainer;
 	private TableView<ShotEntry> shotTimerTable;
@@ -108,15 +106,15 @@ public class TrainingExerciseBase {
 		this.targets = targets;
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, ShootOFFController controller) {
-		init(config, camerasSupervisor, controller.getButtonsPane(), controller.getShotEntryTable());
-		cameraViews = controller;
-		trainingExerciseContainer = controller.getTrainingExerciseContainer();
+	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TrainingExerciseView exerciseView) {
+		init(config, camerasSupervisor, exerciseView.getButtonsPane(), exerciseView.getShotEntryTable());
+		trainingExerciseContainer = exerciseView.getTrainingExerciseContainer();
+		this.exerciseView = exerciseView;
 
-		if (cameraViews.getArenaView().isPresent()) {
+		if (exerciseView.getArenaView().isPresent()) {
 			final Label exerciseLabel = new Label();
 			exerciseLabel.setTextFill(Color.WHITE);
-			final CameraView arenaView = cameraViews.getArenaView().get();
+			final CameraView arenaView = exerciseView.getArenaView().get();
 			arenaView.addChild(exerciseLabel);
 			exerciseLabels.put(arenaView, exerciseLabel);
 		}
@@ -206,9 +204,9 @@ public class TrainingExerciseBase {
 	}
 
 	/**
-	 * Shows controls that let the user set the interval for a random
-	 * start delay in seconds. Notify interval points to a function that gets
-	 * the min and max values for the interval as parameters.
+	 * Shows controls that let the user set the interval for a random start
+	 * delay in seconds. Notify interval points to a function that gets the min
+	 * and max values for the interval as parameters.
 	 * 
 	 * @param listener
 	 *            the object to notify when the user closes this window with a
@@ -308,7 +306,6 @@ public class TrainingExerciseBase {
 		exerciseButtons.remove(exerciseButton);
 	}
 
-
 	/**
 	 * Adds a column to the shot timer table. The <tt>name</tt> is used to
 	 * reference this column for the purposes of setting text and cleaning up.
@@ -351,7 +348,7 @@ public class TrainingExerciseBase {
 		if (shotTimerTable != null && shotTimerTable.getItems() != null) {
 			final Runnable shotTimerColumnTextSetter = () -> {
 				if (shotTimerTable.getItems().size() == 0) {
-					logger.error("Trying to set shot timer column text on an empty shot timer list", 
+					logger.error("Trying to set shot timer column text on an empty shot timer list",
 							new AssertionError("Shot timer table is empty"));
 					return;
 				}
@@ -420,7 +417,7 @@ public class TrainingExerciseBase {
 			changedRowColor = false;
 		}
 
-		if (config.getExercise().isPresent()) config.getExercise().get().reset(cameraViews.getTargets());
+		if (config.getExercise().isPresent()) config.getExercise().get().reset(exerciseView.getTargets());
 	}
 
 	/**
@@ -430,7 +427,7 @@ public class TrainingExerciseBase {
 	 *         targets known at the time this method was called)
 	 */
 	public List<Target> getCurrentTargets() {
-		return cameraViews.getTargets();
+		return exerciseView.getTargets();
 	}
 
 	/**

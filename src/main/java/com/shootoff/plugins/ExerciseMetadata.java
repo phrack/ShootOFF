@@ -83,4 +83,9 @@ public class ExerciseMetadata {
 		} else if (!version.equals(other.version)) return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return name + " " + version + " " + creator;
+	}
 }

@@ -19,6 +19,7 @@
 package com.shootoff.headless;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraErrorView;
 import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
@@ -45,14 +47,17 @@ import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.ExerciseListener;
 import com.shootoff.gui.Resetter;
+import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.TargetView;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
+import com.shootoff.headless.protocol.CurrentExercisesMessage;
 import com.shootoff.headless.protocol.ErrorMessage;
 import com.shootoff.headless.protocol.ErrorMessage.ErrorType;
 import com.shootoff.headless.protocol.GetConfigurationMessage;
+import com.shootoff.headless.protocol.GetExercisesMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
 import com.shootoff.headless.protocol.MoveTargetMessage;
@@ -60,31 +65,40 @@ import com.shootoff.headless.protocol.RemoveTargetMessage;
 import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
 import com.shootoff.headless.protocol.SetConfigurationMessage;
+import com.shootoff.headless.protocol.SetExerciseMessage;
 import com.shootoff.headless.protocol.TargetMessage;
+import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
+import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.plugins.TrainingExerciseView;
+import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.Target;
 
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class HeadlessController implements CameraErrorView, Resetter, ExerciseListener, CalibrationConfigurator,
-		QRCodeListener, ConnectionListener, MessageListener {
+		QRCodeListener, ConnectionListener, MessageListener, TrainingExerciseView {
 	private static final Logger logger = LoggerFactory.getLogger(HeadlessController.class);
 
 	private final Configuration config;
 	private final CamerasSupervisor camerasSupervisor;
 	private final Map<UUID, Target> targets = new HashMap<>();
-	private final Set<TrainingExercise> trainingExerices = new HashSet<>();
+	private final Set<TrainingExercise> trainingExercises = new HashSet<>();
 	private final Set<TrainingExercise> projectorTrainingExercises = new HashSet<>();
 
 	private PluginEngine pluginEngine;
+	private ProjectorArenaPane arenaPane;
 	private CanvasManager arenaCanvasManager;
 	private Target qrCodeTarget;
 
@@ -125,8 +139,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		// SBC
 		final Pane trainingExerciseContainer = new Pane();
 
-		final ProjectorArenaPane arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this,
-				null);
+		arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this, null);
 
 		arenaCanvasManager = arenaPane.getCanvasManager();
 
@@ -150,7 +163,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			pluginEngine = new PluginEngine(new PluginListener() {
 				@Override
 				public void registerExercise(TrainingExercise exercise) {
-					trainingExerices.add(exercise);
+					trainingExercises.add(exercise);
 				}
 
 				@Override
@@ -163,7 +176,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 					if (exercise instanceof ProjectorTrainingExerciseBase) {
 						projectorTrainingExercises.remove(exercise);
 					} else {
-						trainingExerices.remove(exercise);
+						trainingExercises.remove(exercise);
 					}
 				}
 			});
@@ -235,12 +248,75 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void setProjectorExercise(TrainingExercise exercise) {
-		// TODO: Set exercise
+		try {
+			config.setExercise(null);
+
+			final Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+			final TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(arenaCanvasManager.getTargets());
+
+			final Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+			if (plugin.isPresent()) {
+				config.setPlugin(plugin.get());
+			} else {
+				config.setPlugin(null);
+			}
+
+			config.setExercise(newExercise);
+
+			final Runnable initExercise = () -> {
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaPane);
+				newExercise.init();
+			};
+
+			if (Platform.isFxApplicationThread()) {
+				initExercise.run();
+			} else {
+				Platform.runLater(initExercise);
+			}
+
+		} catch (final ReflectiveOperationException e) {
+			final ExerciseMetadata metadata = exercise.getInfo();
+			logger.error("Failed to start projector exercise " + metadata.getName() + " " + metadata.getVersion(), e);
+		}
 	}
 
 	@Override
 	public void setExercise(TrainingExercise exercise) {
-		// TODO: Set exercise
+		try {
+			// If there is a current exercise, ensure it is destroyed
+			// before starting an new one in case it's a projector
+			// exercise that added targets that need to be removed.
+			config.setExercise(null);
+
+			if (exercise == null) return;
+
+			final Constructor<?> ctor = exercise.getClass().getConstructor(List.class);
+
+			final TrainingExercise newExercise = (TrainingExercise) ctor.newInstance(arenaCanvasManager.getTargets());
+
+			final Optional<Plugin> plugin = pluginEngine.getPlugin(newExercise);
+			if (plugin.isPresent()) {
+				config.setPlugin(plugin.get());
+			} else {
+				config.setPlugin(null);
+			}
+
+			config.setExercise(newExercise);
+
+			final Runnable initExercise = () -> {
+				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
+				newExercise.init();
+			};
+
+			if (Platform.isFxApplicationThread()) {
+				initExercise.run();
+			} else {
+				Platform.runLater(initExercise);
+			}
+		} catch (final ReflectiveOperationException e) {
+			final ExerciseMetadata metadata = exercise.getInfo();
+			logger.error("Failed to start exercise " + metadata.getName() + " " + metadata.getVersion(), e);
+		}
 	}
 
 	@Override
@@ -293,11 +369,16 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	public void messageReceived(Message message) {
 		if (message instanceof GetConfigurationMessage) {
 			sendConfiguration();
+		} else if (message instanceof GetExercisesMessage) {
+			sendExercises();
 		} else if (message instanceof ResetMessage) {
 			reset();
 		} else if (message instanceof SetConfigurationMessage) {
 			final SetConfigurationMessage configMessage = (SetConfigurationMessage) message;
 			setConfiguration(configMessage.getConfigurationData());
+		} else if (message instanceof SetExerciseMessage) {
+			final SetExerciseMessage exerciseMessage = (SetExerciseMessage) message;
+			setExercise(exerciseMessage.getNewExercise());
 		} else if (message instanceof TargetMessage) {
 			handleTargetMessage((TargetMessage) message);
 		}
@@ -310,6 +391,18 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 					config.getVirtualMagazineCapacity(), config.useMalfunctions(), config.getMalfunctionsProbability(),
 					config.showArenaShotMarkers());
 			server.get().sendMessage(new CurrentConfigurationMessage(configurationData));
+		}
+	}
+
+	private void sendExercises() {
+		if (server.isPresent()) {
+			final Set<ExerciseMetadata> trainingExercisesMetadata = new HashSet<ExerciseMetadata>();
+			final Set<ExerciseMetadata> projectorTrainingExercisesMetadata = new HashSet<ExerciseMetadata>();
+			trainingExercises.stream().map(TrainingExercise::getInfo).forEach(trainingExercisesMetadata::add);
+			projectorTrainingExercises.stream().map(TrainingExercise::getInfo)
+					.forEach(projectorTrainingExercisesMetadata::add);
+			server.get().sendMessage(
+					new CurrentExercisesMessage(trainingExercisesMetadata, projectorTrainingExercisesMetadata));
 		}
 	}
 
@@ -331,6 +424,22 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			config.writeConfigurationFile();
 		} catch (ConfigurationException | IOException e) {
 			logger.error("Failed to save headless configuration", e);
+		}
+	}
+
+	private void setExercise(ExerciseMetadata exerciseMetadata) {
+		for (TrainingExercise exercise : trainingExercises) {
+			if (exercise.getInfo().equals(exercise)) {
+				setExercise(exercise);
+				return;
+			}
+		}
+
+		for (TrainingExercise exercise : projectorTrainingExercises) {
+			if (exercise.getInfo().equals(exercise)) {
+				setProjectorExercise(exercise);
+				return;
+			}
 		}
 	}
 
@@ -370,5 +479,33 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 				targets.remove(targetUuid);
 			}
 		}
+	}
+
+	@Override
+	public Pane getTrainingExerciseContainer() {
+		// TODO Use a stub that sends controls to tablet
+		return null;
+	}
+
+	@Override
+	public TableView<ShotEntry> getShotEntryTable() {
+		// TODO Use a stub that sends column data to tablet
+		return new TableView<ShotEntry>();
+	}
+
+	@Override
+	public VBox getButtonsPane() {
+		// TODO Use a stub that sends controls to tablet
+		return null;
+	}
+
+	@Override
+	public Optional<CameraView> getArenaView() {
+		return Optional.empty();
+	}
+
+	@Override
+	public List<Target> getTargets() {
+		return arenaCanvasManager.getTargets();
 	}
 }

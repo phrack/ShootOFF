@@ -1,8 +1,5 @@
 package com.shootoff.targets;
 
-import java.util.List;
-import java.util.Optional;
-
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.gui.CanvasManager;
@@ -13,8 +10,6 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
 public interface CameraViews {
-	List<Target> getTargets();
-
 	/**
 	 * Add a view to the same GUI widget used to display camera views, but for a
 	 * non-camera view (i.e. an arena tab).
@@ -38,8 +33,6 @@ public interface CameraViews {
 	void removeCameraView(String name);
 
 	boolean isArenaViewSelected();
-
-	Optional<CameraView> getArenaView();
 
 	CameraView getSelectedCameraView();
 

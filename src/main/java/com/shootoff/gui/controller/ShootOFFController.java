@@ -60,6 +60,7 @@ import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.plugins.TrainingExerciseView;
 import com.shootoff.plugins.engine.Plugin;
 import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.targets.CameraViews;
@@ -103,7 +104,8 @@ import javafx.scene.shape.Shape;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews, Closeable, Resetter, ExerciseListener {
+public class ShootOFFController implements CameraConfigListener, CameraErrorView, CameraViews, Closeable, Resetter,
+		TrainingExerciseView, ExerciseListener {
 	private Stage shootOFFStage;
 	@FXML private VBox shootOffContainer;
 	@FXML private HBox controlsContainer;
@@ -127,7 +129,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	private final List<Stage> streamDebuggerStages = new ArrayList<>();
 
 	static public double getDpiScaleFactorForScreen() {
-		//http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
+		// http://news.kynosarges.org/2015/06/29/javafx-dpi-scaling-fixed/
 		// Number of actual horizontal lines (768p)
 		final double trueHorizontalLines = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 		// Number of scaled horizontal lines. (384p for 200%)
@@ -137,7 +139,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 		return dpiScaleFactor;
 	}
-
 
 	@SuppressFBWarnings("SIC_INNER_SHOULD_BE_STATIC_ANON")
 	public void init(Configuration config) throws IOException {
@@ -171,9 +172,9 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			}
 		});
 
-		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);		
+		targetPane = new TargetSlide(controlsContainer, bodyContainer, this);
 		exerciseSlide = new ExerciseSlide(controlsContainer, bodyContainer, this);
-		projectorSlide = new ProjectorSlide(controlsContainer, bodyContainer, this, shootOFFStage, 
+		projectorSlide = new ProjectorSlide(controlsContainer, bodyContainer, this, shootOFFStage,
 				trainingExerciseContainer, this, exerciseSlide);
 
 		pluginEngine = new PluginEngine(exerciseSlide);
@@ -213,8 +214,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				final double d = newValue.doubleValue() - oldValue.doubleValue();
 
 				cameraTabPane.setPrefHeight(cameraTabPane.getLayoutBounds().getHeight() + d * .25);
-				trainingExerciseScrollPane.setPrefHeight(trainingExerciseScrollPane.getLayoutBounds().getHeight()
-						+ d * .75);
+				trainingExerciseScrollPane
+						.setPrefHeight(trainingExerciseScrollPane.getLayoutBounds().getHeight() + d * .75);
 			});
 		}, 2000);
 
@@ -283,7 +284,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						unselected.getShot().getMarker().setFill(unselected.getShot().getPaintColor());
 
 						if (unselected.getShot().getMirroredShot().isPresent()) {
-							unselected.getShot().getMirroredShot().get().getMarker().setFill(unselected.getShot().getPaintColor());
+							unselected.getShot().getMirroredShot().get().getMarker()
+									.setFill(unselected.getShot().getPaintColor());
 						}
 					}
 
@@ -293,7 +295,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
 
 						if (selected.getShot().getMirroredShot().isPresent()) {
-							selected.getShot().getMirroredShot().get().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
+							selected.getShot().getMirroredShot().get().getMarker()
+									.setFill(TargetRegion.SELECTED_STROKE_COLOR);
 						}
 
 						// Move all selected shots to top the of their z-stack
@@ -424,7 +427,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return camerasSupervisor.getCameraManager(cameraTabPane.getSelectionModel().getSelectedIndex());
 	}
 
-	@Override 
+	@Override
 	public Node getSelectedCameraContainer() {
 		return cameraTabPane.getSelectionModel().getSelectedItem().getContent();
 	}
@@ -433,6 +436,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		return shootOFFStage;
 	}
 
+	@Override
 	public VBox getButtonsPane() {
 		return buttonsContainer;
 	}
@@ -447,10 +451,12 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
 	}
 
+	@Override
 	public Pane getTrainingExerciseContainer() {
 		return trainingExerciseContainer;
 	}
 
+	@Override
 	public TableView<ShotEntry> getShotEntryTable() {
 		return shotTimerTable;
 	}
@@ -468,8 +474,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	private void addConfiguredCameras() {
 		Optional<Camera> defaultCam = Optional.empty();
-		if (config.getWebcams().isEmpty())
-			defaultCam = CameraFactory.getDefault();
+		if (config.getWebcams().isEmpty()) defaultCam = CameraFactory.getDefault();
 
 		for (final Iterator<Entry<Tab, CameraManager>> it = cameraManagerTabs.entrySet().iterator(); it.hasNext();) {
 			final Entry<Tab, CameraManager> next = it.next();
@@ -498,8 +503,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		}
 
 		if (config.getWebcams().isEmpty()) {
-			if (camerasSupervisor.getCameraManagers().size() > 0)
-				return;
+			if (camerasSupervisor.getCameraManagers().size() > 0) return;
 
 			if (defaultCam.isPresent()) {
 				if (!addCameraTab("Default", defaultCam.get())) showCameraLockError(defaultCam.get(), true);
@@ -508,8 +512,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				Main.closeNoCamera();
 			}
 		} else {
-			if (camerasSupervisor.getCameraManagers().size() == config.getWebcams().size())
-				return;
+			if (camerasSupervisor.getCameraManagers().size() == config.getWebcams().size()) return;
 
 			int failureCount = 0;
 
@@ -527,6 +530,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	}
 
 	private final Map<Tab, CameraManager> cameraManagerTabs = new HashMap<>();
+
 	private boolean addCameraTab(String webcamName, Camera cameraInterface) {
 		if (cameraInterface.isLocked() && !cameraInterface.isOpen()) {
 			return false;
@@ -553,7 +557,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 	}
 
 	@Override
-	public void addNonCameraView(String name, Pane content, CanvasManager canvasManager, boolean select, boolean maximizeView) {
+	public void addNonCameraView(String name, Pane content, CanvasManager canvasManager, boolean select,
+			boolean maximizeView) {
 		final Tab viewTab = new Tab(name, content);
 		cameraTabPane.getTabs().add(viewTab);
 		installDebugCoordDisplay(canvasManager);
@@ -565,7 +570,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		// Keep aspect ratio but always match size to the width of the tab
 		if (maximizeView) {
 			final Runnable translateTabContents = () -> {
-				final double scale = cameraTabPane.getBoundsInLocal().getWidth() / content.getBoundsInLocal().getWidth();
+				final double scale = cameraTabPane.getBoundsInLocal().getWidth()
+						/ content.getBoundsInLocal().getWidth();
 				content.setScaleX(scale);
 				content.setScaleY(scale);
 
@@ -942,7 +948,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 			config.setExercise(newExercise);
 
-
 			final Runnable initExercise = () -> {
 				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
 				newExercise.init();
@@ -978,7 +983,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			config.setExercise(newExercise);
 
 			final Runnable initExercise = () -> {
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, projectorSlide.getArenaPane());
+				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this,
+						projectorSlide.getArenaPane());
 				newExercise.init();
 			};
 
