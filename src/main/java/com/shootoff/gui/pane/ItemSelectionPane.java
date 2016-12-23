@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -79,8 +80,7 @@ public class ItemSelectionPane<T> extends ScrollPane {
 			if (columnCount <= MAX_COLUMNS) subContainer.setPrefColumns(columnCount);
 		});
 
-		setStyle(
-				"-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
+		setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
 		setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 		setHbarPolicy(ScrollBarPolicy.NEVER);
 		setFitToHeight(true);
@@ -112,7 +112,17 @@ public class ItemSelectionPane<T> extends ScrollPane {
 		button.setWrapText(true);
 
 		if (graphic.isPresent()) button.setGraphic(graphic.get());
-		if (tooltip.isPresent()) button.setTooltip(tooltip.get());
+		if (tooltip.isPresent()) {
+			button.setOnMouseEntered((event) -> {
+				final Point2D p = button.localToScreen(button.getLayoutBounds().getMaxX(),
+						button.getLayoutBounds().getMaxY());
+				tooltip.get().show(button, p.getX(), p.getY());
+			});
+
+			button.setOnMouseExited((event) -> {
+				tooltip.get().hide();
+			});
+		}
 
 		button.setOnAction((event) -> {
 			itemListener.onItemClicked(ref);
