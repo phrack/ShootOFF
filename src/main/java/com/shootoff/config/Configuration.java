@@ -280,8 +280,8 @@ public class Configuration {
 			for (final String nameString : prop.getProperty(WEBCAMS_PROP).split(",")) {
 				final String[] names = nameString.split(":");
 				if (names.length > 1) {
-					webcamNames.add(names[0]);
-					webcamInternalNames.add(names[1]);
+					webcamNames.add(names[0].replaceAll("//`", ":"));
+					webcamInternalNames.add(names[1].replaceAll("//`", ":"));
 				}
 			}
 
@@ -421,9 +421,9 @@ public class Configuration {
 		final StringBuilder webcamList = new StringBuilder();
 		for (final Entry<String, Camera> entry : webcams.entrySet()) {
 			if (webcamList.length() > 0) webcamList.append(",");
-			webcamList.append(entry.getKey());
+			webcamList.append(entry.getKey().replaceAll(":", "//`"));
 			webcamList.append(":");
-			webcamList.append(entry.getValue().getName());
+			webcamList.append(entry.getValue().getName().replaceAll(":", "//`"));
 		}
 
 		final StringBuilder recordingWebcamList = new StringBuilder();
