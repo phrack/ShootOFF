@@ -32,7 +32,7 @@ public class CurrentExercisesMessage extends Message {
 		this.projectorTrainingExerices = projectorTrainingExerices;
 	}
 
-	public Set<ExerciseMetadata> getTrainingExerices() {
+	public Set<ExerciseMetadata> getTrainingExercises() {
 		return trainingExerices;
 	}
 
