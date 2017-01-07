@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 
 import javafx.scene.paint.Color;
 
@@ -39,9 +39,9 @@ public class ShotEntry {
 			boolean hadReload) {
 		this.shot = shot;
 
-		if (shot.getColor().equals(ShotColor.RED)) {
+		if (ShotColor.RED.equals(shot.getColor())) {
 			color = "red";
-		} else if (shot.getColor().equals(ShotColor.GREEN)) {
+		} else if (ShotColor.GREEN.equals(shot.getColor())) {
 			color = "green";
 		} else {
 			color = "infrared";
@@ -49,12 +49,12 @@ public class ShotEntry {
 
 		this.rowColor = rowColor;
 
-		final float timestampS = ((float) shot.getTimestamp()) / (float) 1000;
+		final float timestampS = ((float) shot.getTimestamp()) / 1000f;
 		timestamp = String.format("%.2f", timestampS);
 
 		String split;
 		if (lastShot.isPresent()) {
-			split = String.format("%.2f", timestampS - ((float) lastShot.get().getTimestamp() / (float) 1000));
+			split = String.format("%.2f", timestampS - ((float) lastShot.get().getTimestamp() / 1000f));
 		} else {
 			split = "-";
 		}

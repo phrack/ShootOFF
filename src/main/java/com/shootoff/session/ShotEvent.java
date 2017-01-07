@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 
 public class ShotEvent implements Event {
 	private final String cameraName;

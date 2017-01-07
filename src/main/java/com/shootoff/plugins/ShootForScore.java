@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;

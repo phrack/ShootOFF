@@ -5,7 +5,7 @@ import java.io.File;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Frame;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 import com.shootoff.util.SystemInfo;
 
 public class NativeShotDetector extends FrameProcessingShotDetector {

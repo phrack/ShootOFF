@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
 
 import javafx.geometry.Bounds;

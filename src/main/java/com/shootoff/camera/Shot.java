@@ -35,10 +35,6 @@ import javafx.scene.shape.Ellipse;
  * @author phrack
  */
 public class Shot {
-	public enum ShotColor {
-		RED, GREEN, INFRARED
-	};
-
 	static public final Map<ShotColor, Color> colorMap = new HashMap<ShotColor, Color>();
 	static {
 		colorMap.put(ShotColor.RED, Color.RED);

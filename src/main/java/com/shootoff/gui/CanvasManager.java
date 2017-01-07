@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 import com.shootoff.camera.processors.MalfunctionsProcessor;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.camera.processors.VirtualMagazineProcessor;
@@ -100,7 +100,7 @@ public class CanvasManager implements CameraView {
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
-	private final List<Shot> shots;
+	private final List<Shot> shots = Collections.synchronizedList(new ArrayList<Shot>());
 	private final List<Target> targets = new ArrayList<>();
 
 	private ProgressIndicator progress;
@@ -124,7 +124,6 @@ public class CanvasManager implements CameraView {
 		this.resetter = resetter;
 		this.cameraName = cameraName;
 		this.shotEntries = shotEntries;
-		shots = Collections.synchronizedList(new ArrayList<Shot>());
 
 		background.setOnMouseClicked((event) -> {
 			toggleTargetSelection(Optional.empty());
@@ -560,9 +559,13 @@ public class CanvasManager implements CameraView {
 		// in the shot timer table if the shot timer
 		// table is in use
 		if (shotEntries != null) {
-			Optional<Shot> lastShot = Optional.empty();
+			final Optional<Shot> lastShot;
 
-			if (shotEntries.size() > 0) lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
+			if (shotEntries.isEmpty()) {
+				lastShot = Optional.empty();
+			} else {
+				lastShot = Optional.of(shotEntries.get(shotEntries.size() - 1).getShot());
+			}
 
 			final ShotEntry shotEntry;
 			if (hadMalfunction || hadReload) {
@@ -594,7 +597,7 @@ public class CanvasManager implements CameraView {
 
 			if (b.contains(shot.getX(), shot.getY())) {
 				passedToArena = true;
-				
+
 				final double x_scale = arenaPane.get().getWidth() / b.getWidth();
 				final double y_scale = arenaPane.get().getHeight() / b.getHeight();
 
@@ -605,7 +608,7 @@ public class CanvasManager implements CameraView {
 				processedShot = arenaPane.get().getCanvasManager().addArenaShot(arenaShot, videoString, isMirroredShot);
 			}
 		}
-		
+
 		// If the arena canvas handled the shot, we don't need to do anything
 		// else
 		if (passedToArena || processedShot) return;

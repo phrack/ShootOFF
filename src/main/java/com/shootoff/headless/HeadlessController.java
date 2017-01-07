@@ -38,6 +38,7 @@ import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.Shot;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -61,6 +62,7 @@ import com.shootoff.headless.protocol.GetExercisesMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
 import com.shootoff.headless.protocol.MoveTargetMessage;
+import com.shootoff.headless.protocol.NewShotMessage;
 import com.shootoff.headless.protocol.RemoveTargetMessage;
 import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
@@ -79,6 +81,9 @@ import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.Target;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
@@ -131,7 +136,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 		initializePluginEngine();
 
-		final CanvasManager canvasManager = new CanvasManager(new Group(), this, "Default", null);
+		final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
+		final CanvasManager canvasManager = new CanvasManager(new Group(), this, "Default", shotEntries);
 		final CameraManager cameraManager = camerasSupervisor.addCameraManager(c, this, canvasManager);
 
 		final Stage arenaStage = new Stage();
@@ -139,9 +145,22 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		// SBC
 		final Pane trainingExerciseContainer = new Pane();
 
-		arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this, null);
+		arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this, shotEntries);
 
 		arenaCanvasManager = arenaPane.getCanvasManager();
+
+		shotEntries.addListener(new ListChangeListener<ShotEntry>() {
+			@Override
+			public void onChanged(Change<? extends ShotEntry> change) {
+				if (!server.isPresent() || !change.next() || change.getAddedSize() < 1) return;
+
+				for (ShotEntry entry : change.getAddedSubList()) {
+					final Shot shot = entry.getShot();
+					server.get().sendMessage(
+							new NewShotMessage(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp()));
+				}
+			}
+		});
 
 		arenaStage.setTitle("Projector Arena");
 		arenaStage.setScene(new Scene(arenaPane));

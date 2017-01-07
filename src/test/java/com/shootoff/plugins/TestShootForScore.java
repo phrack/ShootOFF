@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import com.shootoff.camera.CamerasSupervisor;
 import com.shootoff.camera.Shot;
-import com.shootoff.camera.Shot.ShotColor;
+import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.TargetView;
