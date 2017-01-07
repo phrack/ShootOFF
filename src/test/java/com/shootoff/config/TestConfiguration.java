@@ -12,9 +12,14 @@ import org.junit.Test;
 
 public class TestConfiguration {
 	Configuration defaultConfig;
-
+	
 	@Before
 	public void setUp() throws ConfigurationException, IOException {
+		// This is required because testWriteConfigFile loads a 
+		// configuration file after writing it, which causes
+		// cameras to be enumerated then opened with OpenCV
+		nu.pattern.OpenCV.loadShared();
+
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 		String[] emptyArgs = new String[0];
 		defaultConfig = new Configuration(emptyArgs);
