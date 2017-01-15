@@ -22,6 +22,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -706,7 +707,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					recordMenuItem.setText("Stop Recording");
 
 					final String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
-					final String videoName = tabName + ".mp4";
+					final String videoName = tabName + 
+							LocalDateTime.now().toString().replaceAll(":", ".") + ".mp4";
 					cameraManager.startRecordingStream(new File(videoName));
 				} else {
 					recordMenuItem.setText("Start Recording");
