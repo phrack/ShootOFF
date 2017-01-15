@@ -408,8 +408,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	public void setCourse(final Course course) {
 		if (course.getBackground().isPresent()) {
 			setArenaBackground(course.getBackground().get());
-		} else {
-			setArenaBackground(null);
 		}
 
 		canvasManager.clearTargets();
