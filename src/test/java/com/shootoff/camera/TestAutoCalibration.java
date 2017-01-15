@@ -305,6 +305,29 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		assertEquals(true, compareImages(compareFrame, resultFrame));
 
 	}
+	
+	
+	@Test
+	public void testCalibrateOffEdgeImage() throws IOException {
+		acm.reset();
+		
+		BufferedImage testFrame = ImageIO
+				.read(TestAutoCalibration.class.getResourceAsStream("/autocalibration/calibration_crash_shortpatter.png"));
+		mockCamera.setViewSize(new Dimension(testFrame.getWidth(), testFrame.getHeight()));
+
+		final Mat mat = acm.prepTestFrame(testFrame);
+		
+		// Step 1: Find the chessboard corners
+		final Optional<MatOfPoint2f> boardCorners = acm.findChessboard(mat);
+
+		assertTrue(boardCorners.isPresent());
+
+		
+		Optional<Bounds> calibrationBounds = acm.calibrateFrame(boardCorners.get(), mat);
+
+		assertFalse(calibrationBounds.isPresent());
+
+	}
 
 	@Test
 	public void testCalibrateTightPatternTurned() throws IOException {
@@ -345,7 +368,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		CameraManager result = autoCalibrationVideo("/autocalibration/highres-autocalibration-1280x720.mp4");
 		assertEquals(true, result.cameraAutoCalibrated);
 	}
-	
+
 	@Test
 	public void testCalibrateWithPaperPattern() throws IOException {
 		MockCameraManager result = autoCalibrationVideo("/autocalibration/calibrate-projection-paper-ifly53e.mp4");
@@ -367,6 +390,7 @@ public class TestAutoCalibration implements VideoFinishedListener {
 		assertEquals(57.15, result.getACM().getPaperDimensions().get().getHeight(), 1);
 		
 	}
+	
 	
 	
 	@Test
