@@ -526,13 +526,10 @@ public class AutoCalibrationManager {
 		final MatOfPoint2f boardRect = calcBoardRectFromCorners(boardCorners);
 
 		// Estimate the pattern corners
-		final Optional<MatOfPoint2f> estimatedPatternRect = estimatePatternRect(traceMat, boardRect);
-		
-		if (!estimatedPatternRect.isPresent())
-			return Optional.empty();
+		final MatOfPoint2f estimatedPatternRect = estimatePatternRect(traceMat, boardRect);
 
 		// More definitively find corners using goodFeaturesToTrack
-		final Optional<Point[]> corners = findCorners(boardRect, mat, estimatedPatternRect.get());
+		final Optional<Point[]> corners = findCorners(boardRect, mat, estimatedPatternRect);
 
 		if (!corners.isPresent()) return Optional.empty();
 
@@ -825,12 +822,7 @@ public class AutoCalibrationManager {
 		return warpPerspective(mat);
 	}
 
-	/*
-	 * Make an estimate of a undistorted, unrotated rectangle
-	 * Returns: Optional<>, MatOfPoint2f of rectangle, or empty if cannot be completed in bounds
-	 * 
-	 */
-	private Optional<MatOfPoint2f> estimatePatternRect(Mat traceMat, MatOfPoint2f boardRect) {
+	private MatOfPoint2f estimatePatternRect(Mat traceMat, MatOfPoint2f boardRect) {
 
 		// We use this to calculate the angle
 		final RotatedRect boardBox = Imgproc.minAreaRect(boardRect);
@@ -848,15 +840,6 @@ public class AutoCalibrationManager {
 		// This is what we'll use as the transformation target and bounds given
 		// back to the cameramanager
 		boundsRect = Imgproc.minAreaRect(estimatedPatternSizeRect);
-
-		
-		if (boundsRect.boundingRect().x < 0 || boundsRect.boundingRect().y < 0 ||
-			boundsRect.boundingRect().y+boundsRect.boundingRect().height >= this.camera.getViewSize().getHeight() ||
-			boundsRect.boundingRect().x+boundsRect.boundingRect().width >= this.camera.getViewSize().getWidth())
-		{
-			logger.debug("Pattern found but autocalibration failed--Cannot dedistort within camera bounds, make sure the projector area is a perfect rectangle and try again");
-			return Optional.empty();
-		}
 
 		// We now rotate the estimation back to the original angle to use for
 		// transformation source
@@ -917,7 +900,7 @@ public class AutoCalibrationManager {
 					new Scalar(255, 255, 0));
 		}
 
-		return Optional.of(rotatedPatternSizeRect);
+		return rotatedPatternSizeRect;
 	}
 
 	/*
