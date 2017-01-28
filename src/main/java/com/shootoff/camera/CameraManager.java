@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -630,10 +631,16 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 				currentFrame = acm.undistortFrame(currentFrame);
 			}
 
-			submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(),
-					(int) projectionBounds.getMaxY(), (int) projectionBounds.getMinX(),
-					(int) projectionBounds.getMaxX());
-
+			try {
+				submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(),
+						(int) projectionBounds.getMaxY(), (int) projectionBounds.getMinX(),
+						(int) projectionBounds.getMaxX());
+			} catch (CvException e) {
+				logger.error("Failed to get submat for frame using projection bounds, projectionBounds = "
+						+ projectionBounds.toString() + ", frameSize = "
+						+ currentFrame.getOriginalMat().size().toString(), e);
+			}
+			
 			if (recordingCalibratedArea) {
 				final BufferedImage image = ConverterFactory.convertToType(Camera.matToBufferedImage(submatFrameBGR),
 						BufferedImage.TYPE_3BYTE_BGR);
@@ -654,13 +661,27 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		}
 
 		if ((isLimitingDetectionToProjection() || isCroppingFeedToProjection()) && projectionBounds != null) {
-			if (submatFrameBGR == null)
-				submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(),
-						(int) projectionBounds.getMaxY(), (int) projectionBounds.getMinX(),
-						(int) projectionBounds.getMaxX());
+			if (submatFrameBGR == null) {
+				try {
+					submatFrameBGR = currentFrame.getOriginalMat().submat((int) projectionBounds.getMinY(),
+							(int) projectionBounds.getMaxY(), (int) projectionBounds.getMinX(),
+							(int) projectionBounds.getMaxX());
+				} catch (CvException e) {
+					logger.error("Failed to get submat for frame to limit detection bounds, projectionBounds = "
+							+ projectionBounds.toString() + ", frameSize = "
+							+ currentFrame.getOriginalMat().size().toString(), e);
+				}
+			}
 
-			if (shotDetector instanceof FrameProcessingShotDetector) ((FrameProcessingShotDetector) shotDetector)
-					.processFrame(new Frame(submatFrameBGR, currentFrame.getTimestamp()), isDetecting.get());
+			if (shotDetector instanceof FrameProcessingShotDetector) {
+				if (submatFrameBGR != null) {
+					((FrameProcessingShotDetector) shotDetector)
+							.processFrame(new Frame(submatFrameBGR, currentFrame.getTimestamp()), isDetecting.get());
+				} else {
+					logger.warn("Due to errors fetching frame submat, falling back to using full frame");
+					((FrameProcessingShotDetector) shotDetector).processFrame(currentFrame, isDetecting.get());
+				}
+			}
 		} else {
 			if (shotDetector instanceof FrameProcessingShotDetector)
 				((FrameProcessingShotDetector) shotDetector).processFrame(currentFrame, isDetecting.get());
