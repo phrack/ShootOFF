@@ -420,6 +420,11 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			reset();
 		} else if (message instanceof SetBackgroundMessage) {
 			final SetBackgroundMessage backgroundMessage = (SetBackgroundMessage) message;
+
+			if (backgroundMessage.getName().isEmpty() && backgroundMessage.getResourceName().isEmpty()) {
+				arenaPane.setArenaBackground(null);
+			}
+
 			final String resourceName = backgroundMessage.getResourceName();
 
 			if (ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS.containsKey(backgroundMessage.getName())
