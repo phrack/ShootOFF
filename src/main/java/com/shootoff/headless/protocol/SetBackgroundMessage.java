@@ -18,24 +18,20 @@
 
 package com.shootoff.headless.protocol;
 
-public class ErrorMessage extends Message {
-	private final String message;
-	private final ErrorType type;
+public class SetBackgroundMessage extends Message {
+	private final String name;
+	private final String resourceName;
 
-	public ErrorMessage(String message, ErrorType type) {
-		this.message = message;
-		this.type = type;
+	public SetBackgroundMessage(String name, String resourceName) {
+		this.name = name;
+		this.resourceName = resourceName;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getName() {
+		return name;
 	}
 
-	public ErrorType getType() {
-		return type;
-	}
-
-	public enum ErrorType {
-		BACKGROUND, CAMERA, EXERCSIE, TARGET
+	public String getResourceName() {
+		return resourceName;
 	}
 }

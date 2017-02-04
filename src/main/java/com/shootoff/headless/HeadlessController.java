@@ -20,6 +20,7 @@ package com.shootoff.headless;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,17 +49,21 @@ import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.ExerciseListener;
+import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.Resetter;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.TargetView;
+import com.shootoff.gui.pane.ArenaBackgroundsSlide;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
+import com.shootoff.headless.protocol.CurrentBackgroundsMessage;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
 import com.shootoff.headless.protocol.CurrentExercisesMessage;
 import com.shootoff.headless.protocol.CurrentTargetsMessage;
 import com.shootoff.headless.protocol.ErrorMessage;
 import com.shootoff.headless.protocol.ErrorMessage.ErrorType;
+import com.shootoff.headless.protocol.GetBackgroundsMessage;
 import com.shootoff.headless.protocol.GetConfigurationMessage;
 import com.shootoff.headless.protocol.GetExercisesMessage;
 import com.shootoff.headless.protocol.GetTargetsMessage;
@@ -69,6 +74,7 @@ import com.shootoff.headless.protocol.NewShotMessage;
 import com.shootoff.headless.protocol.RemoveTargetMessage;
 import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
+import com.shootoff.headless.protocol.SetBackgroundMessage;
 import com.shootoff.headless.protocol.SetConfigurationMessage;
 import com.shootoff.headless.protocol.SetExerciseMessage;
 import com.shootoff.headless.protocol.TargetMessage;
@@ -390,7 +396,10 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void messageReceived(Message message) {
-		if (message instanceof GetConfigurationMessage) {
+		if (message instanceof GetBackgroundsMessage) {
+			if (server.isPresent())
+				server.get().sendMessage(new CurrentBackgroundsMessage(ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS));
+		} else if (message instanceof GetConfigurationMessage) {
 			sendConfiguration();
 		} else if (message instanceof GetExercisesMessage) {
 			sendExercises();
@@ -398,6 +407,23 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			sendTargets();
 		} else if (message instanceof ResetMessage) {
 			reset();
+		} else if (message instanceof SetBackgroundMessage) {
+			final SetBackgroundMessage backgroundMessage = (SetBackgroundMessage) message;
+
+			final String resourceName = backgroundMessage.getResourceName();
+
+			if (ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS.containsKey(backgroundMessage.getName())
+					&& ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS.get(backgroundMessage.getName())
+							.equals(resourceName)) {
+				final InputStream is = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
+				arenaPane.setArenaBackground(new LocatedImage(is, resourceName));
+			} else {
+				if (server.isPresent()) {
+					server.get().sendMessage(new ErrorMessage(
+							"Background " + backgroundMessage.getName() + " " + resourceName + " does not exist.",
+							ErrorType.BACKGROUND));
+				}
+			}
 		} else if (message instanceof SetConfigurationMessage) {
 			final SetConfigurationMessage configMessage = (SetConfigurationMessage) message;
 			setConfiguration(configMessage.getConfigurationData());
@@ -430,7 +456,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 					new CurrentExercisesMessage(trainingExercisesMetadata, projectorTrainingExercisesMetadata));
 		}
 	}
-	
+
 	private void sendTargets() {
 		if (!server.isPresent()) return;
 

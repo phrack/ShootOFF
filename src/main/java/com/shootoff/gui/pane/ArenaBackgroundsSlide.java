@@ -20,6 +20,9 @@ package com.shootoff.gui.pane;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.gui.LocatedImage;
@@ -33,6 +36,22 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListener<LocatedImage> {
+	public static final Map<String, String> DEFAULT_BACKGROUNDS;
+	
+	static {
+		final Map<String, String> defaultBackgrounds = new HashMap<>();
+		defaultBackgrounds.put("Hickok45 Autumn", "/arena/backgrounds/hickok45_autumn.gif");
+		defaultBackgrounds.put("Hickok45 Summer", "/arena/backgrounds/hickok45_summer.gif");
+		defaultBackgrounds.put("Indoor Range", "/arena/backgrounds/indoor_range.gif");
+		defaultBackgrounds.put("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
+		defaultBackgrounds.put("Oradour-sur-Glane", "/arena/backgrounds/oradour-sur-glane.gif");
+		defaultBackgrounds.put("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
+		defaultBackgrounds.put("Steel Range Bay", "/arena/backgrounds/steel_range_bay.gif");
+		defaultBackgrounds.put("Subterranean Parking Lot", "/arena/backgrounds/subterranean_parking_lot.gif");
+		
+		DEFAULT_BACKGROUNDS = Collections.unmodifiableMap(defaultBackgrounds);
+	}
+	
 	private final ItemSelectionPane<LocatedImage> itemPane = new ItemSelectionPane<>(true, this);
 	private final ProjectorArenaPane arenaPane;
 	private final Stage shootOffStage;
@@ -69,14 +88,9 @@ public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListene
 	private void initDefaultBackgrounds() {
 		new Thread(() -> {
 			addDefaultBackground("Select Local Image...", "/images/normal_folder.png");
-			addDefaultBackground("Hickok45 Autumn", "/arena/backgrounds/hickok45_autumn.gif");
-			addDefaultBackground("Hickok45 Summer", "/arena/backgrounds/hickok45_summer.gif");
-			addDefaultBackground("Indoor Range", "/arena/backgrounds/indoor_range.gif");
-			addDefaultBackground("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
-			addDefaultBackground("Oradour-sur-Glane", "/arena/backgrounds/oradour-sur-glane.gif");
-			addDefaultBackground("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
-			addDefaultBackground("Steel Range Bay", "/arena/backgrounds/steel_range_bay.gif");
-			addDefaultBackground("Subterranean Parking Lot", "/arena/backgrounds/subterranean_parking_lot.gif");
+			
+			for (Map.Entry<String, String> background : DEFAULT_BACKGROUNDS.entrySet())
+				addDefaultBackground(background.getKey(), background.getValue());
 		}).start();
 	}
 
