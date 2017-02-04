@@ -18,6 +18,7 @@
 
 package com.shootoff.headless;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -55,10 +56,12 @@ import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
 import com.shootoff.headless.protocol.CurrentExercisesMessage;
+import com.shootoff.headless.protocol.CurrentTargetsMessage;
 import com.shootoff.headless.protocol.ErrorMessage;
 import com.shootoff.headless.protocol.ErrorMessage.ErrorType;
 import com.shootoff.headless.protocol.GetConfigurationMessage;
 import com.shootoff.headless.protocol.GetExercisesMessage;
+import com.shootoff.headless.protocol.GetTargetsMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
 import com.shootoff.headless.protocol.MoveTargetMessage;
@@ -91,6 +94,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import marytts.util.io.FileFilter;
 
 public class HeadlessController implements CameraErrorView, Resetter, ExerciseListener, CalibrationConfigurator,
 		QRCodeListener, ConnectionListener, MessageListener, TrainingExerciseView {
@@ -390,6 +394,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			sendConfiguration();
 		} else if (message instanceof GetExercisesMessage) {
 			sendExercises();
+		} else if (message instanceof GetTargetsMessage) {
+			sendTargets();
 		} else if (message instanceof ResetMessage) {
 			reset();
 		} else if (message instanceof SetConfigurationMessage) {
@@ -422,6 +428,28 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 					.forEach(projectorTrainingExercisesMetadata::add);
 			server.get().sendMessage(
 					new CurrentExercisesMessage(trainingExercisesMetadata, projectorTrainingExercisesMetadata));
+		}
+	}
+	
+	private void sendTargets() {
+		if (!server.isPresent()) return;
+
+		final String shootOffHome = System.getProperty("shootoff.home") + File.separator;
+		final File targetsFolder = new File(shootOffHome + "targets");
+
+		final File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
+
+		if (targetFiles != null) {
+			final File[] relativeTargetFiles = new File[targetFiles.length];
+
+			for (int i = 0; i < targetFiles.length; i++) {
+				relativeTargetFiles[i] = new File(targetFiles[i].toString().replaceAll(shootOffHome, ""));
+			}
+
+			Arrays.sort(relativeTargetFiles);
+			server.get().sendMessage(new CurrentTargetsMessage(Arrays.asList(relativeTargetFiles)));
+		} else {
+			server.get().sendMessage(new ErrorMessage("Failed to find target files", ErrorType.TARGET));
 		}
 	}
 
