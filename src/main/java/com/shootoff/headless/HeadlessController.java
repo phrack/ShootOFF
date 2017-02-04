@@ -19,6 +19,7 @@
 package com.shootoff.headless;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -44,6 +45,8 @@ import com.shootoff.camera.Shot;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.courses.Course;
+import com.shootoff.courses.io.CourseIO;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
@@ -59,12 +62,14 @@ import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
 import com.shootoff.headless.protocol.CurrentBackgroundsMessage;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
+import com.shootoff.headless.protocol.CurrentCoursesMessage;
 import com.shootoff.headless.protocol.CurrentExercisesMessage;
 import com.shootoff.headless.protocol.CurrentTargetsMessage;
 import com.shootoff.headless.protocol.ErrorMessage;
 import com.shootoff.headless.protocol.ErrorMessage.ErrorType;
 import com.shootoff.headless.protocol.GetBackgroundsMessage;
 import com.shootoff.headless.protocol.GetConfigurationMessage;
+import com.shootoff.headless.protocol.GetCoursesMessage;
 import com.shootoff.headless.protocol.GetExercisesMessage;
 import com.shootoff.headless.protocol.GetTargetsMessage;
 import com.shootoff.headless.protocol.Message;
@@ -76,6 +81,7 @@ import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
 import com.shootoff.headless.protocol.SetBackgroundMessage;
 import com.shootoff.headless.protocol.SetConfigurationMessage;
+import com.shootoff.headless.protocol.SetCourseMessage;
 import com.shootoff.headless.protocol.SetExerciseMessage;
 import com.shootoff.headless.protocol.TargetMessage;
 import com.shootoff.plugins.ExerciseMetadata;
@@ -401,6 +407,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 				server.get().sendMessage(new CurrentBackgroundsMessage(ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS));
 		} else if (message instanceof GetConfigurationMessage) {
 			sendConfiguration();
+		} else if (message instanceof GetCoursesMessage) {
+			sendCourses();
 		} else if (message instanceof GetExercisesMessage) {
 			sendExercises();
 		} else if (message instanceof GetTargetsMessage) {
@@ -409,7 +417,6 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			reset();
 		} else if (message instanceof SetBackgroundMessage) {
 			final SetBackgroundMessage backgroundMessage = (SetBackgroundMessage) message;
-
 			final String resourceName = backgroundMessage.getResourceName();
 
 			if (ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS.containsKey(backgroundMessage.getName())
@@ -427,6 +434,21 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		} else if (message instanceof SetConfigurationMessage) {
 			final SetConfigurationMessage configMessage = (SetConfigurationMessage) message;
 			setConfiguration(configMessage.getConfigurationData());
+		} else if (message instanceof SetCourseMessage) {
+			final SetCourseMessage courseMessage = (SetCourseMessage) message;
+			final File courseFile = new File(
+					System.getProperty("shootoff.courses") + File.separator + courseMessage.getCourse().toString());
+
+			if (courseFile.exists()) {
+				final Optional<Course> course = CourseIO.loadCourse(arenaPane, courseFile);
+
+				if (course.isPresent()) {
+					arenaPane.setCourse(course.get());
+				}
+			} else {
+				if (server.isPresent()) server.get().sendMessage(
+						new ErrorMessage("Course " + courseMessage.getCourse() + " does not exist.", ErrorType.COURSE));
+			}
 		} else if (message instanceof SetExerciseMessage) {
 			final SetExerciseMessage exerciseMessage = (SetExerciseMessage) message;
 			setExercise(exerciseMessage.getNewExercise());
@@ -443,6 +465,39 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 					config.showArenaShotMarkers());
 			server.get().sendMessage(new CurrentConfigurationMessage(configurationData));
 		}
+	}
+
+	private void sendCourses() {
+		if (!server.isPresent()) return;
+
+		final java.io.FileFilter folderFilter = new java.io.FileFilter() {
+			@Override
+			public boolean accept(File path) {
+				return path.isDirectory();
+			}
+		};
+
+		final File coursesDirectory = new File(System.getProperty("shootoff.courses"));
+		final File[] courseFolders = coursesDirectory.listFiles(folderFilter);
+
+		final FilenameFilter courseFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File directory, String fileName) {
+				return fileName.endsWith(".course");
+			}
+		};
+
+		final Map<String, List<String>> courses = new HashMap<>();
+		for (File courseFolder : courseFolders) {
+			final List<String> courseFileNames = new ArrayList<>();
+			for (File courseFile : courseFolder.listFiles(courseFilter)) {
+				courseFileNames.add(courseFile.getName());
+			}
+
+			courses.put(courseFolder.getName(), courseFileNames);
+		}
+
+		server.get().sendMessage(new CurrentCoursesMessage(courses));
 	}
 
 	private void sendExercises() {

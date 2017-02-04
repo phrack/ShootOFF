@@ -18,24 +18,17 @@
 
 package com.shootoff.headless.protocol;
 
-public class ErrorMessage extends Message {
-	private final String message;
-	private final ErrorType type;
+import java.util.List;
+import java.util.Map;
 
-	public ErrorMessage(String message, ErrorType type) {
-		this.message = message;
-		this.type = type;
+public class CurrentCoursesMessage extends Message {
+	private final Map<String, List<String>> courses;
+
+	public CurrentCoursesMessage(Map<String, List<String>> courses) {
+		this.courses = courses;
 	}
 
-	public String getMessage() {
-		return message;
-	}
-
-	public ErrorType getType() {
-		return type;
-	}
-
-	public enum ErrorType {
-		BACKGROUND, CAMERA, COURSE, EXERCSIE, TARGET
+	public Map<String, List<String>> getCourses() {
+		return courses;
 	}
 }

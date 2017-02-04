@@ -18,24 +18,16 @@
 
 package com.shootoff.headless.protocol;
 
-public class ErrorMessage extends Message {
-	private final String message;
-	private final ErrorType type;
+import java.io.File;
 
-	public ErrorMessage(String message, ErrorType type) {
-		this.message = message;
-		this.type = type;
+public class SetCourseMessage extends Message {
+	private final File course;
+
+	public SetCourseMessage(File course) {
+		this.course = course;
 	}
 
-	public String getMessage() {
-		return message;
-	}
-
-	public ErrorType getType() {
-		return type;
-	}
-
-	public enum ErrorType {
-		BACKGROUND, CAMERA, COURSE, EXERCSIE, TARGET
+	public File getCourse() {
+		return course;
 	}
 }
