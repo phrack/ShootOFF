@@ -59,6 +59,7 @@ import com.shootoff.gui.TargetView;
 import com.shootoff.gui.pane.ArenaBackgroundsSlide;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
+import com.shootoff.headless.protocol.ClearCourseMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
 import com.shootoff.headless.protocol.CurrentBackgroundsMessage;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
@@ -402,7 +403,9 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	@Override
 	public void messageReceived(Message message) {
-		if (message instanceof GetBackgroundsMessage) {
+		if (message instanceof ClearCourseMessage) {
+			arenaPane.getCanvasManager().clearTargets();
+		} else if (message instanceof GetBackgroundsMessage) {
 			if (server.isPresent())
 				server.get().sendMessage(new CurrentBackgroundsMessage(ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS));
 		} else if (message instanceof GetConfigurationMessage) {
