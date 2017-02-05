@@ -564,6 +564,15 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	}
 
 	private void setExercise(ExerciseMetadata exerciseMetadata) {
+		logger.debug("Setting exercise with metadata {}", exerciseMetadata);
+
+		if (exerciseMetadata.getCreator().isEmpty() && exerciseMetadata.getDescription().isEmpty()
+				&& exerciseMetadata.getName().isEmpty() && exerciseMetadata.getVersion().isEmpty()) {
+			setExercise((TrainingExercise) null);
+			logger.trace("Exercise unset");
+			return;
+		}
+		
 		for (TrainingExercise exercise : trainingExercises) {
 			if (exercise.getInfo().equals(exerciseMetadata)) {
 				logger.trace("Setting exercise to {}", exercise.getInfo().toString());
