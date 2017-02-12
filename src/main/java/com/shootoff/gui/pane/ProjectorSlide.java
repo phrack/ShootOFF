@@ -71,10 +71,12 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		calibrateButton = addSlideControlButton("Calibrate", (event) -> {
 			if (!calibrationManager.isPresent()) return;
 
-			if (!calibrationManager.get().isCalibrating()) {
-				calibrationManager.get().enableCalibration();
+			final CalibrationManager calibrator = calibrationManager.get();
+
+			if (!calibrator.isCalibrating()) {
+				calibrator.enableCalibration();
 			} else {
-				calibrationManager.get().stopCalibration();
+				calibrator.stopCalibration();
 			}
 		});
 
@@ -134,117 +136,119 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 	}
 
 	public void startArena() {
-		if (arenaPane == null) {
-			final Stage arenaStage = new Stage();
-
-			arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, resetter,
-					null);
-
-			// Prepare calibrating manager up front so that we can switch
-			// to the arena tab when it's ready (otherwise
-			// getSelectedCameraManager() will fail)
-			final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
-
-			// Mirror panes so that anything that happens to one also
-			// happens to the other
-			final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage,
-					trainingExerciseContainer, resetter, cameraViews.getShotTimerModel());
-
-			arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
-			arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
-
-			cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
-
-			arenaPane.setArenaPaneMirror(arenaTabPane);
-
-			final CanvasManager arenaCanvasManager = arenaPane.getCanvasManager();
-
-			if (!(arenaCanvasManager instanceof MirroredCanvasManager)) {
-				throw new AssertionError("Arena canvas manager is not of type MirroredCanvasManager");
-			}
-
-			final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaCanvasManager;
-
-			final CanvasManager tabArenaCanvasManager = arenaTabPane.getCanvasManager();
-
-			if (!(tabArenaCanvasManager instanceof MirroredCanvasManager)) {
-				throw new AssertionError("Tab arena canvas manager is not of type MirroredCanvasManager");
-			}
-
-			final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) tabArenaCanvasManager;
-
-			projectorCanvasManager.setMirroredManager(tabCanvasManager);
-			tabCanvasManager.setMirroredManager(projectorCanvasManager);
-			projectorCanvasManager.updateBackground(null, Optional.empty());
-			// This camera manager must be set to enable click-to-shoot for
-			// the arena tab
-			tabCanvasManager.setCameraManager(calibratingCameraManager);
-
-			// Final preparation to display
-			arenaStage.setTitle("Projector Arena");
-			arenaStage.setScene(new Scene(arenaPane));
-			arenaStage.setFullScreenExitHint("");
-
-			calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane,
-					cameraViews, exerciseSlide.getExerciseListener()));
-
-			calibrationManager.get().addCalibrationListener(new CalibrationListener() {
-				@Override
-				public void startCalibration() {}
-
-				@Override
-				public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
-					if (Platform.isFxApplicationThread()) {
-						hide();
-					} else {
-						Platform.runLater(() -> hide());
-					}
-				}
-			});
-
-			arenaPane.setCalibrationManager(calibrationManager.get());
-
-			exerciseSlide.toggleProjectorExercises(false);
-			arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
-
-			backgroundsSlide = new ArenaBackgroundsSlide(parentControls, parentBody, arenaPane, shootOffStage);
-			backgroundsSlide.setOnSlideHidden(() -> {
-				if (backgroundsSlide.choseBackground()) {
-					backgroundsSlide.setChoseBackground(false);
-					hide();
-				}
-			});
-
-			// Display the arena
-			calibrateButton.fire();
-			arenaPane.toggleArena();
-			arenaPane.autoPlaceArena();
-
-			arenaStage.setOnCloseRequest((e) -> {
-				arenaStage.setOnCloseRequest(null);
-
-				arenaPane.close();
-				arenaPane.setFeedCanvasManager(null);
-				arenaPane = null;
-
-				cameraViews.removeCameraView("Arena");
-
-				if (config.getExercise().isPresent()
-						&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
-					exerciseSlide.toggleProjectorExercises(true);
-				}
-
-				if (calibrationManager.isPresent()) {
-					if (calibrationManager.get().isCalibrating()) {
-						calibrationManager.get().stopCalibration();
-					} else {
-						calibrationManager.get().arenaClosing();
-					}
-				}
-
-				exerciseSlide.toggleProjectorExercises(true);
-			});
+		if (arenaPane != null) {
+			// Already started
+			return;
 		}
+
+		final Stage arenaStage = new Stage();
+
+		arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, resetter, null);
+
+		// Prepare calibrating manager up front so that we can switch
+		// to the arena tab when it's ready (otherwise
+		// getSelectedCameraManager() will fail)
+		final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
+
+		// Mirror panes so that anything that happens to one also
+		// happens to the other
+		final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage,
+				trainingExerciseContainer, resetter, cameraViews.getShotTimerModel());
+
+		arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
+		arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
+
+		cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
+
+		arenaPane.setArenaPaneMirror(arenaTabPane);
+
+		final CanvasManager arenaCanvasManager = arenaPane.getCanvasManager();
+
+		if (!(arenaCanvasManager instanceof MirroredCanvasManager)) {
+			throw new AssertionError("Arena canvas manager is not of type MirroredCanvasManager");
+		}
+
+		final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaCanvasManager;
+
+		final CanvasManager tabArenaCanvasManager = arenaTabPane.getCanvasManager();
+
+		if (!(tabArenaCanvasManager instanceof MirroredCanvasManager)) {
+			throw new AssertionError("Tab arena canvas manager is not of type MirroredCanvasManager");
+		}
+
+		final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) tabArenaCanvasManager;
+
+		projectorCanvasManager.setMirroredManager(tabCanvasManager);
+		tabCanvasManager.setMirroredManager(projectorCanvasManager);
+		projectorCanvasManager.updateBackground(null, Optional.empty());
+		// This camera manager must be set to enable click-to-shoot for
+		// the arena tab
+		tabCanvasManager.setCameraManager(calibratingCameraManager);
+
+		// Final preparation to display
+		arenaStage.setTitle("Projector Arena");
+		arenaStage.setScene(new Scene(arenaPane));
+		arenaStage.setFullScreenExitHint("");
+
+		calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, cameraViews,
+				exerciseSlide.getExerciseListener()));
+
+		calibrationManager.get().addCalibrationListener(new CalibrationListener() {
+			@Override
+			public void startCalibration() {}
+
+			@Override
+			public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
+				if (Platform.isFxApplicationThread()) {
+					hide();
+				} else {
+					Platform.runLater(() -> hide());
+				}
+			}
+		});
+
+		arenaPane.setCalibrationManager(calibrationManager.get());
+
+		exerciseSlide.toggleProjectorExercises(false);
+		arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
+
+		backgroundsSlide = new ArenaBackgroundsSlide(parentControls, parentBody, arenaPane, shootOffStage);
+		backgroundsSlide.setOnSlideHidden(() -> {
+			if (backgroundsSlide.choseBackground()) {
+				backgroundsSlide.setChoseBackground(false);
+				hide();
+			}
+		});
+
+		// Display the arena
+		calibrateButton.fire();
+		arenaPane.toggleArena();
+		arenaPane.autoPlaceArena();
+
+		arenaStage.setOnCloseRequest((e) -> {
+			arenaStage.setOnCloseRequest(null);
+
+			arenaPane.close();
+			arenaPane.setFeedCanvasManager(null);
+			arenaPane = null;
+
+			cameraViews.removeCameraView("Arena");
+
+			if (config.getExercise().isPresent()
+					&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
+				exerciseSlide.toggleProjectorExercises(true);
+			}
+
+			if (calibrationManager.isPresent()) {
+				if (calibrationManager.get().isCalibrating()) {
+					calibrationManager.get().stopCalibration();
+				} else {
+					calibrationManager.get().arenaClosing();
+				}
+			}
+
+			exerciseSlide.toggleProjectorExercises(true);
+		});
 	}
 
 	public void closeArena() {

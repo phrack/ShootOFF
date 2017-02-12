@@ -114,20 +114,58 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	private static final Logger logger = LoggerFactory.getLogger(HeadlessController.class);
 
 	private final Configuration config;
+	private final ProjectorArenaPane arenaPane;
 	private final CamerasSupervisor camerasSupervisor;
+	private final CanvasManager arenaCanvasManager;
 	private final Map<UUID, Target> targets = new HashMap<>();
 	private final Set<TrainingExercise> trainingExercises = new HashSet<>();
 	private final Set<TrainingExercise> projectorTrainingExercises = new HashSet<>();
 
 	private PluginEngine pluginEngine;
-	private ProjectorArenaPane arenaPane;
-	private CanvasManager arenaCanvasManager;
+	private CalibrationManager calibrationManager;
 	private Target qrCodeTarget;
 
 	private Optional<HeadlessServer> server = Optional.empty();
 
 	public HeadlessController() {
 		config = Configuration.getConfig();
+
+		// Configuring cameras may cause us to bail out before doing anything
+		// actually useful
+		// but we initialize these points first so that we can make more fields
+		// immutable
+		// (initializing them after a guarded return will make it so the can't
+		// be final unless
+		// we initialize them all to null).
+		final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
+
+		shotEntries.addListener(new ListChangeListener<ShotEntry>() {
+			@Override
+			public void onChanged(Change<? extends ShotEntry> change) {
+				if (!server.isPresent() || !change.next() || change.getAddedSize() < 1) return;
+
+				for (ShotEntry entry : change.getAddedSubList()) {
+					final Shot shot = entry.getShot();
+					server.get().sendMessage(
+							new NewShotMessage(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp()));
+				}
+			}
+		});
+
+		final CanvasManager canvasManager = new CanvasManager(new Group(), this, "Default", shotEntries);
+
+		final Stage arenaStage = new Stage();
+		// TODO: Pass controls added to this pane to the device controlling
+		// SBC
+		final Pane trainingExerciseContainer = new Pane();
+
+		arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this, shotEntries);
+		arenaCanvasManager = arenaPane.getCanvasManager();
+
+		arenaStage.setTitle("Projector Arena");
+		arenaStage.setScene(new Scene(arenaPane));
+		arenaStage.setFullScreenExitHint("");
+
 		camerasSupervisor = new CamerasSupervisor(config);
 
 		final Map<String, Camera> configuredCameras = config.getWebcams();
@@ -153,39 +191,10 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 		initializePluginEngine();
 
-		final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
-		final CanvasManager canvasManager = new CanvasManager(new Group(), this, "Default", shotEntries);
 		final CameraManager cameraManager = camerasSupervisor.addCameraManager(c, this, canvasManager);
 
-		final Stage arenaStage = new Stage();
-		// TODO: Pass controls added to this pane to the device controlling
-		// SBC
-		final Pane trainingExerciseContainer = new Pane();
-
-		arenaPane = new ProjectorArenaPane(arenaStage, null, trainingExerciseContainer, this, shotEntries);
-
-		arenaCanvasManager = arenaPane.getCanvasManager();
-
-		shotEntries.addListener(new ListChangeListener<ShotEntry>() {
-			@Override
-			public void onChanged(Change<? extends ShotEntry> change) {
-				if (!server.isPresent() || !change.next() || change.getAddedSize() < 1) return;
-
-				for (ShotEntry entry : change.getAddedSubList()) {
-					final Shot shot = entry.getShot();
-					server.get().sendMessage(
-							new NewShotMessage(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp()));
-				}
-			}
-		});
-
-		arenaStage.setTitle("Projector Arena");
-		arenaStage.setScene(new Scene(arenaPane));
-		arenaStage.setFullScreenExitHint("");
-
 		// TODO: Camera views to non-null value to handle calibration issues
-		final CalibrationManager calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null,
-				this);
+		calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null, this);
 
 		arenaPane.setCalibrationManager(calibrationManager);
 		arenaPane.toggleArena();
@@ -572,7 +581,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			logger.trace("Exercise unset");
 			return;
 		}
-		
+
 		for (TrainingExercise exercise : trainingExercises) {
 			if (exercise.getInfo().equals(exerciseMetadata)) {
 				logger.trace("Setting exercise to {}", exercise.getInfo().toString());
