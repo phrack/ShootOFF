@@ -84,6 +84,8 @@ import com.shootoff.headless.protocol.SetBackgroundMessage;
 import com.shootoff.headless.protocol.SetConfigurationMessage;
 import com.shootoff.headless.protocol.SetCourseMessage;
 import com.shootoff.headless.protocol.SetExerciseMessage;
+import com.shootoff.headless.protocol.StartCalibrationMessage;
+import com.shootoff.headless.protocol.StopCalibrationMessage;
 import com.shootoff.headless.protocol.TargetMessage;
 import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
@@ -385,9 +387,13 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	@Override
 	public void toggleCalibrating(boolean isCalibrating) {
 		if (!isCalibrating) {
-			final HeadlessServer headlessServer = new BluetoothServer(this);
-			server = Optional.of(headlessServer);
-			headlessServer.startReading(this, this);
+			if (server.isPresent()) {
+				server.get().sendMessage(new StopCalibrationMessage());
+			} else {
+				final HeadlessServer headlessServer = new BluetoothServer(this);
+				server = Optional.of(headlessServer);
+				headlessServer.startReading(this, this);
+			}
 		}
 	}
 
@@ -469,6 +475,14 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		} else if (message instanceof SetExerciseMessage) {
 			final SetExerciseMessage exerciseMessage = (SetExerciseMessage) message;
 			setExercise(exerciseMessage.getNewExercise());
+		} else if (message instanceof StartCalibrationMessage) {
+			if (!calibrationManager.isCalibrating()) {
+				calibrationManager.enableCalibration();
+			}
+		} else if (message instanceof StopCalibrationMessage) {
+			if (calibrationManager.isCalibrating()) {
+				calibrationManager.stopCalibration();
+			}
 		} else if (message instanceof TargetMessage) {
 			handleTargetMessage((TargetMessage) message);
 		}
