@@ -80,6 +80,7 @@ import com.shootoff.headless.protocol.NewShotMessage;
 import com.shootoff.headless.protocol.RemoveTargetMessage;
 import com.shootoff.headless.protocol.ResetMessage;
 import com.shootoff.headless.protocol.ResizeTargetMessage;
+import com.shootoff.headless.protocol.SaveCourseMessage;
 import com.shootoff.headless.protocol.SetBackgroundMessage;
 import com.shootoff.headless.protocol.SetConfigurationMessage;
 import com.shootoff.headless.protocol.SetCourseMessage;
@@ -433,6 +434,20 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			sendTargets();
 		} else if (message instanceof ResetMessage) {
 			reset();
+		} else if (message instanceof SaveCourseMessage) {
+			final File courseDirectory = new File(System.getProperty("shootoff.courses"));
+			final File courseFile = ((SaveCourseMessage) message).getFile();
+
+			if (courseFile.getParent() != null) {
+				final File parentDirectory = new File(
+						courseDirectory.toString() + File.separator + courseFile.getParent());
+				if (!parentDirectory.exists() && !parentDirectory.mkdirs()) {
+					logger.error("Failed to make directory for course {}", courseFile);
+				}
+			}
+
+			CourseIO.saveCourse(arenaPane,
+					new File(courseDirectory.toString() + File.separator + courseFile.toString()));
 		} else if (message instanceof SetBackgroundMessage) {
 			final SetBackgroundMessage backgroundMessage = (SetBackgroundMessage) message;
 
