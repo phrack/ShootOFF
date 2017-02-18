@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.processors.ShotProcessor;
+import com.shootoff.camera.processors.VirtualMagazineProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.gui.ParListener;
@@ -77,13 +79,13 @@ import javafx.util.Callback;
  * 
  * @author phrack
  */
-public class TrainingExerciseBase {
+public abstract class TrainingExerciseBase {
 	private static final Logger logger = LoggerFactory.getLogger(TrainingExerciseBase.class);
 
+	protected Configuration config;
 	private static boolean isSilenced = false;
 
 	@SuppressWarnings("unused") private List<Target> targets;
-	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private TrainingExerciseView exerciseView;
 	private VBox buttonsContainer;
@@ -106,7 +108,8 @@ public class TrainingExerciseBase {
 		this.targets = targets;
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TrainingExerciseView exerciseView) {
+	public void init(CamerasSupervisor camerasSupervisor, TrainingExerciseView exerciseView) {
+		config = Configuration.getConfig();
 		init(config, camerasSupervisor, exerciseView.getButtonsPane(), exerciseView.getShotEntryTable());
 		trainingExerciseContainer = exerciseView.getTrainingExerciseContainer();
 		this.exerciseView = exerciseView;
@@ -397,6 +400,21 @@ public class TrainingExerciseBase {
 				exerciseLabel.setText(message);
 			}
 		});
+	}
+
+	/**
+	 * Reset the round count in the virtual magazine to its configured capacity.
+	 * 
+	 * @since 4.0
+	 */
+	public void reloadVirtualMagazine() {
+		if (!config.useVirtualMagazine()) return;
+
+		for (ShotProcessor processor : config.getShotProcessors()) {
+			if (processor instanceof VirtualMagazineProcessor) {
+				processor.reset();
+			}
+		}
 	}
 
 	/**

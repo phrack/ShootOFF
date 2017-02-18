@@ -60,9 +60,6 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 		thisSuper = super.getInstance();
 		this.targets = targets;
-
-		repeatExercise = checkTargets(targets);
-		startRound();
 	}
 
 	@Override
@@ -71,6 +68,9 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 		super.addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
 		super.addShotTimerColumn(HIT_COL_NAME, HIT_COL_WIDTH);
+		
+		repeatExercise = checkTargets(targets);
+		startRound();
 	}
 
 	// For testing
@@ -145,6 +145,7 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 	private void startRound() {
 		if (!repeatExercise) return;
 
+		reloadVirtualMagazine();
 		roundTargets = new HashSet<>(targets);
 
 		if (testing) {

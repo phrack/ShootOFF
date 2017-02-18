@@ -57,7 +57,6 @@ import javafx.scene.text.Font;
  * @author phrack
  */
 public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
-	private Configuration config;
 	private CamerasSupervisor camerasSupervisor;
 	private ProjectorArenaPane arenaPane;
 	private final List<Target> targets = new ArrayList<>();
@@ -71,10 +70,9 @@ public class ProjectorTrainingExerciseBase extends TrainingExerciseBase {
 		super(targets);
 	}
 
-	public void init(Configuration config, CamerasSupervisor camerasSupervisor, TrainingExerciseView exerciseView,
+	public void init(CamerasSupervisor camerasSupervisor, TrainingExerciseView exerciseView,
 			ProjectorArenaPane arenaPane) {
-		super.init(config, camerasSupervisor, exerciseView);
-		this.config = config;
+		super.init(camerasSupervisor, exerciseView);
 		this.camerasSupervisor = camerasSupervisor;
 		this.arenaPane = arenaPane;
 		exerciseLabel.setTextFill(Color.WHITE);

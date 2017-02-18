@@ -176,7 +176,7 @@ public class TestTargetIO {
 		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
 		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
-		pteb.init(config, cs, new ShootOFFController(), pac);
+		pteb.init(cs, new ShootOFFController(), pac);
 
 		pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
 	}

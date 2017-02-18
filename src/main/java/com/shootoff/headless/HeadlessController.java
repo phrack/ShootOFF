@@ -312,7 +312,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			config.setExercise(newExercise);
 
 			final Runnable initExercise = () -> {
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this, arenaPane);
+				((ProjectorTrainingExerciseBase) newExercise).init(camerasSupervisor, this, arenaPane);
 				newExercise.init();
 			};
 
@@ -352,7 +352,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			config.setExercise(newExercise);
 
 			final Runnable initExercise = () -> {
-				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
+				((TrainingExerciseBase) newExercise).init(camerasSupervisor, this);
 				newExercise.init();
 			};
 

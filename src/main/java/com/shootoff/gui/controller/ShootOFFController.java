@@ -951,7 +951,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			config.setExercise(newExercise);
 
 			final Runnable initExercise = () -> {
-				((TrainingExerciseBase) newExercise).init(config, camerasSupervisor, this);
+				((TrainingExerciseBase) newExercise).init(camerasSupervisor, this);
 				newExercise.init();
 			};
 
@@ -985,7 +985,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			config.setExercise(newExercise);
 
 			final Runnable initExercise = () -> {
-				((ProjectorTrainingExerciseBase) newExercise).init(config, camerasSupervisor, this,
+				((ProjectorTrainingExerciseBase) newExercise).init(camerasSupervisor, this,
 						projectorSlide.getArenaPane());
 				newExercise.init();
 			};
