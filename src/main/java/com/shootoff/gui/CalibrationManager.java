@@ -79,7 +79,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		calibrationListeners.add(arenaPane);
 		this.arenaPane = arenaPane;
 		this.cameraViews = cameraViews;
-		config = exerciseListener.getConfiguration();
+		config = Configuration.getConfig();
 		this.exerciseListener = exerciseListener;
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);

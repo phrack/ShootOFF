@@ -220,38 +220,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 			});
 		}, 2000);
 
-		if (config.getWebcams().isEmpty()) {
-			final Optional<Camera> defaultCamera = CameraFactory.getDefault();
-			if (defaultCamera.isPresent()) {
-				if (!addCameraTab("Default", defaultCamera.get())) {
-					// Failed to open the default camera. This sometimes happens
-					// on Windows when video devices get registered and set as
-					// the default camera even though the physical device is not
-					// actually present. This seems to happen sometimes with TV
-					// tuners and buggy camera drivers. As a workaround, try to
-					// fall back to using a different camera as the default.
-					final List<Camera> allCameras = CameraFactory.getWebcams();
-
-					if (allCameras.size() <= 1) {
-						showCameraLockError(defaultCamera.get(), true);
-					} else {
-						for (final Camera c : allCameras) {
-							if (!c.equals(defaultCamera.get())) {
-								if (!addCameraTab("Default", c)) {
-									showCameraLockError(c, true);
-								}
-
-								break;
-							}
-						}
-					}
-				}
-			} else {
-				Main.closeNoCamera();
-			}
-		} else {
-			addConfiguredCameras();
-		}
+		addCameraTabs();
 
 		final TableColumn<ShotEntry, String> timeCol = new TableColumn<>("Time");
 		timeCol.setMinWidth(85);
@@ -467,10 +436,77 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		config.unregisterAllRecordingCameraManagers();
 		addConfiguredCameras();
 	}
+	
+	private final Map<Tab, CameraManager> cameraManagerTabs = new HashMap<>();
 
-	@Override
-	public Configuration getConfiguration() {
-		return config;
+	private void addCameraTabs() {
+		if (!config.getWebcams().isEmpty()) {
+			addConfiguredCameras();
+			return;
+		}
+
+		// No configured cameras, attempt to use the system default
+		final Optional<Camera> defaultCamera = CameraFactory.getDefault();
+		if (!defaultCamera.isPresent()) {
+			Main.closeNoCamera();
+		}
+
+		if (!addCameraTab("Default", defaultCamera.get())) {
+			// Failed to open the default camera. This sometimes happens
+			// on Windows when video devices get registered and set as
+			// the default camera even though the physical device is not
+			// actually present. This seems to happen sometimes with TV
+			// tuners and buggy camera drivers. As a workaround, try to
+			// fall back to using a different camera as the default.
+			final List<Camera> allCameras = CameraFactory.getWebcams();
+
+			if (allCameras.size() <= 1) {
+				showCameraLockError(defaultCamera.get(), true);
+			} else {
+				logger.warn("System default camera is in use, attempting to fall back to a different camera.");
+
+				for (final Camera c : allCameras) {
+					if (!c.equals(defaultCamera.get())) {
+						if (!addCameraTab("Default", c)) {
+							showCameraLockError(c, true);
+						}
+
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	private boolean addCameraTab(String webcamName, Camera cameraInterface) {
+		if (cameraInterface.isLocked() && !cameraInterface.isOpen()) {
+			return false;
+		}
+
+		final Tab cameraTab = new Tab(webcamName);
+		final Group cameraCanvasGroup = new Group();
+		// 640 x 480
+		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
+
+		final CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, this, webcamName, shotEntries);
+		final Optional<CameraManager> cameraManagerOptional = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
+
+		if (!cameraManagerOptional.isPresent()) {
+			return false;
+		}
+		
+		final CameraManager cameraManager = cameraManagerOptional.get();
+		
+		cameraManagerTabs.put(cameraTab, cameraManager);
+
+		if (config.getRecordingCameras().contains(cameraInterface)) {
+			config.registerRecordingCameraManager(cameraManager);
+		}
+
+		canvasManager.setContextMenu(createContextMenu());
+		installDebugCoordDisplay(canvasManager);
+
+		return cameraTabPane.getTabs().add(cameraTab);
 	}
 
 	private void addConfiguredCameras() {
@@ -528,33 +564,6 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 			}
 		}
-	}
-
-	private final Map<Tab, CameraManager> cameraManagerTabs = new HashMap<>();
-
-	private boolean addCameraTab(String webcamName, Camera cameraInterface) {
-		if (cameraInterface.isLocked() && !cameraInterface.isOpen()) {
-			return false;
-		}
-
-		final Tab cameraTab = new Tab(webcamName);
-		final Group cameraCanvasGroup = new Group();
-		// 640 x 480
-		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
-
-		final CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, this, webcamName, shotEntries);
-		final CameraManager cameraManager = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
-
-		cameraManagerTabs.put(cameraTab, cameraManager);
-
-		if (config.getRecordingCameras().contains(cameraInterface)) {
-			config.registerRecordingCameraManager(cameraManager);
-		}
-
-		canvasManager.setContextMenu(createContextMenu());
-		installDebugCoordDisplay(canvasManager);
-
-		return cameraTabPane.getTabs().add(cameraTab);
 	}
 
 	@Override
@@ -707,8 +716,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					recordMenuItem.setText("Stop Recording");
 
 					final String tabName = cameraTabPane.getSelectionModel().getSelectedItem().getText();
-					final String videoName = tabName + 
-							LocalDateTime.now().toString().replaceAll(":", ".") + ".mp4";
+					final String videoName = tabName + LocalDateTime.now().toString().replaceAll(":", ".") + ".mp4";
 					cameraManager.startRecordingStream(new File(videoName));
 				} else {
 					recordMenuItem.setText("Start Recording");

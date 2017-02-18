@@ -99,11 +99,6 @@ public class TestAutoCalibration implements VideoFinishedListener {
 					public PluginEngine getPluginEngine() {
 						return null;
 					}
-					
-					@Override
-					public Configuration getConfiguration() {
-						return null;
-					}
 				}));
 		cameraManager.enableAutoCalibration(false);
 

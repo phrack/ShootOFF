@@ -18,10 +18,7 @@
 
 package com.shootoff.gui;
 
-import com.shootoff.config.Configuration;
-
+@FunctionalInterface
 public interface CameraConfigListener {
 	void cameraConfigUpdated();
-
-	Configuration getConfiguration();
 }

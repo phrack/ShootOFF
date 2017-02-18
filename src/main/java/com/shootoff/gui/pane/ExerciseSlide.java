@@ -127,7 +127,7 @@ public class ExerciseSlide extends Slide implements PluginListener, ItemSelectio
 			if (loader.isPresent()) {
 				final SessionViewerController sessionViewerController = (SessionViewerController) loader.get()
 						.getController();
-				sessionViewerController.init(exerciseListener.getConfiguration());
+				sessionViewerController.init(Configuration.getConfig());
 
 				final SessionViewerSlide sessionViewerSlide = new SessionViewerSlide(parentControls, parentBody,
 						sessionViewerController);

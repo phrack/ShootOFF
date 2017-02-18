@@ -169,7 +169,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		return camera.getName();
 	}
 
-	public void start() {
+	public boolean start() {
 		sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
 		// Turn on all shot sectors by default
@@ -183,19 +183,13 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 			if (!camera.isOpen()) {
 				camera.setViewSize(new Dimension(getFeedWidth(), getFeedHeight()));
 
-				if (!camera.open()) {
-					cameraErrorView.get().showCameraLockError(camera, true);
-					return;
-				}
+				if (!camera.open()) return false;
 
 				final Dimension openDimension = camera.getViewSize();
 
 				if ((int) openDimension.getWidth() != getFeedWidth()
 						|| (int) openDimension.getHeight() != getFeedHeight()) {
-					if (openDimension.getWidth() == -1) {
-						cameraErrorView.get().showCameraLockError(camera, true);
-						return;
-					}
+					if (openDimension.getWidth() == -1) return false;
 
 					if (logger.isWarnEnabled()) {
 						logger.warn(
@@ -223,6 +217,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 
 		setDetecting(true);
 
+		return true;
 	}
 
 	public boolean isSectorOn(int x, int y) {

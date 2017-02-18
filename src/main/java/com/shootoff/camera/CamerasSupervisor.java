@@ -20,6 +20,7 @@ package com.shootoff.camera;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.shootoff.camera.cameratypes.Camera;
@@ -36,13 +37,17 @@ public class CamerasSupervisor {
 		this.config = config;
 	}
 
-	public CameraManager addCameraManager(Camera cameraInterface, CameraErrorView cameraErrorView,
+	public Optional<CameraManager> addCameraManager(Camera cameraInterface, CameraErrorView cameraErrorView,
 			CameraView cameraView) {
 		final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView);
-		managers.add(manager);
-		allDetecting.set(true);
-		manager.start();
-		return manager;
+
+		if (manager.start()) {
+			managers.add(manager);
+			allDetecting.set(true);
+			return Optional.of(manager);
+		}
+
+		return Optional.empty();
 	}
 
 	public void clearManagers() {

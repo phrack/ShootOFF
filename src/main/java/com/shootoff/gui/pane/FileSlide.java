@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.Closeable;
+import com.shootoff.config.Configuration;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CameraConfigListener;
 import com.shootoff.gui.controller.PreferencesController;
@@ -63,7 +64,7 @@ public class FileSlide extends Slide {
 
 				preferencesController = (PreferencesController) loader.getController();
 				preferencesController.setConfig((Stage) parentControls.getScene().getWindow(),
-						configListener.getConfiguration(), calibrationConfigurator, configListener);
+						Configuration.getConfig(), calibrationConfigurator, configListener);
 			}
 
 			final PreferencesSlide preferencesSlide = new PreferencesSlide(parentControls, parentBody,

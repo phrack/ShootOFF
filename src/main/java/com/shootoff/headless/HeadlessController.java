@@ -194,16 +194,21 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 		initializePluginEngine();
 
-		final CameraManager cameraManager = camerasSupervisor.addCameraManager(c, this, canvasManager);
+		final Optional<CameraManager> manager = camerasSupervisor.addCameraManager(c, this, canvasManager);
+		if (manager.isPresent()) {
+			final CameraManager cameraManager = manager.get();
 
-		// TODO: Camera views to non-null value to handle calibration issues
-		calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null, this);
+			// TODO: Camera views to non-null value to handle calibration issues
+			calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null, this);
 
-		arenaPane.setCalibrationManager(calibrationManager);
-		arenaPane.toggleArena();
-		arenaPane.autoPlaceArena();
+			arenaPane.setCalibrationManager(calibrationManager);
+			arenaPane.toggleArena();
+			arenaPane.autoPlaceArena();
 
-		calibrationManager.enableCalibration();
+			calibrationManager.enableCalibration();
+		} else {
+			logger.error("Failed to start camera {}", c.getName());
+		}
 	}
 
 	private void initializePluginEngine() {
@@ -365,11 +370,6 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			final ExerciseMetadata metadata = exercise.getInfo();
 			logger.error("Failed to start exercise " + metadata.getName() + " " + metadata.getVersion(), e);
 		}
-	}
-
-	@Override
-	public Configuration getConfiguration() {
-		return config;
 	}
 
 	@Override
