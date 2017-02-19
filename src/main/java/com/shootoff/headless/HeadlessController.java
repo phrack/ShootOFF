@@ -18,9 +18,6 @@
 
 package com.shootoff.headless;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -103,7 +100,6 @@ import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.Target;
-import com.shootoff.util.SwingFXUtils;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
