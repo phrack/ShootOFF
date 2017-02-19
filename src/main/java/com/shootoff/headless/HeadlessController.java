@@ -18,6 +18,9 @@
 
 package com.shootoff.headless;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -61,12 +64,14 @@ import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.headless.protocol.AddTargetMessage;
 import com.shootoff.headless.protocol.ClearCourseMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
+import com.shootoff.headless.protocol.CurrentArenaSnapshotMessage;
 import com.shootoff.headless.protocol.CurrentBackgroundsMessage;
 import com.shootoff.headless.protocol.CurrentConfigurationMessage;
 import com.shootoff.headless.protocol.CurrentCoursesMessage;
 import com.shootoff.headless.protocol.CurrentExercisesMessage;
 import com.shootoff.headless.protocol.CurrentTargetsMessage;
 import com.shootoff.headless.protocol.ErrorMessage;
+import com.shootoff.headless.protocol.GetArenaSnapshotMessage;
 import com.shootoff.headless.protocol.ErrorMessage.ErrorType;
 import com.shootoff.headless.protocol.GetBackgroundsMessage;
 import com.shootoff.headless.protocol.GetConfigurationMessage;
@@ -98,6 +103,7 @@ import com.shootoff.plugins.engine.PluginEngine;
 import com.shootoff.plugins.engine.PluginListener;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.Target;
+import com.shootoff.util.SwingFXUtils;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -105,8 +111,11 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -421,6 +430,22 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	public void messageReceived(Message message) {
 		if (message instanceof ClearCourseMessage) {
 			arenaPane.getCanvasManager().clearTargets();
+		} else if (message instanceof GetArenaSnapshotMessage) {
+			Platform.runLater(() -> {
+				if (server.isPresent()) {
+					final WritableImage snapshot = arenaPane.getCanvasManager().getCanvasGroup()
+							.snapshot(new SnapshotParameters(), null);
+
+					final int width = (int) snapshot.getWidth();
+					final int height = (int) snapshot.getHeight();
+					final int[] snapshotPixels = new int[width * height];
+					snapshot.getPixelReader().getPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(),
+							snapshotPixels, 0, width);
+
+					server.get().sendMessage(new CurrentArenaSnapshotMessage(snapshotPixels, width, height));
+				}
+
+			});
 		} else if (message instanceof GetBackgroundsMessage) {
 			if (server.isPresent())
 				server.get().sendMessage(new CurrentBackgroundsMessage(ArenaBackgroundsSlide.DEFAULT_BACKGROUNDS));

@@ -165,7 +165,7 @@ class BluetoothServer implements HeadlessServer {
 	public void sendMessage(Message message) {
 		final String jsonMessage = message.toJson();
 
-		logger.trace("Sending message via bluetooth: {}", jsonMessage);
+		logger.trace("Sending message via bluetooth: {}, size: {} kb", jsonMessage, jsonMessage.length() / 1024);
 
 		bluetoothOutput.write(jsonMessage);
 		bluetoothOutput.flush();
