@@ -139,12 +139,10 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		config = Configuration.getConfig();
 
 		// Configuring cameras may cause us to bail out before doing anything
-		// actually useful
-		// but we initialize these points first so that we can make more fields
-		// immutable
-		// (initializing them after a guarded return will make it so the can't
-		// be final unless
-		// we initialize them all to null).
+		// actually useful but we initialize these points first so that we can
+		// make more fields immutable (initializing them after a guarded return
+		// will make it so the can't be final unless we initialize them all to
+		// null).
 		final ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 
 		shotEntries.addListener(new ListChangeListener<ShotEntry>() {
@@ -396,9 +394,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			if (server.isPresent()) {
 				server.get().sendMessage(new StopCalibrationMessage());
 			} else {
-				final HeadlessServer headlessServer = new BluetoothServer(this);
-				server = Optional.of(headlessServer);
-				headlessServer.startReading(this, this);
+				startBluetooth();
 			}
 		}
 	}
@@ -414,12 +410,24 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		qrCodeTarget = arenaCanvasManager.addTarget(null, targetGroup, new HashMap<String, String>(), false);
 	}
 
+	private void startBluetooth() {
+		final HeadlessServer headlessServer = new BluetoothServer(this);
+		server = Optional.of(headlessServer);
+		headlessServer.startReading(this, this);
+	}
+	
 	@Override
 	public void connectionEstablished() {
 		if (qrCodeTarget != null) {
 			arenaCanvasManager.removeTarget(qrCodeTarget);
 			qrCodeTarget = null;
 		}
+	}
+	
+	@Override
+	public void bluetoothDisconnected() {
+		server = Optional.empty();
+		startBluetooth();
 	}
 
 	@Override

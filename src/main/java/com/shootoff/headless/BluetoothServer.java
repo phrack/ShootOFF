@@ -45,14 +45,17 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.shootoff.headless.protocol.HeartbeatMessage;
 import com.shootoff.headless.protocol.Message;
 import com.shootoff.headless.protocol.MessageListener;
+import com.shootoff.util.TimerPool;
 import com.shootoff.util.SwingFXUtils;
 
 import javafx.scene.image.Image;
 
 class BluetoothServer implements HeadlessServer {
 	private static final Logger logger = LoggerFactory.getLogger(BluetoothServer.class);
+	private static final int HEARTBEAT_INTERVAL = 1000; // ms
 
 	private final AtomicBoolean open = new AtomicBoolean(false);
 
@@ -136,12 +139,12 @@ class BluetoothServer implements HeadlessServer {
 			final OutputStream outStream = connection.openOutputStream();
 			bluetoothOutput = new PrintWriter(new OutputStreamWriter(outStream));
 
-			final BufferedReader bReader = new BufferedReader(new InputStreamReader(connection.openInputStream()));
+			final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.openInputStream()));
 
 			readLoopThread = new Thread(() -> {
 				while (open.get()) {
 					try {
-						final String lineRead = bReader.readLine();
+						final String lineRead = reader.readLine();
 						logger.trace("Received message via bluetooth: {}", lineRead);
 						if (messageListener != null) messageListener.messageReceived(Message.fromJson(lineRead));
 					} catch (IOException e) {
@@ -151,6 +154,7 @@ class BluetoothServer implements HeadlessServer {
 			});
 
 			readLoopThread.start();
+			startHeartbeat(connectionListener);
 		} catch (ServiceRegistrationException e) {
 			logger.error("Open /usr/lib/systemd/system/bluetooth.service and ensure bluetoothd is "
 					+ "started with --compat. Additionally ensure that /var/run/sdp has o+w: "
@@ -161,15 +165,26 @@ class BluetoothServer implements HeadlessServer {
 		}
 	}
 
+	private void startHeartbeat(ConnectionListener connectionListener) {
+		TimerPool.schedule(() -> {
+			if (!sendMessage(new HeartbeatMessage())) {
+				close();
+				connectionListener.bluetoothDisconnected();
+			} else {
+				startHeartbeat(connectionListener);
+			}
+		}, HEARTBEAT_INTERVAL);
+	}
+
 	@Override
-	public void sendMessage(Message message) {
+	public boolean sendMessage(Message message) {
 		final String jsonMessage = message.toJson();
 
 		logger.trace("Sending message via bluetooth: {}, size: {} kb", jsonMessage, jsonMessage.length() / 1024);
 
 		bluetoothOutput.write(jsonMessage);
 		bluetoothOutput.flush();
-
+		return !bluetoothOutput.checkError();
 	}
 
 	@Override

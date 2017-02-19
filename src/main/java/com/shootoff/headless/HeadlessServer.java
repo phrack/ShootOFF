@@ -7,5 +7,5 @@ import com.shootoff.headless.protocol.MessageListener;
 public interface HeadlessServer extends Closeable {
 	void startReading(ConnectionListener connectionListener, MessageListener messageListener);
 
-	void sendMessage(Message message);
+	boolean sendMessage(Message message);
 }
