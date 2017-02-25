@@ -18,7 +18,10 @@
 
 package com.shootoff.headless.protocol;
 
-public class ConfigurationData {
+import java.io.Serializable;
+
+public class ConfigurationData implements Serializable {
+	private static final long serialVersionUID = 1L;
 	// Laser settings
 	private final int markerRadius;
 	private final boolean ignoreLaserColor;
