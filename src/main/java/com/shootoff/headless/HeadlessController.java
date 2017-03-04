@@ -698,7 +698,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	@Override
 	public Pane getTrainingExerciseContainer() {
 		// TODO Use a stub that sends controls to tablet
-		return null;
+		return new Pane();
 	}
 
 	@Override
@@ -710,7 +710,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	@Override
 	public VBox getButtonsPane() {
 		// TODO Use a stub that sends controls to tablet
-		return null;
+		return new VBox();
 	}
 
 	@Override
