@@ -51,6 +51,7 @@ import javafx.stage.WindowEvent;
 
 public class CalibrationManager implements CameraCalibrationListener {
 	private static final int MAX_AUTO_CALIBRATION_TIME = 12 * 1000;
+	private static final int MAX_AUTO_CALIBRATION_TIME_HEADLESS = 45 * 1000;
 	private static final Logger logger = LoggerFactory.getLogger(CalibrationManager.class);
 
 	private final CalibrationConfigurator calibrationConfigurator;
@@ -58,6 +59,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final CanvasManager calibratingCanvasManager;
 	private final CameraViews cameraViews;
 	private final Configuration config;
+	private final Optional<AutocalibrationListener> autocalibrationListener;
 	private final ExerciseListener exerciseListener;
 	private final List<CalibrationListener> calibrationListeners = new ArrayList<>();
 	private final ProjectorArenaPane arenaPane;
@@ -72,7 +74,8 @@ public class CalibrationManager implements CameraCalibrationListener {
 	private final AtomicBoolean isShowingPattern = new AtomicBoolean(false);
 
 	public CalibrationManager(CalibrationConfigurator calibrationConfigurator, CameraManager calibratingCameraManager,
-			ProjectorArenaPane arenaPane, CameraViews cameraViews, ExerciseListener exerciseListener) {
+			ProjectorArenaPane arenaPane, CameraViews cameraViews, AutocalibrationListener autocalibrationListener,
+			ExerciseListener exerciseListener) {
 		this.calibrationConfigurator = calibrationConfigurator;
 		this.calibratingCameraManager = calibratingCameraManager;
 		calibratingCanvasManager = (CanvasManager) calibratingCameraManager.getCameraView();
@@ -80,6 +83,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 		this.arenaPane = arenaPane;
 		this.cameraViews = cameraViews;
 		config = Configuration.getConfig();
+		this.autocalibrationListener = Optional.ofNullable(autocalibrationListener);
 		this.exerciseListener = exerciseListener;
 
 		arenaPane.setFeedCanvasManager(calibratingCanvasManager);
@@ -336,13 +340,18 @@ public class CalibrationManager implements CameraCalibrationListener {
 		autoCalibrationFuture = TimerPool.schedule(() -> {
 			Platform.runLater(() -> {
 				if (isCalibrating.get() && isFullScreen) {
-					calibratingCameraManager.disableAutoCalibration();
-					enableManualCalibration();
+					if (autocalibrationListener.isPresent()) {
+						autocalibrationListener.get().autocalibrationTimedOut();
+						stopCalibration();
+					} else {
+						calibratingCameraManager.disableAutoCalibration();
+						enableManualCalibration();
+					}
 				}
 				// Keep waiting
 				else if (!isFullScreen) launchAutoCalibrationTimer();
 			});
-		}, MAX_AUTO_CALIBRATION_TIME);
+		}, autocalibrationListener.isPresent() ? MAX_AUTO_CALIBRATION_TIME_HEADLESS : MAX_AUTO_CALIBRATION_TIME);
 	}
 
 	@Override

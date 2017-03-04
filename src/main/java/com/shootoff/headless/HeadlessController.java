@@ -47,6 +47,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
+import com.shootoff.gui.AutocalibrationListener;
 import com.shootoff.gui.CalibrationConfigurator;
 import com.shootoff.gui.CalibrationManager;
 import com.shootoff.gui.CalibrationOption;
@@ -105,20 +106,24 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import marytts.util.io.FileFilter;
 
-public class HeadlessController implements CameraErrorView, Resetter, ExerciseListener, CalibrationConfigurator,
-		QRCodeListener, ConnectionListener, MessageListener, TrainingExerciseView {
+public class HeadlessController implements AutocalibrationListener, CameraErrorView, Resetter, ExerciseListener,
+		CalibrationConfigurator, QRCodeListener, ConnectionListener, MessageListener, TrainingExerciseView {
 	private static final Logger logger = LoggerFactory.getLogger(HeadlessController.class);
 
 	private final Configuration config;
@@ -131,6 +136,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 
 	private PluginEngine pluginEngine;
 	private CalibrationManager calibrationManager;
+	private boolean calibrated = true;
 	private Target qrCodeTarget;
 
 	private Optional<HeadlessServer> server = Optional.empty();
@@ -202,7 +208,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			final CameraManager cameraManager = manager.get();
 
 			// TODO: Camera views to non-null value to handle calibration issues
-			calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null, this);
+			calibrationManager = new CalibrationManager(this, cameraManager, arenaPane, null, this, this);
 
 			arenaPane.setCalibrationManager(calibrationManager);
 			arenaPane.toggleArena();
@@ -268,6 +274,21 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 				webcamName.isPresent() ? webcamName.get() : webcam.getName());
 
 		server.get().sendMessage(new ErrorMessage(message, ErrorType.TARGET));
+	}
+
+	@Override
+	public void autocalibrationTimedOut() {
+		calibrated = false;
+		
+		final Label calibrationLabel = new Label("Calibration Failed!");
+		calibrationLabel.setFont(Font.font(48));
+		calibrationLabel.setTextFill(Color.web("#f5a807"));
+		calibrationLabel.setLayoutX(6);
+		calibrationLabel.setLayoutY(6);
+		calibrationLabel.setPrefSize(628, 90);
+		calibrationLabel.setAlignment(Pos.CENTER);
+
+		arenaPane.getCanvasManager().getCanvasGroup().getChildren().add(calibrationLabel);
 	}
 
 	@Override
@@ -391,6 +412,8 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 	@Override
 	public void toggleCalibrating(boolean isCalibrating) {
 		if (!isCalibrating) {
+			if (!calibrated) return;
+			
 			if (server.isPresent()) {
 				server.get().sendMessage(new StopCalibrationMessage());
 			} else {
