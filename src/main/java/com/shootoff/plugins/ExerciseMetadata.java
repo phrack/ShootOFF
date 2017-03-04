@@ -18,12 +18,16 @@
 
 package com.shootoff.plugins;
 
+import java.io.Serializable;
+
 /**
  * Data about what an exercise is and who wrote it.
  * 
  * @author phrack
  */
-public class ExerciseMetadata {
+public class ExerciseMetadata implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private final String name;
 	private final String version;
 	private final String creator;

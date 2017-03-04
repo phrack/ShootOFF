@@ -23,13 +23,19 @@ import java.util.Set;
 import com.shootoff.plugins.ExerciseMetadata;
 
 public class CurrentExercisesMessage extends Message {
+	private final ExerciseMetadata enabledExercise;
 	private final Set<ExerciseMetadata> trainingExerices;
 	private final Set<ExerciseMetadata> projectorTrainingExerices;
-	
-	public CurrentExercisesMessage(Set<ExerciseMetadata> trainingExerices,
+
+	public CurrentExercisesMessage(ExerciseMetadata enabledExercise, Set<ExerciseMetadata> trainingExerices,
 			Set<ExerciseMetadata> projectorTrainingExerices) {
+		this.enabledExercise = enabledExercise;
 		this.trainingExerices = trainingExerices;
 		this.projectorTrainingExerices = projectorTrainingExerices;
+	}
+
+	public ExerciseMetadata getEnabledExercise() {
+		return enabledExercise;
 	}
 
 	public Set<ExerciseMetadata> getTrainingExercises() {

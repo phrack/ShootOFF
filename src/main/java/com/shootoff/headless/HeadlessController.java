@@ -415,7 +415,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 		server = Optional.of(headlessServer);
 		headlessServer.startReading(this, this);
 	}
-	
+
 	@Override
 	public void connectionEstablished() {
 		if (qrCodeTarget != null) {
@@ -423,7 +423,7 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			qrCodeTarget = null;
 		}
 	}
-	
+
 	@Override
 	public void bluetoothDisconnected() {
 		server = Optional.empty();
@@ -582,8 +582,13 @@ public class HeadlessController implements CameraErrorView, Resetter, ExerciseLi
 			trainingExercises.stream().map(TrainingExercise::getInfo).forEach(trainingExercisesMetadata::add);
 			projectorTrainingExercises.stream().map(TrainingExercise::getInfo)
 					.forEach(projectorTrainingExercisesMetadata::add);
-			server.get().sendMessage(
-					new CurrentExercisesMessage(trainingExercisesMetadata, projectorTrainingExercisesMetadata));
+
+			final Optional<TrainingExercise> enabledExercise = config.getExercise();
+			final ExerciseMetadata enabledExerciseMetadata = enabledExercise.isPresent()
+					? enabledExercise.get().getInfo() : null;
+
+			server.get().sendMessage(new CurrentExercisesMessage(enabledExerciseMetadata, trainingExercisesMetadata,
+					projectorTrainingExercisesMetadata));
 		}
 	}
 
