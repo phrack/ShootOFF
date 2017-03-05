@@ -3,8 +3,8 @@
      to learn about existing plugins. Do not add a plugin's data to this file unless you are
      ready to support it yourself.-->
 <plugins>
-  <plugin name="Clay Buster" version="1.0" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
-    creator="phrack" download="https://github.com/phrack/ShootOFF-Clay-Buster/releases/download/v1.0-FINAL/ShootOFF-Clay-Buster.jar" 
+  <plugin name="Clay Buster" version="1.1" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
+    creator="phrack" download="https://github.com/phrack/ShootOFF-Clay-Buster/releases/download/v1.1-FINAL/ShootOFF-Clay-Buster.jar" 
     description="Practice shooting clays with a new clay launched every 7 seconds." />
   <plugin name="Cowboy Fast Draw" version="1.1" minShootOFFVersion="3.8" maxShootOFFVersion="4.0" 
     creator="phrack" download="https://github.com/phrack/ShootOFF-Cowboy-Fast-Draw/releases/download/v1.1-FINAL/ShootOFF-Cowboy-Fast-Draw.jar" 
