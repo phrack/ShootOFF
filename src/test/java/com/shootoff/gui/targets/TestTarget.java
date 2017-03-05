@@ -286,7 +286,7 @@ public class TestTarget {
 				KeyCode.UP, true, true, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), upArrowEvent);
 
-		assertEquals(oldWidth + TargetView.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldWidth + (TargetView.SCALE_DELTA * (oldWidth / oldHeight)), pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight + TargetView.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 
@@ -299,7 +299,7 @@ public class TestTarget {
 				"down", KeyCode.DOWN, true, true, false, false);
 		Event.fireEvent(pepperPopper.getTargetGroup(), downArrowEvent);
 
-		assertEquals(oldWidth - TargetView.SCALE_DELTA, pepperPopper.getDimension().getWidth(), .001);
+		assertEquals(oldWidth - (TargetView.SCALE_DELTA * (oldWidth / oldHeight)), pepperPopper.getDimension().getWidth(), .001);
 		assertEquals(oldHeight - TargetView.SCALE_DELTA, pepperPopper.getDimension().getHeight(), .001);
 	}
 }
