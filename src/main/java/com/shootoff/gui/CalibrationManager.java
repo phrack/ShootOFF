@@ -34,6 +34,7 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.plugins.ProjectorTrainingExerciseBase;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.targets.CameraViews;

@@ -8,6 +8,8 @@ import java.util.Optional;
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.gui.targets.MirroredTarget;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 

@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.targets;
 
-import java.io.File;
+import java.util.List;
 
-public interface TargetListener {
-	public void newTarget(File path);
+@FunctionalInterface
+public interface CommandProcessor {
+	public void process(List<String> commands, String commandName, List<String> args);
 }

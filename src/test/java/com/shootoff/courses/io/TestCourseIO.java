@@ -17,7 +17,7 @@ import com.shootoff.courses.Course;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.LocatedImage;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.TargetView;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.io.TargetIO;

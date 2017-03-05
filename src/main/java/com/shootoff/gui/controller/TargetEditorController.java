@@ -32,7 +32,7 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.gui.TargetListener;
+import com.shootoff.gui.targets.TargetListener;
 import com.shootoff.gui.pane.TagEditorPane;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;

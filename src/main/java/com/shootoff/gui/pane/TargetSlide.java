@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
-import com.shootoff.gui.TargetListener;
+import com.shootoff.gui.targets.TargetListener;
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.CameraViews;
 import com.shootoff.targets.io.TargetIO;

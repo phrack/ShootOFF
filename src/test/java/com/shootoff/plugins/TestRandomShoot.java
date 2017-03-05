@@ -26,7 +26,7 @@ import org.junit.Test;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.gui.JavaFXThreadingRule;
-import com.shootoff.gui.TargetView;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;

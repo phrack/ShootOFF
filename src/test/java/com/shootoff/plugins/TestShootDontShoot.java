@@ -21,7 +21,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.TargetView;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;

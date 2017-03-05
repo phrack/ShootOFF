@@ -10,6 +10,7 @@ import com.shootoff.camera.Shot;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ShootOFFController;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Target;
 
 import javafx.collections.FXCollections;

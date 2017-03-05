@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.courses.Course;
 import com.shootoff.courses.io.CourseIO;
-import com.shootoff.gui.TargetView;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Target;
 
 import javafx.geometry.Dimension2D;

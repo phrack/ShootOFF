@@ -15,7 +15,7 @@ import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.MockCanvasManager;
-import com.shootoff.gui.TargetView;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.SessionRecorder;

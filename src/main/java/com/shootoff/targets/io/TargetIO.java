@@ -28,7 +28,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.gui.TargetView;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.gui.controller.TargetEditorController;
 import com.shootoff.targets.EllipseRegion;
 import com.shootoff.targets.ImageRegion;

@@ -1,9 +1,10 @@
-package com.shootoff.gui;
+package com.shootoff.gui.targets;
 
 import java.io.File;
 import java.util.Map;
 
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.CanvasManager;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;

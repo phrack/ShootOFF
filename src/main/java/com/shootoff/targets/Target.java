@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.shootoff.camera.Shot;
-import com.shootoff.gui.TargetView.TargetSelectionListener;
+import com.shootoff.gui.targets.TargetView.TargetSelectionListener;
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;

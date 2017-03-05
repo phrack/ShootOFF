@@ -28,6 +28,7 @@ import java.util.Optional;
 
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.VideoPlayerController;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.gui;
+package com.shootoff.gui.targets;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.CanvasManager;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
 import com.shootoff.targets.RectangleRegion;
@@ -309,7 +310,7 @@ public class TargetView implements Target {
 		return keepInBounds;
 	}
 
-	protected static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
+	public static void parseCommandTag(TargetRegion region, CommandProcessor commandProcessor) {
 		if (!region.tagExists("command")) return;
 
 		final String commandsSource = region.getTag("command");
@@ -332,7 +333,7 @@ public class TargetView implements Target {
 		}
 	}
 
-	protected static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region,
+	public static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region,
 			String name) {
 		for (final Target target : targets) {
 			if (target.hasRegion(region)) {

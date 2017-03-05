@@ -21,7 +21,6 @@ package com.shootoff.gui;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -51,6 +50,9 @@ import com.shootoff.camera.processors.VirtualMagazineProcessor;
 import com.shootoff.camera.recorders.ShotRecorder;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.gui.targets.MirroredTarget;
+import com.shootoff.gui.targets.TargetCommands;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.plugins.TrainingExercise;
 import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.targets.Hit;
@@ -712,51 +714,7 @@ public class CanvasManager implements CameraView {
 	}
 
 	private void executeRegionCommands(Hit hit) {
-		TargetView.parseCommandTag(hit.getHitRegion(), (commands, commandName, args) -> {
-			switch (commandName) {
-			case "reset":
-				resetter.reset();
-				break;
-
-			case "animate":
-				hit.getTarget().animate(hit.getHitRegion(), args);
-				break;
-
-			case "reverse":
-				hit.getTarget().reverseAnimation(hit.getHitRegion());
-				break;
-
-			case "play_sound":
-				// If there is a second parameter, we should look to see
-				// if it's an image region that is down and if so, don't
-				// play the sound
-				if (args.size() == 2) {
-					final Optional<TargetRegion> namedRegion = TargetView.getTargetRegionByName(targets,
-							hit.getHitRegion(), args.get(1));
-					if (namedRegion.isPresent() && namedRegion.get().getType() == RegionType.IMAGE) {
-						if (!((ImageRegion) namedRegion.get()).onFirstFrame()) break;
-					}
-				}
-
-				// If the string starts with an @ we are supposed to
-				// load the sound as a resource from the current exercises
-				// JAR file. This indicates that the target is from
-				// a modular exercise
-				final String soundPath = args.get(0);
-				if (config.getExercise().isPresent() && '@' == soundPath.charAt(0)) {
-					final InputStream is = config.getExercise().get().getClass()
-							.getResourceAsStream(soundPath.substring(1));
-					TrainingExerciseBase.playSound(new BufferedInputStream(is));
-				} else if ('@' != soundPath.charAt(0)) {
-					TrainingExerciseBase.playSound(soundPath);
-				} else {
-					logger.error("Can't play {} because it is a resource in an exercise but no exercise is loaded.",
-							soundPath);
-				}
-
-				break;
-			}
-		});
+		TargetView.parseCommandTag(hit.getHitRegion(), new TargetCommands(targets, resetter, hit));
 	}
 
 	protected Optional<TargetComponents> loadTarget(File targetFile, boolean playAnimations) {
