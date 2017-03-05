@@ -52,8 +52,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -99,7 +97,7 @@ public class TargetView implements Target {
 
 	private TargetSelectionListener selectionListener;
 
-	public TargetView(File targetFile, Group target, Map<String, String> targetTags, CanvasManager parent, 
+	public TargetView(File targetFile, Group target, Map<String, String> targetTags, CanvasManager parent,
 			boolean userDeletable) {
 		this.targetFile = targetFile;
 		targetGroup = target;
@@ -112,7 +110,8 @@ public class TargetView implements Target {
 
 		targetGroup.setOnMouseClicked((event) -> {
 			// Skip target selection if click to shoot is being used
-			if (config.isPresent() && config.get().inDebugMode() && (event.isShiftDown() || event.isControlDown())) return;
+			if (config.isPresent() && config.get().inDebugMode() && (event.isShiftDown() || event.isControlDown()))
+				return;
 
 			parent.toggleTargetSelection(Optional.of(this));
 			targetGroup.requestFocus();
@@ -262,7 +261,7 @@ public class TargetView implements Target {
 	public Dimension2D getDimension() {
 		return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), targetGroup.getBoundsInParent().getHeight());
 	}
-	
+
 	@Override
 	public void scale(double widthFactor, double heightFactor) {
 		final double newWidth = getDimension().getWidth() * widthFactor;
@@ -284,7 +283,7 @@ public class TargetView implements Target {
 	public Bounds getBoundsInParent() {
 		return targetGroup.getBoundsInParent();
 	}
-	
+
 	@Override
 	public Point2D parentToLocal(double x, double y) {
 		return getTargetGroup().parentToLocal(x, y);
@@ -294,7 +293,7 @@ public class TargetView implements Target {
 	public void setClip(Rectangle clip) {
 		getTargetGroup().setClip(clip);
 	}
-	
+
 	/**
 	 * Sets whether or not the target should stay in the bounds of its parent.
 	 * 
@@ -333,8 +332,7 @@ public class TargetView implements Target {
 		}
 	}
 
-	public static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region,
-			String name) {
+	public static Optional<TargetRegion> getTargetRegionByName(List<Target> targets, TargetRegion region, String name) {
 		for (final Target target : targets) {
 			if (target.hasRegion(region)) {
 				for (final TargetRegion r : target.getRegions()) {
@@ -911,18 +909,18 @@ public class TargetView implements Target {
 
 					targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
 
+					// Scale up proportionally if ctrl is down
+					if (event.isControlDown()) {
+						final double newWidth = currentWidth - (SCALE_DELTA * (currentWidth / currentHeight));
+						final double widthDelta = (newWidth - currentWidth) / currentWidth;
+
+						targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - widthDelta));
+					}
+
 					if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 						config.get().getSessionRecorder().get().recordTargetResized(cameraName, this,
 								targetGroup.getBoundsInParent().getWidth(),
 								targetGroup.getBoundsInParent().getHeight());
-					}
-
-					// Scale up proportionally if ctrl is down
-					if (event.isControlDown()) {
-						final KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, true, true, false,
-								false);
-
-						targetGroup.fireEvent(ke);
 					}
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() - MOVEMENT_DELTA >= 0
@@ -950,20 +948,20 @@ public class TargetView implements Target {
 							&& targetGroup.getBoundsInParent().getMaxY() + (SCALE_DELTA / 2) <= config.get()
 									.getDisplayHeight())) {
 						targetGroup.setScaleY(targetGroup.getScaleY() * (1.0 - scaleDelta));
+
+						// Scale down proportionally if ctrl is down
+						if (event.isControlDown()) {
+							final double newWidth = currentWidth + (SCALE_DELTA * (currentWidth / currentHeight));
+							final double widthDelta = (newWidth - currentWidth) / currentWidth;
+
+							targetGroup.setScaleX(targetGroup.getScaleX() * (1.0 - widthDelta));
+						}
 					}
 
 					if (config.isPresent() && config.get().getSessionRecorder().isPresent()) {
 						config.get().getSessionRecorder().get().recordTargetResized(cameraName, this,
 								targetGroup.getBoundsInParent().getWidth(),
 								targetGroup.getBoundsInParent().getHeight());
-					}
-
-					// Scale down proportionally if ctrl is down
-					if (event.isControlDown()) {
-						final KeyEvent ke = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.RIGHT, true, true, false,
-								false);
-
-						targetGroup.fireEvent(ke);
 					}
 				} else {
 					if (!keepInBounds || (targetGroup.getBoundsInParent().getMinY() + MOVEMENT_DELTA >= 0
