@@ -213,7 +213,7 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		}
 
 		if (shotDetector instanceof ShotYieldingShotDetector)
-			((ShotYieldingShotDetector) shotDetector).startDetecting();
+			((ShotYieldingShotDetector) shotDetector).initDetecting();
 
 		setDetecting(true);
 
@@ -282,9 +282,10 @@ public class CameraManager implements ObservableCloseable, CameraEventListener, 
 		setDetecting(false);
 		setStreaming(false);
 
+		setCameraState(CameraState.CLOSED);
+		
 		camera.setCameraEventListener(null);
 
-		setCameraState(CameraState.CLOSED);
 
 		if (recordingStream) stopRecordingStream();
 		TimerPool.cancelTimer(brightnessDiagnosticFuture);

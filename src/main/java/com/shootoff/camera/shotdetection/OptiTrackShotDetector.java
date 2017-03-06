@@ -33,9 +33,9 @@ import com.shootoff.camera.cameratypes.OptiTrackCamera;
 
 public class OptiTrackShotDetector extends ShotYieldingShotDetector implements CameraStateListener {
 	private static final Logger logger = LoggerFactory.getLogger(OptiTrackShotDetector.class);
-	
+
 	private final CameraManager cameraManager;
-	
+
 	private final long startTime = System.currentTimeMillis();
 
 	public OptiTrackShotDetector(final CameraManager cameraManager,	final CameraView cameraView) {
@@ -83,7 +83,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 
 	/**
 	 * Called by the native code to notify this class when a shot is detected.
-	 * 
+	 *
 	 * @param x
 	 *            the x coordinate of the new shot
 	 * @param y
@@ -94,22 +94,21 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, long timestamp, int rgb) {
-		
+
 		if (!cameraManager.isDetecting()) return;
 
 		final Point undist = cameraManager.undistortCoords(x,y);
-		
+
 		if (logger.isTraceEnabled()) logger.trace("Translation: {} {} to {}", x, y, undist);
 
 		super.addShot(ShotColor.INFRARED, undist.x, undist.y, startTime+timestamp, true);
 	}
 
 	@Override
-	public void startDetecting() {
+	public void initDetecting() {
 		startDetectionModeNative();
-		enableDetection();
 	}
-	
+
 	@Override
 	protected boolean handlesBounds() {
 		return false;

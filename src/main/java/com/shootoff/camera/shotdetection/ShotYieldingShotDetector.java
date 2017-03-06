@@ -28,5 +28,5 @@ public abstract class ShotYieldingShotDetector extends ShotDetector {
 		super(cameraManager, cameraView);
 	}
 
-	public abstract void startDetecting();
+	public abstract void initDetecting();
 }

@@ -77,15 +77,15 @@ public class OptiTrackCamera implements Camera {
 	public boolean setState(CameraState cameraState) {
 		switch (cameraState) {
 		case DETECTING_CALIBRATED:
-			if (!getIRFilterState()) toggleIRFilter();
+			setIRFilter(true);
 			break;
 		case CALIBRATING:
 			resetExposure();
-			if (getIRFilterState()) toggleIRFilter();
+			setIRFilter(false);
 			break;
 		case DETECTING:
 			// This camera does not detect when not calibrated, intentionally
-			if (getIRFilterState()) toggleIRFilter();
+			setIRFilter(false);
 			break;
 		case CLOSED:
 			if (this.cameraState != CameraState.CLOSED) {
@@ -134,7 +134,7 @@ public class OptiTrackCamera implements Camera {
 
 	private native boolean getIRFilterState();
 
-	private native void toggleIRFilter();
+	private native void setIRFilter(boolean filter);
 
 	private native int getExposure();
 
