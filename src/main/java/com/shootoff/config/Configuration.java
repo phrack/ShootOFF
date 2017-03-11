@@ -80,6 +80,7 @@ import javafx.scene.paint.Color;
  * @author phrack
  */
 public class Configuration {
+	
 	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
 	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
@@ -103,6 +104,10 @@ public class Configuration {
 	private static final String SHOW_ARENA_SHOT_MARKERS = "shootoff.arena.show.markers";
 	private static final String CALIBRATE_AUTO_ADJUST_EXPOSURE = "shootoff.arena.calibrated.exposure";
 
+	private static final String POI_ADJUSTMENT_X = "shootoff.poiadjust.x";
+	private static final String POI_ADJUSTMENT_Y = "shootoff.poiadjust.y";
+
+	
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
 	protected static final String LASER_COLOR_MESSAGE = "LASER_COLOR has an invalid value: %s. Acceptable values are "
@@ -112,7 +117,7 @@ public class Configuration {
 			+ "between 1 and 45.";
 	protected static final String INJECT_MALFUNCTIONS_MESSAGE = "INJECT_MALFUNCTIONS has an invalid value: %f. Acceptable values are "
 			+ "between 0.1 and 99.9.";
-
+	
 	private static final String DEFAULT_CONFIG_FILE = "shootoff.properties";
 
 	private static final int DEFAULT_DISPLAY_WIDTH = 640;
@@ -162,6 +167,12 @@ public class Configuration {
 	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
 	private boolean showArenaShotMarkers = false;
 	private boolean autoAdjustExposure = true;
+	
+	private Optional<Double> poiAdjustmentX = Optional.empty();
+	private Optional<Double> poiAdjustmentY = Optional.empty();
+	private int poiAdjustmentCount = 0;
+
+
 
 	private static Configuration config = null;
 
@@ -381,6 +392,12 @@ public class Configuration {
 		if (prop.contains(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
 			setAutoAdjustExposure(Boolean.parseBoolean(CALIBRATE_AUTO_ADJUST_EXPOSURE));
 		}
+		
+		if (prop.contains(POI_ADJUSTMENT_X) && prop.contains(POI_ADJUSTMENT_Y)) {
+			updatePOIAdjustment(Double.parseDouble(POI_ADJUSTMENT_X),
+					Double.parseDouble(POI_ADJUSTMENT_Y));
+		}
+
 
 		validateConfiguration();
 	}
@@ -475,6 +492,12 @@ public class Configuration {
 		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
 		prop.setProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE, String.valueOf(autoAdjustExposure));
 
+		if (poiAdjustmentX.isPresent() && poiAdjustmentY.isPresent())
+		{
+			prop.setProperty(POI_ADJUSTMENT_X, String.valueOf(poiAdjustmentX.get()));
+			prop.setProperty(POI_ADJUSTMENT_Y, String.valueOf(poiAdjustmentY.get()));
+		}
+		
 		final OutputStream outputStream = new FileOutputStream(configName);
 
 		try {
@@ -997,5 +1020,48 @@ public class Configuration {
 
 	public boolean autoAdjustExposure() {
 		return autoAdjustExposure;
+	}
+
+	public void updatePOIAdjustment(double offsetx, double offsety) {
+		int numTargets = 5;
+		
+		if (!poiAdjustmentX.isPresent() || !poiAdjustmentY.isPresent() || poiAdjustmentCount > numTargets || poiAdjustmentCount == 0)
+		{
+			poiAdjustmentX = Optional.of(-1.0 * offsetx);
+			poiAdjustmentY = Optional.of(-1.0 * offsety);
+			poiAdjustmentCount = 1;
+		}
+		else
+		{
+			double weightedAdjX = poiAdjustmentCount * poiAdjustmentX.get();
+			double weightedAdjY = poiAdjustmentCount * poiAdjustmentY.get();
+			
+			poiAdjustmentX = Optional.of((weightedAdjX - offsetx) / (double)(poiAdjustmentCount+1));
+			poiAdjustmentY = Optional.of((weightedAdjY - offsety) / (double)(poiAdjustmentCount+1));
+			
+			poiAdjustmentCount++;
+		}
+		
+		/*if (poiAdjustmentCount == numTargets)
+		{
+			try {
+				writeConfigurationFile();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+	}
+	
+	public Optional<Double> getPOIAdjustmentX()
+	{
+		return poiAdjustmentX;
+	}
+	public Optional<Double> getPOIAdjustmentY()
+	{
+		return poiAdjustmentY;
 	}
 }

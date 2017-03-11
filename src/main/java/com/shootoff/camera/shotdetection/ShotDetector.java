@@ -8,7 +8,6 @@ import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
-
 import javafx.geometry.Bounds;
 
 /**
@@ -75,24 +74,25 @@ public abstract class ShotDetector {
 		if (!checkIgnoreColor(color))
 			return false;
 
-		final Shot shot;
-
+		final Shot shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(), config.getMarkerRadius());
+		
+		if (config.getPOIAdjustmentX().isPresent() && config.getPOIAdjustmentY().isPresent())
+		{
+			shot.adjustCoords(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
+			logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, shot.getX(), shot.getY());
+		}
+			
 		if (scaleShot && (cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
 			if (handlesBounds())
 			{
-				shot = new Shot(color, x + b.getMinX(), y + b.getMinY(), cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(),
-						config.getMarkerRadius());
+				shot.adjustCoords(b.getMinX(), b.getMinY());
 			} else {
 				if (cameraManager.isLimitingDetectionToProjection() && !b.contains(x,y))
 					return false;
-				shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(), config.getMarkerRadius());
 			}
-
-		} else {
-			shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(), config.getMarkerRadius());
 		}
 
 		// If the shot didn't come from click to shoot (cameFromCanvas) and the
@@ -102,7 +102,7 @@ public abstract class ShotDetector {
 			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
 					cameraManager.getFeedHeight());
 		}
-
+		
 		if (!checkDuplicate(shot))
 			return false;
 

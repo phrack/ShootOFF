@@ -179,4 +179,21 @@ public class TestCanvasManager {
 		assertEquals(320, cm.getShots().get(0).getX(), 1.0);
 		assertEquals(240, cm.getShots().get(0).getY(), 1.0);
 	}
+	
+	
+	@Test
+	public void testPOIAdjust() {
+		config.setDisplayResolution(640, 480);
+		config.updatePOIAdjustment(-10.0, -10.0);
+
+		assertEquals(0, cm.getShots().size());
+
+		cm.getCameraManager().injectShot(ShotColor.RED, 160, 160, false);
+
+		assertEquals(1, cm.getShots().size());
+
+		assertEquals(170, cm.getShots().get(0).getX(), 1.0);
+		assertEquals(170, cm.getShots().get(0).getY(), 1.0);
+	}
+	
 }

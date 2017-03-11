@@ -108,6 +108,12 @@ public class Shot {
 	public Ellipse getMarker() {
 		return marker;
 	}
+	
+	public void adjustCoords(double adjX, double adjY)
+	{
+		x = x + adjX;
+		y = y + adjY;
+	}
 
 	public void setTranslation(int displayWidth, int displayHeight, int feedWidth, int feedHeight) {
 		final double scaleX = (double) displayWidth / (double) feedWidth;

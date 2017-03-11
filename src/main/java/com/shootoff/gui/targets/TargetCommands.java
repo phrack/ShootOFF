@@ -31,6 +31,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.gui.Resetter;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
+import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
@@ -97,6 +98,35 @@ public class TargetCommands implements CommandProcessor {
 			}
 
 			break;
+			
+		case "poi_adjust":
+			if (hit.getHitRegion().getType() != RegionType.RECTANGLE)
+				break;
+			RectangleRegion reg = (RectangleRegion) hit.getHitRegion();
+			double regcenterx = (reg.getWidth()/2.0);
+			double regcentery = (reg.getHeight()/2.0);
+
+			double offsetx = hit.getImpactX() - regcenterx;
+			double offsety = hit.getImpactY() - regcentery;
+			
+			if (logger.isTraceEnabled())
+			{
+				logger.trace("Adjusting POI regcenterx {} regcentery {}", regcenterx, regcentery);
+				logger.trace("Adjusting POI impactx {} impacty {}", hit.getImpactX(), hit.getImpactY());
+				logger.trace("Adjusting POI offsetx {} offsety {}", offsetx, offsety);
+			}
+			
+			// This code is necessary because the shot adjustment will begin after the first time poi_adjust
+			// is called.  On subsequent calls, we need to undo the poi adjustment in the shot
+			if (config.getPOIAdjustmentX().isPresent() && config.getPOIAdjustmentY().isPresent())
+			{
+				offsetx += config.getPOIAdjustmentX().get();
+				offsety += config.getPOIAdjustmentY().get();
+			}
+			
+			logger.trace("Adjusting POI resx {} resy {}", offsetx, offsety);
+			
+			config.updatePOIAdjustment(offsetx, offsety);
 		}
 	}
 }

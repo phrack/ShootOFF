@@ -307,4 +307,26 @@ public class TestConfiguration {
 			System.err.println("Can't delete test config file: " + props.getPath());
 		}
 	}
+	
+	
+	@Test
+	public void testPOIAdjustment() {
+		assertFalse(defaultConfig.getPOIAdjustmentX().isPresent());
+		assertFalse(defaultConfig.getPOIAdjustmentY().isPresent());
+		defaultConfig.updatePOIAdjustment(-1, -1);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentX().get(), .1f);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentY().get(), .1f);
+		defaultConfig.updatePOIAdjustment(-1, -1);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentX().get(), .1f);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentY().get(), .1f);
+		defaultConfig.updatePOIAdjustment(-1, -1);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentX().get(), .1f);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentY().get(), .1f);
+		defaultConfig.updatePOIAdjustment(-1, -1);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentX().get(), .1f);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentY().get(), .1f);
+		defaultConfig.updatePOIAdjustment(-1, -1);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentX().get(), .1f);
+		assertEquals(1.0f, defaultConfig.getPOIAdjustmentY().get(), .1f);
+	}
 }
