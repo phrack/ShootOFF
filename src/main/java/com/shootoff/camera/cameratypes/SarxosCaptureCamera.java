@@ -144,15 +144,14 @@ public class SarxosCaptureCamera extends CalculatedFPSCamera {
 			resetExposure();
 			camera.release();
 
+			CameraFactory.openCamerasRemove(this);
+			if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
+			
 		} else if (isOpen() && closing.get()) {
 			return;
 		} else if (!isOpen()) {
 			closing.set(false);
 		}
-
-		CameraFactory.openCamerasRemove(this);
-
-		if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
 
 		return;
 	}
