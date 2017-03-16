@@ -320,7 +320,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 	}
 
 	private boolean shouldShowBrightnessWarning() {
-		if (logger.isTraceEnabled())
+		if (logger.isTraceEnabled() && avgBrightPixels > 0)
 			logger.trace("avgBrightPixels {}", avgBrightPixels);
 
 		if (avgBrightPixels >= BRIGHTNESS_WARNING_AVG_THRESHOLD
@@ -444,7 +444,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 			final Mat debugFrame = new Mat();
 			Imgproc.cvtColor(workingFrame.getOriginalMat(), debugFrame, Imgproc.COLOR_HSV2BGR);
 
-			String filename = String.format("shot-%d-%d-%d_orig.png", cameraManager.getFrameCount(),
+			String filename = String.format("shot-%d-%d-%d_orig.png", cameraManager.cameraTimeToShotTime(workingFrame.getTimestamp()),
 					(int) pc.centerPixelX, (int) pc.centerPixelY);
 			final File file = new File(filename);
 			filename = file.toString();
@@ -460,7 +460,7 @@ public final class JavaShotDetector extends FrameProcessingShotDetector {
 				}
 			}
 
-			final File outputfile = new File(String.format("shot-%d-%d-%d.png", cameraManager.getFrameCount(),
+			final File outputfile = new File(String.format("shot-%d-%d-%d.png", cameraManager.cameraTimeToShotTime(workingFrame.getTimestamp()),
 					(int) pc.centerPixelX, (int) pc.centerPixelY));
 			filename = outputfile.toString();
 			Highgui.imwrite(filename, debugFrame);

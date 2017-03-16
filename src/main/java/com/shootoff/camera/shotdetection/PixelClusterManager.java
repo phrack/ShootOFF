@@ -46,8 +46,8 @@ public class PixelClusterManager {
 
 	// Use different values if shot width + shot height <= 16 px
 	private final static int SMALL_SHOT_THRESHOLD = 16;
-	private final static double MINIMUM_SHOT_RATIO_SMALL = .5f;
-	private final static double MAXIMUM_SHOT_RATIO_SMALL = 1.5f;
+	private final static double MINIMUM_SHOT_RATIO_SMALL = .47f;
+	private final static double MAXIMUM_SHOT_RATIO_SMALL = 1.75f;
 
 	private final static int EXCESSIVE_PIXEL_CUTOFF = 300;
 	private final static int EXCESSIVE_PIXEL_REGION_COUNT = 1;

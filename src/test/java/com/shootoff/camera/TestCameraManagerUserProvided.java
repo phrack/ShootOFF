@@ -8,7 +8,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.shootoff.Main;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
@@ -76,11 +79,57 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 		requiredShots.add(new Shot(ShotColor.RED, 429.6, 230.0, 0, 2));
 		requiredShots.add(new Shot(ShotColor.RED, 287.6, 403.3, 0, 2));
 		requiredShots.add(new Shot(ShotColor.RED, 171.0, 224.7, 0, 2));
-		requiredShots.add(new Shot(ShotColor.RED, 375.7, 228.6, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 397.0, 241.0, 0, 2));
 		requiredShots.add(new Shot(ShotColor.RED, 289.1, 144.2, 0, 2));
 		requiredShots.add(new Shot(ShotColor.RED, 200.4, 209.5, 0, 2));
 		requiredShots.add(new Shot(ShotColor.RED, 334.3, 227.3, 0, 2));
 		requiredShots.add(new Shot(ShotColor.RED, 295.6, 352.7, 0, 2));
+
+		List<Shot> optionalShots = new ArrayList<Shot>();
+		optionalShots.add(new Shot(ShotColor.RED, 397.5, 242.0, 0, 2));
+
+		super.checkShots(collector, shots, requiredShots, optionalShots, false);
+	}
+	
+	
+	@Test
+	public void testC910Red_z() {
+		List<Shot> shots = findShots("/shotsearcher/c910_red_z.mp4", Optional.empty(),
+				mockManager, config, sectorStatuses);
+
+		List<Shot> requiredShots = new ArrayList<Shot>();
+		requiredShots.add(new Shot(ShotColor.RED, 394.0, 244.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 315.0, 237.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 430.0, 187.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 485.0, 276.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 397.0, 193.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 329.0, 208.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 387.0, 273.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 468.0, 243.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 399.0, 192.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 332.0, 232.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 279.0, 251.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 266.0, 217.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 298.0, 190.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 219.0, 205.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 254.0, 292.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 345.0, 299.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 373.0, 186.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 473.0, 198.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 503.0, 168.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 513.0, 240.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 510.0, 239.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 414.0, 171.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 319.0, 193.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 245.0, 161.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 148.0, 218.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 202.0, 300.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 191.0, 293.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 292.0, 324.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 375.0, 324.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 432.0, 306.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 394.0, 208.0, 0, 2));
+		requiredShots.add(new Shot(ShotColor.RED, 447.0, 215.0, 0, 2));
 
 		List<Shot> optionalShots = new ArrayList<Shot>();
 
