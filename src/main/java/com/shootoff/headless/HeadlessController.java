@@ -161,8 +161,9 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 
 				for (ShotEntry entry : change.getAddedSubList()) {
 					final Shot shot = entry.getShot();
-					server.get().sendMessage(
-							new NewShotMessage(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp()));
+					final Dimension2D d = arenaPane.getArenaStageResolution();
+					server.get().sendMessage(new NewShotMessage(shot.getColor(), shot.getX(), shot.getY(),
+							shot.getTimestamp(), d.getWidth(), d.getHeight()));
 				}
 			}
 		});

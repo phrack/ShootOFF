@@ -25,12 +25,16 @@ public class NewShotMessage extends Message {
 	private final double x;
 	private final double y;
 	private final long timestamp;
+	private final double arenaWidth;
+	private final double arenaHeight;
 
-	public NewShotMessage(ShotColor color, double x, double y, long timestamp) {
+	public NewShotMessage(ShotColor color, double x, double y, long timestamp, double arenaWidth, double arenaHeight) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
+		this.arenaWidth = arenaWidth;
+		this.arenaHeight = arenaHeight;
 	}
 
 	public ShotColor getColor() {
@@ -47,5 +51,13 @@ public class NewShotMessage extends Message {
 
 	public long getTimestamp() {
 		return timestamp;
+	}
+
+	public double getArenaWidth() {
+		return arenaWidth;
+	}
+
+	public double getArenaHeight() {
+		return arenaHeight;
 	}
 }
