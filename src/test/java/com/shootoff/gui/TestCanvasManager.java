@@ -202,6 +202,10 @@ public class TestCanvasManager {
 	public void testPOIAdjust() {
 		config.setDisplayResolution(640, 480);
 		config.updatePOIAdjustment(-10.0, -10.0);
+		config.updatePOIAdjustment(-10.0, -10.0);
+		config.updatePOIAdjustment(-10.0, -10.0);
+		config.updatePOIAdjustment(-10.0, -10.0);
+		config.updatePOIAdjustment(-10.0, -10.0);
 
 		assertEquals(0, cm.getShots().size());
 
@@ -217,6 +221,24 @@ public class TestCanvasManager {
 
 		assertEquals(170, cm.getShots().get(0).getX(), 1.0);
 		assertEquals(170, cm.getShots().get(0).getY(), 1.0);
+		
+		config.updatePOIAdjustment(-10.0, -10.0);
+		
+		cm.getCameraManager().reset();
+		
+		cm.getCameraManager().injectShot(ShotColor.RED, 160, 160, false);
+
+		// This sleep is to give the shot notification thread a chance
+		// to do its job
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {}
+
+		assertEquals(1, cm.getShots().size());
+
+		assertEquals(160, cm.getShots().get(0).getX(), 1.0);
+		assertEquals(160, cm.getShots().get(0).getY(), 1.0);
+		
 	}
 
 }
