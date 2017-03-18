@@ -94,7 +94,6 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, long timestamp, int rgb) {
-
 		if (!cameraManager.isDetecting()) return;
 
 		final Point undist = cameraManager.undistortCoords(x,y);

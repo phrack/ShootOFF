@@ -30,8 +30,7 @@ public abstract class ShotDetector {
 		this.cameraView = cameraView;
 	}
 
-	public void reset() {
-	}
+	public void reset() {}
 
 	/**
 	 * Notify the shot detector of the dimensions of webcam frames (e.g. the
@@ -71,27 +70,25 @@ public abstract class ShotDetector {
 	 *         preprocessing
 	 */
 	public boolean addShot(ShotColor color, double x, double y, long timestamp, boolean scaleShot) {
-		if (!checkIgnoreColor(color))
-			return false;
+		if (!checkIgnoreColor(color)) return false;
 
-		final Shot shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp), cameraManager.getFrameCount(), config.getMarkerRadius());
-		
-		if (config.getPOIAdjustmentX().isPresent() && config.getPOIAdjustmentY().isPresent())
-		{
+		final Shot shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp),
+				cameraManager.getFrameCount(), config.getMarkerRadius());
+
+		if (config.getPOIAdjustmentX().isPresent() && config.getPOIAdjustmentY().isPresent()) {
 			shot.adjustCoords(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
-			logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, shot.getX(), shot.getY());
+			logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, shot.getX(),
+					shot.getY());
 		}
-			
+
 		if (scaleShot && (cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
-			if (handlesBounds())
-			{
+			if (handlesBounds()) {
 				shot.adjustCoords(b.getMinX(), b.getMinY());
 			} else {
-				if (cameraManager.isLimitingDetectionToProjection() && !b.contains(x,y))
-					return false;
+				if (cameraManager.isLimitingDetectionToProjection() && !b.contains(x, y)) return false;
 			}
 		}
 
@@ -102,9 +99,8 @@ public abstract class ShotDetector {
 			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
 					cameraManager.getFeedHeight());
 		}
-		
-		if (!checkDuplicate(shot))
-			return false;
+
+		if (!checkDuplicate(shot)) return false;
 
 		submitShot(shot);
 
@@ -112,18 +108,19 @@ public abstract class ShotDetector {
 	}
 
 	protected void submitShot(final Shot shot) {
-		if (logger.isInfoEnabled())
-			logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(), shot.getY(),
-					shot.getColor(), cameraManager.getFrameCount());
+		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(),
+				shot.getY(), shot.getColor(), cameraManager.getFrameCount());
 
-		cameraView.addShot(shot, false);
+		// Notify of new shot on a non-shot detection thread because most
+		// training exercises do shot processing on whatever thread submits
+		// the shot
+		new Thread(() -> cameraView.addShot(shot, false), "Shot Notifier").start();
 	}
 
 	protected boolean checkDuplicate(final Shot shot) {
 		if (!cameraManager.getDeduplicationProcessor().processShot(shot)) {
-			if (logger.isDebugEnabled())
-				logger.debug("Processing Shot: Shot Rejected By {}",
-						cameraManager.getDeduplicationProcessor().getClass().getName());
+			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot Rejected By {}",
+					cameraManager.getDeduplicationProcessor().getClass().getName());
 			return false;
 		}
 		return true;
@@ -132,9 +129,8 @@ public abstract class ShotDetector {
 	protected boolean checkIgnoreColor(ShotColor color) {
 		if (config.ignoreLaserColor() && config.getIgnoreLaserColor().isPresent()
 				&& Shot.colorMap.get(color).equals(config.getIgnoreLaserColor().get())) {
-			if (logger.isDebugEnabled())
-				logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
-						config.getIgnoreLaserColor().get());
+			if (logger.isDebugEnabled()) logger.debug("Processing Shot: Shot rejected by ignoreLaserColor {}",
+					config.getIgnoreLaserColor().get());
 			return false;
 		}
 		return true;
@@ -142,8 +138,9 @@ public abstract class ShotDetector {
 
 	/**
 	 * 
-	 * @return True if this shot detector only returns shots in bounds
-	 * and offset within the bounds according to the settings in CameraManager
+	 * @return True if this shot detector only returns shots in bounds and
+	 *         offset within the bounds according to the settings in
+	 *         CameraManager
 	 */
 	protected abstract boolean handlesBounds();
 }
