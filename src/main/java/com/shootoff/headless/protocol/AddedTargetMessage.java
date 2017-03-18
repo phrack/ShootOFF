@@ -18,9 +18,11 @@
 
 package com.shootoff.headless.protocol;
 
+import java.io.File;
 import java.util.UUID;
 
 public class AddedTargetMessage extends TargetMessage {
+	private final File targetFile;
 	private final double x;
 	private final double y;
 	private final double width;
@@ -28,15 +30,20 @@ public class AddedTargetMessage extends TargetMessage {
 	private final double arenaWidth;
 	private final double arenaHeight;
 
-	public AddedTargetMessage(UUID uuid, double x, double y, double width, double height, double arenaWidth,
-			double arenaHeight) {
+	public AddedTargetMessage(UUID uuid, File targetFile, double x, double y, double width, double height,
+			double arenaWidth, double arenaHeight) {
 		super(uuid);
+		this.targetFile = targetFile;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.arenaWidth = arenaWidth;
 		this.arenaHeight = arenaHeight;
+	}
+
+	public File getTargetFile() {
+		return targetFile;
 	}
 
 	public double getX() {

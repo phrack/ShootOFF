@@ -702,8 +702,8 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 					final Point2D p = t.getPosition();
 					final Dimension2D d = t.getDimension();
 					final Dimension2D arenaD = arenaPane.getArenaStageResolution();
-					server.get().sendMessage(new AddedTargetMessage(addTarget.getUuid(), p.getX(), p.getY(),
-							d.getWidth(), d.getHeight(), arenaD.getWidth(), arenaD.getWidth()));
+					server.get().sendMessage(new AddedTargetMessage(addTarget.getUuid(), addTarget.getTargetFile(),
+							p.getX(), p.getY(), d.getWidth(), d.getHeight(), arenaD.getWidth(), arenaD.getWidth()));
 				}
 			}
 		} else {
