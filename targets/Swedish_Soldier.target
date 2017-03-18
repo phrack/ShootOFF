@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="234.000000" y="0.000000" file="targets/swedish_soldier/swedish_soldier.png">
+		<tag name="subtarget" value="E" />
+		<tag name="points" value="1" />
+	</image>
+	<image x="246.500000" y="84.500000" file="targets/swedish_soldier/D.png">
+		<tag name="subtarget" value="D" />
+		<tag name="points" value="2" />
+	</image>
+	<image x="271.000000" y="84.500000" file="targets/swedish_soldier/C.png">
+		<tag name="subtarget" value="C" />
+		<tag name="points" value="4" />
+	</image>
+	<image x="297.500000" y="99.500000" file="targets/swedish_soldier/A.png">
+		<tag name="subtarget" value="A" />
+		<tag name="points" value="5" />
+	</image>
+	<image x="297.500000" y="34.000000" file="targets/swedish_soldier/B.png">
+		<tag name="subtarget" value="B" />
+		<tag name="points" value="4" />
+	</image>
+	<image x="305.000000" y="42.000000" file="targets/swedish_soldier/A_head.png">
+		<tag name="subtarget" value="A" />
+		<tag name="points" value="5" />
+	</image>
+</target>
