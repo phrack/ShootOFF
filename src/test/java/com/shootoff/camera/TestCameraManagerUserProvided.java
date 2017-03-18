@@ -8,10 +8,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.shootoff.Main;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;
