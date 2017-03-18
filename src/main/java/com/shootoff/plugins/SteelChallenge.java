@@ -209,6 +209,9 @@ public class SteelChallenge extends ProjectorTrainingExerciseBase implements Tra
 
 	@Override
 	public void shotListener(Shot shot, Optional<Hit> hit) {
+		// This is evidence the round hasn't actually started
+		if (roundTargets == null) return;
+		
 		final long elapsedTime = System.currentTimeMillis() - startTime;
 		final String elapsedTimeSeconds;
 
