@@ -75,10 +75,15 @@ public abstract class ShotDetector {
 		final Shot shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp),
 				cameraManager.getFrameCount(), config.getMarkerRadius());
 
-		if (config.getPOIAdjustmentX().isPresent() && config.getPOIAdjustmentY().isPresent()) {
+		if (config.isAdjustingPOI())
+		{
 			shot.adjustCoords(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
-			logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, shot.getX(),
-					shot.getY());
+			
+			if (logger.isTraceEnabled())
+			{
+				logger.trace("POI Adjustment: x {} y {}", config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
+				logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, shot.getX(), shot.getY());
+			}
 		}
 
 		if (scaleShot && (cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.config.Configuration;
+import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.Resetter;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.ImageRegion;
@@ -35,6 +36,8 @@ import com.shootoff.targets.RectangleRegion;
 import com.shootoff.targets.RegionType;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
+
+import javafx.util.Pair;
 
 /**
  * This class contains the implementations for tag commands for targets.
@@ -46,12 +49,16 @@ public class TargetCommands implements CommandProcessor {
 	private final Resetter resetter;
 	private final Hit hit;
 	private final Configuration config;
+	private final CanvasManager canvasManager;
+	private final boolean isMirroredShot;
 
-	public TargetCommands(List<Target> targets, Resetter resetter, Hit hit) {
+	public TargetCommands(CanvasManager canvasManager, List<Target> targets, Resetter resetter, Hit hit, boolean isMirroredShot) {
+		this.canvasManager = canvasManager;
 		this.targets = targets;
 		this.resetter = resetter;
 		this.hit = hit;
 		config = Configuration.getConfig();
+		this.isMirroredShot = isMirroredShot;
 	}
 
 	@Override
@@ -99,8 +106,8 @@ public class TargetCommands implements CommandProcessor {
 
 			break;
 			
-		case "poi_adjust":
-			if (hit.getHitRegion().getType() != RegionType.RECTANGLE)
+		case "poi_adjust":			
+			if (isMirroredShot || hit.getHitRegion().getType() != RegionType.RECTANGLE)
 				break;
 			RectangleRegion reg = (RectangleRegion) hit.getHitRegion();
 			double regcenterx = (reg.getWidth()/2.0);
@@ -116,13 +123,11 @@ public class TargetCommands implements CommandProcessor {
 				logger.trace("Adjusting POI offsetx {} offsety {}", offsetx, offsety);
 			}
 			
-			// This code is necessary because the shot adjustment will begin after the first time poi_adjust
-			// is called.  On subsequent calls, we need to undo the poi adjustment in the shot
-			if (config.getPOIAdjustmentX().isPresent() && config.getPOIAdjustmentY().isPresent())
-			{
-				offsetx += config.getPOIAdjustmentX().get();
-				offsety += config.getPOIAdjustmentY().get();
-			}
+			// Pair is convenient but it's clearly not the intended use.
+			// Refactor it if it bugs you
+			Pair<Double, Double> translated = canvasManager.translateCanvasToCamera(offsetx, offsety);
+			offsetx = translated.getKey();
+			offsety = translated.getValue();
 			
 			logger.trace("Adjusting POI resx {} resy {}", offsetx, offsety);
 			

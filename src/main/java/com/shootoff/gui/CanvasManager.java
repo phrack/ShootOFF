@@ -82,6 +82,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.util.Pair;
 
 public class CanvasManager implements CameraView {
 	private final Logger logger = LoggerFactory.getLogger(CanvasManager.class);
@@ -405,6 +406,24 @@ public class CanvasManager implements CameraView {
 
 		return new BoundingBox(minX, minY, width, height);
 	}
+	
+	public Pair<Double, Double> translateCanvasToCamera(double x, double y) {
+		if (cameraManager == null)
+		{
+			logger.error("Called when cameraManager == null");
+			return new Pair<Double, Double>(x,y);
+		}
+		
+		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
+				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+			return new Pair<Double, Double>(x,y);
+
+		final double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
+		final double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
+
+		return new Pair<Double, Double>(x * scaleX, y * scaleY);
+	}
+	
 
 	public Group getCanvasGroup() {
 		return canvasGroup;
@@ -617,7 +636,7 @@ public class CanvasManager implements CameraView {
 
 		final Optional<TrainingExercise> currentExercise = config.getExercise();
 		final Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
-		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get());
+		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get(), isMirroredShot);
 
 		if (currentExercise.isPresent() && !processedShot) {
 			// If the canvas is mirrored, use the one without the camera manager
@@ -640,7 +659,7 @@ public class CanvasManager implements CameraView {
 		final Optional<TrainingExercise> currentExercise = config.getExercise();
 		final Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
 		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) {
-			executeRegionCommands(hit.get());
+			executeRegionCommands(hit.get(), isMirroredShot);
 		}
 
 		if (!isMirroredShot) {
@@ -666,7 +685,7 @@ public class CanvasManager implements CameraView {
 		}
 	}
 
-	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
+	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString, boolean isMirroredShot) {		
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
@@ -713,8 +732,12 @@ public class CanvasManager implements CameraView {
 		return Optional.empty();
 	}
 
-	private void executeRegionCommands(Hit hit) {
-		TargetView.parseCommandTag(hit.getHitRegion(), new TargetCommands(targets, resetter, hit));
+	private void executeRegionCommands(Hit hit, boolean isMirroredShot) {
+		if (arenaPane.isPresent())
+			TargetView.parseCommandTag(hit.getHitRegion(), new TargetCommands(arenaPane.get().getCanvasManager(), targets, resetter, hit, isMirroredShot));
+		else
+			TargetView.parseCommandTag(hit.getHitRegion(), new TargetCommands(this, targets, resetter, hit, isMirroredShot));
+
 	}
 
 	protected Optional<TargetComponents> loadTarget(File targetFile, boolean playAnimations) {
