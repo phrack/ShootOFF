@@ -60,6 +60,7 @@ import com.shootoff.gui.pane.ArenaBackgroundsSlide;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.headless.protocol.AddTargetMessage;
+import com.shootoff.headless.protocol.AddedTargetMessage;
 import com.shootoff.headless.protocol.ClearCourseMessage;
 import com.shootoff.headless.protocol.ConfigurationData;
 import com.shootoff.headless.protocol.CurrentArenaSnapshotMessage;
@@ -106,6 +107,8 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Dimension2D;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -279,7 +282,7 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 	@Override
 	public void autocalibrationTimedOut() {
 		calibrated = false;
-		
+
 		final Label calibrationLabel = new Label("Calibration Failed!");
 		calibrationLabel.setFont(Font.font(48));
 		calibrationLabel.setTextFill(Color.web("#f5a807"));
@@ -413,7 +416,7 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 	public void toggleCalibrating(boolean isCalibrating) {
 		if (!isCalibrating) {
 			if (!calibrated) return;
-			
+
 			if (server.isPresent()) {
 				server.get().sendMessage(new StopCalibrationMessage());
 			} else {
@@ -691,13 +694,22 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 			final Optional<Target> target = arenaCanvasManager.addTarget(addTarget.getTargetFile());
 
 			if (target.isPresent()) {
-				targets.put(addTarget.getUuid(), target.get());
+				final Target t = target.get();
+				targets.put(addTarget.getUuid(), t);
+
+				if (server.isPresent()) {
+					final Point2D p = t.getPosition();
+					final Dimension2D d = t.getDimension();
+					final Dimension2D arenaD = arenaPane.getArenaStageResolution();
+					server.get().sendMessage(new AddedTargetMessage(addTarget.getUuid(), p.getX(), p.getY(),
+							d.getWidth(), d.getHeight(), arenaD.getWidth(), arenaD.getWidth()));
+				}
 			}
 		} else {
 			final UUID targetUuid = message.getUuid();
 			if (!targets.containsKey(targetUuid)) {
 				final String errorMessage = String.format(
-						"A target with UUID {} does not exist to perform operation {}", targetUuid,
+						"A target with UUID %s does not exist to perform operation %s", targetUuid,
 						message.getClass().getName());
 
 				if (server.isPresent()) {
