@@ -397,8 +397,9 @@ public class Configuration {
 		}
 		
 		if (prop.contains(POI_ADJUSTMENT_X) && prop.contains(POI_ADJUSTMENT_Y)) {
-			updatePOIAdjustment(Double.parseDouble(POI_ADJUSTMENT_X),
-					Double.parseDouble(POI_ADJUSTMENT_Y));
+			poiAdjustmentX = Optional.of(Double.parseDouble(POI_ADJUSTMENT_X));
+			poiAdjustmentY = Optional.of(Double.parseDouble(POI_ADJUSTMENT_Y));
+			adjustingPOI = true;
 		}
 
 
