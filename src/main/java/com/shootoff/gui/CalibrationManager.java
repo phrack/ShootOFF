@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraCalibrationListener;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.CameraView;
 import com.shootoff.camera.perspective.PerspectiveManager;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
@@ -69,6 +70,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 	private Optional<TrainingExercise> savedExercise = Optional.empty();
 	private Optional<TargetView> calibrationTarget = Optional.empty();
+	private Optional<CameraView> originalView = Optional.empty();
 	private Optional<Dimension2D> perspectivePaperDims = Optional.empty();
 
 	private final AtomicBoolean isCalibrating = new AtomicBoolean(false);
@@ -144,6 +146,10 @@ public class CalibrationManager implements CameraCalibrationListener {
 		removeAutoCalibrationMessage();
 		removeManualCalibrationRequestMessage();
 		removeCalibrationTargetIfPresent();
+
+		if (originalView.isPresent()) {
+			cameraViews.selectCameraView(originalView.get());
+		}
 
 		PerspectiveManager pm = null;
 
@@ -255,6 +261,7 @@ public class CalibrationManager implements CameraCalibrationListener {
 
 		removeAutoCalibrationMessage();
 
+		originalView = Optional.of(cameraViews.getSelectedCameraView());
 		cameraViews.selectCameraView(calibratingCanvasManager);
 
 		showManualCalibrationRequestMessage();

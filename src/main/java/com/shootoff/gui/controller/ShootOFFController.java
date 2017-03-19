@@ -418,7 +418,20 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 
 	@Override
 	public void selectCameraView(CameraView cameraView) {
-		cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
+		final int viewTabIndex = camerasSupervisor.getCameraViews().indexOf(cameraView);
+
+		if (viewTabIndex == -1) {
+			// Attempting to show a non-camera view. As of now, this can only
+			// be the arena tab
+			for (Tab t : cameraTabPane.getTabs()) {
+				if ("Arena".equals(t.getText())) {
+					cameraTabPane.getSelectionModel().select(t);
+					break;
+				}
+			}
+		} else {
+			cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
+		}
 	}
 
 	@Override
@@ -436,7 +449,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		config.unregisterAllRecordingCameraManagers();
 		addConfiguredCameras();
 	}
-	
+
 	private final Map<Tab, CameraManager> cameraManagerTabs = new HashMap<>();
 
 	private void addCameraTabs() {
@@ -489,14 +502,15 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		cameraTab.setContent(new AnchorPane(cameraCanvasGroup));
 
 		final CanvasManager canvasManager = new CanvasManager(cameraCanvasGroup, this, webcamName, shotEntries);
-		final Optional<CameraManager> cameraManagerOptional = camerasSupervisor.addCameraManager(cameraInterface, this, canvasManager);
+		final Optional<CameraManager> cameraManagerOptional = camerasSupervisor.addCameraManager(cameraInterface, this,
+				canvasManager);
 
 		if (!cameraManagerOptional.isPresent()) {
 			return false;
 		}
-		
+
 		final CameraManager cameraManager = cameraManagerOptional.get();
-		
+
 		cameraManagerTabs.put(cameraTab, cameraManager);
 
 		if (config.getRecordingCameras().contains(cameraInterface)) {
@@ -584,7 +598,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						/ content.getBoundsInLocal().getWidth();
 				content.setScaleX(scale);
 				content.setScaleY(scale);
-				
+
 				content.setTranslateX(
 						(content.getBoundsInParent().getWidth() - content.getBoundsInLocal().getWidth()) / 2);
 				content.setTranslateY(
