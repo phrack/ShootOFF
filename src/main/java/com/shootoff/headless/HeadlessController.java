@@ -538,6 +538,12 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 
 				if (course.isPresent()) {
 					arenaPane.setCourse(course.get());
+
+					for (Target t : course.get().getTargets()) {
+						final UUID targetUuid = UUID.randomUUID();
+						sendAddedTargetMessage(targetUuid, t);
+						targets.put(targetUuid, t);
+					}
 				}
 			} else {
 				if (server.isPresent()) server.get().sendMessage(
@@ -698,13 +704,7 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 				final Target t = target.get();
 				targets.put(addTarget.getUuid(), t);
 
-				if (server.isPresent()) {
-					final Point2D p = t.getPosition();
-					final Dimension2D d = t.getDimension();
-					final Dimension2D arenaD = arenaPane.getArenaStageResolution();
-					server.get().sendMessage(new AddedTargetMessage(addTarget.getUuid(), addTarget.getTargetFile(),
-							p.getX(), p.getY(), d.getWidth(), d.getHeight(), arenaD.getWidth(), arenaD.getWidth()));
-				}
+				sendAddedTargetMessage(addTarget.getUuid(), t);
 			}
 		} else {
 			final UUID targetUuid = message.getUuid();
@@ -733,6 +733,16 @@ public class HeadlessController implements AutocalibrationListener, CameraErrorV
 				arenaCanvasManager.removeTarget(t);
 				targets.remove(targetUuid);
 			}
+		}
+	}
+
+	private void sendAddedTargetMessage(UUID uuid, Target t) {
+		if (server.isPresent()) {
+			final Point2D p = t.getPosition();
+			final Dimension2D d = t.getDimension();
+			final Dimension2D arenaD = arenaPane.getArenaStageResolution();
+			server.get().sendMessage(new AddedTargetMessage(uuid, t.getTargetFile(), p.getX(), p.getY(), d.getWidth(),
+					d.getHeight(), arenaD.getWidth(), arenaD.getWidth()));
 		}
 	}
 
