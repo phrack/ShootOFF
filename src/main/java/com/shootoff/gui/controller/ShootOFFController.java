@@ -430,7 +430,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				}
 			}
 		} else {
-			cameraTabPane.getSelectionModel().select(camerasSupervisor.getCameraViews().indexOf(cameraView));
+			cameraTabPane.getSelectionModel().select(viewTabIndex);
 		}
 	}
 
