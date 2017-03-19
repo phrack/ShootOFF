@@ -281,11 +281,11 @@ public class TargetView implements Target {
 
 	@Override
 	public double getScaleX() {
-		return (targetGroup.getBoundsInParent().getWidth() / origWidth);
+		return targetGroup.getBoundsInParent().getWidth() / origWidth;
 	}
 	@Override
 	public double getScaleY() {
-		return (targetGroup.getBoundsInParent().getHeight() / origHeight);
+		return targetGroup.getBoundsInParent().getHeight() / origHeight;
 	}
 
 	@Override

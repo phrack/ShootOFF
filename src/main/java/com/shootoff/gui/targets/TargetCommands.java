@@ -52,7 +52,8 @@ public class TargetCommands implements CommandProcessor {
 	private final CanvasManager canvasManager;
 	private final boolean isMirroredShot;
 
-	public TargetCommands(CanvasManager canvasManager, List<Target> targets, Resetter resetter, Hit hit, boolean isMirroredShot) {
+	public TargetCommands(CanvasManager canvasManager, List<Target> targets, Resetter resetter, Hit hit,
+			boolean isMirroredShot) {
 		this.canvasManager = canvasManager;
 		this.targets = targets;
 		this.resetter = resetter;
@@ -105,44 +106,38 @@ public class TargetCommands implements CommandProcessor {
 			}
 
 			break;
-			
-		case "poi_adjust":			
-			if (isMirroredShot || hit.getHitRegion().getType() != RegionType.RECTANGLE)
-				break;
-			RectangleRegion reg = (RectangleRegion) hit.getHitRegion();
-			
-			
-			double regcenterx = (reg.getWidth()/2.0);
-			double regcentery = (reg.getHeight()/2.0);
+
+		case "poi_adjust":
+			if (isMirroredShot || hit.getHitRegion().getType() != RegionType.RECTANGLE) break;
+			final RectangleRegion reg = (RectangleRegion) hit.getHitRegion();
+
+			final double regcenterx = reg.getWidth() / 2.0;
+			final double regcentery = reg.getHeight() / 2.0;
 
 			double offsetx = (hit.getImpactX() - regcenterx) / hit.getTarget().getScaleX();
 			double offsety = (hit.getImpactY() - regcentery) / hit.getTarget().getScaleY();
-			
-			if (logger.isTraceEnabled())
-			{
+
+			if (logger.isTraceEnabled()) {
 				logger.trace("Adjusting POI regcenterx {} regcentery {}", regcenterx, regcentery);
 				logger.trace("Adjusting POI impactx {} impacty {}", hit.getImpactX(), hit.getImpactY());
 				logger.trace("Adjusting POI offsetx {} offsety {}", offsetx, offsety);
 			}
-			
+
 			// Pair is convenient but it's clearly not the intended use.
 			// Refactor it if it bugs you
 			Pair<Double, Double> translated = canvasManager.translateCanvasToCamera(offsetx, offsety);
 			offsetx = translated.getKey();
 			offsety = translated.getValue();
-			
+
 			logger.trace("Adjusting POI resx {} resy {}", offsetx, offsety);
-			
-			if (config.updatePOIAdjustment(offsetx, offsety))
-			{
+
+			if (config.updatePOIAdjustment(offsetx, offsety)) {
 				TrainingExerciseBase.playSound("sounds/beep2.wav");
 				try {
 					Thread.sleep(200);
-				} catch (InterruptedException e) {
-				}
+				} catch (InterruptedException e) {}
 				TrainingExerciseBase.playSound("sounds/beep2.wav");
-			}
-			else if (config.isAdjustingPOI())
+			} else if (config.isAdjustingPOI())
 				TrainingExerciseBase.playSound("sounds/beep.wav");
 			else
 				TrainingExerciseBase.playSound("sounds/beep2.wav");
