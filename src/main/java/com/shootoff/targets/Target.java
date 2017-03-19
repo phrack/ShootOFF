@@ -26,6 +26,7 @@ public interface Target {
 	public static final String TAG_RESIZABLE = "isResizable";
 	public static final String TAG_OPACITY = "opacity";
 	public static final String TAG_VISIBLE = "visible";
+	public static final String TAG_FILL_CANVAS = "fillCanvas";
 	public static final String TAG_DEFAULT_PERCEIVED_WIDTH = "defaultPerceivedWidth";
 	public static final String TAG_DEFAULT_PERCEIVED_HEIGHT = "defaultPerceivedHeight";
 	public static final String TAG_DEFAULT_PERCEIVED_DISTANCE = "defaultDistance";
@@ -84,4 +85,8 @@ public interface Target {
 	Map<String, String> getAllTags();
 
 	void setTargetSelectionListener(TargetSelectionListener selectionListener);
+
+	double getScaleX();
+
+	double getScaleY();
 }

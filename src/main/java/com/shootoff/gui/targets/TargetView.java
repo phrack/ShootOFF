@@ -94,6 +94,9 @@ public class TargetView implements Target {
 	private boolean right;
 	private double x;
 	private double y;
+	
+	private final double origWidth;
+	private final double origHeight;
 
 	private TargetSelectionListener selectionListener;
 
@@ -107,6 +110,8 @@ public class TargetView implements Target {
 		targets = Optional.empty();
 		this.userDeletable = userDeletable;
 		cameraName = parent.getCameraName();
+		origWidth = targetGroup.getBoundsInParent().getWidth();
+		origHeight = targetGroup.getBoundsInParent().getHeight();
 
 		targetGroup.setOnMouseClicked((event) -> {
 			// Skip target selection if click to shoot is being used
@@ -135,12 +140,15 @@ public class TargetView implements Target {
 		this.targets = Optional.of(targets);
 		userDeletable = false;
 		cameraName = null;
+		origWidth = targetGroup.getBoundsInParent().getWidth();
+		origHeight = targetGroup.getBoundsInParent().getHeight();
 
 		mousePressed();
 		mouseDragged();
 		mouseMoved();
 		mouseReleased();
 		keyPressed();
+
 	}
 
 	public boolean isUserDeletable() {
@@ -260,6 +268,16 @@ public class TargetView implements Target {
 	@Override
 	public Dimension2D getDimension() {
 		return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), targetGroup.getBoundsInParent().getHeight());
+	}
+	
+
+	@Override
+	public double getScaleX() {
+		return (targetGroup.getBoundsInParent().getWidth() / origWidth);
+	}
+	@Override
+	public double getScaleY() {
+		return (targetGroup.getBoundsInParent().getHeight() / origHeight);
 	}
 
 	@Override

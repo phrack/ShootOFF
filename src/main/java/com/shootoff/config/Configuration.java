@@ -1025,8 +1025,14 @@ public class Configuration {
 		return autoAdjustExposure;
 	}
 
-	public void updatePOIAdjustment(double offsetx, double offsety) {
-		final int numTargets = 5;
+	private final static int POI_NUM_TARGETS = 5;
+	// Returns true IFF the current action is TURNING OFF POI Adjustment
+	// Logic:
+	// 1. Does not enable POI adjustment until 5 shots have been reached
+	// 2. POI is average of those 5 shots
+	// 3. Sixth shot turns off POI and resets shot count to 0
+	public boolean updatePOIAdjustment(double offsetx, double offsety) {
+		
 		
 		// If it is already enabled, disable it and return.  Don't process the current value 
 		if (adjustingPOI == true)
@@ -1045,7 +1051,7 @@ public class Configuration {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return;
+			return true;
 		}
 		
 		// First call
@@ -1068,12 +1074,11 @@ public class Configuration {
 		}
 		
 		logger.trace("POI Adjustment: x {} y {}", poiAdjustmentX.get(), poiAdjustmentY.get());
-				
-		if (poiAdjustmentCount == numTargets)
-			adjustingPOI = true;
 		
-		if (poiAdjustmentCount == numTargets)
+		if (poiAdjustmentCount == POI_NUM_TARGETS)
 		{
+			adjustingPOI = true;
+			
 			try {
 				writeConfigurationFile();
 			} catch (ConfigurationException e) {
@@ -1084,6 +1089,8 @@ public class Configuration {
 				e.printStackTrace();
 			}
 		}
+		
+		return false;
 	}
 	
 	public Optional<Double> getPOIAdjustmentX()

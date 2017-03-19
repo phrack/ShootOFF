@@ -110,11 +110,13 @@ public class TargetCommands implements CommandProcessor {
 			if (isMirroredShot || hit.getHitRegion().getType() != RegionType.RECTANGLE)
 				break;
 			RectangleRegion reg = (RectangleRegion) hit.getHitRegion();
+			
+			
 			double regcenterx = (reg.getWidth()/2.0);
 			double regcentery = (reg.getHeight()/2.0);
 
-			double offsetx = hit.getImpactX() - regcenterx;
-			double offsety = hit.getImpactY() - regcentery;
+			double offsetx = (hit.getImpactX() - regcenterx) / hit.getTarget().getScaleX();
+			double offsety = (hit.getImpactY() - regcentery) / hit.getTarget().getScaleY();
 			
 			if (logger.isTraceEnabled())
 			{
@@ -131,7 +133,19 @@ public class TargetCommands implements CommandProcessor {
 			
 			logger.trace("Adjusting POI resx {} resy {}", offsetx, offsety);
 			
-			config.updatePOIAdjustment(offsetx, offsety);
+			if (config.updatePOIAdjustment(offsetx, offsety))
+			{
+				TrainingExerciseBase.playSound("sounds/beep2.wav");
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+				}
+				TrainingExerciseBase.playSound("sounds/beep2.wav");
+			}
+			else if (config.isAdjustingPOI())
+				TrainingExerciseBase.playSound("sounds/beep.wav");
+			else
+				TrainingExerciseBase.playSound("sounds/beep2.wav");
 		}
 	}
 }

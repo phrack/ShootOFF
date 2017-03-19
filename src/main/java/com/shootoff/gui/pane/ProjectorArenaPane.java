@@ -598,6 +598,14 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	 */
 	public void targetAdded(Target target) {
 		resizeTargetToDefaultPerspective(target);
+	
+		if (target.tagExists(Target.TAG_FILL_CANVAS) && Boolean.parseBoolean(target.getTag(Target.TAG_FILL_CANVAS)))
+		{
+			target.setPosition(0, 0);
+			target.setDimensions(arenaStage.getWidth(), arenaStage.getHeight());
+			
+			logger.trace("target {} - {}", target.getPosition(), target.getDimension());
+		}
 
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
 			if (!isSelected) {
