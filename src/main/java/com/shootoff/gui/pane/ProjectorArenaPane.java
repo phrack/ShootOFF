@@ -598,8 +598,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	public void targetAdded(Target target) {
 		resizeTargetToDefaultPerspective(target);
 
-		System.out.println("XXXXXXXXXXXXXXXXXXX " + getTranslateX() + " " + getTranslateY());
-
 		if (target.tagExists(Target.TAG_FILL_CANVAS) && Boolean.parseBoolean(target.getTag(Target.TAG_FILL_CANVAS))) {
 			target.fillParent();
 			// This is a hack because ShootOFFController.addNonCameraView sets
