@@ -505,8 +505,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private CanvasManager feedCanvasManager;
 
 	private void cursorWarningToggle(boolean mouseEntered) {
-		if (feedCanvasManager == null || calibrationManager == null || 
-				calibrationManager.isCalibrating()) return;
+		if (feedCanvasManager == null || calibrationManager == null || calibrationManager.isCalibrating()) return;
 
 		// If everything is still the same, return
 		if (mouseEntered && showingCursorWarning && !calibrationManager.isCalibrating()) return;
@@ -598,13 +597,16 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	 */
 	public void targetAdded(Target target) {
 		resizeTargetToDefaultPerspective(target);
-	
-		if (target.tagExists(Target.TAG_FILL_CANVAS) && Boolean.parseBoolean(target.getTag(Target.TAG_FILL_CANVAS)))
-		{
-			target.setPosition(0, 0);
-			target.setDimensions(arenaStage.getWidth(), arenaStage.getHeight());
-			
-			logger.trace("target {} - {}", target.getPosition(), target.getDimension());
+
+		System.out.println("XXXXXXXXXXXXXXXXXXX " + getTranslateX() + " " + getTranslateY());
+
+		if (target.tagExists(Target.TAG_FILL_CANVAS) && Boolean.parseBoolean(target.getTag(Target.TAG_FILL_CANVAS))) {
+			target.fillParent();
+			// This is a hack because ShootOFFController.addNonCameraView sets
+			// a translation for this anchor tab otherwise the anchor is not
+			// fully visible in the tab when scaled. I have no idea why the
+			// anchor moves off center when scaled, but here we are...
+			target.setPosition(getTranslateX() * -1, getTranslateY() * -1);
 		}
 
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {

@@ -36,6 +36,8 @@ public interface Target {
 	File getTargetFile();
 
 	int getTargetIndex();
+	
+	void fillParent();
 
 	void addTargetChild(Node child);
 

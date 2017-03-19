@@ -584,7 +584,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						/ content.getBoundsInLocal().getWidth();
 				content.setScaleX(scale);
 				content.setScaleY(scale);
-
+				
 				content.setTranslateX(
 						(content.getBoundsInParent().getWidth() - content.getBoundsInLocal().getWidth()) / 2);
 				content.setTranslateY(

@@ -171,6 +171,15 @@ public class TargetView implements Target {
 		else
 			return -1;
 	}
+	
+	@Override
+	public void fillParent() {
+		if (parent.isPresent()) {
+			final Bounds b = parent.get().getCanvasGroup().getBoundsInParent();
+			setDimensions(b.getWidth(), b.getHeight());
+			setPosition(0, 0);
+		}
+	}
 
 	@Override
 	public void addTargetChild(Node child) {
@@ -217,7 +226,6 @@ public class TargetView implements Target {
 			config.get().getSessionRecorder().get().recordTargetMoved(cameraName, this, (int) targetGroup.getLayoutX(),
 					(int) targetGroup.getLayoutY());
 		}
-
 	}
 
 	@Override

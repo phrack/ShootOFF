@@ -163,7 +163,7 @@ public class ProjectorSlide extends Slide implements CalibrationConfigurator {
 		arenaPane.setArenaPaneMirror(arenaTabPane);
 
 		final CanvasManager arenaCanvasManager = arenaPane.getCanvasManager();
-		
+
 		arenaCanvasManager.setCameraManager(calibratingCameraManager);
 
 		if (!(arenaCanvasManager instanceof MirroredCanvasManager)) {
