@@ -36,6 +36,6 @@ public class ErrorMessage extends Message {
 	}
 
 	public enum ErrorType {
-		BACKGROUND, CAMERA, COURSE, EXERCSIE, TARGET
+		BACKGROUND, CAMERA, COURSE, EXERCISE, TARGET
 	}
 }
