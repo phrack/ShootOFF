@@ -82,7 +82,6 @@ import javafx.scene.paint.Color;
 public class Configuration {
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Configuration.class);
 
-	
 	private static final String FIRST_RUN_PROP = "shootoff.firstrun";
 	private static final String ERROR_REPORTING_PROP = "shootoff.errorreporting";
 	private static final String IPCAMS_PROP = "shootoff.ipcams";
@@ -109,7 +108,6 @@ public class Configuration {
 	private static final String POI_ADJUSTMENT_X = "shootoff.poiadjust.x";
 	private static final String POI_ADJUSTMENT_Y = "shootoff.poiadjust.y";
 
-	
 	protected static final String MARKER_RADIUS_MESSAGE = "MARKER_RADIUS has an invalid value: %d. Acceptable values are "
 			+ "between 1 and 20.";
 	protected static final String LASER_COLOR_MESSAGE = "LASER_COLOR has an invalid value: %s. Acceptable values are "
@@ -119,7 +117,7 @@ public class Configuration {
 			+ "between 1 and 45.";
 	protected static final String INJECT_MALFUNCTIONS_MESSAGE = "INJECT_MALFUNCTIONS has an invalid value: %f. Acceptable values are "
 			+ "between 0.1 and 99.9.";
-	
+
 	private static final String DEFAULT_CONFIG_FILE = "shootoff.properties";
 
 	private static final int DEFAULT_DISPLAY_WIDTH = 640;
@@ -169,13 +167,11 @@ public class Configuration {
 	private CalibrationOption calibratedFeedBehavior = CalibrationOption.ONLY_IN_BOUNDS;
 	private boolean showArenaShotMarkers = false;
 	private boolean autoAdjustExposure = true;
-	
+
 	private Optional<Double> poiAdjustmentX = Optional.empty();
 	private Optional<Double> poiAdjustmentY = Optional.empty();
 	private boolean adjustingPOI = false;
 	private int poiAdjustmentCount = 0;
-
-
 
 	private static Configuration config = null;
 
@@ -395,13 +391,12 @@ public class Configuration {
 		if (prop.contains(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
 			setAutoAdjustExposure(Boolean.parseBoolean(CALIBRATE_AUTO_ADJUST_EXPOSURE));
 		}
-		
+
 		if (prop.contains(POI_ADJUSTMENT_X) && prop.contains(POI_ADJUSTMENT_Y)) {
 			poiAdjustmentX = Optional.of(Double.parseDouble(POI_ADJUSTMENT_X));
 			poiAdjustmentY = Optional.of(Double.parseDouble(POI_ADJUSTMENT_Y));
 			adjustingPOI = true;
 		}
-
 
 		validateConfiguration();
 	}
@@ -496,12 +491,11 @@ public class Configuration {
 		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
 		prop.setProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE, String.valueOf(autoAdjustExposure));
 
-		if (isAdjustingPOI() && poiAdjustmentX.isPresent() && poiAdjustmentY.isPresent())
-		{
+		if (isAdjustingPOI() && poiAdjustmentX.isPresent() && poiAdjustmentY.isPresent()) {
 			prop.setProperty(POI_ADJUSTMENT_X, String.valueOf(poiAdjustmentX.get()));
 			prop.setProperty(POI_ADJUSTMENT_Y, String.valueOf(poiAdjustmentY.get()));
 		}
-		
+
 		final OutputStream outputStream = new FileOutputStream(configName);
 
 		try {
@@ -1027,84 +1021,72 @@ public class Configuration {
 	}
 
 	private final static int POI_NUM_TARGETS = 5;
+
 	// Returns true IFF the current action is TURNING OFF POI Adjustment
 	// Logic:
 	// 1. Does not enable POI adjustment until 5 shots have been reached
 	// 2. POI is average of those 5 shots
 	// 3. Sixth shot turns off POI and resets shot count to 0
-	public boolean updatePOIAdjustment(double offsetx, double offsety) {
-		
-		
-		// If it is already enabled, disable it and return.  Don't process the current value 
-		if (adjustingPOI == true)
-		{
+	public boolean updatePOIAdjustment(double offsetX, double offsetY) {
+		// If it is already enabled, disable it and return. Don't process the
+		// current value
+		if (adjustingPOI == true) {
 			adjustingPOI = false;
 			poiAdjustmentX = Optional.empty();
 			poiAdjustmentY = Optional.empty();
 			poiAdjustmentCount = 0;
-			
+
 			try {
 				writeConfigurationFile();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (ConfigurationException | IOException e) {
+				logger.error("Failed to disable POI", e);
+				return false;
 			}
 			return true;
 		}
-		
+
 		// First call
-		if (poiAdjustmentCount == 0)
-		{
-			poiAdjustmentX = Optional.of(-1.0 * offsetx);
-			poiAdjustmentY = Optional.of(-1.0 * offsety);
+		if (poiAdjustmentCount == 0) {
+			poiAdjustmentX = Optional.of(-1.0 * offsetX);
+			poiAdjustmentY = Optional.of(-1.0 * offsetY);
 			poiAdjustmentCount = 1;
 		}
 		// Second through numTargets calls
-		else
-		{
+		else {
 			double weightedAdjX = poiAdjustmentCount * poiAdjustmentX.get();
 			double weightedAdjY = poiAdjustmentCount * poiAdjustmentY.get();
-			
-			poiAdjustmentX = Optional.of((weightedAdjX - offsetx) / (double)(poiAdjustmentCount+1));
-			poiAdjustmentY = Optional.of((weightedAdjY - offsety) / (double)(poiAdjustmentCount+1));
-						
+
+			poiAdjustmentX = Optional.of((weightedAdjX - offsetX) / (double) (poiAdjustmentCount + 1));
+			poiAdjustmentY = Optional.of((weightedAdjY - offsetY) / (double) (poiAdjustmentCount + 1));
+
 			poiAdjustmentCount++;
 		}
-		
+
 		logger.trace("POI Adjustment: x {} y {}", poiAdjustmentX.get(), poiAdjustmentY.get());
-		
-		if (poiAdjustmentCount == POI_NUM_TARGETS)
-		{
+
+		if (poiAdjustmentCount == POI_NUM_TARGETS) {
 			adjustingPOI = true;
-			
+
 			try {
 				writeConfigurationFile();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (ConfigurationException | IOException e) {
+				logger.error("Failed to write new POI", e);
+				return false;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	public Optional<Double> getPOIAdjustmentX()
-	{
+
+	public Optional<Double> getPOIAdjustmentX() {
 		return poiAdjustmentX;
 	}
-	public Optional<Double> getPOIAdjustmentY()
-	{
+
+	public Optional<Double> getPOIAdjustmentY() {
 		return poiAdjustmentY;
 	}
-	
-	public boolean isAdjustingPOI()
-	{
+
+	public boolean isAdjustingPOI() {
 		return adjustingPOI;
 	}
 }
