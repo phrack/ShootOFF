@@ -104,6 +104,7 @@ public class Configuration {
 	private static final String CALIBRATED_FEED_BEHAVIOR_PROP = "shootoff.arena.calibrated.behavior";
 	private static final String SHOW_ARENA_SHOT_MARKERS = "shootoff.arena.show.markers";
 	private static final String CALIBRATE_AUTO_ADJUST_EXPOSURE = "shootoff.arena.calibrated.exposure";
+	private static final String SHOWED_PERSPECTIVE_USAGE_MESSAGE = "shootoff.arena.notified.perspective";
 
 	private static final String POI_ADJUSTMENT_X = "shootoff.poiadjust.x";
 	private static final String POI_ADJUSTMENT_Y = "shootoff.poiadjust.y";
@@ -154,6 +155,7 @@ public class Configuration {
 	private Optional<Point2D> arenaPosition = Optional.empty();
 	private final Map<String, Integer> cameraDistances = new HashMap<>();
 	private final Set<String> messagesChimeMuted = new HashSet<>();
+	private boolean showedPerspectiveMessage = false;
 
 	private int displayWidth = DEFAULT_DISPLAY_WIDTH;
 
@@ -387,6 +389,10 @@ public class Configuration {
 		if (prop.containsKey(SHOW_ARENA_SHOT_MARKERS)) {
 			setShowArenaShotMarkers(Boolean.parseBoolean(prop.getProperty(SHOW_ARENA_SHOT_MARKERS)));
 		}
+		
+		if (prop.containsKey(SHOWED_PERSPECTIVE_USAGE_MESSAGE)) {
+			setShowedPerspectiveMessage(Boolean.parseBoolean(prop.getProperty(SHOWED_PERSPECTIVE_USAGE_MESSAGE)));
+		}
 
 		if (prop.contains(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
 			setAutoAdjustExposure(Boolean.parseBoolean(CALIBRATE_AUTO_ADJUST_EXPOSURE));
@@ -490,6 +496,7 @@ public class Configuration {
 		prop.setProperty(CALIBRATED_FEED_BEHAVIOR_PROP, calibratedFeedBehavior.name());
 		prop.setProperty(SHOW_ARENA_SHOT_MARKERS, String.valueOf(showArenaShotMarkers));
 		prop.setProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE, String.valueOf(autoAdjustExposure));
+		prop.setProperty(SHOWED_PERSPECTIVE_USAGE_MESSAGE, String.valueOf(showedPerspectiveMessage));
 
 		if (isAdjustingPOI() && poiAdjustmentX.isPresent() && poiAdjustmentY.isPresent()) {
 			prop.setProperty(POI_ADJUSTMENT_X, String.valueOf(poiAdjustmentX.get()));
@@ -884,6 +891,10 @@ public class Configuration {
 		cameraDistances.put(webcamName, distance);
 	}
 
+	public void setShowedPerspectiveMessage(boolean showedPerspectiveMessage) {
+		this.showedPerspectiveMessage = showedPerspectiveMessage;
+	}
+
 	public Map<String, URL> getRegistedIpCams() {
 		return ipcams;
 	}
@@ -1014,6 +1025,10 @@ public class Configuration {
 
 	public boolean showArenaShotMarkers() {
 		return showArenaShotMarkers;
+	}
+
+	public boolean showedPerspectiveMessage() {
+		return showedPerspectiveMessage;
 	}
 
 	public boolean autoAdjustExposure() {

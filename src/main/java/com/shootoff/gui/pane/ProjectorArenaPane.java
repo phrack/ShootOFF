@@ -86,7 +86,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	private CalibrationManager calibrationManager;
 	private Optional<PerspectiveManager> perspectiveManager = Optional.empty();
 	private Pair<Target, TargetDistancePane> openDistancePane;
-	private boolean showedRecalibrationMessage = false;
 
 	private ProjectorArenaPane mirroredArenaPane;
 
@@ -623,7 +622,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 				trainingExerciseContainer.getChildren().add(openDistancePane.getValue());
 			} else {
-				showRecalibrationMessage();
+				showPerspectiveUsageMessage();
 			}
 		});
 
@@ -701,25 +700,32 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 		}
 	}
 
-	private void showRecalibrationMessage() {
-		if (showedRecalibrationMessage) return;
+	private void showPerspectiveUsageMessage() {
+		if (config.showedPerspectiveMessage()) return;
 
-		final Alert recalibrationAlert = new Alert(AlertType.ERROR);
+		final Alert recalibrationAlert = new Alert(AlertType.INFORMATION);
 
-		final String message = "Data required to set a target's distance is missing and there is no way "
-				+ "to determine the correct values unless you recalibrate the arena with the perspective "
+		final String message = "Did you know that ShootOFF supports configuring targets to appear at real "
+				+ "world distances? ShootOFF supports this feature out of the box for some cameras, but "
+				+ "with your camera you need to recalibrate the arena with the perspective "
 				+ "calibration pattern.\n\nPlease print out this file and tape it to your wall or "
 				+ "projector screen in view of the camera pointed at your projection:\n\n"
 				+ System.getProperty("shootoff.home") + File.separator + "targets" + File.separator
-				+ "PerspectiveCalibrationPattern.pdf\n\nThen hit Projector -> Start Calibrating.";
+				+ "PerspectiveCalibrationPattern.pdf\n\nThen hit Projector -> Start Calibrating.\n\n"
+				+ "This message will only show once, so take notes for future reference!";
 
-		recalibrationAlert.setTitle("Missing Perspective Data");
-		recalibrationAlert.setHeaderText("Critical Distance Data Missing!");
+		recalibrationAlert.setTitle("Real World Distances");
+		recalibrationAlert.setHeaderText("Add the Paper Pattern and Use Real World Target Distances!");
 		recalibrationAlert.setResizable(true);
 		recalibrationAlert.setContentText(message);
 		if (shootOffStage != null) recalibrationAlert.initOwner(shootOffStage);
 		recalibrationAlert.showAndWait();
 
-		showedRecalibrationMessage = true;
+		config.setShowedPerspectiveMessage(true);
+		try {
+			config.writeConfigurationFile();
+		} catch (ConfigurationException | IOException e) {
+			logger.error("Failed to persist showed perspective manager settings.", e);
+		}
 	}
 }
