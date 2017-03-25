@@ -177,7 +177,8 @@ public class TargetView implements Target {
 		if (parent.isPresent()) {
 			final Bounds b = parent.get().getCanvasGroup().getBoundsInParent();
 			setDimensions(b.getWidth(), b.getHeight());
-			setPosition(0, 0);
+			final Point2D p = targetGroup.localToParent(0, 0);
+			setPosition(p.getX() * -1, p.getY() * -1);
 		}
 	}
 

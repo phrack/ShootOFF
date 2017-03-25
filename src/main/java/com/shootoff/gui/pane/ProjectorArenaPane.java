@@ -599,11 +599,6 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 
 		if (target.tagExists(Target.TAG_FILL_CANVAS) && Boolean.parseBoolean(target.getTag(Target.TAG_FILL_CANVAS))) {
 			target.fillParent();
-			// This is a hack because ShootOFFController.addNonCameraView sets
-			// a translation for this anchor tab otherwise the anchor is not
-			// fully visible in the tab when scaled. I have no idea why the
-			// anchor moves off center when scaled, but here we are...
-			target.setPosition(getTranslateX() * -1, getTranslateY() * -1);
 		}
 
 		target.setTargetSelectionListener((toggledTarget, isSelected) -> {
