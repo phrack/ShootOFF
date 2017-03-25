@@ -696,7 +696,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
 	}
 
 	private void showPerspectiveUsageMessage() {
-		if (config.showedPerspectiveMessage()) return;
+		if (config.showedPerspectiveMessage() || config.inDebugMode()) return;
 
 		final Alert recalibrationAlert = new Alert(AlertType.INFORMATION);
 
