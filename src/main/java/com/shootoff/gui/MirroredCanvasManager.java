@@ -21,7 +21,6 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 
 public class MirroredCanvasManager extends CanvasManager {
-	private final ProjectorArenaPane arenaPane;
 	private final Configuration config;
 
 	private MirroredCanvasManager mirroredManager;
@@ -31,7 +30,7 @@ public class MirroredCanvasManager extends CanvasManager {
 		super(canvasGroup, resetter, cameraName, shotEntries);
 
 		config = Configuration.getConfig();
-		this.arenaPane = arenaPane;
+		this.arenaPane = Optional.of(arenaPane);
 	}
 
 	public void setMirroredManager(MirroredCanvasManager mirroredManager) {
@@ -99,7 +98,7 @@ public class MirroredCanvasManager extends CanvasManager {
 			target.setMirroredTarget(t);
 			t.setMirroredTarget(target);
 
-			arenaPane.targetAdded(target);
+			arenaPane.get().targetAdded(target);
 		}
 
 		return super.addTarget(target);
@@ -119,7 +118,7 @@ public class MirroredCanvasManager extends CanvasManager {
 		mirroredManager.mirrorRemoveTarget(((MirroredTarget) target).getMirroredTarget());
 		super.removeTarget(target);
 
-		arenaPane.targetRemoved(target);
+		arenaPane.get().targetRemoved(target);
 	}
 
 	public void mirrorRemoveTarget(Target target) {

@@ -26,6 +26,7 @@ import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
@@ -82,9 +83,9 @@ public class TestSteelChallenge {
 				TargetRegion r = (TargetRegion) n;
 
 				if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
-					stopRegionHit = new Hit(t, r, 0, 0);
+					stopRegionHit = new MockHit(t, r, 0, 0);
 				} else if (r.getAllTags().size() > 0 && nonStopRegionHit == null) {
-					nonStopRegionHit = new Hit(t, r, 0, 0);
+					nonStopRegionHit = new MockHit(t, r, 0, 0);
 				}
 			}
 		}

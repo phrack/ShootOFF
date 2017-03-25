@@ -618,7 +618,7 @@ public class TargetView implements Target {
 						if (!node.contains(localCoords)) continue;
 					}
 
-					return Optional.of(new Hit(this, (TargetRegion) node, adjustedX, adjustedY));
+					return Optional.of(new Hit(this, (TargetRegion) node, shot, adjustedX, adjustedY));
 				}
 			}
 		}

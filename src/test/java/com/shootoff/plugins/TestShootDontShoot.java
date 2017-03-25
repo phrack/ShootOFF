@@ -24,6 +24,7 @@ import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
@@ -96,7 +97,7 @@ public class TestShootDontShoot {
 		assertEquals(5, dontShootTargets.size());
 
 		// Shoot dont shoot target
-		Hit dontShootHit = new Hit(dontShootTargets.get(0),
+		Hit dontShootHit = new MockHit(dontShootTargets.get(0),
 				(TargetRegion) ((TargetView) dontShootTargets.get(0)).getTargetGroup().getChildren().get(0), 0, 0);
 
 		sds.shotListener(null, Optional.of(dontShootHit));

@@ -23,6 +23,7 @@ import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -55,9 +56,9 @@ public class TestShootForScore {
 			TargetRegion region = (TargetRegion) node;
 
 			if (region.tagExists("points") && region.getTag("points").equals("10")) {
-				tenRegionHit = new Hit(bullseyeScoreTarget, region, 0, 0);
+				tenRegionHit = new MockHit(bullseyeScoreTarget, region, 0, 0);
 			} else if (region.tagExists("points") && region.getTag("points").equals("5")) {
-				fiveRegionHit = new Hit(bullseyeScoreTarget, region, 0, 0);
+				fiveRegionHit = new MockHit(bullseyeScoreTarget, region, 0, 0);
 			}
 		}
 

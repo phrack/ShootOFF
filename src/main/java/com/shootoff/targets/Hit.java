@@ -18,6 +18,8 @@
 
 package com.shootoff.targets;
 
+import com.shootoff.camera.Shot;
+
 /**
  * This class encapsulates the information for a shot that hit a target.
  * 
@@ -27,6 +29,7 @@ public class Hit {
 	private final Target target;
 	private final TargetRegion hitRegion;
 	private final int impactX, impactY;
+	private final Shot shot;
 
 	/**
 	 * Create a new Hit with coordinates for the shot adjusted to the hit region
@@ -35,6 +38,8 @@ public class Hit {
 	 *            the target that owns the <tt>TargetRegion</tt> that was hit
 	 * @param hitRegion
 	 *            the <tt>TargetRegion</tt> that was shot
+	 * @param shot
+	 *            the <tt>Shot</tt>
 	 * @param impactX
 	 *            the x coordinate of the shot adjusted to be relative to the
 	 *            hit region (i.e. the origin for the impact is the top left
@@ -44,11 +49,12 @@ public class Hit {
 	 *            the y coordinate of the shot adjusted to be relative to the
 	 *            hit region
 	 */
-	public Hit(final Target target, final TargetRegion hitRegion, final int impactX, final int impactY) {
+	public Hit(final Target target, final TargetRegion hitRegion, final Shot shot, final int impactX, final int impactY) {
 		this.target = target;
 		this.hitRegion = hitRegion;
 		this.impactX = impactX;
 		this.impactY = impactY;
+		this.shot = shot;
 	}
 
 	public Target getTarget() {
@@ -65,5 +71,10 @@ public class Hit {
 
 	public int getImpactY() {
 		return impactY;
+	}
+	
+	public Shot getShot()
+	{
+		return shot;
 	}
 }

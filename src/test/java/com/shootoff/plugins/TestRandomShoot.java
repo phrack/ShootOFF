@@ -28,6 +28,7 @@ import com.shootoff.camera.ShotColor;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -119,7 +120,7 @@ public class TestRandomShoot {
 		}
 
 		int oldSize = rs.getCurrentSubtargets().size();
-		Hit expectedHit = new Hit(bullseyeFiveTarget, expectedRegion, 0, 0);
+		Hit expectedHit = new MockHit(bullseyeFiveTarget, expectedRegion, 0, 0);
 
 		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
 

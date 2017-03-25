@@ -31,6 +31,7 @@ import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -72,9 +73,9 @@ public class TestDuelingTree {
 			TargetRegion region = (TargetRegion) node;
 
 			if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("left_paddle")) {
-				leftPaddlesHits.add(new Hit(duelTreeTarget, region, 0, 0));
+				leftPaddlesHits.add(new MockHit(duelTreeTarget, region, 0, 0));
 			} else if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("right_paddle")) {
-				rightPaddlesHits.add(new Hit(duelTreeTarget, region, 0, 0));
+				rightPaddlesHits.add(new MockHit(duelTreeTarget, region, 0, 0));
 			}
 		}
 

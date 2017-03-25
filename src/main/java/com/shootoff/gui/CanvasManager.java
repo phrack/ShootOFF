@@ -117,7 +117,7 @@ public class CanvasManager implements CameraView {
 	private static final int MINIMUM_FRAME_DELTA = 1000 / MAX_FEED_FPS; // ms
 	private long lastFrameTime = 0;
 
-	private Optional<ProjectorArenaPane> arenaPane = Optional.empty();
+	protected Optional<ProjectorArenaPane> arenaPane = Optional.empty();
 	private Optional<Bounds> projectionBounds = Optional.empty();
 
 	public CanvasManager(Group canvasGroup, Resetter resetter, String cameraName,
@@ -407,21 +407,31 @@ public class CanvasManager implements CameraView {
 		return new BoundingBox(minX, minY, width, height);
 	}
 	
-	public Pair<Double, Double> translateCanvasToCamera(double x, double y) {
+	public Pair<Double, Double> translateCanvasToCameraPoint(double x, double y) {
 		if (cameraManager == null)
 		{
 			logger.error("Called when cameraManager == null");
 			return new Pair<Double, Double>(x,y);
 		}
 		
-		if (config.getDisplayWidth() == cameraManager.getFeedWidth()
-				&& config.getDisplayHeight() == cameraManager.getFeedHeight())
+		if (!cameraManager.getProjectionBounds().isPresent())
+		{
+			logger.error("Called when projectionBounds is not available");
 			return new Pair<Double, Double>(x,y);
+		}
+		
+		final Bounds b = cameraManager.getProjectionBounds().get();
+		if (!b.contains(x, y))
+		{
+			logger.error("Called with x,y outside bounds");
+			return new Pair<Double, Double>(x,y);
+		}
+		
 
-		final double scaleX = (double) cameraManager.getFeedWidth() / (double) config.getDisplayWidth();
-		final double scaleY = (double) cameraManager.getFeedHeight() / (double) config.getDisplayHeight();
+		final double x_scale = arenaPane.get().getWidth() / b.getWidth();
+		final double y_scale = arenaPane.get().getHeight() / b.getHeight();
 
-		return new Pair<Double, Double>(x * scaleX, y * scaleY);
+		return new Pair<Double, Double>((x - b.getMinX()) * x_scale, (y - b.getMinY()) * y_scale);
 	}
 	
 

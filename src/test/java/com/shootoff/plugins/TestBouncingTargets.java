@@ -26,6 +26,7 @@ import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
@@ -62,12 +63,12 @@ public class TestBouncingTargets {
 		bt.init(config, cs, null, null, pac);
 		bt.init(6, 5, 0);
 
-		shootRegionHit = new Hit(bt.getShootTargets().get(0).getTarget(),
+		shootRegionHit = new MockHit(bt.getShootTargets().get(0).getTarget(),
 				(TargetRegion) ((TargetView) bt.getShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
 						.get(0),
 				0, 0);
 
-		dontShootRegionHit = new Hit(bt.getDontShootTargets().get(0).getTarget(),
+		dontShootRegionHit = new MockHit(bt.getDontShootTargets().get(0).getTarget(),
 				(TargetRegion) ((TargetView) bt.getDontShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
 						.get(0),
 				0, 0);

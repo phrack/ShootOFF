@@ -25,6 +25,7 @@ import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.ShotEntry;
 import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
+import com.shootoff.targets.MockHit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -68,7 +69,7 @@ public class TestISSFStandardPistol {
 		TargetComponents tc = TargetIO.loadTarget(new File("targets/ISSF.target")).get();
 		TargetView issfTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
 		targets.add(issfTarget);
-		scoredRegionHit = new Hit(issfTarget, (TargetRegion) issfTarget.getTargetGroup().getChildren().get(0), 0, 0);
+		scoredRegionHit = new MockHit(issfTarget, (TargetRegion) issfTarget.getTargetGroup().getChildren().get(0), 0, 0);
 		regionScore = Integer.parseInt(scoredRegionHit.getHitRegion().getTag("points"));
 
 		issfExercise = new ISSFStandardPistol(targets);
