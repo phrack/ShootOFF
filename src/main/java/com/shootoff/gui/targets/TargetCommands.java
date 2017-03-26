@@ -110,29 +110,31 @@ public class TargetCommands implements CommandProcessor {
 
 		case "poi_adjust":
 			if (isMirroredShot || hit.getHitRegion().getType() != RegionType.RECTANGLE) break;
-						
+
 			final RectangleRegion reg = (RectangleRegion) hit.getHitRegion();
-			final Bounds nodeBounds = ((TargetView)hit.getTarget()).getTargetGroup().getLocalToParentTransform().transform(reg.getBoundsInParent());
-			
-			
+			final Bounds nodeBounds = ((TargetView) hit.getTarget()).getTargetGroup().getLocalToParentTransform()
+					.transform(reg.getBoundsInParent());
+
 			double regcenterx = reg.getWidth() / 2.0;
 			double regcentery = reg.getHeight() / 2.0;
-			
+
 			// Pair is convenient but it's clearly not the intended use.
 			// Refactor it if it bugs you
-			Pair<Double, Double> translated = canvasManager.translateCanvasToCameraPoint(nodeBounds.getMinX() + regcenterx, nodeBounds.getMinY() + regcentery);
+			Pair<Double, Double> translated = canvasManager
+					.translateCanvasToCameraPoint(nodeBounds.getMinX() + regcenterx, nodeBounds.getMinY() + regcentery);
 			regcenterx = translated.getKey();
 			regcentery = translated.getValue();
-			
+
 			double offsetx = hit.getShot().getX();
 			double offsety = hit.getShot().getY();
-			
+
 			offsetx = (offsetx - regcenterx) / hit.getTarget().getScaleX();
 			offsety = (offsety - regcentery) / hit.getTarget().getScaleY();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Adjusting POI regcenterx {} regcentery {}", regcenterx, regcentery);
-				logger.trace("Adjusting POI scalex {} scaley {}", hit.getTarget().getScaleX(), hit.getTarget().getScaleY());
+				logger.trace("Adjusting POI scalex {} scaley {}", hit.getTarget().getScaleX(),
+						hit.getTarget().getScaleY());
 				logger.trace("Adjusting POI offsetx {} offsety {}", offsetx, offsety);
 			}
 

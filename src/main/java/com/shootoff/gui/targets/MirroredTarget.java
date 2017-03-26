@@ -91,14 +91,14 @@ public class MirroredTarget extends TargetView {
 	public void mirrorSetDimensions(double newWidth, double newHeight) {
 		super.setDimensions(newWidth, newHeight);
 	}
-	
+
 	@Override
 	public void setClip(Rectangle clip) {
 		mirroredTarget.mirrorSetClip(new Rectangle(clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight()));
 		super.setClip(clip);
 	}
-	
+
 	public void mirrorSetClip(Rectangle clip) {
 		super.setClip(clip);
-	}	
+	}
 }

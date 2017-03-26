@@ -94,7 +94,7 @@ public class TargetView implements Target {
 	private boolean right;
 	private double x;
 	private double y;
-	
+
 	private final double origWidth;
 	private final double origHeight;
 
@@ -171,7 +171,7 @@ public class TargetView implements Target {
 		else
 			return -1;
 	}
-	
+
 	@Override
 	public void fillParent() {
 		if (parent.isPresent()) {
@@ -278,12 +278,12 @@ public class TargetView implements Target {
 	public Dimension2D getDimension() {
 		return new Dimension2D(targetGroup.getBoundsInParent().getWidth(), targetGroup.getBoundsInParent().getHeight());
 	}
-	
 
 	@Override
 	public double getScaleX() {
 		return targetGroup.getBoundsInParent().getWidth() / origWidth;
 	}
+
 	@Override
 	public double getScaleY() {
 		return targetGroup.getBoundsInParent().getHeight() / origHeight;
