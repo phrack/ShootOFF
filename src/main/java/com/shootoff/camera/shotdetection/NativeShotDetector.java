@@ -12,8 +12,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	private final CameraManager cameraManager;
 
 	public static boolean loadNativeShotDetector() {
-		if (!isSystemSupported())
-			return false;
+		if (!isSystemSupported()) return false;
 
 		final File lib = new File(System.mapLibraryName("NativeShotDetector"));
 		System.load(lib.getAbsolutePath());
@@ -43,8 +42,7 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 
 	@Override
 	public void processFrame(Frame frame, boolean isDetecting) {
-		if (isDetecting)
-			analyzeFrame(frame.getOriginalMat().getNativeObjAddr());
+		if (isDetecting) analyzeFrame(frame.getOriginalMat().getNativeObjAddr());
 	}
 
 	@Override
@@ -65,9 +63,10 @@ public class NativeShotDetector extends FrameProcessingShotDetector {
 	 *            the rgb color of the new shot
 	 */
 	public void foundShot(int x, int y, long timestamp, int rgb) {
-		//final Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 8) & 0xFF, 1.0);
+		// final Color c = Color.rgb((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, (rgb
+		// >> 8) & 0xFF, 1.0);
 		// TODO: Handle colors
-		
+
 		super.addShot(ShotColor.RED, x, y, timestamp, true);
 	}
 

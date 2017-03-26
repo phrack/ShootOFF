@@ -23,7 +23,6 @@ import com.shootoff.camera.CameraView;
 
 public abstract class ShotYieldingShotDetector extends ShotDetector {
 
-
 	public ShotYieldingShotDetector(CameraManager cameraManager, CameraView cameraView) {
 		super(cameraManager, cameraView);
 	}

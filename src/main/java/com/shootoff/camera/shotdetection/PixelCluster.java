@@ -67,14 +67,12 @@ public class PixelCluster extends HashSet<Pixel> {
 			if (pixel.getConnectedness() < MAXIMUM_CONNECTEDNESS) {
 				for (int h = -1; h <= 1; h++) {
 					for (int w = -1; w <= 1; w++) {
-						if (h == 0 && w == 0)
-							continue;
+						if (h == 0 && w == 0) continue;
 
 						final int rx = pixel.x + w;
 						final int ry = pixel.y + h;
 
-						if (rx < 0 || ry < 0 || rx >= workingFrame.cols() || ry >= workingFrame.rows())
-							continue;
+						if (rx < 0 || ry < 0 || rx >= workingFrame.cols() || ry >= workingFrame.rows()) continue;
 
 						final Pixel nearPoint = new Pixel(rx, ry);
 
@@ -97,8 +95,7 @@ public class PixelCluster extends HashSet<Pixel> {
 		}
 
 		final int pixelCount = visited.size();
-		if (pixelCount == 0)
-			return 0;
+		if (pixelCount == 0) return 0;
 
 		avgSaturation /= pixelCount;
 		avgLum /= pixelCount;

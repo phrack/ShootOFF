@@ -38,7 +38,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 
 	private final long startTime = System.currentTimeMillis();
 
-	public OptiTrackShotDetector(final CameraManager cameraManager,	final CameraView cameraView) {
+	public OptiTrackShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
 		super(cameraManager, cameraView);
 
 		this.cameraManager = cameraManager;
@@ -57,11 +57,10 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 		case DETECTING_CALIBRATED:
 			Timer timer = new Timer();
 			timer.schedule(new TimerTask() {
-			  @Override
-			  public void run() {
-			    if (cameraManager.isDetecting())
-			    	enableDetection();
-			  }
+				@Override
+				public void run() {
+					if (cameraManager.isDetecting()) enableDetection();
+				}
 			}, 100);
 			break;
 		default:
@@ -78,8 +77,7 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	private native void disableDetection();
 
 	@Override
-	public void setFrameSize(int width, int height) {
-	}
+	public void setFrameSize(int width, int height) {}
 
 	/**
 	 * Called by the native code to notify this class when a shot is detected.
@@ -96,11 +94,11 @@ public class OptiTrackShotDetector extends ShotYieldingShotDetector implements C
 	public void foundShot(int x, int y, long timestamp, int rgb) {
 		if (!cameraManager.isDetecting()) return;
 
-		final Point undist = cameraManager.undistortCoords(x,y);
+		final Point undist = cameraManager.undistortCoords(x, y);
 
 		if (logger.isTraceEnabled()) logger.trace("Translation: {} {} to {}", x, y, undist);
 
-		super.addShot(ShotColor.INFRARED, undist.x, undist.y, startTime+timestamp, true);
+		super.addShot(ShotColor.INFRARED, undist.x, undist.y, startTime + timestamp, true);
 	}
 
 	@Override

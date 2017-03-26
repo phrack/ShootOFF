@@ -29,9 +29,9 @@ public abstract class FrameProcessingShotDetector extends ShotDetector {
 	}
 
 	/**
-	 * Process <code>frame</code> to detect shots that appear in it. The
-	 * frame is in blue, green, red format, which is the default used by OpenCV
-	 * when it reads a frame off of a webcam. The behavior when
+	 * Process <code>frame</code> to detect shots that appear in it. The frame
+	 * is in blue, green, red format, which is the default used by OpenCV when
+	 * it reads a frame off of a webcam. The behavior when
 	 * <code>isDetecting</code> is <code>false</code> is dependent on the
 	 * specific implementation of the shot detection algorithm. Some may perform
 	 * no processing in this case, others may still update filters, collect
