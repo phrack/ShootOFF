@@ -1081,6 +1081,8 @@ public class Configuration {
 
 		if (poiAdjustmentCount == POI_NUM_TARGETS) {
 			adjustingPOI = true;
+			
+			logger.info("Setting POI Adjustment: x {} y {}", poiAdjustmentX.get(), poiAdjustmentY.get());
 
 			try {
 				writeConfigurationFile();

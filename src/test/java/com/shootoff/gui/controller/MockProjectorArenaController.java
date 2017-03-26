@@ -13,7 +13,7 @@ public class MockProjectorArenaController extends ProjectorArenaPane {
 		super(config, canvasManager);
 
 		arenaStage = new Stage();
-		Scene scene = new Scene(this, 500, 500);
+		Scene scene = new Scene(this, 640, 360);
 		arenaStage.setScene(scene);
 
 	}

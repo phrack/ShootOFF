@@ -87,8 +87,8 @@ public class TestCourseIO {
 		// in the fxml file for
 		// the arena)
 		assertTrue(course.get().getResolution().isPresent());
-		assertEquals(500, course.get().getResolution().get().getWidth(), 1);
-		assertEquals(500, course.get().getResolution().get().getHeight(), 1);
+		assertEquals(640, course.get().getResolution().get().getWidth(), 1);
+		assertEquals(360, course.get().getResolution().get().getHeight(), 1);
 	}
 
 	@Test

@@ -47,8 +47,11 @@ public class Shot {
 	private double x;
 	private double y;
 	private final long timestamp;
-
 	private final int frame;
+	
+	//Unadulterated original shot values
+	private final double origX;
+	private final double origY;
 
 	private Ellipse marker;
 	private Optional<Shot> mirroredShot = Optional.empty();
@@ -61,6 +64,9 @@ public class Shot {
 		this.frame = frame;
 		marker = new Ellipse(x, y, markerRadius, markerRadius);
 		marker.setFill(colorMap.get(color));
+		
+		this.origX = x;
+		this.origY = y;
 	}
 
 	public Shot(ShotColor color, double x, double y, long timestamp, int markerRadius) {
@@ -71,6 +77,8 @@ public class Shot {
 		marker = new Ellipse(x, y, markerRadius, markerRadius);
 		marker.setFill(colorMap.get(color));
 		frame = 0;
+		this.origX = x;
+		this.origY = y;
 	}
 
 	public Optional<Shot> getMirroredShot() {
@@ -96,6 +104,14 @@ public class Shot {
 	public double getY() {
 		return y;
 	}
+	
+	public double getOrigX() {
+		return origX;
+	}
+
+	public double getOrigY() {
+		return origY;
+	}
 
 	public long getTimestamp() {
 		return timestamp;
@@ -113,6 +129,12 @@ public class Shot {
 	{
 		x = x + adjX;
 		y = y + adjY;
+	}
+	
+	public void setCoords(double x, double y)
+	{
+		this.x = x;
+		this.y = y;
 	}
 
 	public void setTranslation(int displayWidth, int displayHeight, int feedWidth, int feedHeight) {
