@@ -406,34 +406,29 @@ public class CanvasManager implements CameraView {
 
 		return new BoundingBox(minX, minY, width, height);
 	}
-	
+
 	public Pair<Double, Double> translateCanvasToCameraPoint(double x, double y) {
-		if (cameraManager == null)
-		{
+		if (cameraManager == null) {
 			logger.error("Called when cameraManager == null");
-			return new Pair<Double, Double>(x,y);
+			return new Pair<Double, Double>(x, y);
 		}
-		
-		if (!cameraManager.getProjectionBounds().isPresent())
-		{
+
+		if (!cameraManager.getProjectionBounds().isPresent()) {
 			logger.error("Called when projectionBounds is not available");
-			return new Pair<Double, Double>(x,y);
+			return new Pair<Double, Double>(x, y);
 		}
-		
+
 		final Bounds b = cameraManager.getProjectionBounds().get();
-		if (!b.contains(x, y))
-		{
+		if (!b.contains(x, y)) {
 			logger.error("Called with x,y outside bounds");
-			return new Pair<Double, Double>(x,y);
+			return new Pair<Double, Double>(x, y);
 		}
-		
 
 		final double x_scale = arenaPane.get().getWidth() / b.getWidth();
 		final double y_scale = arenaPane.get().getHeight() / b.getHeight();
 
 		return new Pair<Double, Double>((x - b.getMinX()) * x_scale, (y - b.getMinY()) * y_scale);
 	}
-	
 
 	public Group getCanvasGroup() {
 		return canvasGroup;
@@ -453,7 +448,8 @@ public class CanvasManager implements CameraView {
 				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
-			if (arenaPane.isPresent()) arenaPane.get().getCanvasManager().clearShots();
+			if (arenaPane.isPresent() && !(this instanceof MirroredCanvasManager))
+				arenaPane.get().getCanvasManager().clearShots();
 		};
 
 		if (Platform.isFxApplicationThread()) {
@@ -472,7 +468,7 @@ public class CanvasManager implements CameraView {
 			}
 		}
 
-		if (arenaPane.isPresent()) {
+		if (arenaPane.isPresent() && !(this instanceof MirroredCanvasManager)) {
 			arenaPane.get().getCanvasManager().reset();
 		}
 
@@ -646,7 +642,8 @@ public class CanvasManager implements CameraView {
 
 		final Optional<TrainingExercise> currentExercise = config.getExercise();
 		final Optional<Hit> hit = checkHit(shot, videoString, isMirroredShot);
-		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command")) executeRegionCommands(hit.get(), isMirroredShot);
+		if (hit.isPresent() && hit.get().getHitRegion().tagExists("command"))
+			executeRegionCommands(hit.get(), isMirroredShot);
 
 		if (currentExercise.isPresent() && !processedShot) {
 			// If the canvas is mirrored, use the one without the camera manager
@@ -695,7 +692,7 @@ public class CanvasManager implements CameraView {
 		}
 	}
 
-	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString, boolean isMirroredShot) {		
+	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
@@ -744,9 +741,11 @@ public class CanvasManager implements CameraView {
 
 	private void executeRegionCommands(Hit hit, boolean isMirroredShot) {
 		if (arenaPane.isPresent())
-			TargetView.parseCommandTag(hit.getHitRegion(), new TargetCommands(arenaPane.get().getCanvasManager(), targets, resetter, hit, isMirroredShot));
+			TargetView.parseCommandTag(hit.getHitRegion(),
+					new TargetCommands(arenaPane.get().getCanvasManager(), targets, resetter, hit, isMirroredShot));
 		else
-			TargetView.parseCommandTag(hit.getHitRegion(), new TargetCommands(this, targets, resetter, hit, isMirroredShot));
+			TargetView.parseCommandTag(hit.getHitRegion(),
+					new TargetCommands(this, targets, resetter, hit, isMirroredShot));
 
 	}
 
