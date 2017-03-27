@@ -449,7 +449,7 @@ public class CanvasManager implements CameraView {
 				logger.error("JDK 8094135 exception", npe);
 				jdk8094135Warning();
 			}
-			if (arenaPane.isPresent()) arenaPane.get().getCanvasManager().clearShots();
+			if (arenaPane.isPresent() && !(this instanceof MirroredCanvasManager)) arenaPane.get().getCanvasManager().clearShots();
 		};
 
 		if (Platform.isFxApplicationThread()) {
@@ -468,7 +468,7 @@ public class CanvasManager implements CameraView {
 			}
 		}
 
-		if (arenaPane.isPresent()) {
+		if (arenaPane.isPresent() && !(this instanceof MirroredCanvasManager)) {
 			arenaPane.get().getCanvasManager().reset();
 		}
 
@@ -619,7 +619,7 @@ public class CanvasManager implements CameraView {
 		boolean passedToArena = false;
 		boolean processedShot = false;
 
-		if (arenaPane.isPresent() && projectionBounds.isPresent()) {
+		if (arenaPane.isPresent() && !(this instanceof MirroredCanvasManager) && projectionBounds.isPresent()) {
 			final Bounds b = projectionBounds.get();
 
 			if (b.contains(shot.getX(), shot.getY())) {
@@ -667,8 +667,14 @@ public class CanvasManager implements CameraView {
 		final double x_scale = arenaPane.get().getWidth() / projectionBounds.get().getWidth();
 		final double y_scale = arenaPane.get().getHeight() / projectionBounds.get().getHeight();
 		
+		logger.trace("scaleShotToArenaBounds pre x {} y {}", shot.getX(), shot.getY());
+		
 		shot.setCoords((shot.getX() - projectionBounds.get().getMinX()) * x_scale,
 				(shot.getY() - projectionBounds.get().getMinY()) * y_scale);
+
+		logger.trace("scaleShotToArenaBounds post x {} y {}", shot.getX(), shot.getY());
+
+	
 	}
 
 	public boolean addArenaShot(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
