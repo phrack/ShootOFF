@@ -22,6 +22,8 @@ import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.gui.controller.MockProjectorArenaController;
 import com.shootoff.gui.pane.ProjectorArenaPane;
+import com.shootoff.plugins.TextToSpeech;
+import com.shootoff.plugins.TrainingExerciseBase;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
@@ -44,6 +46,9 @@ public class TestTargetCommands {
 	public void setUp() throws ConfigurationException {
 		System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
+		TextToSpeech.silence(true);
+		TrainingExerciseBase.silence(true);
+		
 		config = new Configuration(new String[0]);
 		canvasManager = new MockCanvasManager(config);
 		cameraManager = new MockCameraManager();
@@ -80,7 +85,6 @@ public class TestTargetCommands {
 		assertTrue(r.get().tagExists("name"));
 		assertEquals("center", r.get().getTag("name"));
 		
-		System.out.println(canvasManager.getTargets().get(0).getDimension());
 
 		assertFalse(config.isAdjustingPOI());		
 		assertFalse(config.getPOIAdjustmentX().isPresent());
