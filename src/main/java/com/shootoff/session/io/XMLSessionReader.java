@@ -38,8 +38,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.shootoff.camera.DisplayShot;
-import com.shootoff.camera.ShotColor;
+import com.shootoff.camera.shot.DisplayShot;
+import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
 import com.shootoff.session.ShotEvent;

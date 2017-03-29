@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.camera;
+package com.shootoff.camera.shot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,6 +81,14 @@ public class Shot {
 
 	public Color getPaintColor() {
 		return colorMap.get(color);
+	}
+	
+	public double getOrigX() {
+		return x;
+	}
+
+	public double getOrigY() {
+		return y;
 	}
 
 	public double getX() {

@@ -11,13 +11,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.shootoff.camera.ArenaShot;
-import com.shootoff.camera.BoundsShot;
 import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.MockCameraManager;
-import com.shootoff.camera.Shot;
-import com.shootoff.camera.ShotColor;
+import com.shootoff.camera.shot.ArenaShot;
+import com.shootoff.camera.shot.BoundsShot;
+import com.shootoff.camera.shot.DisplayShot;
+import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
 import com.shootoff.gui.CanvasManager;

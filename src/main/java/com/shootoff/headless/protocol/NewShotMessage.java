@@ -18,7 +18,7 @@
 
 package com.shootoff.headless.protocol;
 
-import com.shootoff.camera.ShotColor;
+import com.shootoff.camera.shot.ShotColor;
 
 public class NewShotMessage extends Message {
 	private final ShotColor color;

@@ -20,7 +20,7 @@ package com.shootoff.session.io;
 
 import java.util.Optional;
 
-import com.shootoff.camera.DisplayShot;
+import com.shootoff.camera.shot.DisplayShot;
 
 public interface EventVisitor {
 	public void visitCamera(String cameraName);

@@ -1,4 +1,4 @@
-package com.shootoff.camera;
+package com.shootoff.camera.shot;
 
 import java.util.Optional;
 

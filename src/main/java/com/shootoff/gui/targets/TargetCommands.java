@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.plugins.TrainingExerciseBase;
-import com.shootoff.camera.BoundsShot;
+import com.shootoff.camera.shot.BoundsShot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.Resetter;

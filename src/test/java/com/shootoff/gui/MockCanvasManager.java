@@ -6,8 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.processors.ShotProcessor;
+import com.shootoff.camera.shot.DisplayShot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.gui.targets.TargetView;

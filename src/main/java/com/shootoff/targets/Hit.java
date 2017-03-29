@@ -18,7 +18,7 @@
 
 package com.shootoff.targets;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.shot.Shot;
 
 /**
  * This class encapsulates the information for a shot that hit a target.

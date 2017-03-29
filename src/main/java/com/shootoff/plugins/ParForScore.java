@@ -21,8 +21,8 @@ package com.shootoff.plugins;
 import java.util.List;
 import java.util.Optional;
 
-import com.shootoff.camera.Shot;
-import com.shootoff.camera.ShotColor;
+import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.gui.ParListener;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;

@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.Frame;
-import com.shootoff.camera.ShotColor;
+import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.Configuration;
 
 public final class JavaShotDetector extends FrameProcessingShotDetector {

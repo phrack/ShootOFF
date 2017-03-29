@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.shootoff.camera.DisplayShot;
+import com.shootoff.camera.shot.DisplayShot;
 import com.shootoff.targets.Target;
 
 import javafx.geometry.Dimension2D;

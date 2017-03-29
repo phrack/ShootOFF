@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.ObservableCloseable;
-import com.shootoff.camera.ShotColor;
 import com.shootoff.camera.autocalibration.AutoCalibrationManager;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
@@ -47,6 +46,8 @@ import com.shootoff.camera.cameratypes.SarxosCaptureCamera;
 import com.shootoff.camera.processors.DeduplicationProcessor;
 import com.shootoff.camera.recorders.RollingRecorder;
 import com.shootoff.camera.recorders.ShotRecorder;
+import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.camera.shotdetection.CameraStateListener;
 import com.shootoff.camera.shotdetection.FrameProcessingShotDetector;
 import com.shootoff.camera.shotdetection.JavaShotDetector;

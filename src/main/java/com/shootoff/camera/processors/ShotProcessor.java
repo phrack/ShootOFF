@@ -18,7 +18,7 @@
 
 package com.shootoff.camera.processors;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.shot.Shot;
 
 public interface ShotProcessor {
 	public boolean processShot(Shot shot);

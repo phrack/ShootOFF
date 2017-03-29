@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
-import com.shootoff.camera.ShotColor;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
+import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.camera.cameratypes.OptiTrackCamera;
 
 public class OptiTrackShotDetector extends ShotYieldingShotDetector implements CameraStateListener {

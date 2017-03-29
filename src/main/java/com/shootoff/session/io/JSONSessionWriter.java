@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.DisplayShot;
+import com.shootoff.camera.shot.DisplayShot;
 
 public class JSONSessionWriter implements EventVisitor {
 	private final Logger logger = LoggerFactory.getLogger(JSONSessionWriter.class);

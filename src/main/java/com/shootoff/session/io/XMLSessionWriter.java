@@ -27,7 +27,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.DisplayShot;
+import com.shootoff.camera.shot.DisplayShot;
 
 public class XMLSessionWriter implements EventVisitor {
 	private final Logger logger = LoggerFactory.getLogger(XMLSessionWriter.class);

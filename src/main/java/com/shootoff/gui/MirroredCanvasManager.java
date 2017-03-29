@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.Optional;
 
-import com.shootoff.camera.ArenaShot;
-import com.shootoff.camera.DisplayShot;
+import com.shootoff.camera.shot.ArenaShot;
+import com.shootoff.camera.shot.DisplayShot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.gui.targets.MirroredTarget;

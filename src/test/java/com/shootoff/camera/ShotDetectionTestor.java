@@ -13,6 +13,8 @@ import org.junit.Ignore;
 import org.junit.rules.ErrorCollector;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.shot.DisplayShot;
+import com.shootoff.camera.shot.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.MockCanvasManager;
 import com.shootoff.plugins.TrainingExerciseBase;

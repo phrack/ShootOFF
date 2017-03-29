@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.shootoff.camera.DisplayShot;
-import com.shootoff.camera.ShotColor;
+import com.shootoff.camera.shot.DisplayShot;
+import com.shootoff.camera.shot.ShotColor;
 
 public class ShotEvent implements Event {
 	private final String cameraName;

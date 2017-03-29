@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.shot.Shot;
 import com.shootoff.gui.DelayedStartListener;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;

@@ -1,10 +1,8 @@
-package com.shootoff.camera;
+package com.shootoff.camera.shot;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.shootoff.camera.Shot;
 
 import javafx.scene.shape.Ellipse;
 
@@ -112,4 +110,8 @@ public class DisplayShot extends BoundsShot {
 		return displayY.get();
 	}
 	
+	public Ellipse getDisplayMarker()
+	{
+		return this.marker;
+	}
 }

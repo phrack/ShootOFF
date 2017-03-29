@@ -1,4 +1,4 @@
-package com.shootoff.camera;
+package com.shootoff.camera.shot;
 
 import java.util.Optional;
 
@@ -11,6 +11,7 @@ import javafx.scene.shape.Ellipse;
  */
 public class ArenaShot extends DisplayShot {
 	Optional<Double> arenaX = Optional.empty(), arenaY = Optional.empty();
+	Ellipse arenaMarker;
 	
 	public ArenaShot(DisplayShot shot)
 	{
@@ -22,16 +23,16 @@ public class ArenaShot extends DisplayShot {
 			this.arenaY = ((ArenaShot) shot).arenaY;
 		}
 		
-		this.marker = new Ellipse(getX(), getY(), shot.getMarker().getRadiusX(), shot.getMarker().getRadiusX());
-		this.marker.setFill(colorMap.get(color));
+		this.arenaMarker = new Ellipse(getX(), getY(), shot.getMarker().getRadiusX(), shot.getMarker().getRadiusX());
+		this.arenaMarker.setFill(colorMap.get(color));
 	}
 
 	public void setArenaCoords(double x, double y) {
 		arenaX = Optional.of(x);
 		arenaY = Optional.of(y);
 		
-		this.marker = new Ellipse(getX(), getY(), getMarker().getRadiusX(), getMarker().getRadiusX());
-		this.marker.setFill(colorMap.get(color));
+		this.arenaMarker = new Ellipse(getX(), getY(), getMarker().getRadiusX(), getMarker().getRadiusX());
+		this.arenaMarker.setFill(colorMap.get(color));
 	}
 	
 	public double getX() {
@@ -54,5 +55,15 @@ public class ArenaShot extends DisplayShot {
 		if (!arenaY.isPresent())
 			return super.getY();
 		return arenaY.get();
+	}
+	
+	public Ellipse getMarker()
+	{
+		return this.arenaMarker;
+	}
+	
+	public void setMarker(Ellipse marker)
+	{
+		this.arenaMarker = marker;
 	}
 }

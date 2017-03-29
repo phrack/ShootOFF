@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Optional;
 
 import com.shootoff.Closeable;
+import com.shootoff.camera.shot.DisplayShot;
 import com.shootoff.targets.Target;
 
 import javafx.geometry.Bounds;
