@@ -43,7 +43,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 
 	@Test
 	public void testLifecamIndoorGreen() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-green.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/lifecam-indoor-green.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -62,7 +62,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 
 	@Test
 	public void testLifecamOutdoorGreen() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-outdoor-green.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/lifecam-outdoor-green.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -81,7 +81,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 
 	@Test
 	public void testLifecamSafariGreen() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-safari-green.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/lifecam-safari-green.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -100,7 +100,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 
 	@Test
 	public void testLifecamMotion() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-motion-in-room.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/lifecam-motion-in-room.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		// This is noise but we can't get rid of it without really messing up
@@ -117,7 +117,7 @@ public class TestCameraManagerLifecam extends ShotDetectionTestor {
 
 	@Test
 	public void testLifecamDuelTree() {
-		List<Shot> shots = findShots("/shotsearcher/lifecam-indoor-tree-green.mp4", Optional.empty(), mockManager,
+		List<DisplayShot> shots = findShots("/shotsearcher/lifecam-indoor-tree-green.mp4", Optional.empty(), mockManager,
 				config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();

@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.MockCamera;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
@@ -55,14 +56,14 @@ public class TestCanvasManager {
 
 	@Test
 	public void testCheckHitMiss() {
-		Optional<Hit> h = cm.checkHit(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), false);
+		Optional<Hit> h = cm.checkHit(new DisplayShot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 	}
 
 	@Test
 	public void testCheckHitHit() {
-		Optional<Hit> h = cm.checkHit(new Shot(ShotColor.RED, 150, 150, 0, 2), Optional.empty(), false);
+		Optional<Hit> h = cm.checkHit(new DisplayShot(ShotColor.RED, 150, 150, 0, 2), Optional.empty(), false);
 
 		assertTrue(h.isPresent());
 		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
@@ -71,17 +72,17 @@ public class TestCanvasManager {
 
 	@Test
 	public void testAddShotMissHitMiss() {
-		Optional<Hit> h = cm.checkHit(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), false);
+		Optional<Hit> h = cm.checkHit(new DisplayShot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 
-		h = cm.checkHit(new Shot(ShotColor.RED, 150, 150, 0, 2), Optional.empty(), false);
+		h = cm.checkHit(new DisplayShot(ShotColor.RED, 150, 150, 0, 2), Optional.empty(), false);
 
 		assertTrue(h.isPresent());
 		assertTrue(ipscTarget.getRegions().contains(h.get().getHitRegion()));
 		assertEquals(ipscTarget, h.get().getTarget());
 
-		h = cm.checkHit(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty(), false);
+		h = cm.checkHit(new DisplayShot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty(), false);
 
 		assertFalse(h.isPresent());
 	}
@@ -130,7 +131,7 @@ public class TestCanvasManager {
 	public void testAddShot() {
 		assertEquals(0, cm.getShots().size());
 
-		Shot shot = new Shot(ShotColor.RED, 0, 0, 0, 2);
+		DisplayShot shot = new DisplayShot(new Shot(ShotColor.RED, 0, 0, 0), 2);
 		cm.addShot(shot, false);
 
 		assertEquals(1, cm.getShots().size());

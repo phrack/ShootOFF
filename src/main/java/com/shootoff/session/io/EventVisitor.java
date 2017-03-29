@@ -20,14 +20,14 @@ package com.shootoff.session.io;
 
 import java.util.Optional;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 
 public interface EventVisitor {
 	public void visitCamera(String cameraName);
 
 	public void visitCameraEnd();
 
-	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
+	public void visitShot(long timestamp, DisplayShot shot, boolean isMalfunction, boolean isReload,
 			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString);
 
 	public void visitTargetAdd(long timestamp, String targetName);

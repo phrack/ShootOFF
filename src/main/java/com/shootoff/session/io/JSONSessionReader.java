@@ -36,7 +36,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
@@ -97,7 +97,7 @@ public class JSONSessionReader {
 							c = ShotColor.GREEN;
 						}
 
-						final Shot shot = new Shot(c, (double) event.get("x"), (double) event.get("y"),
+						final DisplayShot shot = new DisplayShot(c, (double) event.get("x"), (double) event.get("y"),
 								(Long) event.get("shotTimestamp"), ((Long) event.get("markerRadius")).intValue());
 
 						final boolean isMalfunction = (boolean) event.get("isMalfunction");

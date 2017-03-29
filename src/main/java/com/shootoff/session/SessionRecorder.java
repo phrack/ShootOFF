@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.targets.Target;
 
 import javafx.geometry.Dimension2D;
@@ -97,7 +97,7 @@ public class SessionRecorder {
 		}
 	}
 
-	public void recordShot(String cameraName, Shot shot, boolean isMalfunction, boolean isReload,
+	public void recordShot(String cameraName, DisplayShot shot, boolean isMalfunction, boolean isReload,
 			Optional<Target> target, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		Optional<Integer> targetIndex = Optional.empty();
 

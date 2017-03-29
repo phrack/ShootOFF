@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.controller.ShootOFFController;
@@ -19,7 +19,7 @@ import javafx.scene.Group;
 
 public class MockCanvasManager extends CanvasManager {
 	private final Logger logger = LoggerFactory.getLogger(MockCanvasManager.class);
-	private final List<Shot> shots = new ArrayList<Shot>();
+	private final List<DisplayShot> shots = new ArrayList<DisplayShot>();
 	private final Configuration config;
 	private final String cameraName;
 	private final boolean useShotProcessors;
@@ -47,7 +47,7 @@ public class MockCanvasManager extends CanvasManager {
 	}
 
 	@Override
-	public void addShot(Shot shot, boolean mirroredShot) {
+	public void addShot(DisplayShot shot, boolean mirroredShot) {
 		if (useShotProcessors) {
 
 			for (ShotProcessor p : config.getShotProcessors()) {
@@ -62,7 +62,7 @@ public class MockCanvasManager extends CanvasManager {
 		shots.add(shot);
 	}
 
-	public List<Shot> getShots() {
+	public List<DisplayShot> getShots() {
 		return shots;
 	}
 

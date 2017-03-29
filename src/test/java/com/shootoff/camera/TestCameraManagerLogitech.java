@@ -45,7 +45,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	@Test
 	public void testLogitechIndoorGreen() {
 		// Missing 2 shots
-		List<Shot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-indoor-green.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -64,7 +64,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 
 	@Test
 	public void testLogitechOutdoorGreen2() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.mp4", Optional.empty(), mockManager,
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-outdoor-green-2.mp4", Optional.empty(), mockManager,
 				config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -86,7 +86,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 
 	@Test
 	public void testLogitechSafariGreen() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-safari-green.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -108,7 +108,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 
 	@Test
 	public void testLogitechOutdoorRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-red.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-outdoor-red.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -130,7 +130,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 
 	@Test
 	public void testLogitechSafariRed() {
-		List<Shot> shots = findShots("/shotsearcher/logitech-safari-red.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-safari-red.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -153,7 +153,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	@Test
 	public void testLogitechBouncingTargetsNoBG() {
 
-		List<Shot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", Optional.empty(),
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-nobg-bouncingtargets-noshots.mp4", Optional.empty(),
 				mockManager, config, sectorStatuses);
 
 		assertEquals(0, shots.size());
@@ -162,7 +162,7 @@ public class TestCameraManagerLogitech extends ShotDetectionTestor {
 	@Test
 	public void testLogitechBouncingTargetsOutdoor() {
 
-		List<Shot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty(),
+		List<DisplayShot> shots = findShots("/shotsearcher/logitech-outdoor-bouncingtargets-noshots.mp4", Optional.empty(),
 				mockManager, config, sectorStatuses);
 
 		assertEquals(0, shots.size());

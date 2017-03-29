@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
@@ -22,7 +22,7 @@ import javafx.scene.Group;
 public class TestSessionRecorder {
 	private SessionRecorder sessionRecorder;
 	private String cameraName;
-	private Shot shot;
+	private DisplayShot shot;
 	private String targetName1;
 	private TargetView target1;
 	private int targetIndex1;
@@ -38,7 +38,7 @@ public class TestSessionRecorder {
 
 		sessionRecorder = new SessionRecorder();
 		cameraName = "Default";
-		shot = new Shot(ShotColor.RED, 0, 0, 0, 2);
+		shot = new DisplayShot(ShotColor.RED, 0, 0, 0, 2);
 
 		targetName1 = "bullseye.target";
 		target1 = new TargetView(new File(targetName1), new Group(), new HashMap<String, String>(), canvasManager, false);

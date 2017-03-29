@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
@@ -76,7 +77,7 @@ public class TestISSFStandardPistol {
 		TableView<ShotEntry> shotTimerTable = new TableView<ShotEntry>();
 		ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
 		shotEntries
-				.add(new ShotEntry(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
+				.add(new ShotEntry(new DisplayShot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
 		shotTimerTable.setItems(shotEntries);
 		issfExercise.init(config, cs, null, shotTimerTable);
 		issfExercise.init(0, 0);

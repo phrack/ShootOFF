@@ -5,7 +5,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.Optional;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.ArenaShot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.gui.targets.MirroredTarget;
@@ -166,27 +167,26 @@ public class MirroredCanvasManager extends CanvasManager {
 	}
 
 	@Override
-	public void addShot(Shot shot, boolean isMirroredShot) {
-		final Shot mirroredShot = new Shot(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp(),
-				(int) shot.getMarker().getRadiusX());
+	public void addShot(DisplayShot shot, boolean isMirroredShot) {
+		final DisplayShot mirroredShot = new DisplayShot(shot, shot.getMarker());
+
 		shot.setMirroredShot(mirroredShot);
 		mirroredShot.setMirroredShot(shot);
 		mirroredManager.mirrorAddShot(mirroredShot);
 		super.addShot(shot, isMirroredShot);
 	}
 
-	public void mirrorAddShot(Shot shot) {
+	public void mirrorAddShot(DisplayShot shot) {
 		super.addShot(shot, true);
 	}
 
 	@Override
-	public boolean addArenaShot(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
-		mirroredManager.mirrorAddArenaShot(new Shot(shot.getColor(), shot.getX(), shot.getY(), shot.getTimestamp(),
-				(int) shot.getMarker().getRadiusX()), videoString);
+	public boolean addArenaShot(ArenaShot shot, Optional<String> videoString, boolean isMirroredShot) {
+		mirroredManager.mirrorAddArenaShot(new ArenaShot(shot), videoString);
 		return super.addArenaShot(shot, videoString, isMirroredShot);
 	}
 
-	public boolean mirrorAddArenaShot(Shot shot, Optional<String> videoString) {
+	public boolean mirrorAddArenaShot(ArenaShot shot, Optional<String> videoString) {
 		return super.addArenaShot(shot, videoString, true);
 	}
 

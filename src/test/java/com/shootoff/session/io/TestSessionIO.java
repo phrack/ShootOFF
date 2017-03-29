@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
@@ -32,8 +33,8 @@ public class TestSessionIO {
 	private String cameraName1;
 	private String cameraName2;
 	private String videoString;
-	private Shot redShot;
-	private Shot greenShot;
+	private DisplayShot redShot;
+	private DisplayShot greenShot;
 	private String targetName;
 	private int hitRegionIndex;
 	private String exerciseMessage;
@@ -47,8 +48,8 @@ public class TestSessionIO {
 		cameraName1 = "Default";
 		cameraName2 = "Another Camera";
 		videoString = "camera1:test/file.mp4,camera2:what/ax.vid";
-		redShot = new Shot(ShotColor.RED, 10, 11, 3, 2);
-		greenShot = new Shot(ShotColor.GREEN, 12, 15, 3, 5);
+		redShot = new DisplayShot(new Shot(ShotColor.RED, 10, 11, 3), 2);
+		greenShot = new DisplayShot(new Shot(ShotColor.GREEN, 12, 15, 3), 5);
 		targetName = "bullseye.target";
 		exerciseMessage = "This is a\n\t test";
 

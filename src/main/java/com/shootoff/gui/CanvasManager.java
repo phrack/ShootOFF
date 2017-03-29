@@ -40,8 +40,10 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.ArenaShot;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.camera.processors.MalfunctionsProcessor;
@@ -103,7 +105,7 @@ public class CanvasManager implements CameraView {
 	private final String cameraName;
 	private final ObservableList<ShotEntry> shotEntries;
 	private final ImageView background = new ImageView();
-	private final List<Shot> shots = Collections.synchronizedList(new ArrayList<Shot>());
+	private final List<DisplayShot> shots = Collections.synchronizedList(new ArrayList<DisplayShot>());
 	private final List<Target> targets = new ArrayList<>();
 
 	private ProgressIndicator progress;
@@ -165,8 +167,7 @@ public class CanvasManager implements CameraView {
 				if (this instanceof MirroredCanvasManager) {
 					final long shotTimestamp = System.currentTimeMillis();
 
-					addShot(new Shot(shotColor, event.getX(), event.getY(), shotTimestamp, config.getMarkerRadius()),
-							false);
+					addShot(new DisplayShot(new Shot(shotColor, event.getX(), event.getY(), shotTimestamp), config.getMarkerRadius()), false);
 				} else {
 					cameraManager.injectShot(shotColor, event.getX(), event.getY(), false);
 				}
@@ -407,6 +408,10 @@ public class CanvasManager implements CameraView {
 		return new BoundingBox(minX, minY, width, height);
 	}
 	
+	/* Takes a point x,y and translates it from an arena canvas to a camera (feed) point.
+	 * 
+	 * This is hackish because it will break if any of the math for these calculations changes in other places.
+	 */
 	public Pair<Double, Double> translateCanvasToCameraPoint(double x, double y) {
 		if (cameraManager == null)
 		{
@@ -438,7 +443,7 @@ public class CanvasManager implements CameraView {
 	@Override
 	public void clearShots() {
 		final Runnable clearShotsAction = () -> {
-			for (final Shot shot : shots) {
+			for (final DisplayShot shot : shots) {
 				canvasGroup.getChildren().remove(shot.getMarker());
 			}
 
@@ -482,7 +487,7 @@ public class CanvasManager implements CameraView {
 
 	public void setShowShots(boolean showShots) {
 		if (this.showShots != showShots) {
-			for (final Shot shot : shots)
+			for (final DisplayShot shot : shots)
 				shot.getMarker().setVisible(showShots);
 		}
 
@@ -539,7 +544,7 @@ public class CanvasManager implements CameraView {
 		return rejectingProcessor;
 	}
 
-	private void recordRejectedShot(Shot shot, ShotProcessor rejectingProcessor) {
+	private void recordRejectedShot(DisplayShot shot, ShotProcessor rejectingProcessor) {
 
 		if (!config.getSessionRecorder().isPresent()) return;
 
@@ -557,12 +562,12 @@ public class CanvasManager implements CameraView {
 	}
 
 	// For testing
-	protected List<Shot> getShots() {
+	protected List<DisplayShot> getShots() {
 		return shots;
 	}
 
 	@Override
-	public void addShot(Shot shot, boolean isMirroredShot) {
+	public void addShot(DisplayShot shot, boolean isMirroredShot) {
 		if (!isMirroredShot) {
 			final Optional<ShotProcessor> rejectingProcessor = processShot(shot);
 			if (rejectingProcessor.isPresent()) {
@@ -626,9 +631,7 @@ public class CanvasManager implements CameraView {
 				passedToArena = true;
 
 
-				final Shot arenaShot = new Shot(shot.getColor(), shot.getX(),
-						shot.getY(), shot.getTimestamp(), shot.getFrame(),
-						config.getMarkerRadius());
+				final ArenaShot arenaShot = new ArenaShot(shot);
 				
 				scaleShotToArenaBounds(arenaShot);
 
@@ -658,7 +661,7 @@ public class CanvasManager implements CameraView {
 		}
 	}
 
-	public void scaleShotToArenaBounds(Shot shot) {
+	public void scaleShotToArenaBounds(ArenaShot shot) {
 		if (!projectionBounds.isPresent()) {
 			logger.error("scaleShotToArenaBounds called when projectionBounds not present");
 			return;
@@ -669,7 +672,7 @@ public class CanvasManager implements CameraView {
 		
 		logger.trace("scaleShotToArenaBounds pre x {} y {}", shot.getX(), shot.getY());
 		
-		shot.setCoords((shot.getX() - projectionBounds.get().getMinX()) * x_scale,
+		shot.setArenaCoords((shot.getX() - projectionBounds.get().getMinX()) * x_scale,
 				(shot.getY() - projectionBounds.get().getMinY()) * y_scale);
 
 		logger.trace("scaleShotToArenaBounds post x {} y {}", shot.getX(), shot.getY());
@@ -677,7 +680,7 @@ public class CanvasManager implements CameraView {
 	
 	}
 
-	public boolean addArenaShot(Shot shot, Optional<String> videoString, boolean isMirroredShot) {
+	public boolean addArenaShot(ArenaShot shot, Optional<String> videoString, boolean isMirroredShot) {
 		shots.add(shot);
 		drawShot(shot);
 
@@ -697,7 +700,7 @@ public class CanvasManager implements CameraView {
 		return false;
 	}
 
-	private void drawShot(Shot shot) {
+	private void drawShot(DisplayShot shot) {
 		final Runnable drawShotAction = () -> {
 			canvasGroup.getChildren().add(shot.getMarker());
 			shot.getMarker().setVisible(showShots);
@@ -710,16 +713,26 @@ public class CanvasManager implements CameraView {
 		}
 	}
 
-	protected Optional<Hit> checkHit(Shot shot, Optional<String> videoString, boolean isMirroredShot) {		
+	protected Optional<Hit> checkHit(DisplayShot shot, Optional<String> videoString, boolean isMirroredShot) {		
 		// Targets are in order of when they were added, thus we must search in
 		// reverse to ensure shots register for the top target when targets
 		// overlap
 		for (final ListIterator<Target> li = targets.listIterator(targets.size()); li.hasPrevious();) {
 			final Target target = li.previous();
 
-			final Optional<Hit> hit = target.isHit(shot);
+			final Optional<Hit> hit;
+			if (shot instanceof ArenaShot)
+			{
+				hit = target.isHit(((ArenaShot)shot).getX(), ((ArenaShot)shot).getY());
+			}
+			else
+			{
+				hit = target.isHit(shot.getX(), shot.getY());
+			}
 
 			if (hit.isPresent()) {
+				hit.get().setShot(shot);
+				
 				final TargetRegion region = hit.get().getHitRegion();
 
 				if (config.inDebugMode()) {

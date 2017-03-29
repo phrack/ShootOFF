@@ -3,8 +3,10 @@ package com.shootoff.camera.shotdetection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shootoff.camera.BoundsShot;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.config.Configuration;
@@ -73,46 +75,52 @@ public abstract class ShotDetector {
 		if (!checkIgnoreColor(color)) return false;
 
 		final Shot shot = new Shot(color, x, y, cameraManager.cameraTimeToShotTime(timestamp),
-				cameraManager.getFrameCount(), config.getMarkerRadius());
+				cameraManager.getFrameCount());
 
 		if (config.isAdjustingPOI())
 		{
-			shot.adjustCoords(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
-			
 			if (logger.isTraceEnabled())
 			{
 				logger.trace("POI Adjustment: x {} y {}", config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
-				logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, shot.getX(), shot.getY());
+				logger.trace("Adjusting offset via POI setting, coords were {} {} now {} {}", x, y, x+config.getPOIAdjustmentX().get(), y+config.getPOIAdjustmentY().get());
 			}
+			
+			shot.adjustPOI(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
+
 		}
+		
+		BoundsShot bShot = new BoundsShot(shot);
 
 		if (scaleShot && (cameraManager.isLimitingDetectionToProjection() || cameraManager.isCroppingFeedToProjection())
 				&& cameraManager.getProjectionBounds().isPresent()) {
 			final Bounds b = cameraManager.getProjectionBounds().get();
 
 			if (handlesBounds()) {
-				shot.adjustCoords(b.getMinX(), b.getMinY());
+				bShot.adjustBounds(b.getMinX(), b.getMinY());
 			} else {
 				if (cameraManager.isLimitingDetectionToProjection() && !b.contains(x, y)) return false;
 			}
 		}
+		
+		DisplayShot dShot = new DisplayShot(bShot, config.getMarkerRadius());
+		
 
 		// If the shot didn't come from click to shoot (cameFromCanvas) and the
 		// resolution of the display and feed differ, translate shot coordinates
 		if (scaleShot && (config.getDisplayWidth() != cameraManager.getFeedWidth()
 				|| config.getDisplayHeight() != cameraManager.getFeedHeight())) {
-			shot.setTranslation(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
+			dShot.setDisplayVals(config.getDisplayWidth(), config.getDisplayHeight(), cameraManager.getFeedWidth(),
 					cameraManager.getFeedHeight());
 		}
 
-		if (!checkDuplicate(shot)) return false;
+		if (!checkDuplicate(dShot)) return false;
 
-		submitShot(shot);
+		submitShot(dShot);
 
 		return true;
 	}
 
-	protected void submitShot(final Shot shot) {
+	protected void submitShot(final DisplayShot shot) {
 		if (logger.isInfoEnabled()) logger.info("Suspected shot accepted: Center ({}, {}), cl {} fr {}", shot.getX(),
 				shot.getY(), shot.getColor(), cameraManager.getFrameCount());
 

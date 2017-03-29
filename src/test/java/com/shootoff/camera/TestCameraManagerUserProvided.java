@@ -44,7 +44,7 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 
 	@Test
 	public void testC920CloseRed_Greatone123x() {
-		List<Shot> shots = findShots("/shotsearcher/c920_close_red_laserlyte_greatone123x.mp4", Optional.empty(),
+		List<DisplayShot> shots = findShots("/shotsearcher/c920_close_red_laserlyte_greatone123x.mp4", Optional.empty(),
 				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -68,7 +68,7 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 
 	@Test
 	public void testC615CloseRed_edwardkort() {
-		List<Shot> shots = findShots("/shotsearcher/c615_close_red_edwardkort.mp4", Optional.empty(),
+		List<DisplayShot> shots = findShots("/shotsearcher/c615_close_red_edwardkort.mp4", Optional.empty(),
 				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -91,7 +91,7 @@ public class TestCameraManagerUserProvided extends ShotDetectionTestor {
 	
 	@Test
 	public void testC910Red_z() {
-		List<Shot> shots = findShots("/shotsearcher/c910_red_z.mp4", Optional.empty(),
+		List<DisplayShot> shots = findShots("/shotsearcher/c910_red_z.mp4", Optional.empty(),
 				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();

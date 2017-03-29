@@ -41,7 +41,7 @@ public class ShotDetectionTestor implements VideoFinishedListener {
 		rootLogger.detachAndStopAllAppenders();
 	}
 
-	public void checkShots(ErrorCollector collector, final List<Shot> actualShots, List<Shot> requiredShots,
+	public void checkShots(ErrorCollector collector, final List<DisplayShot> actualShots, List<Shot> requiredShots,
 			List<Shot> optionalShots, boolean isColorWarning) {
 
 		List<Shot> mutableActualShots = new ArrayList<Shot>(actualShots);
@@ -129,7 +129,7 @@ public class ShotDetectionTestor implements VideoFinishedListener {
 	}
 
 	Object processingLock = new Object();
-	protected List<Shot> findShots(String videoPath, Optional<Bounds> projectionBounds, MockCanvasManager mockManager,
+	protected List<DisplayShot> findShots(String videoPath, Optional<Bounds> projectionBounds, MockCanvasManager mockManager,
 			Configuration config, boolean[][] sectorStatuses) {
 		
 		File videoFile = new File(ShotDetectionTestor.class.getResource(videoPath).getFile());

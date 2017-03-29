@@ -45,7 +45,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 	// VERY BRIGHT
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOff() {
 
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4",
+		List<DisplayShot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_off.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -72,7 +72,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 	// VERY BRIGHT
 	public void testMSHD3000MinBrightnessDefaultContrastWhiteBalanceOn() {
 
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_on.mp4",
+		List<DisplayShot> shots = findShots("/shotsearcher/mshd3000_min_brightness_default_contrast_whitebalance_on.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -99,7 +99,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 			sectorStatuses[0][x] = false;
 		}
 
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_min_brightness_min_contrast_whitebalance_off.mp4",
+		List<DisplayShot> shots = findShots("/shotsearcher/mshd3000_min_brightness_min_contrast_whitebalance_off.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -122,7 +122,7 @@ public class TestCameraManagerVeryBright extends ShotDetectionTestor {
 	@Test
 	// VERY BRIGHT
 	public void testMSHD3000HardwareDefaultsAmbientLightNatureScene() {
-		List<Shot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4",
+		List<DisplayShot> shots = findShots("/shotsearcher/mshd3000_hardware_defaults_ambient_light_nature_scene.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> optionalShots = new ArrayList<Shot>();

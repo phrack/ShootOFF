@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.plugins.TrainingExerciseBase;
+import com.shootoff.camera.BoundsShot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.Resetter;
@@ -119,8 +120,8 @@ public class TargetCommands implements CommandProcessor {
 				logger.trace("reg width {} height {}", reg.getWidth(), reg.getHeight());
 				logger.trace("reg boundsinparent {}", reg.getBoundsInParent());
 				logger.trace("nodeBounds {}", nodeBounds);
-				logger.trace("shot x {} y {} origx {} origy {}", hit.getShot().getX(),
-					 hit.getShot().getY(), hit.getShot().getOrigX(), hit.getShot().getOrigY());
+				logger.trace("shot x {} y {}", ((BoundsShot)hit.getShot()).getBoundsX(),
+					 ((BoundsShot)hit.getShot()).getBoundsY());
 			}
 			
 			double regcenterx = reg.getWidth() / 2.0;
@@ -132,8 +133,8 @@ public class TargetCommands implements CommandProcessor {
 			regcenterx = translated.getKey();
 			regcentery = translated.getValue();
 			
-			double offsetx = hit.getShot().getOrigX();
-			double offsety = hit.getShot().getOrigY();
+			double offsetx = ((BoundsShot)hit.getShot()).getBoundsX();
+			double offsety = ((BoundsShot)hit.getShot()).getBoundsY();
 			
 			offsetx = (offsetx - regcenterx) / hit.getTarget().getScaleX();
 			offsety = (offsety - regcentery) / hit.getTarget().getScaleY();

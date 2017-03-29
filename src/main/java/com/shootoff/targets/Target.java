@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.shootoff.camera.Shot;
 import com.shootoff.gui.targets.TargetView.TargetSelectionListener;
 
 import javafx.geometry.Bounds;
@@ -78,7 +77,7 @@ public interface Target {
 
 	void reverseAnimation(TargetRegion region);
 
-	Optional<Hit> isHit(Shot shot);
+	Optional<Hit> isHit(double x, double y);
 
 	boolean tagExists(String name);
 

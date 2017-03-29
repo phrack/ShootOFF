@@ -22,20 +22,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
 
 import javafx.scene.paint.Color;
 
 public class ShotEntry {
-	private final Shot shot;
+	private final DisplayShot shot;
 	private final String timestamp;
 	private final String color;
 	private final Optional<Color> rowColor;
 	private final SplitData split;
 	private final Map<String, String> exerciseData = new HashMap<>();
 
-	public ShotEntry(Shot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
+	public ShotEntry(DisplayShot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
 			boolean hadReload) {
 		this.shot = shot;
 
@@ -108,7 +109,7 @@ public class ShotEntry {
 		return split;
 	}
 
-	public Shot getShot() {
+	public DisplayShot getShot() {
 		return shot;
 	}
 

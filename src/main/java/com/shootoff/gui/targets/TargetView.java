@@ -32,7 +32,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Shot;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CanvasManager;
 import com.shootoff.targets.Hit;
@@ -534,8 +533,8 @@ public class TargetView implements Target {
 	}
 
 	@Override
-	public Optional<Hit> isHit(Shot shot) {
-		if (targetGroup.getBoundsInParent().contains(shot.getX(), shot.getY())) {
+	public Optional<Hit> isHit(double x, double y) {
+		if (targetGroup.getBoundsInParent().contains(x, y)) {
 			// Target was hit, see if a specific region was hit
 			for (int i = targetGroup.getChildren().size() - 1; i >= 0; i--) {
 				final Node node = targetGroup.getChildren().get(i);
@@ -544,10 +543,10 @@ public class TargetView implements Target {
 
 				final Bounds nodeBounds = targetGroup.getLocalToParentTransform().transform(node.getBoundsInParent());
 
-				final int adjustedX = (int) (shot.getX() - nodeBounds.getMinX());
-				final int adjustedY = (int) (shot.getY() - nodeBounds.getMinY());
+				final int adjustedX = (int) (x - nodeBounds.getMinX());
+				final int adjustedY = (int) (y - nodeBounds.getMinY());
 
-				if (nodeBounds.contains(shot.getX(), shot.getY())) {
+				if (nodeBounds.contains(x, y)) {
 					// If we hit an image region on a transparent pixel,
 					// ignore it
 					final TargetRegion region = (TargetRegion) node;
@@ -568,7 +567,7 @@ public class TargetView implements Target {
 							logger.debug(
 									"An adjusted pixel is negative: Adjusted ({}, {}), Original ({}, {}), "
 											+ " nodeBounds.getMin ({}, {})",
-									adjustedX, adjustedY, shot.getX(), shot.getY(), nodeBounds.getMaxX(),
+									adjustedX, adjustedY, x, y, nodeBounds.getMaxX(),
 									nodeBounds.getMinY());
 							return Optional.empty();
 						}
@@ -597,7 +596,7 @@ public class TargetView implements Target {
 										"Index out of bounds while trying to find adjusted coordinate (%d, %d) "
 												+ "from original (%.2f, %.2f) in adjusted BufferedImage for target %s "
 												+ "with width = %d, height = %d",
-										adjustedX, adjustedY, shot.getX(), shot.getY(), getTargetFile().getPath(),
+										adjustedX, adjustedY, x, y, getTargetFile().getPath(),
 										bufferedResized.getWidth(), bufferedResized.getHeight());
 								logger.error(message, e);
 								return Optional.empty();
@@ -614,11 +613,11 @@ public class TargetView implements Target {
 						// fill otherwise we can get a shot detected where
 						// there isn't actually
 						// a region showing
-						final Point2D localCoords = targetGroup.parentToLocal(shot.getX(), shot.getY());
+						final Point2D localCoords = targetGroup.parentToLocal(x, y);
 						if (!node.contains(localCoords)) continue;
 					}
 
-					return Optional.of(new Hit(this, (TargetRegion) node, shot, adjustedX, adjustedY));
+					return Optional.of(new Hit(this, (TargetRegion) node, adjustedX, adjustedY));
 				}
 			}
 		}

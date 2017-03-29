@@ -44,6 +44,7 @@ import com.shootoff.camera.CameraFactory;
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
 import com.shootoff.camera.CamerasSupervisor;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.cameratypes.Camera;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.CalibrationManager;
@@ -252,9 +253,8 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 				while (change.next()) {
 					for (final ShotEntry unselected : change.getRemoved()) {
 						unselected.getShot().getMarker().setFill(unselected.getShot().getPaintColor());
-
 						if (unselected.getShot().getMirroredShot().isPresent()) {
-							unselected.getShot().getMirroredShot().get().getMarker()
+							((DisplayShot)unselected.getShot().getMirroredShot().get()).getMarker()
 									.setFill(unselected.getShot().getPaintColor());
 						}
 					}
@@ -265,7 +265,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
 
 						if (selected.getShot().getMirroredShot().isPresent()) {
-							selected.getShot().getMirroredShot().get().getMarker()
+							((DisplayShot)selected.getShot().getMirroredShot().get()).getMarker()
 									.setFill(TargetRegion.SELECTED_STROKE_COLOR);
 						}
 

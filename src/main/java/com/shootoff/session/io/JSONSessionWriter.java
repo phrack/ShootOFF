@@ -30,7 +30,7 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 
 public class JSONSessionWriter implements EventVisitor {
 	private final Logger logger = LoggerFactory.getLogger(JSONSessionWriter.class);
@@ -62,7 +62,7 @@ public class JSONSessionWriter implements EventVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
+	public void visitShot(long timestamp, DisplayShot shot, boolean isMalfunction, boolean isReload,
 			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 
 		final JSONObject event = new JSONObject();

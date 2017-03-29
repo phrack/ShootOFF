@@ -38,7 +38,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.ShotColor;
 import com.shootoff.session.Event;
 import com.shootoff.session.ExerciseFeedMessageEvent;
@@ -115,7 +115,7 @@ public class XMLSessionReader {
 					c = ShotColor.GREEN;
 				}
 
-				final Shot shot = new Shot(c, Double.parseDouble(attributes.getValue("x")),
+				final DisplayShot shot = new DisplayShot(c, Double.parseDouble(attributes.getValue("x")),
 						Double.parseDouble(attributes.getValue("y")),
 						Long.parseLong(attributes.getValue("shotTimestamp")),
 						Integer.parseInt(attributes.getValue("markerRadius")));

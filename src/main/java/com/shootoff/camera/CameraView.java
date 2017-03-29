@@ -28,7 +28,7 @@ public interface CameraView extends Closeable {
 	 */
 	public boolean addChild(Node c);
 
-	public void addShot(Shot shot, boolean isMirroredShot);
+	public void addShot(DisplayShot shot, boolean isMirroredShot);
 
 	public Optional<Target> addTarget(File targetFile);
 

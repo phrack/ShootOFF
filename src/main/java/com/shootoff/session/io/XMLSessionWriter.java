@@ -27,7 +27,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 
 public class XMLSessionWriter implements EventVisitor {
 	private final Logger logger = LoggerFactory.getLogger(XMLSessionWriter.class);
@@ -49,7 +49,7 @@ public class XMLSessionWriter implements EventVisitor {
 	}
 
 	@Override
-	public void visitShot(long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
+	public void visitShot(long timestamp, DisplayShot shot, boolean isMalfunction, boolean isReload,
 			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 
 		int targIndex;

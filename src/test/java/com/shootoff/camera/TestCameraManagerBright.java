@@ -44,7 +44,7 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsBrightRoom() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty(),
+		List<DisplayShot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_bright_room.mp4", Optional.empty(),
 				mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -61,7 +61,7 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsRedLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4",
+		List<DisplayShot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_red_laser_lights_on.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -81,7 +81,7 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	@Test
 	// BRIGHT
 	public void testPS3EyeHardwareDefaultsGreenLaserRoomLightOnSafari() {
-		List<Shot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4",
+		List<DisplayShot> shots = findShots("/shotsearcher/ps3eye_hardware_defaults_safari_green_laser_lights_on.mp4",
 				Optional.empty(), mockManager, config, sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();
@@ -102,7 +102,7 @@ public class TestCameraManagerBright extends ShotDetectionTestor {
 	@Test
 	// BRIGHT
 	public void testGreen45inch() {
-		List<Shot> shots = findShots("/shotsearcher/45in-green.mp4", Optional.empty(), mockManager, config,
+		List<DisplayShot> shots = findShots("/shotsearcher/45in-green.mp4", Optional.empty(), mockManager, config,
 				sectorStatuses);
 
 		List<Shot> requiredShots = new ArrayList<Shot>();

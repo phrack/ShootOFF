@@ -22,17 +22,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
 
 /**
- * This class encapsulates the operations to show a shot of a specific color and
- * size on a canvas.
+ * This class encapsulates a shot of a specific color, time, and frame count
  * 
- * @author phrack
+ * It can be paired with a mirrored shot.
+ * 
+ * The shot location can be modified for POI offset, which must happen before
+ * other operations.
+ * 
+ * @author phrack, cbdmaul
  */
 public class Shot {
 	static public final Map<ShotColor, Color> colorMap = new HashMap<ShotColor, Color>();
@@ -42,53 +42,39 @@ public class Shot {
 		colorMap.put(ShotColor.INFRARED, Color.ORANGE);
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(Shot.class);
-	private final ShotColor color;
+	protected final ShotColor color;
+
 	private double x;
 	private double y;
-	private final long timestamp;
-	private final int frame;
 	
-	//Unadulterated original shot values
-	private final double origX;
-	private final double origY;
+	protected final long timestamp;
+	protected final int frame;
+	
+	public Shot(Shot shot)
+	{
+		this.color = shot.color;
+		this.x = shot.getX();
+		this.y = shot.getY();
+		this.timestamp = shot.timestamp;
+		this.frame = shot.frame;
+	}
 
-	private Ellipse marker;
-	private Optional<Shot> mirroredShot = Optional.empty();
-
-	public Shot(ShotColor color, double x, double y, long timestamp, int frame, int markerRadius) {
+	public Shot(ShotColor color, double x, double y, long timestamp, int frame) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
 		this.frame = frame;
-		marker = new Ellipse(x, y, markerRadius, markerRadius);
-		marker.setFill(colorMap.get(color));
-		
-		this.origX = x;
-		this.origY = y;
+
 	}
 
-	public Shot(ShotColor color, double x, double y, long timestamp, int markerRadius) {
+	public Shot(ShotColor color, double x, double y, long timestamp) {
 		this.color = color;
 		this.x = x;
 		this.y = y;
 		this.timestamp = timestamp;
-		marker = new Ellipse(x, y, markerRadius, markerRadius);
-		marker.setFill(colorMap.get(color));
 		frame = 0;
-		this.origX = x;
-		this.origY = y;
 	}
-
-	public Optional<Shot> getMirroredShot() {
-		return mirroredShot;
-	}
-
-	public void setMirroredShot(Shot mirroredShot) {
-		this.mirroredShot = Optional.of(mirroredShot);
-	}
-
 	public ShotColor getColor() {
 		return color;
 	}
@@ -105,13 +91,6 @@ public class Shot {
 		return y;
 	}
 	
-	public double getOrigX() {
-		return origX;
-	}
-
-	public double getOrigY() {
-		return origY;
-	}
 
 	public long getTimestamp() {
 		return timestamp;
@@ -121,37 +100,25 @@ public class Shot {
 		return frame;
 	}
 
-	public Ellipse getMarker() {
-		return marker;
-	}
 	
-	public void adjustCoords(double adjX, double adjY)
+	public void adjustPOI(double adjX, double adjY)
 	{
 		x = x + adjX;
 		y = y + adjY;
 	}
 	
-	public void setCoords(double x, double y)
-	{
-		this.x = x;
-		this.y = y;
+	
+
+	private Optional<Shot> mirroredShot = Optional.empty();
+
+	
+	public Optional<Shot> getMirroredShot() {
+		return mirroredShot;
 	}
 
-	public void setTranslation(int displayWidth, int displayHeight, int feedWidth, int feedHeight) {
-		final double scaleX = (double) displayWidth / (double) feedWidth;
-		final double scaleY = (double) displayHeight / (double) feedHeight;
-
-		final double scaledX = x * scaleX;
-		final double scaledY = y * scaleY;
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("setTranslation {} {} - {} {} to {} {}", scaleX, scaleY, x, y, scaledX, scaledY);
-		}
-
-		marker = new Ellipse(scaledX, scaledY, marker.radiusXProperty().get(), marker.radiusYProperty().get());
-		marker.setFill(colorMap.get(color));
-
-		x = scaledX;
-		y = scaledY;
+	public void setMirroredShot(Shot mirroredShot) {
+		this.mirroredShot = Optional.of(mirroredShot);
 	}
+
 }
+

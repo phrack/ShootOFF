@@ -394,14 +394,15 @@ public class Configuration {
 			setShowedPerspectiveMessage(Boolean.parseBoolean(prop.getProperty(SHOWED_PERSPECTIVE_USAGE_MESSAGE)));
 		}
 
-		if (prop.contains(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
-			setAutoAdjustExposure(Boolean.parseBoolean(CALIBRATE_AUTO_ADJUST_EXPOSURE));
+		if (prop.containsKey(CALIBRATE_AUTO_ADJUST_EXPOSURE)) {
+			setAutoAdjustExposure(Boolean.parseBoolean(prop.getProperty(CALIBRATE_AUTO_ADJUST_EXPOSURE)));
 		}
 
-		if (prop.contains(POI_ADJUSTMENT_X) && prop.contains(POI_ADJUSTMENT_Y)) {
-			poiAdjustmentX = Optional.of(Double.parseDouble(POI_ADJUSTMENT_X));
-			poiAdjustmentY = Optional.of(Double.parseDouble(POI_ADJUSTMENT_Y));
+		if (prop.containsKey(POI_ADJUSTMENT_X) && prop.containsKey(POI_ADJUSTMENT_Y)) {
+			poiAdjustmentX = Optional.of(Double.parseDouble(prop.getProperty(POI_ADJUSTMENT_X)));
+			poiAdjustmentY = Optional.of(Double.parseDouble(prop.getProperty(POI_ADJUSTMENT_Y)));
 			adjustingPOI = true;
+			logger.info("POI Adjustment loaded from config, x {} y {}", poiAdjustmentX.get(), poiAdjustmentY.get());
 		}
 
 		validateConfiguration();

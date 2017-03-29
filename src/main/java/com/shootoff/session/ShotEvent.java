@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.shootoff.camera.Shot;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.ShotColor;
 
 public class ShotEvent implements Event {
 	private final String cameraName;
 	private final long timestamp;
-	private final Shot shot;
+	private final DisplayShot shot;
 	private final boolean isMalfunction;
 	private final boolean isReload;
 	private final Optional<Integer> targetIndex;
@@ -37,7 +37,7 @@ public class ShotEvent implements Event {
 	private final Optional<String> videoString;
 	private final Map<String, File> videos = new HashMap<>();
 
-	public ShotEvent(String cameraName, long timestamp, Shot shot, boolean isMalfunction, boolean isReload,
+	public ShotEvent(String cameraName, long timestamp, DisplayShot shot, boolean isMalfunction, boolean isReload,
 			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
 		this.cameraName = cameraName;
 		this.timestamp = timestamp;
@@ -63,7 +63,7 @@ public class ShotEvent implements Event {
 		return cameraName;
 	}
 
-	public Shot getShot() {
+	public DisplayShot getShot() {
 		return shot;
 	}
 

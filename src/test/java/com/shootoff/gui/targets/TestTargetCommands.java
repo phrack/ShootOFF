@@ -11,7 +11,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.shootoff.camera.ArenaShot;
+import com.shootoff.camera.BoundsShot;
 import com.shootoff.camera.CameraManager;
+import com.shootoff.camera.DisplayShot;
 import com.shootoff.camera.MockCameraManager;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.ShotColor;
@@ -90,24 +93,28 @@ public class TestTargetCommands {
 		assertFalse(config.getPOIAdjustmentX().isPresent());
 		assertFalse(config.getPOIAdjustmentY().isPresent());
 		
-		Shot shot = new Shot(ShotColor.GREEN, 371, 225, 0, 0);
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
-
-		shot = new Shot(ShotColor.GREEN, 381, 235, 0, 0);
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
-
-		shot = new Shot(ShotColor.GREEN, 381, 235, 0, 0);
+		BoundsShot bShot = new BoundsShot(ShotColor.GREEN, 271, 125, 0);
+		bShot.adjustBounds(100, 100);
+		
+		ArenaShot shot = new ArenaShot(new DisplayShot(bShot, 0));
 		canvasManager.scaleShotToArenaBounds(shot);
 		canvasManager.addArenaShot(shot, Optional.empty(), false);
 
 
-		shot = new Shot(ShotColor.GREEN, 381, 235, 0, 0);
+		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
 		canvasManager.scaleShotToArenaBounds(shot);
 		canvasManager.addArenaShot(shot, Optional.empty(), false);
 
-		shot = new Shot(ShotColor.GREEN, 381, 235, 0, 0);
+		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+		canvasManager.scaleShotToArenaBounds(shot);
+		canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+
+		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+		canvasManager.scaleShotToArenaBounds(shot);
+		canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
 		canvasManager.scaleShotToArenaBounds(shot);
 		canvasManager.addArenaShot(shot, Optional.empty(), false);
 
@@ -115,16 +122,16 @@ public class TestTargetCommands {
 		assertTrue(config.getPOIAdjustmentX().isPresent());
 		assertTrue(config.getPOIAdjustmentY().isPresent());
 		
-		assertEquals(config.getPOIAdjustmentX().get(), -7.0, 1.0);
-		assertEquals(config.getPOIAdjustmentY().get(), -7.0, 1.0);
+		assertEquals(-7.0, config.getPOIAdjustmentX().get(), 1.0);
+		assertEquals(-7.0, config.getPOIAdjustmentY().get(), 1.0);
 
-		shot = new Shot(ShotColor.GREEN, 50, 50, 0, 0);
-		shot.adjustCoords(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
-		assertEquals(shot.getX(), 43, 1);
-		assertEquals(shot.getY(), 43, 1);
+		Shot nshot = new Shot(ShotColor.GREEN, 50, 50, 0, 0);
+		nshot.adjustPOI(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
+		assertEquals(43, nshot.getX(), 1);
+		assertEquals(43, nshot.getY(), 1);
 		
 		
-		shot = new Shot(ShotColor.GREEN, 381, 235, 0, 0);
+		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
 		canvasManager.scaleShotToArenaBounds(shot);
 		canvasManager.addArenaShot(shot, Optional.empty(), false);
 
