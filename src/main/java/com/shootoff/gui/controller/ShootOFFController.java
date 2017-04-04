@@ -254,7 +254,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 					for (final ShotEntry unselected : change.getRemoved()) {
 						unselected.getShot().getMarker().setFill(unselected.getShot().getPaintColor());
 						if (unselected.getShot().getMirroredShot().isPresent()) {
-							((DisplayShot)unselected.getShot().getMirroredShot().get()).getMarker()
+							((DisplayShot) unselected.getShot().getMirroredShot().get()).getMarker()
 									.setFill(unselected.getShot().getPaintColor());
 						}
 					}
@@ -265,7 +265,7 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 						selected.getShot().getMarker().setFill(TargetRegion.SELECTED_STROKE_COLOR);
 
 						if (selected.getShot().getMirroredShot().isPresent()) {
-							((DisplayShot)selected.getShot().getMirroredShot().get()).getMarker()
+							((DisplayShot) selected.getShot().getMirroredShot().get()).getMarker()
 									.setFill(TargetRegion.SELECTED_STROKE_COLOR);
 						}
 
@@ -594,10 +594,20 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
 		// Keep aspect ratio but always match size to the width of the tab
 		if (maximizeView) {
 			final Runnable translateTabContents = () -> {
-				final double scale = cameraTabPane.getBoundsInLocal().getWidth()
+				final double widthScale = cameraTabPane.getBoundsInLocal().getWidth()
 						/ content.getBoundsInLocal().getWidth();
-				content.setScaleX(scale);
-				content.setScaleY(scale);
+				content.setScaleX(widthScale);
+				content.setScaleY(widthScale);
+
+				// If the arena content is hanging off the bottom of the tab
+				// this means the arena is tall and we should scale off the
+				// height instead
+				if (content.getBoundsInParent().getHeight() > cameraTabPane.getHeight()) {
+					final double heightScale = cameraTabPane.getBoundsInLocal().getHeight()
+							/ content.getBoundsInLocal().getHeight();
+					content.setScaleX(heightScale);
+					content.setScaleY(heightScale);
+				}
 
 				content.setTranslateX(
 						(content.getBoundsInParent().getWidth() - content.getBoundsInLocal().getWidth()) / 2);
