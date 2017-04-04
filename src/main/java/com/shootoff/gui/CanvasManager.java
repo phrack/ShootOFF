@@ -853,7 +853,9 @@ public class CanvasManager implements CameraView {
 		targets.add(newTarget);
 
 		// If this is a mirrored canvas, only alert exercises of target updates
-		// from the arena window, not the tab
+		// from the arena window, not the tab. There is no arena tab if we are in
+		// headless mode, thus there is also no MirroredCanvasManager. Always
+		// perform target update when the canvas isn't mirrored for that reason.
 		if (!(this instanceof MirroredCanvasManager)
 				|| ((this instanceof MirroredCanvasManager) && arenaPane.isPresent())) {
 			final Optional<TrainingExercise> enabledExercise = config.getExercise();
@@ -881,7 +883,9 @@ public class CanvasManager implements CameraView {
 		targets.remove(target);
 
 		// If this is a mirrored canvas, only alert exercises of target updates
-		// from the arena window, not the tab
+		// from the arena window, not the tab. There is no arena tab if we are in
+		// headless mode, thus there is also no MirroredCanvasManager. Always
+		// perform target update when the canvas isn't mirrored for that reason.
 		if (!(this instanceof MirroredCanvasManager)
 				|| ((this instanceof MirroredCanvasManager) && arenaPane.isPresent())) {
 			final Optional<TrainingExercise> enabledExercise = config.getExercise();
