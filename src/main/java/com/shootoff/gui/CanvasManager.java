@@ -855,7 +855,7 @@ public class CanvasManager implements CameraView {
 		// If this is a mirrored canvas, only alert exercises of target updates
 		// from the arena window, not the tab
 		if (!(this instanceof MirroredCanvasManager)
-				|| ((this instanceof MirroredCanvasManager) && cameraManager == null)) {
+				|| ((this instanceof MirroredCanvasManager) && arenaPane.isPresent())) {
 			final Optional<TrainingExercise> enabledExercise = config.getExercise();
 			if (enabledExercise.isPresent())
 				enabledExercise.get().targetUpdate(newTarget, TrainingExercise.TargetChange.ADDED);
@@ -883,7 +883,7 @@ public class CanvasManager implements CameraView {
 		// If this is a mirrored canvas, only alert exercises of target updates
 		// from the arena window, not the tab
 		if (!(this instanceof MirroredCanvasManager)
-				|| ((this instanceof MirroredCanvasManager) && cameraManager == null)) {
+				|| ((this instanceof MirroredCanvasManager) && arenaPane.isPresent())) {
 			final Optional<TrainingExercise> enabledExercise = config.getExercise();
 			if (enabledExercise.isPresent())
 				enabledExercise.get().targetUpdate(target, TrainingExercise.TargetChange.REMOVED);
