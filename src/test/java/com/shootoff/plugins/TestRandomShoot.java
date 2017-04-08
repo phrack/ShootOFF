@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.gui.JavaFXThreadingRule;
 import com.shootoff.gui.targets.TargetView;

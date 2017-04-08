@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
 import com.shootoff.camera.shot.DisplayShot;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.camera.shotdetection.JavaShotDetector;
 import com.shootoff.config.Configuration;

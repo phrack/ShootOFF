@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.shootoff.camera.Shot;
 import com.shootoff.camera.shot.DisplayShot;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 
 import javafx.scene.paint.Color;

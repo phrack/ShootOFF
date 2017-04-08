@@ -42,13 +42,13 @@ import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.CameraView;
+import com.shootoff.camera.Shot;
 import com.shootoff.camera.processors.MalfunctionsProcessor;
 import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.camera.processors.VirtualMagazineProcessor;
 import com.shootoff.camera.recorders.ShotRecorder;
 import com.shootoff.camera.shot.ArenaShot;
 import com.shootoff.camera.shot.DisplayShot;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.gui.pane.ProjectorArenaPane;

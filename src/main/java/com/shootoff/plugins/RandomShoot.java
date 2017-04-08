@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Stack;
 
-import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.Shot;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;

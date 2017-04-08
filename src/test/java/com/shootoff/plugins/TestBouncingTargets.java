@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CamerasSupervisor;
-import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;

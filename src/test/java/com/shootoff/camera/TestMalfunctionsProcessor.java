@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.shootoff.camera.processors.MalfunctionsProcessor;
 import com.shootoff.camera.processors.ShotProcessor;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;

@@ -16,11 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.shootoff.camera.shot;
+package com.shootoff.camera;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.shootoff.camera.shot.ShotColor;
 
 import javafx.scene.paint.Color;
 

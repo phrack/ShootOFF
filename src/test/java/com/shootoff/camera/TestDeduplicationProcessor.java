@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.shootoff.camera.processors.DeduplicationProcessor;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.ConfigurationException;
 

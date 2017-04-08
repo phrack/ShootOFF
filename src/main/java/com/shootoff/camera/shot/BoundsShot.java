@@ -2,6 +2,8 @@ package com.shootoff.camera.shot;
 
 import java.util.Optional;
 
+import com.shootoff.camera.Shot;
+
 
 /**
  * This class encapsulates a Shot which can be adjusted for bounds

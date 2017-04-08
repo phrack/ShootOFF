@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.camera.CameraManager;
-import com.shootoff.camera.shot.Shot;
+import com.shootoff.camera.Shot;
 
 public class DeduplicationProcessor implements ShotProcessor {
 	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);

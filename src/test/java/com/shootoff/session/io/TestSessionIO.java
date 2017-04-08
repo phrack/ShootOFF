@@ -10,8 +10,8 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.shootoff.camera.Shot;
 import com.shootoff.camera.shot.DisplayShot;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;

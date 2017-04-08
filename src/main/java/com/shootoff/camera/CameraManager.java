@@ -46,7 +46,6 @@ import com.shootoff.camera.cameratypes.SarxosCaptureCamera;
 import com.shootoff.camera.processors.DeduplicationProcessor;
 import com.shootoff.camera.recorders.RollingRecorder;
 import com.shootoff.camera.recorders.ShotRecorder;
-import com.shootoff.camera.shot.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.camera.shotdetection.CameraStateListener;
 import com.shootoff.camera.shotdetection.FrameProcessingShotDetector;

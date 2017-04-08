@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.shootoff.camera.Shot;
+
 public class TestShot {
 	@Test
 	public void testShot() {
