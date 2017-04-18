@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<target>
+	<image x="0" y="0" file="targets/ufo.gif">
+		<tag name="points" value="20" />
+		<tag name="command" value="animate;play_sound(sounds/ufo_lowpitch.wav)" />
+	</image>
+</target>

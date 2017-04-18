@@ -46,6 +46,7 @@ import com.shootoff.plugins.ParRandomShot;
 import com.shootoff.plugins.RandomShoot;
 import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
+import com.shootoff.plugins.SpaceInvaders;
 import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingExercise;
@@ -101,6 +102,7 @@ public class PluginEngine implements Runnable {
 	}
 
 	private void registerDefaultProjectorExercises() {
+		pluginListener.registerProjectorExercise(new SpaceInvaders());
 		pluginListener.registerProjectorExercise(new BouncingTargets());
 		pluginListener.registerProjectorExercise(new DuelingTree());
 		pluginListener.registerProjectorExercise(new ShootDontShoot());
