@@ -9,9 +9,9 @@ You can find additional information about using ShootOFF on the wiki: https://gi
 
 =====
 
-*Report a bug: Through this github or via email: project.shootoff@gmail.com*
+*Report a bug: Through this github or Reddit: https://www.reddit.com/r/ShootOFF/*
 
-Nightly builds (UNSTABLE): http://dev.shootoffapp.com:9090/
+You can email us if you do not want to use the above two options. Please be aware that our volunteer-only efforts often get overwhelmed by the number of emails: project.shootoff@gmail.com.
 
 
 ### Developers
