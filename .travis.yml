@@ -7,7 +7,7 @@ env:
 branches:
   only:
   - master
-script: travis_wait 45 gradle check
+script: gradle check
 before_script:
   - gradle --version
   # Have ssh trust our deployment server
@@ -26,3 +26,8 @@ after_success:
   - gradle zipRelease -x test
   - mv build/dist/shootoff-*-final.zip shootoff-nightly-$(date +'%m%d%Y').zip
   - sshpass -e scp shootoff-nightly-$(date +'%m%d%Y').zip nightlies@dev.shootoffapp.com:~/continuous-deployment-page/nightlies
+
+cache:
+  directories:
+  - $HOME/.gradle/caches/
+  - $HOME/.gradle/wrapper/
